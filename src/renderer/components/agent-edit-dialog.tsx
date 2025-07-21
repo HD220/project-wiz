@@ -236,7 +236,7 @@ export function AgentEditDialog({
   };
 
   const selectedProvider = providers.find(
-    (p) => p.id === form.watch("providerId"),
+    (provider) => provider.id === form.watch("providerId"),
   );
   const getModelsForProvider = (providerType: string) => {
     switch (providerType) {
@@ -251,7 +251,7 @@ export function AgentEditDialog({
     }
   };
 
-  const activeProviders = providers.filter((p) => p.isActive);
+  const activeProviders = providers.filter((provider) => provider.isActive);
 
   const applyTemplate = (templateKey: string) => {
     const template = agentTemplates[templateKey as keyof typeof agentTemplates];

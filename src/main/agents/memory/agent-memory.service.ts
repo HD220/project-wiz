@@ -157,7 +157,9 @@ export class AgentMemoryService {
 
     // Sort by relevance score
     return scoredMemories
-      .sort((a, b) => b.relevanceScore - a.relevanceScore)
+      .sort(
+        (memoryA, memoryB) => memoryB.relevanceScore - memoryA.relevanceScore,
+      )
       .slice(0, criteria.limit || 50);
   }
 

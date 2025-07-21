@@ -23,15 +23,15 @@ export function AgentList({ userId }: AgentListProps) {
   }, [loadAgents, loadProviders, userId]);
 
   const getProviderName = (providerId: string): string => {
-    const provider = providers.find((p) => p.id === providerId);
+    const provider = providers.find((prov) => prov.id === providerId);
     return provider ? provider.name : "Unknown Provider";
   };
 
   if (isLoading) {
     return (
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {[...Array(6)].map((_, i) => (
-          <div key={i} className="space-y-3">
+        {[...Array(6)].map((_, index) => (
+          <div key={index} className="space-y-3">
             <Skeleton className="h-[200px] w-full rounded-lg" />
           </div>
         ))}
@@ -81,17 +81,18 @@ export function AgentList({ userId }: AgentListProps) {
         <h2 className="text-lg font-medium">Your Agents ({agents.length})</h2>
         <div className="flex items-center space-x-2 text-sm text-muted-foreground">
           <span>
-            {agents.filter((a) => a.status === "active").length} active
+            {agents.filter((agent) => agent.status === "active").length} active
           </span>
           <span>•</span>
           <span>
-            {agents.filter((a) => a.status === "inactive").length} inactive
+            {agents.filter((agent) => agent.status === "inactive").length}{" "}
+            inactive
           </span>
-          {agents.filter((a) => a.status === "busy").length > 0 && (
+          {agents.filter((agent) => agent.status === "busy").length > 0 && (
             <>
               <span>•</span>
               <span>
-                {agents.filter((a) => a.status === "busy").length} busy
+                {agents.filter((agent) => agent.status === "busy").length} busy
               </span>
             </>
           )}

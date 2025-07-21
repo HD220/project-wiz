@@ -102,9 +102,9 @@ export function Chat() {
                   role="button"
                   tabIndex={0}
                   onClick={() => setSelectedAgent(agent)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" || e.key === " ") {
-                      e.preventDefault();
+                  onKeyDown={(event) => {
+                    if (event.key === "Enter" || event.key === " ") {
+                      event.preventDefault();
                       setSelectedAgent(agent);
                     }
                   }}

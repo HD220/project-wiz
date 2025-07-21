@@ -99,9 +99,9 @@ export function AgentMemoryPanel({
     try {
       const response = await agentMemoryApi.archive(memoryId);
       if (response.success) {
-        setMemories((prev) => prev.filter((m) => m.id !== memoryId));
+        setMemories((prev) => prev.filter((memory) => memory.id !== memoryId));
         setSearchResults((prev) =>
-          prev.filter((r) => r.memory.id !== memoryId),
+          prev.filter((result) => result.memory.id !== memoryId),
         );
         if (selectedMemory?.id === memoryId) {
           setSelectedMemory(null);
@@ -116,9 +116,9 @@ export function AgentMemoryPanel({
     try {
       const response = await agentMemoryApi.delete(memoryId);
       if (response.success) {
-        setMemories((prev) => prev.filter((m) => m.id !== memoryId));
+        setMemories((prev) => prev.filter((memory) => memory.id !== memoryId));
         setSearchResults((prev) =>
-          prev.filter((r) => r.memory.id !== memoryId),
+          prev.filter((result) => result.memory.id !== memoryId),
         );
         if (selectedMemory?.id === memoryId) {
           setSelectedMemory(null);
@@ -198,8 +198,8 @@ export function AgentMemoryPanel({
             <Button
               size="sm"
               variant="ghost"
-              onClick={(e) => {
-                e.stopPropagation();
+              onClick={(event) => {
+                event.stopPropagation();
                 archiveMemory(memory.id);
               }}
             >
@@ -208,8 +208,8 @@ export function AgentMemoryPanel({
             <Button
               size="sm"
               variant="ghost"
-              onClick={(e) => {
-                e.stopPropagation();
+              onClick={(event) => {
+                event.stopPropagation();
                 deleteMemory(memory.id);
               }}
             >
@@ -272,8 +272,8 @@ export function AgentMemoryPanel({
                 <Input
                   placeholder="Search memories..."
                   value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  onKeyDown={(e) => e.key === "Enter" && searchMemories()}
+                  onChange={(event) => setSearchQuery(event.target.value))
+                  onKeyDown={(event) => event.key === "Enter" && searchMemories()}
                 />
               </div>
               <Button onClick={searchMemories} disabled={loading}>

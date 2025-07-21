@@ -13,7 +13,10 @@ import type {
   UpdateAgentMemory,
 } from "./agent-memories.schema";
 
-export function setupAgentMemoryHandlers(): void {
+/**
+ * Setup memory CRUD operation handlers
+ */
+function setupMemoryCrudHandlers(): void {
   /**
    * Create a new memory entry
    */
@@ -59,6 +62,72 @@ export function setupAgentMemoryHandlers(): void {
   );
 
   /**
+   * Update memory
+   */
+  ipcMain.handle(
+    "agent-memory:update",
+    async (
+      _,
+      id: string,
+      updates: UpdateAgentMemory,
+    ): Promise<IpcResponse<AgentMemoryWithMetadata>> => {
+      try {
+        const memory = await AgentMemoryService.update(id, updates);
+        return { success: true, data: memory };
+      } catch (error) {
+        return {
+          success: false,
+          error:
+            error instanceof Error ? error.message : "Failed to update memory",
+        };
+      }
+    },
+  );
+
+  /**
+   * Archive memory
+   */
+  ipcMain.handle(
+    "agent-memory:archive",
+    async (_, id: string): Promise<IpcResponse<void>> => {
+      try {
+        await AgentMemoryService.archive(id);
+        return { success: true, data: undefined };
+      } catch (error) {
+        return {
+          success: false,
+          error:
+            error instanceof Error ? error.message : "Failed to archive memory",
+        };
+      }
+    },
+  );
+
+  /**
+   * Delete memory
+   */
+  ipcMain.handle(
+    "agent-memory:delete",
+    async (_, id: string): Promise<IpcResponse<void>> => {
+      try {
+        await AgentMemoryService.delete(id);
+        return { success: true, data: undefined };
+      } catch (error) {
+        return {
+          success: false,
+          error:
+            error instanceof Error ? error.message : "Failed to delete memory",
+        };
+      }
+    },
+  );
+}
+
+/**
+ * Setup memory retrieval and search operation handlers
+ */
+function setupMemoryRetrievalHandlers(): void {
+  /**
    * Search memories with criteria
    */
   ipcMain.handle(
@@ -68,8 +137,8 @@ export function setupAgentMemoryHandlers(): void {
       criteria: MemorySearchCriteria,
     ): Promise<IpcResponse<MemoryRelevanceScore[]>> => {
       try {
-        const memories = await AgentMemoryService.search(criteria);
-        return { success: true, data: memories };
+        const results = await AgentMemoryService.search(criteria);
+        return { success: true, data: results };
       } catch (error) {
         return {
           success: false,
@@ -91,7 +160,7 @@ export function setupAgentMemoryHandlers(): void {
       _,
       agentId: string,
       userId: string,
-      limit?: number,
+      limit: number = 10,
     ): Promise<IpcResponse<AgentMemoryWithMetadata[]>> => {
       try {
         const memories = await AgentMemoryService.getRecent(
@@ -113,20 +182,17 @@ export function setupAgentMemoryHandlers(): void {
   );
 
   /**
-   * Get memories by conversation
+   * Get memories by conversation ID
    */
   ipcMain.handle(
     "agent-memory:get-by-conversation",
     async (
       _,
       conversationId: string,
-      limit?: number,
     ): Promise<IpcResponse<AgentMemoryWithMetadata[]>> => {
       try {
-        const memories = await AgentMemoryService.getByConversation(
-          conversationId,
-          limit,
-        );
+        const memories =
+          await AgentMemoryService.getByConversationId(conversationId);
         return { success: true, data: memories };
       } catch (error) {
         return {
@@ -141,99 +207,6 @@ export function setupAgentMemoryHandlers(): void {
   );
 
   /**
-   * Update a memory
-   */
-  ipcMain.handle(
-    "agent-memory:update",
-    async (
-      _,
-      id: string,
-      updates: Partial<UpdateAgentMemory>,
-    ): Promise<IpcResponse<AgentMemoryWithMetadata>> => {
-      try {
-        const memory = await AgentMemoryService.update(id, updates);
-        return { success: true, data: memory };
-      } catch (error) {
-        return {
-          success: false,
-          error:
-            error instanceof Error ? error.message : "Failed to update memory",
-        };
-      }
-    },
-  );
-
-  /**
-   * Archive a memory
-   */
-  ipcMain.handle(
-    "agent-memory:archive",
-    async (_, id: string): Promise<IpcResponse<void>> => {
-      try {
-        await AgentMemoryService.archive(id);
-        return { success: true };
-      } catch (error) {
-        return {
-          success: false,
-          error:
-            error instanceof Error ? error.message : "Failed to archive memory",
-        };
-      }
-    },
-  );
-
-  /**
-   * Delete a memory
-   */
-  ipcMain.handle(
-    "agent-memory:delete",
-    async (_, id: string): Promise<IpcResponse<void>> => {
-      try {
-        await AgentMemoryService.delete(id);
-        return { success: true };
-      } catch (error) {
-        return {
-          success: false,
-          error:
-            error instanceof Error ? error.message : "Failed to delete memory",
-        };
-      }
-    },
-  );
-
-  /**
-   * Create memory relation
-   */
-  ipcMain.handle(
-    "agent-memory:create-relation",
-    async (
-      _,
-      sourceMemoryId: string,
-      targetMemoryId: string,
-      relationType: string,
-      strength?: number,
-    ): Promise<IpcResponse<void>> => {
-      try {
-        await AgentMemoryService.createRelation(
-          sourceMemoryId,
-          targetMemoryId,
-          relationType,
-          strength,
-        );
-        return { success: true };
-      } catch (error) {
-        return {
-          success: false,
-          error:
-            error instanceof Error
-              ? error.message
-              : "Failed to create memory relation",
-        };
-      }
-    },
-  );
-
-  /**
    * Get related memories
    */
   ipcMain.handle(
@@ -241,9 +214,10 @@ export function setupAgentMemoryHandlers(): void {
     async (
       _,
       memoryId: string,
-    ): Promise<IpcResponse<AgentMemoryWithMetadata[]>> => {
+      limit: number = 5,
+    ): Promise<IpcResponse<MemoryRelevanceScore[]>> => {
       try {
-        const memories = await AgentMemoryService.getRelatedMemories(memoryId);
+        const memories = await AgentMemoryService.getRelated(memoryId, limit);
         return { success: true, data: memories };
       } catch (error) {
         return {
@@ -256,25 +230,65 @@ export function setupAgentMemoryHandlers(): void {
       }
     },
   );
+}
 
+/**
+ * Setup memory relationship operation handlers
+ */
+function setupMemoryRelationHandlers(): void {
   /**
-   * Prune old memories
+   * Create memory relation
+   */
+  ipcMain.handle(
+    "agent-memory:create-relation",
+    async (
+      _,
+      sourceMemoryId: string,
+      targetMemoryId: string,
+      relationType: string,
+      strength: number = 1.0,
+    ): Promise<IpcResponse<void>> => {
+      try {
+        await AgentMemoryService.createRelation(
+          sourceMemoryId,
+          targetMemoryId,
+          relationType,
+          strength,
+        );
+        return { success: true, data: undefined };
+      } catch (error) {
+        return {
+          success: false,
+          error:
+            error instanceof Error
+              ? error.message
+              : "Failed to create memory relation",
+        };
+      }
+    },
+  );
+}
+
+/**
+ * Setup memory maintenance and analytics operation handlers
+ */
+function setupMemoryMaintenanceHandlers(): void {
+  /**
+   * Prune old memories for an agent
    */
   ipcMain.handle(
     "agent-memory:prune",
     async (
       _,
       agentId: string,
-      daysOld?: number,
-      minImportanceScore?: number,
-    ): Promise<IpcResponse<number>> => {
+      retentionDays: number = 30,
+    ): Promise<IpcResponse<{ deletedCount: number }>> => {
       try {
-        const prunedCount = await AgentMemoryService.pruneOldMemories(
+        const result = await MemoryMaintenanceService.pruneOldMemories(
           agentId,
-          daysOld,
-          minImportanceScore,
+          retentionDays,
         );
-        return { success: true, data: prunedCount };
+        return { success: true, data: result };
       } catch (error) {
         return {
           success: false,
@@ -286,16 +300,17 @@ export function setupAgentMemoryHandlers(): void {
   );
 
   /**
-   * Perform comprehensive memory maintenance
+   * Clean old memories across all agents
    */
   ipcMain.handle(
     "agent-memory:clean-old-memories",
-    async (_, agentId: string, daysOld?: number): Promise<IpcResponse> => {
+    async (
+      _,
+      retentionDays: number = 90,
+    ): Promise<IpcResponse<{ deletedCount: number }>> => {
       try {
-        const result = await MemoryMaintenanceService.cleanOldMemories(
-          agentId,
-          daysOld,
-        );
+        const result =
+          await MemoryMaintenanceService.cleanOldMemories(retentionDays);
         return { success: true, data: result };
       } catch (error) {
         return {
@@ -310,14 +325,19 @@ export function setupAgentMemoryHandlers(): void {
   );
 
   /**
-   * Get memory statistics
+   * Get memory count statistics
    */
   ipcMain.handle(
     "agent-memory:get-count",
-    async (_, agentId: string): Promise<IpcResponse> => {
+    async (
+      _,
+      agentId: string,
+    ): Promise<
+      IpcResponse<{ total: number; active: number; archived: number }>
+    > => {
       try {
-        const count = await MemoryMaintenanceService.getMemoryCount(agentId);
-        return { success: true, data: { count } };
+        const result = await AgentMemoryService.getMemoryCount(agentId);
+        return { success: true, data: result };
       } catch (error) {
         return {
           success: false,
@@ -329,8 +349,14 @@ export function setupAgentMemoryHandlers(): void {
       }
     },
   );
+}
 
-  /**
-   * Run automated maintenance for all agents
-   */
+/**
+ * Setup agent memory IPC handlers
+ */
+export function setupAgentMemoryHandlers(): void {
+  setupMemoryCrudHandlers();
+  setupMemoryRetrievalHandlers();
+  setupMemoryRelationHandlers();
+  setupMemoryMaintenanceHandlers();
 }

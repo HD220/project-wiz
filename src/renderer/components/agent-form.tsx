@@ -137,7 +137,7 @@ export function AgentForm({ userId, onSuccess }: AgentFormProps) {
 
   // Model options based on provider type
   const getModelOptions = (providerId: string) => {
-    const provider = providers.find((p) => p.id === providerId);
+    const provider = providers.find((prov) => prov.id === providerId);
     if (!provider) return [];
 
     switch (provider.type) {
@@ -345,8 +345,8 @@ export function AgentForm({ userId, onSuccess }: AgentFormProps) {
                       min="0"
                       max="2"
                       {...field}
-                      onChange={(e) =>
-                        field.onChange(parseFloat(e.target.value))
+                      onChange={(event) =>
+                        field.onChange(parseFloat(event.target.value))
                       }
                     />
                   </FormControl>
@@ -370,7 +370,9 @@ export function AgentForm({ userId, onSuccess }: AgentFormProps) {
                       min="1"
                       max="8000"
                       {...field}
-                      onChange={(e) => field.onChange(parseInt(e.target.value))}
+                      onChange={(event) =>
+                        field.onChange(parseInt(event.target.value))
+                      }
                     />
                   </FormControl>
                   <FormDescription>Maximum response length.</FormDescription>

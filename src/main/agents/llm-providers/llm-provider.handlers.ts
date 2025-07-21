@@ -5,9 +5,9 @@ import type { CreateProviderInput } from "@/main/agents/llm-providers/llm-provid
 import type { IpcResponse } from "@/main/types";
 
 /**
- * Setup LLM provider IPC handlers
+ * Setup LLM provider CRUD operation handlers
  */
-export function setupLlmProviderHandlers(): void {
+function setupLlmProviderCrudHandlers(): void {
   // Create LLM provider
   ipcMain.handle(
     "llm-providers:create",
@@ -111,7 +111,12 @@ export function setupLlmProviderHandlers(): void {
       }
     },
   );
+}
 
+/**
+ * Setup default provider management handlers
+ */
+function setupLlmProviderDefaultHandlers(): void {
   // Set provider as default
   ipcMain.handle(
     "llm-providers:setDefault",
@@ -155,7 +160,12 @@ export function setupLlmProviderHandlers(): void {
       }
     },
   );
+}
 
+/**
+ * Setup LLM provider validation handlers
+ */
+function setupLlmProviderValidationHandlers(): void {
   // Test API key
   ipcMain.handle(
     "llm-providers:testApiKey",
@@ -184,4 +194,13 @@ export function setupLlmProviderHandlers(): void {
       }
     },
   );
+}
+
+/**
+ * Setup LLM provider IPC handlers
+ */
+export function setupLlmProviderHandlers(): void {
+  setupLlmProviderCrudHandlers();
+  setupLlmProviderDefaultHandlers();
+  setupLlmProviderValidationHandlers();
 }

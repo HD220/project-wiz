@@ -6,16 +6,14 @@ import type { IpcResponse } from "@/main/types";
 import { AuthService } from "@/main/user/authentication/auth.service";
 
 /**
- * Setup agent IPC handlers
- * Exposes AgentService methods to the frontend via IPC
+ * Setup agent CRUD operation handlers
  */
-export function setupAgentHandlers(): void {
+function setupAgentCrudHandlers(): void {
   // Create agent
   ipcMain.handle(
     "agents:create",
     async (_, input: CreateAgentInput): Promise<IpcResponse> => {
       try {
-        // Get current user ID for ownership tracking
         const currentUser = await AuthService.getCurrentUser();
         if (!currentUser) {
           throw new Error("User not authenticated");
@@ -36,11 +34,58 @@ export function setupAgentHandlers(): void {
     },
   );
 
-  // List agents (for now returns all agents, could be filtered by owner)
+  // Update agent
+  ipcMain.handle(
+    "agents:update",
+    async (
+      _,
+      id: string,
+      updates: Partial<CreateAgentInput>,
+    ): Promise<IpcResponse> => {
+      try {
+        const result = await AgentService.update(id, updates);
+        return {
+          success: true,
+          data: result,
+        };
+      } catch (error) {
+        return {
+          success: false,
+          error:
+            error instanceof Error ? error.message : "Failed to update agent",
+        };
+      }
+    },
+  );
+
+  // Delete agent
+  ipcMain.handle(
+    "agents:delete",
+    async (_, id: string): Promise<IpcResponse> => {
+      try {
+        await AgentService.delete(id);
+        return {
+          success: true,
+          data: { message: "Agent deleted successfully" },
+        };
+      } catch (error) {
+        return {
+          success: false,
+          error:
+            error instanceof Error ? error.message : "Failed to delete agent",
+        };
+      }
+    },
+  );
+}
+
+/**
+ * Setup agent query operation handlers
+ */
+function setupAgentQueryHandlers(): void {
+  // List agents
   ipcMain.handle("agents:list", async (): Promise<IpcResponse> => {
     try {
-      // For now, we'll return all agents
-      // In a real implementation, you'd want to filter by current user
       const currentUser = await AuthService.getCurrentUser();
       if (!currentUser) {
         throw new Error("User not authenticated");
@@ -102,7 +147,12 @@ export function setupAgentHandlers(): void {
       }
     },
   );
+}
 
+/**
+ * Setup agent status management handlers
+ */
+function setupAgentStatusHandlers(): void {
   // Update agent status
   ipcMain.handle(
     "agents:updateStatus",
@@ -124,48 +174,14 @@ export function setupAgentHandlers(): void {
       }
     },
   );
+}
 
-  // Update agent
-  ipcMain.handle(
-    "agents:update",
-    async (
-      _,
-      id: string,
-      updates: Partial<CreateAgentInput>,
-    ): Promise<IpcResponse> => {
-      try {
-        const result = await AgentService.update(id, updates);
-        return {
-          success: true,
-          data: result,
-        };
-      } catch (error) {
-        return {
-          success: false,
-          error:
-            error instanceof Error ? error.message : "Failed to update agent",
-        };
-      }
-    },
-  );
-
-  // Delete agent
-  ipcMain.handle(
-    "agents:delete",
-    async (_, id: string): Promise<IpcResponse> => {
-      try {
-        await AgentService.delete(id);
-        return {
-          success: true,
-          data: { message: "Agent deleted successfully" },
-        };
-      } catch (error) {
-        return {
-          success: false,
-          error:
-            error instanceof Error ? error.message : "Failed to delete agent",
-        };
-      }
-    },
-  );
+/**
+ * Setup agent IPC handlers
+ * Exposes AgentService methods to the frontend via IPC
+ */
+export function setupAgentHandlers(): void {
+  setupAgentCrudHandlers();
+  setupAgentQueryHandlers();
+  setupAgentStatusHandlers();
 }

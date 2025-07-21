@@ -11,7 +11,7 @@ import type { SendAgentMessageInput } from "./agent-chat.service";
 import type { CreateConversationInput } from "./conversation.service";
 import type { SendMessageInput } from "./message.service";
 
-export function setupConversationsHandlers(): void {
+function setupConversationHandlers(): void {
   ipcMain.handle(
     "conversations:create",
     async (_, input: CreateConversationInput): Promise<IpcResponse> => {
@@ -48,7 +48,9 @@ export function setupConversationsHandlers(): void {
       }
     },
   );
+}
 
+function setupMessageHandlers(): void {
   ipcMain.handle(
     "messages:send",
     async (_, input: SendMessageInput): Promise<IpcResponse> => {
@@ -81,7 +83,9 @@ export function setupConversationsHandlers(): void {
       }
     },
   );
+}
 
+function setupAgentChatHandlers(): void {
   ipcMain.handle(
     "agent-chat:sendMessage",
     async (_, input: SendAgentMessageInput): Promise<IpcResponse> => {
@@ -121,7 +125,6 @@ export function setupConversationsHandlers(): void {
     },
   );
 
-  // Memory-enhanced agent chat handlers
   ipcMain.handle(
     "agent-chat:sendMessageWithMemory",
     async (_, input: SendAgentMessageInput): Promise<IpcResponse> => {
@@ -140,6 +143,10 @@ export function setupConversationsHandlers(): void {
       }
     },
   );
+}
 
-  // Handler removed - use separate conversation and memory endpoints
+export function setupConversationsHandlers(): void {
+  setupConversationHandlers();
+  setupMessageHandlers();
+  setupAgentChatHandlers();
 }

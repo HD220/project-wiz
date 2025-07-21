@@ -113,9 +113,9 @@ export function AgentChat({ agent, userId }: AgentChatProps) {
     }
   };
 
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
+  const handleKeyPress = (event: React.KeyboardEvent) => {
+    if (event.key === "Enter" && !event.shiftKey) {
+      event.preventDefault();
       sendMessage();
     }
   };
@@ -218,7 +218,7 @@ export function AgentChat({ agent, userId }: AgentChatProps) {
           <div className="flex gap-2">
             <Input
               value={newMessage}
-              onChange={(e) => setNewMessage(e.target.value)}
+              onChange={(event) => setNewMessage(event.target.value)}
               onKeyPress={handleKeyPress}
               placeholder={`Message ${agent.name}...`}
               disabled={isLoading}
