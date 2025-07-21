@@ -16,6 +16,7 @@ export interface LLMProvider {
 
 // Form input types
 export interface CreateProviderInput {
+  userId: string; // Required by backend
   name: string;
   type: "openai" | "deepseek" | "anthropic" | "google" | "custom";
   apiKey: string;

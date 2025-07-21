@@ -30,6 +30,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Separator } from "@/components/ui/separator";
 
 import { useLLMProvidersStore } from "@/renderer/store/llm-providers-store";
+import { useAuthStore } from "@/renderer/store/auth-store";
 import { 
   LLMProvider, 
   ProviderFormData, 
@@ -49,6 +50,7 @@ interface ProviderFormProps {
 
 export function ProviderForm({ provider, onClose }: ProviderFormProps) {
   const { createProvider, updateProvider, isLoading } = useLLMProvidersStore();
+  const { user } = useAuthStore();
   
   const isEditing = !!provider;
   
@@ -87,7 +89,18 @@ export function ProviderForm({ provider, onClose }: ProviderFormProps) {
         await updateProvider(provider.id, data);
         toast.success("Provider updated successfully");
       } else {
-        await createProvider(data);
+        // Include userId when creating new provider
+        if (!user?.id) {
+          toast.error("User not authenticated");
+          return;
+        }
+        
+        const createData = {
+          ...data,
+          userId: user.id,
+        };
+        
+        await createProvider(createData);
         toast.success("Provider created successfully");
       }
       onClose();

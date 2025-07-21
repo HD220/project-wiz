@@ -1,5 +1,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
+import { useAuthStore } from "./auth-store";
+import type { CreateProviderInput } from "@/features/llm-providers/types";
 
 // Local type definitions to avoid boundary violations
 interface LLMProvider {
@@ -15,15 +17,15 @@ interface LLMProvider {
   updatedAt: Date;
 }
 
-interface CreateProviderInput {
-  name: string;
-  type: "openai" | "deepseek" | "anthropic" | "google" | "custom";
-  apiKey: string;
-  baseUrl?: string;
-  defaultModel: string;
-  isDefault?: boolean;
-  isActive?: boolean;
-}
+
+// Helper function to get current user ID
+const getCurrentUserId = (): string => {
+  const authState = useAuthStore.getState();
+  if (!authState.user?.id) {
+    throw new Error("User not authenticated");
+  }
+  return authState.user.id;
+};
 
 interface UpdateProviderInput {
   name?: string;
@@ -74,7 +76,8 @@ export const useLLMProvidersStore = create<LLMProvidersState>()(
         set({ isLoading: true, error: null });
 
         try {
-          const response = await window.api.llmProviders.list();
+          const userId = getCurrentUserId();
+          const response = await window.api.llmProviders.list(userId);
 
           if (response.success && response.data) {
             const providers = response.data as LLMProvider[];
@@ -193,7 +196,8 @@ export const useLLMProvidersStore = create<LLMProvidersState>()(
         set({ isLoading: true, error: null });
 
         try {
-          const response = await window.api.llmProviders.setDefault(id);
+          const userId = getCurrentUserId();
+          const response = await window.api.llmProviders.setDefault(id, userId);
 
           if (response.success && response.data) {
             const updatedProvider = response.data as LLMProvider;
