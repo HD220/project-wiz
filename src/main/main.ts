@@ -1,6 +1,6 @@
 import * as path from "path";
 
-import { app, BrowserWindow } from "electron";
+import { app, BrowserWindow, ipcMain } from "electron";
 import squirrel from "electron-squirrel-startup";
 
 import { setupAgentHandlers } from "./agents/agent.handlers";
@@ -41,7 +41,7 @@ function createMainWindow(): void {
       nodeIntegration: false,
       contextIsolation: true,
     },
-    titleBarStyle: "hiddenInset",
+    frame: false, // Remove frame for custom titlebar
     show: false, // Don't show until ready
   });
 
@@ -100,6 +100,10 @@ app.whenReady().then(() => {
   setupAgentMemoryHandlers();
   logger.info("Agent Memory IPC handlers registered");
 
+  // Setup window control handlers
+  setupWindowHandlers();
+  logger.info("Window control IPC handlers registered");
+
   createMainWindow();
 
   // On macOS, re-create window when dock icon is clicked
@@ -144,5 +148,38 @@ process.on("uncaughtException", (error) => {
 process.on("unhandledRejection", (reason, promise) => {
   logger.error("Unhandled rejection at:", promise, "reason:", reason);
 });
+
+/**
+ * Setup window control IPC handlers
+ */
+function setupWindowHandlers(): void {
+  ipcMain.handle("window:minimize", () => {
+    if (mainWindow) {
+      mainWindow.minimize();
+    }
+  });
+
+  ipcMain.handle("window:maximize", () => {
+    if (mainWindow) {
+      mainWindow.maximize();
+    }
+  });
+
+  ipcMain.handle("window:toggle-maximize", () => {
+    if (mainWindow) {
+      if (mainWindow.isMaximized()) {
+        mainWindow.unmaximize();
+      } else {
+        mainWindow.maximize();
+      }
+    }
+  });
+
+  ipcMain.handle("window:close", () => {
+    if (mainWindow) {
+      mainWindow.close();
+    }
+  });
+}
 
 logger.info("Main process initialized");

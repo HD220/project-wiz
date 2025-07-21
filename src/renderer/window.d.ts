@@ -162,6 +162,15 @@ declare global {
       // General invoke method
       invoke: (channel: string, ...args: unknown[]) => Promise<IpcResponse>;
     };
+
+    electronAPI?: {
+      window: {
+        minimize: () => Promise<void>;
+        maximize: () => Promise<void>;
+        toggleMaximize: () => Promise<void>;
+        close: () => Promise<void>;
+      };
+    };
   }
 }
 

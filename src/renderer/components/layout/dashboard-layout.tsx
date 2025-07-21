@@ -1,0 +1,37 @@
+import { ReactNode } from "react";
+import { Sidebar } from "@/features/dashboard/components/sidebar";
+import { ServerSidebar } from "@/features/dashboard/components/server-sidebar";
+import { DashboardHeader } from "@/features/dashboard/components/dashboard-header";
+
+interface DashboardLayoutProps {
+  children: ReactNode;
+  headerTitle?: string;
+  headerDescription?: string;
+}
+
+export function DashboardLayout({ 
+  children, 
+  headerTitle, 
+  headerDescription 
+}: DashboardLayoutProps) {
+  return (
+    <div className="h-full bg-background flex overflow-hidden">
+      {/* Server Sidebar */}
+      <ServerSidebar />
+      
+      {/* Main Sidebar */}
+      <div className="w-60 flex flex-col">
+        <Sidebar />
+      </div>
+      
+      {/* Main content area */}
+      <div className="flex-1 flex flex-col">
+        <DashboardHeader title={headerTitle} description={headerDescription} />
+        
+        <main className="flex-1 overflow-auto">
+          {children}
+        </main>
+      </div>
+    </div>
+  );
+}

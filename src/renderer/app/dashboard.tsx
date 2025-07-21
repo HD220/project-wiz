@@ -1,18 +1,17 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
 import { useAuthStore } from "@/renderer/store/auth-store";
+import { DashboardLayout } from "@/components/layout/dashboard-layout";
+import { WelcomeView } from "@/features/dashboard/components/welcome-view";
 
-function HomePage() {
+function DashboardPage() {
   return (
-    <div className="min-h-screen bg-[#36393f] flex items-center justify-center">
-      <div className="text-center text-white">
-        <h1 className="text-2xl font-bold mb-2">Project Wiz</h1>
-        <p className="text-[#b9bbbe]">Redirecting...</p>
-      </div>
-    </div>
+    <DashboardLayout>
+      <WelcomeView />
+    </DashboardLayout>
   );
 }
 
-export const Route = createFileRoute("/")({
+export const Route = createFileRoute("/dashboard")({
   beforeLoad: async () => {
     const { isAuthenticated, getCurrentUser } = useAuthStore.getState();
     
@@ -26,9 +25,6 @@ export const Route = createFileRoute("/")({
         throw redirect({ to: "/auth/login" });
       }
     }
-    
-    // If authenticated, redirect to dashboard
-    throw redirect({ to: "/dashboard" });
   },
-  component: HomePage,
+  component: DashboardPage,
 });

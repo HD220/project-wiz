@@ -223,4 +223,14 @@ contextBridge.exposeInMainWorld("api", {
     ipcRenderer.invoke(channel, ...args),
 });
 
+// Expose window control APIs
+contextBridge.exposeInMainWorld("electronAPI", {
+  window: {
+    minimize: () => ipcRenderer.invoke("window:minimize"),
+    maximize: () => ipcRenderer.invoke("window:maximize"),
+    toggleMaximize: () => ipcRenderer.invoke("window:toggle-maximize"),
+    close: () => ipcRenderer.invoke("window:close"),
+  },
+});
+
 console.log("Preload script loaded successfully");

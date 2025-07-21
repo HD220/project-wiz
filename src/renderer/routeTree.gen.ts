@@ -8,111 +8,150 @@
 // You should NOT make any changes in this file as it will be overwritten.
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
-import { Route as rootRouteImport } from "./app/__root";
-import { Route as ChatRouteImport } from "./app/chat";
-import { Route as IndexRouteImport } from "./app/index";
-import { Route as SettingsLlmProvidersRouteImport } from "./app/settings/llm-providers";
-import { Route as SettingsAgentsRouteImport } from "./app/settings/agents";
+import { Route as rootRouteImport } from './app/__root'
+import { Route as DashboardRouteImport } from './app/dashboard'
+import { Route as IndexRouteImport } from './app/index'
+import { Route as AuthRegisterRouteImport } from './app/auth/register'
+import { Route as AuthLoginRouteImport } from './app/auth/login'
+import { Route as DashboardServerServerIdRouteImport } from './app/dashboard/server/$serverId'
 
-const ChatRoute = ChatRouteImport.update({
-  id: "/chat",
-  path: "/chat",
+const DashboardRoute = DashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const IndexRoute = IndexRouteImport.update({
-  id: "/",
-  path: "/",
+  id: '/',
+  path: '/',
   getParentRoute: () => rootRouteImport,
-} as any);
-const SettingsLlmProvidersRoute = SettingsLlmProvidersRouteImport.update({
-  id: "/settings/llm-providers",
-  path: "/settings/llm-providers",
+} as any)
+const AuthRegisterRoute = AuthRegisterRouteImport.update({
+  id: '/auth/register',
+  path: '/auth/register',
   getParentRoute: () => rootRouteImport,
-} as any);
-const SettingsAgentsRoute = SettingsAgentsRouteImport.update({
-  id: "/settings/agents",
-  path: "/settings/agents",
+} as any)
+const AuthLoginRoute = AuthLoginRouteImport.update({
+  id: '/auth/login',
+  path: '/auth/login',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
+const DashboardServerServerIdRoute = DashboardServerServerIdRouteImport.update({
+  id: '/server/$serverId',
+  path: '/server/$serverId',
+  getParentRoute: () => DashboardRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
-  "/": typeof IndexRoute;
-  "/chat": typeof ChatRoute;
-  "/settings/agents": typeof SettingsAgentsRoute;
-  "/settings/llm-providers": typeof SettingsLlmProvidersRoute;
+  '/': typeof IndexRoute
+  '/dashboard': typeof DashboardRouteWithChildren
+  '/auth/login': typeof AuthLoginRoute
+  '/auth/register': typeof AuthRegisterRoute
+  '/dashboard/server/$serverId': typeof DashboardServerServerIdRoute
 }
 export interface FileRoutesByTo {
-  "/": typeof IndexRoute;
-  "/chat": typeof ChatRoute;
-  "/settings/agents": typeof SettingsAgentsRoute;
-  "/settings/llm-providers": typeof SettingsLlmProvidersRoute;
+  '/': typeof IndexRoute
+  '/dashboard': typeof DashboardRouteWithChildren
+  '/auth/login': typeof AuthLoginRoute
+  '/auth/register': typeof AuthRegisterRoute
+  '/dashboard/server/$serverId': typeof DashboardServerServerIdRoute
 }
 export interface FileRoutesById {
-  __root__: typeof rootRouteImport;
-  "/": typeof IndexRoute;
-  "/chat": typeof ChatRoute;
-  "/settings/agents": typeof SettingsAgentsRoute;
-  "/settings/llm-providers": typeof SettingsLlmProvidersRoute;
+  __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
+  '/dashboard': typeof DashboardRouteWithChildren
+  '/auth/login': typeof AuthLoginRoute
+  '/auth/register': typeof AuthRegisterRoute
+  '/dashboard/server/$serverId': typeof DashboardServerServerIdRoute
 }
 export interface FileRouteTypes {
-  fileRoutesByFullPath: FileRoutesByFullPath;
-  fullPaths: "/" | "/chat" | "/settings/agents" | "/settings/llm-providers";
-  fileRoutesByTo: FileRoutesByTo;
-  to: "/" | "/chat" | "/settings/agents" | "/settings/llm-providers";
+  fileRoutesByFullPath: FileRoutesByFullPath
+  fullPaths:
+    | '/'
+    | '/dashboard'
+    | '/auth/login'
+    | '/auth/register'
+    | '/dashboard/server/$serverId'
+  fileRoutesByTo: FileRoutesByTo
+  to:
+    | '/'
+    | '/dashboard'
+    | '/auth/login'
+    | '/auth/register'
+    | '/dashboard/server/$serverId'
   id:
-    | "__root__"
-    | "/"
-    | "/chat"
-    | "/settings/agents"
-    | "/settings/llm-providers";
-  fileRoutesById: FileRoutesById;
+    | '__root__'
+    | '/'
+    | '/dashboard'
+    | '/auth/login'
+    | '/auth/register'
+    | '/dashboard/server/$serverId'
+  fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
-  IndexRoute: typeof IndexRoute;
-  ChatRoute: typeof ChatRoute;
-  SettingsAgentsRoute: typeof SettingsAgentsRoute;
-  SettingsLlmProvidersRoute: typeof SettingsLlmProvidersRoute;
+  IndexRoute: typeof IndexRoute
+  DashboardRoute: typeof DashboardRouteWithChildren
+  AuthLoginRoute: typeof AuthLoginRoute
+  AuthRegisterRoute: typeof AuthRegisterRoute
 }
 
-declare module "@tanstack/react-router" {
+declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    "/chat": {
-      id: "/chat";
-      path: "/chat";
-      fullPath: "/chat";
-      preLoaderRoute: typeof ChatRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/": {
-      id: "/";
-      path: "/";
-      fullPath: "/";
-      preLoaderRoute: typeof IndexRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/settings/llm-providers": {
-      id: "/settings/llm-providers";
-      path: "/settings/llm-providers";
-      fullPath: "/settings/llm-providers";
-      preLoaderRoute: typeof SettingsLlmProvidersRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/settings/agents": {
-      id: "/settings/agents";
-      path: "/settings/agents";
-      fullPath: "/settings/agents";
-      preLoaderRoute: typeof SettingsAgentsRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
+    '/dashboard': {
+      id: '/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof DashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth/register': {
+      id: '/auth/register'
+      path: '/auth/register'
+      fullPath: '/auth/register'
+      preLoaderRoute: typeof AuthRegisterRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth/login': {
+      id: '/auth/login'
+      path: '/auth/login'
+      fullPath: '/auth/login'
+      preLoaderRoute: typeof AuthLoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/dashboard/server/$serverId': {
+      id: '/dashboard/server/$serverId'
+      path: '/server/$serverId'
+      fullPath: '/dashboard/server/$serverId'
+      preLoaderRoute: typeof DashboardServerServerIdRouteImport
+      parentRoute: typeof DashboardRoute
+    }
   }
 }
 
+interface DashboardRouteChildren {
+  DashboardServerServerIdRoute: typeof DashboardServerServerIdRoute
+}
+
+const DashboardRouteChildren: DashboardRouteChildren = {
+  DashboardServerServerIdRoute: DashboardServerServerIdRoute,
+}
+
+const DashboardRouteWithChildren = DashboardRoute._addFileChildren(
+  DashboardRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  ChatRoute: ChatRoute,
-  SettingsAgentsRoute: SettingsAgentsRoute,
-  SettingsLlmProvidersRoute: SettingsLlmProvidersRoute,
-};
+  DashboardRoute: DashboardRouteWithChildren,
+  AuthLoginRoute: AuthLoginRoute,
+  AuthRegisterRoute: AuthRegisterRoute,
+}
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
-  ._addFileTypes<FileRouteTypes>();
+  ._addFileTypes<FileRouteTypes>()

@@ -403,3 +403,8 @@ export class AuthService {
 - **IPC failures**: Check handler registration in main.ts
 - **Build failures**: Clear cache with `npm run clean`
 - **Auth issues**: Check credentials (admin/admin123 for testing)
+
+## Best Practices
+
+- **Library Usage Best Practices**
+  - Sempre utilizar ao maximo possivel funcionalidade das bibliotecas: zustand, tanstack, react hookforms, zod, components shadcn, etc. Evitar reeinventar a roda
