@@ -4,7 +4,9 @@
       "Bash(npm run type-check:*)",
       "Bash(find:*)",
       "WebFetch(domain:ai-sdk.dev)",
-      "Bash(rm:*)"
+      "Bash(rm:*)",
+      "Bash(mkdir:*)",
+      "Bash(mv:*)"
     ],
     "deny": []
   }

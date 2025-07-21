@@ -81,21 +81,30 @@ cp .env.example .env     # Setup environment
 ```
 src/
 ├── main/                # Backend (Node.js/Electron)
-│   ├── user/           # User bounded context
-│   │   ├── authentication/  # Auth handlers and services
-│   │   └── profile/         # User profile management
-│   ├── project/        # Project bounded context
-│   │   ├── channels/        # Channel management
-│   │   ├── members/         # Project membership
-│   │   └── issues/          # Issue management
-│   ├── conversations/  # Conversation bounded context
-│   ├── agents/         # Agent bounded context
-│   ├── database/       # Database layer
-│   └── main.ts         # Application entry point
-├── renderer/           # Frontend (React)
-│   ├── app/           # TanStack Router pages
-│   ├── components/    # Shared components
-│   └── store/         # Zustand state management
+│   ├── features/        # Features organized by domain
+│   │   ├── auth/        # Authentication bounded context
+│   │   ├── user/        # User bounded context  
+│   │   ├── project/     # Project bounded context
+│   │   ├── conversation/ # Conversation bounded context
+│   │   ├── agent/       # Agent bounded context
+│   │   └── git/         # Git integration
+│   ├── database/        # Database layer
+│   ├── types.ts         # Global types
+│   ├── utils/           # Global utilities
+│   └── main.ts          # Application entry point
+├── renderer/            # Frontend (React)
+│   ├── app/            # TanStack Router pages
+│   ├── components/     # Shared components (NO /shared folder)
+│   ├── features/       # Features organized by domain
+│   │   ├── auth/       # Auth feature with components, store, hooks
+│   │   ├── user/       # User feature  
+│   │   ├── project/    # Project feature
+│   │   └── app/        # General app components
+│   ├── hooks/          # Global hooks
+│   ├── store/          # Global store
+│   ├── lib/            # Global utilities
+│   ├── contexts/       # Global contexts
+│   └── locales/        # Internationalization
 ```
 
 ### Database Schema
@@ -119,6 +128,18 @@ SQLite with Drizzle ORM including:
 - **Constants**: `SCREAMING_SNAKE_CASE`
 - **Database columns**: `snake_case`
 
+### File Suffixes (with dots)
+
+- **`.handler.ts`** - IPC handlers no main
+- **`.service.ts`** - Serviços de negócio
+- **`.store.ts`** - Stores Zustand
+- **`.model.ts`** - Schemas Drizzle (database)
+- **`.schema.ts`** - Schemas Zod (validação)
+- **`.types.ts`** - Definições de tipos
+- **`.api.ts`** - Camadas de API/IPC
+- **`.hook.ts`** - Custom hooks (prefixo `use-`)
+- **Components** - SEM sufixo (e.g., `login-form.tsx`, `user-profile.tsx`)
+
 ### Import Organization
 
 ```typescript
@@ -131,7 +152,7 @@ import { drizzle } from "drizzle-orm";
 
 // 3. Internal imports (use aliases)
 import { getDatabase } from "@/main/database/connection";
-import { usersTable } from "@/main/user/authentication/users.schema";
+import { usersTable } from "@/main/features/user/user.model";
 
 // 4. Relative imports
 import { validateUserData } from "./validate-user-data";
@@ -141,9 +162,9 @@ import { validateUserData } from "./validate-user-data";
 
 ```typescript
 // Always use aliases, never relative imports
-import { Button } from "@/components/ui/button";
-import { useAuthStore } from "@/store/auth-store";
-import { AuthService } from "@/main/user/authentication/auth.service";
+import { Button } from "@/renderer/components/ui/button";
+import { useAuthStore } from "@/renderer/store/auth.store";
+import { AuthService } from "@/main/features/auth/auth.service";
 ```
 
 ## Database Patterns
@@ -173,7 +194,7 @@ export type UpdateProject = Partial<InsertProject> & { id: string };
 
 ### Migration Workflow
 
-1. Create/modify schema in `src/main/**/*.schema.ts`
+1. Create/modify schema in `src/main/features/**/*.model.ts`
 2. `npm run db:generate` - auto-detects via `drizzle.config.ts`
 3. `npm run db:migrate` - applies migrations
 4. Update service layer if needed
@@ -322,12 +343,12 @@ export interface IpcResponse<T = any> {
 ### Domain Types
 
 ```typescript
-// ✅ Correct - Types in schema for reusability
-// src/main/user/authentication/users.schema.ts
+// ✅ Correct - Types in model for reusability
+// src/main/features/user/user.model.ts
 export type Theme = "dark" | "light" | "system";
 
 // ✅ Correct - Derived types using Omit
-// src/main/user/authentication/auth.types.ts
+// src/main/features/auth/auth.types.ts
 export type AuthenticatedUser = Omit<SelectUser, "passwordHash">;
 export type RegisterUserInput = Omit<InsertUser, "passwordHash"> & {
   password: string;
@@ -374,8 +395,8 @@ export class AuthService {
 
 - Follow directory structure exactly as defined
 - Don't create redundant abstractions when framework provides them
-- Organize types by domain, not in shared folders
-- Use bounded context organization (DDD)
+- NO shared folders - organize by features and global resources
+- Use bounded context organization (DDD) within features/
 
 ### Critical Rules
 
@@ -384,17 +405,21 @@ export class AuthService {
 3. **Use Drizzle type inference** - don't recreate types manually
 4. **Follow bounded context structure** - don't mix domains
 5. **Register handlers centrally** via setup functions in main.ts
-6. **Define types in schemas** for cross-domain reusability
+6. **Use .model.ts for Drizzle, .schema.ts for Zod** - clear separation
+7. **Components as function declarations** - never React.FC
+8. **NO shared folders** - features/ for specific, globals in respective folders
 
 ## Development Flow
 
-1. **Schema First** - Define/modify database schema
+1. **Model First** - Define/modify database schema in `*.model.ts`
 2. **Generate Migration** - `npm run db:generate`
 3. **Apply Migration** - `npm run db:migrate`
-4. **Service Layer** - Implement business logic
-5. **IPC Handlers** - Create type-safe handlers
-6. **Frontend Integration** - Update stores and components
-7. **Quality Check** - `npm run quality:check`
+4. **Validation Schema** - Create Zod schemas in `*.schema.ts`
+5. **Service Layer** - Implement business logic in `*.service.ts`
+6. **IPC Handlers** - Create type-safe handlers in `*.handler.ts`
+7. **Frontend Integration** - Create `*.api.ts`, `*.store.ts`, `use-*.hook.ts`
+8. **Components** - Build UI with function declarations and shadcn/ui
+9. **Quality Check** - `npm run quality:check`
 
 ## Troubleshooting
 
@@ -406,5 +431,74 @@ export class AuthService {
 
 ## Best Practices
 
+## Component Patterns
+
+### React Components (Function Declaration)
+
+```typescript
+// ✅ CORRETO: Function declaration, sem React.FC, sem import React
+interface LoginFormProps {
+  onSuccess?: () => void;
+  className?: string;
+}
+
+function LoginForm(props: LoginFormProps) {
+  const { onSuccess, className } = props;
+  // Component logic...
+  
+  return (
+    <Card className={className}>
+      {/* JSX content */}
+    </Card>
+  );
+}
+
+export { LoginForm };
+
+// ❌ ERRADO: React.FC e import React
+import React from 'react'; // NÃO IMPORTAR
+
+const LoginForm: React.FC<LoginFormProps> = ({ 
+  onSuccess, 
+  className 
+}) => {
+  return <div>...</div>;
+};
+```
+
+### shadcn/ui Integration
+
+```typescript
+// SEMPRE usar componentes shadcn/ui
+import { Button } from "@/renderer/components/ui/button";
+import { Input } from "@/renderer/components/ui/input";
+import { Card, CardContent, CardHeader, CardTitle } from "@/renderer/components/ui/card";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/renderer/components/ui/form";
+
+// SEMPRE usar FormField pattern
+<FormField
+  control={form.control}
+  name="fieldName"
+  render={({ field }) => (
+    <FormItem>
+      <FormLabel>Label</FormLabel>
+      <FormControl>
+        <Input {...field} placeholder="placeholder" />
+      </FormControl>
+      <FormMessage />
+    </FormItem>
+  )}
+/>
+
+// ❌ NUNCA usar HTML nativo quando existe componente shadcn/ui
+<input {...register('fieldName')} /> // ERRADO
+<button type="submit">Submit</button> // ERRADO
+```
+
+## Best Practices
+
 - **Library Usage Best Practices**
   - Sempre utilizar ao maximo possivel funcionalidade das bibliotecas: zustand, tanstack, react hookforms, zod, components shadcn, etc. Evitar reeinventar a roda
+  - **Components**: SEMPRE function declaration, NUNCA React.FC
+  - **Forms**: SEMPRE usar shadcn/ui Form components
+  - **UI**: SEMPRE usar shadcn/ui, NUNCA HTML nativo
