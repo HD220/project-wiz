@@ -4,8 +4,8 @@ import { LogOut } from "lucide-react";
 import { Button } from "@/renderer/components/ui/button";
 import { useAuthStore } from "@/renderer/store/auth.store";
 
-import { UserAvatar } from "./user-avatar";
-import { UserStatus } from "./user-status";
+import { UserAvatar } from "@/renderer/features/user/components/user-avatar";
+import { UserStatus } from "@/renderer/features/user/components/user-status";
 
 function SidebarUserArea() {
   const router = useRouter();
