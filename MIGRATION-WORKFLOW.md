@@ -139,39 +139,39 @@ Após completar cada item de checklist:
 4. Confirmar arquivo existe no destino antes de próximo
 
 ### Checklist - Reorganização Stores:
-- [ ] `src/renderer/store/auth-store.ts` → `src/renderer/store/auth.store.ts`
-- [ ] `src/renderer/store/llm-providers-store.ts` → `src/renderer/store/llm-provider.store.ts`
+- [x] `src/renderer/store/auth-store.ts` → `src/renderer/store/auth.store.ts`
+- [x] `src/renderer/store/llm-providers-store.ts` → `src/renderer/store/llm-provider.store.ts`
 
 ### Checklist - Feature AUTH Components (já estão em features/auth/components/):
-- [ ] Verificar `src/renderer/features/auth/components/auth-card.tsx` existe
-- [ ] Verificar `src/renderer/features/auth/components/auth-layout.tsx` existe  
-- [ ] Verificar `src/renderer/features/auth/components/login-form.tsx` existe
-- [ ] Verificar `src/renderer/features/auth/components/register-form.tsx` existe
+- [x] Verificar `src/renderer/features/auth/components/auth-card.tsx` existe
+- [x] Verificar `src/renderer/features/auth/components/auth-layout.tsx` existe  
+- [x] Verificar `src/renderer/features/auth/components/login-form.tsx` existe
+- [x] Verificar `src/renderer/features/auth/components/register-form.tsx` existe
 
 ### Checklist - Feature LLM-PROVIDER (renomear de llm-providers para llm-provider):
-- [ ] `src/renderer/features/llm-providers/` → `src/renderer/features/llm-provider/`
+- [x] `src/renderer/features/llm-providers/` → `src/renderer/features/llm-provider/`
 - [ ] Verificar todos componentes em `src/renderer/features/llm-provider/components/` existem:
-  - [ ] `empty-state.tsx`
-  - [ ] `provider-card.tsx` 
-  - [ ] `provider-form.tsx`
-  - [ ] `provider-list.tsx`
-  - [ ] `test-api-button.tsx`
+  - [x] `empty-state.tsx`
+  - [x] `provider-card.tsx` 
+  - [x] `provider-form.tsx`
+  - [x] `provider-list.tsx`
+  - [x] `test-api-button.tsx`
 
 ### Checklist - Feature APP (já está em features/app/components/):
-- [ ] Verificar todos componentes em `src/renderer/features/app/components/` existem:
-  - [ ] `activity-item.tsx`
-  - [ ] `content-header.tsx`
-  - [ ] `navigation-item.tsx`
-  - [ ] `project-sidebar.tsx`
-  - [ ] `root-sidebar.tsx`
-  - [ ] `server-view.tsx`
-  - [ ] `sidebar-header.tsx`
-  - [ ] `sidebar-navigation.tsx`
-  - [ ] `sidebar-user-area.tsx`
-  - [ ] `user-avatar.tsx`
-  - [ ] `user-sidebar.tsx`
-  - [ ] `user-status.tsx`
-  - [ ] `welcome-view.tsx`
+- [x] Verificar todos componentes em `src/renderer/features/app/components/` existem:
+  - [x] `activity-item.tsx`
+  - [x] `content-header.tsx`
+  - [x] `navigation-item.tsx`
+  - [x] `project-sidebar.tsx`
+  - [x] `root-sidebar.tsx`
+  - [x] `server-view.tsx`
+  - [x] `sidebar-header.tsx`
+  - [x] `sidebar-navigation.tsx`
+  - [x] `sidebar-user-area.tsx`
+  - [x] `user-avatar.tsx`
+  - [x] `user-sidebar.tsx`
+  - [x] `user-status.tsx`
+  - [x] `welcome-view.tsx`
 
 **Validação Fase 2B:** ✅ Todos os arquivos frontend reorganizados com sucesso
 
