@@ -45,16 +45,29 @@ function ProviderList() {
   return (
     <>
       <div className="space-y-6">
-        {/* Add Provider Button */}
-        <div className="flex justify-end">
-          <Button onClick={() => setShowForm(true)} className="gap-2">
+        {/* Header with Add Button */}
+        <div className="flex items-center justify-between">
+          <div className="space-y-1">
+            <div className="flex items-center gap-2">
+              <h3 className="font-medium">Configured Providers</h3>
+              {providers.length > 0 && (
+                <span className="text-sm text-muted-foreground">
+                  ({providers.length})
+                </span>
+              )}
+            </div>
+            <p className="text-sm text-muted-foreground">
+              Manage your AI language model providers
+            </p>
+          </div>
+          <Button onClick={() => setShowForm(true)} className="gap-2 shrink-0">
             <Plus className="h-4 w-4" />
             Add Provider
           </Button>
         </div>
 
-        {/* Providers Grid */}
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        {/* Providers List */}
+        <div className="space-y-2">
           {providers.map((provider) => (
             <ProviderCard
               key={provider.id}
