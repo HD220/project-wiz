@@ -7,11 +7,15 @@ interface UserAvatarProps {
   className?: string;
 }
 
-export function UserAvatar({ name = "User", size = "md", className }: UserAvatarProps) {
+export function UserAvatar({
+  name = "User",
+  size = "md",
+  className,
+}: UserAvatarProps) {
   const sizeClasses = {
     sm: "w-6 h-6 text-xs",
-    md: "w-8 h-8 text-sm", 
-    lg: "w-12 h-12 text-base"
+    md: "w-8 h-8 text-sm",
+    lg: "w-12 h-12 text-base",
   };
 
   return (

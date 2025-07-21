@@ -1,11 +1,14 @@
-import { useState } from "react";
 import { useRouter } from "@tanstack/react-router";
+import { Loader2 } from "lucide-react";
+import { useState } from "react";
+
 import { useAuthStore } from "@/renderer/store/auth-store";
+
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Loader2 } from "lucide-react";
+
 import { AuthCard } from "./auth-card";
 
 export function RegisterForm() {
@@ -38,20 +41,19 @@ export function RegisterForm() {
           username: formData.username,
           password: formData.password,
         });
-        router.navigate({ to: "/dashboard" });
+        router.navigate({ to: "/user" });
       }
     } catch {
       // Error handling
     }
   };
 
-  const isPasswordMismatch = formData.password !== formData.confirmPassword && formData.confirmPassword !== "";
+  const isPasswordMismatch =
+    formData.password !== formData.confirmPassword &&
+    formData.confirmPassword !== "";
 
   return (
-    <AuthCard
-      title="Create an account"
-      description="Join our community today!"
-    >
+    <AuthCard title="Create an account" description="Join our community today!">
       <form onSubmit={handleSubmit} className="space-y-4">
         {error && (
           <Alert variant="destructive" className="bg-red-900/50 border-red-800">
@@ -81,7 +83,9 @@ export function RegisterForm() {
             id="username"
             type="text"
             value={formData.username}
-            onChange={(e) => setFormData({ ...formData, username: e.target.value })}
+            onChange={(e) =>
+              setFormData({ ...formData, username: e.target.value })
+            }
             placeholder="Choose a username"
             required
           />
@@ -95,21 +99,28 @@ export function RegisterForm() {
             id="password"
             type="password"
             value={formData.password}
-            onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+            onChange={(e) =>
+              setFormData({ ...formData, password: e.target.value })
+            }
             placeholder="Enter your password"
             required
           />
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="confirmPassword" className="text-xs font-bold uppercase">
+          <Label
+            htmlFor="confirmPassword"
+            className="text-xs font-bold uppercase"
+          >
             Confirm Password
           </Label>
           <Input
             id="confirmPassword"
             type="password"
             value={formData.confirmPassword}
-            onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
+            onChange={(e) =>
+              setFormData({ ...formData, confirmPassword: e.target.value })
+            }
             placeholder="Confirm your password"
             required
           />

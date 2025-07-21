@@ -1,11 +1,14 @@
-import { useState } from "react";
 import { useRouter } from "@tanstack/react-router";
+import { Loader2 } from "lucide-react";
+import { useState } from "react";
+
 import { useAuthStore } from "@/renderer/store/auth-store";
+
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Loader2 } from "lucide-react";
+
 import { AuthCard } from "./auth-card";
 
 export function LoginForm() {
@@ -22,7 +25,7 @@ export function LoginForm() {
 
     try {
       await login(formData);
-      router.navigate({ to: "/dashboard" });
+      router.navigate({ to: "/user" });
     } catch {
       // Error is handled by the store
     }
@@ -32,7 +35,7 @@ export function LoginForm() {
     clearError();
     try {
       await useAuthStore.getState().quickLogin();
-      router.navigate({ to: "/dashboard" });
+      router.navigate({ to: "/user" });
     } catch {
       // Error is handled by the store
     }
@@ -58,7 +61,9 @@ export function LoginForm() {
             id="username"
             type="text"
             value={formData.username}
-            onChange={(e) => setFormData({ ...formData, username: e.target.value })}
+            onChange={(e) =>
+              setFormData({ ...formData, username: e.target.value })
+            }
             placeholder="Enter your username"
             required
           />
@@ -72,18 +77,16 @@ export function LoginForm() {
             id="password"
             type="password"
             value={formData.password}
-            onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+            onChange={(e) =>
+              setFormData({ ...formData, password: e.target.value })
+            }
             placeholder="Enter your password"
             required
           />
         </div>
 
         <div className="flex flex-col space-y-3 pt-2">
-          <Button
-            type="submit"
-            disabled={isLoading}
-            className="w-full"
-          >
+          <Button type="submit" disabled={isLoading} className="w-full">
             {isLoading ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />

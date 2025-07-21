@@ -1,11 +1,15 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { WelcomeView } from "@/features/dashboard/components/welcome-view";
-import { DashboardHeader } from "@/features/dashboard/components/dashboard-header";
+
+import { ContentHeader } from "@/features/app/components/content-header";
+import { WelcomeView } from "@/features/app/components/welcome-view";
 
 function UserPage() {
   return (
     <div className="flex-1 flex flex-col">
-      <DashboardHeader title="Área Pessoal" description="Converse com seus agentes pessoais" />
+      <ContentHeader
+        title="Área Pessoal"
+        description="Converse com seus agentes pessoais"
+      />
       <main className="flex-1 overflow-auto">
         <WelcomeView />
       </main>

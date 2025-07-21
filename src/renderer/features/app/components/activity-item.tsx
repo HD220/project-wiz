@@ -8,17 +8,17 @@ interface ActivityItemProps {
   className?: string;
 }
 
-export function ActivityItem({ 
-  icon, 
-  title, 
-  timestamp, 
-  variant = "info", 
-  className 
+export function ActivityItem({
+  icon,
+  title,
+  timestamp,
+  variant = "info",
+  className,
 }: ActivityItemProps) {
   const variantStyles = {
     success: "text-green-500",
-    info: "text-primary", 
-    warning: "text-yellow-500"
+    info: "text-primary",
+    warning: "text-yellow-500",
   };
 
   return (

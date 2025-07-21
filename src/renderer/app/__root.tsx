@@ -1,4 +1,5 @@
 import { createRootRoute, Outlet } from "@tanstack/react-router";
+
 import { Titlebar } from "@/components/layout/titlebar";
 
 function RootComponent() {

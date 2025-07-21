@@ -10,7 +10,7 @@ export function UserStatus({ status = "online", className }: UserStatusProps) {
     online: { color: "bg-green-500", label: "Online" },
     away: { color: "bg-yellow-500", label: "Away" },
     busy: { color: "bg-red-500", label: "Busy" },
-    offline: { color: "bg-gray-500", label: "Offline" }
+    offline: { color: "bg-gray-500", label: "Offline" },
   };
 
   const config = statusConfig[status];

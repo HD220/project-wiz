@@ -1,6 +1,14 @@
 import { useAuthStore } from "@/renderer/store/auth-store";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+
 import { Badge } from "@/components/ui/badge";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+
 import { ActivityItem } from "./activity-item";
 
 export function WelcomeView() {
@@ -38,9 +46,7 @@ export function WelcomeView() {
         <Card>
           <CardHeader className="pb-3">
             <CardTitle>Projects</CardTitle>
-            <CardDescription>
-              Manage your development projects
-            </CardDescription>
+            <CardDescription>Manage your development projects</CardDescription>
           </CardHeader>
           <CardContent>
             <p className="text-sm text-muted-foreground">
@@ -52,9 +58,7 @@ export function WelcomeView() {
         <Card>
           <CardHeader className="pb-3">
             <CardTitle>Community</CardTitle>
-            <CardDescription>
-              Connect with other developers
-            </CardDescription>
+            <CardDescription>Connect with other developers</CardDescription>
           </CardHeader>
           <CardContent>
             <p className="text-sm text-muted-foreground">

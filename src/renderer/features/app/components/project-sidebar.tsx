@@ -1,9 +1,14 @@
-import { Hash, Users, Bot, Settings, ChevronDown } from "lucide-react";
 import { Link } from "@tanstack/react-router";
+import { Hash, Users, Bot, Settings, ChevronDown } from "lucide-react";
+
 import { Button } from "@/components/ui/button";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { cn } from "@/lib/utils";
 
 interface Channel {
@@ -27,7 +32,7 @@ interface ProjectSidebarProps {
 export function ProjectSidebar({ projectId, className }: ProjectSidebarProps) {
   // Mock data - in real app this would come from stores
   const projectName = "Project Alpha";
-  
+
   const channels: Channel[] = [
     { id: "general", name: "geral", type: "text", hasNotification: true },
     { id: "development", name: "desenvolvimento", type: "text" },
@@ -41,17 +46,21 @@ export function ProjectSidebar({ projectId, className }: ProjectSidebarProps) {
   ];
 
   return (
-    <div className={cn("w-60 h-full flex flex-col bg-card border-r", className)}>
+    <div className={cn("h-full flex flex-col bg-card", className)}>
       {/* Project Header */}
-      <div className="h-12 flex items-center justify-between px-4 border-b bg-muted/30">
-        <h2 className="font-semibold text-sm truncate">{projectName}</h2>
-        <Button variant="ghost" size="icon" className="w-5 h-5">
+      <div className="h-12 bg-card border-b flex items-center justify-center relative">
+        <h1 className="text-foreground font-semibold">{projectName}</h1>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="absolute right-2 w-6 h-6"
+        >
           <Settings className="w-4 h-4" />
         </Button>
       </div>
 
       <ScrollArea className="flex-1">
-        <div className="p-2 space-y-4">
+        <div className="p-2 space-y-1">
           {/* Text Channels */}
           <Collapsible defaultOpen>
             <CollapsibleTrigger asChild>
@@ -71,15 +80,15 @@ export function ProjectSidebar({ projectId, className }: ProjectSidebarProps) {
                   params={{ projectId, channelId: channel.id }}
                   className="block"
                   activeProps={{
-                    className: "active"
+                    className: "active",
                   }}
                 >
-                  {({ isActive }) => (
+                  {({ isActive }: { isActive: boolean }) => (
                     <Button
                       variant="ghost"
                       className={cn(
-                        "w-full justify-start px-2 h-8 text-sm font-normal",
-                        isActive && "bg-muted text-foreground"
+                        "w-full justify-start px-2 h-8 text-sm font-normal text-muted-foreground hover:text-foreground hover:bg-accent",
+                        isActive && "bg-accent text-foreground",
                       )}
                     >
                       <Hash className="w-4 h-4 mr-2 text-muted-foreground" />
@@ -94,7 +103,9 @@ export function ProjectSidebar({ projectId, className }: ProjectSidebarProps) {
             </CollapsibleContent>
           </Collapsible>
 
-          <Separator />
+          <div className="my-2">
+            <Separator />
+          </div>
 
           {/* Project Agents */}
           <Collapsible defaultOpen>
@@ -112,7 +123,7 @@ export function ProjectSidebar({ projectId, className }: ProjectSidebarProps) {
                 <Button
                   key={agent.id}
                   variant="ghost"
-                  className="w-full justify-start px-2 h-8 text-sm font-normal"
+                  className="w-full justify-start px-2 h-8 text-sm font-normal text-muted-foreground hover:text-foreground hover:bg-accent"
                 >
                   <Bot className="w-4 h-4 mr-2 text-muted-foreground" />
                   {agent.name}
@@ -121,7 +132,7 @@ export function ProjectSidebar({ projectId, className }: ProjectSidebarProps) {
                       "ml-auto w-2 h-2 rounded-full",
                       agent.status === "online" && "bg-green-500",
                       agent.status === "offline" && "bg-gray-400",
-                      agent.status === "busy" && "bg-yellow-500"
+                      agent.status === "busy" && "bg-yellow-500",
                     )}
                   />
                 </Button>
@@ -129,7 +140,9 @@ export function ProjectSidebar({ projectId, className }: ProjectSidebarProps) {
             </CollapsibleContent>
           </Collapsible>
 
-          <Separator />
+          <div className="my-2">
+            <Separator />
+          </div>
 
           {/* Members */}
           <Collapsible defaultOpen>
@@ -145,7 +158,7 @@ export function ProjectSidebar({ projectId, className }: ProjectSidebarProps) {
             <CollapsibleContent className="space-y-1">
               <Button
                 variant="ghost"
-                className="w-full justify-start px-2 h-8 text-sm font-normal"
+                className="w-full justify-start px-2 h-8 text-sm font-normal text-muted-foreground hover:text-foreground hover:bg-accent"
               >
                 <Users className="w-4 h-4 mr-2 text-muted-foreground" />
                 Ver todos os membros

@@ -1,6 +1,7 @@
+import { LucideIcon } from "lucide-react";
+
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { LucideIcon } from "lucide-react";
 
 interface NavigationItemProps {
   icon: LucideIcon;
@@ -10,12 +11,12 @@ interface NavigationItemProps {
   className?: string;
 }
 
-export function NavigationItem({ 
-  icon: Icon, 
-  label, 
-  isActive = false, 
-  onClick, 
-  className 
+export function NavigationItem({
+  icon: IconComponent,
+  label,
+  isActive = false,
+  onClick,
+  className,
 }: NavigationItemProps) {
   return (
     <Button
@@ -24,10 +25,10 @@ export function NavigationItem({
       className={cn(
         "w-full justify-start text-muted-foreground hover:text-foreground hover:bg-accent",
         isActive && "bg-accent text-foreground",
-        className
+        className,
       )}
     >
-      <Icon className="w-4 h-4 mr-2" />
+      <IconComponent className="w-4 h-4 mr-2" />
       {label}
     </Button>
   );

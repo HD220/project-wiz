@@ -1,7 +1,10 @@
-import { LogOut } from "lucide-react";
 import { useRouter } from "@tanstack/react-router";
+import { LogOut } from "lucide-react";
+
 import { useAuthStore } from "@/renderer/store/auth-store";
+
 import { Button } from "@/components/ui/button";
+
 import { UserAvatar } from "./user-avatar";
 import { UserStatus } from "./user-status";
 
@@ -18,14 +21,14 @@ export function SidebarUserArea() {
     <div className="p-2 bg-muted/50">
       <div className="flex items-center gap-2">
         <UserAvatar name={user?.name} />
-        
+
         <div className="flex-1 min-w-0">
           <p className="text-sm font-medium text-foreground truncate">
             {user?.name || "User"}
           </p>
           <UserStatus status="online" />
         </div>
-        
+
         <Button
           variant="ghost"
           size="sm"

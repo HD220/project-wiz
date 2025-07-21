@@ -1,11 +1,17 @@
-import { Plus, Settings } from "lucide-react";
 import { Link } from "@tanstack/react-router";
+import { Plus, Settings } from "lucide-react";
+
+import { useAuthStore } from "@/renderer/store/auth-store";
+
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { useAuthStore } from "@/renderer/store/auth-store";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 
 interface Server {
@@ -30,28 +36,33 @@ export function RootSidebar({ className }: RootSidebarProps) {
   ];
 
   return (
-    <div className={cn("w-14 bg-muted/50 flex flex-col items-center pb-2 border-r", className)}>
+    <div
+      className={cn(
+        "w-14 bg-muted/50 flex flex-col items-center pb-2 border-r",
+        className,
+      )}
+    >
       {/* User Space / Direct Messages */}
       <div className="h-12 flex items-center justify-center">
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
-              <Link 
+              <Link
                 to="/user"
                 className=""
                 activeProps={{
-                  className: "active"
+                  className: "active",
                 }}
               >
-                {({ isActive }) => (
+                {({ isActive }: { isActive: boolean }) => (
                   <Button
                     variant="ghost"
                     size="icon"
                     className={cn(
                       "w-10 h-10 p-0 rounded-full border transition-all duration-200",
-                      isActive 
-                        ? "bg-primary text-primary-foreground border-primary" 
-                        : "bg-muted border-muted-foreground/30 hover:bg-primary hover:text-white hover:border-primary"
+                      isActive
+                        ? "bg-primary text-primary-foreground border-primary"
+                        : "bg-muted border-muted-foreground/30 hover:bg-primary hover:text-white hover:border-primary",
                     )}
                   >
                     <Avatar className="w-6 h-6">
@@ -83,28 +94,32 @@ export function RootSidebar({ className }: RootSidebarProps) {
                   params={{ projectId: server.id }}
                   className="relative"
                   activeProps={{
-                    className: "active"
+                    className: "active",
                   }}
                 >
-                  {({ isActive }) => (
+                  {({ isActive }: { isActive: boolean }) => (
                     <Button
                       variant="ghost"
                       size="icon"
                       className={cn(
                         "w-10 h-10 p-0 rounded-full border transition-all duration-200 relative",
-                        isActive 
-                          ? "bg-primary text-primary-foreground border-primary" 
-                          : "bg-muted border-muted-foreground/30 hover:bg-primary hover:text-white hover:border-primary"
+                        isActive
+                          ? "bg-primary text-primary-foreground border-primary"
+                          : "bg-muted border-muted-foreground/30 hover:bg-primary hover:text-white hover:border-primary",
                       )}
                     >
                       {server.icon ? (
-                        <img src={server.icon} alt={server.name} className="w-6 h-6 rounded-full" />
+                        <img
+                          src={server.icon}
+                          alt={server.name}
+                          className="w-6 h-6 rounded-full"
+                        />
                       ) : (
                         <span className="font-semibold text-sm">
                           {server.name.charAt(0).toUpperCase()}
                         </span>
                       )}
-                      
+
                       {/* Notification indicator */}
                       {server.hasNotification && !isActive && (
                         <div className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-destructive rounded-full border border-background" />
@@ -141,7 +156,7 @@ export function RootSidebar({ className }: RootSidebarProps) {
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>
-        
+
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>

@@ -47,82 +47,88 @@ app/
 ## Responsabilidades dos Layouts
 
 ### `__root.tsx` - Window Layout
+
 ```tsx
 function RootComponent() {
   return (
     <div className="h-screen flex flex-col">
-      <Titlebar />  {/* Window controls */}
+      <Titlebar /> {/* Window controls */}
       <div className="flex-1 overflow-hidden">
         <Outlet />
       </div>
     </div>
-  )
+  );
 }
 ```
 
 **Responsabilidade**: Controles da janela desktop sempre presentes
 
 ### `_authenticated/_layout.tsx` - Authenticated Layout
+
 ```tsx
 function AuthenticatedLayout() {
   return (
     <div className="h-full flex">
-      <RootSidebar />  {/* Compartilhado entre contextos */}
+      <RootSidebar /> {/* Compartilhado entre contextos */}
       <div className="flex-1 flex">
-        <Outlet />  {/* user/_layout ou project/$projectId/_layout */}
+        <Outlet /> {/* user/_layout ou project/$projectId/_layout */}
       </div>
     </div>
-  )
+  );
 }
 ```
 
-**Responsabilidade**: 
+**Responsabilidade**:
+
 - Auth guard centralizado
 - RootSidebar sempre presente quando autenticado
 - Redirecionamento para `/auth/login` se não autenticado
 
 ### `_authenticated/user/_layout.tsx` - User Context Layout
+
 ```tsx
 function UserLayout() {
   return (
     <>
       <UserSidebar />
       <main className="flex-1">
-        <Outlet />  {/* user/index.tsx, user/dm/$agentId.tsx */}
+        <Outlet /> {/* user/index.tsx, user/dm/$agentId.tsx */}
       </main>
     </>
-  )
+  );
 }
 ```
 
 **Responsabilidade**: UserSidebar + área de conteúdo do usuário
 
 ### `_authenticated/project/$projectId/_layout.tsx` - Project Context Layout
+
 ```tsx
 function ProjectLayout() {
-  const { projectId } = Route.useParams()
-  
+  const { projectId } = Route.useParams();
+
   return (
     <>
       <ProjectSidebar projectId={projectId} />
       <main className="flex-1">
-        <Outlet />  {/* project/index.tsx, project/channel/$channelId.tsx */}
+        <Outlet /> {/* project/index.tsx, project/channel/$channelId.tsx */}
       </main>
     </>
-  )
+  );
 }
 ```
 
 **Responsabilidade**: ProjectSidebar específica + área de conteúdo do projeto
 
 ### `auth/_layout.tsx` - Public Layout
+
 ```tsx
 function AuthLayout() {
   return (
     <div className="h-full bg-muted flex items-center justify-center">
-      <Outlet />  {/* auth/login.tsx, auth/register.tsx */}
+      <Outlet /> {/* auth/login.tsx, auth/register.tsx */}
     </div>
-  )
+  );
 }
 ```
 
@@ -131,18 +137,20 @@ function AuthLayout() {
 ## Composição Visual
 
 ### Contexto Usuário (`/user` ou `/user/dm/123`)
+
 ```
 ┌─────────────────────────────────────┐
 │ Titlebar (window controls)          │  ← __root.tsx
 ├─┬────────┬─────────────────────────┤
 │Root     │User     │ Content        │  ← _authenticated/_layout.tsx
-│Sidebar  │Sidebar  │ Area           │  ← user/_layout.tsx  
+│Sidebar  │Sidebar  │ Area           │  ← user/_layout.tsx
 │         │         │ + Header       │  ← user/index.tsx
 │         │         │                │
 └─┴────────┴─────────────────────────┘
 ```
 
 ### Contexto Projeto (`/project/123` ou `/project/123/channel/456`)
+
 ```
 ┌─────────────────────────────────────┐
 │ Titlebar (window controls)          │  ← __root.tsx
@@ -155,6 +163,7 @@ function AuthLayout() {
 ```
 
 ### Contexto Público (`/auth/login` ou `/auth/register`)
+
 ```
 ┌─────────────────────────────────────┐
 │ Titlebar (window controls)          │  ← __root.tsx
@@ -169,26 +178,30 @@ function AuthLayout() {
 ## Componentes da Interface
 
 ### RootSidebar (ex-ServerSidebar)
+
 - **Localização**: Primeira coluna visual
 - **Conteúdo**: Lista de projetos + botão "Área Pessoal"
-- **Navegação**: 
+- **Navegação**:
   - Botão User → `/user`
   - Projeto X → `/project/X`
 - **Visual**: Coluna estreita (56px) com ícones redondos
 
 ### UserSidebar (ex-Sidebar principal)
+
 - **Localização**: Segunda coluna visual no contexto usuário
 - **Conteúdo**: Conversas com agentes pessoais, histórico
 - **Navegação**: Links para DMs com agentes
 - **Visual**: Coluna média (240px) com lista textual
 
 ### ProjectSidebar (novo componente)
+
 - **Localização**: Segunda coluna visual no contexto projeto
 - **Conteúdo**: Canais do projeto, agentes do projeto, membros
 - **Props**: Recebe `projectId` do layout
 - **Visual**: Coluna média (240px) com estrutura hierárquica
 
 ### ContentHeader
+
 - **Localização**: Topo da área de conteúdo
 - **Responsabilidade**: Cada página define seu próprio header
 - **Conteúdo**: Título, breadcrumb, ações contextuais
@@ -197,15 +210,15 @@ function AuthLayout() {
 
 ```tsx
 // _authenticated/_layout.tsx
-export const Route = createFileRoute('/_authenticated')({
+export const Route = createFileRoute("/_authenticated")({
   beforeLoad: async () => {
-    const { isAuthenticated } = useAuthStore.getState()
+    const { isAuthenticated } = useAuthStore.getState();
     if (!isAuthenticated) {
-      throw redirect({ to: '/auth/login' })
+      throw redirect({ to: "/auth/login" });
     }
   },
   component: AuthenticatedLayout,
-})
+});
 ```
 
 ## Fluxo de Navegação
@@ -220,21 +233,25 @@ export const Route = createFileRoute('/_authenticated')({
 ## Vantagens da Arquitetura
 
 ### ✅ DRY (Don't Repeat Yourself)
+
 - RootSidebar definida uma vez, reutilizada automaticamente
 - Layouts compostos hierarquicamente
 - Auth guard centralizado
 
 ### ✅ Performance
+
 - TanStack Router otimiza re-renders
 - Layouts aninhados = carregamento incremental
 - Componentes preservados entre navegações
 
 ### ✅ Manutenibilidade
+
 - Estrutura clara e previsível
 - Responsabilidades bem definidas
 - Fácil adicionar novos contextos
 
 ### ✅ UX Familiar
+
 - Interface Discord-like conhecida pelos desenvolvedores
 - Transições suaves entre contextos
 - Navegação intuitiva
@@ -242,19 +259,23 @@ export const Route = createFileRoute('/_authenticated')({
 ## Refatoração Necessária
 
 ### Componentes a Renomear
+
 - `ServerSidebar` → `RootSidebar`
 - `Sidebar` atual → `UserSidebar`
 
 ### Componentes a Criar
+
 - `ProjectSidebar` para contexto de projeto
 - Layouts `_layout.tsx` para cada nível
 
 ### Arquivos a Mover/Reorganizar
+
 - `/dashboard.tsx` → `/_authenticated/user/index.tsx`
 - `/dashboard/server/$serverId.tsx` → `/_authenticated/project/$projectId/index.tsx`
 - Remover `DashboardLayout` - substituído pelos layouts pathless
 
 ### Rotas de Redirecionamento
+
 - `/` → `/auth/login` (não autenticado) ou `/user` (autenticado)
 - `/dashboard` → `/user` (compatibilidade temporária)
 - `/dashboard/server/$serverId` → `/project/$serverId`
