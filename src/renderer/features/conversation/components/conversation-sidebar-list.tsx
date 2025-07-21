@@ -1,17 +1,13 @@
 import { useEffect, useState } from "react";
 import { Plus, MessageCircle } from "lucide-react";
-import { useNavigate, useRouterState } from "@tanstack/react-router";
 
 import { Button } from "@/renderer/components/ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "@/renderer/components/ui/avatar";
-import { cn } from "@/renderer/lib/utils";
 
 import { useConversationStore } from "../conversation.store";
 import { CreateConversationDialog } from "./create-conversation-dialog";
+import { ConversationSidebarItem } from "./conversation-sidebar-item";
 
 function ConversationSidebarList() {
-  const navigate = useNavigate();
-  const routerState = useRouterState();
   const [showCreateDialog, setShowCreateDialog] = useState(false);
 
   const {
@@ -20,7 +16,6 @@ function ConversationSidebarList() {
     isLoading,
     loadConversations,
     loadAvailableUsers,
-    getConversationDisplayName,
     getOtherParticipants,
   } = useConversationStore();
 
@@ -30,33 +25,9 @@ function ConversationSidebarList() {
     loadAvailableUsers();
   }, [loadConversations, loadAvailableUsers]);
 
-  // Get current conversation ID from router
-  const getCurrentConversationId = () => {
-    const pathname = routerState.location.pathname;
-    const match = pathname.match(/\/user\/dm\/(.+)$/);
-    return match ? match[1] : null;
-  };
-
-  const currentConversationId = getCurrentConversationId();
-
-  const handleConversationSelect = (conversationId: string) => {
-    navigate({
-      to: "/user/dm/$conversationId",
-      params: { conversationId },
-    });
-  };
-
   const handleCreateConversation = () => {
     setShowCreateDialog(true);
   };
-
-  // Auto-select first conversation if none selected and conversations exist
-  useEffect(() => {
-    if (!currentConversationId && conversations.length > 0 && !isLoading) {
-      const firstConversation = conversations[0];
-      handleConversationSelect(firstConversation.id);
-    }
-  }, [conversations, currentConversationId, isLoading]);
 
   const handleCloseCreateDialog = () => {
     setShowCreateDialog(false);
@@ -64,10 +35,10 @@ function ConversationSidebarList() {
 
   const handleConversationCreated = (conversationId: string) => {
     setShowCreateDialog(false);
-    handleConversationSelect(conversationId);
+    // Let the user manually navigate to the new conversation
   };
 
-  // Loading skeleton
+  // Loading skeleton - Discord style
   if (isLoading) {
     return (
       <div className="space-y-1">
@@ -77,11 +48,15 @@ function ConversationSidebarList() {
           <div className="h-6 w-6 bg-muted animate-pulse rounded" />
         </div>
         
-        {/* Conversation items skeleton */}
-        {Array.from({ length: 3 }).map((_, i) => (
-          <div key={i} className="flex items-center gap-2 px-2 py-1.5 rounded">
-            <div className="w-6 h-6 bg-muted animate-pulse rounded-full" />
-            <div className="h-3 w-16 bg-muted animate-pulse rounded" />
+        {/* Conversation items skeleton - Discord style */}
+        {Array.from({ length: 4 }).map((_, i) => (
+          <div key={i} className="flex items-center gap-3 px-2 py-2 mx-1 rounded">
+            <div className="w-8 h-8 bg-muted animate-pulse rounded-full flex-shrink-0" />
+            <div className="flex-1 space-y-1">
+              <div className="h-3.5 w-20 bg-muted animate-pulse rounded" />
+              <div className="h-3 w-32 bg-muted/70 animate-pulse rounded" />
+            </div>
+            <div className="h-2.5 w-8 bg-muted/50 animate-pulse rounded" />
           </div>
         ))}
       </div>
@@ -106,79 +81,34 @@ function ConversationSidebarList() {
         </Button>
       </div>
 
-      {/* Conversations list */}
+      {/* Conversations list - Discord style */}
       <div className="space-y-0.5">
         {conversations.map((conversation) => {
           const otherParticipantIds = getOtherParticipants(conversation);
           const otherParticipants = availableUsers.filter(user => 
             otherParticipantIds.includes(user.id)
           );
-          const displayName = getConversationDisplayName(conversation);
-          const isSelected = currentConversationId === conversation.id;
-
-          // Get avatar for conversation
-          const getAvatar = () => {
-            if (otherParticipants.length === 1) {
-              const participant = otherParticipants[0];
-              return {
-                image: participant.avatar,
-                fallback: participant.name.charAt(0).toUpperCase(),
-              };
-            }
-            
-            return {
-              image: null,
-              fallback: otherParticipants.length.toString(),
-            };
-          };
-
-          const avatar = getAvatar();
 
           return (
-            <div
+            <ConversationSidebarItem
               key={conversation.id}
-              role="button"
-              tabIndex={0}
-              className={cn(
-                "flex items-center gap-2 px-2 py-1.5 rounded text-sm cursor-pointer transition-colors",
-                "hover:bg-muted/50",
-                isSelected 
-                  ? "bg-muted text-foreground" 
-                  : "text-muted-foreground hover:text-foreground"
-              )}
-              onClick={() => handleConversationSelect(conversation.id)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' || e.key === ' ') {
-                  e.preventDefault();
-                  handleConversationSelect(conversation.id);
-                }
-              }}
-            >
-              {/* Avatar */}
-              <Avatar className="w-6 h-6 flex-shrink-0">
-                <AvatarImage src={avatar.image || undefined} />
-                <AvatarFallback className="text-xs">
-                  {otherParticipants.length > 1 ? (
-                    <MessageCircle className="h-3 w-3" />
-                  ) : (
-                    avatar.fallback
-                  )}
-                </AvatarFallback>
-              </Avatar>
-
-              {/* Conversation name */}
-              <span className="truncate flex-1 text-sm">
-                {displayName}
-              </span>
-            </div>
+              conversation={conversation}
+              lastMessage={null} // TODO: Get from store when implemented
+              otherParticipants={otherParticipants}
+              unreadCount={0} // TODO: Get from store when implemented
+            />
           );
         })}
 
         {/* Empty state when no conversations */}
         {conversations.length === 0 && !isLoading && (
-          <div className="px-2 py-2 text-center">
-            <p className="text-xs text-muted-foreground">
+          <div className="px-4 py-6 text-center">
+            <MessageCircle className="w-8 h-8 text-muted-foreground/50 mx-auto mb-2" />
+            <p className="text-sm text-muted-foreground mb-1 font-medium">
               No conversations yet
+            </p>
+            <p className="text-xs text-muted-foreground/70">
+              Click the + button to start chatting
             </p>
           </div>
         )}
