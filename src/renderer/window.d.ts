@@ -81,7 +81,7 @@ declare global {
         ) => Promise<IpcResponse>;
         getDefault: (userId: string) => Promise<IpcResponse>;
         testApiKey: (
-          type: "openai" | "deepseek" | "anthropic",
+          type: "openai" | "deepseek" | "anthropic" | "google" | "custom",
           apiKey: string,
           baseUrl?: string,
         ) => Promise<IpcResponse>;

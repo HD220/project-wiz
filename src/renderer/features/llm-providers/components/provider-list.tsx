@@ -7,15 +7,15 @@ import { useLLMProvidersStore } from "@/renderer/store/llm-providers-store";
 import { ProviderCard } from "./provider-card";
 import { ProviderForm } from "./provider-form";
 import { EmptyState } from "./empty-state";
-import { LLMProvider } from "../types";
+import type { LlmProvider } from "@/main/agents/llm-providers/llm-provider.types";
 
 export function ProviderList() {
   const [showForm, setShowForm] = useState(false);
-  const [editingProvider, setEditingProvider] = useState<LLMProvider | null>(null);
+  const [editingProvider, setEditingProvider] = useState<LlmProvider | null>(null);
   
   const { providers, isLoading } = useLLMProvidersStore();
 
-  const handleEdit = (provider: LLMProvider) => {
+  const handleEdit = (provider: LlmProvider) => {
     setEditingProvider(provider);
     setShowForm(true);
   };

@@ -1,21 +1,11 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { useAuthStore } from "./auth-store";
-import type { CreateProviderInput } from "@/features/llm-providers/types";
-
-// Local type definitions to avoid boundary violations
-interface LLMProvider {
-  id: string;
-  name: string;
-  type: "openai" | "deepseek" | "anthropic" | "google" | "custom";
-  apiKey: string; // Will be masked in UI
-  baseUrl?: string;
-  defaultModel: string;
-  isDefault: boolean;
-  isActive: boolean;
-  createdAt: Date;
-  updatedAt: Date;
-}
+import type {
+  CreateProviderInput,
+  LlmProvider,
+  ProviderType,
+} from "@/main/agents/llm-providers/llm-provider.types";
 
 
 // Helper function to get current user ID
@@ -29,24 +19,24 @@ const getCurrentUserId = (): string => {
 
 interface UpdateProviderInput {
   name?: string;
-  type?: "openai" | "deepseek" | "anthropic" | "google" | "custom";
+  type?: ProviderType;
   apiKey?: string;
-  baseUrl?: string;
+  baseUrl?: string | null;
   defaultModel?: string;
   isDefault?: boolean;
   isActive?: boolean;
 }
 
 interface TestApiKeyInput {
-  type: "openai" | "deepseek" | "anthropic" | "google" | "custom";
+  type: ProviderType;
   apiKey: string;
   baseUrl?: string;
 }
 
 interface LLMProvidersState {
   // State
-  providers: LLMProvider[];
-  defaultProvider: LLMProvider | null;
+  providers: LlmProvider[];
+  defaultProvider: LlmProvider | null;
   isLoading: boolean;
   error: string | null;
   testingProvider: string | null; // ID of provider being tested
@@ -80,7 +70,7 @@ export const useLLMProvidersStore = create<LLMProvidersState>()(
           const response = await window.api.llmProviders.list(userId);
 
           if (response.success && response.data) {
-            const providers = response.data as LLMProvider[];
+            const providers = response.data as LlmProvider[];
             const defaultProvider = providers.find(p => p.isDefault) || null;
 
             set({
@@ -108,7 +98,7 @@ export const useLLMProvidersStore = create<LLMProvidersState>()(
           const response = await window.api.llmProviders.create(data);
 
           if (response.success && response.data) {
-            const newProvider = response.data as LLMProvider;
+            const newProvider = response.data as LlmProvider;
             const currentProviders = get().providers;
 
             set({
@@ -136,7 +126,7 @@ export const useLLMProvidersStore = create<LLMProvidersState>()(
           const response = await window.api.llmProviders.update(id, data);
 
           if (response.success && response.data) {
-            const updatedProvider = response.data as LLMProvider;
+            const updatedProvider = response.data as LlmProvider;
             const currentProviders = get().providers;
 
             const updatedProviders = currentProviders.map(p => 
@@ -200,7 +190,7 @@ export const useLLMProvidersStore = create<LLMProvidersState>()(
           const response = await window.api.llmProviders.setDefault(id, userId);
 
           if (response.success && response.data) {
-            const updatedProvider = response.data as LLMProvider;
+            const updatedProvider = response.data as LlmProvider;
             const currentProviders = get().providers;
 
             // Update all providers - set the new default and unset others
@@ -231,11 +221,11 @@ export const useLLMProvidersStore = create<LLMProvidersState>()(
         set({ testingProvider: "test", error: null });
 
         try {
-          const response = await window.api.llmProviders.testApiKey(data);
+          const response = await window.api.llmProviders.testApiKey(data.type, data.apiKey, data.baseUrl);
 
-          if (response.success && response.data) {
+          if (response.success && response.data && typeof response.data === 'object' && 'valid' in response.data) {
             set({ testingProvider: null });
-            return response.data as boolean;
+            return (response.data as {valid: boolean}).valid;
           } else {
             throw new Error(response.error || "Failed to test API key");
           }

@@ -1,5 +1,6 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 import { useEffect } from "react";
 import { X } from "lucide-react";
 
@@ -31,20 +32,34 @@ import { Separator } from "@/components/ui/separator";
 
 import { useLLMProvidersStore } from "@/renderer/store/llm-providers-store";
 import { useAuthStore } from "@/renderer/store/auth-store";
-import { 
-  LLMProvider, 
-  ProviderFormData, 
-  providerFormSchema, 
-  PROVIDER_TYPES,
-  getDefaultModel,
-  getAvailableModels,
-  requiresBaseUrl
-} from "../types";
+import type {
+  LlmProvider,
+  ProviderType,
+} from "@/main/agents/llm-providers/llm-provider.types";
 import { TestApiButton } from "./test-api-button";
 import { toast } from "sonner";
 
+// Simple provider configs for UI
+const PROVIDER_CONFIGS = {
+  openai: { label: "OpenAI", defaultModel: "gpt-4o", requiresBaseUrl: false },
+  deepseek: { label: "DeepSeek", defaultModel: "deepseek-coder", requiresBaseUrl: false },
+  anthropic: { label: "Anthropic", defaultModel: "claude-3-5-sonnet-20241022", requiresBaseUrl: false },
+  google: { label: "Google", defaultModel: "gemini-pro", requiresBaseUrl: false },
+  custom: { label: "Custom", defaultModel: "custom-model", requiresBaseUrl: true },
+} as const;
+
+type ProviderFormData = {
+  name: string;
+  type: ProviderType;
+  apiKey: string;
+  baseUrl?: string;
+  defaultModel: string;
+  isDefault: boolean;
+  isActive: boolean;
+};
+
 interface ProviderFormProps {
-  provider?: LLMProvider | null;
+  provider?: LlmProvider | null;
   onClose: () => void;
 }
 
@@ -55,12 +70,20 @@ export function ProviderForm({ provider, onClose }: ProviderFormProps) {
   const isEditing = !!provider;
   
   const form = useForm<ProviderFormData>({
-    resolver: zodResolver(providerFormSchema),
+    resolver: zodResolver(z.object({
+      name: z.string().min(1, "Provider name is required"),
+      type: z.enum(["openai", "deepseek", "anthropic", "google", "custom"]),
+      apiKey: z.string().min(1, "API key is required"),
+      baseUrl: z.string().url("Invalid URL").optional().or(z.literal("")),
+      defaultModel: z.string().min(1, "Default model is required"),
+      isDefault: z.boolean().default(false),
+      isActive: z.boolean().default(true),
+    })),
     defaultValues: {
       name: provider?.name || "",
       type: provider?.type || "openai",
       apiKey: provider?.apiKey || "",
-      baseUrl: provider?.baseUrl || "",
+      baseUrl: provider?.baseUrl || undefined,
       defaultModel: provider?.defaultModel || "gpt-4o",
       isDefault: provider?.isDefault || false,
       isActive: provider?.isActive ?? true,
@@ -73,11 +96,11 @@ export function ProviderForm({ provider, onClose }: ProviderFormProps) {
   // Update default model when provider type changes
   useEffect(() => {
     if (!isEditing) {
-      const newDefaultModel = getDefaultModel(watchedType);
+      const newDefaultModel = PROVIDER_CONFIGS[watchedType].defaultModel;
       form.setValue("defaultModel", newDefaultModel);
       
       // Clear base URL if not required for new type
-      if (!requiresBaseUrl(watchedType)) {
+      if (!PROVIDER_CONFIGS[watchedType].requiresBaseUrl) {
         form.setValue("baseUrl", "");
       }
     }
@@ -109,8 +132,7 @@ export function ProviderForm({ provider, onClose }: ProviderFormProps) {
     }
   };
 
-  const availableModels = getAvailableModels(watchedType);
-  const showBaseUrl = requiresBaseUrl(watchedType);
+  const showBaseUrl = PROVIDER_CONFIGS[watchedType].requiresBaseUrl;
   
   return (
     <Dialog open onOpenChange={onClose}>
@@ -151,10 +173,9 @@ export function ProviderForm({ provider, onClose }: ProviderFormProps) {
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {Object.entries(PROVIDER_TYPES).map(([key, config]) => (
+                      {Object.entries(PROVIDER_CONFIGS).map(([key, config]) => (
                         <SelectItem key={key} value={key}>
                           <div className="flex items-center gap-2">
-                            <span>{config.icon}</span>
                             <span>{config.label}</span>
                           </div>
                         </SelectItem>
@@ -227,26 +248,9 @@ export function ProviderForm({ provider, onClose }: ProviderFormProps) {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Default Model</FormLabel>
-                  {availableModels.length > 0 ? (
-                    <Select onValueChange={field.onChange} value={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {availableModels.map((model) => (
-                          <SelectItem key={model} value={model}>
-                            {model}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  ) : (
-                    <FormControl>
-                      <Input placeholder="custom-model" {...field} />
-                    </FormControl>
-                  )}
+                  <FormControl>
+                    <Input placeholder="gpt-4o" {...field} />
+                  </FormControl>
                   <FormMessage />
                 </FormItem>
               )}

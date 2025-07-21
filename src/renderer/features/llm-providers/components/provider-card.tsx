@@ -22,14 +22,26 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 
-import { LLMProvider } from "../types";
-import { maskApiKey, getProviderIcon, getProviderLabel } from "../types";
+import type { LlmProvider } from "@/main/agents/llm-providers/llm-provider.types";
+// Simple utility functions
+const maskApiKey = (apiKey: string): string => {
+  if (apiKey.length <= 8) return "●".repeat(apiKey.length);
+  return `${apiKey.slice(0, 4)}${"●".repeat(Math.max(0, apiKey.length - 8))}${apiKey.slice(-4)}`;
+};
+
+const getProviderLabel = (type: string): string => {
+  const labels: Record<string, string> = {
+    openai: "OpenAI", deepseek: "DeepSeek", anthropic: "Anthropic", 
+    google: "Google", custom: "Custom"
+  };
+  return labels[type] || "Unknown";
+};
 import { useLLMProvidersStore } from "@/renderer/store/llm-providers-store";
 import { toast } from "sonner";
 
 interface ProviderCardProps {
-  provider: LLMProvider;
-  onEdit: (provider: LLMProvider) => void;
+  provider: LlmProvider;
+  onEdit: (provider: LlmProvider) => void;
 }
 
 export function ProviderCard({ provider, onEdit }: ProviderCardProps) {
@@ -68,7 +80,7 @@ export function ProviderCard({ provider, onEdit }: ProviderCardProps) {
         <CardHeader className="pb-3">
           <div className="flex items-start justify-between">
             <div className="flex items-center gap-3">
-              <div className="text-2xl">{getProviderIcon(provider.type)}</div>
+              <div className="text-2xl">🤖</div>
               <div className="space-y-1">
                 <div className="flex items-center gap-2">
                   <h3 className="font-semibold">{provider.name}</h3>

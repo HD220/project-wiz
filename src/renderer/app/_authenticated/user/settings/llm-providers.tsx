@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 
 function LLMProvidersPage() {
   const navigate = Route.useNavigate();
-  const { loadProviders, isLoading } = useLLMProvidersStore();
+  const { loadProviders } = useLLMProvidersStore();
 
   useEffect(() => {
     loadProviders();

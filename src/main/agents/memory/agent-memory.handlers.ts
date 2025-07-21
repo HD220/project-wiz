@@ -192,7 +192,7 @@ function setupMemoryRetrievalHandlers(): void {
     ): Promise<IpcResponse<AgentMemoryWithMetadata[]>> => {
       try {
         const memories =
-          await AgentMemoryService.getByConversationId(conversationId);
+          await AgentMemoryService.getByConversation(conversationId);
         return { success: true, data: memories };
       } catch (error) {
         return {
@@ -214,10 +214,10 @@ function setupMemoryRetrievalHandlers(): void {
     async (
       _,
       memoryId: string,
-      limit: number = 5,
-    ): Promise<IpcResponse<MemoryRelevanceScore[]>> => {
+      _limit: number = 5,
+    ): Promise<IpcResponse<AgentMemoryWithMetadata[]>> => {
       try {
-        const memories = await AgentMemoryService.getRelated(memoryId, limit);
+        const memories = await AgentMemoryService.getRelatedMemories(memoryId);
         return { success: true, data: memories };
       } catch (error) {
         return {
@@ -284,11 +284,11 @@ function setupMemoryMaintenanceHandlers(): void {
       retentionDays: number = 30,
     ): Promise<IpcResponse<{ deletedCount: number }>> => {
       try {
-        const result = await MemoryMaintenanceService.pruneOldMemories(
+        const result = await MemoryMaintenanceService.cleanOldMemories(
           agentId,
           retentionDays,
         );
-        return { success: true, data: result };
+        return { success: true, data: { deletedCount: result.deleted } };
       } catch (error) {
         return {
           success: false,
@@ -306,12 +306,13 @@ function setupMemoryMaintenanceHandlers(): void {
     "agent-memory:clean-old-memories",
     async (
       _,
+      agentId: string,
       retentionDays: number = 90,
     ): Promise<IpcResponse<{ deletedCount: number }>> => {
       try {
         const result =
-          await MemoryMaintenanceService.cleanOldMemories(retentionDays);
-        return { success: true, data: result };
+          await MemoryMaintenanceService.cleanOldMemories(agentId, retentionDays);
+        return { success: true, data: { deletedCount: result.deleted } };
       } catch (error) {
         return {
           success: false,
@@ -336,7 +337,8 @@ function setupMemoryMaintenanceHandlers(): void {
       IpcResponse<{ total: number; active: number; archived: number }>
     > => {
       try {
-        const result = await AgentMemoryService.getMemoryCount(agentId);
+        const count = await MemoryMaintenanceService.getMemoryCount(agentId);
+        const result = { total: count, active: count, archived: 0 };
         return { success: true, data: result };
       } catch (error) {
         return {

@@ -3,7 +3,12 @@ import { Loader2, CheckCircle, XCircle, TestTube } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { useLLMProvidersStore } from "@/renderer/store/llm-providers-store";
-import { TestApiKeyData } from "../types";
+// Interface para os dados do teste
+interface TestApiKeyData {
+  type: "openai" | "deepseek" | "anthropic" | "google" | "custom";
+  apiKey: string;
+  baseUrl?: string;
+}
 import { toast } from "sonner";
 
 interface TestApiButtonProps {

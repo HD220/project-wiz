@@ -5,7 +5,7 @@ import { eq, and, desc, sql } from "drizzle-orm";
 import { agentsTable } from "@/main/agents/agents.schema";
 import type {
   CreateProviderInput,
-  SelectLlmProvider,
+  LlmProvider,
 } from "@/main/agents/llm-providers/llm-provider.types";
 import { createProviderSchema } from "@/main/agents/llm-providers/llm-provider.types";
 import { llmProvidersTable } from "@/main/agents/llm-providers/llm-providers.schema";
@@ -67,7 +67,7 @@ export class LlmProviderService {
   /**
    * Create a new LLM provider
    */
-  static async create(input: CreateProviderInput): Promise<SelectLlmProvider> {
+  static async create(input: CreateProviderInput): Promise<LlmProvider> {
     // Validate input
     const validatedInput = createProviderSchema.parse(input);
 
@@ -101,8 +101,8 @@ export class LlmProviderService {
    * Sanitize provider for display (hide API keys)
    */
   private static sanitizeForDisplay(
-    provider: SelectLlmProvider,
-  ): SelectLlmProvider {
+    provider: LlmProvider,
+  ): LlmProvider {
     return {
       ...provider,
       apiKey: "••••••••", // Mask API key for UI
@@ -112,7 +112,7 @@ export class LlmProviderService {
   /**
    * Find all providers for a user (sorted newest first, API keys masked)
    */
-  static async findByUserId(userId: string): Promise<SelectLlmProvider[]> {
+  static async findByUserId(userId: string): Promise<LlmProvider[]> {
     const db = getDatabase();
 
     const providers = await db
@@ -128,7 +128,7 @@ export class LlmProviderService {
   /**
    * Find a provider by ID
    */
-  static async findById(id: string): Promise<SelectLlmProvider | null> {
+  static async findById(id: string): Promise<LlmProvider | null> {
     const db = getDatabase();
 
     const [provider] = await db
@@ -159,7 +159,7 @@ export class LlmProviderService {
   static async update(
     id: string,
     updates: Partial<CreateProviderInput>,
-  ): Promise<SelectLlmProvider> {
+  ): Promise<LlmProvider> {
     const db = getDatabase();
 
     // If updating API key, encrypt it
@@ -239,7 +239,7 @@ export class LlmProviderService {
    */
   static async getDefaultProvider(
     userId: string,
-  ): Promise<SelectLlmProvider | null> {
+  ): Promise<LlmProvider | null> {
     const db = getDatabase();
 
     const [provider] = await db
@@ -262,7 +262,7 @@ export class LlmProviderService {
    */
   static async findDefaultByUserId(
     userId: string,
-  ): Promise<SelectLlmProvider | null> {
+  ): Promise<LlmProvider | null> {
     return this.getDefaultProvider(userId);
   }
 

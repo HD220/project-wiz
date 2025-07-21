@@ -103,7 +103,7 @@ contextBridge.exposeInMainWorld("api", {
     getDefault: (userId: string): Promise<IpcResponse> =>
       ipcRenderer.invoke("llm-providers:getDefault", userId),
     testApiKey: (
-      type: "openai" | "deepseek" | "anthropic",
+      type: "openai" | "deepseek" | "anthropic" | "google" | "custom",
       apiKey: string,
       baseUrl?: string,
     ): Promise<IpcResponse> =>

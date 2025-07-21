@@ -1,7 +1,6 @@
 import { z } from "zod";
 
 import type {
-  SelectLlmProvider,
   InsertLlmProvider,
   ProviderType,
 } from "@/main/agents/llm-providers/llm-providers.schema";
@@ -27,5 +26,26 @@ export const createProviderSchema = z.object({
   isActive: z.boolean().default(true),
 });
 
-// Export types for reuse
-export type { SelectLlmProvider, InsertLlmProvider, ProviderType };
+// Export types for reuse (only what's needed by frontend)
+export type { ProviderType };
+
+// API response types for frontend  
+export interface LlmProvider {
+  id: string;
+  userId: string;
+  name: string;
+  type: ProviderType;
+  apiKey: string; // Will be masked in UI
+  baseUrl: string | null;
+  defaultModel: string;
+  isDefault: boolean;
+  isActive: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface TestApiKeyResult {
+  valid: boolean;
+  message: string;
+  model?: string;
+}
