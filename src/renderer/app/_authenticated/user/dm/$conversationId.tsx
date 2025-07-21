@@ -25,7 +25,7 @@ function UserDMPage() {
   // Loading state
   if (isLoadingMessages || !selectedConversation) {
     return (
-      <div className="flex-1 flex flex-col">
+      <div className="h-full flex flex-col">
         <ContentHeader
           title="Loading..."
           description="Loading conversation"
@@ -51,7 +51,7 @@ function UserDMPage() {
     : `Group conversation with ${otherParticipants.length} participants`;
 
   return (
-    <div className="flex-1 flex flex-col">
+    <div className="h-full w-full flex flex-col">
       <ContentHeader
         title={displayName}
         description={description}

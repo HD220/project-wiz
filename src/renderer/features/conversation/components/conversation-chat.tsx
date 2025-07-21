@@ -1,6 +1,7 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useMemo } from "react";
 import { Loader2 } from "lucide-react";
 
+import { ScrollArea } from "@/renderer/components/ui/scroll-area";
 import { Separator } from "@/renderer/components/ui/separator";
 
 import type { ConversationWithMessagesAndParticipants } from "../conversation.types";
@@ -30,9 +31,19 @@ function ConversationChat(props: ConversationChatProps) {
 
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
-    if (messagesEndRef.current && scrollAreaRef.current) {
-      scrollAreaRef.current.scrollTop = scrollAreaRef.current.scrollHeight;
-    }
+    const scrollToBottom = () => {
+      if (scrollAreaRef.current) {
+        const viewport = scrollAreaRef.current.querySelector('[data-radix-scroll-area-viewport]');
+        if (viewport) {
+          // Force scroll to absolute bottom
+          viewport.scrollTop = viewport.scrollHeight;
+        }
+      }
+    };
+
+    // Use setTimeout to ensure DOM is updated after render
+    const timeoutId = setTimeout(scrollToBottom, 50);
+    return () => clearTimeout(timeoutId);
   }, [conversation.messages.length]);
 
   const handleSendMessage = async (content: string) => {
@@ -49,14 +60,20 @@ function ConversationChat(props: ConversationChatProps) {
     return availableUsers.find(user => user.id === userId);
   };
 
-  // Group consecutive messages by the same author
-  const groupMessages = () => {
+
+  const messageGroups = useMemo(() => {
     const groups: {
       authorId: string;
       messages: typeof conversation.messages;
     }[] = [];
 
-    conversation.messages.forEach((message, index) => {
+    // Create a unique set to avoid duplicates
+    const uniqueMessages = conversation.messages.filter(
+      (message, index, array) => 
+        array.findIndex(m => m.id === message.id) === index
+    );
+
+    uniqueMessages.forEach((message, index) => {
       const lastGroup = groups[groups.length - 1];
       
       if (lastGroup && lastGroup.authorId === message.authorId) {
@@ -72,9 +89,7 @@ function ConversationChat(props: ConversationChatProps) {
     });
 
     return groups;
-  };
-
-  const messageGroups = groupMessages();
+  }, [conversation.messages]);
 
   if (!currentUser) {
     return (
@@ -85,67 +100,68 @@ function ConversationChat(props: ConversationChatProps) {
   }
 
   return (
-    <div className={`h-full flex flex-col ${className || ""}`}>
+    <div className={`flex flex-col h-full ${className || ""}`}>
       {/* Messages area - Discord style */}
-      <div className="flex-1 overflow-y-auto overflow-x-hidden" ref={scrollAreaRef}>
-        <div className="p-4 space-y-1">
-          {messageGroups.length === 0 ? (
-            /* Empty conversation state */
-            <div className="h-full flex items-center justify-center py-16">
-              <div className="text-center space-y-2">
-                <p className="text-muted-foreground">
-                  This is the beginning of your conversation
-                </p>
-                <p className="text-sm text-muted-foreground">
-                  Send a message to get started!
-                </p>
-              </div>
+      <ScrollArea 
+        className="flex-1 h-0" 
+        ref={scrollAreaRef}
+      >
+        {messageGroups.length === 0 ? (
+          /* Empty conversation state */
+          <div className="h-full flex items-center justify-center p-8">
+            <div className="text-center space-y-2">
+              <p className="text-muted-foreground">
+                This is the beginning of your conversation
+              </p>
+              <p className="text-sm text-muted-foreground">
+                Send a message to get started!
+              </p>
             </div>
-          ) : (
-            <>
-              {messageGroups.map((group, groupIndex) => {
-                const author = getUserById(group.authorId);
-                const isCurrentUser = group.authorId === currentUser.id;
+          </div>
+        ) : (
+          <div className="p-4 space-y-1">
+            {messageGroups.map((group, groupIndex) => {
+              const author = getUserById(group.authorId);
+              const isCurrentUser = group.authorId === currentUser.id;
 
-                return (
-                  <div key={`group-${groupIndex}`} className="space-y-0.5">
-                    {group.messages.map((message, messageIndex) => (
+              return (
+                <div key={`group-${group.authorId}-${groupIndex}`} className="space-y-0.5">
+                  {group.messages.map((message, messageIndex) => {
+                    // Check if this is the last message from current user and we're sending
+                    const isLastUserMessage = isCurrentUser && 
+                      groupIndex === messageGroups.length - 1 && 
+                      messageIndex === group.messages.length - 1;
+                    const showSending = isSendingMessage && isLastUserMessage;
+                    
+                    return (
                       <MessageBubble
-                        key={message.id}
+                        key={`${message.id}-${messageIndex}`}
                         message={message}
                         author={author}
                         isCurrentUser={isCurrentUser}
                         showAvatar={messageIndex === 0} // Only show avatar for first message in group
+                        isSending={showSending}
                       />
-                    ))}
-                    
-                    {/* Add some spacing between different authors */}
-                    {groupIndex < messageGroups.length - 1 && (
-                      <div className="h-2" />
-                    )}
-                  </div>
-                );
-              })}
-              
-              {/* Scroll anchor */}
-              <div ref={messagesEndRef} />
-            </>
-          )}
-        </div>
-      </div>
+                    );
+                  })}
+                  
+                  {/* Add some spacing between different authors */}
+                  {groupIndex < messageGroups.length - 1 && (
+                    <div className="h-2" />
+                  )}
+                </div>
+              );
+            })}
+            
+            {/* Scroll anchor */}
+            <div ref={messagesEndRef} />
+          </div>
+        )}
+      </ScrollArea>
 
       {/* Separator */}
       <Separator />
 
-      {/* Sending indicator */}
-      {isSendingMessage && (
-        <div className="px-4 py-2 bg-muted/30">
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <Loader2 className="h-4 w-4 animate-spin" />
-            <span>Sending message...</span>
-          </div>
-        </div>
-      )}
 
       {/* Error message */}
       {error && (
@@ -154,12 +170,14 @@ function ConversationChat(props: ConversationChatProps) {
         </div>
       )}
 
-      {/* Message input */}
-      <MessageInput
-        onSendMessage={handleSendMessage}
-        isSending={isSendingMessage}
-        placeholder={`Message ${conversation.name || "this conversation"}...`}
-      />
+      {/* Message input - Fixed at bottom */}
+      <div className="flex-shrink-0">
+        <MessageInput
+          onSendMessage={handleSendMessage}
+          isSending={isSendingMessage}
+          placeholder={`Message ${conversation.name || "this conversation"}...`}
+        />
+      </div>
     </div>
   );
 }

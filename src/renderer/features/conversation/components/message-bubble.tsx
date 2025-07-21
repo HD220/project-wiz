@@ -1,5 +1,6 @@
 import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { Loader2, Clock } from "lucide-react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/renderer/components/ui/avatar";
 import { cn } from "@/renderer/lib/utils";
@@ -11,11 +12,12 @@ interface MessageBubbleProps {
   author?: AuthenticatedUser;
   isCurrentUser: boolean;
   showAvatar?: boolean;
+  isSending?: boolean;
   className?: string;
 }
 
 function MessageBubble(props: MessageBubbleProps) {
-  const { message, author, isCurrentUser, showAvatar = true, className } = props;
+  const { message, author, isCurrentUser, showAvatar = true, isSending = false, className } = props;
 
   // Format timestamp - Discord style (short format)
   const getTimeAgo = () => {
@@ -86,7 +88,15 @@ function MessageBubble(props: MessageBubbleProps) {
 
         {/* Message text - Discord style (no bubbles) */}
         <div className="text-sm text-foreground leading-relaxed break-words">
-          <p className="whitespace-pre-wrap">{message.content}</p>
+          <div className="flex items-center gap-2">
+            <p className="whitespace-pre-wrap flex-1">{message.content}</p>
+            {isSending && (
+              <div className="flex items-center gap-1 text-muted-foreground">
+                <Loader2 className="w-3 h-3 animate-spin" />
+                <span className="text-xs">Sending...</span>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>

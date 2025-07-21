@@ -5,7 +5,7 @@ import { useAuthStore } from "@/renderer/store/auth.store";
 
 function AuthenticatedLayout() {
   return (
-    <div className="h-full flex">
+    <div className="h-full w-full flex">
       <RootSidebar />
       <div className="flex-1 flex">
         <Outlet />
