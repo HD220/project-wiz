@@ -1,5 +1,5 @@
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { cn } from "@/lib/utils";
+import { Avatar, AvatarFallback } from "@/renderer/components/ui/avatar";
+import { cn } from "@/renderer/lib/utils";
 
 interface UserAvatarProps {
   name?: string;
@@ -7,11 +7,9 @@ interface UserAvatarProps {
   className?: string;
 }
 
-export function UserAvatar({
-  name = "User",
-  size = "md",
-  className,
-}: UserAvatarProps) {
+function UserAvatar(props: UserAvatarProps) {
+  const { name = "User", size = "md", className } = props;
+  
   const sizeClasses = {
     sm: "w-6 h-6 text-xs",
     md: "w-8 h-8 text-sm",
@@ -26,3 +24,5 @@ export function UserAvatar({
     </Avatar>
   );
 }
+
+export { UserAvatar };

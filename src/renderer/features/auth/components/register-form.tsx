@@ -1,45 +1,58 @@
 import { useRouter } from "@tanstack/react-router";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2 } from "lucide-react";
-import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
 
-import { useAuthStore } from "@/renderer/store/auth-store";
+import { useAuthStore } from "@/renderer/store/auth.store";
 
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { Alert, AlertDescription } from "@/renderer/components/ui/alert";
+import { Button } from "@/renderer/components/ui/button";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/renderer/components/ui/form";
+import { Input } from "@/renderer/components/ui/input";
 
 import { AuthCard } from "./auth-card";
 
-export function RegisterForm() {
+const registerSchema = z.object({
+  name: z.string().min(1, "Display name is required"),
+  username: z.string().min(3, "Username must be at least 3 characters"),
+  password: z.string().min(6, "Password must be at least 6 characters"),
+  confirmPassword: z.string().min(1, "Please confirm your password"),
+}).refine((data) => data.password === data.confirmPassword, {
+  message: "Passwords do not match",
+  path: ["confirmPassword"],
+});
+
+type RegisterFormData = z.infer<typeof registerSchema>;
+
+function RegisterForm() {
   const router = useRouter();
   const { isLoading, error, clearError } = useAuthStore();
-  const [formData, setFormData] = useState({
-    name: "",
-    username: "",
-    password: "",
-    confirmPassword: "",
+
+  const form = useForm<RegisterFormData>({
+    resolver: zodResolver(registerSchema),
+    defaultValues: {
+      name: "",
+      username: "",
+      password: "",
+      confirmPassword: "",
+    },
   });
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const onSubmit = async (data: RegisterFormData) => {
     clearError();
-
-    if (formData.password !== formData.confirmPassword) {
-      return;
-    }
 
     try {
       const response = await window.api.auth.register({
-        name: formData.name,
-        username: formData.username,
-        password: formData.password,
+        name: data.name,
+        username: data.username,
+        password: data.password,
       });
 
       if (response.success) {
         await useAuthStore.getState().login({
-          username: formData.username,
-          password: formData.password,
+          username: data.username,
+          password: data.password,
         });
         router.navigate({ to: "/user" });
       }
@@ -48,115 +61,111 @@ export function RegisterForm() {
     }
   };
 
-  const isPasswordMismatch =
-    formData.password !== formData.confirmPassword &&
-    formData.confirmPassword !== "";
-
   return (
     <AuthCard title="Create an account" description="Join our community today!">
-      <form onSubmit={handleSubmit} className="space-y-4">
-        {error && (
-          <Alert variant="destructive" className="bg-red-900/50 border-red-800">
-            <AlertDescription>{error}</AlertDescription>
-          </Alert>
-        )}
-
-        <div className="space-y-2">
-          <Label htmlFor="name" className="text-xs font-bold uppercase">
-            Display Name
-          </Label>
-          <Input
-            id="name"
-            type="text"
-            value={formData.name}
-            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-            placeholder="Enter your display name"
-            required
-          />
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="username" className="text-xs font-bold uppercase">
-            Username
-          </Label>
-          <Input
-            id="username"
-            type="text"
-            value={formData.username}
-            onChange={(e) =>
-              setFormData({ ...formData, username: e.target.value })
-            }
-            placeholder="Choose a username"
-            required
-          />
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="password" className="text-xs font-bold uppercase">
-            Password
-          </Label>
-          <Input
-            id="password"
-            type="password"
-            value={formData.password}
-            onChange={(e) =>
-              setFormData({ ...formData, password: e.target.value })
-            }
-            placeholder="Enter your password"
-            required
-          />
-        </div>
-
-        <div className="space-y-2">
-          <Label
-            htmlFor="confirmPassword"
-            className="text-xs font-bold uppercase"
-          >
-            Confirm Password
-          </Label>
-          <Input
-            id="confirmPassword"
-            type="password"
-            value={formData.confirmPassword}
-            onChange={(e) =>
-              setFormData({ ...formData, confirmPassword: e.target.value })
-            }
-            placeholder="Confirm your password"
-            required
-          />
-          {isPasswordMismatch && (
-            <p className="text-xs text-destructive">Passwords do not match</p>
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          {error && (
+            <Alert variant="destructive" className="bg-red-900/50 border-red-800">
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
           )}
-        </div>
 
-        <div className="flex flex-col space-y-3 pt-2">
-          <Button
-            type="submit"
-            disabled={isLoading || isPasswordMismatch}
-            className="w-full"
-          >
-            {isLoading ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Creating account...
-              </>
-            ) : (
-              "Create Account"
+          <FormField
+            control={form.control}
+            name="name"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="text-xs font-bold uppercase">
+                  Display Name
+                </FormLabel>
+                <FormControl>
+                  <Input {...field} placeholder="Enter your display name" />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
             )}
-          </Button>
+          />
 
-          <p className="text-sm text-muted-foreground text-center">
-            Already have an account?{" "}
+          <FormField
+            control={form.control}
+            name="username"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="text-xs font-bold uppercase">
+                  Username
+                </FormLabel>
+                <FormControl>
+                  <Input {...field} placeholder="Choose a username" />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="password"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="text-xs font-bold uppercase">
+                  Password
+                </FormLabel>
+                <FormControl>
+                  <Input {...field} type="password" placeholder="Enter your password" />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="confirmPassword"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="text-xs font-bold uppercase">
+                  Confirm Password
+                </FormLabel>
+                <FormControl>
+                  <Input {...field} type="password" placeholder="Confirm your password" />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <div className="flex flex-col space-y-3 pt-2">
             <Button
-              variant="link"
-              className="p-0 h-auto font-normal"
-              onClick={() => router.navigate({ to: "/auth/login" })}
+              type="submit"
+              disabled={isLoading}
+              className="w-full"
             >
-              Sign In
+              {isLoading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Creating account...
+                </>
+              ) : (
+                "Create Account"
+              )}
             </Button>
-          </p>
-        </div>
-      </form>
+
+            <p className="text-sm text-muted-foreground text-center">
+              Already have an account?{" "}
+              <Button
+                variant="link"
+                className="p-0 h-auto font-normal"
+                onClick={() => router.navigate({ to: "/auth/login" })}
+              >
+                Sign In
+              </Button>
+            </p>
+          </div>
+        </form>
+      </Form>
     </AuthCard>
   );
 }
+
+export { RegisterForm };

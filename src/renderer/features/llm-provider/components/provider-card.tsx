@@ -1,16 +1,16 @@
 import { useState } from "react";
 import { MoreHorizontal, Edit2, Trash2, Star, StarOff, Eye, EyeOff } from "lucide-react";
 
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader } from "@/renderer/components/ui/card";
+import { Badge } from "@/renderer/components/ui/badge";
+import { Button } from "@/renderer/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+} from "@/renderer/components/ui/dropdown-menu";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -20,9 +20,9 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+} from "@/renderer/components/ui/alert-dialog";
 
-import type { LlmProvider } from "@/main/agents/llm-providers/llm-provider.types";
+import type { LlmProvider } from "@/main/features/agent/llm-provider/llm-provider.types";
 // Simple utility functions
 const maskApiKey = (apiKey: string): string => {
   if (apiKey.length <= 8) return "●".repeat(apiKey.length);
@@ -36,7 +36,7 @@ const getProviderLabel = (type: string): string => {
   };
   return labels[type] || "Unknown";
 };
-import { useLLMProvidersStore } from "@/renderer/store/llm-providers-store";
+import { useLLMProvidersStore } from "@/renderer/store/llm-provider.store";
 import { toast } from "sonner";
 
 interface ProviderCardProps {
@@ -44,7 +44,8 @@ interface ProviderCardProps {
   onEdit: (provider: LlmProvider) => void;
 }
 
-export function ProviderCard({ provider, onEdit }: ProviderCardProps) {
+function ProviderCard(props: ProviderCardProps) {
+  const { provider, onEdit } = props;
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [showApiKey, setShowApiKey] = useState(false);
   
@@ -215,3 +216,5 @@ export function ProviderCard({ provider, onEdit }: ProviderCardProps) {
     </>
   );
 }
+
+export { ProviderCard };

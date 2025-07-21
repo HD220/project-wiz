@@ -1,10 +1,10 @@
 import { generateText } from "ai";
 
 import { AgentService } from "@/main/features/agent/agent.service";
-import type { SelectAgent } from "@/main/features/agent/agents.schema";
-import { LlmProviderService } from "@/main/features/agent/llm-providers/llm-provider.service";
-import type { SelectLlmProvider } from "@/main/features/agent/llm-providers/llm-providers.schema";
-import { LLMService } from "@/main/features/agent/llm-providers/llm.service";
+import type { SelectAgent } from "@/main/features/agent/agent.types";
+import { LlmProviderService } from "@/main/features/agent/llm-provider/llm-provider.service";
+import type { SelectLlmProvider } from "@/main/features/agent/llm-provider/llm-provider.model";
+import { LLMService } from "@/main/features/agent/llm-provider/llm.service";
 
 import { ConversationService } from "./conversation.service";
 import { MessageService } from "./message.service";

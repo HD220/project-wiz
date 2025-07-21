@@ -1,14 +1,13 @@
 import { useRouter } from "@tanstack/react-router";
 import { LogOut } from "lucide-react";
 
-import { useAuthStore } from "@/renderer/store/auth-store";
-
-import { Button } from "@/components/ui/button";
+import { useAuthStore } from "@/renderer/store/auth.store";
+import { Button } from "@/renderer/components/ui/button";
 
 import { UserAvatar } from "./user-avatar";
 import { UserStatus } from "./user-status";
 
-export function SidebarUserArea() {
+function SidebarUserArea() {
   const router = useRouter();
   const { user, logout } = useAuthStore();
 
@@ -41,3 +40,5 @@ export function SidebarUserArea() {
     </div>
   );
 }
+
+export { SidebarUserArea };

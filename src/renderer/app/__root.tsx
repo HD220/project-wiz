@@ -1,7 +1,7 @@
 import { createRootRoute, Outlet } from "@tanstack/react-router";
 
-import { Titlebar } from "@/components/layout/titlebar";
-import { Toaster } from "@/components/ui/sonner";
+import { Titlebar } from "@/renderer/components/layout/titlebar";
+import { Toaster } from "@/renderer/components/ui/sonner";
 
 function RootComponent() {
   return (

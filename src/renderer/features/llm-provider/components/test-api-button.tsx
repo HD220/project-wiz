@@ -1,15 +1,16 @@
 import { useState } from "react";
 import { Loader2, CheckCircle, XCircle, TestTube } from "lucide-react";
+import { toast } from "sonner";
 
-import { Button } from "@/components/ui/button";
-import { useLLMProvidersStore } from "@/renderer/store/llm-providers-store";
+import { Button } from "@/renderer/components/ui/button";
+import { useLLMProvidersStore } from "@/renderer/store/llm-provider.store";
+
 // Interface para os dados do teste
 interface TestApiKeyData {
   type: "openai" | "deepseek" | "anthropic" | "google" | "custom";
   apiKey: string;
   baseUrl?: string;
 }
-import { toast } from "sonner";
 
 interface TestApiButtonProps {
   data: TestApiKeyData;
@@ -17,7 +18,8 @@ interface TestApiButtonProps {
   size?: "default" | "sm" | "lg";
 }
 
-export function TestApiButton({ data, disabled = false, size = "default" }: TestApiButtonProps) {
+function TestApiButton(props: TestApiButtonProps) {
+  const { data, disabled = false, size = "default" } = props;
   const [testResult, setTestResult] = useState<"success" | "error" | null>(null);
   const { testProvider, testingProvider } = useLLMProvidersStore();
 
@@ -79,3 +81,5 @@ export function TestApiButton({ data, disabled = false, size = "default" }: Test
     </Button>
   );
 }
+
+export { TestApiButton };

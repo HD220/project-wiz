@@ -1,10 +1,10 @@
 import { Hash, MessageCircle, Settings } from "lucide-react";
 
-import { Separator } from "@/components/ui/separator";
+import { Separator } from "@/renderer/components/ui/separator";
 
 import { NavigationItem } from "./navigation-item";
 
-export function SidebarNavigation() {
+function SidebarNavigation() {
   return (
     <div className="flex-1 p-2 space-y-1">
       <NavigationItem 
@@ -29,3 +29,5 @@ export function SidebarNavigation() {
     </div>
   );
 }
+
+export { SidebarNavigation };

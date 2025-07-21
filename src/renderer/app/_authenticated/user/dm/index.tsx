@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { MessageCircle } from "lucide-react";
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/renderer/components/ui/card";
 
 function DirectMessagesIndex() {
   return (

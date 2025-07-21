@@ -42,6 +42,16 @@ export type CreateConversationInput = Omit<InsertConversation, "id" | "createdAt
 export type CreateMessageInput = Omit<InsertMessage, "id" | "createdAt" | "updatedAt">;
 export type AddParticipantInput = Omit<InsertConversationParticipant, "id" | "createdAt" | "updatedAt">;
 
+// Message service input types
+export type SendMessageInput = Omit<InsertMessage, "id" | "createdAt" | "updatedAt">;
+
+// Agent chat service input types
+export interface SendAgentMessageInput {
+  agentId: string;
+  userId: string;
+  content: string;
+}
+
 // Query filters
 export type ConversationFilters = {
   type?: ConversationType;

@@ -2,7 +2,7 @@ import { ipcMain } from "electron";
 
 import type { IpcResponse } from "@/main/types";
 import { ProfileService } from "@/main/features/user/profile.service";
-import type { Theme } from "@/main/features/user/user-preferences.schema";
+import type { Theme } from "@/main/features/user/profile.model";
 
 export function setupProfileHandlers(): void {
   ipcMain.handle(

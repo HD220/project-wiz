@@ -48,3 +48,6 @@ export interface ProjectDeletionResult {
   success: boolean;
   message?: string;
 }
+
+// Re-export base types for convenience
+export type { SelectProject, InsertProject } from "@/main/features/project/project.model";

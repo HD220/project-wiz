@@ -1,11 +1,14 @@
-import { cn } from "@/lib/utils";
+import { ReactNode } from "react";
+import { cn } from "@/renderer/lib/utils";
 
 interface AuthLayoutProps {
-  children: React.ReactNode;
+  children: ReactNode;
   className?: string;
 }
 
-export function AuthLayout({ children, className }: AuthLayoutProps) {
+function AuthLayout(props: AuthLayoutProps) {
+  const { children, className } = props;
+  
   return (
     <div
       className={cn(
@@ -17,3 +20,5 @@ export function AuthLayout({ children, className }: AuthLayoutProps) {
     </div>
   );
 }
+
+export { AuthLayout };

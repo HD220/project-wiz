@@ -1,10 +1,10 @@
 export { db, getDatabase } from "./connection";
 export type { DatabaseType } from "./connection";
 
-export { usersTable } from "@/main/user/users.schema";
-export { llmProvidersTable } from "@/main/agents/llm-providers/llm-providers.schema";
-export { agentsTable } from "@/main/agents/agents.schema";
+export { usersTable } from "@/main/features/user/user.model";
+export { llmProvidersTable } from "@/main/features/agent/llm-provider/llm-provider.model";
+export { agentsTable } from "@/main/features/agent/agent.model";
 export {
   agentMemoriesTable,
   memoryRelationsTable,
-} from "@/main/agents/memory/agent-memories.schema";
+} from "@/main/features/agent/memory/memory.model";

@@ -1,20 +1,18 @@
-import { cn } from "@/lib/utils";
+import { ReactNode } from "react";
+
+import { cn } from "@/renderer/lib/utils";
 
 interface ActivityItemProps {
-  icon: React.ReactNode;
+  icon: ReactNode;
   title: string;
   timestamp: string;
   variant?: "success" | "info" | "warning";
   className?: string;
 }
 
-export function ActivityItem({
-  icon,
-  title,
-  timestamp,
-  variant = "info",
-  className,
-}: ActivityItemProps) {
+function ActivityItem(props: ActivityItemProps) {
+  const { icon, title, timestamp, variant = "info", className } = props;
+  
   const variantStyles = {
     success: "text-green-500",
     info: "text-primary",
@@ -31,3 +29,5 @@ export function ActivityItem({
     </div>
   );
 }
+
+export { ActivityItem };

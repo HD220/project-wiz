@@ -8,7 +8,7 @@ import type {
 } from "@/main/features/agent/agent.types";
 import { createAgentSchema } from "@/main/features/agent/agent.types";
 import { agentsTable } from "@/main/features/agent/agent.model";
-import { llmProvidersTable } from "@/main/features/agent/llm-provider.model";
+import { llmProvidersTable } from "@/main/features/agent/llm-provider/llm-provider.model";
 import { getDatabase } from "@/main/database/connection";
 import { usersTable } from "@/main/features/user/user.model";
 

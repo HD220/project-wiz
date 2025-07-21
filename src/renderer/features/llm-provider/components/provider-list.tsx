@@ -1,15 +1,15 @@
 import { useState } from "react";
 import { Plus } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
-import { useLLMProvidersStore } from "@/renderer/store/llm-providers-store";
+import { Button } from "@/renderer/components/ui/button";
+import { useLLMProvidersStore } from "@/renderer/store/llm-provider.store";
 
 import { ProviderCard } from "./provider-card";
 import { ProviderForm } from "./provider-form";
 import { EmptyState } from "./empty-state";
-import type { LlmProvider } from "@/main/agents/llm-providers/llm-provider.types";
+import type { LlmProvider } from "@/main/features/agent/llm-provider/llm-provider.types";
 
-export function ProviderList() {
+function ProviderList() {
   const [showForm, setShowForm] = useState(false);
   const [editingProvider, setEditingProvider] = useState<LlmProvider | null>(null);
   
@@ -72,3 +72,5 @@ export function ProviderList() {
     </>
   );
 }
+
+export { ProviderList };

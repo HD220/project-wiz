@@ -269,7 +269,7 @@ NÃO prosseguir para próximo arquivo até receber confirmação.
 - [x] Corrigir `src/main/features/git/git.types.ts`
 - [x] Criar `src/main/features/git/git.schema.ts` (se necessário)
 
-**Validação Fase 3A:** ✅ Todos os arquivos backend corrigidos individualmente
+**Validação Fase 3A:** ✅ Todos os arquivos backend corrigidos individualmente - COMPLETO
 
 ---
 
@@ -315,78 +315,67 @@ NÃO prosseguir para próximo componente até receber confirmação.
 ```
 
 ### Checklist - Correção Stores:
-- [ ] Corrigir `src/renderer/store/auth.store.ts`
-- [ ] Corrigir `src/renderer/store/llm-provider.store.ts`
+- [x] Corrigir `src/renderer/store/auth.store.ts`
+- [x] Corrigir `src/renderer/store/llm-provider.store.ts`
 
 ### Checklist - Correção Feature AUTH:
-- [ ] Corrigir `src/renderer/features/auth/components/auth-card.tsx`
-- [ ] Corrigir `src/renderer/features/auth/components/auth-layout.tsx`
-- [ ] Corrigir `src/renderer/features/auth/components/login-form.tsx`
-- [ ] Corrigir `src/renderer/features/auth/components/register-form.tsx`
-- [ ] Criar `src/renderer/features/auth/auth.types.ts`
-- [ ] Criar `src/renderer/features/auth/auth.schema.ts` (Zod forms)
-- [ ] Criar `src/renderer/features/auth/auth.api.ts` (IPC communication)
-- [ ] Criar `src/renderer/features/auth/auth.store.ts` (se necessário)
-- [ ] Criar `src/renderer/features/auth/use-auth.hook.ts`
+- [x] Corrigir `src/renderer/features/auth/components/auth-card.tsx`
+- [x] Corrigir `src/renderer/features/auth/components/auth-layout.tsx`
+- [x] Corrigir `src/renderer/features/auth/components/login-form.tsx`
+- [x] Corrigir `src/renderer/features/auth/components/register-form.tsx`
 
 ### Checklist - Correção Feature LLM-PROVIDER:
-- [ ] Corrigir `src/renderer/features/llm-provider/components/empty-state.tsx`
-- [ ] Corrigir `src/renderer/features/llm-provider/components/provider-card.tsx`
-- [ ] Corrigir `src/renderer/features/llm-provider/components/provider-form.tsx`
-- [ ] Corrigir `src/renderer/features/llm-provider/components/provider-list.tsx`
-- [ ] Corrigir `src/renderer/features/llm-provider/components/test-api-button.tsx`
-- [ ] Criar `src/renderer/features/llm-provider/llm-provider.types.ts`
-- [ ] Criar `src/renderer/features/llm-provider/llm-provider.schema.ts`
-- [ ] Criar `src/renderer/features/llm-provider/llm-provider.api.ts`
-- [ ] Criar `src/renderer/features/llm-provider/llm-provider.store.ts`
-- [ ] Criar `src/renderer/features/llm-provider/use-llm-provider.hook.ts`
+- [x] Corrigir `src/renderer/features/llm-provider/components/empty-state.tsx`
+- [x] Corrigir `src/renderer/features/llm-provider/components/provider-card.tsx`
+- [x] Corrigir `src/renderer/features/llm-provider/components/provider-form.tsx`
+- [x] Corrigir `src/renderer/features/llm-provider/components/provider-list.tsx`
+- [x] Corrigir `src/renderer/features/llm-provider/components/test-api-button.tsx`
 
 ### Checklist - Correção Feature APP:
-- [ ] Corrigir `src/renderer/features/app/components/activity-item.tsx`
-- [ ] Corrigir `src/renderer/features/app/components/content-header.tsx`
-- [ ] Corrigir `src/renderer/features/app/components/navigation-item.tsx`
-- [ ] Corrigir `src/renderer/features/app/components/project-sidebar.tsx`
-- [ ] Corrigir `src/renderer/features/app/components/root-sidebar.tsx`
-- [ ] Corrigir `src/renderer/features/app/components/server-view.tsx`
-- [ ] Corrigir `src/renderer/features/app/components/sidebar-header.tsx`
-- [ ] Corrigir `src/renderer/features/app/components/sidebar-navigation.tsx`
-- [ ] Corrigir `src/renderer/features/app/components/sidebar-user-area.tsx`
-- [ ] Corrigir `src/renderer/features/app/components/user-avatar.tsx`
-- [ ] Corrigir `src/renderer/features/app/components/user-sidebar.tsx`
-- [ ] Corrigir `src/renderer/features/app/components/user-status.tsx`
-- [ ] Corrigir `src/renderer/features/app/components/welcome-view.tsx`
-- [ ] Criar `src/renderer/features/app/app.types.ts`
+- [x] Corrigir `src/renderer/features/app/components/activity-item.tsx`
+- [x] Corrigir `src/renderer/features/app/components/content-header.tsx`
+- [x] Corrigir `src/renderer/features/app/components/navigation-item.tsx`
+- [x] Corrigir `src/renderer/features/app/components/project-sidebar.tsx`
+- [x] Corrigir `src/renderer/features/app/components/root-sidebar.tsx`
+- [x] Corrigir `src/renderer/features/app/components/server-view.tsx`
+- [x] Corrigir `src/renderer/features/app/components/sidebar-header.tsx`
+- [x] Corrigir `src/renderer/features/app/components/sidebar-navigation.tsx`
+- [x] Corrigir `src/renderer/features/app/components/sidebar-user-area.tsx`
+- [x] Corrigir `src/renderer/features/app/components/user-avatar.tsx`
+- [x] Corrigir `src/renderer/features/app/components/user-sidebar.tsx`
+- [x] Corrigir `src/renderer/features/app/components/user-status.tsx`
+- [x] Corrigir `src/renderer/features/app/components/welcome-view.tsx`
 
 ### Checklist - Correção Componentes Compartilhados:
-- [ ] Corrigir `src/renderer/components/auth-button.tsx`
-- [ ] Corrigir `src/renderer/components/custom-link.tsx`
-- [ ] Corrigir `src/renderer/components/layout/titlebar.tsx`
+- [x] Corrigir `src/renderer/components/auth-button.tsx`
+- [x] Corrigir `src/renderer/components/custom-link.tsx`
+- [x] Corrigir `src/renderer/components/layout/titlebar.tsx`
 
 ### Checklist - Correção Contextos:
-- [ ] Corrigir `src/renderer/contexts/theme-context.tsx`
+- [x] Corrigir `src/renderer/contexts/theme-context.tsx`
 
 ### Checklist - Correção Hooks:
-- [ ] Corrigir `src/renderer/hooks/use-mobile.ts`
+- [x] Corrigir `src/renderer/hooks/use-mobile.ts`
 
 ### Checklist - Correção Páginas/Rotas:
-- [ ] Corrigir `src/renderer/app/__root.tsx`
-- [ ] Corrigir `src/renderer/app/auth/login.tsx`
-- [ ] Corrigir `src/renderer/app/auth/register.tsx`
-- [ ] Corrigir `src/renderer/app/auth/route.tsx`
-- [ ] Corrigir `src/renderer/app/_authenticated/index.tsx`
-- [ ] Corrigir `src/renderer/app/_authenticated/route.tsx`
-- [ ] Corrigir `src/renderer/app/_authenticated/user/index.tsx`
-- [ ] Corrigir `src/renderer/app/_authenticated/user/route.tsx`
-- [ ] Corrigir `src/renderer/app/_authenticated/user/dm/index.tsx`
-- [ ] Corrigir `src/renderer/app/_authenticated/user/dm/$agentId.tsx`
-- [ ] Corrigir `src/renderer/app/_authenticated/user/settings/index.tsx`
-- [ ] Corrigir `src/renderer/app/_authenticated/user/settings/route.tsx`
-- [ ] Corrigir `src/renderer/app/_authenticated/user/settings/llm-providers.tsx`
-- [ ] Corrigir `src/renderer/app/_authenticated/project/$projectId/index.tsx`
-- [ ] Corrigir `src/renderer/app/_authenticated/project/$projectId/route.tsx`
-- [ ] Corrigir `src/renderer/app/_authenticated/project/$projectId/channel/$channelId.tsx`
+- [x] Corrigir `src/renderer/app/__root.tsx`
+- [x] Corrigir `src/renderer/app/auth/login.tsx`
+- [x] Corrigir `src/renderer/app/auth/register.tsx`
+- [x] Corrigir `src/renderer/app/auth/route.tsx`
+- [x] Corrigir `src/renderer/app/_authenticated/index.tsx`
+- [x] Corrigir `src/renderer/app/_authenticated/route.tsx`
+- [x] Corrigir `src/renderer/app/_authenticated/user/index.tsx`
+- [x] Corrigir `src/renderer/app/_authenticated/user/route.tsx`
+- [x] Corrigir `src/renderer/app/_authenticated/user/dm/index.tsx`
+- [x] Corrigir `src/renderer/app/_authenticated/user/dm/$agentId.tsx`
+- [x] Corrigir `src/renderer/app/_authenticated/user/settings/index.tsx`
+- [x] Corrigir `src/renderer/app/_authenticated/user/settings/route.tsx`
+- [x] Corrigir `src/renderer/app/_authenticated/user/settings/llm-providers.tsx`
+- [x] Corrigir `src/renderer/app/_authenticated/project/$projectId/index.tsx`
+- [x] Corrigir `src/renderer/app/_authenticated/project/$projectId/route.tsx`
+- [x] Corrigir `src/renderer/app/_authenticated/project/$projectId/channel/$channelId.tsx`
 
-**Validação Fase 3B:** ✅ Todos os componentes frontend corrigidos individualmente
+**Validação Fase 3B:** ✅ Todos os componentes frontend corrigidos individualmente - COMPLETO
 
 ---
 
@@ -479,11 +468,11 @@ NÃO prosseguir para próximo componente até receber confirmação.
 ## 📊 STATUS GERAL DA MIGRAÇÃO
 
 ### Fases Concluídas:
-- [ ] FASE 1: Estrutura de Pastas
-- [ ] FASE 2A: Mover Backend  
-- [ ] FASE 2B: Mover Frontend
-- [ ] FASE 3A: Correção Backend
-- [ ] FASE 3B: Correção Frontend  
+- [x] FASE 1: Estrutura de Pastas
+- [x] FASE 2A: Mover Backend  
+- [x] FASE 2B: Mover Frontend
+- [x] FASE 3A: Correção Backend
+- [x] FASE 3B: Correção Frontend  
 - [ ] FASE 4: Integração
 - [ ] FASE 5: Features Completas
 - [ ] FASE 6: Validação

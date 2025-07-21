@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/renderer/components/ui/card";
+import { Button } from "@/renderer/components/ui/button";
 import { Settings, Bot, User, Palette } from "lucide-react";
 
 function SettingsIndex() {

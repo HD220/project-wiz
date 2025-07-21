@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 
-import { RegisterForm } from "@/features/auth/components/register-form";
+import { RegisterForm } from "@/renderer/features/auth/components/register-form";
 
 function RegisterPage() {
   return <RegisterForm />;

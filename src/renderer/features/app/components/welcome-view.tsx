@@ -1,17 +1,17 @@
-import { useAuthStore } from "@/renderer/store/auth-store";
+import { useAuthStore } from "@/renderer/store/auth.store";
 
-import { Badge } from "@/components/ui/badge";
+import { Badge } from "@/renderer/components/ui/badge";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
+} from "@/renderer/components/ui/card";
 
 import { ActivityItem } from "./activity-item";
 
-export function WelcomeView() {
+function WelcomeView() {
   const { user } = useAuthStore();
 
   return (
@@ -95,3 +95,5 @@ export function WelcomeView() {
     </div>
   );
 }
+
+export { WelcomeView };

@@ -1,17 +1,18 @@
-import { Badge } from "@/components/ui/badge";
+import { Badge } from "@/renderer/components/ui/badge";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
+} from "@/renderer/components/ui/card";
 
 interface ServerViewProps {
   serverId: string;
 }
 
-export function ServerView({ serverId }: ServerViewProps) {
+function ServerView(props: ServerViewProps) {
+  const { serverId } = props;
   // Mock server data - in real app this would come from a store/API
   const getServerData = (id: string) => {
     const servers = {
@@ -81,3 +82,5 @@ export function ServerView({ serverId }: ServerViewProps) {
     </div>
   );
 }
+
+export { ServerView };

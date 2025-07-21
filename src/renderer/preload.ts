@@ -3,26 +3,26 @@
 
 import { contextBridge, ipcRenderer } from "electron";
 
-import type { CreateAgentInput, AgentStatus } from "@/main/agents/agent.types";
-import type { CreateProviderInput } from "@/main/agents/llm-providers/llm-provider.types";
+import type { CreateAgentInput, AgentStatus } from "@/main/features/agent/agent.types";
+import type { CreateProviderInput } from "@/main/features/agent/llm-provider/llm-provider.types";
 import type {
   MemoryCreationInput,
   MemoryUpdateInput,
   MemorySearchInput,
-} from "@/main/agents/memory/agent-memory.types";
-import type { SendAgentMessageInput } from "@/main/conversations/agent-chat.service";
-import type { CreateConversationInput } from "@/main/conversations/conversation.service";
-import type { SendMessageInput } from "@/main/conversations/message.service";
+} from "@/main/features/agent/memory/memory.types";
+import type { SendAgentMessageInput } from "@/main/features/conversation/conversation.types";
+import type { CreateConversationInput } from "@/main/features/conversation/conversation.types";
+import type { SendMessageInput } from "@/main/features/conversation/conversation.types";
 import type {
   InsertProject,
   UpdateProject,
-} from "@/main/project/projects.schema";
+} from "@/main/features/project/project.types";
 import type { IpcResponse } from "@/main/types";
 import type {
   LoginCredentials,
   RegisterUserInput,
-} from "@/main/user/authentication/auth.types";
-import type { Theme } from "@/main/user/profile/user-preferences.schema";
+} from "@/main/features/auth/auth.types";
+import type { Theme } from "@/main/features/user/user.types";
 
 // Expose protected methods that allow the renderer process to use
 // the ipcRenderer without exposing the entire object

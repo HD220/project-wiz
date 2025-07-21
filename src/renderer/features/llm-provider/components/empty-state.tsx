@@ -1,13 +1,15 @@
 import { Bot, Plus } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Button } from "@/renderer/components/ui/button";
+import { Card, CardContent, CardHeader } from "@/renderer/components/ui/card";
 
 interface EmptyStateProps {
   onAddProvider: () => void;
 }
 
-export function EmptyState({ onAddProvider }: EmptyStateProps) {
+function EmptyState(props: EmptyStateProps) {
+  const { onAddProvider } = props;
+
   return (
     <Card className="border-dashed border-2 border-muted-foreground/25">
       <CardHeader className="pb-4">
@@ -33,3 +35,5 @@ export function EmptyState({ onAddProvider }: EmptyStateProps) {
     </Card>
   );
 }
+
+export { EmptyState };

@@ -1,15 +1,15 @@
 import { Link } from "@tanstack/react-router";
 import { Hash, Users, Bot, Settings, ChevronDown } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
+import { Button } from "@/renderer/components/ui/button";
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
-} from "@/components/ui/collapsible";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Separator } from "@/components/ui/separator";
-import { cn } from "@/lib/utils";
+} from "@/renderer/components/ui/collapsible";
+import { ScrollArea } from "@/renderer/components/ui/scroll-area";
+import { Separator } from "@/renderer/components/ui/separator";
+import { cn } from "@/renderer/lib/utils";
 
 interface Channel {
   id: string;
@@ -29,7 +29,8 @@ interface ProjectSidebarProps {
   className?: string;
 }
 
-export function ProjectSidebar({ projectId, className }: ProjectSidebarProps) {
+function ProjectSidebar(props: ProjectSidebarProps) {
+  const { projectId, className } = props;
   // Mock data - in real app this would come from stores
   const projectName = "Project Alpha";
 
@@ -170,3 +171,5 @@ export function ProjectSidebar({ projectId, className }: ProjectSidebarProps) {
     </div>
   );
 }
+
+export { ProjectSidebar };

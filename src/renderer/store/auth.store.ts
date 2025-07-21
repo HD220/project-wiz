@@ -1,24 +1,11 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
-// Local type definitions to avoid boundary violations
-interface User {
-  id: string;
-  name: string;
-  avatar: string | null;
-  type: "human" | "agent";
-  createdAt: Date;
-  updatedAt: Date;
-}
-
-interface LoginCredentials {
-  username: string;
-  password: string;
-}
+import type { AuthenticatedUser, LoginCredentials } from "@/main/features/auth/auth.types";
 
 interface AuthState {
   // State
-  user: User | null;
+  user: AuthenticatedUser | null;
   isAuthenticated: boolean;
   isLoading: boolean;
   error: string | null;
@@ -51,7 +38,7 @@ export const useAuthStore = create<AuthState>()(
 
           if (response.success && response.data) {
             set({
-              user: response.data as User,
+              user: response.data as AuthenticatedUser,
               isAuthenticated: true,
               isLoading: false,
             });
@@ -91,7 +78,7 @@ export const useAuthStore = create<AuthState>()(
 
           if (response.success && response.data) {
             set({
-              user: response.data as User,
+              user: response.data as AuthenticatedUser,
               isAuthenticated: true,
               isLoading: false,
             });
@@ -144,7 +131,7 @@ export const useAuthStore = create<AuthState>()(
 
           if (response.success && response.data) {
             set({
-              user: response.data as User,
+              user: response.data as AuthenticatedUser,
               isAuthenticated: true,
               isLoading: false,
             });

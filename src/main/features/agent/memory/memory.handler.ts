@@ -2,7 +2,7 @@ import { ipcMain } from "electron";
 
 import type { IpcResponse } from "@/main/types";
 
-import { AgentMemoryService } from "@/main/features/agent/memory/agent-memory.service";
+import { AgentMemoryService } from "@/main/features/agent/memory/memory.service";
 import { MemoryMaintenanceService } from "@/main/features/agent/memory/memory-maintenance.service";
 
 import type {
@@ -11,7 +11,7 @@ import type {
   MemoryRelevanceScore,
   InsertAgentMemory,
   UpdateAgentMemory,
-} from "@/main/features/agent/memory/agent-memory.types";
+} from "@/main/features/agent/memory/memory.types";
 
 /**
  * Setup memory CRUD operation handlers

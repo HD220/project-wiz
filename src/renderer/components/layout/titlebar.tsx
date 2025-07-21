@@ -1,12 +1,13 @@
-import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
+import { Button } from "@/renderer/components/ui/button";
+import { cn } from "@/renderer/lib/utils";
 
 interface TitlebarProps {
   title?: string;
   className?: string;
 }
 
-export function Titlebar({ title = "Project Wiz", className }: TitlebarProps) {
+function Titlebar(props: TitlebarProps) {
+  const { title = "Project Wiz", className } = props;
   const handleMinimize = () => {
     window.electronAPI?.window.minimize();
   };
@@ -95,3 +96,5 @@ function CloseIcon() {
     </svg>
   );
 }
+
+export { Titlebar };

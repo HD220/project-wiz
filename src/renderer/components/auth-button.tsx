@@ -1,9 +1,8 @@
 import { LogIn, LogOut, User } from "lucide-react";
-import React from "react";
+import { useEffect } from "react";
 
-import { useAuthStore } from "@/renderer/store/auth-store";
-
-import { Button } from "@/components/ui/button";
+import { useAuthStore } from "@/renderer/store/auth.store";
+import { Button } from "@/renderer/components/ui/button";
 
 export function AuthButton() {
   const {
@@ -17,7 +16,7 @@ export function AuthButton() {
   } = useAuthStore();
 
   // Clear any existing errors when component mounts
-  React.useEffect(() => {
+  useEffect(() => {
     if (error) {
       clearError();
     }

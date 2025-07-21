@@ -3,13 +3,13 @@ import * as path from "path";
 import { app, BrowserWindow, ipcMain } from "electron";
 import squirrel from "electron-squirrel-startup";
 
-import { setupAgentHandlers } from "./agents/agent.handlers";
-import { setupLlmProviderHandlers } from "./agents/llm-providers/llm-provider.handlers";
-import { setupAgentMemoryHandlers } from "./agents/memory/agent-memory.handlers";
-import { setupConversationsHandlers } from "./conversations/conversations.handlers";
-import { setupProjectHandlers } from "./project/project.handlers";
-import { setupAuthHandlers } from "./user/authentication/auth.handlers";
-import { setupProfileHandlers } from "./user/profile/profile.handlers";
+import { setupAuthHandlers } from "@/main/features/auth/auth.handler";
+import { setupProfileHandlers } from "@/main/features/user/profile.handler";
+import { setupProjectHandlers } from "@/main/features/project/project.handler";
+import { setupConversationsHandlers } from "@/main/features/conversation/conversation.handler";
+import { setupAgentHandlers } from "@/main/features/agent/agent.handler";
+import { setupLlmProviderHandlers } from "@/main/features/agent/llm-provider/llm-provider.handler";
+import { setupAgentMemoryHandlers } from "@/main/features/agent/memory/memory.handler";
 import { getLogger } from "./utils/logger";
 
 declare const MAIN_WINDOW_VITE_DEV_SERVER_URL: string | undefined;

@@ -1,19 +1,19 @@
 import { Link } from "@tanstack/react-router";
 import { Plus, Settings } from "lucide-react";
 
-import { useAuthStore } from "@/renderer/store/auth-store";
+import { useAuthStore } from "@/renderer/store/auth.store";
 
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
-import { CustomLink } from "@/components/custom-link";
-import { Separator } from "@/components/ui/separator";
+import { Avatar, AvatarFallback } from "@/renderer/components/ui/avatar";
+import { Button } from "@/renderer/components/ui/button";
+import { CustomLink } from "@/renderer/components/custom-link";
+import { Separator } from "@/renderer/components/ui/separator";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "@/components/ui/tooltip";
-import { cn } from "@/lib/utils";
+} from "@/renderer/components/ui/tooltip";
+import { cn } from "@/renderer/lib/utils";
 
 interface Server {
   id: string;
@@ -26,7 +26,8 @@ interface RootSidebarProps {
   className?: string;
 }
 
-export function RootSidebar({ className }: RootSidebarProps) {
+function RootSidebar(props: RootSidebarProps) {
+  const { className } = props;
   const { user } = useAuthStore();
 
   // Mock servers data - in real app this would come from a store
@@ -179,3 +180,5 @@ export function RootSidebar({ className }: RootSidebarProps) {
     </div>
   );
 }
+
+export { RootSidebar };

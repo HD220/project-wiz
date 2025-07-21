@@ -1,9 +1,8 @@
-import { Link, LinkProps } from "@tanstack/react-router";
 import { forwardRef } from "react";
-
-import { Button, buttonVariants } from "@/components/ui/button";
-
+import { Link, LinkProps } from "@tanstack/react-router";
 import type { VariantProps } from "class-variance-authority";
+
+import { Button, buttonVariants } from "@/renderer/components/ui/button";
 
 interface CustomLinkProps
   extends Omit<LinkProps, "className">,
@@ -12,11 +11,17 @@ interface CustomLinkProps
   children: React.ReactNode;
 }
 
-export const CustomLink = forwardRef<HTMLAnchorElement, CustomLinkProps>(
-  (
-    { variant = "ghost", size, className, children, to, ...restLinkProps },
-    ref,
-  ) => {
+const CustomLink = forwardRef<HTMLAnchorElement, CustomLinkProps>(
+  (props, ref) => {
+    const { 
+      variant = "ghost", 
+      size, 
+      className, 
+      children, 
+      to, 
+      ...restLinkProps 
+    } = props;
+
     return (
       <Button variant={variant} size={size} className={className} asChild>
         <Link ref={ref} to={to} {...restLinkProps}>
@@ -28,3 +33,5 @@ export const CustomLink = forwardRef<HTMLAnchorElement, CustomLinkProps>(
 );
 
 CustomLink.displayName = "CustomLink";
+
+export { CustomLink };

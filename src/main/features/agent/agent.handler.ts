@@ -3,7 +3,7 @@ import { ipcMain } from "electron";
 import { AgentService } from "@/main/features/agent/agent.service";
 import type { CreateAgentInput, AgentStatus } from "@/main/features/agent/agent.types";
 import type { IpcResponse } from "@/main/types";
-import { AuthService } from "@/main/features/user/authentication/auth.service";
+import { AuthService } from "@/main/features/auth/auth.service";
 
 /**
  * Setup agent CRUD operation handlers

@@ -1,7 +1,6 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { createRouter, RouterProvider } from "@tanstack/react-router";
 import { ThemeProvider } from "next-themes";
-import React from "react";
 import ReactDOMClient from "react-dom/client";
 
 import "./globals.css";
@@ -34,16 +33,14 @@ if (!rootElement) {
 const root = ReactDOMClient.createRoot(rootElement);
 
 root.render(
-  <React.StrictMode>
-    <QueryClientProvider client={queryClient}>
-      <ThemeProvider
-        attribute="class"
-        defaultTheme="system"
-        enableSystem
-        disableTransitionOnChange
-      >
-        <RouterProvider router={router} />
-      </ThemeProvider>
-    </QueryClientProvider>
-  </React.StrictMode>,
+  <QueryClientProvider client={queryClient}>
+    <ThemeProvider
+      attribute="class"
+      defaultTheme="system"
+      enableSystem
+      disableTransitionOnChange
+    >
+      <RouterProvider router={router} />
+    </ThemeProvider>
+  </QueryClientProvider>,
 );

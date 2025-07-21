@@ -9,7 +9,7 @@ import type {
   AgentMemoryWithMetadata,
   MemorySearchCriteria,
   MemoryRelevanceScore,
-} from "@/main/features/agent/memory/agent-memories.schema";
+} from "@/main/features/agent/memory/memory.model";
 
 export type {
   MemoryType,

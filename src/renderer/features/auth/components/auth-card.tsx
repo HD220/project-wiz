@@ -4,8 +4,8 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
-import { cn } from "@/lib/utils";
+} from "@/renderer/components/ui/card";
+import { cn } from "@/renderer/lib/utils";
 
 interface AuthCardProps {
   title: string;
@@ -14,12 +14,9 @@ interface AuthCardProps {
   className?: string;
 }
 
-export function AuthCard({
-  title,
-  description,
-  children,
-  className,
-}: AuthCardProps) {
+function AuthCard(props: AuthCardProps) {
+  const { title, description, children, className } = props;
+  
   return (
     <Card className={cn("w-full", className)}>
       <CardHeader className="space-y-1 text-center">
@@ -30,3 +27,5 @@ export function AuthCard({
     </Card>
   );
 }
+
+export { AuthCard };

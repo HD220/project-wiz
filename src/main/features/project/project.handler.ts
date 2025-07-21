@@ -4,7 +4,7 @@ import { ProjectService } from "@/main/features/project/project.service";
 import type {
   InsertProject,
   UpdateProject,
-} from "@/main/features/project/projects.schema";
+} from "@/main/features/project/project.model";
 import type { IpcResponse } from "@/main/types";
 
 function setupCreateHandler(): void {

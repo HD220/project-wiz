@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 
-import { ContentHeader } from "@/features/app/components/content-header";
-import { ServerView } from "@/features/app/components/server-view";
+import { ContentHeader } from "@/renderer/features/app/components/content-header";
+import { ServerView } from "@/renderer/features/app/components/server-view";
 
 function ProjectPage() {
   const { projectId } = Route.useParams();

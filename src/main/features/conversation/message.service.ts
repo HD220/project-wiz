@@ -2,13 +2,13 @@ import { eq, asc } from "drizzle-orm";
 
 import { getDatabase } from "@/main/database/connection";
 
-import { messagesTable, llmMessagesTable } from "@/main/features/conversation/messages.schema";
+import { messagesTable, llmMessagesTable } from "@/main/features/conversation/message.model";
 
 import type {
   SelectMessage,
   InsertMessage,
   InsertLlmMessage,
-} from "@/main/features/conversation/messages.schema";
+} from "@/main/features/conversation/message.model";
 
 export type SendMessageInput = Omit<
   InsertMessage,

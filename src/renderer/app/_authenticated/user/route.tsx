@@ -1,6 +1,6 @@
 import { createFileRoute, Outlet } from "@tanstack/react-router";
 
-import { UserSidebar } from "@/features/app/components/user-sidebar";
+import { UserSidebar } from "@/renderer/features/app/components/user-sidebar";
 
 function UserLayout() {
   return (

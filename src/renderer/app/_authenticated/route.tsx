@@ -1,8 +1,8 @@
 import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
 
-import { useAuthStore } from "@/renderer/store/auth-store";
+import { useAuthStore } from "@/renderer/store/auth.store";
 
-import { RootSidebar } from "@/features/app/components/root-sidebar";
+import { RootSidebar } from "@/renderer/features/app/components/root-sidebar";
 
 function AuthenticatedLayout() {
   return (

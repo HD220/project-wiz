@@ -1,30 +1,47 @@
 import { useRouter } from "@tanstack/react-router";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 import { Loader2 } from "lucide-react";
-import { useState } from "react";
 
-import { useAuthStore } from "@/renderer/store/auth-store";
+import { useAuthStore } from "@/renderer/store/auth.store";
 
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { Alert, AlertDescription } from "@/renderer/components/ui/alert";
+import { Button } from "@/renderer/components/ui/button";
+import { Input } from "@/renderer/components/ui/input";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/renderer/components/ui/form";
 
 import { AuthCard } from "./auth-card";
 
-export function LoginForm() {
+const loginSchema = z.object({
+  username: z.string().min(1, "Username is required"),
+  password: z.string().min(1, "Password is required"),
+});
+
+type LoginFormData = z.infer<typeof loginSchema>;
+
+interface LoginFormProps {
+  className?: string;
+}
+
+function LoginForm(props: LoginFormProps) {
+  const { className } = props;
   const router = useRouter();
   const { login, isLoading, error, clearError } = useAuthStore();
-  const [formData, setFormData] = useState({
-    username: "",
-    password: "",
+  
+  const form = useForm<LoginFormData>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: {
+      username: "",
+      password: "",
+    },
   });
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async (data: LoginFormData) => {
     clearError();
 
     try {
-      await login(formData);
+      await login(data);
       router.navigate({ to: "/user" });
     } catch {
       // Error is handled by the store
@@ -45,80 +62,95 @@ export function LoginForm() {
     <AuthCard
       title="Welcome back!"
       description="We're so excited to see you again!"
+      className={className}
     >
-      <form onSubmit={handleSubmit} className="space-y-4">
-        {error && (
-          <Alert variant="destructive" className="bg-red-900/50 border-red-800">
-            <AlertDescription>{error}</AlertDescription>
-          </Alert>
-        )}
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+          {error && (
+            <Alert variant="destructive" className="bg-red-900/50 border-red-800">
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          )}
 
-        <div className="space-y-2">
-          <Label htmlFor="username" className="text-xs font-bold uppercase">
-            Username
-          </Label>
-          <Input
-            id="username"
-            type="text"
-            value={formData.username}
-            onChange={(e) =>
-              setFormData({ ...formData, username: e.target.value })
-            }
-            placeholder="Enter your username"
-            required
-          />
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="password" className="text-xs font-bold uppercase">
-            Password
-          </Label>
-          <Input
-            id="password"
-            type="password"
-            value={formData.password}
-            onChange={(e) =>
-              setFormData({ ...formData, password: e.target.value })
-            }
-            placeholder="Enter your password"
-            required
-          />
-        </div>
-
-        <div className="flex flex-col space-y-3 pt-2">
-          <Button type="submit" disabled={isLoading} className="w-full">
-            {isLoading ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Signing in...
-              </>
-            ) : (
-              "Sign In"
+          <FormField
+            control={form.control}
+            name="username"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="text-xs font-bold uppercase">
+                  Username
+                </FormLabel>
+                <FormControl>
+                  <Input
+                    {...field}
+                    type="text"
+                    placeholder="Enter your username"
+                    disabled={isLoading}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
             )}
-          </Button>
+          />
 
-          <Button
-            type="button"
-            variant="outline"
-            onClick={handleQuickLogin}
-            disabled={isLoading}
-            className="w-full"
-          >
-            Quick Login (Demo)
-          </Button>
+          <FormField
+            control={form.control}
+            name="password"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="text-xs font-bold uppercase">
+                  Password
+                </FormLabel>
+                <FormControl>
+                  <Input
+                    {...field}
+                    type="password"
+                    placeholder="Enter your password"
+                    disabled={isLoading}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-          <p className="text-sm text-muted-foreground text-center">
-            Need an account?{" "}
-            <Button
-              variant="link"
-              className="p-0 h-auto font-normal"
-              onClick={() => router.navigate({ to: "/auth/register" })}
-            >
-              Register
+          <div className="flex flex-col space-y-3 pt-2">
+            <Button type="submit" disabled={isLoading} className="w-full">
+              {isLoading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Signing in...
+                </>
+              ) : (
+                "Sign In"
+              )}
             </Button>
-          </p>
-        </div>
-      </form>
+
+            <Button
+              type="button"
+              variant="outline"
+              onClick={handleQuickLogin}
+              disabled={isLoading}
+              className="w-full"
+            >
+              Quick Login (Demo)
+            </Button>
+
+            <p className="text-sm text-muted-foreground text-center">
+              Need an account?{" "}
+              <Button
+                variant="link"
+                className="p-0 h-auto font-normal"
+                onClick={() => router.navigate({ to: "/auth/register" })}
+              >
+                Register
+              </Button>
+            </p>
+          </div>
+        </form>
+      </Form>
     </AuthCard>
   );
 }
+
+export { LoginForm };

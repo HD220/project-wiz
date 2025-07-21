@@ -1,11 +1,13 @@
-import { cn } from "@/lib/utils";
+import { cn } from "@/renderer/lib/utils";
 
 interface UserStatusProps {
   status?: "online" | "away" | "busy" | "offline";
   className?: string;
 }
 
-export function UserStatus({ status = "online", className }: UserStatusProps) {
+function UserStatus(props: UserStatusProps) {
+  const { status = "online", className } = props;
+  
   const statusConfig = {
     online: { color: "bg-green-500", label: "Online" },
     away: { color: "bg-yellow-500", label: "Away" },
@@ -22,3 +24,5 @@ export function UserStatus({ status = "online", className }: UserStatusProps) {
     </div>
   );
 }
+
+export { UserStatus };

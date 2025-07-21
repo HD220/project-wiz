@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 
-import { ContentHeader } from "@/features/app/components/content-header";
+import { ContentHeader } from "@/renderer/features/app/components/content-header";
 
 function ChannelPage() {
   const { projectId, channelId } = Route.useParams();

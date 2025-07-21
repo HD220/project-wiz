@@ -4,13 +4,13 @@ import { z } from "zod";
 import { useEffect } from "react";
 import { X } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
+import { Button } from "@/renderer/components/ui/button";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
+} from "@/renderer/components/ui/dialog";
 import {
   Form,
   FormControl,
@@ -18,24 +18,24 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
+} from "@/renderer/components/ui/form";
+import { Input } from "@/renderer/components/ui/input";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Separator } from "@/components/ui/separator";
+} from "@/renderer/components/ui/select";
+import { Checkbox } from "@/renderer/components/ui/checkbox";
+import { Separator } from "@/renderer/components/ui/separator";
 
-import { useLLMProvidersStore } from "@/renderer/store/llm-providers-store";
-import { useAuthStore } from "@/renderer/store/auth-store";
+import { useLLMProvidersStore } from "@/renderer/store/llm-provider.store";
+import { useAuthStore } from "@/renderer/store/auth.store";
 import type {
   LlmProvider,
   ProviderType,
-} from "@/main/agents/llm-providers/llm-provider.types";
+} from "@/main/features/agent/llm-provider/llm-provider.types";
 import { TestApiButton } from "./test-api-button";
 import { toast } from "sonner";
 
@@ -63,7 +63,8 @@ interface ProviderFormProps {
   onClose: () => void;
 }
 
-export function ProviderForm({ provider, onClose }: ProviderFormProps) {
+function ProviderForm(props: ProviderFormProps) {
+  const { provider, onClose } = props;
   const { createProvider, updateProvider, isLoading } = useLLMProvidersStore();
   const { user } = useAuthStore();
   
@@ -323,3 +324,5 @@ export function ProviderForm({ provider, onClose }: ProviderFormProps) {
     </Dialog>
   );
 }
+
+export { ProviderForm };

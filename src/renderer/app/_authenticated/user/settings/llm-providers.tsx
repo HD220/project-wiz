@@ -1,10 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect } from "react";
 
-import { useLLMProvidersStore } from "@/renderer/store/llm-providers-store";
-import { ProviderList } from "@/features/llm-providers/components/provider-list";
+import { useLLMProvidersStore } from "@/renderer/store/llm-provider.store";
+import { ProviderList } from "@/renderer/features/llm-provider/components/provider-list";
 import { Bot, ArrowLeft } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/renderer/components/ui/button";
 
 function LLMProvidersPage() {
   const navigate = Route.useNavigate();

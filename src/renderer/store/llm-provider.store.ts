@@ -1,11 +1,11 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import { useAuthStore } from "./auth-store";
+import { useAuthStore } from "./auth.store";
 import type {
   CreateProviderInput,
   LlmProvider,
   ProviderType,
-} from "@/main/agents/llm-providers/llm-provider.types";
+} from "@/main/features/agent/llm-provider/llm-provider.types";
 
 
 // Helper function to get current user ID
