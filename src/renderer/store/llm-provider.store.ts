@@ -1,12 +1,13 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import { useAuthStore } from "./auth.store";
+
 import type {
   CreateProviderInput,
   LlmProvider,
   ProviderType,
 } from "@/main/features/agent/llm-provider/llm-provider.types";
 
+import { useAuthStore } from "./auth.store";
 
 // Helper function to get current user ID
 const getCurrentUserId = (): string => {
@@ -71,7 +72,7 @@ export const useLLMProvidersStore = create<LLMProvidersState>()(
 
           if (response.success && response.data) {
             const providers = response.data as LlmProvider[];
-            const defaultProvider = providers.find(p => p.isDefault) || null;
+            const defaultProvider = providers.find((p) => p.isDefault) || null;
 
             set({
               providers,
@@ -84,7 +85,10 @@ export const useLLMProvidersStore = create<LLMProvidersState>()(
         } catch (error) {
           set({
             isLoading: false,
-            error: error instanceof Error ? error.message : "Failed to load providers",
+            error:
+              error instanceof Error
+                ? error.message
+                : "Failed to load providers",
           });
           throw error;
         }
@@ -103,7 +107,9 @@ export const useLLMProvidersStore = create<LLMProvidersState>()(
 
             set({
               providers: [...currentProviders, newProvider],
-              defaultProvider: newProvider.isDefault ? newProvider : get().defaultProvider,
+              defaultProvider: newProvider.isDefault
+                ? newProvider
+                : get().defaultProvider,
               isLoading: false,
             });
           } else {
@@ -112,7 +118,10 @@ export const useLLMProvidersStore = create<LLMProvidersState>()(
         } catch (error) {
           set({
             isLoading: false,
-            error: error instanceof Error ? error.message : "Failed to create provider",
+            error:
+              error instanceof Error
+                ? error.message
+                : "Failed to create provider",
           });
           throw error;
         }
@@ -129,13 +138,15 @@ export const useLLMProvidersStore = create<LLMProvidersState>()(
             const updatedProvider = response.data as LlmProvider;
             const currentProviders = get().providers;
 
-            const updatedProviders = currentProviders.map(p => 
-              p.id === id ? updatedProvider : p
+            const updatedProviders = currentProviders.map((p) =>
+              p.id === id ? updatedProvider : p,
             );
 
             set({
               providers: updatedProviders,
-              defaultProvider: updatedProvider.isDefault ? updatedProvider : get().defaultProvider,
+              defaultProvider: updatedProvider.isDefault
+                ? updatedProvider
+                : get().defaultProvider,
               isLoading: false,
             });
           } else {
@@ -144,7 +155,10 @@ export const useLLMProvidersStore = create<LLMProvidersState>()(
         } catch (error) {
           set({
             isLoading: false,
-            error: error instanceof Error ? error.message : "Failed to update provider",
+            error:
+              error instanceof Error
+                ? error.message
+                : "Failed to update provider",
           });
           throw error;
         }
@@ -161,8 +175,11 @@ export const useLLMProvidersStore = create<LLMProvidersState>()(
             const currentProviders = get().providers;
             const currentDefault = get().defaultProvider;
 
-            const updatedProviders = currentProviders.filter(p => p.id !== id);
-            const newDefaultProvider = currentDefault?.id === id ? null : currentDefault;
+            const updatedProviders = currentProviders.filter(
+              (p) => p.id !== id,
+            );
+            const newDefaultProvider =
+              currentDefault?.id === id ? null : currentDefault;
 
             set({
               providers: updatedProviders,
@@ -175,7 +192,10 @@ export const useLLMProvidersStore = create<LLMProvidersState>()(
         } catch (error) {
           set({
             isLoading: false,
-            error: error instanceof Error ? error.message : "Failed to delete provider",
+            error:
+              error instanceof Error
+                ? error.message
+                : "Failed to delete provider",
           });
           throw error;
         }
@@ -194,9 +214,9 @@ export const useLLMProvidersStore = create<LLMProvidersState>()(
             const currentProviders = get().providers;
 
             // Update all providers - set the new default and unset others
-            const updatedProviders = currentProviders.map(p => ({
+            const updatedProviders = currentProviders.map((p) => ({
               ...p,
-              isDefault: p.id === id
+              isDefault: p.id === id,
             }));
 
             set({
@@ -210,7 +230,10 @@ export const useLLMProvidersStore = create<LLMProvidersState>()(
         } catch (error) {
           set({
             isLoading: false,
-            error: error instanceof Error ? error.message : "Failed to set default provider",
+            error:
+              error instanceof Error
+                ? error.message
+                : "Failed to set default provider",
           });
           throw error;
         }
@@ -221,18 +244,27 @@ export const useLLMProvidersStore = create<LLMProvidersState>()(
         set({ testingProvider: "test", error: null });
 
         try {
-          const response = await window.api.llmProviders.testApiKey(data.type, data.apiKey, data.baseUrl);
+          const response = await window.api.llmProviders.testApiKey(
+            data.type,
+            data.apiKey,
+            data.baseUrl,
+          );
 
-          if (response.success && response.data && typeof response.data === 'object' && 'valid' in response.data) {
+          if (
+            response.success &&
+            response.data &&
+            typeof response.data === "object" &&
+            "valid" in response.data
+          ) {
             set({ testingProvider: null });
-            return (response.data as {valid: boolean}).valid;
-          } else {
-            throw new Error(response.error || "Failed to test API key");
+            return (response.data as { valid: boolean }).valid;
           }
+          throw new Error(response.error || "Failed to test API key");
         } catch (error) {
           set({
             testingProvider: null,
-            error: error instanceof Error ? error.message : "Failed to test API key",
+            error:
+              error instanceof Error ? error.message : "Failed to test API key",
           });
           return false;
         }

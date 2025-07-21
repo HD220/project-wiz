@@ -1,11 +1,9 @@
 import { Link } from "@tanstack/react-router";
 import { Plus, Settings } from "lucide-react";
 
-import { useAuthStore } from "@/renderer/store/auth.store";
-
+import { CustomLink } from "@/renderer/components/custom-link";
 import { Avatar, AvatarFallback } from "@/renderer/components/ui/avatar";
 import { Button } from "@/renderer/components/ui/button";
-import { CustomLink } from "@/renderer/components/custom-link";
 import { Separator } from "@/renderer/components/ui/separator";
 import {
   Tooltip,
@@ -14,6 +12,7 @@ import {
   TooltipTrigger,
 } from "@/renderer/components/ui/tooltip";
 import { cn } from "@/renderer/lib/utils";
+import { useAuthStore } from "@/renderer/store/auth.store";
 
 interface Server {
   id: string;

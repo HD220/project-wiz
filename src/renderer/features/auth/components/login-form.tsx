@@ -1,15 +1,21 @@
-import { useRouter } from "@tanstack/react-router";
-import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
+import { useRouter } from "@tanstack/react-router";
 import { Loader2 } from "lucide-react";
-
-import { useAuthStore } from "@/renderer/store/auth.store";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
 
 import { Alert, AlertDescription } from "@/renderer/components/ui/alert";
 import { Button } from "@/renderer/components/ui/button";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/renderer/components/ui/form";
 import { Input } from "@/renderer/components/ui/input";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/renderer/components/ui/form";
+import { useAuthStore } from "@/renderer/store/auth.store";
 
 import { AuthCard } from "./auth-card";
 
@@ -28,7 +34,7 @@ function LoginForm(props: LoginFormProps) {
   const { className } = props;
   const router = useRouter();
   const { login, isLoading, error, clearError } = useAuthStore();
-  
+
   const form = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
@@ -67,7 +73,10 @@ function LoginForm(props: LoginFormProps) {
       <Form {...form}>
         <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
           {error && (
-            <Alert variant="destructive" className="bg-red-900/50 border-red-800">
+            <Alert
+              variant="destructive"
+              className="bg-red-900/50 border-red-800"
+            >
               <AlertDescription>{error}</AlertDescription>
             </Alert>
           )}

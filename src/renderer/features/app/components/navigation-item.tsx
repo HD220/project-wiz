@@ -1,11 +1,12 @@
-import { LucideIcon } from "lucide-react";
 import { LinkProps } from "@tanstack/react-router";
+import { LucideIcon } from "lucide-react";
 import { forwardRef } from "react";
-import type { VariantProps } from "class-variance-authority";
 
 import { CustomLink } from "@/renderer/components/custom-link";
-import { cn } from "@/renderer/lib/utils";
 import { buttonVariants } from "@/renderer/components/ui/button";
+import { cn } from "@/renderer/lib/utils";
+
+import type { VariantProps } from "class-variance-authority";
 
 interface NavigationItemProps
   extends Omit<LinkProps, "className">,
@@ -18,16 +19,16 @@ interface NavigationItemProps
 
 const NavigationItem = forwardRef<HTMLAnchorElement, NavigationItemProps>(
   (props, ref) => {
-    const { 
-      icon: IconComponent, 
-      label, 
-      children, 
-      variant = "ghost", 
+    const {
+      icon: IconComponent,
+      label,
+      children,
+      variant = "ghost",
       size,
-      className, 
-      to, 
+      className,
+      to,
       activeOptions,
-      ...restLinkProps 
+      ...restLinkProps
     } = props;
 
     return (
@@ -41,10 +42,7 @@ const NavigationItem = forwardRef<HTMLAnchorElement, NavigationItemProps>(
           className,
         )}
         activeProps={{
-          className: cn(
-            "bg-accent text-foreground",
-            className,
-          ),
+          className: cn("bg-accent text-foreground", className),
         }}
         activeOptions={activeOptions}
         {...restLinkProps}
@@ -57,7 +55,7 @@ const NavigationItem = forwardRef<HTMLAnchorElement, NavigationItemProps>(
         )}
       </CustomLink>
     );
-  }
+  },
 );
 
 NavigationItem.displayName = "NavigationItem";

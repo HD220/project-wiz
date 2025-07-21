@@ -3,12 +3,14 @@
 ## 🔍 **1. ESCLARECIMENTOS SOLICITADOS**
 
 ### **Padrão `_authenticated`**
+
 - **Função:** Pasta que agrupa todas as rotas autenticadas no TanStack Router
 - **Funcionamento:** O arquivo `/_authenticated/route.tsx` usa `beforeLoad` para verificar autenticação via `useAuthStore`
 - **Redirecionamento:** Se não autenticado, redireciona para `/auth/login`
 - **Layout:** Aplica o layout principal com `RootSidebar` para todas as rotas filhas
 
 ### **Stores de Features Específicas**
+
 - **Localização:** Dentro de cada feature (`src/renderer/features/llm-providers/stores/`)
 - **Não usar:** Stores centralizadas em `/src/renderer/store/` para funcionalidades específicas
 - **Usar centralizadas apenas para:** Estado global da aplicação (auth, theme, etc.)
@@ -18,11 +20,13 @@
 ## 🎨 **2. DESIGN E EXPERIÊNCIA DO USUÁRIO**
 
 ### **Navegação Principal**
+
 - **Local:** Menu "Settings" na sidebar do usuário (já existe)
 - **Ícone:** Cogwheel/Settings que ao clicar abre sheet lateral
 - **Estrutura:** Sheet lateral direita com abas (Profile, AI Providers, Preferences)
 
 ### **Tela Principal - Lista de Provedores**
+
 ```
 ┌─────────────────────────────────────────┐
 │ ⚙️ Settings                    × Close  │
@@ -54,6 +58,7 @@
 ```
 
 ### **Modal Add/Edit Provider**
+
 ```
 ┌─────────────────────────────────────────┐
 │ + Add New AI Provider          × Close  │
@@ -89,6 +94,7 @@
 ```
 
 ### **Estados da Interface**
+
 - **Loading:** Skeleton cards durante carregamento
 - **Empty State:** Mensagem motivacional + CTA para adicionar primeiro provider
 - **Success/Error:** Toast notifications para ações
@@ -127,19 +133,28 @@ src/renderer/app/_authenticated/user/
 ## 🔗 **4. ROTEAMENTO E NAVEGAÇÃO**
 
 ### **Rotas Criadas**
+
 ```typescript
 // Nova rota: /user/settings
-/_authenticated/user/settings/route.tsx
-
-// Nova rota: /user/settings/ai-providers  
-/_authenticated/user/settings/ai-providers.tsx
-
-// Nova rota raiz de settings: /user/settings/
-/_authenticated/user/settings/index.tsx
+/_authenticated/ersu /
+  settings /
+  route.tsx /
+  // Nova rota: /user/settings/ai-providers
+  _authenticated /
+  user /
+  settings /
+  ai -
+  providers.tsx /
+    // Nova rota raiz de settings: /user/settings/
+    _authenticated /
+    user /
+    settings /
+    index.tsx;
 ```
 
 ### **Integração com Sidebar**
-- **Modificar:** `sidebar-navigation.tsx` 
+
+- **Modificar:** `sidebar-navigation.tsx`
 - **Ação:** Settings abre Sheet lateral com abas
 - **Navegação:** Interna no sheet entre Profile, AI Providers, UI Preferences
 
@@ -148,6 +163,7 @@ src/renderer/app/_authenticated/user/
 ## 🏗️ **5. COMPONENTES ESPECÍFICOS DETALHADOS**
 
 ### **ProviderCard Component**
+
 ```typescript
 interface ProviderCardProps {
   provider: SelectLLMProvider;
@@ -159,6 +175,7 @@ interface ProviderCardProps {
 ```
 
 ### **ProviderForm Component**
+
 ```typescript
 interface ProviderFormProps {
   provider?: SelectLLMProvider; // undefined = create mode
@@ -168,6 +185,7 @@ interface ProviderFormProps {
 ```
 
 ### **APIKeyInput Component**
+
 - **Funcionalidades:** Masking automático, toggle visibility, test button integrado
 - **Segurança:** Nunca mostra API key completa, apenas últimos 4 dígitos
 
@@ -176,17 +194,18 @@ interface ProviderFormProps {
 ## 🛠️ **6. STORE E ESTADO**
 
 ### **LLM Providers Store**
+
 ```typescript
 // src/renderer/features/llm-providers/stores/llm-providers-store.ts
 interface LLMProvidersState {
   providers: SelectLLMProvider[];
   defaultProvider: SelectLLMProvider | null;
-  
+
   // UI State
   isLoading: boolean;
   error: string | null;
   testingProvider: string | null;
-  
+
   // Actions
   loadProviders: () => Promise<void>;
   createProvider: (data: CreateProviderInput) => Promise<void>;
@@ -198,6 +217,7 @@ interface LLMProvidersState {
 ```
 
 ### **Form Schema**
+
 ```typescript
 // src/renderer/features/llm-providers/schemas/provider-form.schema.ts
 export const providerFormSchema = z.object({
@@ -216,24 +236,28 @@ export const providerFormSchema = z.object({
 ## 🚀 **7. FLUXO DE IMPLEMENTAÇÃO**
 
 ### **Fase 1: Base Structure**
+
 1. Criar estrutura de pastas e arquivos
 2. Setup da store de LLM providers
 3. Criar schemas de validação
 4. Types específicos da UI
 
 ### **Fase 2: UI Components**
+
 1. ProviderCard component
 2. ProviderForm component (modal)
 3. APIKeyInput component especializado
 4. TestAPI functionality
 
 ### **Fase 3: Integration**
+
 1. Settings Sheet modal
 2. Routing setup
 3. Navigation integration
 4. Error handling e loading states
 
 ### **Fase 4: Polish**
+
 1. Empty states e skeleton loading
 2. Toast notifications
 3. Confirmação de delete
@@ -244,17 +268,20 @@ export const providerFormSchema = z.object({
 ## 🎯 **8. ASPECTOS TÉCNICOS IMPORTANTES**
 
 ### **Segurança**
+
 - API keys sempre mascaradas na UI
 - Teste de conectividade sem exposição de credentials
 - Validação rigorosa de inputs
 
 ### **UX/Performance**
+
 - Loading states em todas as operações
 - Feedback imediato para testes de API
 - Formulários com validação em tempo real
 - Confirmação antes de deletar
 
 ### **Padrões do Projeto**
+
 - Shadcn/ui components consistentes
 - Discord-like visual style
 - TanStack Router navigation
@@ -266,20 +293,24 @@ export const providerFormSchema = z.object({
 ## 📋 **9. BACKEND JÁ IMPLEMENTADO**
 
 ### **Database Schema**
+
 - **Tabela:** `llm_providers` com campos completos
 - **Relacionamento:** Vinculado ao usuário via `userId`
 - **Segurança:** API keys criptografadas com AES-256-GCM
 
 ### **Service Layer**
+
 - **CRUD completo:** Create, Read, Update, Delete
 - **Funcionalidades:** Criptografia, teste de conectividade, provider padrão
 - **Validação:** Schemas Zod para input validation
 
 ### **IPC Handlers**
+
 - **API completa:** Todas as operações expostas via IPC
 - **Endpoints:** create, list, getById, update, delete, setDefault, testApiKey
 
 ### **Frontend API**
+
 - **Disponível:** `window.api.llmProviders.*` pronto para uso
 - **Type-safe:** Interface TypeScript completa
 

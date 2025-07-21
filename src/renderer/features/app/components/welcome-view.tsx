@@ -1,5 +1,3 @@
-import { useAuthStore } from "@/renderer/store/auth.store";
-
 import { Badge } from "@/renderer/components/ui/badge";
 import {
   Card,
@@ -8,6 +6,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/renderer/components/ui/card";
+import { useAuthStore } from "@/renderer/store/auth.store";
 
 import { ActivityItem } from "./activity-item";
 

@@ -3,13 +3,20 @@
 
 import { contextBridge, ipcRenderer } from "electron";
 
-import type { CreateAgentInput, AgentStatus } from "@/main/features/agent/agent.types";
+import type {
+  CreateAgentInput,
+  AgentStatus,
+} from "@/main/features/agent/agent.types";
 import type { CreateProviderInput } from "@/main/features/agent/llm-provider/llm-provider.types";
 import type {
   MemoryCreationInput,
   MemoryUpdateInput,
   MemorySearchInput,
 } from "@/main/features/agent/memory/memory.types";
+import type {
+  LoginCredentials,
+  RegisterUserInput,
+} from "@/main/features/auth/auth.types";
 import type { SendAgentMessageInput } from "@/main/features/conversation/conversation.types";
 import type { CreateConversationInput } from "@/main/features/conversation/conversation.types";
 import type { SendMessageInput } from "@/main/features/conversation/conversation.types";
@@ -17,12 +24,8 @@ import type {
   InsertProject,
   UpdateProject,
 } from "@/main/features/project/project.types";
-import type { IpcResponse } from "@/main/types";
-import type {
-  LoginCredentials,
-  RegisterUserInput,
-} from "@/main/features/auth/auth.types";
 import type { Theme } from "@/main/features/user/user.types";
+import type { IpcResponse } from "@/main/types";
 
 // Expose protected methods that allow the renderer process to use
 // the ipcRenderer without exposing the entire object

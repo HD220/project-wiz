@@ -1,10 +1,10 @@
 import { ipcMain } from "electron";
 
-import { ProjectService } from "@/main/features/project/project.service";
 import type {
   InsertProject,
   UpdateProject,
 } from "@/main/features/project/project.model";
+import { ProjectService } from "@/main/features/project/project.service";
 import type { IpcResponse } from "@/main/types";
 
 function setupCreateHandler(): void {

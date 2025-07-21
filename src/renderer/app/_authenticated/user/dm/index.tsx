@@ -1,7 +1,13 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { MessageCircle } from "lucide-react";
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/renderer/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/renderer/components/ui/card";
 
 function DirectMessagesIndex() {
   return (
@@ -25,7 +31,8 @@ function DirectMessagesIndex() {
         </CardHeader>
         <CardContent className="text-center">
           <p className="text-sm text-muted-foreground">
-            Select an agent from your available agents to start a direct message conversation.
+            Select an agent from your available agents to start a direct message
+            conversation.
           </p>
         </CardContent>
       </Card>

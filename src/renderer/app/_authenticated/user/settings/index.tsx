@@ -1,8 +1,14 @@
 import { createFileRoute } from "@tanstack/react-router";
-
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/renderer/components/ui/card";
-import { Button } from "@/renderer/components/ui/button";
 import { Settings, Bot, User, Palette } from "lucide-react";
+
+import { Button } from "@/renderer/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/renderer/components/ui/card";
 
 function SettingsIndex() {
   const navigate = Route.useNavigate();
@@ -37,9 +43,9 @@ function SettingsIndex() {
           </CardContent>
         </Card>
 
-        <Card 
+        <Card
           className="cursor-pointer hover:bg-accent/50 transition-colors"
-          onClick={() => navigate({ to: '/user/settings/llm-providers' })}
+          onClick={() => navigate({ to: "/user/settings/llm-providers" })}
         >
           <CardHeader>
             <CardTitle className="flex items-center gap-2">

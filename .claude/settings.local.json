@@ -6,7 +6,8 @@
       "WebFetch(domain:ai-sdk.dev)",
       "Bash(rm:*)",
       "Bash(mkdir:*)",
-      "Bash(mv:*)"
+      "Bash(mv:*)",
+      "Bash(ls:*)"
     ],
     "deny": []
   }

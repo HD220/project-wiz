@@ -2,14 +2,14 @@ import crypto from "crypto";
 
 import { eq, and, desc, sql } from "drizzle-orm";
 
+import { getDatabase } from "@/main/database/connection";
 import { agentsTable } from "@/main/features/agent/agent.model";
+import { llmProvidersTable } from "@/main/features/agent/llm-provider/llm-provider.model";
 import type {
   CreateProviderInput,
   LlmProvider,
 } from "@/main/features/agent/llm-provider/llm-provider.types";
 import { createProviderSchema } from "@/main/features/agent/llm-provider/llm-provider.types";
-import { llmProvidersTable } from "@/main/features/agent/llm-provider/llm-provider.model";
-import { getDatabase } from "@/main/database/connection";
 
 // Encryption configuration
 const ENCRYPTION_KEY = process.env["ENCRYPTION_KEY"] || crypto.randomBytes(32);
@@ -100,9 +100,7 @@ export class LlmProviderService {
   /**
    * Sanitize provider for display (hide API keys)
    */
-  private static sanitizeForDisplay(
-    provider: LlmProvider,
-  ): LlmProvider {
+  private static sanitizeForDisplay(provider: LlmProvider): LlmProvider {
     return {
       ...provider,
       apiKey: "••••••••", // Mask API key for UI
@@ -237,9 +235,7 @@ export class LlmProviderService {
   /**
    * Get default provider for a user
    */
-  static async getDefaultProvider(
-    userId: string,
-  ): Promise<LlmProvider | null> {
+  static async getDefaultProvider(userId: string): Promise<LlmProvider | null> {
     const db = getDatabase();
 
     const [provider] = await db

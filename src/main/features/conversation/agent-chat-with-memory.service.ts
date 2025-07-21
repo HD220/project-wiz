@@ -2,8 +2,8 @@ import { generateText } from "ai";
 
 import { AgentService } from "@/main/features/agent/agent.service";
 import type { SelectAgent } from "@/main/features/agent/agent.types";
-import { LlmProviderService } from "@/main/features/agent/llm-provider/llm-provider.service";
 import type { SelectLlmProvider } from "@/main/features/agent/llm-provider/llm-provider.model";
+import { LlmProviderService } from "@/main/features/agent/llm-provider/llm-provider.service";
 import { LLMService } from "@/main/features/agent/llm-provider/llm.service";
 import { AgentMemoryService } from "@/main/features/agent/memory/memory.service";
 import type { MemoryContextWindow } from "@/main/features/agent/memory/memory.types";

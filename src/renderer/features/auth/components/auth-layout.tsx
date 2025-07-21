@@ -1,4 +1,5 @@
 import { ReactNode } from "react";
+
 import { cn } from "@/renderer/lib/utils";
 
 interface AuthLayoutProps {
@@ -8,7 +9,7 @@ interface AuthLayoutProps {
 
 function AuthLayout(props: AuthLayoutProps) {
   const { children, className } = props;
-  
+
   return (
     <div
       className={cn(

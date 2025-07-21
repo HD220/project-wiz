@@ -1,18 +1,21 @@
-import { useState } from "react";
 import { Plus } from "lucide-react";
+import { useState } from "react";
+
+import type { LlmProvider } from "@/main/features/agent/llm-provider/llm-provider.types";
 
 import { Button } from "@/renderer/components/ui/button";
 import { useLLMProvidersStore } from "@/renderer/store/llm-provider.store";
 
+import { EmptyState } from "./empty-state";
 import { ProviderCard } from "./provider-card";
 import { ProviderForm } from "./provider-form";
-import { EmptyState } from "./empty-state";
-import type { LlmProvider } from "@/main/features/agent/llm-provider/llm-provider.types";
 
 function ProviderList() {
   const [showForm, setShowForm] = useState(false);
-  const [editingProvider, setEditingProvider] = useState<LlmProvider | null>(null);
-  
+  const [editingProvider, setEditingProvider] = useState<LlmProvider | null>(
+    null,
+  );
+
   const { providers, isLoading } = useLLMProvidersStore();
 
   const handleEdit = (provider: LlmProvider) => {
@@ -64,10 +67,7 @@ function ProviderList() {
 
       {/* Add/Edit Form Modal */}
       {showForm && (
-        <ProviderForm
-          provider={editingProvider}
-          onClose={handleCloseForm}
-        />
+        <ProviderForm provider={editingProvider} onClose={handleCloseForm} />
       )}
     </>
   );

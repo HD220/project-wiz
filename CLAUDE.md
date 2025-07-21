@@ -83,7 +83,7 @@ src/
 ├── main/                # Backend (Node.js/Electron)
 │   ├── features/        # Features organized by domain
 │   │   ├── auth/        # Authentication bounded context
-│   │   ├── user/        # User bounded context  
+│   │   ├── user/        # User bounded context
 │   │   ├── project/     # Project bounded context
 │   │   ├── conversation/ # Conversation bounded context
 │   │   ├── agent/       # Agent bounded context
@@ -97,7 +97,7 @@ src/
 │   ├── components/     # Shared components (NO /shared folder)
 │   ├── features/       # Features organized by domain
 │   │   ├── auth/       # Auth feature with components, store, hooks
-│   │   ├── user/       # User feature  
+│   │   ├── user/       # User feature
 │   │   ├── project/    # Project feature
 │   │   └── app/        # General app components
 │   ├── hooks/          # Global hooks
@@ -445,7 +445,7 @@ interface LoginFormProps {
 function LoginForm(props: LoginFormProps) {
   const { onSuccess, className } = props;
   // Component logic...
-  
+
   return (
     <Card className={className}>
       {/* JSX content */}
@@ -458,9 +458,9 @@ export { LoginForm };
 // ❌ ERRADO: React.FC e import React
 import React from 'react'; // NÃO IMPORTAR
 
-const LoginForm: React.FC<LoginFormProps> = ({ 
-  onSuccess, 
-  className 
+const LoginForm: React.FC<LoginFormProps> = ({
+  onSuccess,
+  className
 }) => {
   return <div>...</div>;
 };

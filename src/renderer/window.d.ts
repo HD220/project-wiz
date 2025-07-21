@@ -1,10 +1,17 @@
-import type { CreateAgentInput, AgentStatus } from "@/main/features/agent/agent.types";
+import type {
+  CreateAgentInput,
+  AgentStatus,
+} from "@/main/features/agent/agent.types";
 import type { CreateProviderInput } from "@/main/features/agent/llm-provider/llm-provider.types";
 import type {
   MemoryCreationInput,
   MemoryUpdateInput,
   MemorySearchInput,
 } from "@/main/features/agent/memory/memory.types";
+import type {
+  LoginCredentials,
+  RegisterUserInput,
+} from "@/main/features/auth/auth.types";
 import type { SendAgentMessageInput } from "@/main/features/conversation/agent-chat.service";
 import type { CreateConversationInput } from "@/main/features/conversation/conversation.service";
 import type { SendMessageInput } from "@/main/features/conversation/message.service";
@@ -12,12 +19,8 @@ import type {
   InsertProject,
   UpdateProject,
 } from "@/main/features/project/project.model";
-import type { IpcResponse } from "@/main/types";
-import type {
-  LoginCredentials,
-  RegisterUserInput,
-} from "@/main/features/auth/auth.types";
 import type { Theme } from "@/main/features/user/profile.model";
+import type { IpcResponse } from "@/main/types";
 
 declare global {
   interface Window {

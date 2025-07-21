@@ -32,7 +32,10 @@ function Titlebar(props: TitlebarProps) {
         <span className="text-white text-sm font-medium">{title}</span>
       </div>
 
-      <div className="flex" style={{ WebkitAppRegion: "no-drag" } as React.CSSProperties}>
+      <div
+        className="flex"
+        style={{ WebkitAppRegion: "no-drag" } as React.CSSProperties}
+      >
         <TitlebarButton onClick={handleMinimize}>
           <MinimizeIcon />
         </TitlebarButton>

@@ -29,7 +29,7 @@ export const createProviderSchema = z.object({
 // Export types for reuse (only what's needed by frontend)
 export type { ProviderType };
 
-// API response types for frontend  
+// API response types for frontend
 export interface LlmProvider {
   id: string;
   userId: string;

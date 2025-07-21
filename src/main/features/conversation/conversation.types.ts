@@ -26,7 +26,8 @@ export type ConversationWithMessagesAndParticipants = SelectConversation & {
 };
 
 // Conversation participant derived types
-export type UpdateConversationParticipant = Partial<InsertConversationParticipant> & { id: string };
+export type UpdateConversationParticipant =
+  Partial<InsertConversationParticipant> & { id: string };
 
 // Message derived types
 export type UpdateMessage = Partial<InsertMessage> & { id: string };
@@ -38,12 +39,24 @@ export type MessageWithLlmData = SelectMessage & {
 export type UpdateLlmMessage = Partial<InsertLlmMessage> & { id: string };
 
 // Input types for API operations
-export type CreateConversationInput = Omit<InsertConversation, "id" | "createdAt" | "updatedAt">;
-export type CreateMessageInput = Omit<InsertMessage, "id" | "createdAt" | "updatedAt">;
-export type AddParticipantInput = Omit<InsertConversationParticipant, "id" | "createdAt" | "updatedAt">;
+export type CreateConversationInput = Omit<
+  InsertConversation,
+  "id" | "createdAt" | "updatedAt"
+>;
+export type CreateMessageInput = Omit<
+  InsertMessage,
+  "id" | "createdAt" | "updatedAt"
+>;
+export type AddParticipantInput = Omit<
+  InsertConversationParticipant,
+  "id" | "createdAt" | "updatedAt"
+>;
 
 // Message service input types
-export type SendMessageInput = Omit<InsertMessage, "id" | "createdAt" | "updatedAt">;
+export type SendMessageInput = Omit<
+  InsertMessage,
+  "id" | "createdAt" | "updatedAt"
+>;
 
 // Agent chat service input types
 export interface SendAgentMessageInput {

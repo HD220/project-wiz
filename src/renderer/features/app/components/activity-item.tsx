@@ -12,7 +12,7 @@ interface ActivityItemProps {
 
 function ActivityItem(props: ActivityItemProps) {
   const { icon, title, timestamp, variant = "info", className } = props;
-  
+
   const variantStyles = {
     success: "text-green-500",
     info: "text-primary",

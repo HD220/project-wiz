@@ -18,7 +18,9 @@ export const CreateLlmProviderSchema = z.object({
 // Schema para atualizar um LLM provider
 export const UpdateLlmProviderSchema = z.object({
   name: z.string().min(1, "Provider name is required").optional(),
-  type: z.enum(["openai", "deepseek", "anthropic", "google", "custom"]).optional(),
+  type: z
+    .enum(["openai", "deepseek", "anthropic", "google", "custom"])
+    .optional(),
   apiKey: z.string().min(1, "API key is required").optional(),
   baseUrl: z.string().url("Invalid URL").optional().nullable(),
   defaultModel: z.string().min(1, "Default model is required").optional(),
@@ -54,5 +56,7 @@ export type CreateLlmProviderInput = z.infer<typeof CreateLlmProviderSchema>;
 export type UpdateLlmProviderInput = z.infer<typeof UpdateLlmProviderSchema>;
 export type TestApiKeyInput = z.infer<typeof TestApiKeySchema>;
 export type SetDefaultProviderInput = z.infer<typeof SetDefaultProviderSchema>;
-export type FindProvidersByUserInput = z.infer<typeof FindProvidersByUserSchema>;
+export type FindProvidersByUserInput = z.infer<
+  typeof FindProvidersByUserSchema
+>;
 export type FindProviderByIdInput = z.infer<typeof FindProviderByIdSchema>;

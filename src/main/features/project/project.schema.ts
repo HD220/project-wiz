@@ -14,14 +14,8 @@ export const CreateProjectSchema = z.object({
     .max(500, "Description must not exceed 500 characters")
     .trim()
     .optional(),
-  avatarUrl: z
-    .string()
-    .url("Avatar URL must be a valid URL")
-    .optional(),
-  gitUrl: z
-    .string()
-    .url("Git URL must be a valid URL")
-    .optional(),
+  avatarUrl: z.string().url("Avatar URL must be a valid URL").optional(),
+  gitUrl: z.string().url("Git URL must be a valid URL").optional(),
   branch: z
     .string()
     .min(1, "Branch name must not be empty")
@@ -34,7 +28,9 @@ export const CreateProjectSchema = z.object({
     .max(500, "Local path must not exceed 500 characters"),
   status: z
     .enum(["active", "archived"], {
-      errorMap: () => ({ message: "Status must be either 'active' or 'archived'" })
+      errorMap: () => ({
+        message: "Status must be either 'active' or 'archived'",
+      }),
     })
     .default("active")
     .optional(),
@@ -44,9 +40,7 @@ export const CreateProjectSchema = z.object({
  * Schema for project update validation
  */
 export const UpdateProjectSchema = z.object({
-  id: z
-    .string()
-    .uuid("Project ID must be a valid UUID"),
+  id: z.string().uuid("Project ID must be a valid UUID"),
   name: z
     .string()
     .min(1, "Project name is required")
@@ -58,14 +52,8 @@ export const UpdateProjectSchema = z.object({
     .max(500, "Description must not exceed 500 characters")
     .trim()
     .optional(),
-  avatarUrl: z
-    .string()
-    .url("Avatar URL must be a valid URL")
-    .optional(),
-  gitUrl: z
-    .string()
-    .url("Git URL must be a valid URL")
-    .optional(),
+  avatarUrl: z.string().url("Avatar URL must be a valid URL").optional(),
+  gitUrl: z.string().url("Git URL must be a valid URL").optional(),
   branch: z
     .string()
     .min(1, "Branch name must not be empty")
@@ -79,7 +67,9 @@ export const UpdateProjectSchema = z.object({
     .optional(),
   status: z
     .enum(["active", "archived"], {
-      errorMap: () => ({ message: "Status must be either 'active' or 'archived'" })
+      errorMap: () => ({
+        message: "Status must be either 'active' or 'archived'",
+      }),
     })
     .optional(),
 });
@@ -103,24 +93,25 @@ export const ProjectNameSchema = z
 /**
  * Schema for project status validation (standalone)
  */
-export const ProjectStatusSchema = z
-  .enum(["active", "archived"], {
-    errorMap: () => ({ message: "Status must be either 'active' or 'archived'" })
-  });
+export const ProjectStatusSchema = z.enum(["active", "archived"], {
+  errorMap: () => ({ message: "Status must be either 'active' or 'archived'" }),
+});
 
 /**
  * Schema for project filters validation
  */
-export const ProjectFiltersSchema = z.object({
-  status: ProjectStatusSchema.optional(),
-  search: z
-    .string()
-    .max(200, "Search term must not exceed 200 characters")
-    .trim()
-    .optional(),
-  hasGitUrl: z.boolean().optional(),
-  hasLocalPath: z.boolean().optional(),
-}).partial();
+export const ProjectFiltersSchema = z
+  .object({
+    status: ProjectStatusSchema.optional(),
+    search: z
+      .string()
+      .max(200, "Search term must not exceed 200 characters")
+      .trim()
+      .optional(),
+    hasGitUrl: z.boolean().optional(),
+    hasLocalPath: z.boolean().optional(),
+  })
+  .partial();
 
 /**
  * Schema for project archive operation

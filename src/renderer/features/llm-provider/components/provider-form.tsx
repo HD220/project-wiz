@@ -1,10 +1,17 @@
-import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
-import { useEffect } from "react";
 import { X } from "lucide-react";
+import { useEffect } from "react";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
+import { z } from "zod";
+
+import type {
+  LlmProvider,
+  ProviderType,
+} from "@/main/features/agent/llm-provider/llm-provider.types";
 
 import { Button } from "@/renderer/components/ui/button";
+import { Checkbox } from "@/renderer/components/ui/checkbox";
 import {
   Dialog,
   DialogContent,
@@ -27,25 +34,35 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/renderer/components/ui/select";
-import { Checkbox } from "@/renderer/components/ui/checkbox";
 import { Separator } from "@/renderer/components/ui/separator";
-
-import { useLLMProvidersStore } from "@/renderer/store/llm-provider.store";
 import { useAuthStore } from "@/renderer/store/auth.store";
-import type {
-  LlmProvider,
-  ProviderType,
-} from "@/main/features/agent/llm-provider/llm-provider.types";
+import { useLLMProvidersStore } from "@/renderer/store/llm-provider.store";
+
 import { TestApiButton } from "./test-api-button";
-import { toast } from "sonner";
 
 // Simple provider configs for UI
 const PROVIDER_CONFIGS = {
   openai: { label: "OpenAI", defaultModel: "gpt-4o", requiresBaseUrl: false },
-  deepseek: { label: "DeepSeek", defaultModel: "deepseek-coder", requiresBaseUrl: false },
-  anthropic: { label: "Anthropic", defaultModel: "claude-3-5-sonnet-20241022", requiresBaseUrl: false },
-  google: { label: "Google", defaultModel: "gemini-pro", requiresBaseUrl: false },
-  custom: { label: "Custom", defaultModel: "custom-model", requiresBaseUrl: true },
+  deepseek: {
+    label: "DeepSeek",
+    defaultModel: "deepseek-coder",
+    requiresBaseUrl: false,
+  },
+  anthropic: {
+    label: "Anthropic",
+    defaultModel: "claude-3-5-sonnet-20241022",
+    requiresBaseUrl: false,
+  },
+  google: {
+    label: "Google",
+    defaultModel: "gemini-pro",
+    requiresBaseUrl: false,
+  },
+  custom: {
+    label: "Custom",
+    defaultModel: "custom-model",
+    requiresBaseUrl: true,
+  },
 } as const;
 
 type ProviderFormData = {
@@ -67,19 +84,21 @@ function ProviderForm(props: ProviderFormProps) {
   const { provider, onClose } = props;
   const { createProvider, updateProvider, isLoading } = useLLMProvidersStore();
   const { user } = useAuthStore();
-  
+
   const isEditing = !!provider;
-  
+
   const form = useForm<ProviderFormData>({
-    resolver: zodResolver(z.object({
-      name: z.string().min(1, "Provider name is required"),
-      type: z.enum(["openai", "deepseek", "anthropic", "google", "custom"]),
-      apiKey: z.string().min(1, "API key is required"),
-      baseUrl: z.string().url("Invalid URL").optional().or(z.literal("")),
-      defaultModel: z.string().min(1, "Default model is required"),
-      isDefault: z.boolean().default(false),
-      isActive: z.boolean().default(true),
-    })),
+    resolver: zodResolver(
+      z.object({
+        name: z.string().min(1, "Provider name is required"),
+        type: z.enum(["openai", "deepseek", "anthropic", "google", "custom"]),
+        apiKey: z.string().min(1, "API key is required"),
+        baseUrl: z.string().url("Invalid URL").optional().or(z.literal("")),
+        defaultModel: z.string().min(1, "Default model is required"),
+        isDefault: z.boolean().default(false),
+        isActive: z.boolean().default(true),
+      }),
+    ),
     defaultValues: {
       name: provider?.name || "",
       type: provider?.type || "openai",
@@ -99,7 +118,7 @@ function ProviderForm(props: ProviderFormProps) {
     if (!isEditing) {
       const newDefaultModel = PROVIDER_CONFIGS[watchedType].defaultModel;
       form.setValue("defaultModel", newDefaultModel);
-      
+
       // Clear base URL if not required for new type
       if (!PROVIDER_CONFIGS[watchedType].requiresBaseUrl) {
         form.setValue("baseUrl", "");
@@ -118,23 +137,25 @@ function ProviderForm(props: ProviderFormProps) {
           toast.error("User not authenticated");
           return;
         }
-        
+
         const createData = {
           ...data,
           userId: user.id,
         };
-        
+
         await createProvider(createData);
         toast.success("Provider created successfully");
       }
       onClose();
     } catch (error) {
-      toast.error(isEditing ? "Failed to update provider" : "Failed to create provider");
+      toast.error(
+        isEditing ? "Failed to update provider" : "Failed to create provider",
+      );
     }
   };
 
   const showBaseUrl = PROVIDER_CONFIGS[watchedType].requiresBaseUrl;
-  
+
   return (
     <Dialog open onOpenChange={onClose}>
       <DialogContent className="max-w-md">
@@ -163,8 +184,8 @@ function ProviderForm(props: ProviderFormProps) {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Provider Type *</FormLabel>
-                  <Select 
-                    onValueChange={field.onChange} 
+                  <Select
+                    onValueChange={field.onChange}
                     defaultValue={field.value}
                     disabled={isEditing} // Don't allow changing type when editing
                   >
@@ -211,7 +232,7 @@ function ProviderForm(props: ProviderFormProps) {
                 <FormItem>
                   <FormLabel>API Key *</FormLabel>
                   <FormControl>
-                    <Input 
+                    <Input
                       type="password"
                       placeholder="sk-proj-..."
                       {...field}
@@ -231,7 +252,7 @@ function ProviderForm(props: ProviderFormProps) {
                   <FormItem>
                     <FormLabel>Base URL *</FormLabel>
                     <FormControl>
-                      <Input 
+                      <Input
                         placeholder="https://api.example.com/v1"
                         {...field}
                       />
@@ -310,9 +331,9 @@ function ProviderForm(props: ProviderFormProps) {
                 disabled={!watchedApiKey || isLoading}
                 size="default"
               />
-              
+
               <div className="flex-1" />
-              
+
               {/* Save Button */}
               <Button type="submit" disabled={isLoading}>
                 {isLoading ? "Saving..." : "Save Provider"}

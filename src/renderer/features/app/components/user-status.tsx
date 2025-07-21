@@ -7,7 +7,7 @@ interface UserStatusProps {
 
 function UserStatus(props: UserStatusProps) {
   const { status = "online", className } = props;
-  
+
   const statusConfig = {
     online: { color: "bg-green-500", label: "Online" },
     away: { color: "bg-yellow-500", label: "Away" },

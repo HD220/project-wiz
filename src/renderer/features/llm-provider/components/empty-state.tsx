@@ -18,10 +18,13 @@ function EmptyState(props: EmptyStateProps) {
             <Bot className="h-8 w-8 text-muted-foreground" />
           </div>
           <div className="space-y-2">
-            <h3 className="text-xl font-semibold">No AI Providers Configured</h3>
+            <h3 className="text-xl font-semibold">
+              No AI Providers Configured
+            </h3>
             <p className="text-muted-foreground max-w-md">
-              Get started by adding your first AI provider. Connect with OpenAI, DeepSeek, 
-              Anthropic, or any custom provider to start using AI agents.
+              Get started by adding your first AI provider. Connect with OpenAI,
+              DeepSeek, Anthropic, or any custom provider to start using AI
+              agents.
             </p>
           </div>
         </div>

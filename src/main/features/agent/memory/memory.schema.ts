@@ -3,7 +3,7 @@ import { z } from "zod";
 // Memory type validation
 export const MemoryTypeSchema = z.enum([
   "conversation",
-  "preference", 
+  "preference",
   "learning",
   "context",
   "fact",
@@ -12,7 +12,7 @@ export const MemoryTypeSchema = z.enum([
 // Memory importance validation
 export const MemoryImportanceSchema = z.enum([
   "low",
-  "medium", 
+  "medium",
   "high",
   "critical",
 ]);
@@ -20,7 +20,7 @@ export const MemoryImportanceSchema = z.enum([
 // Relation type validation
 export const RelationTypeSchema = z.enum([
   "relates_to",
-  "caused_by", 
+  "caused_by",
   "contradicts",
   "supports",
   "follows",
@@ -31,17 +31,23 @@ export const RelationTypeSchema = z.enum([
 export const CreateMemorySchema = z.object({
   agentId: z.string().uuid("Agent ID must be a valid UUID"),
   userId: z.string().uuid("User ID must be a valid UUID"),
-  conversationId: z.string().uuid("Conversation ID must be a valid UUID").optional(),
-  
+  conversationId: z
+    .string()
+    .uuid("Conversation ID must be a valid UUID")
+    .optional(),
+
   // Memory content
-  content: z.string().min(1, "Content is required").max(10000, "Content too long"),
+  content: z
+    .string()
+    .min(1, "Content is required")
+    .max(10000, "Content too long"),
   summary: z.string().max(500, "Summary too long").optional(),
   type: MemoryTypeSchema.default("conversation"),
   importance: MemoryImportanceSchema.default("medium"),
-  
+
   // Scoring and retrieval
   importanceScore: z.number().min(0).max(1).default(0.5),
-  
+
   // Context and metadata
   keywords: z.array(z.string()).max(20, "Too many keywords").optional(),
   metadata: z.record(z.unknown()).optional(),
@@ -75,7 +81,7 @@ export const MemorySearchSchema = z.object({
 // Memory relation creation schema
 export const CreateMemoryRelationSchema = z.object({
   sourceMemoryId: z.string().uuid("Source memory ID must be a valid UUID"),
-  targetMemoryId: z.string().uuid("Target memory ID must be a valid UUID"), 
+  targetMemoryId: z.string().uuid("Target memory ID must be a valid UUID"),
   relationType: RelationTypeSchema.default("relates_to"),
   strength: z.number().min(0).max(1).default(0.5),
 });
@@ -86,24 +92,31 @@ export const MemoryMaintenanceSchema = z.object({
   minImportanceThreshold: z.number().min(0).max(1).default(0.3),
   maxMemoriesPerAgent: z.number().int().min(100).max(10000).default(1000),
   enableAutoLearning: z.boolean().default(true),
-  memoryRetentionPolicy: z.enum(["none", "importance_based", "time_based", "hybrid"]).default("hybrid"),
+  memoryRetentionPolicy: z
+    .enum(["none", "importance_based", "time_based", "hybrid"])
+    .default("hybrid"),
 });
 
 // Memory analytics request schema
 export const MemoryAnalyticsSchema = z.object({
   agentId: z.string().uuid("Agent ID must be a valid UUID"),
   userId: z.string().uuid("User ID must be a valid UUID"),
-  dateRange: z.object({
-    from: z.date().optional(),
-    to: z.date().optional(),
-  }).optional(),
+  dateRange: z
+    .object({
+      from: z.date().optional(),
+      to: z.date().optional(),
+    })
+    .optional(),
   includeArchived: z.boolean().default(false),
 });
 
 // Memory batch operations schema
 export const BatchMemoryOperationSchema = z.object({
   operation: z.enum(["archive", "delete", "update_importance"]),
-  memoryIds: z.array(z.string().uuid()).min(1, "At least one memory ID required").max(50, "Too many memories for batch operation"),
+  memoryIds: z
+    .array(z.string().uuid())
+    .min(1, "At least one memory ID required")
+    .max(50, "Too many memories for batch operation"),
   data: z.record(z.unknown()).optional(), // Additional data for the operation
 });
 
@@ -127,7 +140,9 @@ export const MemoryImportSchema = z.object({
 export type CreateMemoryInput = z.infer<typeof CreateMemorySchema>;
 export type UpdateMemoryInput = z.infer<typeof UpdateMemorySchema>;
 export type MemorySearchInput = z.infer<typeof MemorySearchSchema>;
-export type CreateMemoryRelationInput = z.infer<typeof CreateMemoryRelationSchema>;
+export type CreateMemoryRelationInput = z.infer<
+  typeof CreateMemoryRelationSchema
+>;
 export type MemoryMaintenanceOptions = z.infer<typeof MemoryMaintenanceSchema>;
 export type MemoryAnalyticsRequest = z.infer<typeof MemoryAnalyticsSchema>;
 export type BatchMemoryOperation = z.infer<typeof BatchMemoryOperationSchema>;

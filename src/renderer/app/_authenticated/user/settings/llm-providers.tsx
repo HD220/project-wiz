@@ -1,10 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { Bot, ArrowLeft } from "lucide-react";
 import { useEffect } from "react";
 
-import { useLLMProvidersStore } from "@/renderer/store/llm-provider.store";
-import { ProviderList } from "@/renderer/features/llm-provider/components/provider-list";
-import { Bot, ArrowLeft } from "lucide-react";
 import { Button } from "@/renderer/components/ui/button";
+import { ProviderList } from "@/renderer/features/llm-provider/components/provider-list";
+import { useLLMProvidersStore } from "@/renderer/store/llm-provider.store";
 
 function LLMProvidersPage() {
   const navigate = Route.useNavigate();
@@ -18,10 +18,10 @@ function LLMProvidersPage() {
     <div className="max-w-4xl">
       <div className="mb-8">
         <div className="flex items-center gap-3 mb-4">
-          <Button 
-            variant="ghost" 
+          <Button
+            variant="ghost"
             size="sm"
-            onClick={() => navigate({ to: '/user/settings' })}
+            onClick={() => navigate({ to: "/user/settings" })}
             className="p-2"
           >
             <ArrowLeft className="h-4 w-4" />
@@ -39,6 +39,8 @@ function LLMProvidersPage() {
   );
 }
 
-export const Route = createFileRoute("/_authenticated/user/settings/llm-providers")({
+export const Route = createFileRoute(
+  "/_authenticated/user/settings/llm-providers",
+)({
   component: LLMProvidersPage,
 });

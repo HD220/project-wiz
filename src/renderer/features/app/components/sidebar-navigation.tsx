@@ -7,25 +7,21 @@ import { NavigationItem } from "./navigation-item";
 function SidebarNavigation() {
   return (
     <div className="flex-1 p-2 space-y-1">
-      <NavigationItem 
-        to="/user" 
-        icon={Hash} 
+      <NavigationItem
+        to="/user"
+        icon={Hash}
         label="Dashboard"
         activeOptions={{ exact: true }}
       />
-      <NavigationItem 
+      <NavigationItem
         to="/user/dm"
-        icon={MessageCircle} 
+        icon={MessageCircle}
         label="Direct Messages"
       />
 
       <Separator className="my-2" />
 
-      <NavigationItem 
-        to="/user/settings"
-        icon={Settings} 
-        label="Settings"
-      />
+      <NavigationItem to="/user/settings" icon={Settings} label="Settings" />
     </div>
   );
 }

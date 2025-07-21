@@ -3,12 +3,14 @@
 ## 📋 Convenções de Nomenclatura
 
 ### Arquivos e Pastas (Padrão kebab-case)
+
 - **kebab-case**: TODOS arquivos e pastas (`user-profile.tsx`, `use-user-data.ts`)
 - **PascalCase**: APENAS nomes de componentes React dentro do arquivo (`UserProfile`)
 - **camelCase**: Funções, variáveis e propriedades (`userData`, `handleClick`)
 - **UPPER_SNAKE_CASE**: Constantes (`API_ENDPOINTS`)
 
 ### Sufixos Obrigatórios (com ponto)
+
 - `.handler.ts` - IPC handlers no main
 - `.service.ts` - Serviços de negócio
 - `.store.ts` - Stores Zustand
@@ -19,14 +21,17 @@
 - `.hook.ts` - Custom hooks
 
 ### Prefixos para Hooks
+
 - `use-` - Hooks React (`use-auth.hook.ts`, `use-user-data.hook.ts`)
 
 ### Componentes SEM sufixo
+
 - `login-form.tsx` - Componente React (SEM sufixo adicional)
 - `user-profile.tsx` - Componente React (SEM sufixo adicional)
 - `dashboard-header.tsx` - Componente React (SEM sufixo adicional)
 
 ### Exemplos de Nomenclatura
+
 ```
 ✅ CORRETO:
 - login-form.tsx (componente)
@@ -63,7 +68,7 @@ interface LoginFormProps {
 function LoginForm(props: LoginFormProps) {
   const { onSuccess, className } = props;
   const { login, isLoading, error } = useAuth();
-  
+
   const form = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
@@ -71,7 +76,7 @@ function LoginForm(props: LoginFormProps) {
       password: ''
     }
   });
-  
+
   const onSubmit = (data: LoginFormData) => {
     login(data, {
       onSuccess: () => {
@@ -79,13 +84,13 @@ function LoginForm(props: LoginFormProps) {
       }
     });
   };
-  
+
   return (
     <Card className={className}>
       <CardHeader>
         <CardTitle>Entrar na conta</CardTitle>
       </CardHeader>
-      
+
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)}>
           {/* Form content */}
@@ -101,8 +106,8 @@ export { LoginForm };
 import React from 'react'; // NÃO IMPORTAR
 
 const LoginForm: React.FC<LoginFormProps> = ({ // NÃO USAR React.FC
-  onSuccess, 
-  className 
+  onSuccess,
+  className
 }) => {
   // ...
 };
@@ -112,36 +117,38 @@ const LoginForm: React.FC<LoginFormProps> = ({ // NÃO USAR React.FC
 
 ```typescript
 // user.model.ts - Drizzle/Database
-import { sqliteTable, text, integer } from 'drizzle-orm/sqlite-core';
+import { sqliteTable, text, integer } from "drizzle-orm/sqlite-core";
 
-export const usersTable = sqliteTable('users', {
-  id: text('id').primaryKey(),
-  email: text('email').notNull().unique(),
-  name: text('name').notNull(),
-  passwordHash: text('password_hash').notNull(),
-  createdAt: integer('created_at', { mode: 'timestamp' }).notNull(),
+export const usersTable = sqliteTable("users", {
+  id: text("id").primaryKey(),
+  email: text("email").notNull().unique(),
+  name: text("name").notNull(),
+  passwordHash: text("password_hash").notNull(),
+  createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
 });
 
 export type SelectUser = typeof usersTable.$inferSelect;
 export type InsertUser = typeof usersTable.$inferInsert;
 
 // user.schema.ts - Zod/Validação
-import { z } from 'zod';
+import { z } from "zod";
 
 export const loginSchema = z.object({
-  email: z.string().email('Email inválido'),
-  password: z.string().min(6, 'Senha deve ter pelo menos 6 caracteres')
+  email: z.string().email("Email inválido"),
+  password: z.string().min(6, "Senha deve ter pelo menos 6 caracteres"),
 });
 
-export const registerSchema = z.object({
-  email: z.string().email('Email inválido'),
-  name: z.string().min(2, 'Nome deve ter pelo menos 2 caracteres'),
-  password: z.string().min(6, 'Senha deve ter pelo menos 6 caracteres'),
-  confirmPassword: z.string()
-}).refine((data) => data.password === data.confirmPassword, {
-  message: "Senhas não coincidem",
-  path: ["confirmPassword"],
-});
+export const registerSchema = z
+  .object({
+    email: z.string().email("Email inválido"),
+    name: z.string().min(2, "Nome deve ter pelo menos 2 caracteres"),
+    password: z.string().min(6, "Senha deve ter pelo menos 6 caracteres"),
+    confirmPassword: z.string(),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Senhas não coincidem",
+    path: ["confirmPassword"],
+  });
 
 export type LoginFormData = z.infer<typeof loginSchema>;
 export type RegisterFormData = z.infer<typeof registerSchema>;
@@ -168,18 +175,18 @@ export const authApi = {
   login: async (data: LoginFormData): Promise<User> => {
     return window.electronAPI.auth.login(data);
   },
-  
+
   logout: async (): Promise<void> => {
     return window.electronAPI.auth.logout();
   },
-  
+
   getCurrentUser: async (): Promise<User | null> => {
     return window.electronAPI.auth.getCurrentUser();
-  }
+  },
 };
 
 // auth.store.ts - Store Zustand
-import { create } from 'zustand';
+import { create } from "zustand";
 
 interface AuthStore extends AuthState {
   setUser: (user: User | null) => void;
@@ -192,41 +199,41 @@ export const useAuthStore = create<AuthStore>((set) => ({
   user: null,
   isLoading: false,
   error: null,
-  
+
   setUser: (user) => set({ user }),
   setLoading: (isLoading) => set({ isLoading }),
   setError: (error) => set({ error }),
-  clearError: () => set({ error: null })
+  clearError: () => set({ error: null }),
 }));
 
 // use-auth.hook.ts - Custom Hook
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery } from "@tanstack/react-query";
 
 export function useAuth() {
   const { user, setUser, setLoading, setError, clearError } = useAuthStore();
-  
+
   const { data: currentUser } = useQuery({
-    queryKey: ['auth', 'currentUser'],
+    queryKey: ["auth", "currentUser"],
     queryFn: authApi.getCurrentUser,
     onSuccess: setUser,
-    onError: (error) => setError(error.message)
+    onError: (error) => setError(error.message),
   });
-  
+
   const loginMutation = useMutation({
     mutationFn: authApi.login,
     onSuccess: (user) => {
       setUser(user);
       clearError();
     },
-    onError: (error) => setError(error.message)
+    onError: (error) => setError(error.message),
   });
-  
+
   return {
     user: user || currentUser,
     isLoading: loginMutation.isLoading,
     error: useAuthStore((state) => state.error),
     login: loginMutation.mutate,
-    logout: () => authApi.logout().then(() => setUser(null))
+    logout: () => authApi.logout().then(() => setUser(null)),
   };
 }
 ```
@@ -235,28 +242,28 @@ export function useAuth() {
 
 ```typescript
 // main/auth.handler.ts
-import { ipcMain } from 'electron';
-import { authService } from './auth.service';
-import { LoginFormData } from '../../types/auth.types';
+import { ipcMain } from "electron";
+import { authService } from "./auth.service";
+import { LoginFormData } from "../../types/auth.types";
 
 export function setupAuthHandlers() {
-  ipcMain.handle('auth:login', async (_, data: LoginFormData) => {
+  ipcMain.handle("auth:login", async (_, data: LoginFormData) => {
     try {
       return await authService.login(data);
     } catch (error) {
       throw error;
     }
   });
-  
-  ipcMain.handle('auth:logout', async () => {
+
+  ipcMain.handle("auth:logout", async () => {
     try {
       return await authService.logout();
     } catch (error) {
       throw error;
     }
   });
-  
-  ipcMain.handle('auth:getCurrentUser', async () => {
+
+  ipcMain.handle("auth:getCurrentUser", async () => {
     try {
       return await authService.getCurrentUser();
     } catch (error) {
@@ -266,25 +273,23 @@ export function setupAuthHandlers() {
 }
 
 // renderer/preload.ts
-import { contextBridge, ipcRenderer } from 'electron';
+import { contextBridge, ipcRenderer } from "electron";
 
 export const electronAPI = {
   auth: {
-    login: (data: LoginFormData) => 
-      ipcRenderer.invoke('auth:login', data),
-    logout: () => 
-      ipcRenderer.invoke('auth:logout'),
-    getCurrentUser: () => 
-      ipcRenderer.invoke('auth:getCurrentUser')
-  }
+    login: (data: LoginFormData) => ipcRenderer.invoke("auth:login", data),
+    logout: () => ipcRenderer.invoke("auth:logout"),
+    getCurrentUser: () => ipcRenderer.invoke("auth:getCurrentUser"),
+  },
 };
 
-contextBridge.exposeInMainWorld('electronAPI', electronAPI);
+contextBridge.exposeInMainWorld("electronAPI", electronAPI);
 ```
 
 ## 🎨 Padrões shadcn/ui
 
 ### Estrutura de Componentes UI
+
 ```typescript
 // SEMPRE usar componentes shadcn/ui, NUNCA import React
 // dashboard-header.tsx
@@ -305,7 +310,7 @@ interface DashboardHeaderProps {
 
 function DashboardHeader(props: DashboardHeaderProps) {
   const { className, children, ...restProps } = props;
-  
+
   return (
     <div className={cn("default-classes", className)} {...restProps}>
       {children}
@@ -317,6 +322,7 @@ export { DashboardHeader };
 ```
 
 ### Componentes de Layout
+
 ```typescript
 // app-layout.tsx - Layout usando shadcn/ui e function declaration
 import { Card, CardContent } from '@/renderer/components/ui/card';
@@ -329,13 +335,13 @@ interface AppLayoutProps {
 
 function AppLayout(props: AppLayoutProps) {
   const { children, className } = props;
-  
+
   return (
     <div className={cn("min-h-screen bg-background", className)}>
       <header className="border-b">
         {/* Header content */}
       </header>
-      
+
       <main className="container mx-auto p-6">
         <Card>
           <CardContent className="p-6">
@@ -351,6 +357,7 @@ export { AppLayout };
 ```
 
 ### Formulários com shadcn/ui Form
+
 ```typescript
 // SEMPRE usar shadcn/ui Form components
 // NUNCA usar register() diretamente nos inputs
@@ -377,13 +384,14 @@ export { AppLayout };
 ## 🚫 Anti-Padrões - O que NUNCA fazer
 
 ### ❌ Componentes Incorretos
+
 ```typescript
 // ❌ ERRADO: React.FC e import React
 import React from 'react';
 
-const LoginForm: React.FC<LoginFormProps> = ({ 
-  onSuccess, 
-  className 
+const LoginForm: React.FC<LoginFormProps> = ({
+  onSuccess,
+  className
 }) => {
   return <div>...</div>;
 };
@@ -412,29 +420,31 @@ export { LoginForm };
 ```
 
 ### ❌ Nomenclatura Incorreta
+
 ```typescript
 // ❌ ERRADO: Sufixos com hífen
-use-auth-hook.ts
-auth-store.ts
-user-schema.ts
+use - auth - hook.ts;
+auth - store.ts;
+user - schema.ts;
 
 // ❌ ERRADO: Sufixos desnecessários em componentes
-login-form-component.tsx
-user-profile-component.tsx
+login - form - component.tsx;
+user - profile - component.tsx;
 
 // ❌ ERRADO: Nomes ambíguos
-user.schema.ts // É Drizzle ou Zod?
-userSchema.ts  // Não é kebab-case
+user.schema.ts; // É Drizzle ou Zod?
+userSchema.ts; // Não é kebab-case
 
 // ✅ CORRETO: Sufixos com ponto e sem sufixos em componentes
-use-auth.hook.ts
-auth.store.ts
-user.model.ts  // Claramente Drizzle
-user.schema.ts // Claramente Zod
-login-form.tsx // Componente sem sufixo
+use - auth.hook.ts;
+auth.store.ts;
+user.model.ts; // Claramente Drizzle
+user.schema.ts; // Claramente Zod
+login - form.tsx; // Componente sem sufixo
 ```
 
 ### ❌ Usar HTML nativo em vez do shadcn/ui
+
 ```typescript
 // ❌ ERRADO: Usar elementos HTML básicos
 <button onClick={handleClick}>Click</button>
@@ -448,13 +458,14 @@ login-form.tsx // Componente sem sufixo
 ```
 
 ### ❌ Estrutura de Arquivos Incorreta
+
 ```typescript
 // ❌ ERRADO: Misturar concerns em um arquivo
 // user-dashboard.tsx
 const UserDashboard = () => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(false);
-  
+
   // Lógica de API diretamente no componente
   const login = async (data) => {
     setLoading(true);
@@ -466,7 +477,7 @@ const UserDashboard = () => {
     }
     setLoading(false);
   };
-  
+
   return (
     <form>
       <input type="email" name="email" />
@@ -487,6 +498,7 @@ const UserDashboard = () => {
 ## ✅ Checklist para Desenvolvimento
 
 ### Componentes React:
+
 - [ ] Usar `function ComponentName(props: PropsType)`
 - [ ] NÃO importar React
 - [ ] NÃO usar `React.FC<>`
@@ -495,6 +507,7 @@ const UserDashboard = () => {
 - [ ] Usar apenas componentes shadcn/ui
 
 ### Arquivos e Nomenclatura:
+
 - [ ] Arquivos em kebab-case
 - [ ] Sufixos com PONTO: `.model.ts`, `.schema.ts`, `.hook.ts`
 - [ ] `.model.ts` para Drizzle schemas
@@ -503,6 +516,7 @@ const UserDashboard = () => {
 - [ ] Componentes sem sufixo adicional
 
 ### Estrutura:
+
 - [ ] Separar tipos, schemas, API, store e hooks
 - [ ] Validar dados com Zod
 - [ ] Usar TanStack Query para cache
@@ -535,6 +549,7 @@ feature/
 ```
 
 Esta estrutura garante:
+
 - **Clareza**: Models vs Schemas bem definidos
 - **Consistência**: Function components sem React import
 - **Nomenclatura**: Sufixos com ponto, componentes sem sufixo

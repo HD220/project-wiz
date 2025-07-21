@@ -1,8 +1,8 @@
 import { useRouter } from "@tanstack/react-router";
 import { LogOut } from "lucide-react";
 
-import { useAuthStore } from "@/renderer/store/auth.store";
 import { Button } from "@/renderer/components/ui/button";
+import { useAuthStore } from "@/renderer/store/auth.store";
 
 import { UserAvatar } from "./user-avatar";
 import { UserStatus } from "./user-status";

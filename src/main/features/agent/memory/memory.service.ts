@@ -1,7 +1,6 @@
 import { and, desc, eq, sql } from "drizzle-orm";
 
 import { getDatabase } from "@/main/database/connection";
-
 import {
   agentMemoriesTable,
   memoryRelationsTable,

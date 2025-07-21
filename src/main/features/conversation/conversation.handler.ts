@@ -1,15 +1,13 @@
 import { ipcMain } from "electron";
 
-import type { IpcResponse } from "@/main/types";
-
 import { AgentChatWithMemoryService } from "@/main/features/conversation/agent-chat-with-memory.service";
 import { AgentChatService } from "@/main/features/conversation/agent-chat.service";
-import { ConversationService } from "@/main/features/conversation/conversation.service";
-import { MessageService } from "@/main/features/conversation/message.service";
-
 import type { SendAgentMessageInput } from "@/main/features/conversation/agent-chat.service";
+import { ConversationService } from "@/main/features/conversation/conversation.service";
 import type { CreateConversationInput } from "@/main/features/conversation/conversation.service";
+import { MessageService } from "@/main/features/conversation/message.service";
 import type { SendMessageInput } from "@/main/features/conversation/message.service";
+import type { IpcResponse } from "@/main/types";
 
 function setupConversationHandlers(): void {
   ipcMain.handle(

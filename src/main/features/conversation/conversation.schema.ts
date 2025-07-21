@@ -11,7 +11,9 @@ export const CreateConversationSchema = z.object({
   description: z.string().optional(),
   type: ConversationTypeSchema.default("dm"),
   agentId: z.string().uuid().optional(),
-  participantIds: z.array(z.string().uuid()).min(1, "At least one participant is required"),
+  participantIds: z
+    .array(z.string().uuid())
+    .min(1, "At least one participant is required"),
 });
 
 export const UpdateConversationSchema = z.object({
@@ -37,12 +39,18 @@ export const RemoveParticipantSchema = z.object({
 export const SendMessageSchema = z.object({
   conversationId: z.string().uuid(),
   authorId: z.string().uuid(),
-  content: z.string().min(1, "Message content cannot be empty").max(10000, "Message too long"),
+  content: z
+    .string()
+    .min(1, "Message content cannot be empty")
+    .max(10000, "Message too long"),
 });
 
 export const UpdateMessageSchema = z.object({
   id: z.string().uuid(),
-  content: z.string().min(1, "Message content cannot be empty").max(10000, "Message too long"),
+  content: z
+    .string()
+    .min(1, "Message content cannot be empty")
+    .max(10000, "Message too long"),
 });
 
 // LLM Message Schemas
@@ -61,7 +69,10 @@ export const SendLlmMessageSchema = z.object({
 export const SendAgentMessageSchema = z.object({
   agentId: z.string().uuid(),
   userId: z.string().uuid(),
-  content: z.string().min(1, "Message content cannot be empty").max(10000, "Message too long"),
+  content: z
+    .string()
+    .min(1, "Message content cannot be empty")
+    .max(10000, "Message too long"),
 });
 
 // Query Filter Schemas
@@ -101,19 +112,19 @@ export const GetConversationMessagesSchema = z.object({
 });
 
 // Validation helpers
-export const validateCreateConversation = (data: unknown) => 
+export const validateCreateConversation = (data: unknown) =>
   CreateConversationSchema.parse(data);
 
-export const validateSendMessage = (data: unknown) => 
+export const validateSendMessage = (data: unknown) =>
   SendMessageSchema.parse(data);
 
-export const validateSendAgentMessage = (data: unknown) => 
+export const validateSendAgentMessage = (data: unknown) =>
   SendAgentMessageSchema.parse(data);
 
-export const validateConversationFilters = (data: unknown) => 
+export const validateConversationFilters = (data: unknown) =>
   ConversationFiltersSchema.parse(data);
 
-export const validateMessageFilters = (data: unknown) => 
+export const validateMessageFilters = (data: unknown) =>
   MessageFiltersSchema.parse(data);
 
 // Type exports for use in services and handlers
@@ -126,9 +137,17 @@ export type UpdateMessageInput = z.infer<typeof UpdateMessageSchema>;
 export type LlmMessageDataInput = z.infer<typeof LlmMessageDataSchema>;
 export type SendLlmMessageInput = z.infer<typeof SendLlmMessageSchema>;
 export type SendAgentMessageInput = z.infer<typeof SendAgentMessageSchema>;
-export type ConversationFiltersInput = z.infer<typeof ConversationFiltersSchema>;
+export type ConversationFiltersInput = z.infer<
+  typeof ConversationFiltersSchema
+>;
 export type MessageFiltersInput = z.infer<typeof MessageFiltersSchema>;
 export type GetConversationInput = z.infer<typeof GetConversationSchema>;
-export type GetUserConversationsInput = z.infer<typeof GetUserConversationsSchema>;
-export type GetAgentConversationInput = z.infer<typeof GetAgentConversationSchema>;
-export type GetConversationMessagesInput = z.infer<typeof GetConversationMessagesSchema>;
+export type GetUserConversationsInput = z.infer<
+  typeof GetUserConversationsSchema
+>;
+export type GetAgentConversationInput = z.infer<
+  typeof GetAgentConversationSchema
+>;
+export type GetConversationMessagesInput = z.infer<
+  typeof GetConversationMessagesSchema
+>;

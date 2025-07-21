@@ -1,8 +1,9 @@
-import { forwardRef } from "react";
 import { Link, LinkProps } from "@tanstack/react-router";
-import type { VariantProps } from "class-variance-authority";
+import { forwardRef } from "react";
 
 import { Button, buttonVariants } from "@/renderer/components/ui/button";
+
+import type { VariantProps } from "class-variance-authority";
 
 interface CustomLinkProps
   extends Omit<LinkProps, "className">,
@@ -13,13 +14,13 @@ interface CustomLinkProps
 
 const CustomLink = forwardRef<HTMLAnchorElement, CustomLinkProps>(
   (props, ref) => {
-    const { 
-      variant = "ghost", 
-      size, 
-      className, 
-      children, 
-      to, 
-      ...restLinkProps 
+    const {
+      variant = "ghost",
+      size,
+      className,
+      children,
+      to,
+      ...restLinkProps
     } = props;
 
     return (

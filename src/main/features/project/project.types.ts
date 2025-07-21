@@ -1,10 +1,16 @@
-import type { SelectProject, InsertProject } from "@/main/features/project/project.model";
+import type {
+  SelectProject,
+  InsertProject,
+} from "@/main/features/project/project.model";
 
 // Base derived types
 export type UpdateProject = Partial<InsertProject> & { id: string };
 
 // Project creation input (for frontend forms)
-export type CreateProjectInput = Omit<InsertProject, "id" | "createdAt" | "updatedAt">;
+export type CreateProjectInput = Omit<
+  InsertProject,
+  "id" | "createdAt" | "updatedAt"
+>;
 
 // Project update input (for frontend forms)
 export type UpdateProjectInput = Partial<CreateProjectInput>;
@@ -50,4 +56,7 @@ export interface ProjectDeletionResult {
 }
 
 // Re-export base types for convenience
-export type { SelectProject, InsertProject } from "@/main/features/project/project.model";
+export type {
+  SelectProject,
+  InsertProject,
+} from "@/main/features/project/project.model";

@@ -1,10 +1,7 @@
 import { ipcMain } from "electron";
 
-import type { IpcResponse } from "@/main/types";
-
-import { AgentMemoryService } from "@/main/features/agent/memory/memory.service";
 import { MemoryMaintenanceService } from "@/main/features/agent/memory/memory-maintenance.service";
-
+import { AgentMemoryService } from "@/main/features/agent/memory/memory.service";
 import type {
   AgentMemoryWithMetadata,
   MemorySearchCriteria,
@@ -12,6 +9,7 @@ import type {
   InsertAgentMemory,
   UpdateAgentMemory,
 } from "@/main/features/agent/memory/memory.types";
+import type { IpcResponse } from "@/main/types";
 
 /**
  * Setup memory CRUD operation handlers
@@ -310,8 +308,10 @@ function setupMemoryMaintenanceHandlers(): void {
       retentionDays: number = 90,
     ): Promise<IpcResponse<{ deletedCount: number }>> => {
       try {
-        const result =
-          await MemoryMaintenanceService.cleanOldMemories(agentId, retentionDays);
+        const result = await MemoryMaintenanceService.cleanOldMemories(
+          agentId,
+          retentionDays,
+        );
         return { success: true, data: { deletedCount: result.deleted } };
       } catch (error) {
         return {

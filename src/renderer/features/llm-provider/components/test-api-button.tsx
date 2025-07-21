@@ -1,5 +1,5 @@
-import { useState } from "react";
 import { Loader2, CheckCircle, XCircle, TestTube } from "lucide-react";
+import { useState } from "react";
 import { toast } from "sonner";
 
 import { Button } from "@/renderer/components/ui/button";
@@ -20,17 +20,19 @@ interface TestApiButtonProps {
 
 function TestApiButton(props: TestApiButtonProps) {
   const { data, disabled = false, size = "default" } = props;
-  const [testResult, setTestResult] = useState<"success" | "error" | null>(null);
+  const [testResult, setTestResult] = useState<"success" | "error" | null>(
+    null,
+  );
   const { testProvider, testingProvider } = useLLMProvidersStore();
 
   const isTesting = testingProvider !== null;
 
   const handleTest = async () => {
     setTestResult(null);
-    
+
     try {
       const success = await testProvider(data);
-      
+
       if (success) {
         setTestResult("success");
         toast.success("API key test successful!");
@@ -38,7 +40,7 @@ function TestApiButton(props: TestApiButtonProps) {
         setTestResult("error");
         toast.error("API key test failed");
       }
-      
+
       // Clear result after 3 seconds
       setTimeout(() => setTestResult(null), 3000);
     } catch (error) {

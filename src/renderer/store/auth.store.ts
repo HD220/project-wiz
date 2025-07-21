@@ -1,7 +1,10 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
-import type { AuthenticatedUser, LoginCredentials } from "@/main/features/auth/auth.types";
+import type {
+  AuthenticatedUser,
+  LoginCredentials,
+} from "@/main/features/auth/auth.types";
 
 interface AuthState {
   // State

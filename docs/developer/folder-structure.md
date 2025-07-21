@@ -3,6 +3,7 @@
 ## 📋 Princípios de Organização
 
 ### **Regras Fundamentais:**
+
 - **SEM pasta `shared`** - não criar abstrações desnecessárias
 - **Componentes compartilhados** → `renderer/components/`
 - **Recursos globais** → suas respectivas pastas em `renderer/`
@@ -10,6 +11,7 @@
 - **Organização por domínio** → features agrupadas por contexto de negócio
 
 ### **Nomenclatura de Arquivos:**
+
 - **kebab-case** para todos os arquivos e pastas
 - **Sufixos com ponto**: `.model.ts`, `.schema.ts`, `.service.ts`, `.handler.ts`, `.store.ts`, `.api.ts`, `.hook.ts`
 - **Componentes SEM sufixo**: `login-form.tsx`, `user-profile.tsx`
@@ -84,30 +86,30 @@ export interface LoginCredentials {
 }
 
 // auth.model.ts - Schema Drizzle
-import { sqliteTable, text, integer } from 'drizzle-orm/sqlite-core';
+import { sqliteTable, text, integer } from "drizzle-orm/sqlite-core";
 
-export const authSessionsTable = sqliteTable('auth_sessions', {
-  id: text('id').primaryKey(),
-  userId: text('user_id').notNull(),
-  token: text('token').notNull(),
-  expiresAt: integer('expires_at', { mode: 'timestamp' }).notNull(),
+export const authSessionsTable = sqliteTable("auth_sessions", {
+  id: text("id").primaryKey(),
+  userId: text("user_id").notNull(),
+  token: text("token").notNull(),
+  expiresAt: integer("expires_at", { mode: "timestamp" }).notNull(),
 });
 
 export type SelectAuthSession = typeof authSessionsTable.$inferSelect;
 export type InsertAuthSession = typeof authSessionsTable.$inferInsert;
 
 // auth.schema.ts - Schema Zod para validações
-import { z } from 'zod';
+import { z } from "zod";
 
 export const loginSchema = z.object({
-  email: z.string().email('Email inválido'),
-  password: z.string().min(6, 'Senha deve ter pelo menos 6 caracteres')
+  email: z.string().email("Email inválido"),
+  password: z.string().min(6, "Senha deve ter pelo menos 6 caracteres"),
 });
 
 export const registerSchema = z.object({
-  email: z.string().email('Email inválido'),
-  name: z.string().min(2, 'Nome deve ter pelo menos 2 caracteres'),
-  password: z.string().min(6, 'Senha deve ter pelo menos 6 caracteres')
+  email: z.string().email("Email inválido"),
+  name: z.string().min(2, "Nome deve ter pelo menos 2 caracteres"),
+  password: z.string().min(6, "Senha deve ter pelo menos 6 caracteres"),
 });
 
 // auth.service.ts - Lógica de negócio
@@ -115,7 +117,7 @@ export class AuthService {
   static async login(credentials: LoginCredentials): Promise<AuthResult> {
     // Implementação da lógica
   }
-  
+
   static async logout(): Promise<void> {
     // Implementação da lógica
   }
@@ -123,7 +125,7 @@ export class AuthService {
 
 // auth.handler.ts - IPC handlers
 export function setupAuthHandlers() {
-  ipcMain.handle('auth:login', async (_, data) => {
+  ipcMain.handle("auth:login", async (_, data) => {
     return await AuthService.login(data);
   });
 }
@@ -173,7 +175,7 @@ export const authApi = {
   login: async (data: LoginFormData): Promise<User> => {
     return window.electronAPI.auth.login(data);
   },
-  
+
   logout: async (): Promise<void> => {
     return window.electronAPI.auth.logout();
   }
@@ -194,10 +196,10 @@ export const useAuthStore = create<AuthStore>((set) => ({
   isLoading: false,
   error: null,
   isAuthenticated: false,
-  
-  setUser: (user) => set({ 
-    user, 
-    isAuthenticated: !!user 
+
+  setUser: (user) => set({
+    user,
+    isAuthenticated: !!user
   }),
   setLoading: (isLoading) => set({ isLoading }),
   setError: (error) => set({ error }),
@@ -207,7 +209,7 @@ export const useAuthStore = create<AuthStore>((set) => ({
 // use-auth.hook.ts - Hook customizado
 export function useAuth() {
   const store = useAuthStore();
-  
+
   const loginMutation = useMutation({
     mutationFn: authApi.login,
     onSuccess: (user) => {
@@ -218,7 +220,7 @@ export function useAuth() {
       store.setError(error.message);
     }
   });
-  
+
   return {
     ...store,
     login: loginMutation.mutate,
@@ -235,9 +237,9 @@ interface LoginFormProps {
 function LoginForm(props: LoginFormProps) {
   const { onSuccess, className } = props;
   const { login, isLoading, error } = useAuth();
-  
+
   // Implementação do componente...
-  
+
   return (
     <Card className={className}>
       {/* JSX do componente */}
@@ -278,24 +280,28 @@ renderer/features/auth/components/
 ## 🌐 Recursos Globais
 
 ### **Hooks Globais:**
+
 ```
 renderer/hooks/
 └── use-mobile.ts             # Hook para detectar mobile
 ```
 
 ### **Contextos Globais:**
+
 ```
 renderer/contexts/
 └── theme-context.tsx         # Context de tema
 ```
 
 ### **Store Global:**
+
 ```
 renderer/store/
 └── auth.store.ts            # Store de autenticação global (se necessário)
 ```
 
 ### **Utilitários Globais:**
+
 ```
 renderer/lib/
 └── utils.ts                 # Utilitários do shadcn/ui e gerais
@@ -304,6 +310,7 @@ renderer/lib/
 ## 🚫 Anti-Padrões - O que NÃO fazer
 
 ### ❌ Pasta Shared
+
 ```
 // ERRADO: Criar pasta shared
 src/shared/
@@ -317,6 +324,7 @@ src/renderer/lib/
 ```
 
 ### ❌ Componentes Misturados
+
 ```
 // ERRADO: Componente específico fora da feature
 renderer/components/login-form.tsx
@@ -326,6 +334,7 @@ renderer/features/auth/components/login-form.tsx
 ```
 
 ### ❌ Nomenclatura Inconsistente
+
 ```
 // ERRADO: Mistura de padrões
 user-schema.ts  (ambíguo)
@@ -342,6 +351,7 @@ use-auth.hook.ts (Hook)
 ## ✅ Checklist de Organização
 
 ### Para cada Feature:
+
 - [ ] **Backend:** Criar pasta em `main/features/[feature]/`
 - [ ] **Frontend:** Criar pasta em `renderer/features/[feature]/`
 - [ ] **Tipos:** Definir em `[feature].types.ts`
@@ -355,6 +365,7 @@ use-auth.hook.ts (Hook)
 - [ ] **Componentes:** Pasta `components/` dentro da feature
 
 ### Para Recursos Globais:
+
 - [ ] **Componentes compartilhados** → `renderer/components/`
 - [ ] **Hooks globais** → `renderer/hooks/`
 - [ ] **Contextos globais** → `renderer/contexts/`
@@ -387,6 +398,7 @@ use-auth.hook.ts (Hook)
    - Integrar no roteamento (`app/`)
 
 Esta estrutura garante:
+
 - **Organização clara** por domínio de negócio
 - **Separação de responsabilidades** bem definida
 - **Reutilização** de componentes e lógica

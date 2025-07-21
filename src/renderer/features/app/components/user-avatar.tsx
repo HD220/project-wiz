@@ -9,7 +9,7 @@ interface UserAvatarProps {
 
 function UserAvatar(props: UserAvatarProps) {
   const { name = "User", size = "md", className } = props;
-  
+
   const sizeClasses = {
     sm: "w-6 h-6 text-xs",
     md: "w-8 h-8 text-sm",

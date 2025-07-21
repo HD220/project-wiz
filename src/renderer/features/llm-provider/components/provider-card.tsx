@@ -1,16 +1,17 @@
-import { useState } from "react";
-import { MoreHorizontal, Edit2, Trash2, Star, StarOff, Eye, EyeOff } from "lucide-react";
-
-import { Card, CardContent, CardHeader } from "@/renderer/components/ui/card";
-import { Badge } from "@/renderer/components/ui/badge";
-import { Button } from "@/renderer/components/ui/button";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/renderer/components/ui/dropdown-menu";
+  MoreHorizontal,
+  Edit2,
+  Trash2,
+  Star,
+  StarOff,
+  Eye,
+  EyeOff,
+} from "lucide-react";
+import { useState } from "react";
+import { toast } from "sonner";
+
+import type { LlmProvider } from "@/main/features/agent/llm-provider/llm-provider.types";
+
 import {
   AlertDialog,
   AlertDialogAction,
@@ -21,8 +22,17 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/renderer/components/ui/alert-dialog";
+import { Badge } from "@/renderer/components/ui/badge";
+import { Button } from "@/renderer/components/ui/button";
+import { Card, CardContent, CardHeader } from "@/renderer/components/ui/card";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/renderer/components/ui/dropdown-menu";
 
-import type { LlmProvider } from "@/main/features/agent/llm-provider/llm-provider.types";
 // Simple utility functions
 const maskApiKey = (apiKey: string): string => {
   if (apiKey.length <= 8) return "●".repeat(apiKey.length);
@@ -31,13 +41,15 @@ const maskApiKey = (apiKey: string): string => {
 
 const getProviderLabel = (type: string): string => {
   const labels: Record<string, string> = {
-    openai: "OpenAI", deepseek: "DeepSeek", anthropic: "Anthropic", 
-    google: "Google", custom: "Custom"
+    openai: "OpenAI",
+    deepseek: "DeepSeek",
+    anthropic: "Anthropic",
+    google: "Google",
+    custom: "Custom",
   };
   return labels[type] || "Unknown";
 };
 import { useLLMProvidersStore } from "@/renderer/store/llm-provider.store";
-import { toast } from "sonner";
 
 interface ProviderCardProps {
   provider: LlmProvider;
@@ -48,8 +60,9 @@ function ProviderCard(props: ProviderCardProps) {
   const { provider, onEdit } = props;
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [showApiKey, setShowApiKey] = useState(false);
-  
-  const { deleteProvider, setDefaultProvider, isLoading } = useLLMProvidersStore();
+
+  const { deleteProvider, setDefaultProvider, isLoading } =
+    useLLMProvidersStore();
 
   const handleDelete = async () => {
     try {
@@ -71,13 +84,17 @@ function ProviderCard(props: ProviderCardProps) {
     }
   };
 
-  const displayApiKey = showApiKey ? provider.apiKey : maskApiKey(provider.apiKey);
+  const displayApiKey = showApiKey
+    ? provider.apiKey
+    : maskApiKey(provider.apiKey);
 
   return (
     <>
-      <Card className={`transition-colors hover:bg-accent/50 ${
-        provider.isDefault ? 'ring-2 ring-primary' : ''
-      }`}>
+      <Card
+        className={`transition-colors hover:bg-accent/50 ${
+          provider.isDefault ? "ring-2 ring-primary" : ""
+        }`}
+      >
         <CardHeader className="pb-3">
           <div className="flex items-start justify-between">
             <div className="flex items-center gap-3">
@@ -96,11 +113,11 @@ function ProviderCard(props: ProviderCardProps) {
                 </p>
               </div>
             </div>
-            
+
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button 
-                  variant="ghost" 
+                <Button
+                  variant="ghost"
                   size="sm"
                   className="h-8 w-8 p-0"
                   disabled={isLoading}
@@ -113,23 +130,23 @@ function ProviderCard(props: ProviderCardProps) {
                   <Edit2 className="mr-2 h-4 w-4" />
                   Edit
                 </DropdownMenuItem>
-                
+
                 {!provider.isDefault && (
                   <DropdownMenuItem onClick={handleSetDefault}>
                     <Star className="mr-2 h-4 w-4" />
                     Set as Default
                   </DropdownMenuItem>
                 )}
-                
+
                 {provider.isDefault && (
                   <DropdownMenuItem disabled>
                     <StarOff className="mr-2 h-4 w-4" />
                     Current Default
                   </DropdownMenuItem>
                 )}
-                
+
                 <DropdownMenuSeparator />
-                
+
                 <DropdownMenuItem
                   onClick={() => setShowDeleteDialog(true)}
                   className="text-destructive"
@@ -141,7 +158,7 @@ function ProviderCard(props: ProviderCardProps) {
             </DropdownMenu>
           </div>
         </CardHeader>
-        
+
         <CardContent className="pt-0">
           <div className="space-y-3">
             {/* API Key Display */}
@@ -182,7 +199,7 @@ function ProviderCard(props: ProviderCardProps) {
 
             {/* Status */}
             <div className="flex items-center justify-between">
-              <Badge 
+              <Badge
                 variant={provider.isActive ? "default" : "secondary"}
                 className="text-xs"
               >
@@ -199,7 +216,8 @@ function ProviderCard(props: ProviderCardProps) {
           <AlertDialogHeader>
             <AlertDialogTitle>Delete Provider</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete "{provider.name}"? This action cannot be undone.
+              Are you sure you want to delete "{provider.name}"? This action
+              cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
