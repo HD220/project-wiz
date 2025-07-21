@@ -1,8 +1,9 @@
-import { Hash, MessageCircle, Settings } from "lucide-react";
+import { Hash } from "lucide-react";
 
 import { Separator } from "@/renderer/components/ui/separator";
 
 import { NavigationItem } from "./navigation-item";
+import { ConversationSidebarList } from "@/renderer/features/conversation/components/conversation-sidebar-list";
 
 function SidebarNavigation() {
   return (
@@ -13,15 +14,11 @@ function SidebarNavigation() {
         label="Dashboard"
         activeOptions={{ exact: true }}
       />
-      <NavigationItem
-        to="/user/dm"
-        icon={MessageCircle}
-        label="Direct Messages"
-      />
 
       <Separator className="my-2" />
 
-      <NavigationItem to="/user/settings" icon={Settings} label="Settings" />
+      {/* Conversations List */}
+      <ConversationSidebarList />
     </div>
   );
 }

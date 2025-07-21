@@ -1,0 +1,221 @@
+import { useState } from "react";
+import { X, Search, Plus, User, Bot } from "lucide-react";
+
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/renderer/components/ui/dialog";
+import { Input } from "@/renderer/components/ui/input";
+import { Button } from "@/renderer/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/renderer/components/ui/avatar";
+import { Badge } from "@/renderer/components/ui/badge";
+import { ScrollArea } from "@/renderer/components/ui/scroll-area";
+
+import type { AuthenticatedUser } from "../conversation.types";
+import { useConversationStore } from "../conversation.store";
+
+interface CreateConversationDialogProps {
+  availableUsers: AuthenticatedUser[];
+  onClose: () => void;
+  onConversationCreated: (conversationId: string) => void;
+}
+
+function CreateConversationDialog(props: CreateConversationDialogProps) {
+  const { availableUsers, onClose, onConversationCreated } = props;
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedUserIds, setSelectedUserIds] = useState<string[]>([]);
+  
+  const { createConversation, isCreatingConversation, error } = useConversationStore();
+
+  // Filter users based on search
+  const filteredUsers = availableUsers.filter(user => 
+    user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    user.username.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const handleUserToggle = (userId: string) => {
+    setSelectedUserIds(prev => 
+      prev.includes(userId) 
+        ? prev.filter(id => id !== userId)
+        : [...prev, userId]
+    );
+  };
+
+  const handleCreateConversation = async () => {
+    if (selectedUserIds.length === 0) return;
+
+    try {
+      const conversationId = await createConversation(selectedUserIds);
+      onConversationCreated(conversationId);
+    } catch (error) {
+      console.error("Failed to create conversation:", error);
+    }
+  };
+
+  const getSelectedUsers = () => {
+    return availableUsers.filter(user => selectedUserIds.includes(user.id));
+  };
+
+  return (
+    <Dialog open onOpenChange={() => onClose()}>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <Plus className="h-5 w-5" />
+            Start a Conversation
+          </DialogTitle>
+        </DialogHeader>
+
+        <div className="space-y-4">
+          {/* Search input */}
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Search users..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10"
+            />
+          </div>
+
+          {/* Selected users */}
+          {selectedUserIds.length > 0 && (
+            <div className="space-y-2">
+              <p className="text-sm font-medium">
+                Selected ({selectedUserIds.length}):
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {getSelectedUsers().map(user => (
+                  <Badge
+                    key={user.id}
+                    variant="secondary"
+                    className="gap-1 pr-1"
+                  >
+                    <span className="text-xs">{user.name}</span>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-4 w-4 p-0 hover:bg-destructive hover:text-destructive-foreground"
+                      onClick={() => handleUserToggle(user.id)}
+                    >
+                      <X className="h-3 w-3" />
+                    </Button>
+                  </Badge>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* User list */}
+          <ScrollArea className="h-64 border rounded-md">
+            <div className="space-y-1 p-2">
+              {filteredUsers.length === 0 ? (
+                <div className="text-center text-muted-foreground py-8">
+                  <p className="text-sm">No users found</p>
+                </div>
+              ) : (
+                filteredUsers.map(user => {
+                  const isSelected = selectedUserIds.includes(user.id);
+                  
+                  return (
+                    <div
+                      key={user.id}
+                      role="button"
+                      tabIndex={0}
+                      className={`
+                        flex items-center gap-3 p-2 rounded-md cursor-pointer transition-colors
+                        hover:bg-muted/50
+                        ${isSelected ? 'bg-muted' : ''}
+                      `}
+                      onClick={() => handleUserToggle(user.id)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault();
+                          handleUserToggle(user.id);
+                        }
+                      }}
+                    >
+                      {/* Avatar */}
+                      <div className="relative flex-shrink-0">
+                        <Avatar className="w-8 h-8">
+                          <AvatarImage src={user.avatar || undefined} />
+                          <AvatarFallback className="text-xs">
+                            {user.name.charAt(0).toUpperCase()}
+                          </AvatarFallback>
+                        </Avatar>
+                        
+                        {/* Type indicator */}
+                        <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 bg-background rounded-full flex items-center justify-center border border-border">
+                          {user.type === "agent" ? (
+                            <Bot className="h-2.5 w-2.5 text-primary" />
+                          ) : (
+                            <User className="h-2.5 w-2.5 text-green-500" />
+                          )}
+                        </div>
+                      </div>
+
+                      {/* User info */}
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium text-sm truncate">
+                          {user.name}
+                        </p>
+                        <p className="text-xs text-muted-foreground truncate">
+                          @{user.username}
+                        </p>
+                      </div>
+
+                      {/* User type badge */}
+                      <Badge 
+                        variant={user.type === "agent" ? "default" : "outline"} 
+                        className="text-xs"
+                      >
+                        {user.type === "agent" ? "AI" : "User"}
+                      </Badge>
+
+                      {/* Selection indicator */}
+                      {isSelected && (
+                        <div className="w-4 h-4 bg-primary rounded-full flex items-center justify-center">
+                          <Plus className="h-2.5 w-2.5 text-primary-foreground rotate-45" />
+                        </div>
+                      )}
+                    </div>
+                  );
+                })
+              )}
+            </div>
+          </ScrollArea>
+
+          {/* Error message */}
+          {error && (
+            <p className="text-sm text-destructive">{error}</p>
+          )}
+
+          {/* Actions */}
+          <div className="flex justify-end gap-2 pt-2">
+            <Button
+              variant="outline"
+              onClick={onClose}
+              disabled={isCreatingConversation}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleCreateConversation}
+              disabled={selectedUserIds.length === 0 || isCreatingConversation}
+            >
+              {isCreatingConversation ? (
+                "Creating..."
+              ) : (
+                `Create${selectedUserIds.length > 1 ? " Group" : ""} (${selectedUserIds.length})`
+              )}
+            </Button>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+export { CreateConversationDialog };

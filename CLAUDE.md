@@ -427,7 +427,6 @@ export class AuthService {
 - **TypeScript errors**: `npm run type-check` for details
 - **IPC failures**: Check handler registration in main.ts
 - **Build failures**: Clear cache with `npm run clean`
-- **Auth issues**: Check credentials (admin/admin123 for testing)
 
 ## Best Practices
 
