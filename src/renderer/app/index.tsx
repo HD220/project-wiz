@@ -27,8 +27,8 @@ export const Route = createFileRoute("/")({
       }
     }
     
-    // If authenticated, redirect to dashboard
-    throw redirect({ to: "/dashboard" });
+    // If authenticated, redirect to user area  
+    throw redirect({ to: "/user" });
   },
   component: HomePage,
 });

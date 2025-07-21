@@ -1,6 +1,6 @@
 import { ReactNode } from "react";
-import { Sidebar } from "@/features/dashboard/components/sidebar";
-import { ServerSidebar } from "@/features/dashboard/components/server-sidebar";
+import { UserSidebar } from "@/features/dashboard/components/user-sidebar";
+import { RootSidebar } from "@/features/dashboard/components/root-sidebar";
 import { DashboardHeader } from "@/features/dashboard/components/dashboard-header";
 
 interface DashboardLayoutProps {
@@ -16,12 +16,12 @@ export function DashboardLayout({
 }: DashboardLayoutProps) {
   return (
     <div className="h-full bg-background flex overflow-hidden">
-      {/* Server Sidebar */}
-      <ServerSidebar />
+      {/* Root Sidebar */}
+      <RootSidebar />
       
-      {/* Main Sidebar */}
+      {/* User Sidebar */}
       <div className="w-60 flex flex-col">
-        <Sidebar />
+        <UserSidebar />
       </div>
       
       {/* Main content area */}

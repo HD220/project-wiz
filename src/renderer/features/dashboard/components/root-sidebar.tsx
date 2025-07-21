@@ -15,11 +15,11 @@ interface Server {
   hasNotification?: boolean;
 }
 
-interface ServerSidebarProps {
+interface RootSidebarProps {
   className?: string;
 }
 
-export function ServerSidebar({ className }: ServerSidebarProps) {
+export function RootSidebar({ className }: RootSidebarProps) {
   const { user } = useAuthStore();
 
   // Mock servers data - in real app this would come from a store
@@ -37,7 +37,7 @@ export function ServerSidebar({ className }: ServerSidebarProps) {
           <Tooltip>
             <TooltipTrigger asChild>
               <Link 
-                to="/dashboard"
+                to="/user"
                 className=""
                 activeProps={{
                   className: "active"
@@ -64,7 +64,7 @@ export function ServerSidebar({ className }: ServerSidebarProps) {
               </Link>
             </TooltipTrigger>
             <TooltipContent side="right">
-              <p>Direct Messages</p>
+              <p>Área Pessoal</p>
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>
@@ -79,8 +79,8 @@ export function ServerSidebar({ className }: ServerSidebarProps) {
             <Tooltip>
               <TooltipTrigger asChild>
                 <Link
-                  to="/dashboard/server/$serverId"
-                  params={{ serverId: server.id }}
+                  to="/project/$projectId"
+                  params={{ projectId: server.id }}
                   className="relative"
                   activeProps={{
                     className: "active"
@@ -137,7 +137,7 @@ export function ServerSidebar({ className }: ServerSidebarProps) {
               </Button>
             </TooltipTrigger>
             <TooltipContent side="right">
-              <p>Add a Server</p>
+              <p>Adicionar Projeto</p>
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>

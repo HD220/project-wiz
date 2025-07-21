@@ -10,14 +10,31 @@
 
 import { Route as rootRouteImport } from './app/__root'
 import { Route as DashboardRouteImport } from './app/dashboard'
+import { Route as AuthenticatedRouteImport } from './app/_authenticated'
+import { Route as AuthRouteRouteImport } from './app/auth/route'
 import { Route as IndexRouteImport } from './app/index'
 import { Route as AuthRegisterRouteImport } from './app/auth/register'
 import { Route as AuthLoginRouteImport } from './app/auth/login'
+import { Route as AuthenticatedUserRouteRouteImport } from './app/_authenticated/user/route'
+import { Route as AuthenticatedUserIndexRouteImport } from './app/_authenticated/user/index'
 import { Route as DashboardServerServerIdRouteImport } from './app/dashboard/server/$serverId'
+import { Route as AuthenticatedProjectProjectIdRouteRouteImport } from './app/_authenticated/project/$projectId/route'
+import { Route as AuthenticatedProjectProjectIdIndexRouteImport } from './app/_authenticated/project/$projectId/index'
+import { Route as AuthenticatedUserDmAgentIdRouteImport } from './app/_authenticated/user/dm/$agentId'
+import { Route as AuthenticatedProjectProjectIdChannelChannelIdRouteImport } from './app/_authenticated/project/$projectId/channel/$channelId'
 
 const DashboardRoute = DashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedRoute = AuthenticatedRouteImport.update({
+  id: '/_authenticated',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthRouteRoute = AuthRouteRouteImport.update({
+  id: '/auth',
+  path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -26,72 +43,146 @@ const IndexRoute = IndexRouteImport.update({
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthRegisterRoute = AuthRegisterRouteImport.update({
-  id: '/auth/register',
-  path: '/auth/register',
-  getParentRoute: () => rootRouteImport,
+  id: '/register',
+  path: '/register',
+  getParentRoute: () => AuthRouteRoute,
 } as any)
 const AuthLoginRoute = AuthLoginRouteImport.update({
-  id: '/auth/login',
-  path: '/auth/login',
-  getParentRoute: () => rootRouteImport,
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => AuthRouteRoute,
+} as any)
+const AuthenticatedUserRouteRoute = AuthenticatedUserRouteRouteImport.update({
+  id: '/user',
+  path: '/user',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedUserIndexRoute = AuthenticatedUserIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AuthenticatedUserRouteRoute,
 } as any)
 const DashboardServerServerIdRoute = DashboardServerServerIdRouteImport.update({
   id: '/server/$serverId',
   path: '/server/$serverId',
   getParentRoute: () => DashboardRoute,
 } as any)
+const AuthenticatedProjectProjectIdRouteRoute =
+  AuthenticatedProjectProjectIdRouteRouteImport.update({
+    id: '/project/$projectId',
+    path: '/project/$projectId',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedProjectProjectIdIndexRoute =
+  AuthenticatedProjectProjectIdIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => AuthenticatedProjectProjectIdRouteRoute,
+  } as any)
+const AuthenticatedUserDmAgentIdRoute =
+  AuthenticatedUserDmAgentIdRouteImport.update({
+    id: '/dm/$agentId',
+    path: '/dm/$agentId',
+    getParentRoute: () => AuthenticatedUserRouteRoute,
+  } as any)
+const AuthenticatedProjectProjectIdChannelChannelIdRoute =
+  AuthenticatedProjectProjectIdChannelChannelIdRouteImport.update({
+    id: '/channel/$channelId',
+    path: '/channel/$channelId',
+    getParentRoute: () => AuthenticatedProjectProjectIdRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRouteRouteWithChildren
   '/dashboard': typeof DashboardRouteWithChildren
+  '/user': typeof AuthenticatedUserRouteRouteWithChildren
   '/auth/login': typeof AuthLoginRoute
   '/auth/register': typeof AuthRegisterRoute
+  '/project/$projectId': typeof AuthenticatedProjectProjectIdRouteRouteWithChildren
   '/dashboard/server/$serverId': typeof DashboardServerServerIdRoute
+  '/user/': typeof AuthenticatedUserIndexRoute
+  '/user/dm/$agentId': typeof AuthenticatedUserDmAgentIdRoute
+  '/project/$projectId/': typeof AuthenticatedProjectProjectIdIndexRoute
+  '/project/$projectId/channel/$channelId': typeof AuthenticatedProjectProjectIdChannelChannelIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRouteRouteWithChildren
   '/dashboard': typeof DashboardRouteWithChildren
   '/auth/login': typeof AuthLoginRoute
   '/auth/register': typeof AuthRegisterRoute
   '/dashboard/server/$serverId': typeof DashboardServerServerIdRoute
+  '/user': typeof AuthenticatedUserIndexRoute
+  '/user/dm/$agentId': typeof AuthenticatedUserDmAgentIdRoute
+  '/project/$projectId': typeof AuthenticatedProjectProjectIdIndexRoute
+  '/project/$projectId/channel/$channelId': typeof AuthenticatedProjectProjectIdChannelChannelIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/auth': typeof AuthRouteRouteWithChildren
+  '/_authenticated': typeof AuthenticatedRouteWithChildren
   '/dashboard': typeof DashboardRouteWithChildren
+  '/_authenticated/user': typeof AuthenticatedUserRouteRouteWithChildren
   '/auth/login': typeof AuthLoginRoute
   '/auth/register': typeof AuthRegisterRoute
+  '/_authenticated/project/$projectId': typeof AuthenticatedProjectProjectIdRouteRouteWithChildren
   '/dashboard/server/$serverId': typeof DashboardServerServerIdRoute
+  '/_authenticated/user/': typeof AuthenticatedUserIndexRoute
+  '/_authenticated/user/dm/$agentId': typeof AuthenticatedUserDmAgentIdRoute
+  '/_authenticated/project/$projectId/': typeof AuthenticatedProjectProjectIdIndexRoute
+  '/_authenticated/project/$projectId/channel/$channelId': typeof AuthenticatedProjectProjectIdChannelChannelIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/auth'
     | '/dashboard'
+    | '/user'
     | '/auth/login'
     | '/auth/register'
+    | '/project/$projectId'
     | '/dashboard/server/$serverId'
+    | '/user/'
+    | '/user/dm/$agentId'
+    | '/project/$projectId/'
+    | '/project/$projectId/channel/$channelId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/auth'
     | '/dashboard'
     | '/auth/login'
     | '/auth/register'
     | '/dashboard/server/$serverId'
+    | '/user'
+    | '/user/dm/$agentId'
+    | '/project/$projectId'
+    | '/project/$projectId/channel/$channelId'
   id:
     | '__root__'
     | '/'
+    | '/auth'
+    | '/_authenticated'
     | '/dashboard'
+    | '/_authenticated/user'
     | '/auth/login'
     | '/auth/register'
+    | '/_authenticated/project/$projectId'
     | '/dashboard/server/$serverId'
+    | '/_authenticated/user/'
+    | '/_authenticated/user/dm/$agentId'
+    | '/_authenticated/project/$projectId/'
+    | '/_authenticated/project/$projectId/channel/$channelId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AuthRouteRoute: typeof AuthRouteRouteWithChildren
+  AuthenticatedRoute: typeof AuthenticatedRouteWithChildren
   DashboardRoute: typeof DashboardRouteWithChildren
-  AuthLoginRoute: typeof AuthLoginRoute
-  AuthRegisterRoute: typeof AuthRegisterRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -103,6 +194,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated': {
+      id: '/_authenticated'
+      path: ''
+      fullPath: ''
+      preLoaderRoute: typeof AuthenticatedRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -112,17 +217,31 @@ declare module '@tanstack/react-router' {
     }
     '/auth/register': {
       id: '/auth/register'
-      path: '/auth/register'
+      path: '/register'
       fullPath: '/auth/register'
       preLoaderRoute: typeof AuthRegisterRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof AuthRouteRoute
     }
     '/auth/login': {
       id: '/auth/login'
-      path: '/auth/login'
+      path: '/login'
       fullPath: '/auth/login'
       preLoaderRoute: typeof AuthLoginRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof AuthRouteRoute
+    }
+    '/_authenticated/user': {
+      id: '/_authenticated/user'
+      path: '/user'
+      fullPath: '/user'
+      preLoaderRoute: typeof AuthenticatedUserRouteRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/user/': {
+      id: '/_authenticated/user/'
+      path: '/'
+      fullPath: '/user/'
+      preLoaderRoute: typeof AuthenticatedUserIndexRouteImport
+      parentRoute: typeof AuthenticatedUserRouteRoute
     }
     '/dashboard/server/$serverId': {
       id: '/dashboard/server/$serverId'
@@ -131,8 +250,99 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardServerServerIdRouteImport
       parentRoute: typeof DashboardRoute
     }
+    '/_authenticated/project/$projectId': {
+      id: '/_authenticated/project/$projectId'
+      path: '/project/$projectId'
+      fullPath: '/project/$projectId'
+      preLoaderRoute: typeof AuthenticatedProjectProjectIdRouteRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/project/$projectId/': {
+      id: '/_authenticated/project/$projectId/'
+      path: '/'
+      fullPath: '/project/$projectId/'
+      preLoaderRoute: typeof AuthenticatedProjectProjectIdIndexRouteImport
+      parentRoute: typeof AuthenticatedProjectProjectIdRouteRoute
+    }
+    '/_authenticated/user/dm/$agentId': {
+      id: '/_authenticated/user/dm/$agentId'
+      path: '/dm/$agentId'
+      fullPath: '/user/dm/$agentId'
+      preLoaderRoute: typeof AuthenticatedUserDmAgentIdRouteImport
+      parentRoute: typeof AuthenticatedUserRouteRoute
+    }
+    '/_authenticated/project/$projectId/channel/$channelId': {
+      id: '/_authenticated/project/$projectId/channel/$channelId'
+      path: '/channel/$channelId'
+      fullPath: '/project/$projectId/channel/$channelId'
+      preLoaderRoute: typeof AuthenticatedProjectProjectIdChannelChannelIdRouteImport
+      parentRoute: typeof AuthenticatedProjectProjectIdRouteRoute
+    }
   }
 }
+
+interface AuthRouteRouteChildren {
+  AuthLoginRoute: typeof AuthLoginRoute
+  AuthRegisterRoute: typeof AuthRegisterRoute
+}
+
+const AuthRouteRouteChildren: AuthRouteRouteChildren = {
+  AuthLoginRoute: AuthLoginRoute,
+  AuthRegisterRoute: AuthRegisterRoute,
+}
+
+const AuthRouteRouteWithChildren = AuthRouteRoute._addFileChildren(
+  AuthRouteRouteChildren,
+)
+
+interface AuthenticatedUserRouteRouteChildren {
+  AuthenticatedUserIndexRoute: typeof AuthenticatedUserIndexRoute
+  AuthenticatedUserDmAgentIdRoute: typeof AuthenticatedUserDmAgentIdRoute
+}
+
+const AuthenticatedUserRouteRouteChildren: AuthenticatedUserRouteRouteChildren =
+  {
+    AuthenticatedUserIndexRoute: AuthenticatedUserIndexRoute,
+    AuthenticatedUserDmAgentIdRoute: AuthenticatedUserDmAgentIdRoute,
+  }
+
+const AuthenticatedUserRouteRouteWithChildren =
+  AuthenticatedUserRouteRoute._addFileChildren(
+    AuthenticatedUserRouteRouteChildren,
+  )
+
+interface AuthenticatedProjectProjectIdRouteRouteChildren {
+  AuthenticatedProjectProjectIdIndexRoute: typeof AuthenticatedProjectProjectIdIndexRoute
+  AuthenticatedProjectProjectIdChannelChannelIdRoute: typeof AuthenticatedProjectProjectIdChannelChannelIdRoute
+}
+
+const AuthenticatedProjectProjectIdRouteRouteChildren: AuthenticatedProjectProjectIdRouteRouteChildren =
+  {
+    AuthenticatedProjectProjectIdIndexRoute:
+      AuthenticatedProjectProjectIdIndexRoute,
+    AuthenticatedProjectProjectIdChannelChannelIdRoute:
+      AuthenticatedProjectProjectIdChannelChannelIdRoute,
+  }
+
+const AuthenticatedProjectProjectIdRouteRouteWithChildren =
+  AuthenticatedProjectProjectIdRouteRoute._addFileChildren(
+    AuthenticatedProjectProjectIdRouteRouteChildren,
+  )
+
+interface AuthenticatedRouteChildren {
+  AuthenticatedUserRouteRoute: typeof AuthenticatedUserRouteRouteWithChildren
+  AuthenticatedProjectProjectIdRouteRoute: typeof AuthenticatedProjectProjectIdRouteRouteWithChildren
+}
+
+const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
+  AuthenticatedUserRouteRoute: AuthenticatedUserRouteRouteWithChildren,
+  AuthenticatedProjectProjectIdRouteRoute:
+    AuthenticatedProjectProjectIdRouteRouteWithChildren,
+}
+
+const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
+  AuthenticatedRouteChildren,
+)
 
 interface DashboardRouteChildren {
   DashboardServerServerIdRoute: typeof DashboardServerServerIdRoute
@@ -148,9 +358,9 @@ const DashboardRouteWithChildren = DashboardRoute._addFileChildren(
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AuthRouteRoute: AuthRouteRouteWithChildren,
+  AuthenticatedRoute: AuthenticatedRouteWithChildren,
   DashboardRoute: DashboardRouteWithChildren,
-  AuthLoginRoute: AuthLoginRoute,
-  AuthRegisterRoute: AuthRegisterRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
