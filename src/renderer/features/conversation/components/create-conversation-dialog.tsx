@@ -29,10 +29,10 @@ function CreateConversationDialog(props: CreateConversationDialogProps) {
   
   const { createConversation, isCreatingConversation, error } = useConversationStore();
 
-  // Filter users based on search
+  // Filter agents based on search
   const filteredUsers = availableUsers.filter(user => 
     user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    user.username.toLowerCase().includes(searchTerm.toLowerCase())
+    (user.username && user.username.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
   const handleUserToggle = (userId: string) => {
@@ -64,7 +64,7 @@ function CreateConversationDialog(props: CreateConversationDialogProps) {
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Plus className="h-5 w-5" />
-            Start a Conversation
+            Start Chat with Agent
           </DialogTitle>
         </DialogHeader>
 
@@ -73,7 +73,7 @@ function CreateConversationDialog(props: CreateConversationDialogProps) {
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Search users..."
+              placeholder="Search agents..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-10"
@@ -113,7 +113,7 @@ function CreateConversationDialog(props: CreateConversationDialogProps) {
             <div className="space-y-1 p-2">
               {filteredUsers.length === 0 ? (
                 <div className="text-center text-muted-foreground py-8">
-                  <p className="text-sm">No users found</p>
+                  <p className="text-sm">No agents found</p>
                 </div>
               ) : (
                 filteredUsers.map(user => {
@@ -166,14 +166,6 @@ function CreateConversationDialog(props: CreateConversationDialogProps) {
                         </p>
                       </div>
 
-                      {/* User type badge */}
-                      <Badge 
-                        variant={user.type === "agent" ? "default" : "outline"} 
-                        className="text-xs"
-                      >
-                        {user.type === "agent" ? "AI" : "User"}
-                      </Badge>
-
                       {/* Selection indicator */}
                       {isSelected && (
                         <div className="w-4 h-4 bg-primary rounded-full flex items-center justify-center">
@@ -208,7 +200,7 @@ function CreateConversationDialog(props: CreateConversationDialogProps) {
               {isCreatingConversation ? (
                 "Creating..."
               ) : (
-                `Create${selectedUserIds.length > 1 ? " Group" : ""} (${selectedUserIds.length})`
+                `Start Chat${selectedUserIds.length > 1 ? " with " + selectedUserIds.length + " Agents" : ""} (${selectedUserIds.length})`
               )}
             </Button>
           </div>

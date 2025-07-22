@@ -7,45 +7,33 @@ import type {
   SendMessageInput,
 } from "./conversation.types";
 
-// Mock data - Available users (including AI agents as regular users)
-const MOCK_AVAILABLE_USERS: AuthenticatedUser[] = [
-  {
-    id: "user-1",
-    name: "João Silva",
-    username: "joao.silva",
-    avatar: null,
-    type: "human",
-    createdAt: new Date("2024-01-15"),
-    updatedAt: new Date("2024-01-15"),
-  },
-  {
-    id: "user-2", 
-    name: "Maria Santos",
-    username: "maria.santos",
-    avatar: null,
-    type: "human",
-    createdAt: new Date("2024-01-16"),
-    updatedAt: new Date("2024-01-16"),
-  },
-  {
-    id: "agent-1",
-    name: "Claude Assistant",
-    username: "claude.assistant",
-    avatar: null,
-    type: "agent",
-    createdAt: new Date("2024-01-10"),
-    updatedAt: new Date("2024-01-10"),
-  },
-  {
-    id: "agent-2",
-    name: "GPT-4 Helper", 
-    username: "gpt4.helper",
-    avatar: null,
-    type: "agent",
-    createdAt: new Date("2024-01-11"),
-    updatedAt: new Date("2024-01-11"),
-  },
-];
+// Function to convert agents to AuthenticatedUser format
+function agentToAuthenticatedUser(agent: any): AuthenticatedUser {
+  return {
+    id: agent.userId, // Use the userId from agent as the user ID
+    name: agent.name,
+    username: agent.name.toLowerCase().replace(/\s+/g, '.'), // Generate username from name
+    avatar: null, // Agents don't have avatars for now
+    type: "agent" as const,
+    createdAt: new Date(agent.createdAt),
+    updatedAt: new Date(agent.updatedAt),
+  };
+}
+
+// Helper function to get all agents
+async function getAllAgents(): Promise<AuthenticatedUser[]> {
+  try {
+    const response = await window.api.agents.list();
+    if (!response.success) {
+      throw new Error(response.error || "Failed to load agents");
+    }
+    const agents = response.data as any[];
+    return agents.map(agentToAuthenticatedUser);
+  } catch (error) {
+    console.error("Error loading agents:", error);
+    return [];
+  }
+}
 
 // Mock conversations
 const MOCK_CONVERSATIONS: ConversationWithParticipants[] = [
@@ -235,8 +223,7 @@ export const conversationApi = {
 
   // Get available users for creating conversations
   getAvailableUsers: async (): Promise<AuthenticatedUser[]> => {
-    await delay(200);
-    return MOCK_AVAILABLE_USERS;
+    return await getAllAgents();
   },
 
   // Create new conversation
@@ -266,11 +253,12 @@ export const conversationApi = {
     let conversationName = "New Conversation";
     if (participantIds.length === 1) {
       // 1:1 conversation - use other participant's name
-      const otherUser = MOCK_AVAILABLE_USERS.find(user => user.id === participantIds[0]);
-      conversationName = otherUser?.name || "Unknown User";
+      const agents = await getAllAgents();
+      const otherUser = agents.find(user => user.id === participantIds[0]);
+      conversationName = otherUser?.name || "Unknown Agent";
     } else if (participantIds.length > 1) {
       // Group conversation - create generic name (could be customizable)
-      conversationName = `Grupo ${participantIds.length + 1} pessoas`;
+      conversationName = `Grupo ${participantIds.length + 1} agentes`;
     }
 
     const newConversation: ConversationWithParticipants = {
@@ -322,6 +310,7 @@ export const conversationApi = {
   // Get user by ID (helper function)
   getUserById: async (userId: string): Promise<AuthenticatedUser | null> => {
     await delay(100);
-    return MOCK_AVAILABLE_USERS.find(user => user.id === userId) || null;
+    const agents = await getAllAgents();
+    return agents.find(user => user.id === userId) || null;
   },
 };
