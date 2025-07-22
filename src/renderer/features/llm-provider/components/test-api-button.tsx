@@ -3,8 +3,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 
 import { Button } from "@/renderer/components/ui/button";
-
-import { useTestLLMProvider } from "../hooks/use-llm-providers";
+import { useTestLLMProvider } from "@/renderer/features/llm-provider/hooks/use-llm-providers";
 
 // Interface para os dados do teste
 interface TestApiKeyData {

@@ -3,9 +3,8 @@ import { Plus } from "lucide-react";
 
 import { Route } from "@/renderer/app/_authenticated/user/settings/llm-providers";
 import { Button } from "@/renderer/components/ui/button";
-
-import { EmptyState } from "./empty-state";
-import { ProviderCard } from "./provider-card";
+import { EmptyState } from "@/renderer/features/llm-provider/components/empty-state";
+import { ProviderCard } from "@/renderer/features/llm-provider/components/provider-card";
 
 function ProviderList() {
   const { providers } = Route.useLoaderData();

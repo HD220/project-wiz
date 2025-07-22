@@ -22,10 +22,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/renderer/components/ui/dropdown-menu";
-
-import { AgentStatusBadge } from "./agent-status-badge";
-
-import type { SelectAgent } from "../agent.types";
+import type { SelectAgent } from "@/renderer/features/agent/agent.types";
+import { AgentStatusBadge } from "@/renderer/features/agent/components/agent-status-badge";
 
 interface AgentListCardProps {
   agent: SelectAgent;

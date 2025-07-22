@@ -1,17 +1,15 @@
 import { eq, and, desc, inArray } from "drizzle-orm";
 
 import { getDatabase } from "@/main/database/connection";
-
 import {
   conversationsTable,
   conversationParticipantsTable,
-} from "./conversation.model";
-import { messagesTable } from "./message.model";
-
+} from "@/main/features/conversation/conversation.model";
 import type {
   SelectConversation,
   InsertConversation,
-} from "./conversation.model";
+} from "@/main/features/conversation/conversation.model";
+import { messagesTable } from "@/main/features/conversation/message.model";
 
 export interface CreateConversationInput
   extends Omit<InsertConversation, "id" | "createdAt" | "updatedAt"> {

@@ -65,7 +65,7 @@ function AuthProvider({ children }: AuthProviderProps) {
       const response = await window.api.auth.login(credentials);
 
       if (response.success && response.data) {
-        const authResult = response.data as any;
+        const authResult = response.data as AuthResult;
         setUser(authResult.user);
         setSessionToken(authResult.sessionToken);
 

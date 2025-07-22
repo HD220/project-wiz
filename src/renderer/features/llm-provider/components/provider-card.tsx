@@ -25,11 +25,10 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/renderer/components/ui/dropdown-menu";
-
 import {
   useDeleteLLMProvider,
   useSetDefaultLLMProvider,
-} from "../hooks/use-llm-providers";
+} from "@/renderer/features/llm-provider/hooks/use-llm-providers";
 
 const getProviderLabel = (type: string): string => {
   const labels: Record<string, string> = {

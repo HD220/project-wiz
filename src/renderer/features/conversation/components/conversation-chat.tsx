@@ -4,11 +4,13 @@ import { useEffect, useRef, useMemo } from "react";
 
 import { ScrollArea } from "@/renderer/components/ui/scroll-area";
 import { Separator } from "@/renderer/components/ui/separator";
-
-import { useMessages, useSendMessage, useAvailableUsers } from "../hooks";
-
-import { MessageBubble } from "./message-bubble";
-import { MessageInput } from "./message-input";
+import { MessageBubble } from "@/renderer/features/conversation/components/message-bubble";
+import { MessageInput } from "@/renderer/features/conversation/components/message-input";
+import {
+  useMessages,
+  useSendMessage,
+  useAvailableUsers,
+} from "@/renderer/features/conversation/hooks";
 
 interface ConversationChatProps {
   conversationId: string;

@@ -2,6 +2,7 @@ import { ipcMain } from "electron";
 
 import { LlmProviderService } from "@/main/features/agent/llm-provider/llm-provider.service";
 import type { CreateProviderInput } from "@/main/features/agent/llm-provider/llm-provider.types";
+import { AuthService } from "@/main/features/auth/auth.service";
 import type { IpcResponse } from "@/main/types";
 
 /**
@@ -13,6 +14,12 @@ function setupLlmProviderCrudHandlers(): void {
     "llm-providers:create",
     async (_, input: CreateProviderInput): Promise<IpcResponse> => {
       try {
+        // Authentication check for desktop app
+        const activeSession = await AuthService.getActiveSession();
+        if (!activeSession) {
+          throw new Error("User not authenticated");
+        }
+
         const result = await LlmProviderService.create(input);
         return { success: true, data: result };
       } catch (error) {

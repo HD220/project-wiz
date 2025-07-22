@@ -2,12 +2,13 @@ import { useRouteContext } from "@tanstack/react-router";
 import { Plus, MessageCircle } from "lucide-react";
 
 import { Button } from "@/renderer/components/ui/button";
-
-import { useConversations, useAvailableUsers } from "../hooks";
-import { useConversationUIStore } from "../store";
-
-import { ConversationSidebarItem } from "./conversation-sidebar-item";
-import { CreateConversationDialog } from "./create-conversation-dialog";
+import { ConversationSidebarItem } from "@/renderer/features/conversation/components/conversation-sidebar-item";
+import { CreateConversationDialog } from "@/renderer/features/conversation/components/create-conversation-dialog";
+import {
+  useConversations,
+  useAvailableUsers,
+} from "@/renderer/features/conversation/hooks";
+import { useConversationUIStore } from "@/renderer/features/conversation/store";
 
 function ConversationSidebarList() {
   const { auth } = useRouteContext({ from: "__root__" });
@@ -100,7 +101,7 @@ function ConversationSidebarList() {
                   : null
               }
               otherParticipants={otherParticipants}
-              unreadCount={0} // TODO: Get from store when implemented
+              unreadCount={0}
             />
           );
         })}

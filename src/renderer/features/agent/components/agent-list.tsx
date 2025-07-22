@@ -12,13 +12,17 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/renderer/components/ui/select";
-
-import { useAgent, useAgentActions, useAgentFilters } from "../use-agent.hook";
-
-import { AgentDeleteDialog } from "./agent-delete-dialog";
-import { AgentListCard } from "./agent-list-card";
-
-import type { SelectAgent, AgentStatus } from "../agent.types";
+import type {
+  SelectAgent,
+  AgentStatus,
+} from "@/renderer/features/agent/agent.types";
+import { AgentDeleteDialog } from "@/renderer/features/agent/components/agent-delete-dialog";
+import { AgentListCard } from "@/renderer/features/agent/components/agent-list-card";
+import {
+  useAgent,
+  useAgentActions,
+  useAgentFilters,
+} from "@/renderer/features/agent/use-agent.hook";
 
 function AgentList() {
   const { filteredAgents, isLoading, error } = useAgent();

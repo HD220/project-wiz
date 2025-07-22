@@ -6,9 +6,11 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouteContext } from "@tanstack/react-router";
 
-import { messageApi } from "../api";
-
-import type { SendMessageInput, SendMessageMutationResult } from "../types";
+import { messageApi } from "@/renderer/features/conversation/api";
+import type {
+  SendMessageInput,
+  SendMessageMutationResult,
+} from "@/renderer/features/conversation/types";
 
 /**
  * Hook to send messages with optimistic updates and cache invalidation

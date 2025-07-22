@@ -1,5 +1,6 @@
 import { ipcMain } from "electron";
 
+import { AuthService } from "@/main/features/auth/auth.service";
 import { AgentChatWithMemoryService } from "@/main/features/conversation/agent-chat-with-memory.service";
 import { AgentChatService } from "@/main/features/conversation/agent-chat.service";
 import type { SendAgentMessageInput } from "@/main/features/conversation/agent-chat.service";
@@ -14,6 +15,12 @@ function setupConversationHandlers(): void {
     "conversations:create",
     async (_, input: CreateConversationInput): Promise<IpcResponse> => {
       try {
+        // Authentication check for desktop app
+        const activeSession = await AuthService.getActiveSession();
+        if (!activeSession) {
+          throw new Error("User not authenticated");
+        }
+
         const conversation = await ConversationService.create(input);
         return { success: true, data: conversation };
       } catch (error) {
@@ -53,6 +60,12 @@ function setupMessageHandlers(): void {
     "messages:send",
     async (_, input: SendMessageInput): Promise<IpcResponse> => {
       try {
+        // Authentication check for desktop app
+        const activeSession = await AuthService.getActiveSession();
+        if (!activeSession) {
+          throw new Error("User not authenticated");
+        }
+
         const message = await MessageService.send(input);
         return { success: true, data: message };
       } catch (error) {

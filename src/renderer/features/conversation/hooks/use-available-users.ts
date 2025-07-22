@@ -6,7 +6,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useRouteContext } from "@tanstack/react-router";
 
-import { conversationApi } from "../api";
+import { conversationApi } from "@/renderer/features/conversation/api";
 
 /**
  * Hook to get available users for creating conversations

@@ -5,7 +5,10 @@
 
 import type { AuthResult } from "@/main/features/auth/auth.types";
 
-import type { ConversationWithMessages, SendMessageInput } from "../types";
+import type {
+  ConversationWithMessages,
+  SendMessageInput,
+} from "@/renderer/features/conversation/types";
 
 // ===========================
 // MESSAGE API
@@ -32,7 +35,7 @@ export const messageApi = {
         throw new Error("User not authenticated");
       }
 
-      const userId = (userResponse.data as any).id;
+      const userId = userResponse.data?.id;
 
       // Get user's conversations to verify access
       const conversationsResponse =
@@ -41,9 +44,12 @@ export const messageApi = {
         throw new Error("Failed to verify conversation access");
       }
 
-      const conversations = conversationsResponse.data as any[];
+      const conversations = conversationsResponse.data as Array<{
+        id: string;
+        lastMessage?: unknown;
+      }>;
       const conversation = conversations.find(
-        (conv: any) => conv.id === conversationId,
+        (conv) => conv.id === conversationId,
       );
 
       if (!conversation) {
@@ -54,7 +60,7 @@ export const messageApi = {
       const messagesResponse =
         await window.api.messages.getConversationMessages(conversationId);
       const messages = messagesResponse.success
-        ? (messagesResponse.data as any[]) || []
+        ? (messagesResponse.data as Array<unknown>) || []
         : [];
 
       return {
@@ -70,7 +76,7 @@ export const messageApi = {
   /**
    * Send message to conversation
    */
-  async sendMessage(input: SendMessageInput): Promise<any> {
+  async sendMessage(input: SendMessageInput): Promise<unknown> {
     try {
       const response = await window.api.messages.send(input);
       if (!response.success) {

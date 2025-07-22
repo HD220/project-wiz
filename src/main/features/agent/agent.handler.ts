@@ -5,7 +5,7 @@ import type {
   CreateAgentInput,
   AgentStatus,
 } from "@/main/features/agent/agent.types";
-// import { AuthService } from "@/main/features/auth/auth.service"; // TODO: Re-enable when auth context is implemented
+import { AuthService } from "@/main/features/auth/auth.service";
 import type { IpcResponse } from "@/main/types";
 
 /**
@@ -17,12 +17,12 @@ function setupAgentCrudHandlers(): void {
     "agents:create",
     async (_, input: CreateAgentInput): Promise<IpcResponse> => {
       try {
-        // TODO: Re-implement auth check with sessionToken
-        // const currentUser = await AuthService.getCurrentUser(sessionToken);
-        // if (!currentUser) {
-        //   throw new Error("User not authenticated");
-        // }
-        const currentUser = { id: "temp-user-id" }; // Temporary fix
+        // Get session from main process for desktop authentication
+        const activeSession = await AuthService.getActiveSession();
+        if (!activeSession) {
+          throw new Error("User not authenticated");
+        }
+        const currentUser = activeSession.user;
 
         const result = await AgentService.create(input, currentUser.id);
         return {
@@ -91,12 +91,12 @@ function setupAgentQueryHandlers(): void {
   // List agents
   ipcMain.handle("agents:list", async (): Promise<IpcResponse> => {
     try {
-      // TODO: Re-implement auth check with sessionToken
-      // const currentUser = await AuthService.getCurrentUser(sessionToken);
-      // if (!currentUser) {
-      //   throw new Error("User not authenticated");
-      // }
-      const currentUser = { id: "temp-user-id" }; // Temporary fix
+      // Get session from main process for desktop authentication
+      const activeSession = await AuthService.getActiveSession();
+      if (!activeSession) {
+        throw new Error("User not authenticated");
+      }
+      const currentUser = activeSession.user;
 
       const result = await AgentService.findByOwner(currentUser.id);
       return {

@@ -6,9 +6,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { useRouteContext } from "@tanstack/react-router";
 
-import { messageApi } from "../api";
-
-import type { MessagesQueryResult } from "../types";
+import { messageApi } from "@/renderer/features/conversation/api";
+import type { MessagesQueryResult } from "@/renderer/features/conversation/types";
 
 /**
  * Hook to get messages for a specific conversation

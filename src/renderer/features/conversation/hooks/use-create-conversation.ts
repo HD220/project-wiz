@@ -6,9 +6,8 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { getRouteApi } from "@tanstack/react-router";
 
-import { conversationApi } from "../api";
-
-import type { CreateConversationMutationResult } from "../types";
+import { conversationApi } from "@/renderer/features/conversation/api";
+import type { CreateConversationMutationResult } from "@/renderer/features/conversation/types";
 
 const routeApi = getRouteApi("/_authenticated");
 

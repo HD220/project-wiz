@@ -25,12 +25,11 @@ import {
 } from "@/renderer/components/ui/select";
 import { Separator } from "@/renderer/components/ui/separator";
 import { Textarea } from "@/renderer/components/ui/textarea";
-
 import type {
   SelectAgent,
   CreateAgentInput,
   ModelConfig,
-} from "../agent.types";
+} from "@/renderer/features/agent/agent.types";
 
 type FormData = z.infer<typeof createAgentSchema>;
 

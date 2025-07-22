@@ -2,13 +2,14 @@ import { useRouteContext } from "@tanstack/react-router";
 import { Plus } from "lucide-react";
 
 import { Button } from "@/renderer/components/ui/button";
-
-import { useConversations, useAvailableUsers } from "../hooks";
-import { useConversationUIStore } from "../store";
-
-import { ConversationItem } from "./conversation-item";
-import { CreateConversationDialog } from "./create-conversation-dialog";
-import { EmptyConversations } from "./empty-conversations";
+import { ConversationItem } from "@/renderer/features/conversation/components/conversation-item";
+import { CreateConversationDialog } from "@/renderer/features/conversation/components/create-conversation-dialog";
+import { EmptyConversations } from "@/renderer/features/conversation/components/empty-conversations";
+import {
+  useConversations,
+  useAvailableUsers,
+} from "@/renderer/features/conversation/hooks";
+import { useConversationUIStore } from "@/renderer/features/conversation/store";
 
 interface ConversationListProps {
   selectedConversationId?: string;

@@ -6,9 +6,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { getRouteApi } from "@tanstack/react-router";
 
-import { conversationApi } from "../api";
-
-import type { ConversationsQueryResult } from "../types";
+import { conversationApi } from "@/renderer/features/conversation/api";
+import type { ConversationsQueryResult } from "@/renderer/features/conversation/types";
 
 const routeApi = getRouteApi("/_authenticated");
 

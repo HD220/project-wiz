@@ -1,5 +1,6 @@
 import { ipcMain } from "electron";
 
+import { AuthService } from "@/main/features/auth/auth.service";
 import type {
   InsertProject,
   UpdateProject,
@@ -12,6 +13,12 @@ function setupCreateHandler(): void {
     "projects:create",
     async (_, input: InsertProject): Promise<IpcResponse> => {
       try {
+        // Authentication check for desktop app
+        const activeSession = await AuthService.getActiveSession();
+        if (!activeSession) {
+          throw new Error("User not authenticated");
+        }
+
         const result = await ProjectService.create(input);
         return {
           success: true,

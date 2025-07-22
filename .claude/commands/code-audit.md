@@ -38,8 +38,9 @@ For **EVERY SINGLE PROBLEM** you identify, you MUST use deep analytical thinking
 - [ ] **Session management violations** - Must use main process + database
 - [ ] **Missing session cleanup** - Must have automatic expired session removal
 - [ ] **Missing foreign key constraints** - All database relationships must have proper constraints
-- [ ] **Missing database indexes** - All foreign keys and frequently queried columns need indexes
+- [ ] **Missing database indexes** - All foreign keys and frequently queried columns need indexes (fix in \*.model.ts)
 - [ ] **Password security** - Must use bcrypt for hashing
+- [ ] **Direct migration SQL edits** - NEVER edit migration files, only modify \*.model.ts and regenerate
 
 ### **🔍 PRIORITY 2: ARCHITECTURAL VIOLATIONS**
 

@@ -35,13 +35,11 @@ import {
   SelectValue,
 } from "@/renderer/components/ui/select";
 import { Separator } from "@/renderer/components/ui/separator";
-
+import { TestApiButton } from "@/renderer/features/llm-provider/components/test-api-button";
 import {
   useCreateLLMProvider,
   useUpdateLLMProvider,
-} from "../hooks/use-llm-providers";
-
-import { TestApiButton } from "./test-api-button";
+} from "@/renderer/features/llm-provider/hooks/use-llm-providers";
 
 // Simple provider configs for UI
 const PROVIDER_CONFIGS = {
