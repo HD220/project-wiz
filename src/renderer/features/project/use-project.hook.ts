@@ -1,28 +1,49 @@
-// Project hook - Custom React hook for project operations
-// TODO: This hook needs to be refactored to use TanStack Query properly
-// For now, keeping simple interface to avoid breaking changes
-
 import { useParams } from "@tanstack/react-router";
 
-import { useProjectStore } from "./project.store";
+import { useProjectUIStore } from "@/renderer/features/project/project-ui.store";
+import {
+  useFilteredProjects,
+  useProject as useProjectQuery,
+  useProjects,
+} from "@/renderer/features/project/project.queries";
 
 export function useProject() {
-  const store = useProjectStore();
+  const uiStore = useProjectUIStore();
   const params = useParams({ strict: false }) as { projectId?: string };
 
+  // TanStack Query for server state
+  const {
+    data: projects = [],
+    isLoading: projectsLoading,
+    error: projectsError,
+  } = useProjects();
+  const {
+    data: currentProjectData,
+    isLoading: currentProjectLoading,
+    error: currentProjectError,
+  } = useProjectQuery(params.projectId);
+
+  // Filtered projects using TanStack Query data
+  const { filteredProjects, activeProjects, archivedProjects } =
+    useFilteredProjects(uiStore.filters);
+
   return {
-    // Current state from store
-    projects: store.projects,
-    selectedProject: store.selectedProject,
-    isLoading: store.isLoading,
-    error: store.error,
+    // Server state from TanStack Query
+    projects,
+    isLoading: projectsLoading || currentProjectLoading,
+    error: projectsError || currentProjectError,
+
+    // UI state from Zustand
+    selectedProject: uiStore.selectedProject,
+    filters: uiStore.filters,
 
     // Computed values
-    activeProjects: store.getActiveProjects(),
-    archivedProjects: store.getArchivedProjects(),
+    filteredProjects,
+    activeProjects,
+    archivedProjects,
 
-    // Current project from route params
-    currentProject: store.selectedProject,
+    // Current project from route and query
+    currentProject: currentProjectData || uiStore.selectedProject,
     currentProjectId: params.projectId,
 
     // Convenience methods
@@ -30,13 +51,14 @@ export function useProject() {
 
     // Project statistics
     projectStats: {
-      total: store.projects.length,
-      active: store.getActiveProjects().length,
-      archived: store.getArchivedProjects().length,
+      total: projects.length,
+      active: activeProjects.length,
+      archived: archivedProjects.length,
     },
 
-    // Actions
-    loadProjects: store.loadProjects,
-    getProject: store.getProject,
+    // UI actions
+    setSelectedProject: uiStore.setSelectedProject,
+    setFilters: uiStore.setFilters,
+    clearFilters: uiStore.clearFilters,
   };
 }

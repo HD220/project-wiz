@@ -8,14 +8,14 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/renderer/components/ui/dialog";
-import { useAgentStore } from "@/renderer/features/agent/agent.store";
 import type { CreateAgentInput } from "@/renderer/features/agent/agent.types";
 import { AgentForm } from "@/renderer/features/agent/components/agent-form";
+import { useAgentActions } from "@/renderer/features/agent/use-agent.hook";
 
 function NewAgentPage() {
   const navigate = useNavigate();
   const { providers } = Route.useLoaderData();
-  const { createAgent, isLoading } = useAgentStore();
+  const { createAgent, isLoading } = useAgentActions();
 
   function handleClose() {
     navigate({ to: "/user/agents" });

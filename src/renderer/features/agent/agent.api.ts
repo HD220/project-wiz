@@ -3,7 +3,7 @@ import type {
   SelectAgent,
   AgentStatus,
   AgentWithProvider,
-} from "./agent.types";
+} from "@/renderer/features/agent/agent.types";
 
 export class AgentAPI {
   static async create(input: CreateAgentInput): Promise<SelectAgent> {

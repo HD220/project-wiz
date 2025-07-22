@@ -8,9 +8,11 @@ import {
   AvatarImage,
 } from "@/renderer/components/ui/avatar";
 import { Badge } from "@/renderer/components/ui/badge";
-
-import type { ConversationWithParticipants, AuthenticatedUser } from "../types";
-import type { SelectMessage } from "../types";
+import type {
+  ConversationWithParticipants,
+  AuthenticatedUser,
+} from "@/renderer/features/conversation/types";
+import type { SelectMessage } from "@/renderer/features/conversation/types";
 
 interface ConversationItemProps {
   conversation: ConversationWithParticipants;

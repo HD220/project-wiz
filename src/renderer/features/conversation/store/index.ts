@@ -2,4 +2,4 @@
 // STORE EXPORTS
 // ===========================
 
-export { useConversationUIStore } from "./conversation-ui.store";
+export { useConversationUIStore } from "@/renderer/features/conversation/store/conversation-ui.store";

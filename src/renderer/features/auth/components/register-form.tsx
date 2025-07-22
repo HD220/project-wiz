@@ -16,8 +16,7 @@ import {
 } from "@/renderer/components/ui/form";
 import { Input } from "@/renderer/components/ui/input";
 import { useAuth } from "@/renderer/contexts/auth.context";
-
-import { AuthCard } from "./auth-card";
+import { AuthCard } from "@/renderer/features/auth/components/auth-card";
 
 const registerSchema = z
   .object({

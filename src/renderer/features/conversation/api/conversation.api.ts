@@ -8,7 +8,7 @@ import type {
   ConversationWithParticipants,
   CreateConversationInput,
   AuthenticatedUser,
-} from "../types";
+} from "@/renderer/features/conversation/types";
 
 // ===========================
 // AGENT CONVERSION HELPER

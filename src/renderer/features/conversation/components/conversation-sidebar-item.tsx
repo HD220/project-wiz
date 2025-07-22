@@ -9,13 +9,12 @@ import {
   AvatarImage,
 } from "@/renderer/components/ui/avatar";
 import { Badge } from "@/renderer/components/ui/badge";
-import { cn } from "@/renderer/lib/utils";
-
 import type {
   ConversationWithLastMessage,
   AuthenticatedUser,
   SelectMessage,
-} from "../types";
+} from "@/renderer/features/conversation/types";
+import { cn } from "@/renderer/lib/utils";
 
 interface ConversationSidebarItemProps {
   conversation: ConversationWithLastMessage;

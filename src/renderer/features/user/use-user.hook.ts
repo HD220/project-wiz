@@ -1,47 +1,54 @@
-// User hook - Custom React hook for user operations
-
-import { useEffect } from "react";
-
 import { useAuth } from "@/renderer/contexts/auth.context";
-import { useUserStore } from "@/renderer/features/user/user.store";
+import {
+  useUpdateUserTheme,
+  useUserTheme,
+} from "@/renderer/features/user/user.queries";
 
 export function useUser() {
   const auth = useAuth();
-  const user = useUserStore();
+  const {
+    data: theme,
+    isLoading: themeLoading,
+    error: themeError,
+  } = useUserTheme(auth.user?.id);
+  const updateThemeMutation = useUpdateUserTheme();
 
-  // Sync theme when user changes
-  useEffect(() => {
-    if (auth.user && auth.isAuthenticated) {
-      user.setThemeFromUser(auth.user);
-    } else {
-      user.setThemeFromUser(null);
+  const updateTheme = async (theme: string) => {
+    if (!auth.user?.id) {
+      throw new Error("User not authenticated");
     }
-  }, [auth.user, auth.isAuthenticated]);
+
+    return updateThemeMutation.mutateAsync({
+      userId: auth.user.id,
+      theme: theme as any,
+    });
+  };
 
   return {
-    // User data from auth store
+    // User data from auth context
     user: auth.user,
     isAuthenticated: auth.isAuthenticated,
 
-    // Theme data from user store
-    theme: user.theme,
+    // Theme data from TanStack Query
+    theme: theme || "system",
 
     // Loading states
-    isLoading: auth.isLoading || user.isLoading,
+    isLoading: auth.isLoading || themeLoading || updateThemeMutation.isPending,
 
     // Error states
     authError: auth.error,
-    userError: user.error,
+    userError: themeError instanceof Error ? themeError.message : null,
 
     // Actions
-    updateTheme: user.updateTheme,
+    updateTheme,
     clearAuthError: auth.clearError,
-    clearUserError: user.clearError,
+    clearUserError: () => {
+      // TanStack Query handles error clearing via refetch/reset
+    },
 
     // Helper to clear all errors
     clearAllErrors: () => {
       auth.clearError();
-      user.clearError();
     },
   };
 }

@@ -7,9 +7,11 @@ import {
   AvatarFallback,
   AvatarImage,
 } from "@/renderer/components/ui/avatar";
+import type {
+  SelectMessage,
+  AuthenticatedUser,
+} from "@/renderer/features/conversation/types";
 import { cn } from "@/renderer/lib/utils";
-
-import type { SelectMessage, AuthenticatedUser } from "../types";
 
 interface MessageBubbleProps {
   message: SelectMessage;

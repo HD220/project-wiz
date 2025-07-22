@@ -16,10 +16,8 @@ import {
 } from "@/renderer/components/ui/dialog";
 import { Input } from "@/renderer/components/ui/input";
 import { ScrollArea } from "@/renderer/components/ui/scroll-area";
-
-import { useCreateConversation } from "../hooks";
-
-import type { AuthenticatedUser } from "../types";
+import { useCreateConversation } from "@/renderer/features/conversation/hooks";
+import type { AuthenticatedUser } from "@/renderer/features/conversation/types";
 
 interface CreateConversationDialogProps {
   availableUsers: AuthenticatedUser[];

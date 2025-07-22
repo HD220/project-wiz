@@ -7,8 +7,7 @@ import "./globals.css";
 // import { detectLocale, dynamicActivate } from '@/config/i18n';
 
 import { AuthProvider, useAuth } from "@/renderer/contexts/auth.context";
-
-import { routeTree } from "./routeTree.gen";
+import { routeTree } from "@/renderer/routeTree.gen";
 
 // Create a query client
 const queryClient = new QueryClient({

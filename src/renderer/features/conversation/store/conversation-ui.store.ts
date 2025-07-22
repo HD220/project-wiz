@@ -6,7 +6,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
-import type { ConversationUIState } from "../types";
+import type { ConversationUIState } from "@/renderer/features/conversation/types";
 
 interface ConversationUIActions {
   // Conversation selection

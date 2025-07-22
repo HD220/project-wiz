@@ -1,9 +1,8 @@
 import { Hash, Bot } from "lucide-react";
 
 import { Separator } from "@/renderer/components/ui/separator";
+import { NavigationItem } from "@/renderer/features/app/components/navigation-item";
 import { ConversationSidebarList } from "@/renderer/features/conversation/components/conversation-sidebar-list";
-
-import { NavigationItem } from "./navigation-item";
 
 function SidebarNavigation() {
   return (

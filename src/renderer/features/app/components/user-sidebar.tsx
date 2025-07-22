@@ -1,6 +1,6 @@
-import { SidebarHeader } from "./sidebar-header";
-import { SidebarNavigation } from "./sidebar-navigation";
-import { SidebarUserArea } from "./sidebar-user-area";
+import { SidebarHeader } from "@/renderer/features/app/components/sidebar-header";
+import { SidebarNavigation } from "@/renderer/features/app/components/sidebar-navigation";
+import { SidebarUserArea } from "@/renderer/features/app/components/sidebar-user-area";
 
 interface UserSidebarProps {
   className?: string;

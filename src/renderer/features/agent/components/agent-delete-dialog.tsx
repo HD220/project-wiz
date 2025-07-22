@@ -8,8 +8,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/renderer/components/ui/alert-dialog";
-
-import type { SelectAgent } from "../agent.types";
+import type { SelectAgent } from "@/renderer/features/agent/agent.types";
 
 interface AgentDeleteDialogProps {
   agent: SelectAgent | null;

@@ -3,4 +3,4 @@
 // ===========================
 // Clean exports for global hooks
 
-export { useIsMobile } from "./use-mobile";
+export { useIsMobile } from "@/renderer/hooks/use-mobile";

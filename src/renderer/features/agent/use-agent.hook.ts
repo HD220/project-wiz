@@ -1,43 +1,112 @@
 import { useCallback } from "react";
 
-import { useAgentStore } from "@/renderer/features/agent/agent.store";
-import type { AgentStatus } from "@/renderer/features/agent/agent.types";
+import { useAgentUIStore } from "@/renderer/features/agent/agent-ui.store";
+import {
+  useAgents,
+  useAgent as useAgentQuery,
+  useCreateAgent,
+  useUpdateAgent,
+  useDeleteAgent,
+  useUpdateAgentStatus,
+} from "@/renderer/features/agent/agent.queries";
+import type {
+  AgentStatus,
+  CreateAgentInput,
+} from "@/renderer/features/agent/agent.types";
 
 export function useAgent() {
-  const {
-    agents,
-    selectedAgent,
-    isLoading,
-    error,
-    filteredAgents,
-    loadAgents,
-    getAgent,
-    clearError,
-    clearSelectedAgent,
-  } = useAgentStore();
+  const uiStore = useAgentUIStore();
+  const { data: agents = [], isLoading, error } = useAgents();
+
+  // Computed filtered agents
+  const filteredAgents = agents
+    .filter((agent) => {
+      if (uiStore.filters.status && agent.status !== uiStore.filters.status) {
+        return false;
+      }
+
+      if (uiStore.filters.search) {
+        const search = uiStore.filters.search.toLowerCase();
+        if (
+          !agent.name.toLowerCase().includes(search) &&
+          !agent.role.toLowerCase().includes(search)
+        ) {
+          return false;
+        }
+      }
+
+      return true;
+    })
+    .sort(
+      (a, b) =>
+        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+    );
 
   return {
     agents,
-    selectedAgent,
+    selectedAgent: uiStore.selectedAgent,
     isLoading,
     error,
-    filteredAgents: filteredAgents(),
-    loadAgents,
-    getAgent,
-    clearError,
-    clearSelectedAgent,
+    filteredAgents,
+    setSelectedAgent: uiStore.setSelectedAgent,
+    clearSelectedAgent: uiStore.clearSelectedAgent,
   };
 }
 
 export function useAgentActions() {
-  const {
-    createAgent,
-    updateAgent,
-    deleteAgent,
-    updateAgentStatus,
-    isLoading,
-    error,
-  } = useAgentStore();
+  const createAgentMutation = useCreateAgent();
+  const updateAgentMutation = useUpdateAgent();
+  const deleteAgentMutation = useDeleteAgent();
+  const updateStatusMutation = useUpdateAgentStatus();
+
+  const createAgent = useCallback(
+    async (input: CreateAgentInput) => {
+      try {
+        await createAgentMutation.mutateAsync(input);
+        return true;
+      } catch (error) {
+        console.error("Error creating agent:", error);
+        return false;
+      }
+    },
+    [createAgentMutation],
+  );
+
+  const updateAgent = useCallback(
+    async (id: string, updates: Partial<CreateAgentInput>) => {
+      try {
+        await updateAgentMutation.mutateAsync({ id, updates });
+        return true;
+      } catch (error) {
+        return false;
+      }
+    },
+    [updateAgentMutation],
+  );
+
+  const deleteAgent = useCallback(
+    async (id: string) => {
+      try {
+        await deleteAgentMutation.mutateAsync(id);
+        return true;
+      } catch (error) {
+        return false;
+      }
+    },
+    [deleteAgentMutation],
+  );
+
+  const updateAgentStatus = useCallback(
+    async (id: string, status: AgentStatus) => {
+      try {
+        await updateStatusMutation.mutateAsync({ id, status });
+        return true;
+      } catch (error) {
+        return false;
+      }
+    },
+    [updateStatusMutation],
+  );
 
   const toggleAgentStatus = useCallback(
     async (id: string, currentStatus: AgentStatus) => {
@@ -54,34 +123,42 @@ export function useAgentActions() {
     deleteAgent,
     updateAgentStatus,
     toggleAgentStatus,
-    isLoading,
-    error,
+    isLoading:
+      createAgentMutation.isPending ||
+      updateAgentMutation.isPending ||
+      deleteAgentMutation.isPending ||
+      updateStatusMutation.isPending,
+    error:
+      createAgentMutation.error ||
+      updateAgentMutation.error ||
+      deleteAgentMutation.error ||
+      updateStatusMutation.error,
   };
 }
 
 export function useAgentFilters() {
-  const { filters, setFilters } = useAgentStore();
+  const uiStore = useAgentUIStore();
 
   const setStatusFilter = useCallback(
     (status: AgentStatus | undefined) => {
-      setFilters({ status });
+      uiStore.setFilters({ status });
     },
-    [setFilters],
+    [uiStore],
   );
 
   const setSearchFilter = useCallback(
     (search: string) => {
-      setFilters({ search: search.trim() || undefined });
+      uiStore.setFilters({ search: search.trim() || undefined });
     },
-    [setFilters],
+    [uiStore],
   );
 
   const clearFilters = useCallback(() => {
-    setFilters({ status: undefined, search: undefined });
-  }, [setFilters]);
+    uiStore.clearFilters();
+  }, [uiStore]);
 
   return {
-    filters,
+    filters: uiStore.filters,
     setStatusFilter,
     setSearchFilter,
     clearFilters,

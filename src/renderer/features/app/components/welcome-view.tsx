@@ -8,8 +8,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/renderer/components/ui/card";
-
-import { ActivityItem } from "./activity-item";
+import { ActivityItem } from "@/renderer/features/app/components/activity-item";
 
 function WelcomeView() {
   const { auth } = useRouteContext({ from: "__root__" });
