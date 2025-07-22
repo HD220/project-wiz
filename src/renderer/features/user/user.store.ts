@@ -3,7 +3,7 @@ import { create } from "zustand";
 import type { AuthenticatedUser } from "@/main/features/auth/auth.types";
 import type { Theme } from "@/main/features/user/user.types";
 
-import { userApi } from "./user.api";
+import { userApi } from "@/renderer/features/user/user.api";
 
 interface UserState {
   // State

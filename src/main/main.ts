@@ -10,8 +10,7 @@ import { setupAuthHandlers } from "@/main/features/auth/auth.handler";
 import { setupConversationsHandlers } from "@/main/features/conversation/conversation.handler";
 import { setupProjectHandlers } from "@/main/features/project/project.handler";
 import { setupProfileHandlers } from "@/main/features/user/profile.handler";
-
-import { getLogger } from "./utils/logger";
+import { getLogger } from "@/main/utils/logger";
 
 declare const MAIN_WINDOW_VITE_DEV_SERVER_URL: string | undefined;
 declare const MAIN_WINDOW_VITE_NAME: string;

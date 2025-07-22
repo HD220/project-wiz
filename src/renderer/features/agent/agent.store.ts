@@ -1,14 +1,13 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
-import { AgentAPI } from "./agent.api";
-
+import { AgentAPI } from "@/renderer/features/agent/agent.api";
 import type {
   SelectAgent,
   CreateAgentInput,
   AgentStatus,
   AgentFilters,
-} from "./agent.types";
+} from "@/renderer/features/agent/agent.types";
 
 interface AgentState {
   // State

@@ -4,22 +4,22 @@
 // Clean exports for the entire conversation feature
 
 // Types
-export * from "./types";
+export * from "@/renderer/features/conversation/types";
 
 // APIs
-export * from "./api";
+export * from "@/renderer/features/conversation/api";
 
 // Hooks
-export * from "./hooks";
+export * from "@/renderer/features/conversation/hooks";
 
 // Store
-export * from "./store";
+export * from "@/renderer/features/conversation/store";
 
 // Components
-export { ConversationSidebarList } from "./components/conversation-sidebar-list";
-export { ConversationSidebarItem } from "./components/conversation-sidebar-item";
-export { ConversationList } from "./components/conversation-list";
-export { ConversationChat } from "./components/conversation-chat";
-export { MessageInput } from "./components/message-input";
-export { MessageBubble } from "./components/message-bubble";
-export { CreateConversationDialog } from "./components/create-conversation-dialog";
+export { ConversationSidebarList } from "@/renderer/features/conversation/components/conversation-sidebar-list";
+export { ConversationSidebarItem } from "@/renderer/features/conversation/components/conversation-sidebar-item";
+export { ConversationList } from "@/renderer/features/conversation/components/conversation-list";
+export { ConversationChat } from "@/renderer/features/conversation/components/conversation-chat";
+export { MessageInput } from "@/renderer/features/conversation/components/message-input";
+export { MessageBubble } from "@/renderer/features/conversation/components/message-bubble";
+export { CreateConversationDialog } from "@/renderer/features/conversation/components/create-conversation-dialog";

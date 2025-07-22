@@ -1,8 +1,7 @@
 import { useCallback } from "react";
 
-import { useAgentStore } from "./agent.store";
-
-import type { AgentStatus } from "./agent.types";
+import { useAgentStore } from "@/renderer/features/agent/agent.store";
+import type { AgentStatus } from "@/renderer/features/agent/agent.types";
 
 export function useAgent() {
   const {

@@ -3,8 +3,7 @@
 import { useEffect } from "react";
 
 import { useAuth } from "@/renderer/contexts/auth.context";
-
-import { useUserStore } from "./user.store";
+import { useUserStore } from "@/renderer/features/user/user.store";
 
 export function useUser() {
   const auth = useAuth();
