@@ -1,6 +1,8 @@
 import { sql } from "drizzle-orm";
 import { sqliteTable, text, integer } from "drizzle-orm/sqlite-core";
 
+import { usersTable } from "@/main/features/user/user.model";
+
 export type ProjectStatus = "active" | "archived";
 
 export const projectsTable = sqliteTable("projects", {
@@ -13,13 +15,16 @@ export const projectsTable = sqliteTable("projects", {
   gitUrl: text("git_url"),
   branch: text("branch"),
   localPath: text("local_path").notNull(),
+  ownerId: text("owner_id")
+    .notNull()
+    .references(() => usersTable.id, { onDelete: "cascade" }),
   status: text("status").$type<ProjectStatus>().notNull().default("active"),
   createdAt: integer("created_at", { mode: "timestamp" })
     .notNull()
-    .default(sql`CURRENT_TIMESTAMP`),
+    .default(sql`(strftime('%s', 'now'))`),
   updatedAt: integer("updated_at", { mode: "timestamp" })
     .notNull()
-    .default(sql`CURRENT_TIMESTAMP`),
+    .default(sql`(strftime('%s', 'now'))`),
 });
 
 export type SelectProject = typeof projectsTable.$inferSelect;

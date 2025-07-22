@@ -3,36 +3,22 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type {
   SelectProject,
   InsertProject,
-  UpdateProject,
-  ProjectFilters,
-} from "@/main/features/project/project.types";
+} from "@/main/features/project/project.model";
 
-import { projectApi } from "@/renderer/features/project/project.api";
+import { ProjectAPI } from "@/renderer/features/project/project.api";
 
 export function useProjects() {
   return useQuery({
     queryKey: ["projects"],
-    queryFn: () => projectApi.listAll(),
-    select: (response) => {
-      if (response.success && response.data) {
-        return response.data as SelectProject[];
-      }
-      throw new Error(response.error || "Failed to load projects");
-    },
+    queryFn: () => ProjectAPI.listAll(),
   });
 }
 
 export function useProject(id: string | undefined) {
   return useQuery({
     queryKey: ["project", id],
-    queryFn: () => projectApi.findById(id!),
+    queryFn: () => ProjectAPI.findById(id!),
     enabled: !!id,
-    select: (response) => {
-      if (response.success && response.data) {
-        return response.data as SelectProject;
-      }
-      throw new Error(response.error || "Project not found");
-    },
   });
 }
 
@@ -40,15 +26,10 @@ export function useCreateProject() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (input: InsertProject) => projectApi.create(input),
-    onSuccess: (response) => {
-      if (response.success && response.data) {
-        const projectData = response.data as SelectProject;
-        queryClient.invalidateQueries({ queryKey: ["projects"] });
-        queryClient.setQueryData(["project", projectData.id], projectData);
-      } else {
-        throw new Error(response.error || "Failed to create project");
-      }
+    mutationFn: (input: InsertProject) => ProjectAPI.create(input),
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ["projects"] });
+      queryClient.setQueryData(["project", data.id], data);
     },
   });
 }
@@ -57,17 +38,11 @@ export function useUpdateProject() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (input: UpdateProject) => projectApi.update(input),
-    onSuccess: (response, variables) => {
-      if (response.success && response.data) {
-        queryClient.invalidateQueries({ queryKey: ["projects"] });
-        queryClient.setQueryData(
-          ["project", variables.id],
-          response.data as SelectProject,
-        );
-      } else {
-        throw new Error(response.error || "Failed to update project");
-      }
+    mutationFn: ({ id, data }: { id: string; data: Partial<InsertProject> }) =>
+      ProjectAPI.update(id, data),
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ["projects"] });
+      queryClient.setQueryData(["project", data.id], data);
     },
   });
 }
@@ -76,56 +51,22 @@ export function useArchiveProject() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (id: string) => projectApi.archive(id),
-    onSuccess: (response, id) => {
-      if (response.success) {
-        queryClient.invalidateQueries({ queryKey: ["projects"] });
-        queryClient.invalidateQueries({ queryKey: ["project", id] });
-      } else {
-        throw new Error(response.error || "Failed to archive project");
-      }
+    mutationFn: (id: string) => ProjectAPI.archive(id),
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ["projects"] });
+      queryClient.setQueryData(["project", data.id], data);
     },
   });
 }
 
-export function useFilteredProjects(filters: ProjectFilters) {
-  const { data: projects = [] } = useProjects();
+export function useDeleteProject() {
+  const queryClient = useQueryClient();
 
-  const filteredProjects = projects.filter((project) => {
-    if (filters.status && project.status !== filters.status) {
-      return false;
-    }
-
-    if (filters.search) {
-      const searchLower = filters.search.toLowerCase();
-      if (
-        !project.name.toLowerCase().includes(searchLower) &&
-        !project.description?.toLowerCase().includes(searchLower)
-      ) {
-        return false;
-      }
-    }
-
-    if (filters.hasGitUrl !== undefined) {
-      const hasGit = !!project.gitUrl;
-      if (filters.hasGitUrl !== hasGit) {
-        return false;
-      }
-    }
-
-    if (filters.hasLocalPath !== undefined) {
-      const hasLocal = !!project.localPath;
-      if (filters.hasLocalPath !== hasLocal) {
-        return false;
-      }
-    }
-
-    return true;
+  return useMutation({
+    mutationFn: (id: string) => ProjectAPI.delete(id),
+    onSuccess: (_, id) => {
+      queryClient.invalidateQueries({ queryKey: ["projects"] });
+      queryClient.removeQueries({ queryKey: ["project", id] });
+    },
   });
-
-  return {
-    filteredProjects,
-    activeProjects: projects.filter((p) => p.status === "active"),
-    archivedProjects: projects.filter((p) => p.status === "archived"),
-  };
 }

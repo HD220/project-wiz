@@ -80,7 +80,9 @@ export const messageApi = {
         messages,
       } as ConversationWithMessages;
     } catch (error) {
-      console.error("Error loading conversation with messages:", error);
+      const { getLogger } = await import("@/renderer/utils/logger");
+      const logger = getLogger("message-api");
+      logger.error("Error loading conversation with messages:", error);
       throw error;
     }
   },
@@ -97,7 +99,9 @@ export const messageApi = {
 
       return response.data;
     } catch (error) {
-      console.error("Error sending message:", error);
+      const { getLogger } = await import("@/renderer/utils/logger");
+      const logger = getLogger("message-api");
+      logger.error("Error sending message:", error);
       throw error;
     }
   },

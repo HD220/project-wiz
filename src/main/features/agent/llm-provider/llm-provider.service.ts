@@ -15,8 +15,10 @@ import { createProviderSchema } from "@/main/features/agent/llm-provider/llm-pro
 const ENCRYPTION_KEY = process.env["ENCRYPTION_KEY"];
 
 if (!ENCRYPTION_KEY) {
-  console.error(
-    "FATAL: ENCRYPTION_KEY environment variable is required for secure API key storage",
+  const { getLogger } = await import("@/main/utils/logger");
+  const logger = getLogger("llm-provider-service");
+  logger.fatal(
+    "ENCRYPTION_KEY environment variable is required for secure API key storage",
   );
   process.exit(1);
 }

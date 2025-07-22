@@ -1,7 +1,4 @@
-// ===========================
-// CONVERSATION API
-// ===========================
-// Server operations for conversations only
+import type { IpcResponse } from "@/main/types";
 
 import type {
   ConversationWithLastMessage,
@@ -10,119 +7,49 @@ import type {
   AuthenticatedUser,
 } from "@/renderer/features/conversation/types";
 
-// ===========================
-// AGENT CONVERSION HELPER
-// ===========================
+export class ConversationAPI {
+  static async getUserConversations(
+    userId: string,
+  ): Promise<ConversationWithLastMessage[]> {
+    const response: IpcResponse<ConversationWithLastMessage[]> =
+      await window.api.conversations.getUserConversations(userId);
 
-function agentToAuthenticatedUser(agent: any): AuthenticatedUser {
-  return {
-    id: agent.userId,
-    name: agent.name,
-    avatar: null,
-    type: "agent" as const,
-    createdAt: new Date(agent.createdAt),
-    updatedAt: new Date(agent.updatedAt),
-  };
-}
+    if (!response.success) {
+      throw new Error(response.error || "Failed to load conversations");
+    }
 
-async function getAllAgents(): Promise<AuthenticatedUser[]> {
-  try {
-    const response = await window.api.agents.list();
+    return response.data || [];
+  }
+
+  static async createConversation(
+    input: CreateConversationInput,
+  ): Promise<ConversationWithParticipants> {
+    const response: IpcResponse<ConversationWithParticipants> =
+      await window.api.conversations.create(input);
+
+    if (!response.success) {
+      throw new Error(response.error || "Failed to create conversation");
+    }
+
+    return response.data!;
+  }
+
+  static async getAvailableAgents(): Promise<AuthenticatedUser[]> {
+    const response: IpcResponse<any[]> = await window.api.agents.list();
+
     if (!response.success) {
       throw new Error(response.error || "Failed to load agents");
     }
-    const agents = response.data as any[];
-    return agents.map(agentToAuthenticatedUser);
-  } catch (error) {
-    console.error("Error loading agents:", error);
-    return [];
+
+    return (response.data || []).map(
+      (agent: any): AuthenticatedUser => ({
+        id: agent.userId,
+        name: agent.name,
+        avatar: null,
+        type: "agent" as const,
+        createdAt: new Date(agent.createdAt),
+        updatedAt: new Date(agent.updatedAt),
+      }),
+    );
   }
 }
-
-// ===========================
-// CONVERSATION API
-// ===========================
-
-export const conversationApi = {
-  /**
-   * Get all conversations for current user with last message
-   */
-  async getUserConversations(
-    sessionToken: string,
-  ): Promise<ConversationWithLastMessage[]> {
-    try {
-      // Get current user
-      const userResponse = await window.api.auth.getCurrentUser(sessionToken);
-      if (!userResponse.success || !userResponse.data) {
-        throw new Error("User not authenticated");
-      }
-
-      const userId = (userResponse.data as any).id;
-
-      // Get conversations
-      const response =
-        await window.api.conversations.getUserConversations(userId);
-      if (!response.success) {
-        throw new Error(response.error || "Failed to load conversations");
-      }
-
-      return (response.data as ConversationWithLastMessage[]) || [];
-    } catch (error) {
-      console.error("Error loading conversations:", error);
-      throw error;
-    }
-  },
-
-  /**
-   * Create new conversation
-   */
-  async createConversation(
-    participantIds: string[],
-    sessionToken: string,
-  ): Promise<ConversationWithParticipants> {
-    try {
-      // Get current user
-      const userResponse = await window.api.auth.getCurrentUser(sessionToken);
-      if (!userResponse.success || !userResponse.data) {
-        throw new Error("User not authenticated");
-      }
-
-      const currentUserId = (userResponse.data as any).id;
-
-      // Determine conversation name
-      let conversationName = "New Conversation";
-      if (participantIds.length === 1) {
-        const agents = await getAllAgents();
-        const otherUser = agents.find((user) => user.id === participantIds[0]);
-        conversationName = otherUser?.name || "Unknown Agent";
-      } else if (participantIds.length > 1) {
-        conversationName = `Grupo ${participantIds.length + 1} agentes`;
-      }
-
-      const createInput: CreateConversationInput = {
-        name: conversationName,
-        description: null,
-        type: "dm",
-        agentId: null,
-        participantIds: [currentUserId, ...participantIds],
-      };
-
-      const response = await window.api.conversations.create(createInput);
-      if (!response.success) {
-        throw new Error(response.error || "Failed to create conversation");
-      }
-
-      return response.data as ConversationWithParticipants;
-    } catch (error) {
-      console.error("Error creating conversation:", error);
-      throw error;
-    }
-  },
-
-  /**
-   * Get available users for creating conversations (agents only)
-   */
-  async getAvailableUsers(): Promise<AuthenticatedUser[]> {
-    return await getAllAgents();
-  },
-};
