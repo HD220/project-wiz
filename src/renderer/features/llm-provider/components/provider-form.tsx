@@ -20,33 +20,10 @@ import {
 } from "@/renderer/components/ui/dialog";
 import { Form } from "@/renderer/components/ui/form";
 
+import { PROVIDER_CONFIGS } from "../constants";
 import { ProviderFormActions } from "./provider-form-actions";
 import { ProviderConfigSection } from "./provider-form-config-section";
 import { ProviderSettingsSection } from "./provider-form-settings-section";
-
-const PROVIDER_CONFIGS = {
-  openai: { label: "OpenAI", defaultModel: "gpt-4o", requiresBaseUrl: false },
-  deepseek: {
-    label: "DeepSeek",
-    defaultModel: "deepseek-coder",
-    requiresBaseUrl: false,
-  },
-  anthropic: {
-    label: "Anthropic",
-    defaultModel: "claude-3-5-sonnet-20241022",
-    requiresBaseUrl: false,
-  },
-  google: {
-    label: "Google",
-    defaultModel: "gemini-pro",
-    requiresBaseUrl: false,
-  },
-  custom: {
-    label: "Custom",
-    defaultModel: "custom-model",
-    requiresBaseUrl: true,
-  },
-} as const;
 
 type ProviderFormData = {
   name: string;

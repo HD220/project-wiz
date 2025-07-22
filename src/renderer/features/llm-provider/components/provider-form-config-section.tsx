@@ -17,29 +17,7 @@ import {
 } from "@/renderer/components/ui/select";
 import { Separator } from "@/renderer/components/ui/separator";
 
-const PROVIDER_CONFIGS = {
-  openai: { label: "OpenAI", defaultModel: "gpt-4o", requiresBaseUrl: false },
-  deepseek: {
-    label: "DeepSeek",
-    defaultModel: "deepseek-coder",
-    requiresBaseUrl: false,
-  },
-  anthropic: {
-    label: "Anthropic",
-    defaultModel: "claude-3-5-sonnet-20241022",
-    requiresBaseUrl: false,
-  },
-  google: {
-    label: "Google",
-    defaultModel: "gemini-pro",
-    requiresBaseUrl: false,
-  },
-  custom: {
-    label: "Custom",
-    defaultModel: "custom-model",
-    requiresBaseUrl: true,
-  },
-} as const;
+import { PROVIDER_CONFIGS } from "../constants";
 
 interface ProviderConfigSectionProps {
   form: UseFormReturn<any>;
