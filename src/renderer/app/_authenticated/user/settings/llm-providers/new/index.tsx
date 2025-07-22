@@ -1,7 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useRouteContext } from "@tanstack/react-router";
-import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -118,9 +117,9 @@ function NewProviderModal() {
     }
   };
 
-  const handleClose = () => {
+  function handleClose() {
     navigate({ to: "/user/settings/llm-providers" });
-  };
+  }
 
   const showBaseUrl = PROVIDER_CONFIGS[watchedType].requiresBaseUrl;
 

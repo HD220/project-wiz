@@ -134,7 +134,7 @@ export function useTestLLMProvider() {
       if (!response.success) {
         throw new Error(response.error || "Failed to test provider");
       }
-      return response.data as boolean;
+      return response.data?.success ?? false;
     },
   });
 }

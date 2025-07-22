@@ -21,7 +21,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   const [actualTheme, setActualTheme] = useState<"light" | "dark">("dark");
 
   useEffect(() => {
-    const updateTheme = () => {
+    function updateTheme() {
       if (theme === "system") {
         const systemTheme = window.matchMedia("(prefers-color-scheme: dark)")
           .matches
@@ -33,7 +33,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
         setActualTheme(theme);
         document.documentElement.className = theme;
       }
-    };
+    }
 
     updateTheme();
 

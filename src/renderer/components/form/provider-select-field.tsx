@@ -42,10 +42,7 @@ function ProviderSelectField({
   providers,
   filterActive = true,
 }: ProviderSelectFieldProps) {
-  const {
-    field,
-    fieldState: { error },
-  } = useController({
+  const { field } = useController({
     name,
     control,
   });

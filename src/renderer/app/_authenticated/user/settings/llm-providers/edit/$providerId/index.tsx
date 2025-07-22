@@ -1,7 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useRouteContext } from "@tanstack/react-router";
-import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -123,17 +122,9 @@ function EditProviderModal() {
     }
   };
 
-  const handleClose = () => {
+  function handleClose() {
     navigate({ to: "/user/settings/llm-providers" });
-  };
-
-  // Redirect if provider not found
-  useEffect(() => {
-    if (!provider) {
-      toast.error("Provider not found");
-      navigate({ to: "/user/settings/llm-providers" });
-    }
-  }, [provider, navigate]);
+  }
 
   if (!provider) {
     return null;
@@ -340,5 +331,25 @@ function EditProviderModal() {
 export const Route = createFileRoute(
   "/_authenticated/user/settings/llm-providers/edit/$providerId/",
 )({
+  beforeLoad: async ({ context, params }) => {
+    const auth = context.auth;
+    if (!auth.user?.id) {
+      throw new Error("User not authenticated");
+    }
+
+    const response = await window.api.llmProviders.list(auth.user.id);
+    if (!response.success) {
+      throw new Error(response.error || "Failed to load providers");
+    }
+    const provider = response.data?.find(
+      (p: any) => p.id === params.providerId,
+    );
+
+    if (!provider) {
+      throw new Error("Provider not found");
+    }
+
+    return { provider };
+  },
   component: EditProviderModal,
 });

@@ -1,9 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
-import type {
-  LlmProvider,
-  CreateProviderInput,
-} from "@/main/features/agent/llm-provider/llm-provider.types";
+import type { CreateProviderInput } from "@/main/features/agent/llm-provider/llm-provider.types";
 
 import { LlmProviderAPI } from "./llm-provider.api";
 
@@ -20,7 +17,7 @@ export function useCreateLLMProvider() {
 
   return useMutation({
     mutationFn: (input: CreateProviderInput) => LlmProviderAPI.create(input),
-    onSuccess: (data) => {
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["llm-providers"] });
     },
   });

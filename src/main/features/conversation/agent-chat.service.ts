@@ -11,12 +11,10 @@ import { SimplifiedMemoryService } from "@/main/features/agent/memory/memory.ser
 import { ConversationService } from "./conversation.service";
 import { MessageService } from "./message.service";
 
-export interface SendAgentMessageInput {
-  agentId: string;
-  userId: string;
-  content: string;
-  useMemory?: boolean;
-}
+import type { SendAgentMessageInput } from "./conversation.types";
+
+// Re-export for handler usage
+export type { SendAgentMessageInput };
 
 export interface AgentResponse {
   content: string;

@@ -6,8 +6,19 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { getRouteApi } from "@tanstack/react-router";
 
-import { conversationApi } from "@/renderer/features/conversation/api";
-import type { CreateConversationMutationResult } from "@/renderer/features/conversation/types";
+import { ConversationAPI } from "@/renderer/features/conversation/api";
+import type {
+  CreateConversationMutationResult,
+  CreateConversationInput,
+} from "@/renderer/features/conversation/types";
+
+// Hook Input Types
+export type CreateConversationParams = {
+  participantIds: string[];
+  type?: "dm" | "agent_chat";
+  name?: string;
+  agentId?: string;
+};
 
 const routeApi = getRouteApi("/_authenticated");
 
@@ -20,8 +31,20 @@ export function useCreateConversation(): CreateConversationMutationResult {
   const { user, sessionToken } = context.auth;
 
   const mutation = useMutation({
-    mutationFn: (participantIds: string[]) =>
-      conversationApi.createConversation(participantIds, sessionToken!),
+    mutationFn: ({
+      participantIds,
+      type = "dm",
+      name,
+      agentId,
+    }: CreateConversationParams) => {
+      const input: CreateConversationInput = {
+        participantIds,
+        type,
+        name,
+        agentId,
+      };
+      return ConversationAPI.createConversation(input);
+    },
 
     onSuccess: (newConversation) => {
       // Invalidate conversations list to show new conversation
@@ -44,11 +67,15 @@ export function useCreateConversation(): CreateConversationMutationResult {
   });
 
   return {
-    createConversation: async (participantIds: string[]) => {
+    createConversation: async (params: CreateConversationParams | string[]) => {
       if (!sessionToken) {
         throw new Error("Not authenticated");
       }
-      const result = await mutation.mutateAsync(participantIds);
+      // Support both new object format and legacy string array
+      const mutationParams: CreateConversationParams = Array.isArray(params)
+        ? { participantIds: params }
+        : params;
+      const result = await mutation.mutateAsync(mutationParams);
       return result.id;
     },
     isCreating: mutation.isPending,

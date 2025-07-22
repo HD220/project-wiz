@@ -37,10 +37,7 @@ function ModelConfigField({
     topP: 1.0,
   },
 }: ModelConfigFieldProps) {
-  const {
-    field,
-    fieldState: { error },
-  } = useController({
+  const { field } = useController({
     name,
     control,
     defaultValue: JSON.stringify(defaultValue, null, 2),

@@ -37,18 +37,18 @@ function ConversationList(props: ConversationListProps) {
   const isLoading = conversationsLoading || usersLoading;
   const error = conversationsError;
 
-  const handleCreateConversation = () => {
+  function handleCreateConversation() {
     openCreateDialog();
-  };
+  }
 
-  const handleCloseCreateDialog = () => {
+  function handleCloseCreateDialog() {
     closeCreateDialog();
-  };
+  }
 
-  const handleConversationCreated = (conversationId: string) => {
+  function handleConversationCreated(conversationId: string) {
     closeCreateDialog();
     onConversationSelect(conversationId);
-  };
+  }
 
   // Loading skeleton similar to Discord
   if (isLoading) {

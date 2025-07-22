@@ -1,4 +1,4 @@
-import { eq, and, desc, inArray } from "drizzle-orm";
+import { eq, and, inArray, sql } from "drizzle-orm";
 
 import { getDatabase } from "@/main/database/connection";
 import {
@@ -9,6 +9,10 @@ import type {
   SelectConversation,
   InsertConversation,
 } from "@/main/features/conversation/conversation.model";
+import {
+  ConversationWithLastMessage,
+  ConversationWithParticipants,
+} from "@/main/features/conversation/conversation.types";
 import { messagesTable } from "@/main/features/conversation/message.model";
 
 export interface CreateConversationInput
@@ -19,7 +23,7 @@ export interface CreateConversationInput
 export class ConversationService {
   static async create(
     input: CreateConversationInput,
-  ): Promise<import("./conversation.types").ConversationWithParticipants> {
+  ): Promise<ConversationWithParticipants> {
     const db = getDatabase();
 
     const [conversation] = await db
@@ -60,7 +64,7 @@ export class ConversationService {
 
   static async getUserConversations(
     userId: string,
-  ): Promise<import("./conversation.types").ConversationWithLastMessage[]> {
+  ): Promise<ConversationWithLastMessage[]> {
     const db = getDatabase();
 
     // 1. Get all conversation IDs for the user
@@ -123,8 +127,7 @@ export class ConversationService {
     }
 
     // 5. Build the result
-    const result: import("./conversation.types").ConversationWithLastMessage[] =
-      [];
+    const result: ConversationWithLastMessage[] = [];
 
     for (const conversation of conversations) {
       const participants = allParticipants.filter(

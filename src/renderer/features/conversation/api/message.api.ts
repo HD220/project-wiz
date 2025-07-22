@@ -10,6 +10,7 @@ import type {
   ConversationWithLastMessage,
   SendMessageInput,
 } from "@/renderer/features/conversation/types";
+import { getLogger } from "@/renderer/utils/logger";
 
 // ===========================
 // MESSAGE API
@@ -80,7 +81,6 @@ export const messageApi = {
         messages,
       } as ConversationWithMessages;
     } catch (error) {
-      const { getLogger } = await import("@/renderer/utils/logger");
       const logger = getLogger("message-api");
       logger.error("Error loading conversation with messages:", error);
       throw error;
@@ -99,7 +99,6 @@ export const messageApi = {
 
       return response.data;
     } catch (error) {
-      const { getLogger } = await import("@/renderer/utils/logger");
       const logger = getLogger("message-api");
       logger.error("Error sending message:", error);
       throw error;

@@ -50,12 +50,9 @@ function LoginForm(props: LoginFormProps) {
     clearError();
 
     try {
-      console.log("Attempting login with:", data);
       await login(data);
-      console.log("Login successful, navigating...");
       router.navigate({ to: "/user" });
     } catch (error) {
-      console.error("Login error:", error);
       // Error is handled by the store
     }
   };

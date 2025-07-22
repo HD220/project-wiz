@@ -5,6 +5,7 @@ import type {
   CreateAgentInput,
   AgentStatus,
 } from "@/main/features/agent/agent.types";
+import { AuthService } from "@/main/features/auth/auth.service";
 import { withAuthUserId } from "@/main/middleware/auth.middleware";
 import type { IpcResponse } from "@/main/types";
 
@@ -47,7 +48,7 @@ function setupAgentCrudHandlers(): void {
   // Delete agent
   ipcMain.handle(
     "agents:delete",
-    withAuthUserId(async (_, userId, id: string) => {
+    withAuthUserId(async (_, _userId, id: string) => {
       await AgentService.delete(id);
       return { message: "Agent deleted successfully" };
     }),
@@ -68,7 +69,7 @@ function setupAgentQueryHandlers(): void {
       }
       const currentUser = activeSession.user;
 
-      const result = await AgentService.findByOwner(currentUser.id);
+      const result = await AgentService.listByUserId(currentUser.id);
       return {
         success: true,
         data: result,
@@ -105,7 +106,7 @@ function setupAgentQueryHandlers(): void {
     "agents:getWithProvider",
     async (_, id: string): Promise<IpcResponse> => {
       try {
-        const result = await AgentService.findWithProvider(id);
+        const result = await AgentService.getWithProvider(id);
         if (!result) {
           throw new Error("Agent not found");
         }

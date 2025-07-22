@@ -14,7 +14,10 @@ export abstract class CrudService<
   async create(input: TInsert): Promise<TSelect> {
     const db = getDatabase();
 
-    const [record] = await db.insert(this.table).values(input).returning();
+    const [record] = await db
+      .insert(this.table)
+      .values(input as any)
+      .returning();
 
     if (!record) {
       throw new Error("Failed to create record");
@@ -40,7 +43,7 @@ export abstract class CrudService<
 
     const [record] = await db
       .update(this.table)
-      .set(input)
+      .set(input as any)
       .where(eq((this.table as any).id, id))
       .returning();
 

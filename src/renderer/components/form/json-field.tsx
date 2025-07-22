@@ -28,10 +28,7 @@ function JsonField({
   control,
   defaultValue = {},
 }: JsonFieldProps) {
-  const {
-    field,
-    fieldState: { error },
-  } = useController({
+  const { field } = useController({
     name,
     control,
     defaultValue: JSON.stringify(defaultValue, null, 2),

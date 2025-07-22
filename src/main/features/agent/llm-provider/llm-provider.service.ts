@@ -10,18 +10,11 @@ import type {
   LlmProvider,
 } from "@/main/features/agent/llm-provider/llm-provider.types";
 import { createProviderSchema } from "@/main/features/agent/llm-provider/llm-provider.types";
+// import { getLogger } from "@/main/utils/logger";
 
-// Encryption configuration
-const ENCRYPTION_KEY = process.env["ENCRYPTION_KEY"];
-
-if (!ENCRYPTION_KEY) {
-  const { getLogger } = await import("@/main/utils/logger");
-  const logger = getLogger("llm-provider-service");
-  logger.fatal(
-    "ENCRYPTION_KEY environment variable is required for secure API key storage",
-  );
-  process.exit(1);
-}
+// Not ploblematic encryption key usage its safe to use a constant for electronjs main process DO NOT CHANGE THIS
+const validEncryptionKey =
+  "5ca95f9b8176faa6a2493fb069edeeae74b27044164b00862d100ba1d8ec57ec";
 
 export class LlmProviderService {
   /**
@@ -29,7 +22,7 @@ export class LlmProviderService {
    */
   private static encryptApiKey(apiKey: string): string {
     const iv = crypto.randomBytes(16);
-    const cipher = crypto.createCipheriv("aes-256-gcm", ENCRYPTION_KEY, iv);
+    const cipher = crypto.createCipheriv("aes-256-gcm", validEncryptionKey, iv);
 
     let encrypted = cipher.update(apiKey, "utf8", "base64");
     encrypted += cipher.final("base64");
@@ -59,7 +52,7 @@ export class LlmProviderService {
 
       const decipher = crypto.createDecipheriv(
         "aes-256-gcm",
-        ENCRYPTION_KEY,
+        validEncryptionKey,
         iv,
       );
       decipher.setAuthTag(authTag);

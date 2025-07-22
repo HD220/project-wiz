@@ -79,7 +79,8 @@ function setupUpdateHandler(): void {
     "projects:update",
     async (_, input: UpdateProject): Promise<IpcResponse> => {
       try {
-        const result = await ProjectService.update(input);
+        const { id, ...updateData } = input;
+        const result = await ProjectService.update(id, updateData);
         return {
           success: true,
           data: result,

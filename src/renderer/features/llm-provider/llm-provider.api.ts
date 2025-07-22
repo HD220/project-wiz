@@ -2,12 +2,10 @@ import type {
   LlmProvider,
   CreateProviderInput,
 } from "@/main/features/agent/llm-provider/llm-provider.types";
-import type { IpcResponse } from "@/main/types";
 
 export class LlmProviderAPI {
   static async create(input: CreateProviderInput): Promise<LlmProvider> {
-    const response: IpcResponse<LlmProvider> =
-      await window.api.llmProviders.create(input);
+    const response = await window.api.llmProviders.create(input);
 
     if (!response.success) {
       throw new Error(response.error || "Failed to create provider");
@@ -20,8 +18,7 @@ export class LlmProviderAPI {
     id: string,
     input: Partial<CreateProviderInput>,
   ): Promise<LlmProvider> {
-    const response: IpcResponse<LlmProvider> =
-      await window.api.llmProviders.update(id, input);
+    const response = await window.api.llmProviders.update(id, input);
 
     if (!response.success) {
       throw new Error(response.error || "Failed to update provider");
@@ -31,8 +28,7 @@ export class LlmProviderAPI {
   }
 
   static async delete(id: string): Promise<void> {
-    const response: IpcResponse<void> =
-      await window.api.llmProviders.delete(id);
+    const response = await window.api.llmProviders.delete(id);
 
     if (!response.success) {
       throw new Error(response.error || "Failed to delete provider");
@@ -40,8 +36,7 @@ export class LlmProviderAPI {
   }
 
   static async list(userId: string): Promise<LlmProvider[]> {
-    const response: IpcResponse<LlmProvider[]> =
-      await window.api.llmProviders.list(userId);
+    const response = await window.api.llmProviders.list(userId);
 
     if (!response.success) {
       throw new Error(response.error || "Failed to list providers");
@@ -51,8 +46,11 @@ export class LlmProviderAPI {
   }
 
   static async testConnection(input: CreateProviderInput): Promise<boolean> {
-    const response: IpcResponse<{ success: boolean }> =
-      await window.api.llmProviders.test(input);
+    const response = await window.api.llmProviders.testApiKey(
+      input.type as "openai" | "deepseek" | "anthropic" | "google" | "custom",
+      input.apiKey,
+      input.baseUrl || undefined,
+    );
 
     if (!response.success) {
       throw new Error(response.error || "Failed to test provider");

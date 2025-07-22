@@ -32,10 +32,10 @@ function ConversationSidebarList() {
       .map((p: any) => p.participantId);
   };
 
-  const handleConversationCreated = () => {
+  function handleConversationCreated() {
     closeCreateDialog();
     // Navigation will be handled by the parent component
-  };
+  }
 
   // Loading skeleton - Discord style
   if (isLoading) {

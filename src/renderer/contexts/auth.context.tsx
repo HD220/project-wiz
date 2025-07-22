@@ -46,17 +46,17 @@ function AuthProvider({ children }: AuthProviderProps) {
     refetchOnWindowFocus: false,
   });
 
-  const clearAuthState = () => {
+  function clearAuthState() {
     setUser(null);
     setSessionToken(null);
     setError(null);
     // Invalidate auth queries when clearing state
     queryClient.invalidateQueries({ queryKey: ["auth"] });
-  };
+  }
 
-  const clearError = () => {
+  function clearError() {
     setError(null);
-  };
+  }
 
   const login = async (credentials: { username: string; password: string }) => {
     setError(null);

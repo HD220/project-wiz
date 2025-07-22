@@ -8,17 +8,18 @@ interface TitlebarProps {
 
 function Titlebar(props: TitlebarProps) {
   const { title = "Project Wiz", className } = props;
-  const handleMinimize = () => {
+
+  function handleMinimize() {
     window.electronAPI?.window.minimize();
-  };
+  }
 
-  const handleMaximize = () => {
+  function handleMaximize() {
     window.electronAPI?.window.toggleMaximize();
-  };
+  }
 
-  const handleClose = () => {
+  function handleClose() {
     window.electronAPI?.window.close();
-  };
+  }
 
   return (
     <div

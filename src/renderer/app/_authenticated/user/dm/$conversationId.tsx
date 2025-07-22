@@ -3,7 +3,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { ContentHeader } from "@/renderer/features/app/components/content-header";
 import {
   messageApi,
-  conversationApi,
+  ConversationAPI,
 } from "@/renderer/features/conversation/api";
 import { ConversationChat } from "@/renderer/features/conversation/components/conversation-chat";
 
@@ -65,7 +65,7 @@ export const Route = createFileRoute("/_authenticated/user/dm/$conversationId")(
       // Fetch conversation with messages and available users in parallel
       const [conversation, availableUsers] = await Promise.all([
         messageApi.getConversationWithMessages(conversationId),
-        conversationApi.getAvailableUsers(),
+        ConversationAPI.getAvailableUsers(),
       ]);
 
       return {

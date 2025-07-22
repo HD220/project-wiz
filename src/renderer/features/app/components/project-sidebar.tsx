@@ -162,7 +162,7 @@ function ProjectSidebar(props: ProjectSidebarProps) {
                 className="w-full justify-start px-2 h-8 text-sm font-normal text-muted-foreground hover:text-foreground hover:bg-accent"
               >
                 <Users className="w-4 h-4 mr-2 text-muted-foreground" />
-                Ver todos os membros
+                View all members
               </Button>
             </CollapsibleContent>
           </Collapsible>

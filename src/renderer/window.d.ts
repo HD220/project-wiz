@@ -1,8 +1,13 @@
 import type {
   CreateAgentInput,
   AgentStatus,
+  SelectAgent,
+  AgentWithProvider,
 } from "@/main/features/agent/agent.types";
-import type { CreateProviderInput } from "@/main/features/agent/llm-provider/llm-provider.types";
+import type {
+  CreateProviderInput,
+  LlmProvider,
+} from "@/main/features/agent/llm-provider/llm-provider.types";
 import type {
   MemoryCreationInput,
   MemoryUpdateInput,
@@ -11,16 +16,26 @@ import type {
 import type {
   LoginCredentials,
   RegisterUserInput,
+  AuthResult,
+  AuthenticatedUser,
 } from "@/main/features/auth/auth.types";
-import type { SendAgentMessageInput } from "@/main/features/conversation/agent-chat.service";
-import type { CreateConversationInput } from "@/main/features/conversation/conversation.service";
-import type { SendMessageInput } from "@/main/features/conversation/message.service";
 import type {
   InsertProject,
   UpdateProject,
-} from "@/main/features/project/project.model";
-import type { Theme } from "@/main/features/user/profile.model";
+  SelectProject,
+} from "@/main/features/project/project.types";
+import type { Theme } from "@/main/features/user/user.types";
 import type { IpcResponse } from "@/main/types";
+
+import type {
+  SendAgentMessageInput,
+  CreateConversationInput,
+  SendMessageInput,
+  SelectConversation,
+  SelectMessage,
+  ConversationWithLastMessage,
+  ConversationWithParticipants,
+} from "@/renderer/features/conversation/types";
 
 declare global {
   interface Window {
@@ -31,78 +46,102 @@ declare global {
 
       // Authentication API
       auth: {
-        register: (input: RegisterUserInput) => Promise<IpcResponse>;
-        login: (credentials: LoginCredentials) => Promise<IpcResponse>;
-        getCurrentUser: (sessionToken: string) => Promise<IpcResponse>;
-        getActiveSession: () => Promise<IpcResponse>;
-        logout: (sessionToken: string) => Promise<IpcResponse>;
-        isLoggedIn: (sessionToken: string) => Promise<IpcResponse>;
-        getUserById: (userId: string) => Promise<IpcResponse>;
+        register: (
+          input: RegisterUserInput,
+        ) => Promise<IpcResponse<AuthResult>>;
+        login: (
+          credentials: LoginCredentials,
+        ) => Promise<IpcResponse<AuthResult>>;
+        getCurrentUser: (
+          sessionToken: string,
+        ) => Promise<IpcResponse<AuthenticatedUser>>;
+        getActiveSession: () => Promise<IpcResponse<AuthResult>>;
+        logout: (sessionToken: string) => Promise<IpcResponse<void>>;
+        isLoggedIn: (sessionToken: string) => Promise<IpcResponse<boolean>>;
+        getUserById: (
+          userId: string,
+        ) => Promise<IpcResponse<AuthenticatedUser>>;
       };
 
       // Profile API
       profile: {
-        getTheme: (userId: string) => Promise<IpcResponse>;
-        updateTheme: (userId: string, theme: Theme) => Promise<IpcResponse>;
+        getTheme: (userId: string) => Promise<IpcResponse<{ theme: Theme }>>;
+        updateTheme: (
+          userId: string,
+          theme: Theme,
+        ) => Promise<IpcResponse<{ theme: Theme }>>;
       };
 
       // Projects API
       projects: {
-        create: (input: InsertProject) => Promise<IpcResponse>;
-        findById: (id: string) => Promise<IpcResponse>;
-        listAll: () => Promise<IpcResponse>;
-        update: (input: UpdateProject) => Promise<IpcResponse>;
-        archive: (id: string) => Promise<IpcResponse>;
+        create: (input: InsertProject) => Promise<IpcResponse<SelectProject>>;
+        findById: (id: string) => Promise<IpcResponse<SelectProject | null>>;
+        listAll: () => Promise<IpcResponse<SelectProject[]>>;
+        update: (input: UpdateProject) => Promise<IpcResponse<SelectProject>>;
+        archive: (id: string) => Promise<IpcResponse<SelectProject>>;
       };
 
       // Conversations API
       conversations: {
-        create: (input: CreateConversationInput) => Promise<IpcResponse>;
-        getUserConversations: (userId: string) => Promise<IpcResponse>;
+        create: (
+          input: CreateConversationInput,
+        ) => Promise<IpcResponse<ConversationWithParticipants>>;
+        getUserConversations: (
+          userId: string,
+        ) => Promise<IpcResponse<ConversationWithLastMessage[]>>;
       };
 
       // Messages API
       messages: {
-        send: (input: SendMessageInput) => Promise<IpcResponse>;
+        send: (input: SendMessageInput) => Promise<IpcResponse<SelectMessage>>;
         getConversationMessages: (
           conversationId: string,
-        ) => Promise<IpcResponse>;
+        ) => Promise<IpcResponse<SelectMessage[]>>;
       };
 
       // LLM Providers API
       llmProviders: {
-        create: (input: CreateProviderInput) => Promise<IpcResponse>;
-        list: (userId: string) => Promise<IpcResponse>;
-        getById: (id: string) => Promise<IpcResponse>;
+        create: (
+          input: CreateProviderInput,
+        ) => Promise<IpcResponse<LlmProvider>>;
+        list: (userId: string) => Promise<IpcResponse<LlmProvider[]>>;
+        getById: (id: string) => Promise<IpcResponse<LlmProvider | null>>;
         update: (
           id: string,
           updates: Partial<CreateProviderInput>,
-        ) => Promise<IpcResponse>;
-        delete: (id: string) => Promise<IpcResponse>;
+        ) => Promise<IpcResponse<LlmProvider>>;
+        delete: (id: string) => Promise<IpcResponse<void>>;
         setDefault: (
           providerId: string,
           userId: string,
-        ) => Promise<IpcResponse>;
-        getDefault: (userId: string) => Promise<IpcResponse>;
+        ) => Promise<IpcResponse<LlmProvider>>;
+        getDefault: (
+          userId: string,
+        ) => Promise<IpcResponse<LlmProvider | null>>;
         testApiKey: (
           type: "openai" | "deepseek" | "anthropic" | "google" | "custom",
           apiKey: string,
           baseUrl?: string,
-        ) => Promise<IpcResponse>;
+        ) => Promise<IpcResponse<{ success: boolean }>>;
       };
 
       // Agents API
       agents: {
-        create: (input: CreateAgentInput) => Promise<IpcResponse>;
-        list: () => Promise<IpcResponse>;
-        get: (id: string) => Promise<IpcResponse>;
-        getWithProvider: (id: string) => Promise<IpcResponse>;
-        updateStatus: (id: string, status: AgentStatus) => Promise<IpcResponse>;
+        create: (input: CreateAgentInput) => Promise<IpcResponse<SelectAgent>>;
+        list: () => Promise<IpcResponse<SelectAgent[]>>;
+        get: (id: string) => Promise<IpcResponse<SelectAgent | null>>;
+        getWithProvider: (
+          id: string,
+        ) => Promise<IpcResponse<AgentWithProvider | null>>;
+        updateStatus: (
+          id: string,
+          status: AgentStatus,
+        ) => Promise<IpcResponse<{ message: string }>>;
         update: (
           id: string,
           updates: Partial<CreateAgentInput>,
-        ) => Promise<IpcResponse>;
-        delete: (id: string) => Promise<IpcResponse>;
+        ) => Promise<IpcResponse<SelectAgent>>;
+        delete: (id: string) => Promise<IpcResponse<{ message: string }>>;
       };
 
       // Agent Chat API

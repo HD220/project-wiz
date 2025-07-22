@@ -107,7 +107,7 @@ export function withAuthUserId<TArgs extends any[], TReturn>(
 export function withAuthUser<TArgs extends any[], TReturn>(
   handler: (
     event: IpcMainInvokeEvent,
-    user: { id: string; email: string; name: string },
+    user: { id: string; name: string; avatar?: string | null },
     ...args: TArgs
   ) => Promise<TReturn>,
 ) {

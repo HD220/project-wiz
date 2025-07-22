@@ -69,6 +69,7 @@ export interface SendAgentMessageInput {
   agentId: string;
   userId: string;
   content: string;
+  useMemory?: boolean;
 }
 
 // Query filters

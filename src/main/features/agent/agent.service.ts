@@ -1,4 +1,4 @@
-import { eq, and, desc, sql } from "drizzle-orm";
+import { eq, and, desc } from "drizzle-orm";
 
 import { getDatabase } from "@/main/database/connection";
 import { agentsTable } from "@/main/features/agent/agent.model";
@@ -12,7 +12,6 @@ import type {
 import { createAgentSchema } from "@/main/features/agent/agent.types";
 import { llmProvidersTable } from "@/main/features/agent/llm-provider/llm-provider.model";
 import { CrudService } from "@/main/features/base/crud.service";
-import { usersTable } from "@/main/features/user/user.model";
 
 export class AgentService extends CrudService<
   typeof agentsTable,

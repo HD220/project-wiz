@@ -1,7 +1,6 @@
 import { ipcMain } from "electron";
 
 import { AuthService } from "@/main/features/auth/auth.service";
-import { AgentChatWithMemoryService } from "@/main/features/conversation/agent-chat-with-memory.service";
 import { AgentChatService } from "@/main/features/conversation/agent-chat.service";
 import type { SendAgentMessageInput } from "@/main/features/conversation/agent-chat.service";
 import { ConversationService } from "@/main/features/conversation/conversation.service";
@@ -140,8 +139,7 @@ function setupAgentChatHandlers(): void {
     "agent-chat:sendMessageWithMemory",
     async (_, input: SendAgentMessageInput): Promise<IpcResponse> => {
       try {
-        const response =
-          await AgentChatWithMemoryService.sendMessageToAgent(input);
+        const response = await AgentChatService.sendMessageToAgent(input);
         return { success: true, data: response };
       } catch (error) {
         return {

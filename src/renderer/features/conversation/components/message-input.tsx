@@ -25,7 +25,7 @@ function MessageInput(props: MessageInputProps) {
   const [message, setMessage] = useState("");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  const handleSend = async () => {
+  async function handleSend() {
     const trimmedMessage = message.trim();
     if (!trimmedMessage || isSending || disabled) return;
 
@@ -41,24 +41,24 @@ function MessageInput(props: MessageInputProps) {
     } catch (error) {
       console.error("Failed to send message:", error);
     }
-  };
+  }
 
-  const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
+  function handleKeyDown(e: KeyboardEvent<HTMLTextAreaElement>) {
     // Send on Enter (but not Shift+Enter)
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       handleSend();
     }
-  };
+  }
 
-  const handleTextareaChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+  function handleTextareaChange(e: React.ChangeEvent<HTMLTextAreaElement>) {
     setMessage(e.target.value);
 
     // Auto-resize textarea
     const textarea = e.target;
     textarea.style.height = "auto";
     textarea.style.height = `${Math.min(textarea.scrollHeight, 120)}px`;
-  };
+  }
 
   const canSend = message.trim().length > 0 && !isSending && !disabled;
 

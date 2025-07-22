@@ -1,13 +1,11 @@
 import type {
   SelectProject,
   InsertProject,
-} from "@/main/features/project/project.model";
-import type { IpcResponse } from "@/main/types";
+} from "@/main/features/project/project.types";
 
 export class ProjectAPI {
   static async create(input: InsertProject): Promise<SelectProject> {
-    const response: IpcResponse<SelectProject> =
-      await window.api.projects.create(input);
+    const response = await window.api.projects.create(input);
 
     if (!response.success) {
       throw new Error(response.error || "Failed to create project");
@@ -17,33 +15,29 @@ export class ProjectAPI {
   }
 
   static async findById(id: string): Promise<SelectProject | null> {
-    const response: IpcResponse<SelectProject | null> =
-      await window.api.projects.findById(id);
+    const response = await window.api.projects.findById(id);
 
     if (!response.success) {
       throw new Error(response.error || "Failed to get project");
     }
 
-    return response.data!;
+    return response.data || null;
   }
 
   static async listAll(): Promise<SelectProject[]> {
-    const response: IpcResponse<SelectProject[]> =
-      await window.api.projects.listAll();
+    const response = await window.api.projects.listAll();
 
     if (!response.success) {
       throw new Error(response.error || "Failed to list projects");
     }
 
-    return response.data!;
+    return response.data || [];
   }
 
   static async update(
-    id: string,
-    input: Partial<InsertProject>,
+    input: { id: string } & Partial<InsertProject>,
   ): Promise<SelectProject> {
-    const response: IpcResponse<SelectProject> =
-      await window.api.projects.update(id, input);
+    const response = await window.api.projects.update(input);
 
     if (!response.success) {
       throw new Error(response.error || "Failed to update project");
@@ -53,8 +47,7 @@ export class ProjectAPI {
   }
 
   static async archive(id: string): Promise<SelectProject> {
-    const response: IpcResponse<SelectProject> =
-      await window.api.projects.archive(id);
+    const response = await window.api.projects.archive(id);
 
     if (!response.success) {
       throw new Error(response.error || "Failed to archive project");
@@ -63,11 +56,8 @@ export class ProjectAPI {
     return response.data!;
   }
 
-  static async delete(id: string): Promise<void> {
-    const response: IpcResponse<void> = await window.api.projects.delete(id);
-
-    if (!response.success) {
-      throw new Error(response.error || "Failed to delete project");
-    }
-  }
+  // Delete is not available in the API - use archive instead
+  // static async delete(id: string): Promise<void> {
+  //   Archive the project instead of deleting
+  // }
 }

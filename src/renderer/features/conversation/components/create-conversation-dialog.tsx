@@ -37,13 +37,13 @@ function CreateConversationDialog(props: CreateConversationDialogProps) {
     user.name.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
-  const handleUserToggle = (userId: string) => {
+  function handleUserToggle(userId: string) {
     setSelectedUserIds((prev) =>
       prev.includes(userId)
         ? prev.filter((id) => id !== userId)
         : [...prev, userId],
     );
-  };
+  }
 
   const handleCreateConversation = async () => {
     if (selectedUserIds.length === 0) return;

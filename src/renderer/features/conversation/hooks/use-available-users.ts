@@ -6,7 +6,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useRouteContext } from "@tanstack/react-router";
 
-import { conversationApi } from "@/renderer/features/conversation/api";
+import { ConversationAPI } from "@/renderer/features/conversation/api";
 
 /**
  * Hook to get available users for creating conversations
@@ -18,7 +18,7 @@ export function useAvailableUsers() {
 
   const query = useQuery({
     queryKey: ["available-users"],
-    queryFn: conversationApi.getAvailableUsers,
+    queryFn: ConversationAPI.getAvailableUsers,
     enabled: isAuthenticated && !!user,
     staleTime: 1000 * 60 * 10, // 10 minutes (users don't change often)
     gcTime: 1000 * 60 * 30, // 30 minutes
