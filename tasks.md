@@ -10,33 +10,33 @@ Here is a detailed checklist of tasks based on the provided code audit report, o
 
 This phase focuses on addressing critical issues, security vulnerabilities, and major code duplications with the highest business impact and quick wins.
 
-**1. Security Vulnerability - Encryption Key (Critical)**
+**1. Security Vulnerability - Encryption Key (Critical)** ✅
 
-- [ ] Update `src/main/features/agent/llm-provider/llm-provider.service.ts` (lines 14-15) to remove the fallback for `ENCRYPTION_KEY`.
-- [ ] Ensure `process.env["ENCRYPTION_KEY"]` is explicitly checked, and the application exits if it's not defined.
+- [x] Update `src/main/features/agent/llm-provider/llm-provider.service.ts` (lines 14-15) to remove the fallback for `ENCRYPTION_KEY`.
+- [x] Ensure `process.env["ENCRYPTION_KEY"]` is explicitly checked, and the application exits if it's not defined.
 
-**2. Over-Engineered Memory System Simplification (Critical YAGNI Violation)**
+**2. Over-Engineered Memory System Simplification (Critical YAGNI Violation)** ✅
 
-- [ ] Refactor `src/main/features/agent/memory/memory.service.ts` to remove unnecessary complexity.
-- [ ] Reduce `memory.service.ts` from 470+ lines to an estimated 50-100 lines.
-- [ ] Implement a simplified `store` method in `SimplifiedMemoryService` for basic memory storage.
-- [ ] Implement a simplified `retrieve` method in `SimplifiedMemoryService` to fetch memories ordered by creation date.
-- [ ] Remove all unused relevance scoring factors (15+ factors) and complex algorithms (e.g., `calculateRelevanceScore`).
-- [ ] Remove unused memory relation system (200+ lines).
-- [ ] Remove auto-pruning functionality if not required.
+- [x] Refactor `src/main/features/agent/memory/memory.service.ts` to remove unnecessary complexity.
+- [x] Reduce `memory.service.ts` from 470+ lines to an estimated 50-100 lines (now 117 lines).
+- [x] Implement a simplified `store` method in `SimplifiedMemoryService` for basic memory storage.
+- [x] Implement a simplified `retrieve` method in `SimplifiedMemoryService` to fetch memories ordered by creation date.
+- [x] Remove all unused relevance scoring factors (15+ factors) and complex algorithms (e.g., `calculateRelevanceScore`).
+- [x] Remove unused memory relation system (200+ lines).
+- [x] Remove auto-pruning functionality if not required.
 
-**3. Duplicate Agent Chat Services Merging (Critical DRY Violation)**
+**3. Duplicate Agent Chat Services Merging (Critical DRY Violation)** ✅
 
-- [ ] Merge `src/main/features/conversation/agent-chat.service.ts` and `src/main/features/conversation/agent-chat-with-memory.service.ts` into a single unified service.
-- [ ] Create a single `AgentChatService` class.
-- [ ] Implement a `generateResponse` method with an optional `useMemory` flag to conditionally include memory logic.
-- [ ] Remove the redundant service file after merging.
+- [x] Merge `src/main/features/conversation/agent-chat.service.ts` and `src/main/features/conversation/agent-chat-with-memory.service.ts` into a single unified service.
+- [x] Create a single `AgentChatService` class.
+- [x] Implement a `generateResponse` method with an optional `useMemory` flag to conditionally include memory logic.
+- [x] Remove the redundant service file after merging.
 
-**4. `useEffect` Violations for Form Loading (High Priority)**
+**4. `useEffect` Violations for Form Loading (High Priority)** ✅
 
-- [ ] Review `src/renderer/features/agent/components/agent-form.tsx` (lines 75-79) and other files for `useEffect` violations related to form state management.
-- [ ] Replace `useEffect` logic with `defaultValues` in `useForm` from `react-hook-form`.
-- [ ] Apply this fix to all 6 identified instances of `useEffect` violations.
+- [x] Review `src/renderer/features/agent/components/agent-form.tsx` (lines 75-79) and other files for `useEffect` violations related to form state management.
+- [x] Replace `useEffect` logic with `defaultValues` in `useForm` from `react-hook-form`.
+- [x] Apply this fix to all 6 identified instances of `useEffect` violations.
 
 ---
 
@@ -44,30 +44,30 @@ This phase focuses on addressing critical issues, security vulnerabilities, and 
 
 This phase focuses on standardizing patterns, improving code reusability, and optimizing database interactions.
 
-**1. Generic CRUD Service Implementation (High Priority)**
+**1. Generic CRUD Service Implementation (High Priority)** ✅
 
-- [ ] Create an abstract `CrudService` class to encapsulate common CRUD operations (`create`, `findById`, `update`, `delete`).
-- [ ] Define abstract `table` property within `CrudService`.
-- [ ] Refactor existing services (e.g., `ProjectService`) to extend `CrudService`.
-- [ ] Eliminate ~75% of CRUD code duplication across services (identified as 8 instances).
+- [x] Create an abstract `CrudService` class to encapsulate common CRUD operations (`create`, `findById`, `update`, `delete`).
+- [x] Define abstract `table` property within `CrudService`.
+- [x] Refactor existing services (e.g., `ProjectService`, `AgentService`) to extend `CrudService`.
+- [x] Eliminate ~75% of CRUD code duplication across services (identified as 8 instances).
 
-**2. Centralized Constants File (Medium Priority)**
+**2. Centralized Constants File (Medium Priority)** ✅
 
-- [ ] Create a dedicated constants file (e.g., `constants/ai-defaults.ts`).
-- [ ] Extract all "magic numbers" (e.g., `temperature: 0.7`, `maxTokens: 4000`, `daysSinceAccess / 30`) into named constants within this file.
-- [ ] Replace hardcoded values with references to these constants in all 20+ identified instances.
+- [x] Create a dedicated constants file (e.g., `constants/ai-defaults.ts`).
+- [x] Extract all "magic numbers" (e.g., `temperature: 0.7`, `maxTokens: 4000`, `daysSinceAccess / 30`) into named constants within this file.
+- [x] Replace hardcoded values with references to these constants in all 20+ identified instances.
 
-**3. Authentication Middleware for IPC Handlers (Medium Priority)**
+**3. Authentication Middleware for IPC Handlers (Medium Priority)** ✅
 
-- [ ] Create a generic `withAuth` middleware function in `middleware/auth.ts`.
-- [ ] Encapsulate the `AuthService.getActiveSession()` check within this middleware.
-- [ ] Apply this `withAuth` middleware to all 8+ IPC handlers that currently duplicate authentication checks.
+- [x] Create a generic `withAuth` middleware function in `middleware/auth.ts`.
+- [x] Encapsulate the `AuthService.getActiveSession()` check within this middleware.
+- [x] Apply this `withAuth` middleware to all 8+ IPC handlers that currently duplicate authentication checks.
 
-**4. N+1 Query Optimization for Conversations (Performance Improvement)**
+**4. N+1 Query Optimization for Conversations (Performance Improvement)** ✅
 
-- [ ] Refactor `src/main/features/conversation/conversation.service.ts` (lines 94-108).
-- [ ] Replace the inefficient approach of fetching all messages and filtering in JavaScript.
-- [ ] Implement SQL window functions (e.g., `ROW_NUMBER() OVER (PARTITION BY ... ORDER BY ... DESC)`) to retrieve conversations with their latest message efficiently.
+- [x] Refactor `src/main/features/conversation/conversation.service.ts` (lines 94-108).
+- [x] Replace the inefficient approach of fetching all messages and filtering in JavaScript.
+- [x] Implement SQL window functions (e.g., `ROW_NUMBER() OVER (PARTITION BY ... ORDER BY ... DESC)`) to retrieve conversations with their latest message efficiently.
 
 **5. Standardize Data Loading Patterns (DX Critical)**
 

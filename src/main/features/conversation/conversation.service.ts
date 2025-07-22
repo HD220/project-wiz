@@ -91,19 +91,34 @@ export class ConversationService {
         inArray(conversationParticipantsTable.conversationId, conversationIds),
       );
 
-    // 4. Get latest message for each conversation
-    // We'll use a more efficient approach: get all messages and find the latest per conversation
-    const allMessages = await db
-      .select()
+    // 4. Get latest message for each conversation using window function
+    const latestMessages = await db
+      .select({
+        id: messagesTable.id,
+        conversationId: messagesTable.conversationId,
+        content: messagesTable.content,
+        authorId: messagesTable.authorId,
+        createdAt: messagesTable.createdAt,
+        updatedAt: messagesTable.updatedAt,
+        rn: sql<number>`ROW_NUMBER() OVER (PARTITION BY ${messagesTable.conversationId} ORDER BY ${messagesTable.createdAt} DESC)`.as(
+          "rn",
+        ),
+      })
       .from(messagesTable)
-      .where(inArray(messagesTable.conversationId, conversationIds))
-      .orderBy(desc(messagesTable.createdAt));
+      .where(inArray(messagesTable.conversationId, conversationIds));
 
-    // Group messages by conversation and find the latest
+    // Filter to get only the latest message per conversation
     const latestMessagesMap = new Map();
-    for (const message of allMessages) {
-      if (!latestMessagesMap.has(message.conversationId)) {
-        latestMessagesMap.set(message.conversationId, message);
+    for (const message of latestMessages) {
+      if (message.rn === 1) {
+        latestMessagesMap.set(message.conversationId, {
+          id: message.id,
+          conversationId: message.conversationId,
+          content: message.content,
+          authorId: message.authorId,
+          createdAt: message.createdAt,
+          updatedAt: message.updatedAt,
+        });
       }
     }
 

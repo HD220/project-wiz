@@ -12,7 +12,14 @@ import type {
 import { createProviderSchema } from "@/main/features/agent/llm-provider/llm-provider.types";
 
 // Encryption configuration
-const ENCRYPTION_KEY = process.env["ENCRYPTION_KEY"] || crypto.randomBytes(32);
+const ENCRYPTION_KEY = process.env["ENCRYPTION_KEY"];
+
+if (!ENCRYPTION_KEY) {
+  console.error(
+    "FATAL: ENCRYPTION_KEY environment variable is required for secure API key storage",
+  );
+  process.exit(1);
+}
 
 export class LlmProviderService {
   /**

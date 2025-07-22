@@ -85,7 +85,7 @@ function NewProviderModal() {
       type: "openai",
       apiKey: "",
       baseUrl: "",
-      defaultModel: "gpt-4o",
+      defaultModel: PROVIDER_CONFIGS["openai"].defaultModel,
       isDefault: false,
       isActive: true,
     },
@@ -93,17 +93,6 @@ function NewProviderModal() {
 
   const watchedType = form.watch("type");
   const watchedApiKey = form.watch("apiKey");
-
-  // Update default model when provider type changes
-  useEffect(() => {
-    const newDefaultModel = PROVIDER_CONFIGS[watchedType].defaultModel;
-    form.setValue("defaultModel", newDefaultModel);
-
-    // Clear base URL if not required for new type
-    if (!PROVIDER_CONFIGS[watchedType].requiresBaseUrl) {
-      form.setValue("baseUrl", "");
-    }
-  }, [watchedType, form]);
 
   const onSubmit = async (data: FormData) => {
     try {

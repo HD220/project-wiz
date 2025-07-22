@@ -3,6 +3,7 @@ import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
+import { AI_DEFAULTS, MODEL_DEFAULTS } from "@/main/constants/ai-defaults";
 import { createAgentSchema } from "@/main/features/agent/agent.types";
 
 import { Button } from "@/renderer/components/ui/button";
@@ -51,9 +52,9 @@ function AgentForm(props: AgentFormProps) {
   // Default model configuration
   const defaultModelConfig: ModelConfig = {
     model: "gpt-4o",
-    temperature: 0.7,
-    maxTokens: 4000,
-    topP: 0.9,
+    temperature: AI_DEFAULTS.TEMPERATURE,
+    maxTokens: AI_DEFAULTS.MAX_TOKENS,
+    topP: AI_DEFAULTS.TOP_P,
   };
 
   const form = useForm<FormData>({
@@ -63,20 +64,14 @@ function AgentForm(props: AgentFormProps) {
       role: initialData?.role || "",
       backstory: initialData?.backstory || "",
       goal: initialData?.goal || "",
-      providerId: initialData?.providerId || defaultProvider?.id || "",
+      providerId:
+        initialData?.providerId || (!isEditing && defaultProvider?.id) || "",
       modelConfig:
         initialData?.modelConfig || JSON.stringify(defaultModelConfig),
       status: "inactive", // Always default to inactive
       avatar: initialData ? "" : "", // Avatar from form
     },
   });
-
-  // Set default provider when providers load
-  useEffect(() => {
-    if (!isEditing && defaultProvider && !form.getValues("providerId")) {
-      form.setValue("providerId", defaultProvider.id);
-    }
-  }, [defaultProvider, isEditing, form]);
 
   async function handleSubmit(data: FormData) {
     await onSubmit(data as CreateAgentInput);

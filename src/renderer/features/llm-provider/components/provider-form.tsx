@@ -110,7 +110,9 @@ function ProviderForm(props: ProviderFormProps) {
       type: provider?.type || "openai",
       apiKey: provider?.apiKey || "",
       baseUrl: provider?.baseUrl || undefined,
-      defaultModel: provider?.defaultModel || "gpt-4o",
+      defaultModel:
+        provider?.defaultModel ||
+        PROVIDER_CONFIGS[provider?.type || "openai"].defaultModel,
       isDefault: provider?.isDefault || false,
       isActive: provider?.isActive ?? true,
     },
@@ -118,19 +120,6 @@ function ProviderForm(props: ProviderFormProps) {
 
   const watchedType = form.watch("type");
   const watchedApiKey = form.watch("apiKey");
-
-  // Update default model when provider type changes
-  useEffect(() => {
-    if (!isEditing) {
-      const newDefaultModel = PROVIDER_CONFIGS[watchedType].defaultModel;
-      form.setValue("defaultModel", newDefaultModel);
-
-      // Clear base URL if not required for new type
-      if (!PROVIDER_CONFIGS[watchedType].requiresBaseUrl) {
-        form.setValue("baseUrl", "");
-      }
-    }
-  }, [watchedType, form, isEditing]);
 
   const onSubmit = async (data: ProviderFormData) => {
     try {
