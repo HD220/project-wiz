@@ -1,4 +1,4 @@
-import { Hash } from "lucide-react";
+import { Hash, Bot } from "lucide-react";
 
 import { Separator } from "@/renderer/components/ui/separator";
 
@@ -13,6 +13,12 @@ function SidebarNavigation() {
         icon={Hash}
         label="Dashboard"
         activeOptions={{ exact: true }}
+      />
+
+      <NavigationItem
+        to="/user/agents"
+        icon={Bot}
+        label="Agents"
       />
 
       <Separator className="my-2" />
