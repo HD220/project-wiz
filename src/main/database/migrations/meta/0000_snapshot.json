@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "ceb49cf7-ea87-4fb1-8a59-82c9c2e63e29",
+  "id": "32731e0f-a264-4c27-b414-84e22c6a6c18",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "agents": {
@@ -95,7 +95,23 @@
           "default": "(strftime('%s', 'now'))"
         }
       },
-      "indexes": {},
+      "indexes": {
+        "agents_user_id_idx": {
+          "name": "agents_user_id_idx",
+          "columns": ["user_id"],
+          "isUnique": false
+        },
+        "agents_provider_id_idx": {
+          "name": "agents_provider_id_idx",
+          "columns": ["provider_id"],
+          "isUnique": false
+        },
+        "agents_status_idx": {
+          "name": "agents_status_idx",
+          "columns": ["status"],
+          "isUnique": false
+        }
+      },
       "foreignKeys": {
         "agents_user_id_users_id_fk": {
           "name": "agents_user_id_users_id_fk",
@@ -206,7 +222,28 @@
           "default": "(strftime('%s', 'now'))"
         }
       },
-      "indexes": {},
+      "indexes": {
+        "llm_providers_user_id_idx": {
+          "name": "llm_providers_user_id_idx",
+          "columns": ["user_id"],
+          "isUnique": false
+        },
+        "llm_providers_type_idx": {
+          "name": "llm_providers_type_idx",
+          "columns": ["type"],
+          "isUnique": false
+        },
+        "llm_providers_is_default_idx": {
+          "name": "llm_providers_is_default_idx",
+          "columns": ["is_default"],
+          "isUnique": false
+        },
+        "llm_providers_is_active_idx": {
+          "name": "llm_providers_is_active_idx",
+          "columns": ["is_active"],
+          "isUnique": false
+        }
+      },
       "foreignKeys": {
         "llm_providers_user_id_users_id_fk": {
           "name": "llm_providers_user_id_users_id_fk",
@@ -352,7 +389,78 @@
           "default": "(strftime('%s', 'now'))"
         }
       },
-      "indexes": {},
+      "indexes": {
+        "agent_memories_agent_id_idx": {
+          "name": "agent_memories_agent_id_idx",
+          "columns": ["agent_id"],
+          "isUnique": false
+        },
+        "agent_memories_user_id_idx": {
+          "name": "agent_memories_user_id_idx",
+          "columns": ["user_id"],
+          "isUnique": false
+        },
+        "agent_memories_conversation_id_idx": {
+          "name": "agent_memories_conversation_id_idx",
+          "columns": ["conversation_id"],
+          "isUnique": false
+        },
+        "agent_memories_type_idx": {
+          "name": "agent_memories_type_idx",
+          "columns": ["type"],
+          "isUnique": false
+        },
+        "agent_memories_importance_idx": {
+          "name": "agent_memories_importance_idx",
+          "columns": ["importance"],
+          "isUnique": false
+        },
+        "agent_memories_importance_score_idx": {
+          "name": "agent_memories_importance_score_idx",
+          "columns": ["importance_score"],
+          "isUnique": false
+        },
+        "agent_memories_access_count_idx": {
+          "name": "agent_memories_access_count_idx",
+          "columns": ["access_count"],
+          "isUnique": false
+        },
+        "agent_memories_last_accessed_at_idx": {
+          "name": "agent_memories_last_accessed_at_idx",
+          "columns": ["last_accessed_at"],
+          "isUnique": false
+        },
+        "agent_memories_is_archived_idx": {
+          "name": "agent_memories_is_archived_idx",
+          "columns": ["is_archived"],
+          "isUnique": false
+        },
+        "agent_memories_created_at_idx": {
+          "name": "agent_memories_created_at_idx",
+          "columns": ["created_at"],
+          "isUnique": false
+        },
+        "agent_memories_agent_user_idx": {
+          "name": "agent_memories_agent_user_idx",
+          "columns": ["agent_id", "user_id"],
+          "isUnique": false
+        },
+        "agent_memories_agent_type_idx": {
+          "name": "agent_memories_agent_type_idx",
+          "columns": ["agent_id", "type"],
+          "isUnique": false
+        },
+        "agent_memories_agent_importance_idx": {
+          "name": "agent_memories_agent_importance_idx",
+          "columns": ["agent_id", "importance"],
+          "isUnique": false
+        },
+        "agent_memories_user_conversation_idx": {
+          "name": "agent_memories_user_conversation_idx",
+          "columns": ["user_id", "conversation_id"],
+          "isUnique": false
+        }
+      },
       "foreignKeys": {
         "agent_memories_agent_id_agents_id_fk": {
           "name": "agent_memories_agent_id_agents_id_fk",
@@ -434,7 +542,38 @@
           "default": "(strftime('%s', 'now'))"
         }
       },
-      "indexes": {},
+      "indexes": {
+        "memory_relations_source_memory_id_idx": {
+          "name": "memory_relations_source_memory_id_idx",
+          "columns": ["source_memory_id"],
+          "isUnique": false
+        },
+        "memory_relations_target_memory_id_idx": {
+          "name": "memory_relations_target_memory_id_idx",
+          "columns": ["target_memory_id"],
+          "isUnique": false
+        },
+        "memory_relations_relation_type_idx": {
+          "name": "memory_relations_relation_type_idx",
+          "columns": ["relation_type"],
+          "isUnique": false
+        },
+        "memory_relations_strength_idx": {
+          "name": "memory_relations_strength_idx",
+          "columns": ["strength"],
+          "isUnique": false
+        },
+        "memory_relations_source_relation_idx": {
+          "name": "memory_relations_source_relation_idx",
+          "columns": ["source_memory_id", "relation_type"],
+          "isUnique": false
+        },
+        "memory_relations_target_relation_idx": {
+          "name": "memory_relations_target_relation_idx",
+          "columns": ["target_memory_id", "relation_type"],
+          "isUnique": false
+        }
+      },
       "foreignKeys": {
         "memory_relations_source_memory_id_agent_memories_id_fk": {
           "name": "memory_relations_source_memory_id_agent_memories_id_fk",
@@ -512,6 +651,16 @@
           "name": "accounts_username_unique",
           "columns": ["username"],
           "isUnique": true
+        },
+        "accounts_username_idx": {
+          "name": "accounts_username_idx",
+          "columns": ["username"],
+          "isUnique": false
+        },
+        "accounts_user_id_idx": {
+          "name": "accounts_user_id_idx",
+          "columns": ["user_id"],
+          "isUnique": false
         }
       },
       "foreignKeys": {
@@ -574,9 +723,34 @@
           "name": "user_sessions_token_unique",
           "columns": ["token"],
           "isUnique": true
+        },
+        "user_sessions_token_idx": {
+          "name": "user_sessions_token_idx",
+          "columns": ["token"],
+          "isUnique": false
+        },
+        "user_sessions_user_id_idx": {
+          "name": "user_sessions_user_id_idx",
+          "columns": ["user_id"],
+          "isUnique": false
+        },
+        "user_sessions_expires_at_idx": {
+          "name": "user_sessions_expires_at_idx",
+          "columns": ["expires_at"],
+          "isUnique": false
         }
       },
-      "foreignKeys": {},
+      "foreignKeys": {
+        "user_sessions_user_id_users_id_fk": {
+          "name": "user_sessions_user_id_users_id_fk",
+          "tableFrom": "user_sessions",
+          "tableTo": "users",
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},
       "checkConstraints": {}
@@ -622,7 +796,23 @@
           "default": "CURRENT_TIMESTAMP"
         }
       },
-      "indexes": {},
+      "indexes": {
+        "conversation_participants_conversation_id_idx": {
+          "name": "conversation_participants_conversation_id_idx",
+          "columns": ["conversation_id"],
+          "isUnique": false
+        },
+        "conversation_participants_participant_id_idx": {
+          "name": "conversation_participants_participant_id_idx",
+          "columns": ["participant_id"],
+          "isUnique": false
+        },
+        "conversation_participants_conversation_participant_idx": {
+          "name": "conversation_participants_conversation_participant_idx",
+          "columns": ["conversation_id", "participant_id"],
+          "isUnique": false
+        }
+      },
       "foreignKeys": {
         "conversation_participants_conversation_id_conversations_id_fk": {
           "name": "conversation_participants_conversation_id_conversations_id_fk",
@@ -703,7 +893,23 @@
           "default": "CURRENT_TIMESTAMP"
         }
       },
-      "indexes": {},
+      "indexes": {
+        "conversations_agent_id_idx": {
+          "name": "conversations_agent_id_idx",
+          "columns": ["agent_id"],
+          "isUnique": false
+        },
+        "conversations_type_idx": {
+          "name": "conversations_type_idx",
+          "columns": ["type"],
+          "isUnique": false
+        },
+        "conversations_created_at_idx": {
+          "name": "conversations_created_at_idx",
+          "columns": ["created_at"],
+          "isUnique": false
+        }
+      },
       "foreignKeys": {
         "conversations_agent_id_agents_id_fk": {
           "name": "conversations_agent_id_agents_id_fk",
@@ -774,7 +980,23 @@
           "default": "CURRENT_TIMESTAMP"
         }
       },
-      "indexes": {},
+      "indexes": {
+        "llm_messages_message_id_idx": {
+          "name": "llm_messages_message_id_idx",
+          "columns": ["message_id"],
+          "isUnique": false
+        },
+        "llm_messages_role_idx": {
+          "name": "llm_messages_role_idx",
+          "columns": ["role"],
+          "isUnique": false
+        },
+        "llm_messages_created_at_idx": {
+          "name": "llm_messages_created_at_idx",
+          "columns": ["created_at"],
+          "isUnique": false
+        }
+      },
       "foreignKeys": {
         "llm_messages_message_id_messages_id_fk": {
           "name": "llm_messages_message_id_messages_id_fk",
@@ -838,7 +1060,28 @@
           "default": "CURRENT_TIMESTAMP"
         }
       },
-      "indexes": {},
+      "indexes": {
+        "messages_conversation_id_idx": {
+          "name": "messages_conversation_id_idx",
+          "columns": ["conversation_id"],
+          "isUnique": false
+        },
+        "messages_author_id_idx": {
+          "name": "messages_author_id_idx",
+          "columns": ["author_id"],
+          "isUnique": false
+        },
+        "messages_created_at_idx": {
+          "name": "messages_created_at_idx",
+          "columns": ["created_at"],
+          "isUnique": false
+        },
+        "messages_conversation_time_idx": {
+          "name": "messages_conversation_time_idx",
+          "columns": ["conversation_id", "created_at"],
+          "isUnique": false
+        }
+      },
       "foreignKeys": {
         "messages_conversation_id_conversations_id_fk": {
           "name": "messages_conversation_id_conversations_id_fk",
@@ -915,6 +1158,13 @@
           "notNull": true,
           "autoincrement": false
         },
+        "owner_id": {
+          "name": "owner_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
         "status": {
           "name": "status",
           "type": "text",
@@ -929,7 +1179,7 @@
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false,
-          "default": "CURRENT_TIMESTAMP"
+          "default": "(strftime('%s', 'now'))"
         },
         "updated_at": {
           "name": "updated_at",
@@ -937,11 +1187,21 @@
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false,
-          "default": "CURRENT_TIMESTAMP"
+          "default": "(strftime('%s', 'now'))"
         }
       },
       "indexes": {},
-      "foreignKeys": {},
+      "foreignKeys": {
+        "projects_owner_id_users_id_fk": {
+          "name": "projects_owner_id_users_id_fk",
+          "tableFrom": "projects",
+          "tableTo": "users",
+          "columnsFrom": ["owner_id"],
+          "columnsTo": ["id"],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},
       "checkConstraints": {}
@@ -988,7 +1248,18 @@
           "default": "CURRENT_TIMESTAMP"
         }
       },
-      "indexes": {},
+      "indexes": {
+        "user_preferences_user_id_idx": {
+          "name": "user_preferences_user_id_idx",
+          "columns": ["user_id"],
+          "isUnique": false
+        },
+        "user_preferences_theme_idx": {
+          "name": "user_preferences_theme_idx",
+          "columns": ["theme"],
+          "isUnique": false
+        }
+      },
       "foreignKeys": {
         "user_preferences_user_id_users_id_fk": {
           "name": "user_preferences_user_id_users_id_fk",

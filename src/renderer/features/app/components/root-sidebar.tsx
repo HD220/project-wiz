@@ -1,4 +1,5 @@
 import { Link, useRouteContext } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
 import { Plus, Settings } from "lucide-react";
 
 import { CustomLink } from "@/renderer/components/custom-link";
@@ -12,6 +13,7 @@ import {
   TooltipTrigger,
 } from "@/renderer/components/ui/tooltip";
 import { cn } from "@/renderer/lib/utils";
+import type { SelectProject } from "@/main/features/project/project.types";
 
 interface Server {
   id: string;

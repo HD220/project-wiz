@@ -3,14 +3,10 @@ import { useRouteContext, useRouter } from "@tanstack/react-router";
 import { useMutation } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import { z } from "zod";
 
 import type { CreateProviderInput } from "@/main/features/agent/llm-provider/llm-provider.types";
 
-import type {
-  LlmProvider,
-  ProviderType,
-} from "@/main/features/agent/llm-provider/llm-provider.types";
+import type { LlmProvider } from "@/main/features/agent/llm-provider/llm-provider.types";
 
 import {
   Dialog,
@@ -20,20 +16,14 @@ import {
 } from "@/renderer/components/ui/dialog";
 import { Form } from "@/renderer/components/ui/form";
 
-import { PROVIDER_CONFIGS } from "../constants";
+import {
+  PROVIDER_CONFIGS,
+  providerFormSchema,
+  type ProviderFormData,
+} from "../constants";
 import { ProviderFormActions } from "./provider-form-actions";
 import { ProviderConfigSection } from "./provider-form-config-section";
 import { ProviderSettingsSection } from "./provider-form-settings-section";
-
-type ProviderFormData = {
-  name: string;
-  type: ProviderType;
-  apiKey: string;
-  baseUrl?: string;
-  defaultModel: string;
-  isDefault: boolean;
-  isActive: boolean;
-};
 
 interface ProviderFormProps {
   provider?: LlmProvider | null;
@@ -50,13 +40,22 @@ function ProviderForm(props: ProviderFormProps) {
   const createProviderMutation = useMutation({
     mutationFn: (data: CreateProviderInput) =>
       window.api.llmProviders.create(data),
-    onSuccess: () => {
-      toast.success("Provider created successfully");
-      router.invalidate(); // Refresh route data
-      onClose();
+    onSuccess: (response) => {
+      if (response.success) {
+        toast.success("Provider created successfully");
+        // Only invalidate specific queries instead of all routes
+        router.invalidate({
+          filter: (route) => route.includes("/settings/llm-providers"),
+        });
+        onClose();
+      } else {
+        toast.error(response.error || "Failed to create provider");
+      }
     },
-    onError: () => {
-      toast.error("Failed to create provider");
+    onError: (error) => {
+      const errorMessage =
+        error instanceof Error ? error.message : "Failed to create provider";
+      toast.error(errorMessage);
     },
   });
 
@@ -68,13 +67,22 @@ function ProviderForm(props: ProviderFormProps) {
       id: string;
       data: Partial<CreateProviderInput>;
     }) => window.api.llmProviders.update(id, data),
-    onSuccess: () => {
-      toast.success("Provider updated successfully");
-      router.invalidate(); // Refresh route data
-      onClose();
+    onSuccess: (response) => {
+      if (response.success) {
+        toast.success("Provider updated successfully");
+        // Only invalidate specific queries instead of all routes
+        router.invalidate({
+          filter: (route) => route.includes("/settings/llm-providers"),
+        });
+        onClose();
+      } else {
+        toast.error(response.error || "Failed to update provider");
+      }
     },
-    onError: () => {
-      toast.error("Failed to update provider");
+    onError: (error) => {
+      const errorMessage =
+        error instanceof Error ? error.message : "Failed to update provider";
+      toast.error(errorMessage);
     },
   });
 
@@ -84,17 +92,7 @@ function ProviderForm(props: ProviderFormProps) {
   const isEditing = !!provider;
 
   const form = useForm<ProviderFormData>({
-    resolver: zodResolver(
-      z.object({
-        name: z.string().min(1, "Provider name is required"),
-        type: z.enum(["openai", "deepseek", "anthropic", "google", "custom"]),
-        apiKey: z.string().min(1, "API key is required"),
-        baseUrl: z.string().url("Invalid URL").optional().or(z.literal("")),
-        defaultModel: z.string().min(1, "Default model is required"),
-        isDefault: z.boolean().default(false),
-        isActive: z.boolean().default(true),
-      }),
-    ),
+    resolver: zodResolver(providerFormSchema),
     defaultValues: {
       name: provider?.name || "",
       type: provider?.type || "openai",
@@ -153,9 +151,6 @@ function ProviderForm(props: ProviderFormProps) {
             />
             <ProviderSettingsSection form={form} />
             <ProviderFormActions
-              watchedType={watchedType}
-              watchedApiKey={watchedApiKey}
-              baseUrl={form.watch("baseUrl")}
               isLoading={isLoading}
               isEditing={isEditing}
               onClose={onClose}

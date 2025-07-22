@@ -17,10 +17,10 @@ import {
 } from "@/renderer/components/ui/select";
 import { Separator } from "@/renderer/components/ui/separator";
 
-import { PROVIDER_CONFIGS } from "../constants";
+import { PROVIDER_CONFIGS, type ProviderFormData } from "../constants";
 
 interface ProviderConfigSectionProps {
-  form: UseFormReturn<any>;
+  form: UseFormReturn<ProviderFormData>;
   isEditing: boolean;
   watchedType: string;
 }

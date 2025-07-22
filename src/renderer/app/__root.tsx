@@ -6,6 +6,9 @@ import type { AuthContextValue } from "@/renderer/contexts/auth.context";
 
 interface RouterContext {
   auth: AuthContextValue;
+  // Enhanced context from _authenticated route
+  user?: AuthContextValue["user"];
+  isAuthenticated?: boolean;
 }
 
 function RootComponent() {

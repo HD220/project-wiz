@@ -31,15 +31,9 @@ function LLMProvidersLayout() {
 export const Route = createFileRoute(
   "/_authenticated/user/settings/llm-providers",
 )({
-  beforeLoad: ({ context }) => {
-    const { auth } = context;
-    if (!auth.user) {
-      throw new Error("User not authenticated");
-    }
-  },
   loader: async ({ context }) => {
-    const { auth } = context;
-    const response = await window.api.llmProviders.list(auth.user!.id);
+    const { user } = context; // Access user from enhanced context
+    const response = await window.api.llmProviders.list(user.id);
     if (!response.success) {
       throw new Error(response.error || "Failed to load providers");
     }

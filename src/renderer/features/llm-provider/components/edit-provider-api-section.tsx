@@ -1,5 +1,7 @@
 import { UseFormReturn } from "react-hook-form";
 
+import type { ProviderType } from "@/main/features/agent/llm-provider/llm-provider.types";
+
 import {
   FormControl,
   FormField,
@@ -13,7 +15,7 @@ import { PROVIDER_CONFIGS, type ProviderFormData } from "../constants";
 
 interface EditProviderApiSectionProps {
   form: UseFormReturn<ProviderFormData>;
-  watchedType: string;
+  watchedType: ProviderType;
 }
 
 function EditProviderApiSection(props: EditProviderApiSectionProps) {

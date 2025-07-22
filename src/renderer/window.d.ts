@@ -118,11 +118,6 @@ declare global {
         getDefault: (
           userId: string,
         ) => Promise<IpcResponse<LlmProvider | null>>;
-        testApiKey: (
-          type: "openai" | "deepseek" | "anthropic" | "google" | "custom",
-          apiKey: string,
-          baseUrl?: string,
-        ) => Promise<IpcResponse<{ success: boolean }>>;
       };
 
       // Agents API

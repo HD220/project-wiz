@@ -49,13 +49,8 @@ function DMLayout() {
 export const Route = createFileRoute("/_authenticated/user/dm/$conversationId")(
   {
     loader: async ({ params, context }) => {
-      const { auth } = context;
-      const { user } = auth;
+      const { user } = context; // Access user from enhanced context
       const { conversationId } = params;
-
-      if (!user?.id) {
-        throw new Error("User not authenticated");
-      }
 
       // SIMPLE: Direct window.api calls
       const conversationsResponse =

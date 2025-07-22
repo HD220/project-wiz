@@ -170,44 +170,9 @@ function setupLlmProviderDefaultHandlers(): void {
 }
 
 /**
- * Setup LLM provider validation handlers
- */
-function setupLlmProviderValidationHandlers(): void {
-  // Test API key
-  ipcMain.handle(
-    "llm-providers:testApiKey",
-    async (
-      _,
-      type: "openai" | "deepseek" | "anthropic" | "google" | "custom",
-      apiKey: string,
-      baseUrl?: string,
-    ): Promise<IpcResponse> => {
-      try {
-        const result = await LlmProviderService.testApiKey(
-          type,
-          apiKey,
-          baseUrl,
-        );
-        return {
-          success: true,
-          data: result,
-        };
-      } catch (error) {
-        return {
-          success: false,
-          error:
-            error instanceof Error ? error.message : "Failed to test API key",
-        };
-      }
-    },
-  );
-}
-
-/**
  * Setup LLM provider IPC handlers
  */
 export function setupLlmProviderHandlers(): void {
   setupLlmProviderCrudHandlers();
   setupLlmProviderDefaultHandlers();
-  setupLlmProviderValidationHandlers();
 }

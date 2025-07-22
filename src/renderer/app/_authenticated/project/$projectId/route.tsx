@@ -20,7 +20,35 @@ function ProjectLayout() {
 
 export const Route = createFileRoute("/_authenticated/project/$projectId")({
   loader: async ({ params }) => {
-    // SIMPLE: Load project data directly with window.api
+    // Check if it's a placeholder project ID (mock data)
+    const isPlaceholder = params.projectId.startsWith("server-");
+
+    if (isPlaceholder) {
+      // Return mock project data for placeholder projects
+      const mockProject = {
+        id: params.projectId,
+        name:
+          params.projectId === "server-1"
+            ? "Project Alpha"
+            : params.projectId === "server-2"
+              ? "Team Beta"
+              : "Community",
+        description:
+          "This is a placeholder project for demonstration purposes.",
+        status: "active" as const,
+        localPath: "/placeholder/path",
+        ownerId: "placeholder-user",
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        avatarUrl: null,
+        gitUrl: null,
+        branch: null,
+      };
+
+      return { project: mockProject };
+    }
+
+    // For real project IDs, load from database
     const response = await window.api.projects.findById(params.projectId);
     if (!response.success) {
       throw new Error(response.error || "Failed to load project");

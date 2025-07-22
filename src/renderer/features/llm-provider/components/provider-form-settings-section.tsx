@@ -9,8 +9,10 @@ import {
 } from "@/renderer/components/ui/form";
 import { Separator } from "@/renderer/components/ui/separator";
 
+import { type ProviderFormData } from "../constants";
+
 interface ProviderSettingsSectionProps {
-  form: UseFormReturn<any>;
+  form: UseFormReturn<ProviderFormData>;
 }
 
 function ProviderSettingsSection(props: ProviderSettingsSectionProps) {

@@ -62,15 +62,9 @@ function NewAgentPage() {
 }
 
 export const Route = createFileRoute("/_authenticated/user/agents/new/")({
-  beforeLoad: ({ context }) => {
-    const { auth } = context;
-    if (!auth.user) {
-      throw new Error("User not authenticated");
-    }
-  },
   loader: async ({ context }) => {
-    const { auth } = context;
-    const providersResponse = await window.api.llmProviders.list(auth.user!.id);
+    const { user } = context; // Access user from enhanced context
+    const providersResponse = await window.api.llmProviders.list(user.id);
     if (!providersResponse.success) {
       throw new Error(providersResponse.error || "Failed to load providers");
     }

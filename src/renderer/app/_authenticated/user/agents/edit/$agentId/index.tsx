@@ -66,17 +66,8 @@ function EditAgentPage() {
 export const Route = createFileRoute(
   "/_authenticated/user/agents/edit/$agentId/",
 )({
-  beforeLoad: async ({ context }) => {
-    const { auth } = context;
-    const { user } = auth;
-
-    if (!user) {
-      throw new Error("User not authenticated");
-    }
-  },
   loader: async ({ params, context }) => {
-    const { auth } = context;
-    const { user } = auth;
+    const { user } = context; // Access user from enhanced context
     const { agentId } = params;
 
     // Load agent data

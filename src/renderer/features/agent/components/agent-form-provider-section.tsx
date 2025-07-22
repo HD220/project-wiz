@@ -1,6 +1,8 @@
 import { UseFormReturn } from "react-hook-form";
+import { z } from "zod";
 
 import { AI_DEFAULTS } from "@/main/constants/ai-defaults";
+import { createAgentSchema } from "@/main/features/agent/agent.types";
 import type { LlmProvider } from "@/main/features/agent/llm-provider/llm-provider.types";
 
 import {
@@ -19,13 +21,12 @@ import {
   SelectValue,
 } from "@/renderer/components/ui/select";
 import { Separator } from "@/renderer/components/ui/separator";
-import type {
-  ModelConfig,
-  CreateAgentInput,
-} from "@/renderer/features/agent/agent.types";
+import type { ModelConfig } from "@/renderer/features/agent/agent.types";
+
+type AgentFormData = z.infer<typeof createAgentSchema>;
 
 interface AgentProviderSectionProps {
-  form: UseFormReturn<CreateAgentInput>;
+  form: UseFormReturn<AgentFormData>;
   providers: LlmProvider[];
 }
 

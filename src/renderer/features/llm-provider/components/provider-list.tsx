@@ -1,7 +1,9 @@
 import { Link } from "@tanstack/react-router";
 import { Plus } from "lucide-react";
 
-import { Route } from "@/renderer/app/_authenticated/user/settings/llm-providers";
+import type { LlmProvider } from "@/main/features/agent/llm-provider/llm-provider.types";
+
+import { Route } from "@/renderer/app/_authenticated/user/settings/llm-providers/route";
 import { Button } from "@/renderer/components/ui/button";
 import { EmptyState } from "@/renderer/features/llm-provider/components/empty-state";
 import { ProviderCard } from "@/renderer/features/llm-provider/components/provider-card";
@@ -30,7 +32,10 @@ function ProviderList() {
             Manage your AI language model providers
           </p>
         </div>
-        <Link to="/user/settings/llm-providers/new">
+        <Link
+          to="/user/settings/llm-providers/$providerId/new"
+          params={{ providerId: "new" }}
+        >
           <Button className="gap-2 shrink-0">
             <Plus className="h-4 w-4" />
             Add Provider
@@ -40,7 +45,7 @@ function ProviderList() {
 
       {/* Providers List */}
       <div className="space-y-2">
-        {providers.map((provider) => (
+        {providers.map((provider: LlmProvider) => (
           <ProviderCard key={provider.id} provider={provider} />
         ))}
       </div>

@@ -144,7 +144,7 @@ function ProviderCard(props: ProviderCardProps) {
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
                 <Link
-                  to="/user/settings/llm-providers/edit/$providerId"
+                  to="/user/settings/llm-providers/$providerId/edit"
                   params={{ providerId: provider.id }}
                 >
                   <DropdownMenuItem>
