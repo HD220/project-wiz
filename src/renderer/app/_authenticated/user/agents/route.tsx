@@ -1,5 +1,7 @@
 import { createFileRoute, Outlet } from "@tanstack/react-router";
 
+import { AgentFiltersSchema } from "@/main/features/agent/agent.schema";
+
 import { AgentList } from "@/renderer/features/agent/components/agent-list";
 import { ContentHeader } from "@/renderer/features/app/components/content-header";
 
@@ -23,19 +25,32 @@ function AgentsLayout() {
 }
 
 export const Route = createFileRoute("/_authenticated/user/agents")({
-  beforeLoad: async ({ context }) => {
-    const { auth } = context;
-    const { user } = auth;
-
-    if (!user) {
-      throw new Error("User not authenticated");
-    }
-
-    // Load agents data
+  validateSearch: (search) => AgentFiltersSchema.parse(search),
+  loaderDeps: ({ search }) => ({ search }),
+  loader: async ({ deps }) => {
+    // Simple data loading with filtering
     const response = await window.api.agents.list();
     if (!response.success) {
       throw new Error(response.error || "Failed to load agents");
     }
+
+    let agents = response.data || [];
+
+    // Client-side filtering for now (simpler implementation)
+    if (deps.search.status) {
+      agents = agents.filter((agent) => agent.status === deps.search.status);
+    }
+
+    if (deps.search.search) {
+      const searchTerm = deps.search.search.toLowerCase();
+      agents = agents.filter(
+        (agent) =>
+          agent.name.toLowerCase().includes(searchTerm) ||
+          agent.role.toLowerCase().includes(searchTerm),
+      );
+    }
+
+    return agents;
   },
   component: AgentsLayout,
 });

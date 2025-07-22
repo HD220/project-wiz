@@ -60,7 +60,7 @@ function setupAgentCrudHandlers(): void {
  */
 function setupAgentQueryHandlers(): void {
   // List agents
-  ipcMain.handle("agents:list", async (): Promise<IpcResponse> => {
+  ipcMain.handle("agents:list", async (_, filters?): Promise<IpcResponse> => {
     try {
       // Get session from main process for desktop authentication
       const activeSession = await AuthService.getActiveSession();
@@ -69,7 +69,10 @@ function setupAgentQueryHandlers(): void {
       }
       const currentUser = activeSession.user;
 
-      const result = await AgentService.listByUserId(currentUser.id);
+      const result = await AgentService.listByUserIdWithFilters(
+        currentUser.id,
+        filters,
+      );
       return {
         success: true,
         data: result,

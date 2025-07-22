@@ -1,4 +1,4 @@
-import { eq, and, desc } from "drizzle-orm";
+import { eq, and, desc, ilike, or } from "drizzle-orm";
 
 import { getDatabase } from "@/main/database/connection";
 import { agentsTable } from "@/main/features/agent/agent.model";
@@ -98,6 +98,41 @@ export class AgentService extends CrudService<
     const conditions = [eq(agentsTable.userId, userId)];
     if (status) {
       conditions.push(eq(agentsTable.status, status));
+    }
+
+    return await db
+      .select()
+      .from(agentsTable)
+      .where(and(...conditions))
+      .orderBy(desc(agentsTable.createdAt));
+  }
+
+  /**
+   * List agents by user ID with complete filtering support
+   */
+  static async listByUserIdWithFilters(
+    userId: string,
+    filters?: { status?: AgentStatus; search?: string },
+  ): Promise<SelectAgent[]> {
+    const db = getDatabase();
+
+    const conditions = [eq(agentsTable.userId, userId)];
+
+    // Add status filter
+    if (filters?.status) {
+      conditions.push(eq(agentsTable.status, filters.status));
+    }
+
+    // Add search filter (search in name and role)
+    if (filters?.search) {
+      const searchTerm = `%${filters.search}%`;
+      const searchCondition = or(
+        ilike(agentsTable.name, searchTerm),
+        ilike(agentsTable.role, searchTerm),
+      );
+      if (searchCondition) {
+        conditions.push(searchCondition);
+      }
     }
 
     return await db

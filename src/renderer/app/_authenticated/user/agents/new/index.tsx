@@ -1,4 +1,10 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useMutation } from "@tanstack/react-query";
+import {
+  createFileRoute,
+  useNavigate,
+  useRouter,
+} from "@tanstack/react-router";
+import { toast } from "sonner";
 
 import type { LlmProvider } from "@/main/features/agent/llm-provider/llm-provider.types";
 
@@ -10,22 +16,31 @@ import {
 } from "@/renderer/components/ui/dialog";
 import type { CreateAgentInput } from "@/renderer/features/agent/agent.types";
 import { AgentForm } from "@/renderer/features/agent/components/agent-form";
-import { useAgentActions } from "@/renderer/features/agent/use-agent.hook";
 
 function NewAgentPage() {
   const navigate = useNavigate();
+  const router = useRouter();
   const { providers } = Route.useLoaderData();
-  const { createAgent, isLoading } = useAgentActions();
+
+  // SIMPLE: Direct mutation with window.api
+  const createAgentMutation = useMutation({
+    mutationFn: (data: CreateAgentInput) => window.api.agents.create(data),
+    onSuccess: () => {
+      toast.success("Agent created successfully");
+      router.invalidate(); // Refresh agents list
+      handleClose();
+    },
+    onError: () => {
+      toast.error("Failed to create agent");
+    },
+  });
 
   function handleClose() {
     navigate({ to: "/user/agents" });
   }
 
   async function handleSubmit(data: CreateAgentInput) {
-    const success = await createAgent(data);
-    if (success) {
-      handleClose();
-    }
+    createAgentMutation.mutate(data);
   }
 
   return (
@@ -39,7 +54,7 @@ function NewAgentPage() {
           providers={providers}
           onSubmit={handleSubmit}
           onCancel={handleClose}
-          isLoading={isLoading}
+          isLoading={createAgentMutation.isPending}
         />
       </DialogContent>
     </Dialog>

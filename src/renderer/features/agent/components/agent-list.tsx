@@ -1,4 +1,11 @@
-import { Link } from "@tanstack/react-router";
+import { useMutation } from "@tanstack/react-query";
+import {
+  Link,
+  useLoaderData,
+  useNavigate,
+  useRouter,
+  useSearch,
+} from "@tanstack/react-router";
 import { Filter, Plus, Search } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -18,108 +25,99 @@ import type {
 } from "@/renderer/features/agent/agent.types";
 import { AgentDeleteDialog } from "@/renderer/features/agent/components/agent-delete-dialog";
 import { AgentListCard } from "@/renderer/features/agent/components/agent-list-card";
-import {
-  useAgent,
-  useAgentActions,
-  useAgentFilters,
-} from "@/renderer/features/agent/use-agent.hook";
 
 function AgentList() {
-  const { filteredAgents, isLoading, error } = useAgent();
-  const { deleteAgent, toggleAgentStatus } = useAgentActions();
-  const { filters, setStatusFilter, setSearchFilter, clearFilters } =
-    useAgentFilters();
+  // SIMPLE: Get data from loader (already filtered)
+  const agents = useLoaderData({
+    from: "/_authenticated/user/agents",
+  }) as SelectAgent[];
 
+  // SIMPLE: Get URL search params and navigation
+  const search = useSearch({ from: "/_authenticated/user/agents" }) as any;
+  const navigate = useNavigate();
+  const router = useRouter();
+
+  // SIMPLE: Local state for UI only
   const [agentToDelete, setAgentToDelete] = useState<SelectAgent | null>(null);
-  const [isDeleting, setIsDeleting] = useState(false);
 
-  async function handleDelete(agent: SelectAgent) {
+  // SIMPLE: Direct mutations with window.api
+  const deleteAgentMutation = useMutation({
+    mutationFn: (id: string) => window.api.agents.delete(id),
+    onSuccess: () => {
+      toast.success("Agent deleted successfully");
+      router.invalidate(); // Refresh route data
+      setAgentToDelete(null);
+    },
+    onError: () => {
+      toast.error("Failed to delete agent");
+    },
+  });
+
+  const toggleStatusMutation = useMutation({
+    mutationFn: ({ id, status }: { id: string; status: AgentStatus }) =>
+      window.api.agents.updateStatus(id, status),
+    onSuccess: () => {
+      router.invalidate(); // Refresh route data
+    },
+    onError: () => {
+      toast.error("Failed to update agent status");
+    },
+  });
+
+  function handleDelete(agent: SelectAgent) {
     setAgentToDelete(agent);
   }
 
-  async function confirmDelete() {
+  function confirmDelete() {
     if (!agentToDelete) return;
-
-    setIsDeleting(true);
-    try {
-      const success = await deleteAgent(agentToDelete.id);
-      if (success) {
-        toast.success("Agent deleted successfully");
-        setAgentToDelete(null);
-      } else {
-        toast.error("Failed to delete agent");
-      }
-    } catch (error) {
-      toast.error("Failed to delete agent");
-    } finally {
-      setIsDeleting(false);
-    }
+    deleteAgentMutation.mutate(agentToDelete.id);
   }
 
-  async function handleToggleStatus(agent: SelectAgent) {
-    try {
-      const success = await toggleAgentStatus(agent.id, agent.status);
-      if (success) {
-        const newStatus = agent.status === "active" ? "inactive" : "active";
-        toast.success(
-          `Agent ${newStatus === "active" ? "activated" : "deactivated"}`,
-        );
-      } else {
-        toast.error("Failed to update agent status");
-      }
-    } catch (error) {
-      toast.error("Failed to update agent status");
-    }
+  function handleToggleStatus(agent: SelectAgent) {
+    const newStatus: AgentStatus =
+      agent.status === "active" ? "inactive" : "active";
+    toggleStatusMutation.mutate({ id: agent.id, status: newStatus });
+    toast.success(
+      `Agent ${newStatus === "active" ? "activated" : "deactivated"}`,
+    );
   }
 
+  // SIMPLE: URL params for filters (shareable and bookmarkable)
   function handleStatusFilter(value: string) {
-    if (value === "all") {
-      setStatusFilter(undefined);
-    } else {
-      setStatusFilter(value as AgentStatus);
-    }
+    navigate({
+      to: "/user/agents",
+      search: {
+        ...search,
+        status: value === "all" ? undefined : (value as AgentStatus),
+      },
+    });
   }
 
   function handleSearchChange(value: string) {
-    setSearchFilter(value);
+    navigate({
+      to: "/user/agents",
+      search: {
+        ...search,
+        search: value.trim() || undefined,
+      },
+    });
   }
 
-  const hasFilters = filters.status || filters.search;
-
-  if (isLoading) {
-    return (
-      <div className="space-y-6">
-        {/* Header Skeleton */}
-        <div className="flex items-center justify-between">
-          <div className="space-y-2">
-            <div className="h-5 w-40 bg-muted animate-pulse rounded" />
-            <div className="h-4 w-60 bg-muted animate-pulse rounded" />
-          </div>
-          <div className="h-9 w-28 bg-muted animate-pulse rounded" />
-        </div>
-
-        {/* List Skeleton */}
-        <div className="space-y-2">
-          {Array.from({ length: 3 }).map((_, i) => (
-            <div key={i} className="h-20 rounded-lg bg-muted animate-pulse" />
-          ))}
-        </div>
-      </div>
-    );
+  function clearFilters() {
+    navigate({
+      to: "/user/agents",
+      search: {},
+    });
   }
 
-  if (error) {
-    return (
-      <div className="text-center py-8">
-        <p className="text-destructive text-sm">{error.message}</p>
-        <Button variant="outline" size="sm" className="mt-2">
-          Try Again
-        </Button>
-      </div>
-    );
-  }
+  // SIMPLE: Check if we have filters for UI purposes
+  const hasFilters = search.status || search.search;
 
-  if (filteredAgents.length === 0 && !hasFilters) {
+  // NO LOADING STATES NEEDED - data comes from loader
+  // NO ERROR STATES NEEDED - loader throws on error
+
+  // SIMPLE: Empty state when no agents and no filters
+  if (agents.length === 0 && !hasFilters) {
     return (
       <div className="space-y-6">
         {/* Header with Add Button */}
@@ -169,7 +167,7 @@ function AgentList() {
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
                 placeholder="Search agents..."
-                value={filters.search || ""}
+                value={search.search || ""}
                 onChange={(e) => handleSearchChange(e.target.value)}
                 className="pl-9 w-64"
               />
@@ -177,7 +175,7 @@ function AgentList() {
 
             {/* Status Filter */}
             <Select
-              value={filters.status || "all"}
+              value={search.status || "all"}
               onValueChange={handleStatusFilter}
             >
               <SelectTrigger className="w-40">
@@ -210,17 +208,17 @@ function AgentList() {
         </div>
 
         {/* Results Info */}
-        {filteredAgents.length > 0 && (
+        {agents.length > 0 && (
           <div className="flex items-center gap-2">
             <h3 className="font-medium">Your AI Agents</h3>
             <span className="text-sm text-muted-foreground">
-              ({filteredAgents.length})
+              ({agents.length})
             </span>
           </div>
         )}
 
         {/* Empty Filter Results */}
-        {filteredAgents.length === 0 && hasFilters && (
+        {agents.length === 0 && hasFilters && (
           <div className="text-center py-12">
             <div className="mx-auto h-12 w-12 bg-muted rounded-lg flex items-center justify-center mb-4">
               <Filter className="h-6 w-6 text-muted-foreground" />
@@ -236,9 +234,9 @@ function AgentList() {
         )}
 
         {/* Agents List */}
-        {filteredAgents.length > 0 && (
+        {agents.length > 0 && (
           <div className="space-y-2">
-            {filteredAgents.map((agent) => (
+            {agents.map((agent) => (
               <AgentListCard
                 key={agent.id}
                 agent={agent}
@@ -256,7 +254,7 @@ function AgentList() {
         open={!!agentToDelete}
         onOpenChange={(open) => !open && setAgentToDelete(null)}
         onConfirm={confirmDelete}
-        isLoading={isDeleting}
+        isLoading={deleteAgentMutation.isPending}
       />
     </>
   );
