@@ -7,6 +7,7 @@ import type { AuthResult } from "@/main/features/auth/auth.types";
 
 import type {
   ConversationWithMessages,
+  ConversationWithLastMessage,
   SendMessageInput,
 } from "@/renderer/features/conversation/types";
 
@@ -35,7 +36,11 @@ export const messageApi = {
         throw new Error("User not authenticated");
       }
 
-      const userId = userResponse.data?.id;
+      const userData = userResponse.data as { id: string } | null;
+      if (!userData || !userData.id) {
+        throw new Error("User data not available");
+      }
+      const userId = userData.id;
 
       // Get user's conversations to verify access
       const conversationsResponse =
@@ -44,10 +49,8 @@ export const messageApi = {
         throw new Error("Failed to verify conversation access");
       }
 
-      const conversations = conversationsResponse.data as Array<{
-        id: string;
-        lastMessage?: unknown;
-      }>;
+      const conversations =
+        conversationsResponse.data as Array<ConversationWithLastMessage>;
       const conversation = conversations.find(
         (conv) => conv.id === conversationId,
       );
@@ -60,13 +63,22 @@ export const messageApi = {
       const messagesResponse =
         await window.api.messages.getConversationMessages(conversationId);
       const messages = messagesResponse.success
-        ? (messagesResponse.data as Array<unknown>) || []
+        ? (messagesResponse.data as Array<{
+            id: string;
+            conversationId: string;
+            authorId: string;
+            content: string;
+            createdAt: Date;
+            updatedAt: Date;
+          }>) || []
         : [];
 
+      // Remove lastMessage and add messages to create ConversationWithMessages
+      const { lastMessage, ...conversationBase } = conversation;
       return {
-        ...conversation,
+        ...conversationBase,
         messages,
-      };
+      } as ConversationWithMessages;
     } catch (error) {
       console.error("Error loading conversation with messages:", error);
       throw error;

@@ -3,7 +3,6 @@ import { useCallback } from "react";
 import { useAgentUIStore } from "@/renderer/features/agent/agent-ui.store";
 import {
   useAgents,
-  useAgent as useAgentQuery,
   useCreateAgent,
   useUpdateAgent,
   useDeleteAgent,

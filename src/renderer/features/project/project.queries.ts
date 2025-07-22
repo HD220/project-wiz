@@ -43,11 +43,9 @@ export function useCreateProject() {
     mutationFn: (input: InsertProject) => projectApi.create(input),
     onSuccess: (response) => {
       if (response.success && response.data) {
+        const projectData = response.data as SelectProject;
         queryClient.invalidateQueries({ queryKey: ["projects"] });
-        queryClient.setQueryData(
-          ["project", response.data.id],
-          response.data as SelectProject,
-        );
+        queryClient.setQueryData(["project", projectData.id], projectData);
       } else {
         throw new Error(response.error || "Failed to create project");
       }

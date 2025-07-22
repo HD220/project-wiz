@@ -95,7 +95,9 @@ export function useSendMessage(): SendMessageMutationResult {
   });
 
   return {
-    sendMessage: mutation.mutateAsync,
+    sendMessage: async (input: SendMessageInput): Promise<void> => {
+      await mutation.mutateAsync(input);
+    },
     isSending: mutation.isPending,
     error: mutation.error,
   };

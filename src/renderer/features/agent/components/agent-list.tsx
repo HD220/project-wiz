@@ -111,7 +111,7 @@ function AgentList() {
   if (error) {
     return (
       <div className="text-center py-8">
-        <p className="text-destructive text-sm">{error}</p>
+        <p className="text-destructive text-sm">{error.message}</p>
         <Button variant="outline" size="sm" className="mt-2">
           Try Again
         </Button>
