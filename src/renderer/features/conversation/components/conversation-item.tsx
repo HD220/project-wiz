@@ -7,13 +7,13 @@ import { Badge } from "@/renderer/components/ui/badge";
 
 import type {
   ConversationWithParticipants,
-  MessageWithLlmData,
   AuthenticatedUser,
-} from "../conversation.types";
+} from "../types";
+import type { SelectMessage } from "../types";
 
 interface ConversationItemProps {
   conversation: ConversationWithParticipants;
-  lastMessage?: MessageWithLlmData | null;
+  lastMessage?: SelectMessage | null;
   otherParticipants: AuthenticatedUser[];
   isSelected?: boolean;
   onClick: () => void;

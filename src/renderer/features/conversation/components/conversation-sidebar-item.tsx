@@ -8,14 +8,14 @@ import { Badge } from "@/renderer/components/ui/badge";
 import { cn } from "@/renderer/lib/utils";
 
 import type {
-  ConversationWithParticipants,
-  MessageWithLlmData,
+  ConversationWithLastMessage,
   AuthenticatedUser,
-} from "../conversation.types";
+  SelectMessage,
+} from "../types";
 
 interface ConversationSidebarItemProps {
-  conversation: ConversationWithParticipants;
-  lastMessage?: MessageWithLlmData | null;
+  conversation: ConversationWithLastMessage;
+  lastMessage?: SelectMessage | null;
   otherParticipants: AuthenticatedUser[];
   className?: string;
   unreadCount?: number;

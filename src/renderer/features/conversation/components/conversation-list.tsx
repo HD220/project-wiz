@@ -1,8 +1,9 @@
-import { useEffect, useState } from "react";
 import { Plus } from "lucide-react";
 
 import { Button } from "@/renderer/components/ui/button";
-import { useConversationStore } from "../conversation.store";
+import { useConversations, useAvailableUsers } from "../hooks";
+import { useConversationUIStore } from "../store";
+import { useAuthStore } from "@/renderer/store/auth.store";
 
 import { EmptyConversations } from "./empty-conversations";
 import { ConversationItem } from "./conversation-item";
@@ -16,35 +17,28 @@ interface ConversationListProps {
 
 function ConversationList(props: ConversationListProps) {
   const { selectedConversationId, onConversationSelect, className } = props;
-  const [showCreateDialog, setShowCreateDialog] = useState(false);
-
-  const {
-    conversations,
-    availableUsers,
-    isLoading,
-    error,
-    loadConversations,
-    loadAvailableUsers,
-    getLastMessage,
-    getOtherParticipants,
-  } = useConversationStore();
-
-  // Load conversations and available users on mount
-  useEffect(() => {
-    loadConversations();
-    loadAvailableUsers();
-  }, [loadConversations, loadAvailableUsers]);
+  const { user } = useAuthStore();
+  
+  // Server state via TanStack Query hooks
+  const { conversations, isLoading: conversationsLoading, error: conversationsError } = useConversations();
+  const { availableUsers, isLoading: usersLoading } = useAvailableUsers();
+  
+  // UI state
+  const { showCreateDialog, openCreateDialog, closeCreateDialog } = useConversationUIStore();
+  
+  const isLoading = conversationsLoading || usersLoading;
+  const error = conversationsError;
 
   const handleCreateConversation = () => {
-    setShowCreateDialog(true);
+    openCreateDialog();
   };
 
   const handleCloseCreateDialog = () => {
-    setShowCreateDialog(false);
+    closeCreateDialog();
   };
 
   const handleConversationCreated = (conversationId: string) => {
-    setShowCreateDialog(false);
+    closeCreateDialog();
     onConversationSelect(conversationId);
   };
 
@@ -79,13 +73,7 @@ function ConversationList(props: ConversationListProps) {
       <div className={`p-4 ${className || ""}`}>
         <div className="text-center text-destructive">
           <p className="text-sm mb-2">Failed to load conversations</p>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => loadConversations()}
-          >
-            Try Again
-          </Button>
+          <p className="text-xs text-muted-foreground">{error?.message}</p>
         </div>
       </div>
     );
@@ -130,11 +118,17 @@ function ConversationList(props: ConversationListProps) {
       {/* Conversations list - Discord style */}
       <div className="space-y-0.5 px-2">
         {conversations.map((conversation) => {
-          const otherParticipantIds = getOtherParticipants(conversation);
+          // Get other participants (exclude current user)
+          const otherParticipantIds = conversation.participants
+            .filter(p => p.participantId !== user?.id)
+            .map(p => p.participantId);
+            
           const otherParticipants = availableUsers.filter(user => 
             otherParticipantIds.includes(user.id)
           );
-          const lastMessage = getLastMessage(conversation.id);
+          
+          // Get last message from conversation data
+          const lastMessage = conversation.lastMessage || null;
 
           return (
             <ConversationItem

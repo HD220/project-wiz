@@ -4,30 +4,37 @@ import { Loader2 } from "lucide-react";
 import { ScrollArea } from "@/renderer/components/ui/scroll-area";
 import { Separator } from "@/renderer/components/ui/separator";
 
-import type { ConversationWithMessagesAndParticipants } from "../conversation.types";
-import { useConversationStore } from "../conversation.store";
+import { useMessages, useSendMessage, useAvailableUsers } from "../hooks";
 import { useAuthStore } from "@/renderer/store/auth.store";
 
 import { MessageBubble } from "./message-bubble";
 import { MessageInput } from "./message-input";
 
 interface ConversationChatProps {
-  conversation: ConversationWithMessagesAndParticipants;
+  conversationId: string;
   className?: string;
 }
 
 function ConversationChat(props: ConversationChatProps) {
-  const { conversation, className } = props;
+  const { conversationId, className } = props;
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const { user: currentUser } = useAuthStore();
-  const { 
-    availableUsers,
-    isSendingMessage,
-    sendMessage,
-    error,
-  } = useConversationStore();
+  
+  // Server state via TanStack Query hooks
+  const { conversation, isLoading } = useMessages(conversationId);
+  const { availableUsers } = useAvailableUsers();
+  const { sendMessage, isSending, error } = useSendMessage();
+
+  // Loading state
+  if (isLoading || !conversation) {
+    return (
+      <div className="flex-1 flex items-center justify-center">
+        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
 
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
@@ -44,11 +51,17 @@ function ConversationChat(props: ConversationChatProps) {
     // Use setTimeout to ensure DOM is updated after render
     const timeoutId = setTimeout(scrollToBottom, 50);
     return () => clearTimeout(timeoutId);
-  }, [conversation.messages.length]);
+  }, [conversation.messages?.length]);
 
   const handleSendMessage = async (content: string) => {
+    if (!currentUser) return;
+    
     try {
-      await sendMessage(content);
+      await sendMessage({
+        conversationId: conversation.id,
+        authorId: currentUser.id,
+        content,
+      });
     } catch (error) {
       console.error("Failed to send message:", error);
     }
@@ -73,7 +86,7 @@ function ConversationChat(props: ConversationChatProps) {
         array.findIndex(m => m.id === message.id) === index
     );
 
-    uniqueMessages.forEach((message, index) => {
+    uniqueMessages.forEach((message) => {
       const lastGroup = groups[groups.length - 1];
       
       if (lastGroup && lastGroup.authorId === message.authorId) {
@@ -131,7 +144,7 @@ function ConversationChat(props: ConversationChatProps) {
                     const isLastUserMessage = isCurrentUser && 
                       groupIndex === messageGroups.length - 1 && 
                       messageIndex === group.messages.length - 1;
-                    const showSending = isSendingMessage && isLastUserMessage;
+                    const showSending = isSending && isLastUserMessage;
                     
                     return (
                       <MessageBubble
@@ -166,7 +179,7 @@ function ConversationChat(props: ConversationChatProps) {
       {/* Error message */}
       {error && (
         <div className="px-4 py-2 bg-destructive/10 border-t border-destructive/20">
-          <p className="text-sm text-destructive">{error}</p>
+          <p className="text-sm text-destructive">{error.message}</p>
         </div>
       )}
 
@@ -174,7 +187,7 @@ function ConversationChat(props: ConversationChatProps) {
       <div className="flex-shrink-0">
         <MessageInput
           onSendMessage={handleSendMessage}
-          isSending={isSendingMessage}
+          isSending={isSending}
           placeholder={`Message ${conversation.name || "this conversation"}...`}
         />
       </div>

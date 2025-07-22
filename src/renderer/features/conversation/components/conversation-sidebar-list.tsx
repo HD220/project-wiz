@@ -1,41 +1,40 @@
-import { useEffect, useState } from "react";
 import { Plus, MessageCircle } from "lucide-react";
 
 import { Button } from "@/renderer/components/ui/button";
+import { useAuthStore } from "@/renderer/store/auth.store";
 
-import { useConversationStore } from "../conversation.store";
+import { useConversations, useAvailableUsers } from "../hooks";
+import { useConversationUIStore } from "../store";
 import { CreateConversationDialog } from "./create-conversation-dialog";
 import { ConversationSidebarItem } from "./conversation-sidebar-item";
 
 function ConversationSidebarList() {
-  const [showCreateDialog, setShowCreateDialog] = useState(false);
+  const { user } = useAuthStore();
+  
+  // Server state via TanStack Query hooks
+  const { conversations, isLoading: conversationsLoading } = useConversations();
+  const { availableUsers, isLoading: usersLoading } = useAvailableUsers();
+  
+  // UI state via Zustand
+  const { 
+    showCreateDialog, 
+    openCreateDialog, 
+    closeCreateDialog 
+  } = useConversationUIStore();
 
-  const {
-    conversations,
-    availableUsers,
-    isLoading,
-    loadConversations,
-    loadAvailableUsers,
-    getOtherParticipants,
-  } = useConversationStore();
+  const isLoading = conversationsLoading || usersLoading;
 
-  // Load conversations on mount
-  useEffect(() => {
-    loadConversations();
-    loadAvailableUsers();
-  }, [loadConversations, loadAvailableUsers]);
-
-  const handleCreateConversation = () => {
-    setShowCreateDialog(true);
+  // Helper functions
+  const getOtherParticipants = (conversation: any) => {
+    const currentUserId = user?.id;
+    return conversation.participants
+      .filter((p: any) => p.participantId !== currentUserId)
+      .map((p: any) => p.participantId);
   };
 
-  const handleCloseCreateDialog = () => {
-    setShowCreateDialog(false);
-  };
-
-  const handleConversationCreated = (conversationId: string) => {
-    setShowCreateDialog(false);
-    // Let the user manually navigate to the new conversation
+  const handleConversationCreated = () => {
+    closeCreateDialog();
+    // Navigation will be handled by the parent component
   };
 
   // Loading skeleton - Discord style
@@ -74,7 +73,7 @@ function ConversationSidebarList() {
           variant="ghost"
           size="sm"
           className="h-5 w-5 p-0 hover:bg-muted"
-          onClick={handleCreateConversation}
+          onClick={openCreateDialog}
           title="Create conversation"
         >
           <Plus className="h-3 w-3" />
@@ -93,7 +92,7 @@ function ConversationSidebarList() {
             <ConversationSidebarItem
               key={conversation.id}
               conversation={conversation}
-              lastMessage={null} // TODO: Get from store when implemented
+              lastMessage={conversation.lastMessage ? (conversation.lastMessage as any) : null}
               otherParticipants={otherParticipants}
               unreadCount={0} // TODO: Get from store when implemented
             />
@@ -118,7 +117,7 @@ function ConversationSidebarList() {
       {showCreateDialog && (
         <CreateConversationDialog
           availableUsers={availableUsers}
-          onClose={handleCloseCreateDialog}
+          onClose={closeCreateDialog}
           onConversationCreated={handleConversationCreated}
         />
       )}

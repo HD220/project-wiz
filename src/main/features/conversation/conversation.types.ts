@@ -24,6 +24,10 @@ export type ConversationWithMessagesAndParticipants = SelectConversation & {
   messages: SelectMessage[];
   participants: SelectConversationParticipant[];
 };
+export type ConversationWithLastMessage = SelectConversation & {
+  participants: SelectConversationParticipant[];
+  lastMessage?: SelectMessage;
+};
 
 // Conversation participant derived types
 export type UpdateConversationParticipant =

@@ -13,8 +13,8 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/renderer/components/ui/av
 import { Badge } from "@/renderer/components/ui/badge";
 import { ScrollArea } from "@/renderer/components/ui/scroll-area";
 
-import type { AuthenticatedUser } from "../conversation.types";
-import { useConversationStore } from "../conversation.store";
+import type { AuthenticatedUser } from "../types";
+import { useCreateConversation } from "../hooks";
 
 interface CreateConversationDialogProps {
   availableUsers: AuthenticatedUser[];
@@ -27,7 +27,7 @@ function CreateConversationDialog(props: CreateConversationDialogProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedUserIds, setSelectedUserIds] = useState<string[]>([]);
   
-  const { createConversation, isCreatingConversation, error } = useConversationStore();
+  const { createConversation, isCreating, error } = useCreateConversation();
 
   // Filter agents based on search
   const filteredUsers = availableUsers.filter(user => 
@@ -180,7 +180,7 @@ function CreateConversationDialog(props: CreateConversationDialogProps) {
 
           {/* Error message */}
           {error && (
-            <p className="text-sm text-destructive">{error}</p>
+            <p className="text-sm text-destructive">{error.message}</p>
           )}
 
           {/* Actions */}
@@ -188,15 +188,15 @@ function CreateConversationDialog(props: CreateConversationDialogProps) {
             <Button
               variant="outline"
               onClick={onClose}
-              disabled={isCreatingConversation}
+              disabled={isCreating}
             >
               Cancel
             </Button>
             <Button
               onClick={handleCreateConversation}
-              disabled={selectedUserIds.length === 0 || isCreatingConversation}
+              disabled={selectedUserIds.length === 0 || isCreating}
             >
-              {isCreatingConversation ? (
+              {isCreating ? (
                 "Creating..."
               ) : (
                 `Start Chat${selectedUserIds.length > 1 ? " with " + selectedUserIds.length + " Agents" : ""} (${selectedUserIds.length})`

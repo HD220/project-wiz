@@ -1,14 +1,14 @@
 import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { Loader2, Clock } from "lucide-react";
+import { Loader2 } from "lucide-react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/renderer/components/ui/avatar";
 import { cn } from "@/renderer/lib/utils";
 
-import type { MessageWithLlmData, AuthenticatedUser } from "../conversation.types";
+import type { SelectMessage, AuthenticatedUser } from "../types";
 
 interface MessageBubbleProps {
-  message: MessageWithLlmData;
+  message: SelectMessage;
   author?: AuthenticatedUser;
   isCurrentUser: boolean;
   showAvatar?: boolean;
@@ -17,7 +17,7 @@ interface MessageBubbleProps {
 }
 
 function MessageBubble(props: MessageBubbleProps) {
-  const { message, author, isCurrentUser, showAvatar = true, isSending = false, className } = props;
+  const { message, author, showAvatar = true, isSending = false, className } = props;
 
   // Format timestamp - Discord style (short format)
   const getTimeAgo = () => {

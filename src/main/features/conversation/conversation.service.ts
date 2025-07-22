@@ -1,4 +1,4 @@
-import { eq, and } from "drizzle-orm";
+import { eq, and, desc, inArray } from "drizzle-orm";
 
 import { getDatabase } from "@/main/database/connection";
 
@@ -6,6 +6,7 @@ import {
   conversationsTable,
   conversationParticipantsTable,
 } from "./conversation.model";
+import { messagesTable } from "./message.model";
 
 import type {
   SelectConversation,
@@ -58,46 +59,71 @@ export class ConversationService {
 
   static async getUserConversations(
     userId: string,
-  ): Promise<import("./conversation.types").ConversationWithParticipants[]> {
+  ): Promise<import("./conversation.types").ConversationWithLastMessage[]> {
     const db = getDatabase();
 
-    const conversations = await db
+    // 1. Get all conversation IDs for the user
+    const userConversations = await db
       .select({ 
-        conversation: conversationsTable,
-        participant: conversationParticipantsTable
+        conversationId: conversationParticipantsTable.conversationId
       })
-      .from(conversationsTable)
-      .innerJoin(
-        conversationParticipantsTable,
-        eq(conversationsTable.id, conversationParticipantsTable.conversationId),
-      )
+      .from(conversationParticipantsTable)
       .where(eq(conversationParticipantsTable.participantId, userId));
 
-    // Group participants by conversation
-    const conversationMap = new Map<string, import("./conversation.types").ConversationWithParticipants>();
+    const conversationIds = userConversations.map(c => c.conversationId);
     
-    for (const row of conversations) {
-      const convId = row.conversation.id;
-      
-      if (!conversationMap.has(convId)) {
-        conversationMap.set(convId, {
-          ...row.conversation,
-          participants: []
-        });
-      }
-      
-      const conv = conversationMap.get(convId)!;
-      
-      // Get all participants for this conversation
-      const allParticipants = await db
-        .select()
-        .from(conversationParticipantsTable)
-        .where(eq(conversationParticipantsTable.conversationId, convId));
-        
-      conv.participants = allParticipants;
+    if (conversationIds.length === 0) {
+      return [];
     }
 
-    return Array.from(conversationMap.values());
+    // 2. Get all conversations data in one query
+    const conversations = await db
+      .select()
+      .from(conversationsTable)
+      .where(inArray(conversationsTable.id, conversationIds));
+
+    // 3. Get all participants for these conversations in one query
+    const allParticipants = await db
+      .select()
+      .from(conversationParticipantsTable)
+      .where(inArray(conversationParticipantsTable.conversationId, conversationIds));
+
+    // 4. Get latest message for each conversation
+    // We'll use a more efficient approach: get all messages and find the latest per conversation
+    const allMessages = await db
+      .select()
+      .from(messagesTable)
+      .where(inArray(messagesTable.conversationId, conversationIds))
+      .orderBy(desc(messagesTable.createdAt));
+
+    // Group messages by conversation and find the latest
+    const latestMessagesMap = new Map();
+    for (const message of allMessages) {
+      if (!latestMessagesMap.has(message.conversationId)) {
+        latestMessagesMap.set(message.conversationId, message);
+      }
+    }
+
+    // 5. Build the result
+    const result: import("./conversation.types").ConversationWithLastMessage[] = [];
+    
+    for (const conversation of conversations) {
+      const participants = allParticipants.filter(p => p.conversationId === conversation.id);
+      const lastMessage = latestMessagesMap.get(conversation.id);
+
+      result.push({
+        ...conversation,
+        participants,
+        lastMessage: lastMessage || undefined
+      });
+    }
+
+    // Sort by last message time (most recent first)
+    return result.sort((a, b) => {
+      const aTime = a.lastMessage?.createdAt || a.updatedAt;
+      const bTime = b.lastMessage?.createdAt || b.updatedAt;
+      return new Date(bTime).getTime() - new Date(aTime).getTime();
+    });
   }
 
   static async getOrCreateAgentConversation(
