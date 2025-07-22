@@ -1,211 +1,338 @@
-# Code Audit - Comprehensive System Analysis
+# Comprehensive System Code Audit
 
-You are performing a **COMPREHENSIVE CODE AUDIT** of this entire codebase. Your mission is to identify and fix **ALL** code smells, architectural violations, complexity issues, and violations of the established guidelines in CLAUDE.md.
+You are a senior software architect specializing in code analysis and complex systems. I need an extremely detailed and comprehensive analysis of the provided system.
 
-## CRITICAL AUDIT METHODOLOGY
+## 🎯 AUDIT OBJECTIVE
+
+Perform a complete code audit, identifying problems, inconsistencies, improvement opportunities, and providing practical recommendations to resolve all found issues.
+
+## 🚨 CRITICAL AUDIT METHODOLOGY
 
 ### **SEQUENTIAL PROBLEM-SOLVING APPROACH**
 
 - **Find 1 Problem** → **Fix Immediately** → **Move to Next**
 - **NO BATCHING** - Each problem must be resolved before moving to the next
 - **COMPLETE FIXES** - No partial solutions or "TODO" comments
-- **VERIFICATION** - After each fix, verify it follows CLAUDE.md guidelines
+- **VERIFICATION** - After each fix, verify compliance with established guidelines
 
-### **ULTRATHINK REQUIREMENT**
+### **DEEP ANALYSIS REQUIREMENT**
 
-For **EVERY SINGLE PROBLEM** you identify, you MUST use deep analytical thinking to:
+For **EVERY SINGLE PROBLEM** identified, you MUST perform deep analytical thinking:
 
 1. **Root Cause Analysis** - Why does this problem exist?
 2. **Impact Assessment** - What are the consequences?
-3. **Solution Design** - What's the optimal fix following CLAUDE.md?
+3. **Solution Design** - What's the optimal fix following best practices?
 4. **Implementation Strategy** - How to implement without breaking dependencies?
 5. **Verification Plan** - How to ensure the fix is complete and correct?
 
-## AUDIT CHECKLIST - ANALYZE THESE SYSTEMATICALLY
+## 📋 SYSTEMATIC AUDIT CHECKLIST
 
-### **🔍 PRIORITY 1: CRITICAL VIOLATIONS**
+### **🔥 PRIORITY 1: CRITICAL VIOLATIONS**
 
-#### **Data Loading & API Usage Violations**
+#### **Architecture & Design Patterns**
 
-- [ ] **useEffect for data loading** - Must migrate to TanStack Query
-- [ ] **Direct window.api calls in component body** - Must move to TanStack Query/beforeLoad
-- [ ] **localStorage usage** - Must remove completely (Electron desktop app)
-- [ ] **Zustand for server state** - Must migrate to TanStack Query
-- [ ] **In-memory sessions** - Must use database-persisted sessions
+- [ ] **Improper data loading patterns** - Check for useEffect instead of proper data fetching
+- [ ] **Direct API calls in components** - Must be abstracted properly
+- [ ] **Browser storage violations** - Inappropriate localStorage/sessionStorage usage
+- [ ] **State management anti-patterns** - Global state misuse or local state abuse
+- [ ] **Authentication & security issues** - Session management, password security
+- [ ] **Database constraint violations** - Missing foreign keys, indexes, relationships
 
-#### **Authentication & Security Issues**
+#### **Framework-Specific Violations**
 
-- [ ] **Session management violations** - Must use main process + database
-- [ ] **Missing session cleanup** - Must have automatic expired session removal
-- [ ] **Missing foreign key constraints** - All database relationships must have proper constraints
-- [ ] **Missing database indexes** - All foreign keys and frequently queried columns need indexes (fix in \*.model.ts)
-- [ ] **Password security** - Must use bcrypt for hashing
-- [ ] **Direct migration SQL edits** - NEVER edit migration files, only modify \*.model.ts and regenerate
+- [ ] **Component pattern violations** - Wrong component declaration patterns
+- [ ] **Import/Export violations** - Incorrect module import patterns
+- [ ] **Routing anti-patterns** - Improper route handling and data loading
+- [ ] **Type system violations** - Missing types, improper type usage
 
-### **🔍 PRIORITY 2: ARCHITECTURAL VIOLATIONS**
+### **🔥 PRIORITY 2: ARCHITECTURAL STRUCTURE**
 
-#### **File Structure & Organization**
+#### **File Organization & Module Structure**
 
-- [ ] **Relative imports** - Must use path aliases (`@/`) everywhere
-- [ ] **Shared folders** - Must use feature-based organization
-- [ ] **Wrong file suffixes** - Must follow `.handler.ts`, `.service.ts`, `.model.ts`, etc.
-- [ ] **Mixed domain logic** - Must maintain bounded contexts in features/
+- [ ] **Import path violations** - Relative imports instead of path aliases
+- [ ] **File naming inconsistencies** - Wrong suffixes, naming conventions
+- [ ] **Feature organization issues** - Mixed domains, poor bounded contexts
+- [ ] **Dependency management** - Circular dependencies, unnecessary coupling
 
-#### **Component & React Patterns**
+#### **Component Architecture**
 
-- [ ] **React.FC usage** - Must use function declarations
-- [ ] **React imports** - Must remove (React 19)
-- [ ] **HTML native elements** - Must use shadcn/ui components
-- [ ] **Missing TypeScript types** - All components must have proper interfaces
+- [ ] **Component size violations** - Components exceeding reasonable limits (>200 lines)
+- [ ] **Single Responsibility violations** - Components handling multiple concerns
+- [ ] **Prop drilling complexity** - Deep prop passing indicating architectural issues
+- [ ] **Nested JSX complexity** - Deep nesting levels (>4-5 levels)
+- [ ] **Conditional rendering complexity** - Multiple ternaries needing extraction
 
-### **🔍 PRIORITY 3: COMPONENT COMPLEXITY & FRONTEND ORGANIZATION**
-
-#### **Component Complexity & Structure**
-
-- [ ] **Oversized components** - Components > 200 lines must be broken down (KISS principle)
-- [ ] **Multiple responsibilities** - Components doing more than one thing (Single Responsibility)
-- [ ] **Complex prop drilling** - More than 2-3 levels indicates need for context/state management
-- [ ] **Deeply nested JSX** - More than 4-5 levels indicates component extraction needed
-- [ ] **Complex conditional rendering** - Multiple ternaries should be extracted to functions
-- [ ] **Inline handlers complexity** - Complex logic in onClick/onChange should be extracted
-
-#### **Frontend Organization & Routing**
-
-- [ ] **Route organization violations** - Routes not following TanStack Router patterns
-- [ ] **Missing route protection** - Auth-required routes without beforeLoad checks
-- [ ] **Route data loading anti-patterns** - Using useEffect instead of loader/beforeLoad
-- [ ] **Layout inconsistencies** - Missing or inconsistent layout components
-- [ ] **Navigation complexity** - Complex navigation logic not abstracted properly
-- [ ] **Route parameter validation** - Missing Zod validation for route params
-
-#### **React Best Practices Violations**
-
-- [ ] **State management complexity** - Local state when global state needed, or vice versa
-- [ ] **Effect cleanup missing** - useEffect without proper cleanup functions
-- [ ] **Key prop violations** - Missing or incorrect key props in lists
-- [ ] **Ref usage anti-patterns** - Using refs when state/props should be used
-- [ ] **Context overuse** - Using context for simple prop passing
-- [ ] **Performance issues** - Missing useMemo/useCallback where needed
-- [ ] **Component re-render issues** - Unnecessary re-renders due to object/array recreation
-
-### **🔍 PRIORITY 4: CODE QUALITY ISSUES**
-
-#### **Type Safety & Inference**
-
-- [ ] **Type duplication** - Must use Drizzle inference
-- [ ] **Any types** - Must have proper typing
-- [ ] **Missing error handling** - All API calls must have proper error handling
-- [ ] **Inconsistent naming** - Must follow kebab-case, camelCase, PascalCase conventions
-
-#### **Database & Performance**
-
-- [ ] **Query inefficiencies** - Must use proper select patterns with Drizzle
-- [ ] **Missing transactions** - Critical operations must use database transactions
-- [ ] **N+1 query problems** - Must optimize with proper joins
-- [ ] **Unused database columns** - Must clean up schema
-
-### **🔍 PRIORITY 5: CLEAN CODE, KISS & YAGNI VIOLATIONS**
+### **🔥 PRIORITY 3: CODE QUALITY & CLEAN CODE**
 
 #### **Clean Code Violations**
 
 - [ ] **Magic numbers/strings** - Hardcoded values without named constants
-- [ ] **Long functions** - Functions > 20-25 lines doing multiple things
-- [ ] **Unclear variable names** - Non-descriptive names like `data`, `item`, `temp`
+- [ ] **Function complexity** - Functions >20-25 lines doing multiple things
+- [ ] **Unclear naming** - Non-descriptive names (data, item, temp, result)
 - [ ] **Deep nesting** - More than 3-4 levels of indentation
-- [ ] **Complex boolean expressions** - Long conditionals that should be extracted
-- [ ] **Dead code** - Unused imports, variables, functions, or comments
-- [ ] **Inconsistent formatting** - Mixed indentation, spacing, or code style
+- [ ] **Complex boolean expressions** - Long conditionals needing extraction
+- [ ] **Dead code** - Unused imports, variables, functions, comments
+- [ ] **Inconsistent formatting** - Mixed styles, spacing, indentation
 
 #### **KISS (Keep It Simple, Stupid) Violations**
 
 - [ ] **Over-engineered solutions** - Complex patterns for simple problems
 - [ ] **Premature optimization** - Complex code without proven performance needs
 - [ ] **Unnecessary abstractions** - Creating abstractions before they're needed
-- [ ] **Complex inheritance** - Deep class hierarchies or complex composition
-- [ ] **Overuse of design patterns** - Using patterns when simple functions would work
-- [ ] **Complex configuration** - Too many options or configuration files
+- [ ] **Complex inheritance/composition** - Deep hierarchies
+- [ ] **Overuse of design patterns** - Patterns when simple functions would work
+- [ ] **Configuration complexity** - Too many options or configuration files
 
 #### **YAGNI (You Aren't Gonna Need It) Violations**
 
-- [ ] **Unused features** - Code built for "future requirements" that don't exist
+- [ ] **Unused features** - Code built for "future requirements"
 - [ ] **Generic solutions** - Overly flexible code for single-use cases
-- [ ] **Speculative abstraction** - Creating abstract classes/interfaces with only one implementation
-- [ ] **Future-proofing code** - Complex code to handle scenarios that may never happen
+- [ ] **Speculative abstraction** - Abstract classes/interfaces with single implementation
+- [ ] **Future-proofing code** - Complex code for scenarios that may never happen
 - [ ] **Unused dependencies** - Libraries added "just in case"
-- [ ] **Excessive configuration** - Configuration options that are never used
+- [ ] **Excessive configuration** - Configuration options never used
 
-### **🔍 PRIORITY 6: BUSINESS LOGIC & COMPLEXITY**
+### **🔥 PRIORITY 4: REACT-SPECIFIC ISSUES**
 
-#### **Service Layer Issues**
+#### **React Best Practices Violations**
 
-- [ ] **Business logic in handlers** - Must move to service layer
-- [ ] **Duplicate code** - Must extract to reusable functions
-- [ ] **Complex functions** - Must break down into smaller, focused functions
-- [ ] **Missing validation** - Must use Zod schemas consistently
+- [ ] **Effect cleanup missing** - useEffect without proper cleanup functions
+- [ ] **Key prop violations** - Missing or incorrect key props in lists
+- [ ] **Ref usage anti-patterns** - Using refs when state/props should be used
+- [ ] **Context overuse** - Using context for simple prop passing
+- [ ] **Performance issues** - Missing useMemo/useCallback where needed
+- [ ] **Component re-render issues** - Unnecessary re-renders due to recreation
+- [ ] **State management complexity** - Wrong choice between local/global state
 
-## DETAILED ANALYSIS INSTRUCTIONS
+#### **Component Structure Issues**
+
+- [ ] **Mixed responsibilities** - UI logic mixed with business logic
+- [ ] **Inline handler complexity** - Complex logic in event handlers
+- [ ] **Component coupling** - Components too tightly coupled
+- [ ] **Layout inconsistencies** - Missing or inconsistent layout patterns
+
+### **🔥 PRIORITY 5: TECHNICAL DEBT & PERFORMANCE**
+
+#### **Database & Performance**
+
+- [ ] **Query inefficiencies** - Poor query patterns, N+1 problems
+- [ ] **Missing transactions** - Critical operations without proper transactions
+- [ ] **Memory leaks** - Potential memory leak patterns
+- [ ] **Resource management** - Improper resource handling
+- [ ] **Algorithm complexity** - Inefficient algorithms
+
+#### **Type Safety & Error Handling**
+
+- [ ] **Type duplication** - Redundant type definitions
+- [ ] **Missing error handling** - API calls without proper error handling
+- [ ] **Inconsistent validation** - Missing or inconsistent input validation
+- [ ] **Type inference issues** - Poor TypeScript usage
+
+## 📊 COMPREHENSIVE ANALYSIS FRAMEWORK
+
+### **1. STRUCTURAL ANALYSIS**
+
+- **Overall Architecture**: Code organization, responsibility separation, architectural pattern adherence
+- **Folder Structure**: Directory organization and convention compliance
+- **Dependencies**: Dependency mapping and unnecessary coupling identification
+- **Modules & Components**: Cohesion, coupling, and responsibility verification
+
+### **2. FEATURE ANALYSIS (END-TO-END)**
+
+For each identified functionality:
+
+- **Complete Flow**: Trace path from input to output
+- **Integration Points**: How features connect with others
+- **State Transitions**: Map all possible states
+- **Edge Cases**: Identify uncovered or poorly handled scenarios
+- **Performance**: Evaluate bottlenecks and optimization opportunities
+
+### **3. DOMAIN & CONTEXT ANALYSIS**
+
+- **Context Separation**: Identify improper domain mixing
+- **Bounded Contexts**: Verify well-defined context boundaries
+- **Domain Logic**: Business logic mixed with infrastructure
+- **Cross-Cutting Concerns**: Logging, security, caching implementation
+
+### **4. DATA FLOW ANALYSIS**
+
+- **Data Flow**: Information flow tracking
+- **State Management**: Proper state management evaluation
+- **Side Effects**: Controlled and predictable side effects
+- **Mutability**: Proper use of mutable/immutable structures
+
+### **5. DEVELOPER EXPERIENCE (DX) ANALYSIS**
+
+#### **Organization & Readability**
+
+- **Clear Structure**: Intuitive and predictable code organization
+- **Consistent Naming**: Naming patterns that facilitate understanding
+- **Responsibility Separation**: Each code part has clear purpose
+- **Logical Hierarchy**: Organization reflecting business domain
+- **Conventions**: Adherence to established project patterns
+
+#### **Maintainability**
+
+- **Feature Location**: Ease of finding where to implement changes
+- **Change Isolation**: Modifications in one area don't break others
+- **Safe Refactoring**: Structure allowing fearless refactoring
+- **Backward Compatibility**: Easy compatibility maintenance
+- **Configuration Management**: Centralized and easy-to-change configurations
+
+#### **Extensibility**
+
+- **Easy Extension**: Easy addition of new features
+- **Established Patterns**: Clear patterns to follow when adding code
+- **Extension Points**: Interfaces and abstractions facilitating extensions
+- **Modularity**: Independent components that can evolve separately
+- **Mental Scaffolding**: Structure naturally guiding developers
+
+#### **Comprehensibility**
+
+- **Self-Documenting Code**: Code that explains itself
+- **Logical Flow**: Easy-to-follow operation sequence
+- **Appropriate Abstractions**: Right abstraction level for each context
+- **Expressiveness**: Code clearly communicating intention
+- **Consistent Mental Models**: Consistent mental models throughout code
+
+#### **Developer Productivity**
+
+- **Copy-Paste Safety**: Patterns that work well when replicated
+- **Discoverability**: Easy discovery of existing functionality
+- **Predictability**: Predictable behavior based on conventions
+- **Minimal Cognitive Load**: Reduced mental load required to work
+- **Quick Wins**: Easy implementation of small changes
+
+## 📈 DETAILED REPORT FORMAT
+
+### **EXECUTIVE SUMMARY**
+
+- **Overall Score**: 1-10 scale for general code quality
+- **Critical Issues**: List of 5 most severe problems
+- **Business Impact**: How problems affect the product
+- **Priority Order**: Recommended resolution sequence
+
+### **DETAILED ANALYSIS BY SECTION**
+
+For each analyzed section:
+
+#### **🔴 IDENTIFIED PROBLEMS**
+
+- **Description**: What exactly is wrong
+- **Location**: Where the problem exists (files/lines)
+- **Impact**: Severity and consequences
+- **Root Cause**: Underlying cause of the problem
+
+#### **⚠️ CODE SMELLS**
+
+- **Bad Smells**: Code smell identification
+- **Technical Debt**: Accumulated technical debt
+- **Anti-Patterns**: Inappropriate patterns used
+
+#### **💡 IMPROVEMENT OPPORTUNITIES**
+
+- **Refactoring**: Specific refactoring suggestions
+- **Simplifications**: Where code can be simplified
+- **Optimizations**: Possible performance improvements
+- **DX Improvements**: Developer experience enhancements
+
+#### **🧹 DEAD/UNNECESSARY CODE**
+
+- **Dead Code**: Unused code that can be removed
+- **Unused Dependencies**: Unused dependencies
+- **Deprecated Features**: Use of obsolete functionality
+- **Redundant Code**: Redundant or duplicated code
+
+### **SPECIFIC RECOMMENDATIONS**
+
+#### **IMMEDIATE (High Priority)**
+
+- Actions that must be taken immediately
+- Urgency justification
+- Effort estimation
+
+#### **MEDIUM TERM (Medium Priority)**
+
+- Important but non-critical improvements
+- Suggested implementation plan
+- Expected benefits
+
+#### **LONG TERM (Low Priority)**
+
+- Quality of life and maintainability improvements
+- Architecture investments
+- Non-critical performance improvements
+
+### **ACTION PLAN**
+
+1. **Refactoring Roadmap**: Recommended action sequence
+2. **Progress Metrics**: How to measure progress
+3. **Risk Assessment**: Risks of each proposed change
+4. **Quick Wins**: Fast improvements with high impact
+
+## 🔍 SPECIFIC IMPLEMENTATION INSTRUCTIONS
 
 ### **STEP 1: COMPREHENSIVE CODEBASE SCAN**
 
-1. **Start with critical files first:**
-   - All authentication-related files
-   - Database models and migrations
-   - IPC handlers and services
-   - React components and stores
+Start with critical files first:
 
-2. **Use search tools extensively:**
-   - Search for prohibited patterns: `useEffect`, `localStorage`, `React.FC`
-   - Search for missing patterns: `TanStack Query`, `beforeLoad`, database constraints
-   - Search for architectural violations: relative imports, shared folders
-   - Search for complexity issues: large components, deep nesting, magic numbers
-   - Search for React anti-patterns: missing keys, improper state management
-   - Search for Clean Code violations: long functions, unclear names, dead code
+- Authentication-related files
+- Database models and migrations
+- API handlers and services
+- React components and state stores
+
+Use extensive search patterns:
+
+- Search for prohibited patterns
+- Search for missing patterns
+- Search for architectural violations
+- Search for complexity issues
+- Search for anti-patterns
 
 ### **STEP 2: PROBLEM IDENTIFICATION & ANALYSIS**
 
-For **EACH PROBLEM** you find:
+For **EACH PROBLEM** found:
 
 ```
-ULTRATHINK ANALYSIS:
+DEEP ANALYSIS:
 1. PROBLEM DESCRIPTION: [Exact description of what's wrong]
-2. RULE VIOLATION: [Which CLAUDE.md rule or principle is being violated]
-3. CLEAN CODE PRINCIPLE: [Which Clean Code/KISS/YAGNI principle is violated]
-4. ROOT CAUSE: [Why this problem exists - technical debt, complexity, over-engineering]
-5. IMPACT ANALYSIS: [Performance, security, maintainability, complexity impact]
-6. SOLUTION DESIGN: [Simple, focused solution following CLAUDE.md + Clean Code]
-7. DEPENDENCIES: [What other files/components will be affected]
-8. MIGRATION STRATEGY: [Step-by-step implementation plan prioritizing simplicity]
+2. PRINCIPLE VIOLATION: [Which principle/rule is being violated]
+3. CLEAN CODE VIOLATION: [Which Clean Code/KISS/YAGNI principle]
+4. ROOT CAUSE: [Why this exists - technical debt, complexity, over-engineering]
+5. IMPACT ANALYSIS: [Performance, security, maintainability impact]
+6. SOLUTION DESIGN: [Simple, focused solution following best practices]
+7. DEPENDENCIES: [What other files/components affected]
+8. MIGRATION STRATEGY: [Step-by-step implementation prioritizing simplicity]
 ```
 
 ### **STEP 3: IMMEDIATE PROBLEM RESOLUTION**
 
-- **Apply the fix immediately** using the appropriate tools (Edit, MultiEdit, Write)
-- **Run TypeScript type-check** after each fix: `npm run type-check`
-- **Resolve ALL related TypeScript errors/warnings** that appear from the change
-- **Verify the fix** by reading the updated code
-- **Check dependencies** to ensure nothing is broken
-- **Update types** if necessary
-- **Add database migrations** if schema changes are needed
-- **Confirm type-check passes** before moving to next problem
+- Apply fix immediately using appropriate methods
+- Run type-checking after each fix
+- Resolve ALL related errors/warnings from the change
+- Verify fix by reading updated code
+- Check dependencies to ensure nothing breaks
+- Update types if necessary
+- Confirm type-check passes before next problem
 
 ### **STEP 4: COMPLIANCE VERIFICATION**
 
-After each fix, verify it meets ALL CLAUDE.md requirements:
+After each fix, verify ALL requirements are met:
 
-- ✅ Uses correct file naming conventions
-- ✅ Uses path aliases for imports
-- ✅ Follows established patterns (TanStack Query, beforeLoad, etc.)
-- ✅ Has proper TypeScript typing
-- ✅ Uses shadcn/ui components
-- ✅ Maintains bounded context organization
-- ✅ **TypeScript type-check passes without errors or warnings**
+- ✅ Uses correct naming conventions
+- ✅ Uses proper import patterns
+- ✅ Follows established patterns
+- ✅ Has proper typing
+- ✅ Uses appropriate components
+- ✅ Maintains proper organization
+- ✅ **Type-check passes without errors or warnings**
 
-## SPECIFIC PATTERNS TO IDENTIFY & FIX
+## 🎯 ANTI-PATTERNS TO FIND & FIX
 
-### **❌ FIND THESE ANTI-PATTERNS:**
+### **❌ CRITICAL ANTI-PATTERNS:**
 
 ```typescript
-// ❌ useEffect data loading
+// ❌ Data loading in effects
 useEffect(() => {
   fetchData();
 }, []);
@@ -215,16 +342,16 @@ function Component() {
   const data = await window.api.getData();
 }
 
-// ❌ localStorage usage
+// ❌ Browser storage misuse
 localStorage.setItem('key', value);
 
-// ❌ React.FC
+// ❌ Wrong component patterns
 const Component: React.FC = () => {};
 
 // ❌ Relative imports
 import { utils } from '../../utils';
 
-// ❌ HTML elements
+// ❌ Native HTML when components available
 <input type="text" />
 <button>Click</button>
 
@@ -242,12 +369,10 @@ const result = condition1 ? (
 
 // ❌ Magic numbers
 setTimeout(() => {}, 5000); // What is 5000?
-const MAX_ITEMS = 50; // Better but where is it defined?
 
 // ❌ Long functions
 function processUserData() {
   // 50+ lines doing multiple things
-  // validation, transformation, API calls, etc.
 }
 
 // ❌ Unclear variable names
@@ -269,37 +394,25 @@ if (user) {
 // ❌ Missing keys in lists
 {items.map(item => <div>{item.name}</div>)}
 
-// ❌ Unnecessary abstractions (YAGNI violation)
-abstract class AbstractDataProcessor {
-  abstract process(): void;
-}
-class UserDataProcessor extends AbstractDataProcessor {
-  process() { /* only implementation */ }
-}
-
 // ❌ Over-engineering (KISS violation)
 const UserManager = createComplexFactory({
   strategies: [Strategy1, Strategy2],
   middleware: [Auth, Validation],
   plugins: [Logger, Cache]
 });
-// When you just need: const users = await getUsers();
 ```
 
-### **✅ REPLACE WITH CORRECT PATTERNS:**
+### **✅ CORRECT PATTERNS:**
 
 ```typescript
-// ✅ TanStack Query
+// ✅ Proper data loading
 const { data } = useQuery({
   queryKey: ['key'],
   queryFn: () => window.api.getData()
 });
 
-// ✅ beforeLoad pattern
+// ✅ Route-based loading
 export const Route = createFileRoute('/path')({
-  beforeLoad: ({ context }) => {
-    // Auth checks here
-  },
   loader: () => window.api.getData()
 });
 
@@ -309,11 +422,11 @@ function Component(props: ComponentProps) {}
 // ✅ Path aliases
 import { utils } from '@/lib/utils';
 
-// ✅ shadcn/ui components
+// ✅ Component library usage
 <Input type="text" />
 <Button>Click</Button>
 
-// ✅ Component composition (break down large components)
+// ✅ Component composition
 function UserProfile({ user }: UserProfileProps) {
   return (
     <Card>
@@ -329,18 +442,11 @@ function shouldShowAdminPanel(user: User): boolean {
   return user?.permissions?.admin?.canDelete ?? false;
 }
 
-if (shouldShowAdminPanel(user)) {
-  // Simple, readable code
-}
-
 // ✅ Named constants
 const DEBOUNCE_DELAY_MS = 500;
 const MAX_RETRY_ATTEMPTS = 3;
-const DEFAULT_PAGE_SIZE = 20;
 
-setTimeout(callback, DEBOUNCE_DELAY_MS);
-
-// ✅ Single-purpose functions (Clean Code)
+// ✅ Single-purpose functions
 function validateUserInput(input: string): boolean {
   return input.length > 0 && input.length <= 100;
 }
@@ -353,130 +459,71 @@ function transformUserData(rawData: RawUser): User {
   };
 }
 
-function saveUserToDatabase(user: User): Promise<void> {
-  return db.insert(usersTable).values(user);
-}
-
-// ✅ Clear, descriptive variable names
+// ✅ Clear, descriptive names
 const currentDate = new Date();
 const activeUsers = userData.filter(user => user.isActive);
 const validationResult = validateUserData(formData);
 
-// ✅ Proper key usage in lists
+// ✅ Proper key usage
 {items.map(item => (
   <div key={item.id}>{item.name}</div>
 ))}
 
-// ✅ Simple, direct solutions (KISS)
+// ✅ Simple, direct solutions
 async function getUsers(): Promise<User[]> {
   const users = await db.select().from(usersTable);
   return users;
 }
 
-// ✅ Extract render logic for complex conditionals
+// ✅ Extract render logic
 function renderUserStatus(user: User) {
   if (user.isActive) return <Badge variant="success">Active</Badge>;
   if (user.isPending) return <Badge variant="warning">Pending</Badge>;
   return <Badge variant="destructive">Inactive</Badge>;
 }
-
-function UserCard({ user }: UserCardProps) {
-  return (
-    <Card>
-      <h3>{user.name}</h3>
-      {renderUserStatus(user)}
-    </Card>
-  );
-}
 ```
 
-## EXECUTION REQUIREMENTS
+## ✅ SUCCESS CRITERIA
 
-1. **START IMMEDIATELY** - Begin the audit without asking for confirmation
-2. **BE THOROUGH** - Check every file in the codebase systematically
-3. **FIX EVERYTHING** - Don't leave any technical debt behind
-4. **FOLLOW STANDARDS** - Every change must align with CLAUDE.md guidelines
-5. **TYPE-CHECK AFTER EACH FIX** - Run `npm run type-check` after every single change
-6. **RESOLVE ALL TYPE ERRORS** - Fix every TypeScript error/warning before proceeding
-7. **VERIFY CHANGES** - Read updated files to ensure correctness
-8. **MAINTAIN FUNCTIONALITY** - Don't break existing features
-9. **UPDATE DOCUMENTATION** - Update types, schemas, and comments as needed
+### **Zero Tolerance Requirements**
 
-## SUCCESS CRITERIA
-
-### **✅ Architecture & Patterns (ZERO violations)**
-
-- **ZERO** useEffect patterns for data loading remain
-- **ZERO** direct window.api calls in component bodies remain
-- **ZERO** localStorage usage remains
-- **ZERO** React.FC patterns remain
-- **ZERO** relative imports remain
-- **ZERO** HTML native elements remain (when shadcn/ui equivalent exists)
-
-### **✅ Component Complexity (Clean Code compliance)**
-
+- **ZERO** architectural pattern violations remain
 - **ZERO** components over 200 lines
 - **ZERO** functions over 25 lines
-- **ZERO** JSX nesting over 4-5 levels
-- **ZERO** complex inline conditional rendering
-- **ZERO** missing keys in React lists
-
-### **✅ Clean Code Standards**
-
 - **ZERO** magic numbers or strings
-- **ZERO** unclear variable names (data, temp, result, etc.)
+- **ZERO** unclear variable names
 - **ZERO** deep nesting (>3-4 levels)
-- **ZERO** dead code (unused imports, variables, functions)
-- **ALL** functions have single responsibility
-
-### **✅ KISS & YAGNI Compliance**
-
+- **ZERO** dead code remains
 - **ZERO** unnecessary abstractions
 - **ZERO** over-engineered solutions
-- **ZERO** unused features or dependencies
-- **ZERO** speculative code for "future requirements"
+- **ZERO** TypeScript errors or warnings
 
-### **✅ React Best Practices**
+### **Positive Requirements**
 
+- **ALL** components use proper patterns
+- **ALL** functions have single responsibility
+- **ALL** data loading uses proper methods
+- **ALL** database relationships have proper constraints
 - **ALL** effects have proper cleanup
 - **ALL** list items have proper keys
-- **ALL** components are properly typed
-- **ALL** state management is appropriate (local vs global)
+- **ALL** type checks pass cleanly
 
-### **✅ Database & Performance**
-
-- **ALL** database relationships have proper foreign keys and indexes
-- **ALL** components use function declarations
-- **ALL** data loading uses TanStack Query or beforeLoad
-- **ALL** sessions are database-persisted with main process management
-
-### **✅ TypeScript Compliance**
-
-- **ZERO** TypeScript errors remain in the entire codebase
-- **ZERO** TypeScript warnings remain in the entire codebase
-- **ALL** type-checks pass after each individual fix
-
-## **🔧 FINAL COMPREHENSIVE TYPE-CHECK**
-
-**CRITICAL REQUIREMENT**: After completing ALL problem fixes:
-
-1. **Run final type-check**: `npm run type-check`
-2. **If ANY errors/warnings remain**:
-   - **Identify each remaining issue**
-   - **Apply ULTRATHINK analysis to each**
-   - **Fix immediately following same methodology**
-   - **Re-run type-check after each fix**
-   - **Repeat until ZERO errors/warnings remain**
-3. **Success confirmation**: Only complete when `npm run type-check` returns clean
-
-## **⚠️ MANDATORY WORKFLOW**
+## 🔧 EXECUTION WORKFLOW
 
 ```bash
-# After each problem fix:
-1. Fix Problem → 2. npm run type-check → 3. Fix ALL related TypeScript issues → 4. Verify clean → 5. Next Problem
+# Mandatory workflow for each problem:
+1. Find Problem → 2. Deep Analysis → 3. Fix Immediately →
+4. Type-Check → 5. Fix ALL Related Issues → 6. Verify → 7. Next Problem
 
 # Final validation:
-1. Complete all problems → 2. npm run type-check → 3. Fix ANY remaining issues → 4. Confirm ZERO errors/warnings
+1. Complete All Problems → 2. Final Type-Check →
+3. Fix ANY Remaining Issues → 4. Confirm ZERO Errors/Warnings
 ```
 
-Begin the comprehensive audit NOW. Start with the most critical violations first, and work through the entire codebase systematically. Remember: **Find 1 Problem → ULTRATHINK → Fix Immediately → Type-Check → Resolve ALL TypeScript Issues → Verify → Move to Next**.
+## 🚀 START IMMEDIATELY
+
+Begin the comprehensive audit NOW. Start with the most critical violations first and work through the entire codebase systematically.
+
+**Remember**: Find 1 Problem → Deep Analysis → Fix Immediately → Type-Check → Resolve ALL Issues → Verify → Move to Next.
+
+**IMPORTANT**: Provide concrete code examples to illustrate each identified problem and their respective solutions. Use code snippets to demonstrate "before" and "after" whenever possible.
