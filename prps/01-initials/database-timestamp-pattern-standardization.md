@@ -9,10 +9,12 @@ Standardize timestamp column definitions across all database models to use a sin
 The database schema uses inconsistent timestamp patterns:
 
 **Pattern A:** `sql\`CURRENT_TIMESTAMP\`` (used in 8+ files)
+
 - Files: user.model.ts, auth.model.ts, project.model.ts, conversation.model.ts
 - Standard SQL approach
 
-**Pattern B:** `sql\`(strftime('%s', 'now'))\`` (used in 3+ files)  
+**Pattern B:** `sql\`(strftime('%s', 'now'))\`` (used in 3+ files)
+
 - Files: llm-provider.model.ts, agent.model.ts
 - SQLite-specific Unix timestamp approach
 
@@ -38,12 +40,12 @@ This inconsistency creates confusion, makes date comparisons complex, and violat
 ## Expected Impact
 
 - **Users:** No direct impact - timestamps continue working as expected
-- **Developers:** 
+- **Developers:**
   - Consistent pattern across all models
   - Simplified date/time queries and comparisons
   - Reduced cognitive load when working with timestamps
   - Easier database debugging and maintenance
-- **System:** 
+- **System:**
   - Consistent timestamp handling across all tables
   - Simplified migration scripts for future timestamp changes
 

@@ -1,57 +1,45 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Loader2 } from "lucide-react";
 
 import { ContentHeader } from "@/renderer/features/app/components/content-header";
+import {
+  messageApi,
+  conversationApi,
+} from "@/renderer/features/conversation/api";
 import { ConversationChat } from "@/renderer/features/conversation/components/conversation-chat";
-import { useMessages, useAvailableUsers } from "@/renderer/features/conversation/hooks";
-import { useAuthStore } from "@/renderer/store/auth.store";
 
 function UserDMPage() {
   const { conversationId } = Route.useParams();
-  const { user } = useAuthStore();
-  
-  // Server state via TanStack Query hooks
-  const { conversation, isLoading } = useMessages(conversationId);
-  const { availableUsers } = useAvailableUsers();
+  const { conversation, availableUsers, user } = Route.useLoaderData();
 
-  // Loading state
-  if (isLoading || !conversation) {
+  if (!conversation) {
     return (
-      <div className="h-full flex flex-col">
-        <ContentHeader
-          title="Loading..."
-          description="Loading conversation"
-        />
-        <main className="flex-1 overflow-auto p-4">
-          <div className="flex items-center justify-center h-full">
-            <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-          </div>
-        </main>
+      <div className="h-full w-full flex items-center justify-center">
+        <div className="text-muted-foreground">Conversation not found</div>
       </div>
     );
   }
 
   // Get conversation display info
   const otherParticipants = conversation.participants
-    .filter(p => p.participantId !== user?.id)
-    .map(p => availableUsers.find(u => u.id === p.participantId))
+    .filter((p) => p.participantId !== user?.id)
+    .map((p) => availableUsers.find((u) => u.id === p.participantId))
     .filter(Boolean);
 
-  const displayName = conversation.name || 
-    (otherParticipants.length === 1 ? otherParticipants[0]?.name : `Group ${otherParticipants.length + 1}`) || 
+  const displayName =
+    conversation.name ||
+    (otherParticipants.length === 1
+      ? otherParticipants[0]?.name
+      : `Group ${otherParticipants.length + 1}`) ||
     "Unknown";
 
-  const description = 
+  const description =
     otherParticipants.length === 1
-      ? `Direct message with ${otherParticipants[0]?.name || 'Unknown'}`
+      ? `Direct message with ${otherParticipants[0]?.name || "Unknown"}`
       : `Group conversation with ${otherParticipants.length} participants`;
 
   return (
     <div className="h-full w-full flex flex-col">
-      <ContentHeader
-        title={displayName}
-        description={description}
-      />
+      <ContentHeader title={displayName} description={description} />
       <main className="flex-1 overflow-hidden">
         <ConversationChat conversationId={conversationId} />
       </main>
@@ -59,6 +47,33 @@ function UserDMPage() {
   );
 }
 
-export const Route = createFileRoute("/_authenticated/user/dm/$conversationId")({
-  component: UserDMPage,
-});
+export const Route = createFileRoute("/_authenticated/user/dm/$conversationId")(
+  {
+    beforeLoad: async ({ context }) => {
+      const { auth } = context;
+      const { user } = auth;
+
+      if (!user) {
+        throw new Error("User not authenticated");
+      }
+    },
+    loader: async ({ params, context }) => {
+      const { auth } = context;
+      const { user } = auth;
+      const { conversationId } = params;
+
+      // Fetch conversation with messages and available users in parallel
+      const [conversation, availableUsers] = await Promise.all([
+        messageApi.getConversationWithMessages(conversationId),
+        conversationApi.getAvailableUsers(),
+      ]);
+
+      return {
+        conversation,
+        availableUsers: availableUsers || [],
+        user,
+      };
+    },
+    component: UserDMPage,
+  },
+);

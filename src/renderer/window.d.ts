@@ -33,9 +33,10 @@ declare global {
       auth: {
         register: (input: RegisterUserInput) => Promise<IpcResponse>;
         login: (credentials: LoginCredentials) => Promise<IpcResponse>;
-        getCurrentUser: () => Promise<IpcResponse>;
-        logout: () => Promise<IpcResponse>;
-        isLoggedIn: () => Promise<IpcResponse>;
+        getCurrentUser: (sessionToken: string) => Promise<IpcResponse>;
+        getActiveSession: () => Promise<IpcResponse>;
+        logout: (sessionToken: string) => Promise<IpcResponse>;
+        isLoggedIn: (sessionToken: string) => Promise<IpcResponse>;
         getUserById: (userId: string) => Promise<IpcResponse>;
       };
 

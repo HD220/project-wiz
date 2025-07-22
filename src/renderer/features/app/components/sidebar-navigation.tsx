@@ -1,9 +1,9 @@
 import { Hash, Bot } from "lucide-react";
 
 import { Separator } from "@/renderer/components/ui/separator";
+import { ConversationSidebarList } from "@/renderer/features/conversation/components/conversation-sidebar-list";
 
 import { NavigationItem } from "./navigation-item";
-import { ConversationSidebarList } from "@/renderer/features/conversation/components/conversation-sidebar-list";
 
 function SidebarNavigation() {
   return (
@@ -15,11 +15,7 @@ function SidebarNavigation() {
         activeOptions={{ exact: true }}
       />
 
-      <NavigationItem
-        to="/user/agents"
-        icon={Bot}
-        label="Agents"
-      />
+      <NavigationItem to="/user/agents" icon={Bot} label="Agents" />
 
       <Separator className="my-2" />
 

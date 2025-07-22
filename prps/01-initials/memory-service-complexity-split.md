@@ -9,6 +9,7 @@ Split the oversized `memory.service.ts` (400+ lines) into focused, single-respon
 The `src/main/features/agent/memory/memory.service.ts` file violates clean code principles:
 
 **Current Issues:**
+
 - **400+ lines long** - far exceeds recommended file size
 - **Multiple responsibilities mixed together:**
   - Basic CRUD operations for memories
@@ -18,6 +19,7 @@ The `src/main/features/agent/memory/memory.service.ts` file violates clean code 
   - Memory maintenance and cleanup
 
 **Maintenance Problems:**
+
 - Difficult to locate specific functionality
 - Changes affect multiple unrelated concerns
 - Hard to understand individual responsibility boundaries

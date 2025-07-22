@@ -9,6 +9,7 @@ Refactor the complex `AgentService.create` method by breaking it into smaller, f
 The `AgentService.create` method in `src/main/features/agent/agent.service.ts` (lines 30-99) violates clean code principles:
 
 **Current Issues:**
+
 - **69 lines long** - exceeds recommended function length
 - **Multiple responsibilities:**
   - Input validation
@@ -18,6 +19,7 @@ The `AgentService.create` method in `src/main/features/agent/agent.service.ts` (
   - Error handling for various failure modes
 
 **Maintenance Problems:**
+
 - Difficult to test individual components
 - Hard to understand business logic flow
 - Changes require touching multiple concerns

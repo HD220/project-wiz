@@ -1,14 +1,15 @@
-import { Plus } from "lucide-react";
 import { Link } from "@tanstack/react-router";
+import { Plus } from "lucide-react";
 
+import { Route } from "@/renderer/app/_authenticated/user/settings/llm-providers";
 import { Button } from "@/renderer/components/ui/button";
-import { useLLMProvidersStore } from "@/renderer/store/llm-provider.store";
 
 import { EmptyState } from "./empty-state";
 import { ProviderCard } from "./provider-card";
 
 function ProviderList() {
-  const { providers, isLoading } = useLLMProvidersStore();
+  const { providers } = Route.useLoaderData();
+  const isLoading = false; // Data is loaded via loader
 
   if (isLoading) {
     return (
@@ -53,7 +54,7 @@ function ProviderList() {
             Manage your AI language model providers
           </p>
         </div>
-        <Link to="/user/settings/llm-providers/new/">
+        <Link to="/user/settings/llm-providers/new">
           <Button className="gap-2 shrink-0">
             <Plus className="h-4 w-4" />
             Add Provider

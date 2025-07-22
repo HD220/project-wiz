@@ -4,9 +4,10 @@
 // TanStack Query mutation for sending messages with optimistic updates
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useRouteContext } from "@tanstack/react-router";
 
-import { useAuthStore } from "@/renderer/store/auth.store";
 import { messageApi } from "../api";
+
 import type { SendMessageInput, SendMessageMutationResult } from "../types";
 
 /**
@@ -15,22 +16,23 @@ import type { SendMessageInput, SendMessageMutationResult } from "../types";
  */
 export function useSendMessage(): SendMessageMutationResult {
   const queryClient = useQueryClient();
-  const { user } = useAuthStore();
+  const { auth } = useRouteContext({ from: "__root__" });
+  const { user } = auth;
 
   const mutation = useMutation({
     mutationFn: messageApi.sendMessage,
-    
+
     // Optimistic update: add message immediately to UI
     onMutate: async (newMessage: SendMessageInput) => {
       // Cancel any outgoing refetches (so they don't overwrite our optimistic update)
-      await queryClient.cancelQueries({ 
-        queryKey: ["messages", newMessage.conversationId] 
+      await queryClient.cancelQueries({
+        queryKey: ["messages", newMessage.conversationId],
       });
 
       // Snapshot the previous value
       const previousMessages = queryClient.getQueryData([
-        "messages", 
-        newMessage.conversationId
+        "messages",
+        newMessage.conversationId,
       ]);
 
       // Optimistically update to the new value
@@ -38,7 +40,7 @@ export function useSendMessage(): SendMessageMutationResult {
         ["messages", newMessage.conversationId],
         (old: any) => {
           if (!old) return old;
-          
+
           const optimisticMessage = {
             id: `temp-${Date.now()}`, // Temporary ID
             conversationId: newMessage.conversationId,
@@ -52,7 +54,7 @@ export function useSendMessage(): SendMessageMutationResult {
             ...old,
             messages: [...(old.messages || []), optimisticMessage],
           };
-        }
+        },
       );
 
       // Return a context object with the snapshotted value
@@ -62,13 +64,13 @@ export function useSendMessage(): SendMessageMutationResult {
     // On success: invalidate and refetch
     onSuccess: (_, variables) => {
       // Invalidate conversations to update last message
-      queryClient.invalidateQueries({ 
-        queryKey: ["conversations", user?.id] 
+      queryClient.invalidateQueries({
+        queryKey: ["conversations", user?.id],
       });
-      
+
       // Invalidate messages to get real data from server
-      queryClient.invalidateQueries({ 
-        queryKey: ["messages", variables.conversationId] 
+      queryClient.invalidateQueries({
+        queryKey: ["messages", variables.conversationId],
       });
     },
 
@@ -77,15 +79,15 @@ export function useSendMessage(): SendMessageMutationResult {
       if (context?.previousMessages) {
         queryClient.setQueryData(
           ["messages", variables.conversationId],
-          context.previousMessages
+          context.previousMessages,
         );
       }
     },
 
     // Always refetch after error or success
     onSettled: (_, __, variables) => {
-      queryClient.invalidateQueries({ 
-        queryKey: ["messages", variables.conversationId] 
+      queryClient.invalidateQueries({
+        queryKey: ["messages", variables.conversationId],
       });
     },
   });

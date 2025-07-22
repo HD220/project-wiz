@@ -1,6 +1,13 @@
-import { useState } from "react";
 import { X, Search, Plus, User, Bot } from "lucide-react";
+import { useState } from "react";
 
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from "@/renderer/components/ui/avatar";
+import { Badge } from "@/renderer/components/ui/badge";
+import { Button } from "@/renderer/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -8,13 +15,11 @@ import {
   DialogTitle,
 } from "@/renderer/components/ui/dialog";
 import { Input } from "@/renderer/components/ui/input";
-import { Button } from "@/renderer/components/ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "@/renderer/components/ui/avatar";
-import { Badge } from "@/renderer/components/ui/badge";
 import { ScrollArea } from "@/renderer/components/ui/scroll-area";
 
-import type { AuthenticatedUser } from "../types";
 import { useCreateConversation } from "../hooks";
+
+import type { AuthenticatedUser } from "../types";
 
 interface CreateConversationDialogProps {
   availableUsers: AuthenticatedUser[];
@@ -26,19 +31,19 @@ function CreateConversationDialog(props: CreateConversationDialogProps) {
   const { availableUsers, onClose, onConversationCreated } = props;
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedUserIds, setSelectedUserIds] = useState<string[]>([]);
-  
+
   const { createConversation, isCreating, error } = useCreateConversation();
 
   // Filter agents based on search
-  const filteredUsers = availableUsers.filter(user => 
-    user.name.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredUsers = availableUsers.filter((user) =>
+    user.name.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
   const handleUserToggle = (userId: string) => {
-    setSelectedUserIds(prev => 
-      prev.includes(userId) 
-        ? prev.filter(id => id !== userId)
-        : [...prev, userId]
+    setSelectedUserIds((prev) =>
+      prev.includes(userId)
+        ? prev.filter((id) => id !== userId)
+        : [...prev, userId],
     );
   };
 
@@ -54,7 +59,7 @@ function CreateConversationDialog(props: CreateConversationDialogProps) {
   };
 
   const getSelectedUsers = () => {
-    return availableUsers.filter(user => selectedUserIds.includes(user.id));
+    return availableUsers.filter((user) => selectedUserIds.includes(user.id));
   };
 
   return (
@@ -86,7 +91,7 @@ function CreateConversationDialog(props: CreateConversationDialogProps) {
                 Selected ({selectedUserIds.length}):
               </p>
               <div className="flex flex-wrap gap-2">
-                {getSelectedUsers().map(user => (
+                {getSelectedUsers().map((user) => (
                   <Badge
                     key={user.id}
                     variant="secondary"
@@ -115,9 +120,9 @@ function CreateConversationDialog(props: CreateConversationDialogProps) {
                   <p className="text-sm">No agents found</p>
                 </div>
               ) : (
-                filteredUsers.map(user => {
+                filteredUsers.map((user) => {
                   const isSelected = selectedUserIds.includes(user.id);
-                  
+
                   return (
                     <div
                       key={user.id}
@@ -126,11 +131,11 @@ function CreateConversationDialog(props: CreateConversationDialogProps) {
                       className={`
                         flex items-center gap-3 p-2 rounded-md cursor-pointer transition-colors
                         hover:bg-muted/50
-                        ${isSelected ? 'bg-muted' : ''}
+                        ${isSelected ? "bg-muted" : ""}
                       `}
                       onClick={() => handleUserToggle(user.id)}
                       onKeyDown={(e) => {
-                        if (e.key === 'Enter' || e.key === ' ') {
+                        if (e.key === "Enter" || e.key === " ") {
                           e.preventDefault();
                           handleUserToggle(user.id);
                         }
@@ -144,7 +149,7 @@ function CreateConversationDialog(props: CreateConversationDialogProps) {
                             {user.name.charAt(0).toUpperCase()}
                           </AvatarFallback>
                         </Avatar>
-                        
+
                         {/* Type indicator */}
                         <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 bg-background rounded-full flex items-center justify-center border border-border">
                           {user.type === "agent" ? (
@@ -179,28 +184,20 @@ function CreateConversationDialog(props: CreateConversationDialogProps) {
           </ScrollArea>
 
           {/* Error message */}
-          {error && (
-            <p className="text-sm text-destructive">{error.message}</p>
-          )}
+          {error && <p className="text-sm text-destructive">{error.message}</p>}
 
           {/* Actions */}
           <div className="flex justify-end gap-2 pt-2">
-            <Button
-              variant="outline"
-              onClick={onClose}
-              disabled={isCreating}
-            >
+            <Button variant="outline" onClick={onClose} disabled={isCreating}>
               Cancel
             </Button>
             <Button
               onClick={handleCreateConversation}
               disabled={selectedUserIds.length === 0 || isCreating}
             >
-              {isCreating ? (
-                "Creating..."
-              ) : (
-                `Start Chat${selectedUserIds.length > 1 ? " with " + selectedUserIds.length + " Agents" : ""} (${selectedUserIds.length})`
-              )}
+              {isCreating
+                ? "Creating..."
+                : `Start Chat${selectedUserIds.length > 1 ? " with " + selectedUserIds.length + " Agents" : ""} (${selectedUserIds.length})`}
             </Button>
           </div>
         </div>

@@ -1,17 +1,20 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 
+import type { LlmProvider } from "@/main/features/agent/llm-provider/llm-provider.types";
+
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
 } from "@/renderer/components/ui/dialog";
-import { AgentForm } from "@/renderer/features/agent/components/agent-form";
 import { useAgentStore } from "@/renderer/features/agent/agent.store";
 import type { CreateAgentInput } from "@/renderer/features/agent/agent.types";
+import { AgentForm } from "@/renderer/features/agent/components/agent-form";
 
 function NewAgentPage() {
   const navigate = useNavigate();
+  const { providers } = Route.useLoaderData();
   const { createAgent, isLoading } = useAgentStore();
 
   function handleClose() {
@@ -31,8 +34,9 @@ function NewAgentPage() {
         <DialogHeader>
           <DialogTitle>Create New Agent</DialogTitle>
         </DialogHeader>
-        
+
         <AgentForm
+          providers={providers}
           onSubmit={handleSubmit}
           onCancel={handleClose}
           isLoading={isLoading}
@@ -43,5 +47,22 @@ function NewAgentPage() {
 }
 
 export const Route = createFileRoute("/_authenticated/user/agents/new/")({
+  beforeLoad: ({ context }) => {
+    const { auth } = context;
+    if (!auth.user) {
+      throw new Error("User not authenticated");
+    }
+  },
+  loader: async ({ context }) => {
+    const { auth } = context;
+    const providersResponse = await window.api.llmProviders.list(auth.user!.id);
+    if (!providersResponse.success) {
+      throw new Error(providersResponse.error || "Failed to load providers");
+    }
+
+    return {
+      providers: providersResponse.data as LlmProvider[],
+    };
+  },
   component: NewAgentPage,
 });

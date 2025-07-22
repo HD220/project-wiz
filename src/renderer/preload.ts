@@ -40,11 +40,14 @@ contextBridge.exposeInMainWorld("api", {
       ipcRenderer.invoke("auth:register", input),
     login: (credentials: LoginCredentials): Promise<IpcResponse> =>
       ipcRenderer.invoke("auth:login", credentials),
-    getCurrentUser: (): Promise<IpcResponse> =>
-      ipcRenderer.invoke("auth:getCurrentUser"),
-    logout: (): Promise<IpcResponse> => ipcRenderer.invoke("auth:logout"),
-    isLoggedIn: (): Promise<IpcResponse> =>
-      ipcRenderer.invoke("auth:isLoggedIn"),
+    getCurrentUser: (sessionToken: string): Promise<IpcResponse> =>
+      ipcRenderer.invoke("auth:getCurrentUser", sessionToken),
+    getActiveSession: (): Promise<IpcResponse> =>
+      ipcRenderer.invoke("auth:getActiveSession"),
+    logout: (sessionToken: string): Promise<IpcResponse> =>
+      ipcRenderer.invoke("auth:logout", sessionToken),
+    isLoggedIn: (sessionToken: string): Promise<IpcResponse> =>
+      ipcRenderer.invoke("auth:isLoggedIn", sessionToken),
     getUserById: (userId: string): Promise<IpcResponse> =>
       ipcRenderer.invoke("auth:getUserById", userId),
   },

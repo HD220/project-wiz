@@ -15,7 +15,7 @@ import {
   FormMessage,
 } from "@/renderer/components/ui/form";
 import { Input } from "@/renderer/components/ui/input";
-import { useAuthStore } from "@/renderer/store/auth.store";
+import { useAuth } from "@/renderer/contexts/auth.context";
 
 import { AuthCard } from "./auth-card";
 
@@ -35,7 +35,7 @@ type RegisterFormData = z.infer<typeof registerSchema>;
 
 function RegisterForm() {
   const router = useRouter();
-  const { isLoading, error, clearError } = useAuthStore();
+  const { isLoading, error, clearError, login } = useAuth();
 
   const form = useForm<RegisterFormData>({
     resolver: zodResolver(registerSchema),
@@ -58,7 +58,7 @@ function RegisterForm() {
       });
 
       if (response.success) {
-        await useAuthStore.getState().login({
+        await login({
           username: data.username,
           password: data.password,
         });
@@ -72,7 +72,14 @@ function RegisterForm() {
   return (
     <AuthCard title="Create an account" description="Join our community today!">
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            const data = form.getValues();
+            onSubmit(data);
+          }}
+          className="space-y-4"
+        >
           {error && (
             <Alert
               variant="destructive"

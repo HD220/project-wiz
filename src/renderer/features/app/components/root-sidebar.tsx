@@ -1,4 +1,4 @@
-import { Link } from "@tanstack/react-router";
+import { Link, useRouteContext } from "@tanstack/react-router";
 import { Plus, Settings } from "lucide-react";
 
 import { CustomLink } from "@/renderer/components/custom-link";
@@ -12,7 +12,6 @@ import {
   TooltipTrigger,
 } from "@/renderer/components/ui/tooltip";
 import { cn } from "@/renderer/lib/utils";
-import { useAuthStore } from "@/renderer/store/auth.store";
 
 interface Server {
   id: string;
@@ -27,7 +26,8 @@ interface RootSidebarProps {
 
 function RootSidebar(props: RootSidebarProps) {
   const { className } = props;
-  const { user } = useAuthStore();
+  const { auth } = useRouteContext({ from: "__root__" });
+  const { user } = auth;
 
   // Mock servers data - in real app this would come from a store
   const servers: Server[] = [

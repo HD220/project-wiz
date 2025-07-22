@@ -1,26 +1,25 @@
+import { useRouteContext } from "@tanstack/react-router";
 import { Plus, MessageCircle } from "lucide-react";
 
 import { Button } from "@/renderer/components/ui/button";
-import { useAuthStore } from "@/renderer/store/auth.store";
 
 import { useConversations, useAvailableUsers } from "../hooks";
 import { useConversationUIStore } from "../store";
-import { CreateConversationDialog } from "./create-conversation-dialog";
+
 import { ConversationSidebarItem } from "./conversation-sidebar-item";
+import { CreateConversationDialog } from "./create-conversation-dialog";
 
 function ConversationSidebarList() {
-  const { user } = useAuthStore();
-  
+  const { auth } = useRouteContext({ from: "__root__" });
+  const { user } = auth;
+
   // Server state via TanStack Query hooks
   const { conversations, isLoading: conversationsLoading } = useConversations();
   const { availableUsers, isLoading: usersLoading } = useAvailableUsers();
-  
+
   // UI state via Zustand
-  const { 
-    showCreateDialog, 
-    openCreateDialog, 
-    closeCreateDialog 
-  } = useConversationUIStore();
+  const { showCreateDialog, openCreateDialog, closeCreateDialog } =
+    useConversationUIStore();
 
   const isLoading = conversationsLoading || usersLoading;
 
@@ -46,10 +45,13 @@ function ConversationSidebarList() {
           <div className="h-3 w-20 bg-muted animate-pulse rounded" />
           <div className="h-6 w-6 bg-muted animate-pulse rounded" />
         </div>
-        
+
         {/* Conversation items skeleton - Discord style */}
         {Array.from({ length: 4 }).map((_, i) => (
-          <div key={i} className="flex items-center gap-3 px-2 py-2 mx-1 rounded">
+          <div
+            key={i}
+            className="flex items-center gap-3 px-2 py-2 mx-1 rounded"
+          >
             <div className="w-8 h-8 bg-muted animate-pulse rounded-full flex-shrink-0" />
             <div className="flex-1 space-y-1">
               <div className="h-3.5 w-20 bg-muted animate-pulse rounded" />
@@ -84,15 +86,19 @@ function ConversationSidebarList() {
       <div className="space-y-0.5">
         {conversations.map((conversation) => {
           const otherParticipantIds = getOtherParticipants(conversation);
-          const otherParticipants = availableUsers.filter(user => 
-            otherParticipantIds.includes(user.id)
+          const otherParticipants = availableUsers.filter((user) =>
+            otherParticipantIds.includes(user.id),
           );
 
           return (
             <ConversationSidebarItem
               key={conversation.id}
               conversation={conversation}
-              lastMessage={conversation.lastMessage ? (conversation.lastMessage as any) : null}
+              lastMessage={
+                conversation.lastMessage
+                  ? (conversation.lastMessage as any)
+                  : null
+              }
               otherParticipants={otherParticipants}
               unreadCount={0} // TODO: Get from store when implemented
             />

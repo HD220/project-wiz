@@ -1,5 +1,6 @@
 import { createFileRoute, Outlet, useLocation } from "@tanstack/react-router";
 import { Bot, User, Palette, X } from "lucide-react";
+
 import { Button } from "@/renderer/components/ui/button";
 import { ScrollArea } from "@/renderer/components/ui/scroll-area";
 
@@ -7,16 +8,31 @@ const settingsCategories = [
   {
     label: "USER SETTINGS",
     items: [
-      { id: "account", label: "My Account", icon: User, path: "/user/settings" },
-      { id: "appearance", label: "Appearance", icon: Palette, path: "/user/settings/appearance" }
-    ]
+      {
+        id: "account",
+        label: "My Account",
+        icon: User,
+        path: "/user/settings",
+      },
+      {
+        id: "appearance",
+        label: "Appearance",
+        icon: Palette,
+        path: "/user/settings/appearance",
+      },
+    ],
   },
   {
-    label: "APP SETTINGS", 
+    label: "APP SETTINGS",
     items: [
-      { id: "llm-providers", label: "AI Providers", icon: Bot, path: "/user/settings/llm-providers" }
-    ]
-  }
+      {
+        id: "llm-providers",
+        label: "AI Providers",
+        icon: Bot,
+        path: "/user/settings/llm-providers",
+      },
+    ],
+  },
 ];
 
 function SettingsLayout() {
@@ -30,8 +46,8 @@ function SettingsLayout() {
         <div className="w-[232px] bg-sidebar flex flex-col border-r border-sidebar-border">
           {/* Close button */}
           <div className="flex justify-end p-4">
-            <Button 
-              variant="ghost" 
+            <Button
+              variant="ghost"
               size="sm"
               onClick={() => navigate({ to: "/" })}
               className="h-8 w-8 p-0 text-muted-foreground hover:bg-accent hover:text-accent-foreground"
@@ -52,16 +68,18 @@ function SettingsLayout() {
                 <div className="space-y-0.5">
                   {category.items.map((item) => {
                     const Icon = item.icon;
-                    const isActive = location.pathname === item.path || 
-                      (item.path === "/user/settings" && location.pathname === "/user/settings/");
-                    
+                    const isActive =
+                      location.pathname === item.path ||
+                      (item.path === "/user/settings" &&
+                        location.pathname === "/user/settings/");
+
                     return (
                       <Button
                         key={item.id}
                         variant="ghost"
                         className={`w-full justify-start h-8 px-2 text-base font-medium border-l-2 border-transparent transition-all ${
-                          isActive 
-                            ? "bg-sidebar-accent text-sidebar-accent-foreground border-l-primary hover:bg-sidebar-accent/80" 
+                          isActive
+                            ? "bg-sidebar-accent text-sidebar-accent-foreground border-l-primary hover:bg-sidebar-accent/80"
                             : "text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground"
                         }`}
                         onClick={() => navigate({ to: item.path })}

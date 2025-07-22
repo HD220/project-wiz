@@ -105,4 +105,3 @@ export interface ProjectStatistics extends ProjectStats {
   recentProjects: SelectProject[];
   favoriteProjects?: SelectProject[];
 }
-

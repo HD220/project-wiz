@@ -3,7 +3,11 @@ import { ptBR } from "date-fns/locale";
 import { MessageCircle } from "lucide-react";
 
 import { CustomLink } from "@/renderer/components/custom-link";
-import { Avatar, AvatarFallback, AvatarImage } from "@/renderer/components/ui/avatar";
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from "@/renderer/components/ui/avatar";
 import { Badge } from "@/renderer/components/ui/badge";
 import { cn } from "@/renderer/lib/utils";
 
@@ -22,9 +26,9 @@ interface ConversationSidebarItemProps {
 }
 
 function ConversationSidebarItem(props: ConversationSidebarItemProps) {
-  const { 
-    conversation, 
-    lastMessage, 
+  const {
+    conversation,
+    lastMessage,
     otherParticipants,
     className,
     unreadCount = 0,
@@ -35,13 +39,13 @@ function ConversationSidebarItem(props: ConversationSidebarItemProps) {
     if (conversation.name) {
       return conversation.name;
     }
-    
+
     if (otherParticipants.length === 1) {
       return otherParticipants[0]?.name || "Unknown";
     } else if (otherParticipants.length > 1) {
       return `Group ${otherParticipants.length + 1}`;
     }
-    
+
     return "New Conversation";
   };
 
@@ -55,7 +59,7 @@ function ConversationSidebarItem(props: ConversationSidebarItemProps) {
         isGroup: false,
       };
     }
-    
+
     return {
       image: null,
       fallback: otherParticipants.length.toString(),
@@ -66,24 +70,26 @@ function ConversationSidebarItem(props: ConversationSidebarItemProps) {
   // Get message preview
   const getMessagePreview = () => {
     if (!lastMessage) return "No messages yet";
-    
+
     const maxLength = 30;
     if (lastMessage.content.length > maxLength) {
       return `${lastMessage.content.substring(0, maxLength)}...`;
     }
-    
+
     return lastMessage.content;
   };
 
   // Format timestamp
   const getTimeAgo = () => {
     if (!lastMessage) return "";
-    
+
     try {
       return formatDistanceToNow(new Date(lastMessage.createdAt), {
         addSuffix: false,
         locale: ptBR,
-      }).replace('cerca de ', '').replace('aproximadamente ', '');
+      })
+        .replace("cerca de ", "")
+        .replace("aproximadamente ", "");
     } catch {
       return "";
     }
@@ -102,10 +108,10 @@ function ConversationSidebarItem(props: ConversationSidebarItemProps) {
       className={cn(
         "flex items-center gap-3 px-2 py-2 mx-1 rounded text-sm transition-all duration-150 group h-auto justify-start",
         "hover:bg-muted/50 text-muted-foreground hover:text-foreground",
-        className
+        className,
       )}
       activeProps={{
-        className: "bg-muted text-foreground"
+        className: "bg-muted text-foreground",
       }}
     >
       {/* Avatar */}
@@ -120,7 +126,7 @@ function ConversationSidebarItem(props: ConversationSidebarItemProps) {
             )}
           </AvatarFallback>
         </Avatar>
-        
+
         {/* Online indicator for 1:1 chats */}
         {!avatar.isGroup && (
           <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-500 rounded-full border-2 border-background" />
@@ -131,10 +137,8 @@ function ConversationSidebarItem(props: ConversationSidebarItemProps) {
       <div className="flex-1 min-w-0">
         {/* Top row: name and timestamp */}
         <div className="flex items-center justify-between gap-2 mb-0.5">
-          <span className="font-medium text-sm truncate">
-            {displayName}
-          </span>
-          
+          <span className="font-medium text-sm truncate">{displayName}</span>
+
           {/* Timestamp */}
           {timeAgo && (
             <span className="text-xs text-muted-foreground/70 flex-shrink-0">
@@ -148,14 +152,14 @@ function ConversationSidebarItem(props: ConversationSidebarItemProps) {
           <p className="text-xs text-muted-foreground/80 truncate flex-1">
             {messagePreview}
           </p>
-          
+
           {/* Unread badge */}
           {unreadCount > 0 && (
-            <Badge 
-              variant="destructive" 
+            <Badge
+              variant="destructive"
               className="h-4 px-1.5 text-xs font-medium min-w-[16px] flex items-center justify-center"
             >
-              {unreadCount > 99 ? '99+' : unreadCount}
+              {unreadCount > 99 ? "99+" : unreadCount}
             </Badge>
           )}
         </div>

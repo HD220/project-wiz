@@ -2,12 +2,12 @@
 
 import { useEffect } from "react";
 
-import { useAuthStore } from "@/renderer/store/auth.store";
+import { useAuth } from "@/renderer/contexts/auth.context";
 
 import { useUserStore } from "./user.store";
 
 export function useUser() {
-  const auth = useAuthStore();
+  const auth = useAuth();
   const user = useUserStore();
 
   // Sync theme when user changes
@@ -23,22 +23,22 @@ export function useUser() {
     // User data from auth store
     user: auth.user,
     isAuthenticated: auth.isAuthenticated,
-    
+
     // Theme data from user store
     theme: user.theme,
-    
+
     // Loading states
     isLoading: auth.isLoading || user.isLoading,
-    
+
     // Error states
     authError: auth.error,
     userError: user.error,
-    
+
     // Actions
     updateTheme: user.updateTheme,
     clearAuthError: auth.clearError,
     clearUserError: user.clearError,
-    
+
     // Helper to clear all errors
     clearAllErrors: () => {
       auth.clearError();

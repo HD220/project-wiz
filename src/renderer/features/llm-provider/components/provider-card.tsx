@@ -1,12 +1,6 @@
-import {
-  MoreHorizontal,
-  Edit2,
-  Trash2,
-  Star,
-  StarOff,
-} from "lucide-react";
+import { Link, useRouteContext } from "@tanstack/react-router";
+import { MoreHorizontal, Edit2, Trash2, Star, StarOff } from "lucide-react";
 import { useState } from "react";
-import { Link } from "@tanstack/react-router";
 import { toast } from "sonner";
 
 import type { LlmProvider } from "@/main/features/agent/llm-provider/llm-provider.types";
@@ -31,7 +25,11 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/renderer/components/ui/dropdown-menu";
-import { useLLMProvidersStore } from "@/renderer/store/llm-provider.store";
+
+import {
+  useDeleteLLMProvider,
+  useSetDefaultLLMProvider,
+} from "../hooks/use-llm-providers";
 
 const getProviderLabel = (type: string): string => {
   const labels: Record<string, string> = {
@@ -52,12 +50,21 @@ function ProviderCard(props: ProviderCardProps) {
   const { provider } = props;
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
-  const { deleteProvider, setDefaultProvider, isLoading } =
-    useLLMProvidersStore();
+  const deleteProviderMutation = useDeleteLLMProvider();
+  const setDefaultProviderMutation = useSetDefaultLLMProvider();
+  const { auth } = useRouteContext({ from: "__root__" });
+  const { user } = auth;
+
+  const isLoading =
+    deleteProviderMutation.isPending || setDefaultProviderMutation.isPending;
 
   const handleDelete = async () => {
     try {
-      await deleteProvider(provider.id);
+      if (!user?.id) throw new Error("User not authenticated");
+      await deleteProviderMutation.mutateAsync({
+        id: provider.id,
+        userId: user.id,
+      });
       toast.success("Provider deleted successfully");
     } catch (error) {
       toast.error("Failed to delete provider");
@@ -68,7 +75,11 @@ function ProviderCard(props: ProviderCardProps) {
 
   const handleSetDefault = async () => {
     try {
-      await setDefaultProvider(provider.id);
+      if (!user?.id) throw new Error("User not authenticated");
+      await setDefaultProviderMutation.mutateAsync({
+        id: provider.id,
+        userId: user.id,
+      });
       toast.success("Default provider updated");
     } catch (error) {
       toast.error("Failed to update default provider");
@@ -104,9 +115,11 @@ function ProviderCard(props: ProviderCardProps) {
           {/* Status */}
           <div className="flex items-center gap-3 shrink-0">
             <div className="flex items-center gap-2">
-              <div className={`w-2 h-2 rounded-full ${
-                provider.isActive ? "bg-green-500" : "bg-muted-foreground"
-              }`} />
+              <div
+                className={`w-2 h-2 rounded-full ${
+                  provider.isActive ? "bg-green-500" : "bg-muted-foreground"
+                }`}
+              />
               <span className="text-sm text-muted-foreground">
                 {provider.isActive ? "Active" : "Inactive"}
               </span>
@@ -125,7 +138,10 @@ function ProviderCard(props: ProviderCardProps) {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <Link to="/user/settings/llm-providers/edit/$providerId/" params={{ providerId: provider.id }}>
+                <Link
+                  to="/user/settings/llm-providers/edit/$providerId"
+                  params={{ providerId: provider.id }}
+                >
                   <DropdownMenuItem>
                     <Edit2 className="mr-2 h-4 w-4" />
                     Edit

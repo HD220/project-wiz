@@ -1,5 +1,5 @@
 import bcrypt from "bcryptjs";
-import { eq } from "drizzle-orm";
+import { eq, and, gt, desc } from "drizzle-orm";
 
 import { getDatabase } from "@/main/database/connection";
 import { accountsTable } from "@/main/features/auth/auth.model";
@@ -7,18 +7,20 @@ import type {
   LoginCredentials,
   RegisterUserInput,
   AuthenticatedUser,
+  AuthResult,
 } from "@/main/features/auth/auth.types";
+import { userSessionsTable } from "@/main/features/auth/user-sessions.model";
 import { userPreferencesTable } from "@/main/features/user/profile.model";
 import { usersTable } from "@/main/features/user/user.model";
 
-// Simple in-memory session store for current user
-let currentUserId: string | null = null;
+// Session token duration (30 days)
+const SESSION_DURATION_MS = 30 * 24 * 60 * 60 * 1000;
 
 export class AuthService {
   /**
    * Register a new user
    */
-  static async register(input: RegisterUserInput): Promise<AuthenticatedUser> {
+  static async register(input: RegisterUserInput): Promise<AuthResult> {
     const db = getDatabase();
 
     // Check if username already exists
@@ -67,18 +69,23 @@ export class AuthService {
       theme: "system",
     });
 
-    // Set current session
-    currentUserId = user.id;
+    // Create session token
+    const sessionToken = crypto.randomUUID();
+    const expiresAt = new Date(Date.now() + SESSION_DURATION_MS);
 
-    return user;
+    await db.insert(userSessionsTable).values({
+      userId: user.id,
+      token: sessionToken,
+      expiresAt,
+    });
+
+    return { user, sessionToken };
   }
 
   /**
    * Login with username and password
    */
-  static async login(
-    credentials: LoginCredentials,
-  ): Promise<AuthenticatedUser> {
+  static async login(credentials: LoginCredentials): Promise<AuthResult> {
     const db = getDatabase();
 
     // Buscar por username na tabela accounts
@@ -106,50 +113,92 @@ export class AuthService {
       throw new Error("Invalid username or password");
     }
 
-    // Set current session
-    currentUserId = result.user.id;
+    // Create session token
+    const sessionToken = crypto.randomUUID();
+    const expiresAt = new Date(Date.now() + SESSION_DURATION_MS);
+
+    await db.insert(userSessionsTable).values({
+      userId: result.user.id,
+      token: sessionToken,
+      expiresAt,
+    });
+
+    return { user: result.user, sessionToken };
+  }
+
+  /**
+   * Get current authenticated user by session token
+   */
+  static async getCurrentUser(
+    sessionToken: string,
+  ): Promise<AuthenticatedUser> {
+    if (!sessionToken) {
+      throw new Error("No session token provided");
+    }
+
+    const db = getDatabase();
+
+    // Find valid session with user
+    const [result] = await db
+      .select({
+        user: usersTable,
+        session: userSessionsTable,
+      })
+      .from(userSessionsTable)
+      .innerJoin(usersTable, eq(userSessionsTable.userId, usersTable.id))
+      .where(
+        and(
+          eq(userSessionsTable.token, sessionToken),
+          gt(userSessionsTable.expiresAt, new Date()),
+        ),
+      )
+      .limit(1);
+
+    if (!result) {
+      throw new Error("Invalid or expired session");
+    }
 
     return result.user;
   }
 
   /**
-   * Get current authenticated user
+   * Logout user by removing session token
    */
-  static async getCurrentUser(): Promise<AuthenticatedUser> {
-    if (!currentUserId) {
-      throw new Error("No user logged in");
+  static async logout(sessionToken: string): Promise<void> {
+    if (!sessionToken) {
+      return; // Nothing to logout
     }
 
     const db = getDatabase();
 
-    // Find user by ID
-    const [user] = await db
-      .select()
-      .from(usersTable)
-      .where(eq(usersTable.id, currentUserId))
-      .limit(1);
+    // Remove session from database
+    await db
+      .delete(userSessionsTable)
+      .where(eq(userSessionsTable.token, sessionToken));
+  }
 
-    if (!user) {
-      // Clear invalid session
-      currentUserId = null;
-      throw new Error("User not found");
+  /**
+   * Check if session token is valid
+   */
+  static async isLoggedIn(sessionToken: string): Promise<boolean> {
+    if (!sessionToken) {
+      return false;
     }
 
-    return user;
-  }
+    const db = getDatabase();
 
-  /**
-   * Logout current user
-   */
-  static logout(): void {
-    currentUserId = null;
-  }
+    const [session] = await db
+      .select({ id: userSessionsTable.id })
+      .from(userSessionsTable)
+      .where(
+        and(
+          eq(userSessionsTable.token, sessionToken),
+          gt(userSessionsTable.expiresAt, new Date()),
+        ),
+      )
+      .limit(1);
 
-  /**
-   * Check if user is logged in
-   */
-  static isLoggedIn(): boolean {
-    return currentUserId !== null;
+    return !!session;
   }
 
   /**
@@ -168,6 +217,38 @@ export class AuthService {
     hash: string,
   ): Promise<boolean> {
     return await bcrypt.compare(password, hash);
+  }
+
+  /**
+   * Get active session for desktop app
+   * Since this is a desktop app, we can get the most recent valid session
+   */
+  static async getActiveSession(): Promise<{
+    user: AuthenticatedUser;
+    sessionToken: string;
+  } | null> {
+    const db = getDatabase();
+
+    // Find the most recent valid session
+    const [result] = await db
+      .select({
+        user: usersTable,
+        session: userSessionsTable,
+      })
+      .from(userSessionsTable)
+      .innerJoin(usersTable, eq(userSessionsTable.userId, usersTable.id))
+      .where(gt(userSessionsTable.expiresAt, new Date()))
+      .orderBy(desc(userSessionsTable.createdAt))
+      .limit(1);
+
+    if (!result) {
+      return null;
+    }
+
+    return {
+      user: result.user,
+      sessionToken: result.session.token,
+    };
   }
 
   /**

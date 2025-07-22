@@ -15,7 +15,7 @@ import {
   FormMessage,
 } from "@/renderer/components/ui/form";
 import { Input } from "@/renderer/components/ui/input";
-import { useAuthStore } from "@/renderer/store/auth.store";
+import { useAuth } from "@/renderer/contexts/auth.context";
 
 import { AuthCard } from "./auth-card";
 
@@ -33,7 +33,7 @@ interface LoginFormProps {
 function LoginForm(props: LoginFormProps) {
   const { className } = props;
   const router = useRouter();
-  const { login, isLoading, error, clearError } = useAuthStore();
+  const { login, isLoading, error, clearError } = useAuth();
 
   const form = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
@@ -43,23 +43,20 @@ function LoginForm(props: LoginFormProps) {
     },
   });
 
-  const handleSubmit = async (data: LoginFormData) => {
+  const handleSubmit = async (
+    data: LoginFormData,
+    event?: React.BaseSyntheticEvent,
+  ) => {
+    event?.preventDefault();
     clearError();
 
     try {
+      console.log("Attempting login with:", data);
       await login(data);
+      console.log("Login successful, navigating...");
       router.navigate({ to: "/user" });
-    } catch {
-      // Error is handled by the store
-    }
-  };
-
-  const handleQuickLogin = async () => {
-    clearError();
-    try {
-      await useAuthStore.getState().quickLogin();
-      router.navigate({ to: "/user" });
-    } catch {
+    } catch (error) {
+      console.error("Login error:", error);
       // Error is handled by the store
     }
   };
@@ -71,7 +68,14 @@ function LoginForm(props: LoginFormProps) {
       className={className}
     >
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            const data = form.getValues();
+            handleSubmit(data, e);
+          }}
+          className="space-y-4"
+        >
           {error && (
             <Alert
               variant="destructive"
@@ -133,16 +137,6 @@ function LoginForm(props: LoginFormProps) {
               ) : (
                 "Sign In"
               )}
-            </Button>
-
-            <Button
-              type="button"
-              variant="outline"
-              onClick={handleQuickLogin}
-              disabled={isLoading}
-              className="w-full"
-            >
-              Quick Login (Demo)
             </Button>
 
             <p className="text-sm text-muted-foreground text-center">

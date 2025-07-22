@@ -2,7 +2,11 @@ import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Loader2 } from "lucide-react";
 
-import { Avatar, AvatarFallback, AvatarImage } from "@/renderer/components/ui/avatar";
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from "@/renderer/components/ui/avatar";
 import { cn } from "@/renderer/lib/utils";
 
 import type { SelectMessage, AuthenticatedUser } from "../types";
@@ -17,28 +21,34 @@ interface MessageBubbleProps {
 }
 
 function MessageBubble(props: MessageBubbleProps) {
-  const { message, author, showAvatar = true, isSending = false, className } = props;
+  const {
+    message,
+    author,
+    showAvatar = true,
+    isSending = false,
+    className,
+  } = props;
 
   // Format timestamp - Discord style (short format)
   const getTimeAgo = () => {
     try {
       const now = new Date();
       const messageDate = new Date(message.createdAt);
-      const diffInHours = Math.abs(now.getTime() - messageDate.getTime()) / (1000 * 60 * 60);
-      
+      const diffInHours =
+        Math.abs(now.getTime() - messageDate.getTime()) / (1000 * 60 * 60);
+
       if (diffInHours < 24) {
         // Same day - show time
-        return messageDate.toLocaleTimeString('pt-BR', { 
-          hour: '2-digit', 
-          minute: '2-digit' 
-        });
-      } else {
-        // Different day - show relative time
-        return formatDistanceToNow(messageDate, {
-          addSuffix: false,
-          locale: ptBR,
+        return messageDate.toLocaleTimeString("pt-BR", {
+          hour: "2-digit",
+          minute: "2-digit",
         });
       }
+      // Different day - show relative time
+      return formatDistanceToNow(messageDate, {
+        addSuffix: false,
+        locale: ptBR,
+      });
     } catch {
       return "agora";
     }
@@ -53,7 +63,7 @@ function MessageBubble(props: MessageBubbleProps) {
     <div
       className={cn(
         "flex gap-3 group hover:bg-muted/30 px-4 py-1.5 transition-colors",
-        className
+        className,
       )}
     >
       {/* Avatar - always on the left (Discord style) */}
@@ -79,7 +89,7 @@ function MessageBubble(props: MessageBubbleProps) {
             <span className="text-sm font-medium text-foreground hover:underline cursor-pointer">
               {authorName}
             </span>
-            
+
             <span className="text-xs text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity">
               {getTimeAgo()}
             </span>

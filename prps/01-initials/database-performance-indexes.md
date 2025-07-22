@@ -9,6 +9,7 @@ Add strategic database indexes for frequently queried columns to improve applica
 **Missing Indexes Identified:**
 
 **High-Frequency Lookups:**
+
 - `accounts.username` - Used in every login operation
 - `llm_providers.user_id + is_default` - Composite lookup for user's default provider
 - `conversations.project_id` - Project conversation lists
@@ -16,11 +17,13 @@ Add strategic database indexes for frequently queried columns to improve applica
 - `agents.user_id` - User's agent listings
 
 **Performance Impact:**
+
 - Login queries scan entire accounts table without username index
 - Default provider lookups require full table scan
 - Conversation and message queries become slower as data grows
 
 **Current State:**
+
 - Primary keys are indexed (SQLite default)
 - Foreign key constraints exist but may not have optimal indexes
 - No composite indexes for multi-column lookups
@@ -46,11 +49,11 @@ Add strategic database indexes for frequently queried columns to improve applica
 ## Expected Impact
 
 - **Users:** Faster application response times, especially for login and conversation loading
-- **Developers:** 
+- **Developers:**
   - Improved query performance during development
   - Better application responsiveness as data grows
   - Foundation for scalable data access patterns
-- **System:** 
+- **System:**
   - Reduced database query execution time
   - Better resource utilization
   - Improved application performance as dataset grows

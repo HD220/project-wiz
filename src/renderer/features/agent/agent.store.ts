@@ -2,6 +2,7 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
 import { AgentAPI } from "./agent.api";
+
 import type {
   SelectAgent,
   CreateAgentInput,
@@ -21,7 +22,10 @@ interface AgentState {
   loadAgents: () => Promise<void>;
   createAgent: (input: CreateAgentInput) => Promise<boolean>;
   getAgent: (id: string) => Promise<void>;
-  updateAgent: (id: string, updates: Partial<CreateAgentInput>) => Promise<boolean>;
+  updateAgent: (
+    id: string,
+    updates: Partial<CreateAgentInput>,
+  ) => Promise<boolean>;
   deleteAgent: (id: string) => Promise<boolean>;
   updateAgentStatus: (id: string, status: AgentStatus) => Promise<boolean>;
   setFilters: (filters: Partial<AgentFilters>) => void;
@@ -50,7 +54,8 @@ export const useAgentStore = create<AgentState>()(
           set({ agents, isLoading: false });
         } catch (error) {
           set({
-            error: error instanceof Error ? error.message : "Failed to load agents",
+            error:
+              error instanceof Error ? error.message : "Failed to load agents",
             isLoading: false,
           });
         }
@@ -68,7 +73,8 @@ export const useAgentStore = create<AgentState>()(
         } catch (error) {
           console.error("Error creating agent:", error);
           set({
-            error: error instanceof Error ? error.message : "Failed to create agent",
+            error:
+              error instanceof Error ? error.message : "Failed to create agent",
             isLoading: false,
           });
           return false;
@@ -82,7 +88,8 @@ export const useAgentStore = create<AgentState>()(
           set({ selectedAgent: agent, isLoading: false });
         } catch (error) {
           set({
-            error: error instanceof Error ? error.message : "Failed to get agent",
+            error:
+              error instanceof Error ? error.message : "Failed to get agent",
             isLoading: false,
           });
         }
@@ -96,13 +103,17 @@ export const useAgentStore = create<AgentState>()(
             agents: state.agents.map((agent) =>
               agent.id === id ? updatedAgent : agent,
             ),
-            selectedAgent: state.selectedAgent?.id === id ? updatedAgent : state.selectedAgent,
+            selectedAgent:
+              state.selectedAgent?.id === id
+                ? updatedAgent
+                : state.selectedAgent,
             isLoading: false,
           }));
           return true;
         } catch (error) {
           set({
-            error: error instanceof Error ? error.message : "Failed to update agent",
+            error:
+              error instanceof Error ? error.message : "Failed to update agent",
             isLoading: false,
           });
           return false;
@@ -115,13 +126,15 @@ export const useAgentStore = create<AgentState>()(
           await AgentAPI.delete(id);
           set((state) => ({
             agents: state.agents.filter((agent) => agent.id !== id),
-            selectedAgent: state.selectedAgent?.id === id ? null : state.selectedAgent,
+            selectedAgent:
+              state.selectedAgent?.id === id ? null : state.selectedAgent,
             isLoading: false,
           }));
           return true;
         } catch (error) {
           set({
-            error: error instanceof Error ? error.message : "Failed to delete agent",
+            error:
+              error instanceof Error ? error.message : "Failed to delete agent",
             isLoading: false,
           });
           return false;
@@ -135,14 +148,18 @@ export const useAgentStore = create<AgentState>()(
             agents: state.agents.map((agent) =>
               agent.id === id ? { ...agent, status } : agent,
             ),
-            selectedAgent: state.selectedAgent?.id === id 
-              ? { ...state.selectedAgent, status } 
-              : state.selectedAgent,
+            selectedAgent:
+              state.selectedAgent?.id === id
+                ? { ...state.selectedAgent, status }
+                : state.selectedAgent,
           }));
           return true;
         } catch (error) {
           set({
-            error: error instanceof Error ? error.message : "Failed to update agent status",
+            error:
+              error instanceof Error
+                ? error.message
+                : "Failed to update agent status",
           });
           return false;
         }
@@ -164,7 +181,9 @@ export const useAgentStore = create<AgentState>()(
         let filtered = [...agents];
 
         if (filters.status) {
-          filtered = filtered.filter((agent) => agent.status === filters.status);
+          filtered = filtered.filter(
+            (agent) => agent.status === filters.status,
+          );
         }
 
         if (filters.search) {
@@ -176,8 +195,9 @@ export const useAgentStore = create<AgentState>()(
           );
         }
 
-        return filtered.sort((a, b) => 
-          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        return filtered.sort(
+          (a, b) =>
+            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
         );
       },
     }),

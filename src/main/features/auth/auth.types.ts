@@ -1,6 +1,6 @@
 // Authentication types for the user domain
 
-import type { SelectUser } from "@/main/features/user/user.model";
+import type { AuthenticatedUser } from "@/main/features/user/user.types";
 
 export interface LoginCredentials {
   username: string;
@@ -14,4 +14,10 @@ export interface RegisterUserInput {
   password: string;
 }
 
-export type AuthenticatedUser = SelectUser;
+// Re-export from user types to avoid duplication
+export type { AuthenticatedUser };
+
+export interface AuthResult {
+  user: AuthenticatedUser;
+  sessionToken: string;
+}

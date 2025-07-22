@@ -1,5 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { X } from "lucide-react";
+import { useRouteContext } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -35,8 +35,11 @@ import {
   SelectValue,
 } from "@/renderer/components/ui/select";
 import { Separator } from "@/renderer/components/ui/separator";
-import { useAuthStore } from "@/renderer/store/auth.store";
-import { useLLMProvidersStore } from "@/renderer/store/llm-provider.store";
+
+import {
+  useCreateLLMProvider,
+  useUpdateLLMProvider,
+} from "../hooks/use-llm-providers";
 
 import { TestApiButton } from "./test-api-button";
 
@@ -82,8 +85,13 @@ interface ProviderFormProps {
 
 function ProviderForm(props: ProviderFormProps) {
   const { provider, onClose } = props;
-  const { createProvider, updateProvider, isLoading } = useLLMProvidersStore();
-  const { user } = useAuthStore();
+  const createProviderMutation = useCreateLLMProvider();
+  const updateProviderMutation = useUpdateLLMProvider();
+  const { auth } = useRouteContext({ from: "__root__" });
+  const { user } = auth;
+
+  const isLoading =
+    createProviderMutation.isPending || updateProviderMutation.isPending;
 
   const isEditing = !!provider;
 
@@ -129,7 +137,15 @@ function ProviderForm(props: ProviderFormProps) {
   const onSubmit = async (data: ProviderFormData) => {
     try {
       if (isEditing && provider) {
-        await updateProvider(provider.id, data);
+        if (!user?.id) {
+          toast.error("User not authenticated");
+          return;
+        }
+        await updateProviderMutation.mutateAsync({
+          id: provider.id,
+          data,
+          userId: user.id,
+        });
         toast.success("Provider updated successfully");
       } else {
         // Include userId when creating new provider
@@ -143,7 +159,7 @@ function ProviderForm(props: ProviderFormProps) {
           userId: user.id,
         };
 
-        await createProvider(createData);
+        await createProviderMutation.mutateAsync(createData);
         toast.success("Provider created successfully");
       }
       onClose();
@@ -194,11 +210,13 @@ function ProviderForm(props: ProviderFormProps) {
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          {Object.entries(PROVIDER_CONFIGS).map(([key, config]) => (
-                            <SelectItem key={key} value={key}>
-                              {config.label}
-                            </SelectItem>
-                          ))}
+                          {Object.entries(PROVIDER_CONFIGS).map(
+                            ([key, config]) => (
+                              <SelectItem key={key} value={key}>
+                                {config.label}
+                              </SelectItem>
+                            ),
+                          )}
                         </SelectContent>
                       </Select>
                       <FormMessage />

@@ -1,11 +1,10 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useRouteContext } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
-
-import type { ProviderType } from "@/main/features/agent/llm-provider/llm-provider.types";
 
 import { Button } from "@/renderer/components/ui/button";
 import { Checkbox } from "@/renderer/components/ui/checkbox";
@@ -32,16 +31,31 @@ import {
   SelectValue,
 } from "@/renderer/components/ui/select";
 import { Separator } from "@/renderer/components/ui/separator";
-import { useAuthStore } from "@/renderer/store/auth.store";
-import { useLLMProvidersStore } from "@/renderer/store/llm-provider.store";
 import { TestApiButton } from "@/renderer/features/llm-provider/components/test-api-button";
+import { useCreateLLMProvider } from "@/renderer/features/llm-provider/hooks/use-llm-providers";
 
 const PROVIDER_CONFIGS = {
   openai: { label: "OpenAI", defaultModel: "gpt-4o", requiresBaseUrl: false },
-  deepseek: { label: "DeepSeek", defaultModel: "deepseek-coder", requiresBaseUrl: false },
-  anthropic: { label: "Anthropic", defaultModel: "claude-3-5-sonnet-20241022", requiresBaseUrl: false },
-  google: { label: "Google", defaultModel: "gemini-pro", requiresBaseUrl: false },
-  custom: { label: "Custom", defaultModel: "custom-model", requiresBaseUrl: true },
+  deepseek: {
+    label: "DeepSeek",
+    defaultModel: "deepseek-coder",
+    requiresBaseUrl: false,
+  },
+  anthropic: {
+    label: "Anthropic",
+    defaultModel: "claude-3-5-sonnet-20241022",
+    requiresBaseUrl: false,
+  },
+  google: {
+    label: "Google",
+    defaultModel: "gemini-pro",
+    requiresBaseUrl: false,
+  },
+  custom: {
+    label: "Custom",
+    defaultModel: "custom-model",
+    requiresBaseUrl: true,
+  },
 } as const;
 
 const formSchema = z.object({
@@ -58,8 +72,11 @@ type FormData = z.infer<typeof formSchema>;
 
 function NewProviderModal() {
   const navigate = useNavigate();
-  const { createProvider, isLoading } = useLLMProvidersStore();
-  const { user } = useAuthStore();
+  const createProviderMutation = useCreateLLMProvider();
+  const { auth } = useRouteContext({ from: "__root__" });
+  const { user } = auth;
+
+  const isLoading = createProviderMutation.isPending;
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
@@ -101,12 +118,14 @@ function NewProviderModal() {
         baseUrl: data.baseUrl || null,
       };
 
-      await createProvider(createData);
+      await createProviderMutation.mutateAsync(createData);
       toast.success("Provider created successfully");
       navigate({ to: "/user/settings/llm-providers" });
     } catch (error) {
       console.error("Error creating provider:", error);
-      toast.error("Failed to create provider. Please check your details and try again.");
+      toast.error(
+        "Failed to create provider. Please check your details and try again.",
+      );
     }
   };
 
@@ -133,18 +152,23 @@ function NewProviderModal() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Provider Type</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
                       <FormControl>
                         <SelectTrigger className="w-full">
                           <SelectValue placeholder="Select provider" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {Object.entries(PROVIDER_CONFIGS).map(([key, config]) => (
-                          <SelectItem key={key} value={key}>
-                            {config.label}
-                          </SelectItem>
-                        ))}
+                        {Object.entries(PROVIDER_CONFIGS).map(
+                          ([key, config]) => (
+                            <SelectItem key={key} value={key}>
+                              {config.label}
+                            </SelectItem>
+                          ),
+                        )}
                       </SelectContent>
                     </Select>
                     <FormMessage />
@@ -178,7 +202,11 @@ function NewProviderModal() {
                   <FormItem>
                     <FormLabel>API Key</FormLabel>
                     <FormControl>
-                      <Input type="password" placeholder="sk-proj-..." {...field} />
+                      <Input
+                        type="password"
+                        placeholder="sk-proj-..."
+                        {...field}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -193,7 +221,10 @@ function NewProviderModal() {
                     <FormItem>
                       <FormLabel>Base URL</FormLabel>
                       <FormControl>
-                        <Input placeholder="https://api.example.com/v1" {...field} />
+                        <Input
+                          placeholder="https://api.example.com/v1"
+                          {...field}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -226,7 +257,10 @@ function NewProviderModal() {
                 render={({ field }) => (
                   <FormItem className="flex flex-row items-center space-x-3 space-y-0">
                     <FormControl>
-                      <Checkbox checked={field.value} onCheckedChange={field.onChange} />
+                      <Checkbox
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
                     </FormControl>
                     <div className="space-y-1 leading-none">
                       <FormLabel>Set as default provider</FormLabel>
@@ -244,7 +278,10 @@ function NewProviderModal() {
                 render={({ field }) => (
                   <FormItem className="flex flex-row items-center space-x-3 space-y-0">
                     <FormControl>
-                      <Checkbox checked={field.value} onCheckedChange={field.onChange} />
+                      <Checkbox
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
                     </FormControl>
                     <div className="space-y-1 leading-none">
                       <FormLabel>Enable this provider</FormLabel>
@@ -271,7 +308,12 @@ function NewProviderModal() {
 
               <div className="flex-1" />
 
-              <Button type="button" variant="outline" onClick={handleClose} disabled={isLoading}>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleClose}
+                disabled={isLoading}
+              >
                 Cancel
               </Button>
               <Button type="submit" disabled={isLoading}>
@@ -285,6 +327,8 @@ function NewProviderModal() {
   );
 }
 
-export const Route = createFileRoute("/_authenticated/user/settings/llm-providers/new/")({
+export const Route = createFileRoute(
+  "/_authenticated/user/settings/llm-providers/new/",
+)({
   component: NewProviderModal,
 });

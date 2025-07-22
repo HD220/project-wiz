@@ -3,7 +3,8 @@ import { useState } from "react";
 import { toast } from "sonner";
 
 import { Button } from "@/renderer/components/ui/button";
-import { useLLMProvidersStore } from "@/renderer/store/llm-provider.store";
+
+import { useTestLLMProvider } from "../hooks/use-llm-providers";
 
 // Interface para os dados do teste
 interface TestApiKeyData {
@@ -23,15 +24,15 @@ function TestApiButton(props: TestApiButtonProps) {
   const [testResult, setTestResult] = useState<"success" | "error" | null>(
     null,
   );
-  const { testProvider, testingProvider } = useLLMProvidersStore();
+  const testProviderMutation = useTestLLMProvider();
 
-  const isTesting = testingProvider !== null;
+  const isTesting = testProviderMutation.isPending;
 
   const handleTest = async () => {
     setTestResult(null);
 
     try {
-      const success = await testProvider(data);
+      const success = await testProviderMutation.mutateAsync(data);
 
       if (success) {
         setTestResult("success");

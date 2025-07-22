@@ -9,15 +9,18 @@ Standardize database column naming to use consistent snake_case convention acros
 Database schema analysis reveals naming inconsistency:
 
 **✅ Correct Pattern (majority):**
+
 - `created_at`, `updated_at`, `user_id`, `project_id`
 - Used in: users, projects, agents, llm_providers, conversations
 
 **❌ Inconsistent Pattern:**
+
 - `agentId` in `src/main/features/conversation/conversation.model.ts:16`
 - Breaks snake_case convention established in CLAUDE.md
 - Creates confusion in query writing
 
 **Problems Created:**
+
 - Developers must remember which tables use which naming pattern
 - Query complexity when joining tables with different conventions
 - Violates established database naming standards

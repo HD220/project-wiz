@@ -1,19 +1,12 @@
-import { LogIn, LogOut, User } from "lucide-react";
+import { LogOut, User } from "lucide-react";
 import { useEffect } from "react";
 
 import { Button } from "@/renderer/components/ui/button";
-import { useAuthStore } from "@/renderer/store/auth.store";
+import { useAuth } from "@/renderer/contexts/auth.context";
 
 export function AuthButton() {
-  const {
-    user,
-    isAuthenticated,
-    isLoading,
-    error,
-    quickLogin,
-    logout,
-    clearError,
-  } = useAuthStore();
+  const { user, isAuthenticated, isLoading, error, logout, clearError } =
+    useAuth();
 
   // Clear any existing errors when component mounts
   useEffect(() => {
@@ -26,9 +19,8 @@ export function AuthButton() {
     try {
       if (isAuthenticated) {
         await logout();
-      } else {
-        await quickLogin();
       }
+      // Remove quickLogin since we don't have demo login anymore
     } catch (error) {
       console.error("Auth error:", error);
     }
@@ -43,27 +35,24 @@ export function AuthButton() {
         </div>
       )}
 
-      <Button
-        onClick={handleAuth}
-        disabled={isLoading}
-        variant={isAuthenticated ? "outline" : "default"}
-        size="sm"
-        className="gap-2"
-      >
-        {isLoading ? (
-          <>Loading...</>
-        ) : isAuthenticated ? (
-          <>
-            <LogOut className="h-4 w-4" />
-            Logout
-          </>
-        ) : (
-          <>
-            <LogIn className="h-4 w-4" />
-            Quick Login (Demo)
-          </>
-        )}
-      </Button>
+      {isAuthenticated && (
+        <Button
+          onClick={handleAuth}
+          disabled={isLoading}
+          variant="outline"
+          size="sm"
+          className="gap-2"
+        >
+          {isLoading ? (
+            <>Loading...</>
+          ) : (
+            <>
+              <LogOut className="h-4 w-4" />
+              Logout
+            </>
+          )}
+        </Button>
+      )}
 
       {error && <div className="text-sm text-red-500">{error}</div>}
     </div>

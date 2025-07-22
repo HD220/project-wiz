@@ -1,3 +1,5 @@
+import { useRouteContext } from "@tanstack/react-router";
+
 import { Badge } from "@/renderer/components/ui/badge";
 import {
   Card,
@@ -6,12 +8,12 @@ import {
   CardHeader,
   CardTitle,
 } from "@/renderer/components/ui/card";
-import { useAuthStore } from "@/renderer/store/auth.store";
 
 import { ActivityItem } from "./activity-item";
 
 function WelcomeView() {
-  const { user } = useAuthStore();
+  const { auth } = useRouteContext({ from: "__root__" });
+  const { user } = auth;
 
   return (
     <div className="p-6 space-y-6">

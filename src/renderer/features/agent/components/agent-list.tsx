@@ -14,18 +14,20 @@ import {
 } from "@/renderer/components/ui/select";
 
 import { useAgent, useAgentActions, useAgentFilters } from "../use-agent.hook";
-import type { SelectAgent, AgentStatus } from "../agent.types";
-import { AgentListCard } from "./agent-list-card";
+
 import { AgentDeleteDialog } from "./agent-delete-dialog";
+import { AgentListCard } from "./agent-list-card";
+
+import type { SelectAgent, AgentStatus } from "../agent.types";
 
 function AgentList() {
   const { filteredAgents, isLoading, error } = useAgent();
   const { deleteAgent, toggleAgentStatus } = useAgentActions();
-  const { filters, setStatusFilter, setSearchFilter, clearFilters } = useAgentFilters();
+  const { filters, setStatusFilter, setSearchFilter, clearFilters } =
+    useAgentFilters();
 
   const [agentToDelete, setAgentToDelete] = useState<SelectAgent | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
-
 
   async function handleDelete(agent: SelectAgent) {
     setAgentToDelete(agent);
@@ -55,7 +57,9 @@ function AgentList() {
       const success = await toggleAgentStatus(agent.id, agent.status);
       if (success) {
         const newStatus = agent.status === "active" ? "inactive" : "active";
-        toast.success(`Agent ${newStatus === "active" ? "activated" : "deactivated"}`);
+        toast.success(
+          `Agent ${newStatus === "active" ? "activated" : "deactivated"}`,
+        );
       } else {
         toast.error("Failed to update agent status");
       }
@@ -168,7 +172,10 @@ function AgentList() {
             </div>
 
             {/* Status Filter */}
-            <Select value={filters.status || "all"} onValueChange={handleStatusFilter}>
+            <Select
+              value={filters.status || "all"}
+              onValueChange={handleStatusFilter}
+            >
               <SelectTrigger className="w-40">
                 <Filter className="h-4 w-4 mr-2" />
                 <SelectValue />

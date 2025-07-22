@@ -1,13 +1,14 @@
+import { useRouteContext } from "@tanstack/react-router";
 import { Plus } from "lucide-react";
 
 import { Button } from "@/renderer/components/ui/button";
+
 import { useConversations, useAvailableUsers } from "../hooks";
 import { useConversationUIStore } from "../store";
-import { useAuthStore } from "@/renderer/store/auth.store";
 
-import { EmptyConversations } from "./empty-conversations";
 import { ConversationItem } from "./conversation-item";
 import { CreateConversationDialog } from "./create-conversation-dialog";
+import { EmptyConversations } from "./empty-conversations";
 
 interface ConversationListProps {
   selectedConversationId?: string;
@@ -17,15 +18,21 @@ interface ConversationListProps {
 
 function ConversationList(props: ConversationListProps) {
   const { selectedConversationId, onConversationSelect, className } = props;
-  const { user } = useAuthStore();
-  
+  const { auth } = useRouteContext({ from: "__root__" });
+  const { user } = auth;
+
   // Server state via TanStack Query hooks
-  const { conversations, isLoading: conversationsLoading, error: conversationsError } = useConversations();
+  const {
+    conversations,
+    isLoading: conversationsLoading,
+    error: conversationsError,
+  } = useConversations();
   const { availableUsers, isLoading: usersLoading } = useAvailableUsers();
-  
+
   // UI state
-  const { showCreateDialog, openCreateDialog, closeCreateDialog } = useConversationUIStore();
-  
+  const { showCreateDialog, openCreateDialog, closeCreateDialog } =
+    useConversationUIStore();
+
   const isLoading = conversationsLoading || usersLoading;
   const error = conversationsError;
 
@@ -51,7 +58,7 @@ function ConversationList(props: ConversationListProps) {
           <div className="h-4 w-32 bg-muted animate-pulse rounded" />
           <div className="h-8 w-8 bg-muted animate-pulse rounded" />
         </div>
-        
+
         {/* Conversation items skeleton */}
         {Array.from({ length: 5 }).map((_, i) => (
           <div key={i} className="flex items-center gap-3 p-3 rounded">
@@ -84,7 +91,7 @@ function ConversationList(props: ConversationListProps) {
     return (
       <div className={`p-4 ${className || ""}`}>
         <EmptyConversations onCreateConversation={handleCreateConversation} />
-        
+
         {/* Create Dialog */}
         {showCreateDialog && (
           <CreateConversationDialog
@@ -120,13 +127,13 @@ function ConversationList(props: ConversationListProps) {
         {conversations.map((conversation) => {
           // Get other participants (exclude current user)
           const otherParticipantIds = conversation.participants
-            .filter(p => p.participantId !== user?.id)
-            .map(p => p.participantId);
-            
-          const otherParticipants = availableUsers.filter(user => 
-            otherParticipantIds.includes(user.id)
+            .filter((p) => p.participantId !== user?.id)
+            .map((p) => p.participantId);
+
+          const otherParticipants = availableUsers.filter((user) =>
+            otherParticipantIds.includes(user.id),
           );
-          
+
           // Get last message from conversation data
           const lastMessage = conversation.lastMessage || null;
 

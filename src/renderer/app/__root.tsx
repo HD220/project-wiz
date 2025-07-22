@@ -1,7 +1,12 @@
-import { createRootRoute, Outlet } from "@tanstack/react-router";
+import { createRootRouteWithContext, Outlet } from "@tanstack/react-router";
 
 import { Titlebar } from "@/renderer/components/layout/titlebar";
 import { Toaster } from "@/renderer/components/ui/sonner";
+import type { AuthContextValue } from "@/renderer/contexts/auth.context";
+
+interface RouterContext {
+  auth: AuthContextValue;
+}
 
 function RootComponent() {
   return (
@@ -15,6 +20,6 @@ function RootComponent() {
   );
 }
 
-export const Route = createRootRoute({
+export const Route = createRootRouteWithContext<RouterContext>()({
   component: RootComponent,
 });

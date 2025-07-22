@@ -1,5 +1,7 @@
-import { createFileRoute, useNavigate, useParams } from "@tanstack/react-router";
-import { useEffect } from "react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+
+import type { LlmProvider } from "@/main/features/agent/llm-provider/llm-provider.types";
 
 import {
   Dialog,
@@ -7,44 +9,39 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/renderer/components/ui/dialog";
+import type {
+  CreateAgentInput,
+  SelectAgent,
+} from "@/renderer/features/agent/agent.types";
 import { AgentForm } from "@/renderer/features/agent/components/agent-form";
-import { useAgentStore } from "@/renderer/features/agent/agent.store";
-import type { CreateAgentInput } from "@/renderer/features/agent/agent.types";
 
 function EditAgentPage() {
   const navigate = useNavigate();
-  const { agentId } = useParams({ from: "/_authenticated/user/agents/edit/$agentId/" });
-  const { selectedAgent, getAgent, updateAgent, isLoading } = useAgentStore();
+  const { agent, providers } = Route.useLoaderData();
+  const queryClient = useQueryClient();
 
-  useEffect(() => {
-    if (agentId) {
-      getAgent(agentId);
-    }
-  }, [agentId, getAgent]);
+  // Mutation for updating agent
+  const updateMutation = useMutation({
+    mutationFn: ({
+      agentId,
+      data,
+    }: {
+      agentId: string;
+      data: CreateAgentInput;
+    }) => window.api.agents.update(agentId, data),
+    onSuccess: () => {
+      // Invalidate and refetch agents list
+      queryClient.invalidateQueries({ queryKey: ["agents"] });
+      handleClose();
+    },
+  });
 
   function handleClose() {
     navigate({ to: "/user/agents" });
   }
 
   async function handleSubmit(data: CreateAgentInput) {
-    if (agentId) {
-      const success = await updateAgent(agentId, data);
-      if (success) {
-        handleClose();
-      }
-    }
-  }
-
-  if (!selectedAgent) {
-    return (
-      <Dialog open onOpenChange={handleClose}>
-        <DialogContent>
-          <div className="flex items-center justify-center p-8">
-            <div className="text-muted-foreground">Loading agent...</div>
-          </div>
-        </DialogContent>
-      </Dialog>
-    );
+    updateMutation.mutate({ agentId: (agent as SelectAgent).id, data });
   }
 
   return (
@@ -53,18 +50,52 @@ function EditAgentPage() {
         <DialogHeader>
           <DialogTitle>Edit Agent</DialogTitle>
         </DialogHeader>
-        
+
         <AgentForm
-          initialData={selectedAgent}
+          initialData={agent as SelectAgent}
+          providers={providers as LlmProvider[]}
           onSubmit={handleSubmit}
           onCancel={handleClose}
-          isLoading={isLoading}
+          isLoading={updateMutation.isPending}
         />
       </DialogContent>
     </Dialog>
   );
 }
 
-export const Route = createFileRoute("/_authenticated/user/agents/edit/$agentId/")({
+export const Route = createFileRoute(
+  "/_authenticated/user/agents/edit/$agentId/",
+)({
+  beforeLoad: async ({ context }) => {
+    const { auth } = context;
+    const { user } = auth;
+
+    if (!user) {
+      throw new Error("User not authenticated");
+    }
+  },
+  loader: async ({ params, context }) => {
+    const { auth } = context;
+    const { user } = auth;
+    const { agentId } = params;
+
+    // Load agent data
+    const agentResponse = await window.api.agents.get(agentId);
+    if (!agentResponse.success) {
+      throw new Error(agentResponse.error || "Failed to load agent");
+    }
+
+    // Load providers data for the form
+    const providersResponse = await window.api.llmProviders.list(user!.id);
+    if (!providersResponse.success) {
+      throw new Error(providersResponse.error || "Failed to load providers");
+    }
+
+    return {
+      agent: agentResponse.data as SelectAgent,
+      providers: providersResponse.data as LlmProvider[],
+      user,
+    };
+  },
   component: EditAgentPage,
 });

@@ -59,7 +59,8 @@ export const useProjectStore = create<ProjectState>((set, get) => ({
     } catch (error) {
       set({
         isLoading: false,
-        error: error instanceof Error ? error.message : "Failed to load projects",
+        error:
+          error instanceof Error ? error.message : "Failed to load projects",
       });
       throw error;
     }
@@ -74,10 +75,10 @@ export const useProjectStore = create<ProjectState>((set, get) => ({
 
       if (response.success && response.data) {
         const project = response.data as SelectProject;
-        
+
         // Update projects array if project exists
-        set(state => ({
-          projects: state.projects.map(p => p.id === id ? project : p),
+        set((state) => ({
+          projects: state.projects.map((p) => (p.id === id ? project : p)),
           selectedProject: project,
           isLoading: false,
         }));
@@ -102,20 +103,20 @@ export const useProjectStore = create<ProjectState>((set, get) => ({
 
       if (response.success && response.data) {
         const newProject = response.data as SelectProject;
-        
-        set(state => ({
+
+        set((state) => ({
           projects: [...state.projects, newProject],
           isLoading: false,
         }));
 
         return newProject;
-      } else {
-        throw new Error(response.error || "Failed to create project");
       }
+      throw new Error(response.error || "Failed to create project");
     } catch (error) {
       set({
         isLoading: false,
-        error: error instanceof Error ? error.message : "Failed to create project",
+        error:
+          error instanceof Error ? error.message : "Failed to create project",
       });
       throw error;
     }
@@ -130,21 +131,26 @@ export const useProjectStore = create<ProjectState>((set, get) => ({
 
       if (response.success && response.data) {
         const updatedProject = response.data as SelectProject;
-        
-        set(state => ({
-          projects: state.projects.map(p => p.id === input.id ? updatedProject : p),
-          selectedProject: state.selectedProject?.id === input.id ? updatedProject : state.selectedProject,
+
+        set((state) => ({
+          projects: state.projects.map((p) =>
+            p.id === input.id ? updatedProject : p,
+          ),
+          selectedProject:
+            state.selectedProject?.id === input.id
+              ? updatedProject
+              : state.selectedProject,
           isLoading: false,
         }));
 
         return updatedProject;
-      } else {
-        throw new Error(response.error || "Failed to update project");
       }
+      throw new Error(response.error || "Failed to update project");
     } catch (error) {
       set({
         isLoading: false,
-        error: error instanceof Error ? error.message : "Failed to update project",
+        error:
+          error instanceof Error ? error.message : "Failed to update project",
       });
       throw error;
     }
@@ -158,13 +164,14 @@ export const useProjectStore = create<ProjectState>((set, get) => ({
       const response = await projectApi.archive(id);
 
       if (response.success) {
-        set(state => ({
-          projects: state.projects.map(p => 
-            p.id === id ? { ...p, status: "archived" } : p
+        set((state) => ({
+          projects: state.projects.map((p) =>
+            p.id === id ? { ...p, status: "archived" } : p,
           ),
-          selectedProject: state.selectedProject?.id === id 
-            ? { ...state.selectedProject, status: "archived" } 
-            : state.selectedProject,
+          selectedProject:
+            state.selectedProject?.id === id
+              ? { ...state.selectedProject, status: "archived" }
+              : state.selectedProject,
           isLoading: false,
         }));
       } else {
@@ -173,7 +180,8 @@ export const useProjectStore = create<ProjectState>((set, get) => ({
     } catch (error) {
       set({
         isLoading: false,
-        error: error instanceof Error ? error.message : "Failed to archive project",
+        error:
+          error instanceof Error ? error.message : "Failed to archive project",
       });
       throw error;
     }
@@ -186,8 +194,8 @@ export const useProjectStore = create<ProjectState>((set, get) => ({
 
   // Set filters
   setFilters: (filters: Partial<ProjectFilters>) => {
-    set(state => ({
-      filters: { ...state.filters, ...filters }
+    set((state) => ({
+      filters: { ...state.filters, ...filters },
     }));
   },
 
@@ -199,34 +207,36 @@ export const useProjectStore = create<ProjectState>((set, get) => ({
   // Get filtered projects based on current filters
   getFilteredProjects: () => {
     const { projects, filters } = get();
-    
-    return projects.filter(project => {
+
+    return projects.filter((project) => {
       if (filters.status && project.status !== filters.status) {
         return false;
       }
-      
+
       if (filters.search) {
         const searchLower = filters.search.toLowerCase();
-        if (!project.name.toLowerCase().includes(searchLower) &&
-            !project.description?.toLowerCase().includes(searchLower)) {
+        if (
+          !project.name.toLowerCase().includes(searchLower) &&
+          !project.description?.toLowerCase().includes(searchLower)
+        ) {
           return false;
         }
       }
-      
+
       if (filters.hasGitUrl !== undefined) {
         const hasGit = !!project.gitUrl;
         if (filters.hasGitUrl !== hasGit) {
           return false;
         }
       }
-      
+
       if (filters.hasLocalPath !== undefined) {
         const hasLocal = !!project.localPath;
         if (filters.hasLocalPath !== hasLocal) {
           return false;
         }
       }
-      
+
       return true;
     });
   },
@@ -234,12 +244,12 @@ export const useProjectStore = create<ProjectState>((set, get) => ({
   // Get only active projects
   getActiveProjects: () => {
     const { projects } = get();
-    return projects.filter(project => project.status === "active");
+    return projects.filter((project) => project.status === "active");
   },
 
   // Get only archived projects
   getArchivedProjects: () => {
     const { projects } = get();
-    return projects.filter(project => project.status === "archived");
+    return projects.filter((project) => project.status === "archived");
   },
 }));

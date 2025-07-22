@@ -30,13 +30,14 @@ function AgentDeleteDialog(props: AgentDeleteDialogProps) {
         <AlertDialogHeader>
           <AlertDialogTitle>Delete Agent</AlertDialogTitle>
           <AlertDialogDescription>
-            Are you sure you want to delete <strong>{agent.name}</strong>? This action cannot be undone.
-            All conversations and memories associated with this agent will also be deleted.
+            Are you sure you want to delete <strong>{agent.name}</strong>? This
+            action cannot be undone. All conversations and memories associated
+            with this agent will also be deleted.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel disabled={isLoading}>Cancel</AlertDialogCancel>
-          <AlertDialogAction 
+          <AlertDialogAction
             onClick={onConfirm}
             disabled={isLoading}
             className="bg-destructive text-destructive-foreground hover:bg-destructive/90"

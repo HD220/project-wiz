@@ -1,9 +1,18 @@
 import { Link } from "@tanstack/react-router";
 import { MoreHorizontal, Pencil, Power, Trash2, User } from "lucide-react";
 
-import { Avatar, AvatarFallback, AvatarImage } from "@/renderer/components/ui/avatar";
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from "@/renderer/components/ui/avatar";
 import { Button } from "@/renderer/components/ui/button";
-import { Card, CardContent, CardFooter, CardHeader } from "@/renderer/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+} from "@/renderer/components/ui/card";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -13,8 +22,9 @@ import {
 } from "@/renderer/components/ui/dropdown-menu";
 import { cn } from "@/renderer/lib/utils";
 
-import type { SelectAgent } from "../agent.types";
 import { AgentStatusBadge } from "./agent-status-badge";
+
+import type { SelectAgent } from "../agent.types";
 
 interface AgentCardProps {
   agent: SelectAgent;
@@ -46,11 +56,13 @@ function AgentCard(props: AgentCardProps) {
               </AvatarFallback>
             </Avatar>
             <div className="space-y-1">
-              <h3 className="font-semibold text-sm leading-none">{agent.name}</h3>
+              <h3 className="font-semibold text-sm leading-none">
+                {agent.name}
+              </h3>
               <p className="text-xs text-muted-foreground">{agent.role}</p>
             </div>
           </div>
-          
+
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
@@ -59,7 +71,10 @@ function AgentCard(props: AgentCardProps) {
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-[160px]">
               <DropdownMenuItem asChild>
-                <Link to="/user/agents/edit/$agentId" params={{ agentId: agent.id }}>
+                <Link
+                  to="/user/agents/edit/$agentId"
+                  params={{ agentId: agent.id }}
+                >
                   <Pencil className="mr-2 h-4 w-4" />
                   Edit
                 </Link>
@@ -80,13 +95,13 @@ function AgentCard(props: AgentCardProps) {
           </DropdownMenu>
         </div>
       </CardHeader>
-      
+
       <CardContent className="pb-3">
         <p className="text-xs text-muted-foreground line-clamp-2">
           {agent.backstory}
         </p>
       </CardContent>
-      
+
       <CardFooter className="pt-0">
         <div className="flex items-center justify-between w-full">
           <AgentStatusBadge status={agent.status} />

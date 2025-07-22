@@ -1,22 +1,18 @@
 import { createFileRoute, Outlet } from "@tanstack/react-router";
-import { useEffect } from "react";
+
+import type { LlmProvider } from "@/main/features/agent/llm-provider/llm-provider.types";
 
 import { ProviderList } from "@/renderer/features/llm-provider/components/provider-list";
-import { useLLMProvidersStore } from "@/renderer/store/llm-provider.store";
 
 function LLMProvidersLayout() {
-  const { loadProviders } = useLLMProvidersStore();
-
-  useEffect(() => {
-    loadProviders();
-  }, [loadProviders]);
-
   return (
     <>
       <div className="space-y-6">
         {/* Page Header */}
         <div className="space-y-2">
-          <h1 className="text-2xl font-semibold text-foreground">AI Providers</h1>
+          <h1 className="text-2xl font-semibold text-foreground">
+            AI Providers
+          </h1>
           <p className="text-muted-foreground text-sm">
             Configure and manage your AI language model providers
           </p>
@@ -25,7 +21,7 @@ function LLMProvidersLayout() {
         {/* Provider List */}
         <ProviderList />
       </div>
-      
+
       {/* Modals/Child Routes */}
       <Outlet />
     </>
@@ -35,5 +31,19 @@ function LLMProvidersLayout() {
 export const Route = createFileRoute(
   "/_authenticated/user/settings/llm-providers",
 )({
+  beforeLoad: ({ context }) => {
+    const { auth } = context;
+    if (!auth.user) {
+      throw new Error("User not authenticated");
+    }
+  },
+  loader: async ({ context }) => {
+    const { auth } = context;
+    const response = await window.api.llmProviders.list(auth.user!.id);
+    if (!response.success) {
+      throw new Error(response.error || "Failed to load providers");
+    }
+    return { providers: response.data as LlmProvider[] };
+  },
   component: LLMProvidersLayout,
 });

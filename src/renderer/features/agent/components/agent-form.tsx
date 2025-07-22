@@ -1,9 +1,10 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
+import { z } from "zod";
 
 import { createAgentSchema } from "@/main/features/agent/agent.types";
-import { z } from "zod";
+
 import { Button } from "@/renderer/components/ui/button";
 import {
   Form,
@@ -24,22 +25,27 @@ import {
 } from "@/renderer/components/ui/select";
 import { Separator } from "@/renderer/components/ui/separator";
 import { Textarea } from "@/renderer/components/ui/textarea";
-import { useLLMProvidersStore } from "@/renderer/store/llm-provider.store";
 
-import type { SelectAgent, CreateAgentInput, ModelConfig } from "../agent.types";
+import type {
+  SelectAgent,
+  CreateAgentInput,
+  ModelConfig,
+} from "../agent.types";
 
 type FormData = z.infer<typeof createAgentSchema>;
 
 interface AgentFormProps {
   initialData?: SelectAgent | null;
+  providers?: any[];
   onSubmit: (data: CreateAgentInput) => Promise<void>;
   onCancel: () => void;
   isLoading?: boolean;
 }
 
 function AgentForm(props: AgentFormProps) {
-  const { initialData, onSubmit, onCancel, isLoading } = props;
-  const { providers, loadProviders, defaultProvider } = useLLMProvidersStore();
+  const { initialData, providers = [], onSubmit, onCancel, isLoading } = props;
+
+  const defaultProvider = providers.find((p: any) => p.isDefault) || null;
 
   const isEditing = !!initialData;
 
@@ -59,18 +65,12 @@ function AgentForm(props: AgentFormProps) {
       backstory: initialData?.backstory || "",
       goal: initialData?.goal || "",
       providerId: initialData?.providerId || defaultProvider?.id || "",
-      modelConfig: initialData?.modelConfig || JSON.stringify(defaultModelConfig),
+      modelConfig:
+        initialData?.modelConfig || JSON.stringify(defaultModelConfig),
       status: "inactive", // Always default to inactive
       avatar: initialData ? "" : "", // Avatar from form
     },
   });
-
-  // Load providers on mount if not already loaded
-  useEffect(() => {
-    if (providers.length === 0) {
-      loadProviders();
-    }
-  }, [providers.length, loadProviders]);
 
   // Set default provider when providers load
   useEffect(() => {
@@ -83,7 +83,9 @@ function AgentForm(props: AgentFormProps) {
     await onSubmit(data as CreateAgentInput);
   }
 
-  const activeProviders = providers.filter((provider) => provider.isActive);
+  const activeProviders = providers.filter(
+    (provider: any) => provider.isActive,
+  );
 
   return (
     <Form {...form}>
@@ -134,7 +136,10 @@ function AgentForm(props: AgentFormProps) {
               <FormItem>
                 <FormLabel>Avatar URL (Optional)</FormLabel>
                 <FormControl>
-                  <Input placeholder="https://example.com/avatar.jpg" {...field} />
+                  <Input
+                    placeholder="https://example.com/avatar.jpg"
+                    {...field}
+                  />
                 </FormControl>
                 <FormDescription>
                   Optional avatar image URL for your agent
@@ -170,7 +175,8 @@ function AgentForm(props: AgentFormProps) {
                   />
                 </FormControl>
                 <FormDescription>
-                  Describe your agent's background and expertise (10-1000 characters)
+                  Describe your agent's background and expertise (10-1000
+                  characters)
                 </FormDescription>
                 <FormMessage />
               </FormItem>
@@ -191,7 +197,8 @@ function AgentForm(props: AgentFormProps) {
                   />
                 </FormControl>
                 <FormDescription>
-                  Define your agent's primary goal and objectives (10-500 characters)
+                  Define your agent's primary goal and objectives (10-500
+                  characters)
                 </FormDescription>
                 <FormMessage />
               </FormItem>
@@ -216,14 +223,17 @@ function AgentForm(props: AgentFormProps) {
             render={({ field }) => (
               <FormItem>
                 <FormLabel>AI Provider *</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <Select
+                  onValueChange={field.onChange}
+                  defaultValue={field.value}
+                >
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Select provider" />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    {activeProviders.map((provider) => (
+                    {activeProviders.map((provider: any) => (
                       <SelectItem key={provider.id} value={provider.id}>
                         {provider.name}
                         {provider.isDefault && " (Default)"}
@@ -249,7 +259,9 @@ function AgentForm(props: AgentFormProps) {
                 control={form.control}
                 name="modelConfig"
                 render={({ field }) => {
-                  const config = field.value ? JSON.parse(field.value) : defaultModelConfig;
+                  const config = field.value
+                    ? JSON.parse(field.value)
+                    : defaultModelConfig;
                   return (
                     <FormItem>
                       <FormLabel>Model</FormLabel>
@@ -257,7 +269,10 @@ function AgentForm(props: AgentFormProps) {
                         <Input
                           value={config.model}
                           onChange={(e) => {
-                            const newConfig = { ...config, model: e.target.value };
+                            const newConfig = {
+                              ...config,
+                              model: e.target.value,
+                            };
                             field.onChange(JSON.stringify(newConfig));
                           }}
                           placeholder="gpt-4o"
@@ -273,7 +288,9 @@ function AgentForm(props: AgentFormProps) {
                 control={form.control}
                 name="modelConfig"
                 render={({ field }) => {
-                  const config = field.value ? JSON.parse(field.value) : defaultModelConfig;
+                  const config = field.value
+                    ? JSON.parse(field.value)
+                    : defaultModelConfig;
                   return (
                     <FormItem>
                       <FormLabel>Temperature</FormLabel>
@@ -285,7 +302,10 @@ function AgentForm(props: AgentFormProps) {
                           step="0.1"
                           value={config.temperature}
                           onChange={(e) => {
-                            const newConfig = { ...config, temperature: parseFloat(e.target.value) };
+                            const newConfig = {
+                              ...config,
+                              temperature: parseFloat(e.target.value),
+                            };
                             field.onChange(JSON.stringify(newConfig));
                           }}
                           placeholder="0.7"
@@ -303,7 +323,9 @@ function AgentForm(props: AgentFormProps) {
                 control={form.control}
                 name="modelConfig"
                 render={({ field }) => {
-                  const config = field.value ? JSON.parse(field.value) : defaultModelConfig;
+                  const config = field.value
+                    ? JSON.parse(field.value)
+                    : defaultModelConfig;
                   return (
                     <FormItem>
                       <FormLabel>Max Tokens</FormLabel>
@@ -313,7 +335,10 @@ function AgentForm(props: AgentFormProps) {
                           min="1"
                           value={config.maxTokens}
                           onChange={(e) => {
-                            const newConfig = { ...config, maxTokens: parseInt(e.target.value) };
+                            const newConfig = {
+                              ...config,
+                              maxTokens: parseInt(e.target.value),
+                            };
                             field.onChange(JSON.stringify(newConfig));
                           }}
                           placeholder="4000"
@@ -329,7 +354,9 @@ function AgentForm(props: AgentFormProps) {
                 control={form.control}
                 name="modelConfig"
                 render={({ field }) => {
-                  const config = field.value ? JSON.parse(field.value) : defaultModelConfig;
+                  const config = field.value
+                    ? JSON.parse(field.value)
+                    : defaultModelConfig;
                   return (
                     <FormItem>
                       <FormLabel>Top P (Optional)</FormLabel>
@@ -341,7 +368,12 @@ function AgentForm(props: AgentFormProps) {
                           step="0.1"
                           value={config.topP || ""}
                           onChange={(e) => {
-                            const newConfig = { ...config, topP: e.target.value ? parseFloat(e.target.value) : undefined };
+                            const newConfig = {
+                              ...config,
+                              topP: e.target.value
+                                ? parseFloat(e.target.value)
+                                : undefined,
+                            };
                             field.onChange(JSON.stringify(newConfig));
                           }}
                           placeholder="0.9"
@@ -367,7 +399,11 @@ function AgentForm(props: AgentFormProps) {
             Cancel
           </Button>
           <Button type="submit" disabled={isLoading}>
-            {isLoading ? "Saving..." : isEditing ? "Update Agent" : "Create Agent"}
+            {isLoading
+              ? "Saving..."
+              : isEditing
+                ? "Update Agent"
+                : "Create Agent"}
           </Button>
         </div>
       </form>

@@ -2,14 +2,13 @@ import { useRouter } from "@tanstack/react-router";
 import { LogOut } from "lucide-react";
 
 import { Button } from "@/renderer/components/ui/button";
-import { useAuthStore } from "@/renderer/store/auth.store";
-
+import { useAuth } from "@/renderer/contexts/auth.context";
 import { UserAvatar } from "@/renderer/features/user/components/user-avatar";
 import { UserStatus } from "@/renderer/features/user/components/user-status";
 
 function SidebarUserArea() {
   const router = useRouter();
-  const { user, logout } = useAuthStore();
+  const { user, logout } = useAuth();
 
   const handleLogout = async () => {
     await logout();

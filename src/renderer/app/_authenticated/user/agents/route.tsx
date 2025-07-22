@@ -1,17 +1,9 @@
 import { createFileRoute, Outlet } from "@tanstack/react-router";
-import { useEffect } from "react";
 
-import { ContentHeader } from "@/renderer/features/app/components/content-header";
 import { AgentList } from "@/renderer/features/agent/components/agent-list";
-import { useAgentStore } from "@/renderer/features/agent/agent.store";
+import { ContentHeader } from "@/renderer/features/app/components/content-header";
 
 function AgentsLayout() {
-  const { loadAgents } = useAgentStore();
-
-  useEffect(() => {
-    loadAgents();
-  }, [loadAgents]);
-
   return (
     <div className="flex-1 flex flex-col">
       <ContentHeader
@@ -23,15 +15,27 @@ function AgentsLayout() {
           <AgentList />
         </div>
       </main>
-      
+
       {/* Modals/Child Routes */}
       <Outlet />
     </div>
   );
 }
 
-export const Route = createFileRoute(
-  "/_authenticated/user/agents",
-)({
+export const Route = createFileRoute("/_authenticated/user/agents")({
+  beforeLoad: async ({ context }) => {
+    const { auth } = context;
+    const { user } = auth;
+
+    if (!user) {
+      throw new Error("User not authenticated");
+    }
+
+    // Load agents data
+    const response = await window.api.agents.list();
+    if (!response.success) {
+      throw new Error(response.error || "Failed to load agents");
+    }
+  },
   component: AgentsLayout,
 });

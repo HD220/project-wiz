@@ -1,3 +1,4 @@
+import { Link } from "@tanstack/react-router";
 import {
   MoreHorizontal,
   Edit2,
@@ -6,11 +7,12 @@ import {
   PowerOff,
   User,
 } from "lucide-react";
-import { useState } from "react";
-import { Link } from "@tanstack/react-router";
 
-import { Avatar, AvatarFallback, AvatarImage } from "@/renderer/components/ui/avatar";
-import { Badge } from "@/renderer/components/ui/badge";
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from "@/renderer/components/ui/avatar";
 import { Button } from "@/renderer/components/ui/button";
 import { Card } from "@/renderer/components/ui/card";
 import {
@@ -21,8 +23,9 @@ import {
   DropdownMenuTrigger,
 } from "@/renderer/components/ui/dropdown-menu";
 
-import type { SelectAgent } from "../agent.types";
 import { AgentStatusBadge } from "./agent-status-badge";
+
+import type { SelectAgent } from "../agent.types";
 
 interface AgentListCardProps {
   agent: SelectAgent;
@@ -57,7 +60,8 @@ function AgentListCard(props: AgentListCardProps) {
               <h3 className="font-medium truncate">{agent.name}</h3>
             </div>
             <p className="text-sm text-muted-foreground truncate">
-              {agent.role} • Created {new Date(agent.createdAt).toLocaleDateString()}
+              {agent.role} • Created{" "}
+              {new Date(agent.createdAt).toLocaleDateString()}
             </p>
           </div>
         </div>
@@ -69,17 +73,16 @@ function AgentListCard(props: AgentListCardProps) {
           {/* Actions Menu */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-8 w-8 p-0"
-              >
+              <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
                 <MoreHorizontal className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuItem asChild>
-                <Link to="/user/agents/edit/$agentId" params={{ agentId: agent.id }}>
+                <Link
+                  to="/user/agents/edit/$agentId"
+                  params={{ agentId: agent.id }}
+                >
                   <Edit2 className="mr-2 h-4 w-4" />
                   Edit
                 </Link>

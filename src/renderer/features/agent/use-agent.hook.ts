@@ -1,6 +1,7 @@
 import { useCallback } from "react";
 
 import { useAgentStore } from "./agent.store";
+
 import type { AgentStatus } from "./agent.types";
 
 export function useAgent() {
@@ -41,7 +42,8 @@ export function useAgentActions() {
 
   const toggleAgentStatus = useCallback(
     async (id: string, currentStatus: AgentStatus) => {
-      const newStatus: AgentStatus = currentStatus === "active" ? "inactive" : "active";
+      const newStatus: AgentStatus =
+        currentStatus === "active" ? "inactive" : "active";
       return await updateAgentStatus(id, newStatus);
     },
     [updateAgentStatus],

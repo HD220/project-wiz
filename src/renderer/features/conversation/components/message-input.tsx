@@ -1,5 +1,5 @@
-import { useState, useRef, KeyboardEvent } from "react";
 import { Send } from "lucide-react";
+import { useState, useRef, KeyboardEvent } from "react";
 
 import { Button } from "@/renderer/components/ui/button";
 import { Textarea } from "@/renderer/components/ui/textarea";
@@ -32,7 +32,7 @@ function MessageInput(props: MessageInputProps) {
     try {
       await onSendMessage(trimmedMessage);
       setMessage("");
-      
+
       // Reset textarea height and maintain focus
       if (textareaRef.current) {
         textareaRef.current.style.height = "auto";
@@ -53,7 +53,7 @@ function MessageInput(props: MessageInputProps) {
 
   const handleTextareaChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setMessage(e.target.value);
-    
+
     // Auto-resize textarea
     const textarea = e.target;
     textarea.style.height = "auto";
@@ -63,10 +63,12 @@ function MessageInput(props: MessageInputProps) {
   const canSend = message.trim().length > 0 && !isSending && !disabled;
 
   return (
-    <div className={cn(
-      "border-t border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60",
-      className
-    )}>
+    <div
+      className={cn(
+        "border-t border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60",
+        className,
+      )}
+    >
       <div className="flex items-end gap-2 p-4">
         {/* Message textarea */}
         <div className="flex-1 relative">
@@ -80,11 +82,11 @@ function MessageInput(props: MessageInputProps) {
             className={cn(
               "min-h-[40px] max-h-[120px] resize-none border-border/50",
               "focus:border-border transition-colors",
-              "pr-12" // Space for send button
+              "pr-12", // Space for send button
             )}
             rows={1}
           />
-          
+
           {/* Send button inside textarea */}
           <Button
             size="sm"
@@ -94,7 +96,7 @@ function MessageInput(props: MessageInputProps) {
             className={cn(
               "absolute right-1 bottom-1 h-8 w-8 p-0",
               "hover:bg-primary hover:text-primary-foreground",
-              canSend && "text-primary"
+              canSend && "text-primary",
             )}
             title="Send message (Enter)"
           >
@@ -102,12 +104,16 @@ function MessageInput(props: MessageInputProps) {
           </Button>
         </div>
       </div>
-      
+
       {/* Helper text */}
       <div className="px-4 pb-2">
         <p className="text-xs text-muted-foreground">
-          Press <kbd className="px-1 bg-muted rounded text-xs">Enter</kbd> to send, 
-          <kbd className="px-1 bg-muted rounded text-xs ml-1">Shift+Enter</kbd> for new line
+          Press <kbd className="px-1 bg-muted rounded text-xs">Enter</kbd> to
+          send,
+          <kbd className="px-1 bg-muted rounded text-xs ml-1">
+            Shift+Enter
+          </kbd>{" "}
+          for new line
         </p>
       </div>
     </div>

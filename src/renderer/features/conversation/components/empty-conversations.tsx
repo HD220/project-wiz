@@ -1,5 +1,6 @@
 import { MessageCircle } from "lucide-react";
 
+import { Button } from "@/renderer/components/ui/button";
 import {
   Card,
   CardContent,
@@ -7,7 +8,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/renderer/components/ui/card";
-import { Button } from "@/renderer/components/ui/button";
 
 interface EmptyConversationsProps {
   onCreateConversation: () => void;
@@ -18,7 +18,9 @@ function EmptyConversations(props: EmptyConversationsProps) {
   const { onCreateConversation, className } = props;
 
   return (
-    <Card className={`border-dashed border-2 border-muted-foreground/25 ${className || ""}`}>
+    <Card
+      className={`border-dashed border-2 border-muted-foreground/25 ${className || ""}`}
+    >
       <CardHeader className="text-center pb-4">
         <div className="mx-auto mb-4 w-12 h-12 rounded-full bg-muted flex items-center justify-center">
           <MessageCircle className="h-6 w-6 text-muted-foreground" />
@@ -30,8 +32,8 @@ function EmptyConversations(props: EmptyConversationsProps) {
       </CardHeader>
       <CardContent className="text-center pt-0">
         <p className="text-sm text-muted-foreground mb-6">
-          Connect with other users or AI agents in private conversations.
-          Select participants to begin chatting.
+          Connect with other users or AI agents in private conversations. Select
+          participants to begin chatting.
         </p>
         <Button onClick={onCreateConversation} className="gap-2">
           <MessageCircle className="h-4 w-4" />

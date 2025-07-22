@@ -9,12 +9,7 @@ import type {
 } from "@/main/features/user/user.types";
 
 // Re-export backend types for consistency
-export type {
-  AuthenticatedUser,
-  Theme,
-  UserProfile,
-  UserPreferences,
-};
+export type { AuthenticatedUser, Theme, UserProfile, UserPreferences };
 
 // Frontend-specific types for user UI
 export interface UserStatusType {

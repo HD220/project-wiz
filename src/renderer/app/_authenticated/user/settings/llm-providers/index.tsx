@@ -5,6 +5,8 @@ function LLMProvidersIndex() {
   return null;
 }
 
-export const Route = createFileRoute("/_authenticated/user/settings/llm-providers/")({
+export const Route = createFileRoute(
+  "/_authenticated/user/settings/llm-providers/",
+)({
   component: LLMProvidersIndex,
 });

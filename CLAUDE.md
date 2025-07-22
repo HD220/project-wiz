@@ -16,6 +16,71 @@ Project guidance for Claude Code when working with this repository.
 - **AI SDK** - LLM integrations (OpenAI, DeepSeek)
 - **Vitest** - Testing framework
 
+## 🚨 CRITICAL RULES - MUST FOLLOW
+
+### **Data Loading & API Usage**
+
+#### **❌ PROHIBITED:**
+
+- **NEVER use `useEffect` for data loading** - migrate to TanStack Query or beforeLoad
+- **NEVER use `localStorage`** - This is an Electron desktop app, use main process
+- **NEVER use `window.api` directly in component bodies** - Only in queries/beforeLoad
+
+#### **✅ ALLOWED window.api usage:**
+
+- **TanStack Query functions** - `queryFn: () => window.api.auth.getCurrentUser()`
+- **beforeLoad functions** - `beforeLoad: ({ context }) => window.api.auth.validate()`
+- **TanStack Query mutations** - `mutationFn: (data) => window.api.users.update(data)`
+
+#### **✅ CORRECT patterns:**
+
+```typescript
+// ✅ CORRECT: TanStack Query for data fetching
+const { data: user } = useQuery({
+  queryKey: ["user", userId],
+  queryFn: () => window.api.auth.getCurrentUser(userId),
+  enabled: !!userId,
+});
+
+// ✅ CORRECT: beforeLoad for route data loading
+export const Route = createFileRoute("/users/$userId")({
+  beforeLoad: async ({ context, params }) => {
+    const response = await window.api.users.get(params.userId);
+    if (!response.success) throw new Error("User not found");
+  },
+  loader: async ({ params }) => {
+    return await window.api.users.get(params.userId);
+  },
+});
+
+// ✅ CORRECT: Router context for auth state
+const { auth } = useRouteContext({ from: "__root__" });
+const { user, isAuthenticated } = auth;
+```
+
+#### **❌ INCORRECT patterns:**
+
+```typescript
+// ❌ WRONG: useEffect for data loading
+useEffect(() => {
+  window.api.users.get(userId).then(setUser); // NEVER DO THIS
+}, [userId]);
+
+// ❌ WRONG: localStorage usage
+localStorage.setItem("user", JSON.stringify(user)); // NEVER DO THIS
+
+// ❌ WRONG: window.api in component body
+function Component() {
+  const user = window.api.auth.getCurrentUser(); // NEVER DO THIS
+}
+```
+
+### **Session Management (Electron)**
+
+- **Sessions managed by main process** - Never localStorage
+- **Auth state via Router Context** - Shared across routes
+- **Session persistence in database** - With automatic cleanup
+
 ## Development Principles
 
 ### **YAGNI** - You Aren't Gonna Need It
@@ -163,7 +228,7 @@ import { validateUserData } from "./validate-user-data";
 ```typescript
 // Always use aliases, never relative imports
 import { Button } from "@/renderer/components/ui/button";
-import { useAuthStore } from "@/renderer/store/auth.store";
+import { useAuth } from "@/renderer/contexts/auth.context";
 import { AuthService } from "@/main/features/auth/auth.service";
 ```
 
@@ -308,24 +373,93 @@ declare global {
 ### Frontend Integration
 
 ```typescript
-// Zustand store integration
-export const useAuthStore = create<AuthState>()(
-  persist(
-    (set) => ({
-      login: async (input: LoginInput) => {
-        set({ isLoading: true, error: null });
-        try {
-          const result = await window.api.auth.login(input);
-          set({ user: result.user, isAuthenticated: true });
-        } catch (error) {
-          set({ error: error.message });
-        }
-      },
-    }),
-    { name: "auth-storage" },
-  ),
-);
+// Auth Context integration (NO Zustand store - deprecated)
+// Use TanStack Router Context for auth state sharing
+const { auth } = useRouteContext({ from: "__root__" });
+const { user, isAuthenticated, login, logout } = auth;
+
+// For data fetching, use TanStack Query hooks
+const { data: userData } = useQuery({
+  queryKey: ["user", user?.id],
+  queryFn: () => window.api.auth.getCurrentUser(),
+  enabled: !!user?.id,
+});
 ```
+
+### **🚨 CRITICAL: Data Loading Rules**
+
+#### **✅ CORRECT Data Loading Patterns:**
+
+```typescript
+// ✅ Route-level data loading with beforeLoad
+export const Route = createFileRoute("/agents/$agentId")({
+  beforeLoad: async ({ context }) => {
+    // Auth validation ONLY - no data loading
+    const { auth } = context;
+    if (!auth.isAuthenticated) throw redirect({ to: "/login" });
+  },
+  loader: async ({ params }) => {
+    // Data loading here is OK
+    const response = await window.api.agents.get(params.agentId);
+    if (!response.success) throw new Error("Agent not found");
+    return { agent: response.data };
+  },
+  component: AgentPage,
+});
+
+// ✅ Component-level with TanStack Query
+function AgentForm() {
+  const { auth } = useRouteContext({ from: "__root__" });
+
+  // ✅ TanStack Query - API calls OK here
+  const { data: providers = [] } = useQuery({
+    queryKey: ["providers", auth.user?.id],
+    queryFn: () => window.api.llmProviders.list(auth.user!.id),
+    enabled: !!auth.user?.id,
+  });
+
+  // ✅ Mutations - API calls OK here
+  const updateMutation = useMutation({
+    mutationFn: (data) => window.api.agents.update(agentId, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["agents"] });
+    },
+  });
+}
+```
+
+#### **❌ FORBIDDEN Patterns:**
+
+```typescript
+// ❌ NEVER: useEffect for data loading
+function BadComponent() {
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    // ❌ FORBIDDEN - migrate to TanStack Query
+    window.api.users.get(userId).then(setUser);
+  }, [userId]);
+}
+
+// ❌ NEVER: Direct API calls in component body
+function BadComponent() {
+  // ❌ FORBIDDEN - move to TanStack Query
+  const user = await window.api.users.get(userId);
+}
+
+// ❌ NEVER: localStorage for sessions
+function BadAuth() {
+  // ❌ FORBIDDEN - use main process sessions
+  const token = localStorage.getItem("session-token");
+}
+```
+
+#### **Migration Strategy:**
+
+1. **useEffect data loading** → TanStack Query hooks
+2. **Component body API calls** → TanStack Query or beforeLoad
+3. **localStorage sessions** → Main process session management
+4. **Zustand for server state** → TanStack Query
 
 ## Type Organization
 
@@ -357,29 +491,86 @@ export type RegisterUserInput = Omit<InsertUser, "passwordHash"> & {
 
 ## Authentication Patterns
 
-### Local Desktop Authentication
+### **🔐 Secure Desktop Authentication (CURRENT)**
 
 ```typescript
-// ✅ Correct - Simple in-memory session for Electron
-let currentUserId: string | null = null;
-
+// ✅ CURRENT PATTERN: Database sessions + main process management
 export class AuthService {
   static async login(credentials: LoginCredentials): Promise<AuthResult> {
-    // Verify with bcrypt
-    const isValid = await bcrypt.compare(password, hash);
+    const db = getDatabase();
 
-    // Set simple session
-    currentUserId = user.id;
+    // 1. Verify credentials with bcrypt
+    const isValid = await bcrypt.compare(credentials.password, storedHash);
+    if (!isValid) throw new Error("Invalid credentials");
 
-    return { user: userWithoutPassword };
+    // 2. Create session token in database
+    const sessionToken = crypto.randomUUID();
+    const expiresAt = new Date(Date.now() + SESSION_DURATION_MS);
+
+    await db.insert(userSessionsTable).values({
+      userId: user.id,
+      token: sessionToken,
+      expiresAt,
+    });
+
+    // 3. Return user + token (stored in main process, NOT localStorage)
+    return { user: userWithoutPassword, sessionToken };
   }
 
-  static logout(): void {
-    currentUserId = null;
+  static async logout(sessionToken: string): Promise<void> {
+    const db = getDatabase();
+    // Remove session from database
+    await db
+      .delete(userSessionsTable)
+      .where(eq(userSessionsTable.token, sessionToken));
+  }
+
+  static async getCurrentUser(
+    sessionToken: string,
+  ): Promise<AuthenticatedUser> {
+    const db = getDatabase();
+
+    // Verify session is valid and not expired
+    const [result] = await db
+      .select()
+      .from(userSessionsTable)
+      .innerJoin(usersTable, eq(userSessionsTable.userId, usersTable.id))
+      .where(
+        and(
+          eq(userSessionsTable.token, sessionToken),
+          gt(userSessionsTable.expiresAt, new Date()),
+        ),
+      );
+
+    if (!result) throw new Error("Invalid or expired session");
+    return result.user;
   }
 }
+```
 
-// ❌ Avoid JWT for local desktop apps - unnecessary complexity
+### **Key Security Features:**
+
+- ✅ **Database-persisted sessions** with expiration
+- ✅ **Main process session management** (no localStorage)
+- ✅ **Session validation** checks expiration on each request
+- ✅ **Foreign key constraints** for data integrity
+- ✅ **Database indexes** for performance
+- ✅ **Router Context** for state sharing
+
+### **❌ DEPRECATED Patterns:**
+
+```typescript
+// ❌ OLD: In-memory sessions (lost on restart)
+let currentUserId: string | null = null;
+
+// ❌ OLD: localStorage sessions (security risk)
+localStorage.setItem("session-token", token);
+
+// ❌ OLD: Zustand auth store (deprecated)
+export const useAuthStore = create(...)
+
+// ❌ OLD: JWT tokens (unnecessary for desktop)
+const token = jwt.sign(payload, secret);
 ```
 
 ## Key Principles
@@ -501,3 +692,110 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
   - **Components**: SEMPRE function declaration, NUNCA React.FC
   - **Forms**: SEMPRE usar shadcn/ui Form components
   - **UI**: SEMPRE usar shadcn/ui, NUNCA HTML nativo
+
+## Critical Rules - FINAL CHECKLIST
+
+### **🚫 PROHIBITED (NEVER DO)**
+
+#### Data Loading & API Usage
+
+- **NEVER** use `useEffect` for data loading - migrate to TanStack Query
+- **NEVER** call `window.api.*` directly in component body
+- **NEVER** use `localStorage` for sessions or user data
+- **NEVER** use Zustand for server state - use TanStack Query
+- **NEVER** use in-memory sessions - use database-persisted sessions
+- **NEVER** use JWT tokens for desktop apps - unnecessary complexity
+
+#### Code Patterns
+
+- **NEVER** use `React.FC` - use function declarations
+- **NEVER** import React in components (React 19)
+- **NEVER** use HTML native elements when shadcn/ui exists
+- **NEVER** create `/shared` folders - use feature-based organization
+- **NEVER** use relative imports - always use path aliases (`@/`)
+
+### **✅ REQUIRED (ALWAYS DO)**
+
+#### Data Loading Patterns
+
+- **ALWAYS** use TanStack Query for component-level data fetching
+- **ALWAYS** use `beforeLoad` for route-level data loading and auth checks
+- **ALWAYS** use main process session management for desktop apps
+- **ALWAYS** persist sessions in database with expiration
+
+#### API Usage Rules
+
+- **ALLOWED**: `window.api.*` calls in TanStack Query hooks
+- **ALLOWED**: `window.api.*` calls in `beforeLoad` functions
+- **ALLOWED**: `window.api.*` calls in TanStack Query mutations
+- **FORBIDDEN**: `window.api.*` calls directly in component body
+
+#### Component Standards
+
+- **ALWAYS** use function declarations for components
+- **ALWAYS** use shadcn/ui components exclusively
+- **ALWAYS** use Form patterns with FormField for forms
+- **ALWAYS** use TypeScript strict mode
+
+#### Architecture Requirements
+
+- **ALWAYS** use bounded context organization in `features/`
+- **ALWAYS** use path aliases (`@/`) for imports
+- **ALWAYS** follow the established file suffix patterns
+- **ALWAYS** use database foreign keys and indexes for relationships
+
+### **🔄 Migration Patterns**
+
+```typescript
+// ❌ OLD: useEffect data loading
+useEffect(() => {
+  window.api.users.get(id).then(setUser);
+}, [id]);
+
+// ✅ NEW: TanStack Query
+const { data: user } = useQuery({
+  queryKey: ["user", id],
+  queryFn: () => window.api.users.get(id),
+  enabled: !!id,
+});
+
+// ❌ OLD: Component body API calls
+function Component() {
+  const user = await window.api.users.get(id); // FORBIDDEN
+}
+
+// ✅ NEW: beforeLoad pattern
+export const Route = createFileRoute("/user/$id")({
+  beforeLoad: async ({ params }) => {
+    if (!auth.user) throw new Error("Not authenticated");
+  },
+  loader: async ({ params }) => {
+    const response = await window.api.users.get(params.id);
+    if (!response.success) throw new Error("User not found");
+    return { user: response.data };
+  },
+});
+
+// ❌ OLD: localStorage sessions
+localStorage.setItem("session-token", token);
+
+// ✅ NEW: Database sessions + main process
+export class AuthService {
+  static async login(): Promise<AuthResult> {
+    // Store session in database, manage in main process
+    await db.insert(userSessionsTable).values({
+      userId,
+      token,
+      expiresAt,
+    });
+    return { user, sessionToken };
+  }
+}
+```
+
+### **⚡ Performance Requirements**
+
+- Database indexes on all foreign keys and frequently queried columns
+- Session validation on each request with automatic expiration checks
+- TanStack Query for automatic caching and invalidation
+- Proper TypeScript inference to avoid type duplication

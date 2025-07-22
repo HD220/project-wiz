@@ -41,13 +41,16 @@ export class ConversationService {
     // Adicionar participantes
     const participants = [];
     if (input.participantIds.length > 0) {
-      const insertedParticipants = await db.insert(conversationParticipantsTable).values(
-        input.participantIds.map((participantId) => ({
-          conversationId: conversation.id,
-          participantId,
-        })),
-      ).returning();
-      
+      const insertedParticipants = await db
+        .insert(conversationParticipantsTable)
+        .values(
+          input.participantIds.map((participantId) => ({
+            conversationId: conversation.id,
+            participantId,
+          })),
+        )
+        .returning();
+
       participants.push(...insertedParticipants);
     }
 
@@ -64,14 +67,14 @@ export class ConversationService {
 
     // 1. Get all conversation IDs for the user
     const userConversations = await db
-      .select({ 
-        conversationId: conversationParticipantsTable.conversationId
+      .select({
+        conversationId: conversationParticipantsTable.conversationId,
       })
       .from(conversationParticipantsTable)
       .where(eq(conversationParticipantsTable.participantId, userId));
 
-    const conversationIds = userConversations.map(c => c.conversationId);
-    
+    const conversationIds = userConversations.map((c) => c.conversationId);
+
     if (conversationIds.length === 0) {
       return [];
     }
@@ -86,7 +89,9 @@ export class ConversationService {
     const allParticipants = await db
       .select()
       .from(conversationParticipantsTable)
-      .where(inArray(conversationParticipantsTable.conversationId, conversationIds));
+      .where(
+        inArray(conversationParticipantsTable.conversationId, conversationIds),
+      );
 
     // 4. Get latest message for each conversation
     // We'll use a more efficient approach: get all messages and find the latest per conversation
@@ -105,16 +110,19 @@ export class ConversationService {
     }
 
     // 5. Build the result
-    const result: import("./conversation.types").ConversationWithLastMessage[] = [];
-    
+    const result: import("./conversation.types").ConversationWithLastMessage[] =
+      [];
+
     for (const conversation of conversations) {
-      const participants = allParticipants.filter(p => p.conversationId === conversation.id);
+      const participants = allParticipants.filter(
+        (p) => p.conversationId === conversation.id,
+      );
       const lastMessage = latestMessagesMap.get(conversation.id);
 
       result.push({
         ...conversation,
         participants,
-        lastMessage: lastMessage || undefined
+        lastMessage: lastMessage || undefined,
       });
     }
 

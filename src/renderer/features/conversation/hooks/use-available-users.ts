@@ -4,8 +4,8 @@
 // TanStack Query hook for available users (agents)
 
 import { useQuery } from "@tanstack/react-query";
+import { useRouteContext } from "@tanstack/react-router";
 
-import { useAuthStore } from "@/renderer/store/auth.store";
 import { conversationApi } from "../api";
 
 /**
@@ -13,7 +13,8 @@ import { conversationApi } from "../api";
  * Uses TanStack Query for caching
  */
 export function useAvailableUsers() {
-  const { isAuthenticated, user } = useAuthStore();
+  const { auth } = useRouteContext({ from: "__root__" });
+  const { isAuthenticated, user } = auth;
 
   const query = useQuery({
     queryKey: ["available-users"],

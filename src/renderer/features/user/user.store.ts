@@ -1,7 +1,7 @@
 import { create } from "zustand";
 
-import type { Theme } from "@/main/features/user/user.types";
 import type { AuthenticatedUser } from "@/main/features/auth/auth.types";
+import type { Theme } from "@/main/features/user/user.types";
 
 import { userApi } from "./user.api";
 
@@ -68,7 +68,8 @@ export const useUserStore = create<UserState>((set, get) => ({
     } catch (error) {
       set({
         isLoading: false,
-        error: error instanceof Error ? error.message : "Failed to update theme",
+        error:
+          error instanceof Error ? error.message : "Failed to update theme",
       });
       throw error;
     }

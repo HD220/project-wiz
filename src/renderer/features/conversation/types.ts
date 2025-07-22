@@ -15,9 +15,7 @@ export type {
   InsertMessage,
 } from "@/main/features/conversation/message.model";
 
-export type {
-  AuthenticatedUser,
-} from "@/main/features/auth/auth.types";
+export type { AuthenticatedUser } from "@/main/features/auth/auth.types";
 
 // Define ConversationType locally to avoid import issues
 export type ConversationType = "dm" | "agent_chat";
@@ -45,7 +43,8 @@ export interface ConversationWithParticipants {
 }
 
 // Conversation with last message (for sidebar with preview)
-export interface ConversationWithLastMessage extends ConversationWithParticipants {
+export interface ConversationWithLastMessage
+  extends ConversationWithParticipants {
   lastMessage?: {
     id: string;
     conversationId: string;

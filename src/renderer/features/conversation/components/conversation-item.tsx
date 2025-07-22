@@ -2,13 +2,14 @@ import { formatDistance } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Users, User } from "lucide-react";
 
-import { Avatar, AvatarFallback, AvatarImage } from "@/renderer/components/ui/avatar";
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from "@/renderer/components/ui/avatar";
 import { Badge } from "@/renderer/components/ui/badge";
 
-import type {
-  ConversationWithParticipants,
-  AuthenticatedUser,
-} from "../types";
+import type { ConversationWithParticipants, AuthenticatedUser } from "../types";
 import type { SelectMessage } from "../types";
 
 interface ConversationItemProps {
@@ -21,13 +22,13 @@ interface ConversationItemProps {
 }
 
 function ConversationItem(props: ConversationItemProps) {
-  const { 
-    conversation, 
-    lastMessage, 
+  const {
+    conversation,
+    lastMessage,
     otherParticipants,
-    isSelected = false, 
-    onClick, 
-    className 
+    isSelected = false,
+    onClick,
+    className,
   } = props;
 
   // Get display name for conversation
@@ -35,13 +36,13 @@ function ConversationItem(props: ConversationItemProps) {
     if (conversation.name) {
       return conversation.name;
     }
-    
+
     if (otherParticipants.length === 1) {
       return otherParticipants[0]?.name || "Unknown";
     } else if (otherParticipants.length > 1) {
       return `Grupo ${otherParticipants.length + 1}`;
     }
-    
+
     return "New Conversation";
   };
 
@@ -55,7 +56,7 @@ function ConversationItem(props: ConversationItemProps) {
         isGroup: false,
       };
     }
-    
+
     return {
       image: null,
       fallback: otherParticipants.length.toString(),
@@ -66,19 +67,19 @@ function ConversationItem(props: ConversationItemProps) {
   // Get preview text for last message
   const getMessagePreview = () => {
     if (!lastMessage) return "No messages yet";
-    
+
     const maxLength = 60;
     if (lastMessage.content.length > maxLength) {
       return `${lastMessage.content.substring(0, maxLength)}...`;
     }
-    
+
     return lastMessage.content;
   };
 
   // Format timestamp
   const getTimeAgo = () => {
     if (!lastMessage) return "";
-    
+
     try {
       return formatDistance(new Date(lastMessage.createdAt), new Date(), {
         addSuffix: true,
@@ -101,12 +102,12 @@ function ConversationItem(props: ConversationItemProps) {
       className={`
         w-full p-3 rounded-lg border border-border/50 hover:border-border hover:bg-muted/50 
         transition-all duration-150 cursor-pointer
-        ${isSelected ? 'bg-muted border-border shadow-sm' : 'bg-card'}
-        ${className || ''}
+        ${isSelected ? "bg-muted border-border shadow-sm" : "bg-card"}
+        ${className || ""}
       `}
       onClick={onClick}
       onKeyDown={(e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
+        if (e.key === "Enter" || e.key === " ") {
           e.preventDefault();
           onClick();
         }
@@ -118,14 +119,10 @@ function ConversationItem(props: ConversationItemProps) {
           <Avatar className="w-10 h-10">
             <AvatarImage src={avatar.image || undefined} />
             <AvatarFallback className="text-sm font-medium">
-              {avatar.isGroup ? (
-                <Users className="h-4 w-4" />
-              ) : (
-                avatar.fallback
-              )}
+              {avatar.isGroup ? <Users className="h-4 w-4" /> : avatar.fallback}
             </AvatarFallback>
           </Avatar>
-          
+
           {/* Group indicator */}
           {avatar.isGroup && (
             <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 bg-primary rounded-full flex items-center justify-center">
@@ -138,13 +135,14 @@ function ConversationItem(props: ConversationItemProps) {
         <div className="flex-1 min-w-0">
           {/* Header */}
           <div className="flex items-center justify-between gap-2 mb-1">
-            <h3 className="font-medium text-sm truncate">
-              {displayName}
-            </h3>
-            
+            <h3 className="font-medium text-sm truncate">{displayName}</h3>
+
             {/* Participants count for groups */}
             {otherParticipants.length > 1 && (
-              <Badge variant="secondary" className="text-xs px-2 py-0.5 shrink-0">
+              <Badge
+                variant="secondary"
+                className="text-xs px-2 py-0.5 shrink-0"
+              >
                 {otherParticipants.length + 1}
               </Badge>
             )}
@@ -155,7 +153,7 @@ function ConversationItem(props: ConversationItemProps) {
             <p className="text-sm text-muted-foreground truncate flex-1">
               {messagePreview}
             </p>
-            
+
             {/* Timestamp */}
             {timeAgo && (
               <span className="text-xs text-muted-foreground shrink-0">
@@ -169,8 +167,12 @@ function ConversationItem(props: ConversationItemProps) {
             <div className="flex items-center gap-1 mt-1">
               <User className="h-3 w-3 text-muted-foreground" />
               <span className="text-xs text-muted-foreground truncate">
-                {otherParticipants.slice(0, 2).map(p => p.name).join(", ")}
-                {otherParticipants.length > 2 && ` +${otherParticipants.length - 2}`}
+                {otherParticipants
+                  .slice(0, 2)
+                  .map((p) => p.name)
+                  .join(", ")}
+                {otherParticipants.length > 2 &&
+                  ` +${otherParticipants.length - 2}`}
               </span>
             </div>
           )}

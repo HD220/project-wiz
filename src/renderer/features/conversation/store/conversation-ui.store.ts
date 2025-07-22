@@ -12,11 +12,11 @@ interface ConversationUIActions {
   // Conversation selection
   selectConversation: (conversationId: string | null) => void;
   clearSelection: () => void;
-  
+
   // Dialog management
   openCreateDialog: () => void;
   closeCreateDialog: () => void;
-  
+
   // Utility
   reset: () => void;
 }
@@ -39,7 +39,7 @@ export const useConversationUIStore = create<ConversationUIStore>()(
       // ===========================
       // ACTIONS
       // ===========================
-      
+
       selectConversation: (conversationId) => {
         set({ selectedConversationId: conversationId });
       },
@@ -69,6 +69,6 @@ export const useConversationUIStore = create<ConversationUIStore>()(
       partialize: (state) => ({
         selectedConversationId: state.selectedConversationId,
       }),
-    }
-  )
+    },
+  ),
 );

@@ -1,10 +1,10 @@
 // Project API - IPC communication layer for project operations
 
-import type { IpcResponse } from "@/main/types";
 import type {
   InsertProject,
   UpdateProject,
 } from "@/main/features/project/project.types";
+import type { IpcResponse } from "@/main/types";
 
 export const projectApi = {
   // Project CRUD operations

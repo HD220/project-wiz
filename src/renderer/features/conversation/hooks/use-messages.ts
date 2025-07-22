@@ -4,17 +4,22 @@
 // TanStack Query hook for messages in a specific conversation
 
 import { useQuery } from "@tanstack/react-query";
+import { useRouteContext } from "@tanstack/react-router";
 
-import { useAuthStore } from "@/renderer/store/auth.store";
 import { messageApi } from "../api";
+
 import type { MessagesQueryResult } from "../types";
 
 /**
  * Hook to get messages for a specific conversation
  * Uses TanStack Query for caching and real-time updates
+ * Gets user from router context for better performance
  */
-export function useMessages(conversationId: string | null): MessagesQueryResult {
-  const { isAuthenticated, user } = useAuthStore();
+export function useMessages(
+  conversationId: string | null,
+): MessagesQueryResult {
+  const { auth } = useRouteContext({ from: "__root__" });
+  const { isAuthenticated, user } = auth;
 
   const query = useQuery({
     queryKey: ["messages", conversationId],

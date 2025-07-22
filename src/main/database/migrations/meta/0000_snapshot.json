@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "73181f2f-59dc-4cfd-b0bc-e9ccc50a1f96",
+  "id": "ceb49cf7-ea87-4fb1-8a59-82c9c2e63e29",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "agents": {
@@ -164,6 +164,14 @@
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false
+        },
+        "default_model": {
+          "name": "default_model",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'gpt-3.5-turbo'"
         },
         "is_default": {
           "name": "is_default",
@@ -451,6 +459,128 @@
       "uniqueConstraints": {},
       "checkConstraints": {}
     },
+    "accounts": {
+      "name": "accounts",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "username": {
+          "name": "username",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "password_hash": {
+          "name": "password_hash",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "CURRENT_TIMESTAMP"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "CURRENT_TIMESTAMP"
+        }
+      },
+      "indexes": {
+        "accounts_username_unique": {
+          "name": "accounts_username_unique",
+          "columns": ["username"],
+          "isUnique": true
+        }
+      },
+      "foreignKeys": {
+        "accounts_user_id_users_id_fk": {
+          "name": "accounts_user_id_users_id_fk",
+          "tableFrom": "accounts",
+          "tableTo": "users",
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "user_sessions": {
+      "name": "user_sessions",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "token": {
+          "name": "token",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "CURRENT_TIMESTAMP"
+        },
+        "expires_at": {
+          "name": "expires_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "user_sessions_token_unique": {
+          "name": "user_sessions_token_unique",
+          "columns": ["token"],
+          "isUnique": true
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
     "conversation_participants": {
       "name": "conversation_participants",
       "columns": {
@@ -500,7 +630,7 @@
           "tableTo": "conversations",
           "columnsFrom": ["conversation_id"],
           "columnsTo": ["id"],
-          "onDelete": "no action",
+          "onDelete": "cascade",
           "onUpdate": "no action"
         },
         "conversation_participants_participant_id_users_id_fk": {
@@ -509,7 +639,7 @@
           "tableTo": "users",
           "columnsFrom": ["participant_id"],
           "columnsTo": ["id"],
-          "onDelete": "no action",
+          "onDelete": "cascade",
           "onUpdate": "no action"
         }
       },
@@ -581,7 +711,7 @@
           "tableTo": "agents",
           "columnsFrom": ["agent_id"],
           "columnsTo": ["id"],
-          "onDelete": "no action",
+          "onDelete": "cascade",
           "onUpdate": "no action"
         }
       },
@@ -652,7 +782,7 @@
           "tableTo": "messages",
           "columnsFrom": ["message_id"],
           "columnsTo": ["id"],
-          "onDelete": "no action",
+          "onDelete": "cascade",
           "onUpdate": "no action"
         }
       },
@@ -716,7 +846,7 @@
           "tableTo": "conversations",
           "columnsFrom": ["conversation_id"],
           "columnsTo": ["id"],
-          "onDelete": "no action",
+          "onDelete": "cascade",
           "onUpdate": "no action"
         },
         "messages_author_id_users_id_fk": {
@@ -725,7 +855,7 @@
           "tableTo": "users",
           "columnsFrom": ["author_id"],
           "columnsTo": ["id"],
-          "onDelete": "no action",
+          "onDelete": "cascade",
           "onUpdate": "no action"
         }
       },
@@ -816,76 +946,6 @@
       "uniqueConstraints": {},
       "checkConstraints": {}
     },
-    "accounts": {
-      "name": "accounts",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "text",
-          "primaryKey": true,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "user_id": {
-          "name": "user_id",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "username": {
-          "name": "username",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "password_hash": {
-          "name": "password_hash",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": "CURRENT_TIMESTAMP"
-        },
-        "updated_at": {
-          "name": "updated_at",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": "CURRENT_TIMESTAMP"
-        }
-      },
-      "indexes": {
-        "accounts_username_unique": {
-          "name": "accounts_username_unique",
-          "columns": ["username"],
-          "isUnique": true
-        }
-      },
-      "foreignKeys": {
-        "accounts_user_id_users_id_fk": {
-          "name": "accounts_user_id_users_id_fk",
-          "tableFrom": "accounts",
-          "tableTo": "users",
-          "columnsFrom": ["user_id"],
-          "columnsTo": ["id"],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "checkConstraints": {}
-    },
     "user_preferences": {
       "name": "user_preferences",
       "columns": {
@@ -936,7 +996,7 @@
           "tableTo": "users",
           "columnsFrom": ["user_id"],
           "columnsTo": ["id"],
-          "onDelete": "no action",
+          "onDelete": "cascade",
           "onUpdate": "no action"
         }
       },

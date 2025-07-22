@@ -10,7 +10,10 @@ import {
   CardTitle,
 } from "@/renderer/components/ui/card";
 import { Label } from "@/renderer/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/renderer/components/ui/radio-group";
+import {
+  RadioGroup,
+  RadioGroupItem,
+} from "@/renderer/components/ui/radio-group";
 
 function AppearancePage() {
   return (
@@ -30,23 +33,16 @@ function AppearancePage() {
             <Palette className="h-5 w-5" />
             Theme
           </CardTitle>
-          <CardDescription>
-            Choose how the app looks and feels
-          </CardDescription>
+          <CardDescription>Choose how the app looks and feels</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="space-y-4">
-            <Label className="text-sm font-medium">
-              Theme Mode
-            </Label>
+            <Label className="text-sm font-medium">Theme Mode</Label>
             <RadioGroup defaultValue="dark" className="grid grid-cols-3 gap-4">
               <div className="flex items-center space-x-2">
-                <RadioGroupItem 
-                  value="light" 
-                  id="light"
-                />
-                <Label 
-                  htmlFor="light" 
+                <RadioGroupItem value="light" id="light" />
+                <Label
+                  htmlFor="light"
                   className="flex items-center gap-2 cursor-pointer"
                 >
                   <Sun className="h-4 w-4" />
@@ -54,12 +50,9 @@ function AppearancePage() {
                 </Label>
               </div>
               <div className="flex items-center space-x-2">
-                <RadioGroupItem 
-                  value="dark" 
-                  id="dark"
-                />
-                <Label 
-                  htmlFor="dark" 
+                <RadioGroupItem value="dark" id="dark" />
+                <Label
+                  htmlFor="dark"
                   className="flex items-center gap-2 cursor-pointer"
                 >
                   <Moon className="h-4 w-4" />
@@ -67,12 +60,9 @@ function AppearancePage() {
                 </Label>
               </div>
               <div className="flex items-center space-x-2">
-                <RadioGroupItem 
-                  value="system" 
-                  id="system"
-                />
-                <Label 
-                  htmlFor="system" 
+                <RadioGroupItem value="system" id="system" />
+                <Label
+                  htmlFor="system"
                   className="flex items-center gap-2 cursor-pointer"
                 >
                   <Monitor className="h-4 w-4" />
@@ -86,9 +76,7 @@ function AppearancePage() {
           </div>
 
           <div className="flex justify-end pt-4">
-            <Button>
-              Save Changes
-            </Button>
+            <Button>Save Changes</Button>
           </div>
         </CardContent>
       </Card>
@@ -96,6 +84,8 @@ function AppearancePage() {
   );
 }
 
-export const Route = createFileRoute("/_authenticated/user/settings/appearance")({
+export const Route = createFileRoute(
+  "/_authenticated/user/settings/appearance",
+)({
   component: AppearancePage,
 });

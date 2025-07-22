@@ -1,11 +1,11 @@
-import { useEffect, useRef, useMemo } from "react";
+import { useRouteContext } from "@tanstack/react-router";
 import { Loader2 } from "lucide-react";
+import { useEffect, useRef, useMemo } from "react";
 
 import { ScrollArea } from "@/renderer/components/ui/scroll-area";
 import { Separator } from "@/renderer/components/ui/separator";
 
 import { useMessages, useSendMessage, useAvailableUsers } from "../hooks";
-import { useAuthStore } from "@/renderer/store/auth.store";
 
 import { MessageBubble } from "./message-bubble";
 import { MessageInput } from "./message-input";
@@ -20,8 +20,9 @@ function ConversationChat(props: ConversationChatProps) {
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  const { user: currentUser } = useAuthStore();
-  
+  const { auth } = useRouteContext({ from: "__root__" });
+  const { user: currentUser } = auth;
+
   // Server state via TanStack Query hooks
   const { conversation, isLoading } = useMessages(conversationId);
   const { availableUsers } = useAvailableUsers();
@@ -40,7 +41,9 @@ function ConversationChat(props: ConversationChatProps) {
   useEffect(() => {
     const scrollToBottom = () => {
       if (scrollAreaRef.current) {
-        const viewport = scrollAreaRef.current.querySelector('[data-radix-scroll-area-viewport]');
+        const viewport = scrollAreaRef.current.querySelector(
+          "[data-radix-scroll-area-viewport]",
+        );
         if (viewport) {
           // Force scroll to absolute bottom
           viewport.scrollTop = viewport.scrollHeight;
@@ -55,7 +58,7 @@ function ConversationChat(props: ConversationChatProps) {
 
   const handleSendMessage = async (content: string) => {
     if (!currentUser) return;
-    
+
     try {
       await sendMessage({
         conversationId: conversation.id,
@@ -70,9 +73,8 @@ function ConversationChat(props: ConversationChatProps) {
   // Get user info by ID
   const getUserById = (userId: string) => {
     if (userId === currentUser?.id) return currentUser;
-    return availableUsers.find(user => user.id === userId);
+    return availableUsers.find((user) => user.id === userId);
   };
-
 
   const messageGroups = useMemo(() => {
     const groups: {
@@ -82,13 +84,13 @@ function ConversationChat(props: ConversationChatProps) {
 
     // Create a unique set to avoid duplicates
     const uniqueMessages = conversation.messages.filter(
-      (message, index, array) => 
-        array.findIndex(m => m.id === message.id) === index
+      (message, index, array) =>
+        array.findIndex((m) => m.id === message.id) === index,
     );
 
     uniqueMessages.forEach((message) => {
       const lastGroup = groups[groups.length - 1];
-      
+
       if (lastGroup && lastGroup.authorId === message.authorId) {
         // Same author, add to existing group
         lastGroup.messages.push(message);
@@ -115,10 +117,7 @@ function ConversationChat(props: ConversationChatProps) {
   return (
     <div className={`flex flex-col h-full ${className || ""}`}>
       {/* Messages area - Discord style */}
-      <ScrollArea 
-        className="flex-1 h-0" 
-        ref={scrollAreaRef}
-      >
+      <ScrollArea className="flex-1 h-0" ref={scrollAreaRef}>
         {messageGroups.length === 0 ? (
           /* Empty conversation state */
           <div className="h-full flex items-center justify-center p-8">
@@ -138,14 +137,18 @@ function ConversationChat(props: ConversationChatProps) {
               const isCurrentUser = group.authorId === currentUser.id;
 
               return (
-                <div key={`group-${group.authorId}-${groupIndex}`} className="space-y-0.5">
+                <div
+                  key={`group-${group.authorId}-${groupIndex}`}
+                  className="space-y-0.5"
+                >
                   {group.messages.map((message, messageIndex) => {
                     // Check if this is the last message from current user and we're sending
-                    const isLastUserMessage = isCurrentUser && 
-                      groupIndex === messageGroups.length - 1 && 
+                    const isLastUserMessage =
+                      isCurrentUser &&
+                      groupIndex === messageGroups.length - 1 &&
                       messageIndex === group.messages.length - 1;
                     const showSending = isSending && isLastUserMessage;
-                    
+
                     return (
                       <MessageBubble
                         key={`${message.id}-${messageIndex}`}
@@ -157,7 +160,7 @@ function ConversationChat(props: ConversationChatProps) {
                       />
                     );
                   })}
-                  
+
                   {/* Add some spacing between different authors */}
                   {groupIndex < messageGroups.length - 1 && (
                     <div className="h-2" />
@@ -165,7 +168,7 @@ function ConversationChat(props: ConversationChatProps) {
                 </div>
               );
             })}
-            
+
             {/* Scroll anchor */}
             <div ref={messagesEndRef} />
           </div>
@@ -174,7 +177,6 @@ function ConversationChat(props: ConversationChatProps) {
 
       {/* Separator */}
       <Separator />
-
 
       {/* Error message */}
       {error && (
