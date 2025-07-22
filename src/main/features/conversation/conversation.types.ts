@@ -42,7 +42,9 @@ export type UpdateLlmMessage = Partial<InsertLlmMessage> & { id: string };
 export type CreateConversationInput = Omit<
   InsertConversation,
   "id" | "createdAt" | "updatedAt"
->;
+> & {
+  participantIds: string[];
+};
 export type CreateMessageInput = Omit<
   InsertMessage,
   "id" | "createdAt" | "updatedAt"

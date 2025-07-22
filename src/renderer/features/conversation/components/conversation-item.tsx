@@ -37,7 +37,7 @@ function ConversationItem(props: ConversationItemProps) {
     }
     
     if (otherParticipants.length === 1) {
-      return otherParticipants[0].name;
+      return otherParticipants[0]?.name || "Unknown";
     } else if (otherParticipants.length > 1) {
       return `Grupo ${otherParticipants.length + 1}`;
     }
@@ -50,8 +50,8 @@ function ConversationItem(props: ConversationItemProps) {
     if (otherParticipants.length === 1) {
       const participant = otherParticipants[0];
       return {
-        image: participant.avatar,
-        fallback: participant.name.charAt(0).toUpperCase(),
+        image: participant?.avatar || null,
+        fallback: participant?.name?.charAt(0).toUpperCase() || "?",
         isGroup: false,
       };
     }

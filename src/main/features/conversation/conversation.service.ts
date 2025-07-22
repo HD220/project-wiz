@@ -20,7 +20,7 @@ export interface CreateConversationInput
 export class ConversationService {
   static async create(
     input: CreateConversationInput,
-  ): Promise<SelectConversation> {
+  ): Promise<import("./conversation.types").ConversationWithParticipants> {
     const db = getDatabase();
 
     const [conversation] = await db
@@ -38,25 +38,34 @@ export class ConversationService {
     }
 
     // Adicionar participantes
+    const participants = [];
     if (input.participantIds.length > 0) {
-      await db.insert(conversationParticipantsTable).values(
+      const insertedParticipants = await db.insert(conversationParticipantsTable).values(
         input.participantIds.map((participantId) => ({
           conversationId: conversation.id,
           participantId,
         })),
-      );
+      ).returning();
+      
+      participants.push(...insertedParticipants);
     }
 
-    return conversation;
+    return {
+      ...conversation,
+      participants,
+    };
   }
 
   static async getUserConversations(
     userId: string,
-  ): Promise<SelectConversation[]> {
+  ): Promise<import("./conversation.types").ConversationWithParticipants[]> {
     const db = getDatabase();
 
     const conversations = await db
-      .select({ conversation: conversationsTable })
+      .select({ 
+        conversation: conversationsTable,
+        participant: conversationParticipantsTable
+      })
       .from(conversationsTable)
       .innerJoin(
         conversationParticipantsTable,
@@ -64,7 +73,31 @@ export class ConversationService {
       )
       .where(eq(conversationParticipantsTable.participantId, userId));
 
-    return conversations.map((row) => row.conversation);
+    // Group participants by conversation
+    const conversationMap = new Map<string, import("./conversation.types").ConversationWithParticipants>();
+    
+    for (const row of conversations) {
+      const convId = row.conversation.id;
+      
+      if (!conversationMap.has(convId)) {
+        conversationMap.set(convId, {
+          ...row.conversation,
+          participants: []
+        });
+      }
+      
+      const conv = conversationMap.get(convId)!;
+      
+      // Get all participants for this conversation
+      const allParticipants = await db
+        .select()
+        .from(conversationParticipantsTable)
+        .where(eq(conversationParticipantsTable.conversationId, convId));
+        
+      conv.participants = allParticipants;
+    }
+
+    return Array.from(conversationMap.values());
   }
 
   static async getOrCreateAgentConversation(

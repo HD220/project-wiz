@@ -218,7 +218,7 @@ export const useConversationStore = create<ConversationState>()((set, get) => ({
 
     if (otherParticipants.length === 1) {
       // 1:1 conversation - try to get the other user's name
-      const participantId = otherParticipants[0].participantId;
+      const participantId = otherParticipants[0]?.participantId;
       const user = get().availableUsers.find(u => u.id === participantId);
       return user?.name || "Unknown User";
     } else if (otherParticipants.length > 1) {
@@ -233,9 +233,9 @@ export const useConversationStore = create<ConversationState>()((set, get) => ({
   getLastMessage: (conversationId: string): MessageWithLlmData | null => {
     const selectedConversation = get().selectedConversation;
     
-    if (selectedConversation?.id === conversationId && selectedConversation.messages.length > 0) {
+    if (selectedConversation?.id === conversationId && selectedConversation.messages?.length > 0) {
       const messages = selectedConversation.messages;
-      return messages[messages.length - 1];
+      return messages[messages.length - 1] || null;
     }
 
     return null;

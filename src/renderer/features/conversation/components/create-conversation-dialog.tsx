@@ -31,8 +31,7 @@ function CreateConversationDialog(props: CreateConversationDialogProps) {
 
   // Filter agents based on search
   const filteredUsers = availableUsers.filter(user => 
-    user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (user.username && user.username.toLowerCase().includes(searchTerm.toLowerCase()))
+    user.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const handleUserToggle = (userId: string) => {
@@ -162,7 +161,7 @@ function CreateConversationDialog(props: CreateConversationDialogProps) {
                           {user.name}
                         </p>
                         <p className="text-xs text-muted-foreground truncate">
-                          @{user.username}
+                          {user.type === "agent" ? "AI Agent" : "User"}
                         </p>
                       </div>
 
