@@ -8,29 +8,6 @@ import { ProviderCard } from "@/renderer/features/llm-provider/components/provid
 
 function ProviderList() {
   const { providers } = Route.useLoaderData();
-  const isLoading = false; // Data is loaded via loader
-
-  if (isLoading) {
-    return (
-      <div className="space-y-6">
-        {/* Header Skeleton */}
-        <div className="flex items-center justify-between">
-          <div className="space-y-2">
-            <div className="h-5 w-40 bg-muted animate-pulse rounded" />
-            <div className="h-4 w-60 bg-muted animate-pulse rounded" />
-          </div>
-          <div className="h-9 w-28 bg-muted animate-pulse rounded" />
-        </div>
-
-        {/* List Skeleton */}
-        <div className="space-y-2">
-          {Array.from({ length: 3 }).map((_, i) => (
-            <div key={i} className="h-20 rounded-lg bg-muted animate-pulse" />
-          ))}
-        </div>
-      </div>
-    );
-  }
 
   if (providers.length === 0) {
     return <EmptyState />;

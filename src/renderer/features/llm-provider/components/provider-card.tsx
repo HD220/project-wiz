@@ -1,4 +1,5 @@
-import { Link, useRouteContext } from "@tanstack/react-router";
+import { Link, useRouteContext, useRouter } from "@tanstack/react-router";
+import { useMutation } from "@tanstack/react-query";
 import { MoreHorizontal, Edit2, Trash2, Star, StarOff } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -25,10 +26,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/renderer/components/ui/dropdown-menu";
-import {
-  useDeleteLLMProvider,
-  useSetDefaultLLMProvider,
-} from "@/renderer/features/llm-provider/hooks/use-llm-providers";
 
 const getProviderLabel = (type: string): string => {
   const labels: Record<string, string> = {
@@ -49,41 +46,50 @@ function ProviderCard(props: ProviderCardProps) {
   const { provider } = props;
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
-  const deleteProviderMutation = useDeleteLLMProvider();
-  const setDefaultProviderMutation = useSetDefaultLLMProvider();
   const { auth } = useRouteContext({ from: "__root__" });
   const { user } = auth;
+  const router = useRouter();
+
+  // SIMPLE: Direct mutations with window.api
+  const deleteProviderMutation = useMutation({
+    mutationFn: (id: string) => window.api.llmProviders.delete(id),
+    onSuccess: () => {
+      toast.success("Provider deleted successfully");
+      router.invalidate(); // Refresh route data
+      setShowDeleteDialog(false);
+    },
+    onError: () => {
+      toast.error("Failed to delete provider");
+    },
+  });
+
+  const setDefaultProviderMutation = useMutation({
+    mutationFn: ({ id, userId }: { id: string; userId: string }) =>
+      window.api.llmProviders.setDefault(id, userId),
+    onSuccess: () => {
+      toast.success("Default provider updated");
+      router.invalidate(); // Refresh route data
+    },
+    onError: () => {
+      toast.error("Failed to update default provider");
+    },
+  });
 
   const isLoading =
     deleteProviderMutation.isPending || setDefaultProviderMutation.isPending;
 
-  const handleDelete = async () => {
-    try {
-      if (!user?.id) throw new Error("User not authenticated");
-      await deleteProviderMutation.mutateAsync({
-        id: provider.id,
-        userId: user.id,
-      });
-      toast.success("Provider deleted successfully");
-    } catch (error) {
-      toast.error("Failed to delete provider");
-    } finally {
-      setShowDeleteDialog(false);
-    }
-  };
+  function handleDelete() {
+    if (!user?.id) return;
+    deleteProviderMutation.mutate(provider.id);
+  }
 
-  const handleSetDefault = async () => {
-    try {
-      if (!user?.id) throw new Error("User not authenticated");
-      await setDefaultProviderMutation.mutateAsync({
-        id: provider.id,
-        userId: user.id,
-      });
-      toast.success("Default provider updated");
-    } catch (error) {
-      toast.error("Failed to update default provider");
-    }
-  };
+  function handleSetDefault() {
+    if (!user?.id) return;
+    setDefaultProviderMutation.mutate({
+      id: provider.id,
+      userId: user.id,
+    });
+  }
 
   return (
     <>

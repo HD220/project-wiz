@@ -1,9 +1,11 @@
+import { useMutation } from "@tanstack/react-query";
 import { Loader2, CheckCircle, XCircle, TestTube } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
+import type { IpcResponse } from "@/main/types";
+
 import { Button } from "@/renderer/components/ui/button";
-import { useTestLLMProvider } from "@/renderer/features/llm-provider/hooks/use-llm-providers";
 
 // Interface para os dados do teste
 interface TestApiKeyData {
@@ -23,32 +25,41 @@ function TestApiButton(props: TestApiButtonProps) {
   const [testResult, setTestResult] = useState<"success" | "error" | null>(
     null,
   );
-  const testProviderMutation = useTestLLMProvider();
+
+  // SIMPLE: Direct mutation with window.api
+  const testProviderMutation = useMutation({
+    mutationFn: (testData: TestApiKeyData) =>
+      window.api.llmProviders.testApiKey(
+        testData.type,
+        testData.apiKey,
+        testData.baseUrl,
+      ),
+  });
 
   const isTesting = testProviderMutation.isPending;
 
-  const handleTest = async () => {
+  function handleTest() {
     setTestResult(null);
 
-    try {
-      const success = await testProviderMutation.mutateAsync(data);
-
-      if (success) {
-        setTestResult("success");
-        toast.success("API connection successful!");
-      } else {
+    testProviderMutation.mutate(data, {
+      onSuccess: (response: IpcResponse) => {
+        if (response.success) {
+          setTestResult("success");
+          toast.success("API connection successful!");
+        } else {
+          setTestResult("error");
+          toast.error("API connection failed");
+        }
+        // Clear result after 2.5 seconds
+        setTimeout(() => setTestResult(null), 2500);
+      },
+      onError: () => {
         setTestResult("error");
         toast.error("API connection failed");
-      }
-
-      // Clear result after 2.5 seconds
-      setTimeout(() => setTestResult(null), 2500);
-    } catch (error) {
-      setTestResult("error");
-      toast.error("API connection failed");
-      setTimeout(() => setTestResult(null), 2500);
-    }
-  };
+        setTimeout(() => setTestResult(null), 2500);
+      },
+    });
+  }
 
   const getButtonVariant = () => {
     if (testResult === "success") return "default";

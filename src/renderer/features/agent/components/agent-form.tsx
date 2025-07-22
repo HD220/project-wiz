@@ -6,6 +6,7 @@ import { AI_DEFAULTS } from "@/main/constants/ai-defaults";
 import { createAgentSchema } from "@/main/features/agent/agent.types";
 
 import { Form } from "@/renderer/components/ui/form";
+import type { LlmProvider } from "@/main/features/agent/llm-provider/llm-provider.types";
 import type {
   SelectAgent,
   CreateAgentInput,
@@ -20,7 +21,7 @@ type FormData = z.infer<typeof createAgentSchema>;
 
 interface AgentFormProps {
   initialData?: SelectAgent | null;
-  providers?: any[];
+  providers?: LlmProvider[];
   onSubmit: (data: CreateAgentInput) => Promise<void>;
   onCancel: () => void;
   isLoading?: boolean;
@@ -29,7 +30,7 @@ interface AgentFormProps {
 function AgentForm(props: AgentFormProps) {
   const { initialData, providers = [], onSubmit, onCancel, isLoading } = props;
 
-  const defaultProvider = providers.find((p: any) => p.isDefault) || null;
+  const defaultProvider = providers.find((p) => p.isDefault) || null;
 
   const isEditing = !!initialData;
 

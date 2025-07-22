@@ -1,8 +1,11 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useRouteContext } from "@tanstack/react-router";
+import { useRouteContext, useRouter } from "@tanstack/react-router";
+import { useMutation } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
+
+import type { CreateProviderInput } from "@/main/features/agent/llm-provider/llm-provider.types";
 
 import type {
   LlmProvider,
@@ -16,10 +19,6 @@ import {
   DialogTitle,
 } from "@/renderer/components/ui/dialog";
 import { Form } from "@/renderer/components/ui/form";
-import {
-  useCreateLLMProvider,
-  useUpdateLLMProvider,
-} from "@/renderer/features/llm-provider/hooks/use-llm-providers";
 
 import { ProviderFormActions } from "./provider-form-actions";
 import { ProviderConfigSection } from "./provider-form-config-section";
@@ -66,10 +65,41 @@ interface ProviderFormProps {
 
 function ProviderForm(props: ProviderFormProps) {
   const { provider, onClose } = props;
-  const createProviderMutation = useCreateLLMProvider();
-  const updateProviderMutation = useUpdateLLMProvider();
   const { auth } = useRouteContext({ from: "__root__" });
   const { user } = auth;
+  const router = useRouter();
+
+  // SIMPLE: Direct mutations with window.api
+  const createProviderMutation = useMutation({
+    mutationFn: (data: CreateProviderInput) =>
+      window.api.llmProviders.create(data),
+    onSuccess: () => {
+      toast.success("Provider created successfully");
+      router.invalidate(); // Refresh route data
+      onClose();
+    },
+    onError: () => {
+      toast.error("Failed to create provider");
+    },
+  });
+
+  const updateProviderMutation = useMutation({
+    mutationFn: ({
+      id,
+      data,
+    }: {
+      id: string;
+      data: Partial<CreateProviderInput>;
+    }) => window.api.llmProviders.update(id, data),
+    onSuccess: () => {
+      toast.success("Provider updated successfully");
+      router.invalidate(); // Refresh route data
+      onClose();
+    },
+    onError: () => {
+      toast.error("Failed to update provider");
+    },
+  });
 
   const isLoading =
     createProviderMutation.isPending || updateProviderMutation.isPending;
@@ -104,40 +134,29 @@ function ProviderForm(props: ProviderFormProps) {
   const watchedType = form.watch("type");
   const watchedApiKey = form.watch("apiKey");
 
-  const onSubmit = async (data: ProviderFormData) => {
-    try {
-      if (isEditing && provider) {
-        if (!user?.id) {
-          toast.error("User not authenticated");
-          return;
-        }
-        await updateProviderMutation.mutateAsync({
-          id: provider.id,
-          data,
-          userId: user.id,
-        });
-        toast.success("Provider updated successfully");
-      } else {
-        if (!user?.id) {
-          toast.error("User not authenticated");
-          return;
-        }
-
-        const createData = {
-          ...data,
-          userId: user.id,
-        };
-
-        await createProviderMutation.mutateAsync(createData);
-        toast.success("Provider created successfully");
-      }
-      onClose();
-    } catch (error) {
-      toast.error(
-        isEditing ? "Failed to update provider" : "Failed to create provider",
-      );
+  function onSubmit(data: ProviderFormData) {
+    if (!user?.id) {
+      toast.error("User not authenticated");
+      return;
     }
-  };
+
+    if (isEditing && provider) {
+      updateProviderMutation.mutate({
+        id: provider.id,
+        data: {
+          ...data,
+          baseUrl: data.baseUrl || null,
+        },
+      });
+    } else {
+      const createData = {
+        ...data,
+        userId: user.id,
+        baseUrl: data.baseUrl || null,
+      };
+      createProviderMutation.mutate(createData);
+    }
+  }
 
   return (
     <Dialog open onOpenChange={onClose}>

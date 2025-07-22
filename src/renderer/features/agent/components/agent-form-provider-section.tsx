@@ -1,6 +1,7 @@
 import { UseFormReturn } from "react-hook-form";
 
 import { AI_DEFAULTS } from "@/main/constants/ai-defaults";
+import type { LlmProvider } from "@/main/features/agent/llm-provider/llm-provider.types";
 
 import {
   FormControl,
@@ -18,19 +19,20 @@ import {
   SelectValue,
 } from "@/renderer/components/ui/select";
 import { Separator } from "@/renderer/components/ui/separator";
-import type { ModelConfig } from "@/renderer/features/agent/agent.types";
+import type {
+  ModelConfig,
+  CreateAgentInput,
+} from "@/renderer/features/agent/agent.types";
 
 interface AgentProviderSectionProps {
-  form: UseFormReturn<any>;
-  providers: any[];
+  form: UseFormReturn<CreateAgentInput>;
+  providers: LlmProvider[];
 }
 
 function AgentProviderSection(props: AgentProviderSectionProps) {
   const { form, providers } = props;
 
-  const activeProviders = providers.filter(
-    (provider: any) => provider.isActive,
-  );
+  const activeProviders = providers.filter((provider) => provider.isActive);
 
   const defaultModelConfig: ModelConfig = {
     model: "gpt-4o",

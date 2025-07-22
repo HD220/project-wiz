@@ -1,5 +1,10 @@
+import { useRouter } from "@tanstack/react-router";
+import { useMutation } from "@tanstack/react-query";
 import { X, Search, Plus, User, Bot } from "lucide-react";
 import { useState } from "react";
+import { toast } from "sonner";
+
+import type { CreateConversationInput } from "@/renderer/features/conversation/types";
 
 import {
   Avatar,
@@ -16,7 +21,6 @@ import {
 } from "@/renderer/components/ui/dialog";
 import { Input } from "@/renderer/components/ui/input";
 import { ScrollArea } from "@/renderer/components/ui/scroll-area";
-import { useCreateConversation } from "@/renderer/features/conversation/hooks";
 import type { AuthenticatedUser } from "@/renderer/features/conversation/types";
 
 interface CreateConversationDialogProps {
@@ -29,8 +33,23 @@ function CreateConversationDialog(props: CreateConversationDialogProps) {
   const { availableUsers, onClose, onConversationCreated } = props;
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedUserIds, setSelectedUserIds] = useState<string[]>([]);
+  const router = useRouter();
 
-  const { createConversation, isCreating, error } = useCreateConversation();
+  // SIMPLE: Direct mutation with window.api
+  const createConversationMutation = useMutation({
+    mutationFn: (data: CreateConversationInput) =>
+      window.api.conversations.create(data),
+    onSuccess: (response) => {
+      if (response.success && response.data) {
+        toast.success("Conversation created successfully");
+        router.invalidate(); // Refresh conversation data
+        onConversationCreated(response.data.id);
+      }
+    },
+    onError: () => {
+      toast.error("Failed to create conversation");
+    },
+  });
 
   // Filter agents based on search
   const filteredUsers = availableUsers.filter((user) =>
@@ -45,16 +64,15 @@ function CreateConversationDialog(props: CreateConversationDialogProps) {
     );
   }
 
-  const handleCreateConversation = async () => {
+  function handleCreateConversation() {
     if (selectedUserIds.length === 0) return;
 
-    try {
-      const conversationId = await createConversation(selectedUserIds);
-      onConversationCreated(conversationId);
-    } catch (error) {
-      console.error("Failed to create conversation:", error);
-    }
-  };
+    createConversationMutation.mutate({
+      participantIds: selectedUserIds,
+      name: null,
+      type: "dm" as const,
+    });
+  }
 
   const getSelectedUsers = () => {
     return availableUsers.filter((user) => selectedUserIds.includes(user.id));
@@ -181,19 +199,23 @@ function CreateConversationDialog(props: CreateConversationDialogProps) {
             </div>
           </ScrollArea>
 
-          {/* Error message */}
-          {error && <p className="text-sm text-destructive">{error.message}</p>}
-
           {/* Actions */}
           <div className="flex justify-end gap-2 pt-2">
-            <Button variant="outline" onClick={onClose} disabled={isCreating}>
+            <Button
+              variant="outline"
+              onClick={onClose}
+              disabled={createConversationMutation.isPending}
+            >
               Cancel
             </Button>
             <Button
               onClick={handleCreateConversation}
-              disabled={selectedUserIds.length === 0 || isCreating}
+              disabled={
+                selectedUserIds.length === 0 ||
+                createConversationMutation.isPending
+              }
             >
-              {isCreating
+              {createConversationMutation.isPending
                 ? "Creating..."
                 : `Start Chat${selectedUserIds.length > 1 ? " with " + selectedUserIds.length + " Agents" : ""} (${selectedUserIds.length})`}
             </Button>

@@ -1,6 +1,8 @@
 import { Link } from "@tanstack/react-router";
 import { Hash, Users, Bot, Settings, ChevronDown } from "lucide-react";
 
+import type { SelectProject } from "@/main/features/project/project.types";
+
 import { Button } from "@/renderer/components/ui/button";
 import {
   Collapsible,
@@ -26,13 +28,12 @@ interface Agent {
 
 interface ProjectSidebarProps {
   projectId: string;
+  project: SelectProject;
   className?: string;
 }
 
 function ProjectSidebar(props: ProjectSidebarProps) {
-  const { projectId, className } = props;
-  // Mock data - in real app this would come from stores
-  const projectName = "Project Alpha";
+  const { projectId, project, className } = props;
 
   const channels: Channel[] = [
     { id: "general", name: "geral", type: "text", hasNotification: true },
@@ -50,7 +51,7 @@ function ProjectSidebar(props: ProjectSidebarProps) {
     <div className={cn("h-full flex flex-col bg-card", className)}>
       {/* Project Header */}
       <div className="h-12 bg-card border-b flex items-center justify-center relative">
-        <h1 className="text-foreground font-semibold">{projectName}</h1>
+        <h1 className="text-foreground font-semibold">{project.name}</h1>
         <Button
           variant="ghost"
           size="icon"

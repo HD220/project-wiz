@@ -1,9 +1,16 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import {
+  createFileRoute,
+  useNavigate,
+  useRouter,
+} from "@tanstack/react-router";
 import { useRouteContext } from "@tanstack/react-router";
+import { useMutation } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
+
+import type { CreateProviderInput } from "@/main/features/agent/llm-provider/llm-provider.types";
 
 import { Button } from "@/renderer/components/ui/button";
 import { Checkbox } from "@/renderer/components/ui/checkbox";
@@ -31,7 +38,6 @@ import {
 } from "@/renderer/components/ui/select";
 import { Separator } from "@/renderer/components/ui/separator";
 import { TestApiButton } from "@/renderer/features/llm-provider/components/test-api-button";
-import { useCreateLLMProvider } from "@/renderer/features/llm-provider/hooks/use-llm-providers";
 
 const PROVIDER_CONFIGS = {
   openai: { label: "OpenAI", defaultModel: "gpt-4o", requiresBaseUrl: false },
@@ -69,56 +75,66 @@ const formSchema = z.object({
 
 type FormData = z.infer<typeof formSchema>;
 
-function NewProviderModal() {
+function EditProviderModal() {
   const navigate = useNavigate();
-  const createProviderMutation = useCreateLLMProvider();
+  const { providerId } = Route.useParams();
   const { auth } = useRouteContext({ from: "__root__" });
-  const { user } = auth;
+  const router = useRouter();
 
-  const isLoading = createProviderMutation.isPending;
+  // SIMPLE: Get provider from route loader
+  const { provider } = Route.useLoaderData();
+
+  // SIMPLE: Direct mutation with window.api
+  const updateProviderMutation = useMutation({
+    mutationFn: (data: Partial<CreateProviderInput>) =>
+      window.api.llmProviders.update(providerId, data),
+    onSuccess: () => {
+      toast.success("Provider updated successfully");
+      router.invalidate(); // Refresh route data
+      navigate({ to: "/user/settings/llm-providers" });
+    },
+    onError: () => {
+      toast.error(
+        "Failed to update provider. Please check your details and try again.",
+      );
+    },
+  });
+
+  const isLoading = updateProviderMutation.isPending;
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      name: "",
-      type: "openai",
-      apiKey: "",
-      baseUrl: "",
-      defaultModel: PROVIDER_CONFIGS["openai"].defaultModel,
-      isDefault: false,
-      isActive: true,
+      name: provider?.name || "",
+      type: provider?.type || "openai",
+      apiKey: provider?.apiKey || "",
+      baseUrl: provider?.baseUrl || "",
+      defaultModel: provider?.defaultModel || "gpt-4o",
+      isDefault: provider?.isDefault || false,
+      isActive: provider?.isActive ?? true,
     },
   });
 
   const watchedType = form.watch("type");
   const watchedApiKey = form.watch("apiKey");
 
-  const onSubmit = async (data: FormData) => {
-    try {
-      if (!user?.id) {
-        toast.error("User not authenticated");
-        return;
-      }
+  function onSubmit(data: FormData) {
+    if (!provider || !auth.user?.id) return;
 
-      const createData = {
-        ...data,
-        userId: user.id,
-        baseUrl: data.baseUrl || null,
-      };
+    const updateData = {
+      ...data,
+      baseUrl: data.baseUrl || null,
+    };
 
-      await createProviderMutation.mutateAsync(createData);
-      toast.success("Provider created successfully");
-      navigate({ to: "/user/settings/llm-providers" });
-    } catch (error) {
-      console.error("Error creating provider:", error);
-      toast.error(
-        "Failed to create provider. Please check your details and try again.",
-      );
-    }
-  };
+    updateProviderMutation.mutate(updateData);
+  }
 
   function handleClose() {
     navigate({ to: "/user/settings/llm-providers" });
+  }
+
+  if (!provider) {
+    return null;
   }
 
   const showBaseUrl = PROVIDER_CONFIGS[watchedType].requiresBaseUrl;
@@ -127,7 +143,7 @@ function NewProviderModal() {
     <Dialog open onOpenChange={handleClose}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Add New AI Provider</DialogTitle>
+          <DialogTitle>Edit Provider</DialogTitle>
         </DialogHeader>
 
         <Form {...form}>
@@ -143,10 +159,11 @@ function NewProviderModal() {
                     <Select
                       onValueChange={field.onChange}
                       defaultValue={field.value}
+                      disabled
                     >
                       <FormControl>
                         <SelectTrigger className="w-full">
-                          <SelectValue placeholder="Select provider" />
+                          <SelectValue />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
@@ -159,6 +176,9 @@ function NewProviderModal() {
                         )}
                       </SelectContent>
                     </Select>
+                    <p className="text-xs text-muted-foreground">
+                      Provider type cannot be changed
+                    </p>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -305,7 +325,7 @@ function NewProviderModal() {
                 Cancel
               </Button>
               <Button type="submit" disabled={isLoading}>
-                {isLoading ? "Creating..." : "Create Provider"}
+                {isLoading ? "Updating..." : "Update Provider"}
               </Button>
             </div>
           </form>
@@ -316,7 +336,25 @@ function NewProviderModal() {
 }
 
 export const Route = createFileRoute(
-  "/_authenticated/user/settings/llm-providers/new/",
+  "/_authenticated/user/settings/llm-providers/$providerId/edit/",
 )({
-  component: NewProviderModal,
+  loader: async ({ context, params }) => {
+    const auth = context.auth;
+    if (!auth.user?.id) {
+      throw new Error("User not authenticated");
+    }
+
+    const response = await window.api.llmProviders.list(auth.user.id);
+    if (!response.success) {
+      throw new Error(response.error || "Failed to load providers");
+    }
+    const provider = response.data?.find((p) => p.id === params.providerId);
+
+    if (!provider) {
+      throw new Error("Provider not found");
+    }
+
+    return { provider };
+  },
+  component: EditProviderModal,
 });

@@ -1,14 +1,21 @@
 import { cn } from "@/renderer/lib/utils";
 
+type UserStatusType = "online" | "away" | "busy" | "offline";
+
+interface UserStatusConfig {
+  color: string;
+  label: string;
+}
+
 interface UserStatusProps {
-  status?: "online" | "away" | "busy" | "offline";
+  status?: UserStatusType;
   className?: string;
 }
 
 function UserStatus(props: UserStatusProps) {
   const { status = "online", className } = props;
 
-  const statusConfig = {
+  const statusConfig: Record<UserStatusType, UserStatusConfig> = {
     online: { color: "bg-green-500", label: "Online" },
     away: { color: "bg-yellow-500", label: "Away" },
     busy: { color: "bg-red-500", label: "Busy" },
@@ -26,3 +33,4 @@ function UserStatus(props: UserStatusProps) {
 }
 
 export { UserStatus };
+export type { UserStatusType, UserStatusConfig };

@@ -22,16 +22,19 @@ import { Route as AuthenticatedProjectProjectIdRouteRouteImport } from "./app/_a
 import { Route as AuthenticatedUserSettingsIndexRouteImport } from "./app/_authenticated/user/settings/index";
 import { Route as AuthenticatedUserAgentsIndexRouteImport } from "./app/_authenticated/user/agents/index";
 import { Route as AuthenticatedProjectProjectIdIndexRouteImport } from "./app/_authenticated/project/$projectId/index";
-import { Route as AuthenticatedUserSettingsLlmProvidersRouteImport } from "./app/_authenticated/user/settings/llm-providers";
 import { Route as AuthenticatedUserSettingsAppearanceRouteImport } from "./app/_authenticated/user/settings/appearance";
-import { Route as AuthenticatedUserDmConversationIdRouteImport } from "./app/_authenticated/user/dm/$conversationId";
+import { Route as AuthenticatedUserSettingsLlmProvidersRouteRouteImport } from "./app/_authenticated/user/settings/llm-providers/route";
+import { Route as AuthenticatedUserDmConversationIdRouteRouteImport } from "./app/_authenticated/user/dm/$conversationId/route";
 import { Route as AuthenticatedUserSettingsLlmProvidersIndexRouteImport } from "./app/_authenticated/user/settings/llm-providers/index";
+import { Route as AuthenticatedUserDmConversationIdIndexRouteImport } from "./app/_authenticated/user/dm/$conversationId/index";
 import { Route as AuthenticatedUserAgentsNewIndexRouteImport } from "./app/_authenticated/user/agents/new/index";
-import { Route as AuthenticatedProjectProjectIdChannelChannelIdRouteImport } from "./app/_authenticated/project/$projectId/channel/$channelId";
-import { Route as AuthenticatedUserSettingsLlmProvidersEditRouteRouteImport } from "./app/_authenticated/user/settings/llm-providers/edit/route";
-import { Route as AuthenticatedUserSettingsLlmProvidersNewIndexRouteImport } from "./app/_authenticated/user/settings/llm-providers/new/index";
+import { Route as AuthenticatedUserSettingsLlmProvidersProviderIdRouteRouteImport } from "./app/_authenticated/user/settings/llm-providers/$providerId/route";
+import { Route as AuthenticatedProjectProjectIdChannelChannelIdRouteRouteImport } from "./app/_authenticated/project/$projectId/channel/$channelId/route";
+import { Route as AuthenticatedUserSettingsLlmProvidersProviderIdIndexRouteImport } from "./app/_authenticated/user/settings/llm-providers/$providerId/index";
 import { Route as AuthenticatedUserAgentsEditAgentIdIndexRouteImport } from "./app/_authenticated/user/agents/edit/$agentId/index";
-import { Route as AuthenticatedUserSettingsLlmProvidersEditProviderIdIndexRouteImport } from "./app/_authenticated/user/settings/llm-providers/edit/$providerId/index";
+import { Route as AuthenticatedProjectProjectIdChannelChannelIdIndexRouteImport } from "./app/_authenticated/project/$projectId/channel/$channelId/index";
+import { Route as AuthenticatedUserSettingsLlmProvidersProviderIdNewIndexRouteImport } from "./app/_authenticated/user/settings/llm-providers/$providerId/new/index";
+import { Route as AuthenticatedUserSettingsLlmProvidersProviderIdEditIndexRouteImport } from "./app/_authenticated/user/settings/llm-providers/$providerId/edit/index";
 
 const AuthRouteRoute = AuthRouteRouteImport.update({
   id: "/auth",
@@ -103,20 +106,20 @@ const AuthenticatedProjectProjectIdIndexRoute =
     path: "/",
     getParentRoute: () => AuthenticatedProjectProjectIdRouteRoute,
   } as any);
-const AuthenticatedUserSettingsLlmProvidersRoute =
-  AuthenticatedUserSettingsLlmProvidersRouteImport.update({
-    id: "/llm-providers",
-    path: "/llm-providers",
-    getParentRoute: () => AuthenticatedUserSettingsRouteRoute,
-  } as any);
 const AuthenticatedUserSettingsAppearanceRoute =
   AuthenticatedUserSettingsAppearanceRouteImport.update({
     id: "/appearance",
     path: "/appearance",
     getParentRoute: () => AuthenticatedUserSettingsRouteRoute,
   } as any);
-const AuthenticatedUserDmConversationIdRoute =
-  AuthenticatedUserDmConversationIdRouteImport.update({
+const AuthenticatedUserSettingsLlmProvidersRouteRoute =
+  AuthenticatedUserSettingsLlmProvidersRouteRouteImport.update({
+    id: "/llm-providers",
+    path: "/llm-providers",
+    getParentRoute: () => AuthenticatedUserSettingsRouteRoute,
+  } as any);
+const AuthenticatedUserDmConversationIdRouteRoute =
+  AuthenticatedUserDmConversationIdRouteRouteImport.update({
     id: "/dm/$conversationId",
     path: "/dm/$conversationId",
     getParentRoute: () => AuthenticatedUserRouteRoute,
@@ -125,7 +128,13 @@ const AuthenticatedUserSettingsLlmProvidersIndexRoute =
   AuthenticatedUserSettingsLlmProvidersIndexRouteImport.update({
     id: "/",
     path: "/",
-    getParentRoute: () => AuthenticatedUserSettingsLlmProvidersRoute,
+    getParentRoute: () => AuthenticatedUserSettingsLlmProvidersRouteRoute,
+  } as any);
+const AuthenticatedUserDmConversationIdIndexRoute =
+  AuthenticatedUserDmConversationIdIndexRouteImport.update({
+    id: "/",
+    path: "/",
+    getParentRoute: () => AuthenticatedUserDmConversationIdRouteRoute,
   } as any);
 const AuthenticatedUserAgentsNewIndexRoute =
   AuthenticatedUserAgentsNewIndexRouteImport.update({
@@ -133,23 +142,24 @@ const AuthenticatedUserAgentsNewIndexRoute =
     path: "/new/",
     getParentRoute: () => AuthenticatedUserAgentsRouteRoute,
   } as any);
-const AuthenticatedProjectProjectIdChannelChannelIdRoute =
-  AuthenticatedProjectProjectIdChannelChannelIdRouteImport.update({
+const AuthenticatedUserSettingsLlmProvidersProviderIdRouteRoute =
+  AuthenticatedUserSettingsLlmProvidersProviderIdRouteRouteImport.update({
+    id: "/$providerId",
+    path: "/$providerId",
+    getParentRoute: () => AuthenticatedUserSettingsLlmProvidersRouteRoute,
+  } as any);
+const AuthenticatedProjectProjectIdChannelChannelIdRouteRoute =
+  AuthenticatedProjectProjectIdChannelChannelIdRouteRouteImport.update({
     id: "/channel/$channelId",
     path: "/channel/$channelId",
     getParentRoute: () => AuthenticatedProjectProjectIdRouteRoute,
   } as any);
-const AuthenticatedUserSettingsLlmProvidersEditRouteRoute =
-  AuthenticatedUserSettingsLlmProvidersEditRouteRouteImport.update({
-    id: "/edit",
-    path: "/edit",
-    getParentRoute: () => AuthenticatedUserSettingsLlmProvidersRoute,
-  } as any);
-const AuthenticatedUserSettingsLlmProvidersNewIndexRoute =
-  AuthenticatedUserSettingsLlmProvidersNewIndexRouteImport.update({
-    id: "/new/",
-    path: "/new/",
-    getParentRoute: () => AuthenticatedUserSettingsLlmProvidersRoute,
+const AuthenticatedUserSettingsLlmProvidersProviderIdIndexRoute =
+  AuthenticatedUserSettingsLlmProvidersProviderIdIndexRouteImport.update({
+    id: "/",
+    path: "/",
+    getParentRoute: () =>
+      AuthenticatedUserSettingsLlmProvidersProviderIdRouteRoute,
   } as any);
 const AuthenticatedUserAgentsEditAgentIdIndexRoute =
   AuthenticatedUserAgentsEditAgentIdIndexRouteImport.update({
@@ -157,11 +167,26 @@ const AuthenticatedUserAgentsEditAgentIdIndexRoute =
     path: "/edit/$agentId/",
     getParentRoute: () => AuthenticatedUserAgentsRouteRoute,
   } as any);
-const AuthenticatedUserSettingsLlmProvidersEditProviderIdIndexRoute =
-  AuthenticatedUserSettingsLlmProvidersEditProviderIdIndexRouteImport.update({
-    id: "/$providerId/",
-    path: "/$providerId/",
-    getParentRoute: () => AuthenticatedUserSettingsLlmProvidersEditRouteRoute,
+const AuthenticatedProjectProjectIdChannelChannelIdIndexRoute =
+  AuthenticatedProjectProjectIdChannelChannelIdIndexRouteImport.update({
+    id: "/",
+    path: "/",
+    getParentRoute: () =>
+      AuthenticatedProjectProjectIdChannelChannelIdRouteRoute,
+  } as any);
+const AuthenticatedUserSettingsLlmProvidersProviderIdNewIndexRoute =
+  AuthenticatedUserSettingsLlmProvidersProviderIdNewIndexRouteImport.update({
+    id: "/new/",
+    path: "/new/",
+    getParentRoute: () =>
+      AuthenticatedUserSettingsLlmProvidersProviderIdRouteRoute,
+  } as any);
+const AuthenticatedUserSettingsLlmProvidersProviderIdEditIndexRoute =
+  AuthenticatedUserSettingsLlmProvidersProviderIdEditIndexRouteImport.update({
+    id: "/edit/",
+    path: "/edit/",
+    getParentRoute: () =>
+      AuthenticatedUserSettingsLlmProvidersProviderIdRouteRoute,
   } as any);
 
 export interface FileRoutesByFullPath {
@@ -174,19 +199,22 @@ export interface FileRoutesByFullPath {
   "/user/agents": typeof AuthenticatedUserAgentsRouteRouteWithChildren;
   "/user/settings": typeof AuthenticatedUserSettingsRouteRouteWithChildren;
   "/user/": typeof AuthenticatedUserIndexRoute;
-  "/user/dm/$conversationId": typeof AuthenticatedUserDmConversationIdRoute;
+  "/user/dm/$conversationId": typeof AuthenticatedUserDmConversationIdRouteRouteWithChildren;
+  "/user/settings/llm-providers": typeof AuthenticatedUserSettingsLlmProvidersRouteRouteWithChildren;
   "/user/settings/appearance": typeof AuthenticatedUserSettingsAppearanceRoute;
-  "/user/settings/llm-providers": typeof AuthenticatedUserSettingsLlmProvidersRouteWithChildren;
   "/project/$projectId/": typeof AuthenticatedProjectProjectIdIndexRoute;
   "/user/agents/": typeof AuthenticatedUserAgentsIndexRoute;
   "/user/settings/": typeof AuthenticatedUserSettingsIndexRoute;
-  "/user/settings/llm-providers/edit": typeof AuthenticatedUserSettingsLlmProvidersEditRouteRouteWithChildren;
-  "/project/$projectId/channel/$channelId": typeof AuthenticatedProjectProjectIdChannelChannelIdRoute;
+  "/project/$projectId/channel/$channelId": typeof AuthenticatedProjectProjectIdChannelChannelIdRouteRouteWithChildren;
+  "/user/settings/llm-providers/$providerId": typeof AuthenticatedUserSettingsLlmProvidersProviderIdRouteRouteWithChildren;
   "/user/agents/new": typeof AuthenticatedUserAgentsNewIndexRoute;
+  "/user/dm/$conversationId/": typeof AuthenticatedUserDmConversationIdIndexRoute;
   "/user/settings/llm-providers/": typeof AuthenticatedUserSettingsLlmProvidersIndexRoute;
+  "/project/$projectId/channel/$channelId/": typeof AuthenticatedProjectProjectIdChannelChannelIdIndexRoute;
   "/user/agents/edit/$agentId": typeof AuthenticatedUserAgentsEditAgentIdIndexRoute;
-  "/user/settings/llm-providers/new": typeof AuthenticatedUserSettingsLlmProvidersNewIndexRoute;
-  "/user/settings/llm-providers/edit/$providerId": typeof AuthenticatedUserSettingsLlmProvidersEditProviderIdIndexRoute;
+  "/user/settings/llm-providers/$providerId/": typeof AuthenticatedUserSettingsLlmProvidersProviderIdIndexRoute;
+  "/user/settings/llm-providers/$providerId/edit": typeof AuthenticatedUserSettingsLlmProvidersProviderIdEditIndexRoute;
+  "/user/settings/llm-providers/$providerId/new": typeof AuthenticatedUserSettingsLlmProvidersProviderIdNewIndexRoute;
 }
 export interface FileRoutesByTo {
   "/auth": typeof AuthRouteRouteWithChildren;
@@ -194,18 +222,18 @@ export interface FileRoutesByTo {
   "/auth/register": typeof AuthRegisterRoute;
   "/": typeof AuthenticatedIndexRoute;
   "/user": typeof AuthenticatedUserIndexRoute;
-  "/user/dm/$conversationId": typeof AuthenticatedUserDmConversationIdRoute;
   "/user/settings/appearance": typeof AuthenticatedUserSettingsAppearanceRoute;
   "/project/$projectId": typeof AuthenticatedProjectProjectIdIndexRoute;
   "/user/agents": typeof AuthenticatedUserAgentsIndexRoute;
   "/user/settings": typeof AuthenticatedUserSettingsIndexRoute;
-  "/user/settings/llm-providers/edit": typeof AuthenticatedUserSettingsLlmProvidersEditRouteRouteWithChildren;
-  "/project/$projectId/channel/$channelId": typeof AuthenticatedProjectProjectIdChannelChannelIdRoute;
   "/user/agents/new": typeof AuthenticatedUserAgentsNewIndexRoute;
+  "/user/dm/$conversationId": typeof AuthenticatedUserDmConversationIdIndexRoute;
   "/user/settings/llm-providers": typeof AuthenticatedUserSettingsLlmProvidersIndexRoute;
+  "/project/$projectId/channel/$channelId": typeof AuthenticatedProjectProjectIdChannelChannelIdIndexRoute;
   "/user/agents/edit/$agentId": typeof AuthenticatedUserAgentsEditAgentIdIndexRoute;
-  "/user/settings/llm-providers/new": typeof AuthenticatedUserSettingsLlmProvidersNewIndexRoute;
-  "/user/settings/llm-providers/edit/$providerId": typeof AuthenticatedUserSettingsLlmProvidersEditProviderIdIndexRoute;
+  "/user/settings/llm-providers/$providerId": typeof AuthenticatedUserSettingsLlmProvidersProviderIdIndexRoute;
+  "/user/settings/llm-providers/$providerId/edit": typeof AuthenticatedUserSettingsLlmProvidersProviderIdEditIndexRoute;
+  "/user/settings/llm-providers/$providerId/new": typeof AuthenticatedUserSettingsLlmProvidersProviderIdNewIndexRoute;
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport;
@@ -219,19 +247,22 @@ export interface FileRoutesById {
   "/_authenticated/user/agents": typeof AuthenticatedUserAgentsRouteRouteWithChildren;
   "/_authenticated/user/settings": typeof AuthenticatedUserSettingsRouteRouteWithChildren;
   "/_authenticated/user/": typeof AuthenticatedUserIndexRoute;
-  "/_authenticated/user/dm/$conversationId": typeof AuthenticatedUserDmConversationIdRoute;
+  "/_authenticated/user/dm/$conversationId": typeof AuthenticatedUserDmConversationIdRouteRouteWithChildren;
+  "/_authenticated/user/settings/llm-providers": typeof AuthenticatedUserSettingsLlmProvidersRouteRouteWithChildren;
   "/_authenticated/user/settings/appearance": typeof AuthenticatedUserSettingsAppearanceRoute;
-  "/_authenticated/user/settings/llm-providers": typeof AuthenticatedUserSettingsLlmProvidersRouteWithChildren;
   "/_authenticated/project/$projectId/": typeof AuthenticatedProjectProjectIdIndexRoute;
   "/_authenticated/user/agents/": typeof AuthenticatedUserAgentsIndexRoute;
   "/_authenticated/user/settings/": typeof AuthenticatedUserSettingsIndexRoute;
-  "/_authenticated/user/settings/llm-providers/edit": typeof AuthenticatedUserSettingsLlmProvidersEditRouteRouteWithChildren;
-  "/_authenticated/project/$projectId/channel/$channelId": typeof AuthenticatedProjectProjectIdChannelChannelIdRoute;
+  "/_authenticated/project/$projectId/channel/$channelId": typeof AuthenticatedProjectProjectIdChannelChannelIdRouteRouteWithChildren;
+  "/_authenticated/user/settings/llm-providers/$providerId": typeof AuthenticatedUserSettingsLlmProvidersProviderIdRouteRouteWithChildren;
   "/_authenticated/user/agents/new/": typeof AuthenticatedUserAgentsNewIndexRoute;
+  "/_authenticated/user/dm/$conversationId/": typeof AuthenticatedUserDmConversationIdIndexRoute;
   "/_authenticated/user/settings/llm-providers/": typeof AuthenticatedUserSettingsLlmProvidersIndexRoute;
+  "/_authenticated/project/$projectId/channel/$channelId/": typeof AuthenticatedProjectProjectIdChannelChannelIdIndexRoute;
   "/_authenticated/user/agents/edit/$agentId/": typeof AuthenticatedUserAgentsEditAgentIdIndexRoute;
-  "/_authenticated/user/settings/llm-providers/new/": typeof AuthenticatedUserSettingsLlmProvidersNewIndexRoute;
-  "/_authenticated/user/settings/llm-providers/edit/$providerId/": typeof AuthenticatedUserSettingsLlmProvidersEditProviderIdIndexRoute;
+  "/_authenticated/user/settings/llm-providers/$providerId/": typeof AuthenticatedUserSettingsLlmProvidersProviderIdIndexRoute;
+  "/_authenticated/user/settings/llm-providers/$providerId/edit/": typeof AuthenticatedUserSettingsLlmProvidersProviderIdEditIndexRoute;
+  "/_authenticated/user/settings/llm-providers/$providerId/new/": typeof AuthenticatedUserSettingsLlmProvidersProviderIdNewIndexRoute;
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath;
@@ -246,18 +277,21 @@ export interface FileRouteTypes {
     | "/user/settings"
     | "/user/"
     | "/user/dm/$conversationId"
-    | "/user/settings/appearance"
     | "/user/settings/llm-providers"
+    | "/user/settings/appearance"
     | "/project/$projectId/"
     | "/user/agents/"
     | "/user/settings/"
-    | "/user/settings/llm-providers/edit"
     | "/project/$projectId/channel/$channelId"
+    | "/user/settings/llm-providers/$providerId"
     | "/user/agents/new"
+    | "/user/dm/$conversationId/"
     | "/user/settings/llm-providers/"
+    | "/project/$projectId/channel/$channelId/"
     | "/user/agents/edit/$agentId"
-    | "/user/settings/llm-providers/new"
-    | "/user/settings/llm-providers/edit/$providerId";
+    | "/user/settings/llm-providers/$providerId/"
+    | "/user/settings/llm-providers/$providerId/edit"
+    | "/user/settings/llm-providers/$providerId/new";
   fileRoutesByTo: FileRoutesByTo;
   to:
     | "/auth"
@@ -265,18 +299,18 @@ export interface FileRouteTypes {
     | "/auth/register"
     | "/"
     | "/user"
-    | "/user/dm/$conversationId"
     | "/user/settings/appearance"
     | "/project/$projectId"
     | "/user/agents"
     | "/user/settings"
-    | "/user/settings/llm-providers/edit"
-    | "/project/$projectId/channel/$channelId"
     | "/user/agents/new"
+    | "/user/dm/$conversationId"
     | "/user/settings/llm-providers"
+    | "/project/$projectId/channel/$channelId"
     | "/user/agents/edit/$agentId"
-    | "/user/settings/llm-providers/new"
-    | "/user/settings/llm-providers/edit/$providerId";
+    | "/user/settings/llm-providers/$providerId"
+    | "/user/settings/llm-providers/$providerId/edit"
+    | "/user/settings/llm-providers/$providerId/new";
   id:
     | "__root__"
     | "/_authenticated"
@@ -290,18 +324,21 @@ export interface FileRouteTypes {
     | "/_authenticated/user/settings"
     | "/_authenticated/user/"
     | "/_authenticated/user/dm/$conversationId"
-    | "/_authenticated/user/settings/appearance"
     | "/_authenticated/user/settings/llm-providers"
+    | "/_authenticated/user/settings/appearance"
     | "/_authenticated/project/$projectId/"
     | "/_authenticated/user/agents/"
     | "/_authenticated/user/settings/"
-    | "/_authenticated/user/settings/llm-providers/edit"
     | "/_authenticated/project/$projectId/channel/$channelId"
+    | "/_authenticated/user/settings/llm-providers/$providerId"
     | "/_authenticated/user/agents/new/"
+    | "/_authenticated/user/dm/$conversationId/"
     | "/_authenticated/user/settings/llm-providers/"
+    | "/_authenticated/project/$projectId/channel/$channelId/"
     | "/_authenticated/user/agents/edit/$agentId/"
-    | "/_authenticated/user/settings/llm-providers/new/"
-    | "/_authenticated/user/settings/llm-providers/edit/$providerId/";
+    | "/_authenticated/user/settings/llm-providers/$providerId/"
+    | "/_authenticated/user/settings/llm-providers/$providerId/edit/"
+    | "/_authenticated/user/settings/llm-providers/$providerId/new/";
   fileRoutesById: FileRoutesById;
 }
 export interface RootRouteChildren {
@@ -402,13 +439,6 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof AuthenticatedProjectProjectIdIndexRouteImport;
       parentRoute: typeof AuthenticatedProjectProjectIdRouteRoute;
     };
-    "/_authenticated/user/settings/llm-providers": {
-      id: "/_authenticated/user/settings/llm-providers";
-      path: "/llm-providers";
-      fullPath: "/user/settings/llm-providers";
-      preLoaderRoute: typeof AuthenticatedUserSettingsLlmProvidersRouteImport;
-      parentRoute: typeof AuthenticatedUserSettingsRouteRoute;
-    };
     "/_authenticated/user/settings/appearance": {
       id: "/_authenticated/user/settings/appearance";
       path: "/appearance";
@@ -416,11 +446,18 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof AuthenticatedUserSettingsAppearanceRouteImport;
       parentRoute: typeof AuthenticatedUserSettingsRouteRoute;
     };
+    "/_authenticated/user/settings/llm-providers": {
+      id: "/_authenticated/user/settings/llm-providers";
+      path: "/llm-providers";
+      fullPath: "/user/settings/llm-providers";
+      preLoaderRoute: typeof AuthenticatedUserSettingsLlmProvidersRouteRouteImport;
+      parentRoute: typeof AuthenticatedUserSettingsRouteRoute;
+    };
     "/_authenticated/user/dm/$conversationId": {
       id: "/_authenticated/user/dm/$conversationId";
       path: "/dm/$conversationId";
       fullPath: "/user/dm/$conversationId";
-      preLoaderRoute: typeof AuthenticatedUserDmConversationIdRouteImport;
+      preLoaderRoute: typeof AuthenticatedUserDmConversationIdRouteRouteImport;
       parentRoute: typeof AuthenticatedUserRouteRoute;
     };
     "/_authenticated/user/settings/llm-providers/": {
@@ -428,7 +465,14 @@ declare module "@tanstack/react-router" {
       path: "/";
       fullPath: "/user/settings/llm-providers/";
       preLoaderRoute: typeof AuthenticatedUserSettingsLlmProvidersIndexRouteImport;
-      parentRoute: typeof AuthenticatedUserSettingsLlmProvidersRoute;
+      parentRoute: typeof AuthenticatedUserSettingsLlmProvidersRouteRoute;
+    };
+    "/_authenticated/user/dm/$conversationId/": {
+      id: "/_authenticated/user/dm/$conversationId/";
+      path: "/";
+      fullPath: "/user/dm/$conversationId/";
+      preLoaderRoute: typeof AuthenticatedUserDmConversationIdIndexRouteImport;
+      parentRoute: typeof AuthenticatedUserDmConversationIdRouteRoute;
     };
     "/_authenticated/user/agents/new/": {
       id: "/_authenticated/user/agents/new/";
@@ -437,26 +481,26 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof AuthenticatedUserAgentsNewIndexRouteImport;
       parentRoute: typeof AuthenticatedUserAgentsRouteRoute;
     };
+    "/_authenticated/user/settings/llm-providers/$providerId": {
+      id: "/_authenticated/user/settings/llm-providers/$providerId";
+      path: "/$providerId";
+      fullPath: "/user/settings/llm-providers/$providerId";
+      preLoaderRoute: typeof AuthenticatedUserSettingsLlmProvidersProviderIdRouteRouteImport;
+      parentRoute: typeof AuthenticatedUserSettingsLlmProvidersRouteRoute;
+    };
     "/_authenticated/project/$projectId/channel/$channelId": {
       id: "/_authenticated/project/$projectId/channel/$channelId";
       path: "/channel/$channelId";
       fullPath: "/project/$projectId/channel/$channelId";
-      preLoaderRoute: typeof AuthenticatedProjectProjectIdChannelChannelIdRouteImport;
+      preLoaderRoute: typeof AuthenticatedProjectProjectIdChannelChannelIdRouteRouteImport;
       parentRoute: typeof AuthenticatedProjectProjectIdRouteRoute;
     };
-    "/_authenticated/user/settings/llm-providers/edit": {
-      id: "/_authenticated/user/settings/llm-providers/edit";
-      path: "/edit";
-      fullPath: "/user/settings/llm-providers/edit";
-      preLoaderRoute: typeof AuthenticatedUserSettingsLlmProvidersEditRouteRouteImport;
-      parentRoute: typeof AuthenticatedUserSettingsLlmProvidersRoute;
-    };
-    "/_authenticated/user/settings/llm-providers/new/": {
-      id: "/_authenticated/user/settings/llm-providers/new/";
-      path: "/new";
-      fullPath: "/user/settings/llm-providers/new";
-      preLoaderRoute: typeof AuthenticatedUserSettingsLlmProvidersNewIndexRouteImport;
-      parentRoute: typeof AuthenticatedUserSettingsLlmProvidersRoute;
+    "/_authenticated/user/settings/llm-providers/$providerId/": {
+      id: "/_authenticated/user/settings/llm-providers/$providerId/";
+      path: "/";
+      fullPath: "/user/settings/llm-providers/$providerId/";
+      preLoaderRoute: typeof AuthenticatedUserSettingsLlmProvidersProviderIdIndexRouteImport;
+      parentRoute: typeof AuthenticatedUserSettingsLlmProvidersProviderIdRouteRoute;
     };
     "/_authenticated/user/agents/edit/$agentId/": {
       id: "/_authenticated/user/agents/edit/$agentId/";
@@ -465,12 +509,26 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof AuthenticatedUserAgentsEditAgentIdIndexRouteImport;
       parentRoute: typeof AuthenticatedUserAgentsRouteRoute;
     };
-    "/_authenticated/user/settings/llm-providers/edit/$providerId/": {
-      id: "/_authenticated/user/settings/llm-providers/edit/$providerId/";
-      path: "/$providerId";
-      fullPath: "/user/settings/llm-providers/edit/$providerId";
-      preLoaderRoute: typeof AuthenticatedUserSettingsLlmProvidersEditProviderIdIndexRouteImport;
-      parentRoute: typeof AuthenticatedUserSettingsLlmProvidersEditRouteRoute;
+    "/_authenticated/project/$projectId/channel/$channelId/": {
+      id: "/_authenticated/project/$projectId/channel/$channelId/";
+      path: "/";
+      fullPath: "/project/$projectId/channel/$channelId/";
+      preLoaderRoute: typeof AuthenticatedProjectProjectIdChannelChannelIdIndexRouteImport;
+      parentRoute: typeof AuthenticatedProjectProjectIdChannelChannelIdRouteRoute;
+    };
+    "/_authenticated/user/settings/llm-providers/$providerId/new/": {
+      id: "/_authenticated/user/settings/llm-providers/$providerId/new/";
+      path: "/new";
+      fullPath: "/user/settings/llm-providers/$providerId/new";
+      preLoaderRoute: typeof AuthenticatedUserSettingsLlmProvidersProviderIdNewIndexRouteImport;
+      parentRoute: typeof AuthenticatedUserSettingsLlmProvidersProviderIdRouteRoute;
+    };
+    "/_authenticated/user/settings/llm-providers/$providerId/edit/": {
+      id: "/_authenticated/user/settings/llm-providers/$providerId/edit/";
+      path: "/edit";
+      fullPath: "/user/settings/llm-providers/$providerId/edit";
+      preLoaderRoute: typeof AuthenticatedUserSettingsLlmProvidersProviderIdEditIndexRouteImport;
+      parentRoute: typeof AuthenticatedUserSettingsLlmProvidersProviderIdRouteRoute;
     };
   }
 }
@@ -494,54 +552,57 @@ const AuthenticatedUserAgentsRouteRouteWithChildren =
     AuthenticatedUserAgentsRouteRouteChildren,
   );
 
-interface AuthenticatedUserSettingsLlmProvidersEditRouteRouteChildren {
-  AuthenticatedUserSettingsLlmProvidersEditProviderIdIndexRoute: typeof AuthenticatedUserSettingsLlmProvidersEditProviderIdIndexRoute;
+interface AuthenticatedUserSettingsLlmProvidersProviderIdRouteRouteChildren {
+  AuthenticatedUserSettingsLlmProvidersProviderIdIndexRoute: typeof AuthenticatedUserSettingsLlmProvidersProviderIdIndexRoute;
+  AuthenticatedUserSettingsLlmProvidersProviderIdEditIndexRoute: typeof AuthenticatedUserSettingsLlmProvidersProviderIdEditIndexRoute;
+  AuthenticatedUserSettingsLlmProvidersProviderIdNewIndexRoute: typeof AuthenticatedUserSettingsLlmProvidersProviderIdNewIndexRoute;
 }
 
-const AuthenticatedUserSettingsLlmProvidersEditRouteRouteChildren: AuthenticatedUserSettingsLlmProvidersEditRouteRouteChildren =
+const AuthenticatedUserSettingsLlmProvidersProviderIdRouteRouteChildren: AuthenticatedUserSettingsLlmProvidersProviderIdRouteRouteChildren =
   {
-    AuthenticatedUserSettingsLlmProvidersEditProviderIdIndexRoute:
-      AuthenticatedUserSettingsLlmProvidersEditProviderIdIndexRoute,
+    AuthenticatedUserSettingsLlmProvidersProviderIdIndexRoute:
+      AuthenticatedUserSettingsLlmProvidersProviderIdIndexRoute,
+    AuthenticatedUserSettingsLlmProvidersProviderIdEditIndexRoute:
+      AuthenticatedUserSettingsLlmProvidersProviderIdEditIndexRoute,
+    AuthenticatedUserSettingsLlmProvidersProviderIdNewIndexRoute:
+      AuthenticatedUserSettingsLlmProvidersProviderIdNewIndexRoute,
   };
 
-const AuthenticatedUserSettingsLlmProvidersEditRouteRouteWithChildren =
-  AuthenticatedUserSettingsLlmProvidersEditRouteRoute._addFileChildren(
-    AuthenticatedUserSettingsLlmProvidersEditRouteRouteChildren,
+const AuthenticatedUserSettingsLlmProvidersProviderIdRouteRouteWithChildren =
+  AuthenticatedUserSettingsLlmProvidersProviderIdRouteRoute._addFileChildren(
+    AuthenticatedUserSettingsLlmProvidersProviderIdRouteRouteChildren,
   );
 
-interface AuthenticatedUserSettingsLlmProvidersRouteChildren {
-  AuthenticatedUserSettingsLlmProvidersEditRouteRoute: typeof AuthenticatedUserSettingsLlmProvidersEditRouteRouteWithChildren;
+interface AuthenticatedUserSettingsLlmProvidersRouteRouteChildren {
+  AuthenticatedUserSettingsLlmProvidersProviderIdRouteRoute: typeof AuthenticatedUserSettingsLlmProvidersProviderIdRouteRouteWithChildren;
   AuthenticatedUserSettingsLlmProvidersIndexRoute: typeof AuthenticatedUserSettingsLlmProvidersIndexRoute;
-  AuthenticatedUserSettingsLlmProvidersNewIndexRoute: typeof AuthenticatedUserSettingsLlmProvidersNewIndexRoute;
 }
 
-const AuthenticatedUserSettingsLlmProvidersRouteChildren: AuthenticatedUserSettingsLlmProvidersRouteChildren =
+const AuthenticatedUserSettingsLlmProvidersRouteRouteChildren: AuthenticatedUserSettingsLlmProvidersRouteRouteChildren =
   {
-    AuthenticatedUserSettingsLlmProvidersEditRouteRoute:
-      AuthenticatedUserSettingsLlmProvidersEditRouteRouteWithChildren,
+    AuthenticatedUserSettingsLlmProvidersProviderIdRouteRoute:
+      AuthenticatedUserSettingsLlmProvidersProviderIdRouteRouteWithChildren,
     AuthenticatedUserSettingsLlmProvidersIndexRoute:
       AuthenticatedUserSettingsLlmProvidersIndexRoute,
-    AuthenticatedUserSettingsLlmProvidersNewIndexRoute:
-      AuthenticatedUserSettingsLlmProvidersNewIndexRoute,
   };
 
-const AuthenticatedUserSettingsLlmProvidersRouteWithChildren =
-  AuthenticatedUserSettingsLlmProvidersRoute._addFileChildren(
-    AuthenticatedUserSettingsLlmProvidersRouteChildren,
+const AuthenticatedUserSettingsLlmProvidersRouteRouteWithChildren =
+  AuthenticatedUserSettingsLlmProvidersRouteRoute._addFileChildren(
+    AuthenticatedUserSettingsLlmProvidersRouteRouteChildren,
   );
 
 interface AuthenticatedUserSettingsRouteRouteChildren {
+  AuthenticatedUserSettingsLlmProvidersRouteRoute: typeof AuthenticatedUserSettingsLlmProvidersRouteRouteWithChildren;
   AuthenticatedUserSettingsAppearanceRoute: typeof AuthenticatedUserSettingsAppearanceRoute;
-  AuthenticatedUserSettingsLlmProvidersRoute: typeof AuthenticatedUserSettingsLlmProvidersRouteWithChildren;
   AuthenticatedUserSettingsIndexRoute: typeof AuthenticatedUserSettingsIndexRoute;
 }
 
 const AuthenticatedUserSettingsRouteRouteChildren: AuthenticatedUserSettingsRouteRouteChildren =
   {
+    AuthenticatedUserSettingsLlmProvidersRouteRoute:
+      AuthenticatedUserSettingsLlmProvidersRouteRouteWithChildren,
     AuthenticatedUserSettingsAppearanceRoute:
       AuthenticatedUserSettingsAppearanceRoute,
-    AuthenticatedUserSettingsLlmProvidersRoute:
-      AuthenticatedUserSettingsLlmProvidersRouteWithChildren,
     AuthenticatedUserSettingsIndexRoute: AuthenticatedUserSettingsIndexRoute,
   };
 
@@ -550,11 +611,26 @@ const AuthenticatedUserSettingsRouteRouteWithChildren =
     AuthenticatedUserSettingsRouteRouteChildren,
   );
 
+interface AuthenticatedUserDmConversationIdRouteRouteChildren {
+  AuthenticatedUserDmConversationIdIndexRoute: typeof AuthenticatedUserDmConversationIdIndexRoute;
+}
+
+const AuthenticatedUserDmConversationIdRouteRouteChildren: AuthenticatedUserDmConversationIdRouteRouteChildren =
+  {
+    AuthenticatedUserDmConversationIdIndexRoute:
+      AuthenticatedUserDmConversationIdIndexRoute,
+  };
+
+const AuthenticatedUserDmConversationIdRouteRouteWithChildren =
+  AuthenticatedUserDmConversationIdRouteRoute._addFileChildren(
+    AuthenticatedUserDmConversationIdRouteRouteChildren,
+  );
+
 interface AuthenticatedUserRouteRouteChildren {
   AuthenticatedUserAgentsRouteRoute: typeof AuthenticatedUserAgentsRouteRouteWithChildren;
   AuthenticatedUserSettingsRouteRoute: typeof AuthenticatedUserSettingsRouteRouteWithChildren;
   AuthenticatedUserIndexRoute: typeof AuthenticatedUserIndexRoute;
-  AuthenticatedUserDmConversationIdRoute: typeof AuthenticatedUserDmConversationIdRoute;
+  AuthenticatedUserDmConversationIdRouteRoute: typeof AuthenticatedUserDmConversationIdRouteRouteWithChildren;
 }
 
 const AuthenticatedUserRouteRouteChildren: AuthenticatedUserRouteRouteChildren =
@@ -564,8 +640,8 @@ const AuthenticatedUserRouteRouteChildren: AuthenticatedUserRouteRouteChildren =
     AuthenticatedUserSettingsRouteRoute:
       AuthenticatedUserSettingsRouteRouteWithChildren,
     AuthenticatedUserIndexRoute: AuthenticatedUserIndexRoute,
-    AuthenticatedUserDmConversationIdRoute:
-      AuthenticatedUserDmConversationIdRoute,
+    AuthenticatedUserDmConversationIdRouteRoute:
+      AuthenticatedUserDmConversationIdRouteRouteWithChildren,
   };
 
 const AuthenticatedUserRouteRouteWithChildren =
@@ -573,17 +649,32 @@ const AuthenticatedUserRouteRouteWithChildren =
     AuthenticatedUserRouteRouteChildren,
   );
 
+interface AuthenticatedProjectProjectIdChannelChannelIdRouteRouteChildren {
+  AuthenticatedProjectProjectIdChannelChannelIdIndexRoute: typeof AuthenticatedProjectProjectIdChannelChannelIdIndexRoute;
+}
+
+const AuthenticatedProjectProjectIdChannelChannelIdRouteRouteChildren: AuthenticatedProjectProjectIdChannelChannelIdRouteRouteChildren =
+  {
+    AuthenticatedProjectProjectIdChannelChannelIdIndexRoute:
+      AuthenticatedProjectProjectIdChannelChannelIdIndexRoute,
+  };
+
+const AuthenticatedProjectProjectIdChannelChannelIdRouteRouteWithChildren =
+  AuthenticatedProjectProjectIdChannelChannelIdRouteRoute._addFileChildren(
+    AuthenticatedProjectProjectIdChannelChannelIdRouteRouteChildren,
+  );
+
 interface AuthenticatedProjectProjectIdRouteRouteChildren {
   AuthenticatedProjectProjectIdIndexRoute: typeof AuthenticatedProjectProjectIdIndexRoute;
-  AuthenticatedProjectProjectIdChannelChannelIdRoute: typeof AuthenticatedProjectProjectIdChannelChannelIdRoute;
+  AuthenticatedProjectProjectIdChannelChannelIdRouteRoute: typeof AuthenticatedProjectProjectIdChannelChannelIdRouteRouteWithChildren;
 }
 
 const AuthenticatedProjectProjectIdRouteRouteChildren: AuthenticatedProjectProjectIdRouteRouteChildren =
   {
     AuthenticatedProjectProjectIdIndexRoute:
       AuthenticatedProjectProjectIdIndexRoute,
-    AuthenticatedProjectProjectIdChannelChannelIdRoute:
-      AuthenticatedProjectProjectIdChannelChannelIdRoute,
+    AuthenticatedProjectProjectIdChannelChannelIdRouteRoute:
+      AuthenticatedProjectProjectIdChannelChannelIdRouteRouteWithChildren,
   };
 
 const AuthenticatedProjectProjectIdRouteRouteWithChildren =

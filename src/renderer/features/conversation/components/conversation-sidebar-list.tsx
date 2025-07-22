@@ -1,40 +1,72 @@
 import { useRouteContext } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
 import { Plus, MessageCircle } from "lucide-react";
+import { useState } from "react";
 
 import { Button } from "@/renderer/components/ui/button";
 import { ConversationSidebarItem } from "@/renderer/features/conversation/components/conversation-sidebar-item";
 import { CreateConversationDialog } from "@/renderer/features/conversation/components/create-conversation-dialog";
-import {
-  useConversations,
-  useAvailableUsers,
-} from "@/renderer/features/conversation/hooks";
-import { useConversationUIStore } from "@/renderer/features/conversation/store";
 
 function ConversationSidebarList() {
   const { auth } = useRouteContext({ from: "__root__" });
   const { user } = auth;
 
-  // Server state via TanStack Query hooks
-  const { conversations, isLoading: conversationsLoading } = useConversations();
-  const { availableUsers, isLoading: usersLoading } = useAvailableUsers();
+  // SIMPLE: Local state for UI
+  const [showCreateDialog, setShowCreateDialog] = useState(false);
 
-  // UI state via Zustand
-  const { showCreateDialog, openCreateDialog, closeCreateDialog } =
-    useConversationUIStore();
+  // SIMPLE: Direct queries with window.api
+  const conversationsQuery = useQuery({
+    queryKey: ["conversations", user?.id],
+    queryFn: async () => {
+      if (!user?.id) return [];
+      const response = await window.api.conversations.getUserConversations(
+        user.id,
+      );
+      return response.success ? response.data || [] : [];
+    },
+    enabled: !!user?.id,
+  });
 
-  const isLoading = conversationsLoading || usersLoading;
+  const availableUsersQuery = useQuery({
+    queryKey: ["availableUsers"],
+    queryFn: async () => {
+      const response = await window.api.agents.list();
+      if (!response.success) return [];
+      const agents = response.data || [];
+      return agents.map((agent) => ({
+        id: agent.userId,
+        name: agent.name,
+        avatar: null,
+        type: "agent" as const,
+        createdAt: new Date(agent.createdAt),
+        updatedAt: new Date(agent.updatedAt),
+      }));
+    },
+  });
+
+  const conversations = conversationsQuery.data || [];
+  const availableUsers = availableUsersQuery.data || [];
+  const isLoading =
+    conversationsQuery.isLoading || availableUsersQuery.isLoading;
 
   // Helper functions
-  const getOtherParticipants = (conversation: any) => {
+  function getOtherParticipants(conversation: any) {
     const currentUserId = user?.id;
     return conversation.participants
       .filter((p: any) => p.participantId !== currentUserId)
       .map((p: any) => p.participantId);
-  };
+  }
+
+  function handleCreateDialog() {
+    setShowCreateDialog(true);
+  }
+
+  function handleCloseDialog() {
+    setShowCreateDialog(false);
+  }
 
   function handleConversationCreated() {
-    closeCreateDialog();
-    // Navigation will be handled by the parent component
+    setShowCreateDialog(false);
   }
 
   // Loading skeleton - Discord style
@@ -76,7 +108,7 @@ function ConversationSidebarList() {
           variant="ghost"
           size="sm"
           className="h-5 w-5 p-0 hover:bg-muted"
-          onClick={openCreateDialog}
+          onClick={handleCreateDialog}
           title="Create conversation"
         >
           <Plus className="h-3 w-3" />
@@ -95,11 +127,7 @@ function ConversationSidebarList() {
             <ConversationSidebarItem
               key={conversation.id}
               conversation={conversation}
-              lastMessage={
-                conversation.lastMessage
-                  ? (conversation.lastMessage as any)
-                  : null
-              }
+              lastMessage={conversation.lastMessage || null}
               otherParticipants={otherParticipants}
               unreadCount={0}
             />
@@ -124,7 +152,7 @@ function ConversationSidebarList() {
       {showCreateDialog && (
         <CreateConversationDialog
           availableUsers={availableUsers}
-          onClose={closeCreateDialog}
+          onClose={handleCloseDialog}
           onConversationCreated={handleConversationCreated}
         />
       )}

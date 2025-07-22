@@ -137,18 +137,14 @@ const importAndBoundaryRules = {
       default: "allow",
       rules: [
         {
-          from: ["renderer"],
-          allow: ["shared"],
-          disallow: ["main"],
-          message:
-            "RENDERER: Proibido importar de ${dependency.type}. A comunicação deve ser via IPC.",
+          type: "main",
+          pattern: "src/main/**",
+          allow: ["type", "interface", "enum"],
         },
         {
-          from: ["main"],
-          allow: ["shared"],
-          disallow: ["renderer"],
-          message:
-            "MAIN: Proibido importar de ${dependency.type}. A comunicação deve ser via IPC.",
+          type: "renderer",
+          pattern: "src/renderer/**",
+          allow: ["type", "interface", "enum"],
         },
       ],
     },

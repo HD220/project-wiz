@@ -1,16 +1,13 @@
-import { useRouteContext } from "@tanstack/react-router";
-import { Loader2 } from "lucide-react";
+import { useLoaderData, useRouter } from "@tanstack/react-router";
+import { useMutation } from "@tanstack/react-query";
 import { useEffect, useRef, useMemo } from "react";
+import { toast } from "sonner";
 
 import { ScrollArea } from "@/renderer/components/ui/scroll-area";
 import { Separator } from "@/renderer/components/ui/separator";
 import { MessageBubble } from "@/renderer/features/conversation/components/message-bubble";
 import { MessageInput } from "@/renderer/features/conversation/components/message-input";
-import {
-  useMessages,
-  useSendMessage,
-  useAvailableUsers,
-} from "@/renderer/features/conversation/hooks";
+import type { SendMessageInput } from "@/main/features/conversation/conversation.types";
 
 interface ConversationChatProps {
   conversationId: string;
@@ -18,26 +15,29 @@ interface ConversationChatProps {
 }
 
 function ConversationChat(props: ConversationChatProps) {
-  const { conversationId, className } = props;
+  const { className } = props;
   const scrollAreaRef = useRef<HTMLDivElement>(null);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const router = useRouter();
 
-  const { auth } = useRouteContext({ from: "__root__" });
-  const { user: currentUser } = auth;
+  // SIMPLE: Get data from route loader
+  const {
+    conversation,
+    availableUsers,
+    user: currentUser,
+  } = useLoaderData({
+    from: "/_authenticated/user/dm/$conversationId",
+  });
 
-  // Server state via TanStack Query hooks
-  const { conversation, isLoading } = useMessages(conversationId);
-  const { availableUsers } = useAvailableUsers();
-  const { sendMessage, isSending, error } = useSendMessage();
-
-  // Loading state
-  if (isLoading || !conversation) {
-    return (
-      <div className="flex-1 flex items-center justify-center">
-        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-      </div>
-    );
-  }
+  // SIMPLE: Direct mutation with window.api
+  const sendMessageMutation = useMutation({
+    mutationFn: (input: SendMessageInput) => window.api.messages.send(input),
+    onSuccess: () => {
+      router.invalidate(); // Refresh conversation data
+    },
+    onError: () => {
+      toast.error("Failed to send message");
+    },
+  });
 
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
@@ -47,36 +47,30 @@ function ConversationChat(props: ConversationChatProps) {
           "[data-radix-scroll-area-viewport]",
         );
         if (viewport) {
-          // Force scroll to absolute bottom
           viewport.scrollTop = viewport.scrollHeight;
         }
       }
     };
 
-    // Use setTimeout to ensure DOM is updated after render
     const timeoutId = setTimeout(scrollToBottom, 50);
     return () => clearTimeout(timeoutId);
   }, [conversation.messages?.length]);
 
-  const handleSendMessage = async (content: string) => {
+  async function handleSendMessage(content: string) {
     if (!currentUser) return;
 
-    try {
-      await sendMessage({
-        conversationId: conversation.id,
-        authorId: currentUser.id,
-        content,
-      });
-    } catch (error) {
-      console.error("Failed to send message:", error);
-    }
-  };
+    sendMessageMutation.mutate({
+      conversationId: conversation.id,
+      authorId: currentUser.id,
+      content,
+    });
+  }
 
   // Get user info by ID
-  const getUserById = (userId: string) => {
+  function getUserById(userId: string) {
     if (userId === currentUser?.id) return currentUser;
     return availableUsers.find((user) => user.id === userId);
-  };
+  }
 
   const messageGroups = useMemo(() => {
     const groups: {
@@ -84,7 +78,6 @@ function ConversationChat(props: ConversationChatProps) {
       messages: typeof conversation.messages;
     }[] = [];
 
-    // Create a unique set to avoid duplicates
     const uniqueMessages = conversation.messages.filter(
       (message, index, array) =>
         array.findIndex((m) => m.id === message.id) === index,
@@ -94,10 +87,8 @@ function ConversationChat(props: ConversationChatProps) {
       const lastGroup = groups[groups.length - 1];
 
       if (lastGroup && lastGroup.authorId === message.authorId) {
-        // Same author, add to existing group
         lastGroup.messages.push(message);
       } else {
-        // New author or first message, create new group
         groups.push({
           authorId: message.authorId,
           messages: [message],
@@ -118,81 +109,84 @@ function ConversationChat(props: ConversationChatProps) {
 
   return (
     <div className={`flex flex-col h-full ${className || ""}`}>
-      {/* Messages area - Discord style */}
-      <ScrollArea className="flex-1 h-0" ref={scrollAreaRef}>
-        {messageGroups.length === 0 ? (
-          /* Empty conversation state */
-          <div className="h-full flex items-center justify-center p-8">
-            <div className="text-center space-y-2">
-              <p className="text-muted-foreground">
-                This is the beginning of your conversation
-              </p>
-              <p className="text-sm text-muted-foreground">
-                Send a message to get started!
-              </p>
+      {/* Messages Area */}
+      <div className="flex-1 overflow-hidden">
+        <ScrollArea ref={scrollAreaRef} className="h-full w-full">
+          <div className="p-4 space-y-4">
+            {/* Welcome Message */}
+            <div className="text-center py-8">
+              <div className="text-2xl font-semibold mb-2">
+                Welcome to the conversation!
+              </div>
+              <div className="text-muted-foreground">
+                This is the beginning of your conversation in{" "}
+                <strong>{conversation.name || "this channel"}</strong>.
+              </div>
             </div>
-          </div>
-        ) : (
-          <div className="p-4 space-y-1">
+
+            <Separator />
+
+            {/* Message Groups */}
             {messageGroups.map((group, groupIndex) => {
               const author = getUserById(group.authorId);
               const isCurrentUser = group.authorId === currentUser.id;
 
               return (
-                <div
-                  key={`group-${group.authorId}-${groupIndex}`}
-                  className="space-y-0.5"
-                >
-                  {group.messages.map((message, messageIndex) => {
-                    // Check if this is the last message from current user and we're sending
-                    const isLastUserMessage =
-                      isCurrentUser &&
-                      groupIndex === messageGroups.length - 1 &&
-                      messageIndex === group.messages.length - 1;
-                    const showSending = isSending && isLastUserMessage;
+                <div key={groupIndex} className="space-y-1">
+                  {/* Author Header (only shown once per group) */}
+                  <div className="flex items-center gap-3 px-1">
+                    <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-sm font-medium">
+                      {author?.name?.charAt(0).toUpperCase() || "?"}
+                    </div>
+                    <div className="font-medium">
+                      {author?.name || "Unknown User"}
+                      {isCurrentUser && (
+                        <span className="ml-2 text-xs text-muted-foreground">
+                          (you)
+                        </span>
+                      )}
+                    </div>
+                    <div className="text-xs text-muted-foreground">
+                      {group.messages[0]?.createdAt
+                        ? new Date(group.messages[0].createdAt).toLocaleString()
+                        : "Unknown time"}
+                    </div>
+                  </div>
 
-                    return (
+                  {/* Messages in Group */}
+                  <div className="space-y-1 ml-11">
+                    {group.messages.map((message) => (
                       <MessageBubble
-                        key={`${message.id}-${messageIndex}`}
+                        key={message.id}
                         message={message}
-                        author={author}
                         isCurrentUser={isCurrentUser}
-                        showAvatar={messageIndex === 0} // Only show avatar for first message in group
-                        isSending={showSending}
+                        showAvatar={false} // Already shown in group header
                       />
-                    );
-                  })}
-
-                  {/* Add some spacing between different authors */}
-                  {groupIndex < messageGroups.length - 1 && (
-                    <div className="h-2" />
-                  )}
+                    ))}
+                  </div>
                 </div>
               );
             })}
 
-            {/* Scroll anchor */}
-            <div ref={messagesEndRef} />
+            {/* Empty state */}
+            {messageGroups.length === 0 && (
+              <div className="text-center py-8 text-muted-foreground">
+                No messages yet. Start the conversation!
+              </div>
+            )}
           </div>
-        )}
-      </ScrollArea>
+        </ScrollArea>
+      </div>
 
-      {/* Separator */}
       <Separator />
 
-      {/* Error message */}
-      {error && (
-        <div className="px-4 py-2 bg-destructive/10 border-t border-destructive/20">
-          <p className="text-sm text-destructive">{error.message}</p>
-        </div>
-      )}
-
-      {/* Message input - Fixed at bottom */}
-      <div className="flex-shrink-0">
+      {/* Message Input */}
+      <div className="p-4">
         <MessageInput
           onSendMessage={handleSendMessage}
-          isSending={isSending}
-          placeholder={`Message ${conversation.name || "this conversation"}...`}
+          disabled={sendMessageMutation.isPending}
+          isSending={sendMessageMutation.isPending}
+          placeholder={`Message ${conversation.name || "conversation"}...`}
         />
       </div>
     </div>
