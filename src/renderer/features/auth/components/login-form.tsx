@@ -45,6 +45,8 @@ function LoginForm(props: LoginFormProps) {
   const handleSubmit = async (data: LoginFormData) => {
     try {
       await login(data);
+      // Aguardar context update antes de navegar
+      await new Promise((resolve) => setTimeout(resolve, 0));
       router.navigate({ to: "/user" });
     } catch (error) {
       form.setError("root", {

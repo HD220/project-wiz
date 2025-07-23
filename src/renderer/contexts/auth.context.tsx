@@ -33,12 +33,12 @@ function AuthProvider({ children }: AuthProviderProps) {
 
   useEffect(() => {
     async function loadSession() {
-      try {
-        // Check if window.api is available (Electron preload timing)
-        if (!window.api?.auth) {
-          return;
-        }
+      if (!window.api?.auth) {
+        setIsLoading(false);
+        return;
+      }
 
+      try {
         const response = await window.api.auth.getActiveSession();
 
         if (response.success && response.data?.user) {
