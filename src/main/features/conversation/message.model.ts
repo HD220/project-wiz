@@ -17,10 +17,10 @@ export const messagesTable = sqliteTable(
       .notNull()
       .references(() => usersTable.id, { onDelete: "cascade" }),
     content: text("content").notNull(),
-    createdAt: integer("created_at", { mode: "timestamp" })
+    createdAt: integer("created_at", { mode: "timestamp_ms" })
       .notNull()
       .default(sql`CURRENT_TIMESTAMP`),
-    updatedAt: integer("updated_at", { mode: "timestamp" })
+    updatedAt: integer("updated_at", { mode: "timestamp_ms" })
       .notNull()
       .default(sql`CURRENT_TIMESTAMP`),
   },
@@ -53,10 +53,10 @@ export const llmMessagesTable = sqliteTable(
       .notNull(),
     toolCalls: text("tool_calls"), // JSON string
     metadata: text("metadata"), // JSON string
-    createdAt: integer("created_at", { mode: "timestamp" })
+    createdAt: integer("created_at", { mode: "timestamp_ms" })
       .notNull()
       .default(sql`CURRENT_TIMESTAMP`),
-    updatedAt: integer("updated_at", { mode: "timestamp" })
+    updatedAt: integer("updated_at", { mode: "timestamp_ms" })
       .notNull()
       .default(sql`CURRENT_TIMESTAMP`),
   },

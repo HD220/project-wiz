@@ -48,7 +48,7 @@ export const agentMemoriesTable = sqliteTable(
     // Scoring and retrieval
     importanceScore: real("importance_score").notNull().default(0.5), // 0.0 to 1.0
     accessCount: integer("access_count").notNull().default(0),
-    lastAccessedAt: integer("last_accessed_at", { mode: "timestamp" }),
+    lastAccessedAt: integer("last_accessed_at", { mode: "timestamp_ms" }),
 
     // Context and metadata
     keywords: text("keywords"), // JSON array of keywords for search
@@ -58,12 +58,12 @@ export const agentMemoriesTable = sqliteTable(
     isArchived: integer("is_archived", { mode: "boolean" })
       .notNull()
       .default(false),
-    archivedAt: integer("archived_at", { mode: "timestamp" }),
+    archivedAt: integer("archived_at", { mode: "timestamp_ms" }),
 
-    createdAt: integer("created_at", { mode: "timestamp" })
+    createdAt: integer("created_at", { mode: "timestamp_ms" })
       .notNull()
       .default(sql`(strftime('%s', 'now'))`),
-    updatedAt: integer("updated_at", { mode: "timestamp" })
+    updatedAt: integer("updated_at", { mode: "timestamp_ms" })
       .notNull()
       .default(sql`(strftime('%s', 'now'))`),
   },
@@ -124,7 +124,7 @@ export const memoryRelationsTable = sqliteTable(
       .references(() => agentMemoriesTable.id, { onDelete: "cascade" }),
     relationType: text("relation_type").notNull(), // "relates_to", "caused_by", "contradicts", etc.
     strength: real("strength").notNull().default(0.5), // 0.0 to 1.0
-    createdAt: integer("created_at", { mode: "timestamp" })
+    createdAt: integer("created_at", { mode: "timestamp_ms" })
       .notNull()
       .default(sql`(strftime('%s', 'now'))`),
   },

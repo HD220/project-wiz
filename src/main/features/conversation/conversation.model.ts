@@ -14,10 +14,10 @@ export const conversationsTable = sqliteTable(
     name: text("name"),
     description: text("description"),
     type: text("type").$type<ConversationType>().notNull().default("dm"),
-    createdAt: integer("created_at", { mode: "timestamp" })
+    createdAt: integer("created_at", { mode: "timestamp_ms" })
       .notNull()
       .default(sql`CURRENT_TIMESTAMP`),
-    updatedAt: integer("updated_at", { mode: "timestamp" })
+    updatedAt: integer("updated_at", { mode: "timestamp_ms" })
       .notNull()
       .default(sql`CURRENT_TIMESTAMP`),
   },
@@ -40,10 +40,10 @@ export const conversationParticipantsTable = sqliteTable(
     participantId: text("participant_id")
       .notNull()
       .references(() => usersTable.id, { onDelete: "cascade" }),
-    createdAt: integer("created_at", { mode: "timestamp" })
+    createdAt: integer("created_at", { mode: "timestamp_ms" })
       .notNull()
       .default(sql`CURRENT_TIMESTAMP`),
-    updatedAt: integer("updated_at", { mode: "timestamp" })
+    updatedAt: integer("updated_at", { mode: "timestamp_ms" })
       .notNull()
       .default(sql`CURRENT_TIMESTAMP`),
   },

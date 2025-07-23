@@ -1,4 +1,4 @@
-import { eq, asc } from "drizzle-orm";
+import { eq, asc, sql } from "drizzle-orm";
 
 import { getDatabase } from "@/main/database/connection";
 import {
@@ -66,11 +66,26 @@ export class MessageService {
   ): Promise<SelectMessage[]> {
     const db = getDatabase();
 
-    return await db
+    const result = await db
       .select()
       .from(messagesTable)
       .where(eq(messagesTable.conversationId, conversationId))
       .orderBy(asc(messagesTable.createdAt));
+
+    // console.log(result);
+
+    // const parsed = result.map((row) => ({
+    //   id: row.id,
+    //   conversationId: row.conversationId,
+    //   authorId: row.authorId,
+    //   content: row.content,
+    //   createdAt: new Date(row.createdAt as unknown as number),
+    //   updatedAt: new Date(row.updatedAt as unknown as number),
+    // }));
+
+    // console.log("Parsed messages:", parsed);
+
+    return result;
   }
 
   static async getMessageWithLlmData(messageId: string) {

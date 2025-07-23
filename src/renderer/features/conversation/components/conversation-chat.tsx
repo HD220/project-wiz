@@ -1,3 +1,4 @@
+/* eslint-disable max-lines-per-function */
 import { useLoaderData, useRouter } from "@tanstack/react-router";
 import { useMutation } from "@tanstack/react-query";
 import { useEffect, useRef, useMemo } from "react";
@@ -97,7 +98,7 @@ function ConversationChat(props: ConversationChatProps) {
     });
 
     return groups;
-  }, [conversation.messages]);
+  }, [conversation]);
 
   if (!currentUser) {
     return (
@@ -113,18 +114,21 @@ function ConversationChat(props: ConversationChatProps) {
       <div className="flex-1 overflow-hidden">
         <ScrollArea ref={scrollAreaRef} className="h-full w-full">
           <div className="p-4 space-y-4">
-            {/* Welcome Message */}
-            <div className="text-center py-8">
-              <div className="text-2xl font-semibold mb-2">
-                Welcome to the conversation!
-              </div>
-              <div className="text-muted-foreground">
-                This is the beginning of your conversation in{" "}
-                <strong>{conversation.name || "this channel"}</strong>.
-              </div>
-            </div>
-
-            <Separator />
+            {/* Welcome Message - only show when no messages */}
+            {messageGroups.length === 0 && (
+              <>
+                <div className="text-center py-8">
+                  <div className="text-2xl font-semibold mb-2">
+                    Welcome to the conversation!
+                  </div>
+                  <div className="text-muted-foreground">
+                    This is the beginning of your direct message with{" "}
+                    <strong>{conversation.name || "this conversation"}</strong>.
+                  </div>
+                </div>
+                <Separator />
+              </>
+            )}
 
             {/* Message Groups */}
             {messageGroups.map((group, groupIndex) => {
@@ -154,7 +158,7 @@ function ConversationChat(props: ConversationChatProps) {
                   </div>
 
                   {/* Messages in Group */}
-                  <div className="space-y-1 ml-11">
+                  <div className="space-y-1">
                     {group.messages.map((message) => (
                       <MessageBubble
                         key={message.id}

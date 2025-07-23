@@ -15,10 +15,10 @@ export const userPreferencesTable = sqliteTable(
       .notNull()
       .references(() => usersTable.id, { onDelete: "cascade" }),
     theme: text("theme").$type<Theme>().notNull().default("system"),
-    createdAt: integer("created_at", { mode: "timestamp" })
+    createdAt: integer("created_at", { mode: "timestamp_ms" })
       .notNull()
       .default(sql`CURRENT_TIMESTAMP`),
-    updatedAt: integer("updated_at", { mode: "timestamp" })
+    updatedAt: integer("updated_at", { mode: "timestamp_ms" })
       .notNull()
       .default(sql`CURRENT_TIMESTAMP`),
   },

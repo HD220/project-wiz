@@ -28,10 +28,10 @@ export const agentsTable = sqliteTable(
     systemPrompt: text("system_prompt").notNull(),
     status: text("status").$type<AgentStatus>().notNull().default("inactive"),
     modelConfig: text("model_config").notNull(), // JSON string
-    createdAt: integer("created_at", { mode: "timestamp" })
+    createdAt: integer("created_at", { mode: "timestamp_ms" })
       .notNull()
       .default(sql`(strftime('%s', 'now'))`),
-    updatedAt: integer("updated_at", { mode: "timestamp" })
+    updatedAt: integer("updated_at", { mode: "timestamp_ms" })
       .notNull()
       .default(sql`(strftime('%s', 'now'))`),
   },

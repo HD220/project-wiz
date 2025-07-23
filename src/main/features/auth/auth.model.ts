@@ -14,10 +14,10 @@ export const accountsTable = sqliteTable(
       .references(() => usersTable.id, { onDelete: "cascade" }),
     username: text("username").notNull().unique(),
     passwordHash: text("password_hash").notNull(),
-    createdAt: integer("created_at", { mode: "timestamp" })
+    createdAt: integer("created_at", { mode: "timestamp_ms" })
       .notNull()
       .default(sql`CURRENT_TIMESTAMP`),
-    updatedAt: integer("updated_at", { mode: "timestamp" })
+    updatedAt: integer("updated_at", { mode: "timestamp_ms" })
       .notNull()
       .default(sql`CURRENT_TIMESTAMP`),
   },

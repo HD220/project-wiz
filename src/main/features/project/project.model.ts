@@ -19,10 +19,10 @@ export const projectsTable = sqliteTable("projects", {
     .notNull()
     .references(() => usersTable.id, { onDelete: "cascade" }),
   status: text("status").$type<ProjectStatus>().notNull().default("active"),
-  createdAt: integer("created_at", { mode: "timestamp" })
+  createdAt: integer("created_at", { mode: "timestamp_ms" })
     .notNull()
     .default(sql`(strftime('%s', 'now'))`),
-  updatedAt: integer("updated_at", { mode: "timestamp" })
+  updatedAt: integer("updated_at", { mode: "timestamp_ms" })
     .notNull()
     .default(sql`(strftime('%s', 'now'))`),
 });

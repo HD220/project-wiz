@@ -13,10 +13,10 @@ export const userSessionsTable = sqliteTable(
       .notNull()
       .references(() => usersTable.id, { onDelete: "cascade" }),
     token: text("token").notNull().unique(),
-    createdAt: integer("created_at", { mode: "timestamp" })
+    createdAt: integer("created_at", { mode: "timestamp_ms" })
       .notNull()
       .default(sql`CURRENT_TIMESTAMP`),
-    expiresAt: integer("expires_at", { mode: "timestamp" }).notNull(),
+    expiresAt: integer("expires_at", { mode: "timestamp_ms" }).notNull(),
   },
   (table) => ({
     // Performance indexes

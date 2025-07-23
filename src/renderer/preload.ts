@@ -89,8 +89,14 @@ contextBridge.exposeInMainWorld("api", {
   messages: {
     send: (input: SendMessageInput): Promise<IpcResponse> =>
       ipcRenderer.invoke("messages:send", input),
-    getConversationMessages: (conversationId: string): Promise<IpcResponse> =>
-      ipcRenderer.invoke("messages:getConversationMessages", conversationId),
+    getConversationMessages: async (
+      conversationId: string,
+    ): Promise<IpcResponse> => {
+      return await ipcRenderer.invoke(
+        "messages:getConversationMessages",
+        conversationId,
+      );
+    },
   },
 
   // LLM Providers API

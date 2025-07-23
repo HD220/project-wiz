@@ -92,7 +92,7 @@ export const authSessionsTable = sqliteTable("auth_sessions", {
   id: text("id").primaryKey(),
   userId: text("user_id").notNull(),
   token: text("token").notNull(),
-  expiresAt: integer("expires_at", { mode: "timestamp" }).notNull(),
+  expiresAt: integer("expires_at", { mode: "timestamp_ms" }).notNull(),
 });
 
 export type SelectAuthSession = typeof authSessionsTable.$inferSelect;

@@ -28,10 +28,10 @@ export const llmProvidersTable = sqliteTable(
       .notNull()
       .default(false),
     isActive: integer("is_active", { mode: "boolean" }).notNull().default(true),
-    createdAt: integer("created_at", { mode: "timestamp" })
+    createdAt: integer("created_at", { mode: "timestamp_ms" })
       .notNull()
       .default(sql`(strftime('%s', 'now'))`),
-    updatedAt: integer("updated_at", { mode: "timestamp" })
+    updatedAt: integer("updated_at", { mode: "timestamp_ms" })
       .notNull()
       .default(sql`(strftime('%s', 'now'))`),
   },

@@ -308,7 +308,7 @@ export const projectsTable = sqliteTable("projects", {
     .$defaultFn(() => crypto.randomUUID()),
   name: text("name").notNull(),
   status: text("status").$type<ProjectStatus>().notNull().default("active"),
-  createdAt: integer("created_at", { mode: "timestamp" })
+  createdAt: integer("created_at", { mode: "timestamp_ms" })
     .notNull()
     .default(sql`CURRENT_TIMESTAMP`),
 });

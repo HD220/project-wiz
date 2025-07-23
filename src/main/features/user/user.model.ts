@@ -8,10 +8,10 @@ export const usersTable = sqliteTable("users", {
   name: text("name").notNull(),
   avatar: text("avatar"),
   type: text("type").$type<"human" | "agent">().notNull().default("human"),
-  createdAt: integer("created_at", { mode: "timestamp" })
+  createdAt: integer("created_at", { mode: "timestamp_ms" })
     .notNull()
     .default(sql`CURRENT_TIMESTAMP`),
-  updatedAt: integer("updated_at", { mode: "timestamp" })
+  updatedAt: integer("updated_at", { mode: "timestamp_ms" })
     .notNull()
     .default(sql`CURRENT_TIMESTAMP`),
 });

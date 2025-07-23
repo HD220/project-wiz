@@ -1,4 +1,5 @@
 import { createFileRoute, Outlet } from "@tanstack/react-router";
+import { MessageCircle } from "lucide-react";
 
 import { ContentHeader } from "@/renderer/features/app/components/content-header";
 import { ConversationChat } from "@/renderer/features/conversation/components/conversation-chat";
@@ -31,11 +32,15 @@ function DMLayout() {
   const description =
     otherParticipants.length === 1
       ? `Direct message with ${otherParticipants[0]?.name || "Unknown"}`
-      : `Group conversation with ${otherParticipants.length} participants`;
+      : `Group conversation with ${otherParticipants.length + 1} participants`;
 
   return (
     <div className="h-full w-full flex flex-col">
-      <ContentHeader title={displayName} description={description} />
+      <ContentHeader
+        title={displayName}
+        description={description}
+        icon={MessageCircle}
+      />
       <main className="flex-1 overflow-hidden">
         <ConversationChat conversationId={conversationId} />
       </main>
@@ -73,6 +78,7 @@ export const Route = createFileRoute("/_authenticated/user/dm/$conversationId")(
 
       const messagesResponse =
         await window.api.messages.getConversationMessages(conversationId);
+
       const messages = messagesResponse.success
         ? messagesResponse.data || []
         : [];

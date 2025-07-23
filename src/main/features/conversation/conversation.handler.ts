@@ -95,6 +95,9 @@ function setupMessageHandlers(): void {
 
         const messages =
           await MessageService.getConversationMessages(conversationId);
+
+        // console.log(messages);
+
         return { success: true, data: messages };
       } catch (error) {
         return {

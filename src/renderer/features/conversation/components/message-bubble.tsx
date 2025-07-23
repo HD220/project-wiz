@@ -64,24 +64,22 @@ function MessageBubble(props: MessageBubbleProps) {
   return (
     <div
       className={cn(
-        "flex gap-3 group hover:bg-muted/30 px-4 py-1.5 transition-colors",
+        "flex gap-3 group hover:bg-muted/30 transition-colors",
+        showAvatar ? "px-4 py-1.5" : "px-2 py-1",
         className,
       )}
     >
-      {/* Avatar - always on the left (Discord style) */}
-      <div className="flex-shrink-0 w-10">
-        {showAvatar ? (
+      {/* Avatar - only show when needed */}
+      {showAvatar && (
+        <div className="flex-shrink-0 w-10">
           <Avatar className="w-10 h-10">
             <AvatarImage src={authorAvatar || undefined} />
             <AvatarFallback className="text-sm font-medium">
               {authorInitials}
             </AvatarFallback>
           </Avatar>
-        ) : (
-          /* Spacer for grouped messages */
-          <div className="w-10 h-5" />
-        )}
-      </div>
+        </div>
+      )}
 
       {/* Message content */}
       <div className="flex-1 min-w-0">
