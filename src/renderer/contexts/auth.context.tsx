@@ -36,7 +36,7 @@ function AuthProvider({ children }: AuthProviderProps) {
       try {
         const response = await window.api.auth.getActiveSession();
 
-        if (response.success) {
+        if (response.success && response.data) {
           setUser(response.data.user);
         }
       } catch (error) {

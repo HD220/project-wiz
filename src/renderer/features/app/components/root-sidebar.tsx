@@ -1,6 +1,10 @@
 import { Link, useRouteContext } from "@tanstack/react-router";
 import { Plus, Settings } from "lucide-react";
 
+import type { SelectProject } from "@/main/features/project/project.types";
+
+import { CreateProjectDialog } from "@/renderer/features/project/components";
+
 import { CustomLink } from "@/renderer/components/custom-link";
 import { Avatar, AvatarFallback } from "@/renderer/components/ui/avatar";
 import { Button } from "@/renderer/components/ui/button";
@@ -13,28 +17,15 @@ import {
 } from "@/renderer/components/ui/tooltip";
 import { cn } from "@/renderer/lib/utils";
 
-interface Server {
-  id: string;
-  name: string;
-  icon?: string;
-  hasNotification?: boolean;
-}
-
 interface RootSidebarProps {
+  projects: SelectProject[];
   className?: string;
 }
 
 function RootSidebar(props: RootSidebarProps) {
-  const { className } = props;
+  const { projects, className } = props;
   const { auth } = useRouteContext({ from: "__root__" });
   const { user } = auth;
-
-  // Mock servers data - in real app this would come from a store
-  const servers: Server[] = [
-    { id: "server-1", name: "Project Alpha", hasNotification: true },
-    { id: "server-2", name: "Team Beta" },
-    { id: "server-3", name: "Community", hasNotification: false },
-  ];
 
   return (
     <div
@@ -84,57 +75,60 @@ function RootSidebar(props: RootSidebarProps) {
 
       <Separator className="w-10 -mt-px mb-2" />
 
-      {/* Servers List */}
+      {/* Projects List */}
       <div className="flex-1 flex flex-col items-center space-y-2 py-1 overflow-hidden">
-        {servers.map((server) => (
-          <TooltipProvider key={server.id}>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Link
-                  to="/project/$projectId"
-                  params={{ projectId: server.id }}
-                  className="relative"
-                  activeProps={{
-                    className: "active",
-                  }}
-                >
-                  {({ isActive }: { isActive: boolean }) => (
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className={cn(
-                        "w-10 h-10 p-0 rounded-full border transition-all duration-200 relative",
-                        isActive
-                          ? "bg-primary text-primary-foreground border-primary"
-                          : "bg-muted border-muted-foreground/30 hover:bg-primary hover:text-white hover:border-primary",
-                      )}
-                    >
-                      {server.icon ? (
-                        <img
-                          src={server.icon}
-                          alt={server.name}
-                          className="w-6 h-6 rounded-full"
-                        />
-                      ) : (
-                        <span className="font-semibold text-sm">
-                          {server.name.charAt(0).toUpperCase()}
-                        </span>
-                      )}
-
-                      {/* Notification indicator */}
-                      {server.hasNotification && !isActive && (
-                        <div className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-destructive rounded-full border border-background" />
-                      )}
-                    </Button>
-                  )}
-                </Link>
-              </TooltipTrigger>
-              <TooltipContent side="right">
-                <p>{server.name}</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-        ))}
+        {projects.length > 0 ? (
+          projects.map((project) => (
+            <TooltipProvider key={project.id}>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Link
+                    to="/project/$projectId"
+                    params={{ projectId: project.id }}
+                    className="relative"
+                    activeProps={{
+                      className: "active",
+                    }}
+                  >
+                    {({ isActive }: { isActive: boolean }) => (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className={cn(
+                          "w-10 h-10 p-0 rounded-full border transition-all duration-200 relative",
+                          isActive
+                            ? "bg-primary text-primary-foreground border-primary"
+                            : "bg-muted border-muted-foreground/30 hover:bg-primary hover:text-white hover:border-primary",
+                        )}
+                      >
+                        {project.avatarUrl ? (
+                          <img
+                            src={project.avatarUrl}
+                            alt={project.name}
+                            className="w-6 h-6 rounded-full"
+                          />
+                        ) : (
+                          <span className="font-semibold text-sm">
+                            {project.name.charAt(0).toUpperCase()}
+                          </span>
+                        )}
+                      </Button>
+                    )}
+                  </Link>
+                </TooltipTrigger>
+                <TooltipContent side="right">
+                  <p>{project.name}</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          ))
+        ) : (
+          <div className="flex-1 flex items-center justify-center px-2">
+            <div className="text-xs text-muted-foreground text-center">
+              Nenhum projeto
+            </div>
+          </div>
+        )}
       </div>
 
       <Separator className="w-10 mt-2 mb-2" />
@@ -144,13 +138,15 @@ function RootSidebar(props: RootSidebarProps) {
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="w-10 h-10 p-0 rounded-full border bg-muted border-muted-foreground/30 hover:bg-primary hover:text-white hover:border-primary transition-all duration-200"
-              >
-                <Plus className="w-5 h-5" />
-              </Button>
+              <CreateProjectDialog>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="w-10 h-10 p-0 rounded-full border bg-muted border-muted-foreground/30 hover:bg-primary hover:text-white hover:border-primary transition-all duration-200"
+                >
+                  <Plus className="w-5 h-5" />
+                </Button>
+              </CreateProjectDialog>
             </TooltipTrigger>
             <TooltipContent side="right">
               <p>Adicionar Projeto</p>

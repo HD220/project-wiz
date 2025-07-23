@@ -17,7 +17,6 @@
 - `.model.ts` - Schemas Drizzle (database)
 - `.schema.ts` - Schemas Zod (validação)
 - `.types.ts` - Definições de tipos
-- `.api.ts` - Camadas de API/IPC
 - `.hook.ts` - Custom hooks
 
 ### Prefixos para Hooks
@@ -39,7 +38,6 @@
 - auth.store.ts (store)
 - user.model.ts (Drizzle)
 - user.schema.ts (Zod)
-- auth.api.ts (API)
 - database.service.ts (service)
 - auth.handler.ts (handler)
 
@@ -169,21 +167,6 @@ export interface AuthState {
   isLoading: boolean;
   error: string | null;
 }
-
-// auth.api.ts - API Layer
-export const authApi = {
-  login: async (data: LoginFormData): Promise<User> => {
-    return window.electronAPI.auth.login(data);
-  },
-
-  logout: async (): Promise<void> => {
-    return window.electronAPI.auth.logout();
-  },
-
-  getCurrentUser: async (): Promise<User | null> => {
-    return window.electronAPI.auth.getCurrentUser();
-  },
-};
 
 // auth.store.ts - Store Zustand
 import { create } from "zustand";

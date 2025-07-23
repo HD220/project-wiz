@@ -29,23 +29,37 @@ interface Agent {
 interface ProjectSidebarProps {
   projectId: string;
   project: SelectProject;
+  conversations?: any[]; // TODO: Type this properly when conversation types are available
+  agents?: any[]; // TODO: Type this properly when agent types are available
   className?: string;
 }
 
 function ProjectSidebar(props: ProjectSidebarProps) {
-  const { projectId, project, className } = props;
+  const {
+    projectId,
+    project,
+    conversations = [],
+    agents = [],
+    className,
+  } = props;
 
-  const channels: Channel[] = [
-    { id: "general", name: "geral", type: "text", hasNotification: true },
-    { id: "development", name: "desenvolvimento", type: "text" },
-    { id: "design", name: "design", type: "text" },
-  ];
+  // Transform conversations into channels format
+  const channels: Channel[] = conversations.map((conv: any) => ({
+    id: conv.id,
+    name: conv.title || conv.name || "Conversa sem nome",
+    type: "text" as const,
+    hasNotification: false, // TODO: Add notification logic from conversation data
+  }));
 
-  const agents: Agent[] = [
-    { id: "agent-1", name: "CodeBot", status: "online" },
-    { id: "agent-2", name: "DesignBot", status: "offline" },
-    { id: "agent-3", name: "TestBot", status: "busy" },
-  ];
+  // Transform agents data to match the expected format
+  const projectAgents: Agent[] =
+    agents.length > 0
+      ? agents.map((agent: any) => ({
+          id: agent.id,
+          name: agent.name || "Unnamed Agent",
+          status: agent.status === "active" ? "online" : ("offline" as const),
+        }))
+      : [];
 
   return (
     <div className={cn("h-full flex flex-col bg-card", className)}>
@@ -75,33 +89,39 @@ function ProjectSidebar(props: ProjectSidebarProps) {
               </Button>
             </CollapsibleTrigger>
             <CollapsibleContent className="space-y-1">
-              {channels.map((channel) => (
-                <Link
-                  key={channel.id}
-                  to="/project/$projectId/channel/$channelId"
-                  params={{ projectId, channelId: channel.id }}
-                  className="block"
-                  activeProps={{
-                    className: "active",
-                  }}
-                >
-                  {({ isActive }: { isActive: boolean }) => (
-                    <Button
-                      variant="ghost"
-                      className={cn(
-                        "w-full justify-start px-2 h-8 text-sm font-normal text-muted-foreground hover:text-foreground hover:bg-accent",
-                        isActive && "bg-accent text-foreground",
-                      )}
-                    >
-                      <Hash className="w-4 h-4 mr-2 text-muted-foreground" />
-                      {channel.name}
-                      {channel.hasNotification && !isActive && (
-                        <div className="ml-auto w-2 h-2 bg-destructive rounded-full" />
-                      )}
-                    </Button>
-                  )}
-                </Link>
-              ))}
+              {channels.length > 0 ? (
+                channels.map((channel) => (
+                  <Link
+                    key={channel.id}
+                    to="/project/$projectId/channel/$channelId"
+                    params={{ projectId, channelId: channel.id }}
+                    className="block"
+                    activeProps={{
+                      className: "active",
+                    }}
+                  >
+                    {({ isActive }: { isActive: boolean }) => (
+                      <Button
+                        variant="ghost"
+                        className={cn(
+                          "w-full justify-start px-2 h-8 text-sm font-normal text-muted-foreground hover:text-foreground hover:bg-accent",
+                          isActive && "bg-accent text-foreground",
+                        )}
+                      >
+                        <Hash className="w-4 h-4 mr-2 text-muted-foreground" />
+                        {channel.name}
+                        {channel.hasNotification && !isActive && (
+                          <div className="ml-auto w-2 h-2 bg-destructive rounded-full" />
+                        )}
+                      </Button>
+                    )}
+                  </Link>
+                ))
+              ) : (
+                <div className="px-2 py-1 text-xs text-muted-foreground">
+                  Nenhuma conversa ainda
+                </div>
+              )}
             </CollapsibleContent>
           </Collapsible>
 
@@ -121,24 +141,30 @@ function ProjectSidebar(props: ProjectSidebarProps) {
               </Button>
             </CollapsibleTrigger>
             <CollapsibleContent className="space-y-1">
-              {agents.map((agent) => (
-                <Button
-                  key={agent.id}
-                  variant="ghost"
-                  className="w-full justify-start px-2 h-8 text-sm font-normal text-muted-foreground hover:text-foreground hover:bg-accent"
-                >
-                  <Bot className="w-4 h-4 mr-2 text-muted-foreground" />
-                  {agent.name}
-                  <div
-                    className={cn(
-                      "ml-auto w-2 h-2 rounded-full",
-                      agent.status === "online" && "bg-green-500",
-                      agent.status === "offline" && "bg-gray-400",
-                      agent.status === "busy" && "bg-yellow-500",
-                    )}
-                  />
-                </Button>
-              ))}
+              {projectAgents.length > 0 ? (
+                projectAgents.map((agent) => (
+                  <Button
+                    key={agent.id}
+                    variant="ghost"
+                    className="w-full justify-start px-2 h-8 text-sm font-normal text-muted-foreground hover:text-foreground hover:bg-accent"
+                  >
+                    <Bot className="w-4 h-4 mr-2 text-muted-foreground" />
+                    {agent.name}
+                    <div
+                      className={cn(
+                        "ml-auto w-2 h-2 rounded-full",
+                        agent.status === "online" && "bg-green-500",
+                        agent.status === "offline" && "bg-gray-400",
+                        agent.status === "busy" && "bg-yellow-500",
+                      )}
+                    />
+                  </Button>
+                ))
+              ) : (
+                <div className="px-2 py-1 text-xs text-muted-foreground">
+                  Nenhum agente configurado
+                </div>
+              )}
             </CollapsibleContent>
           </Collapsible>
 

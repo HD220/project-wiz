@@ -4,12 +4,17 @@ import { ProjectSidebar } from "@/renderer/features/app/components/project-sideb
 
 function ProjectLayout() {
   const { projectId } = Route.useParams();
-  const { project } = Route.useLoaderData();
+  const { project, conversations, agents } = Route.useLoaderData();
 
   return (
     <>
       <div className="w-60">
-        <ProjectSidebar projectId={projectId} project={project} />
+        <ProjectSidebar
+          projectId={projectId}
+          project={project}
+          conversations={conversations}
+          agents={agents}
+        />
       </div>
       <main className="flex-1">
         <Outlet />
@@ -20,45 +25,30 @@ function ProjectLayout() {
 
 export const Route = createFileRoute("/_authenticated/project/$projectId")({
   loader: async ({ params }) => {
-    // Check if it's a placeholder project ID (mock data)
-    const isPlaceholder = params.projectId.startsWith("server-");
+    // Load minimal data for sidebar
+    const [conversationsResponse, agentsResponse] = await Promise.all([
+      window.api.conversations.getUserConversations(),
+      window.api.agents.list(),
+    ]);
 
-    if (isPlaceholder) {
-      // Return mock project data for placeholder projects
-      const mockProject = {
-        id: params.projectId,
-        name:
-          params.projectId === "server-1"
-            ? "Project Alpha"
-            : params.projectId === "server-2"
-              ? "Team Beta"
-              : "Community",
-        description:
-          "This is a placeholder project for demonstration purposes.",
-        status: "active" as const,
-        localPath: "/placeholder/path",
-        ownerId: "placeholder-user",
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        avatarUrl: null,
-        gitUrl: null,
-        branch: null,
-      };
-
-      return { project: mockProject };
-    }
-
-    // For real project IDs, load from database
-    const response = await window.api.projects.findById(params.projectId);
-    if (!response.success) {
-      throw new Error(response.error || "Failed to load project");
-    }
-
-    if (!response.data) {
+    // Get basic project info just for sidebar
+    const projectResponse = await window.api.projects.findById(
+      params.projectId,
+    );
+    if (!projectResponse.success || !projectResponse.data) {
       throw new Error("Project not found");
     }
 
-    return { project: response.data };
+    const conversations = conversationsResponse.success
+      ? conversationsResponse.data
+      : [];
+    const agents = agentsResponse.success ? agentsResponse.data : [];
+
+    return {
+      project: projectResponse.data,
+      conversations: conversations || [],
+      agents: agents || [],
+    };
   },
   component: ProjectLayout,
 });

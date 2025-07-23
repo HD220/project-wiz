@@ -1,19 +1,58 @@
 import { eq } from "drizzle-orm";
 
 import { getDatabase } from "@/main/database/connection";
-import { CrudService } from "@/main/features/base/crud.service";
 import {
   projectsTable,
   type SelectProject,
   type InsertProject,
+  type UpdateProject,
 } from "@/main/features/project/project.model";
 
-export class ProjectService extends CrudService<
-  typeof projectsTable,
-  SelectProject,
-  InsertProject
-> {
-  protected table = projectsTable;
+export class ProjectService {
+  /**
+   * Create a new project
+   */
+  static async create(input: InsertProject): Promise<SelectProject> {
+    const db = getDatabase();
+
+    const [newProject] = await db
+      .insert(projectsTable)
+      .values(input)
+      .returning();
+
+    if (!newProject) {
+      throw new Error("Failed to create project");
+    }
+
+    return newProject;
+  }
+
+  /**
+   * Find project by ID
+   */
+  static async findById(id: string): Promise<SelectProject | null> {
+    const db = getDatabase();
+
+    const [project] = await db
+      .select()
+      .from(projectsTable)
+      .where(eq(projectsTable.id, id))
+      .limit(1);
+
+    return project || null;
+  }
+
+  /**
+   * List all active projects
+   */
+  static async listAll(): Promise<SelectProject[]> {
+    const db = getDatabase();
+
+    return await db
+      .select()
+      .from(projectsTable)
+      .where(eq(projectsTable.status, "active"));
+  }
 
   /**
    * List all active projects for a user
@@ -28,49 +67,50 @@ export class ProjectService extends CrudService<
   }
 
   /**
-   * Update project status
+   * Update project
    */
-  static async updateStatus(
-    id: string,
-    status: "active" | "archived",
-  ): Promise<SelectProject> {
-    const instance = new ProjectService();
-    return await instance.update(id, { status });
+  static async update(input: UpdateProject): Promise<SelectProject> {
+    const db = getDatabase();
+
+    const existingProject = await this.findById(input.id);
+    if (!existingProject) {
+      throw new Error("Project not found");
+    }
+
+    const [updatedProject] = await db
+      .update(projectsTable)
+      .set(input)
+      .where(eq(projectsTable.id, input.id))
+      .returning();
+
+    if (!updatedProject) {
+      throw new Error("Failed to update project");
+    }
+
+    return updatedProject;
   }
 
   /**
-   * Archive a project
+   * Archive project
    */
   static async archive(id: string): Promise<SelectProject> {
-    return await ProjectService.updateStatus(id, "archived");
-  }
+    const db = getDatabase();
 
-  // Static wrappers for backward compatibility
-  static async create(input: InsertProject): Promise<SelectProject> {
-    const instance = new ProjectService();
-    return await instance.create(input);
-  }
+    const existingProject = await this.findById(id);
+    if (!existingProject) {
+      throw new Error("Project not found");
+    }
 
-  static async findById(id: string): Promise<SelectProject | null> {
-    const instance = new ProjectService();
-    return await instance.findById(id);
-  }
+    const [archivedProject] = await db
+      .update(projectsTable)
+      .set({ status: "archived" })
+      .where(eq(projectsTable.id, id))
+      .returning();
 
-  static async update(
-    id: string,
-    input: Partial<InsertProject>,
-  ): Promise<SelectProject> {
-    const instance = new ProjectService();
-    return await instance.update(id, input);
-  }
+    if (!archivedProject) {
+      throw new Error("Failed to archive project");
+    }
 
-  static async delete(id: string): Promise<void> {
-    const instance = new ProjectService();
-    return await instance.delete(id);
-  }
-
-  static async listAll(): Promise<SelectProject[]> {
-    const instance = new ProjectService();
-    return await instance.findAll();
+    return archivedProject;
   }
 }

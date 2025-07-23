@@ -58,12 +58,6 @@ export const Route = createFileRoute("/_authenticated/user/agents/")({
   component: AgentsPage,
 });
 
-// ✅ CORRECT: Router context for accessing route data
-function AgentsPage() {
-  const { agents } = useRouteContext({ from: "/_authenticated/user/agents/" });
-  // No loading states needed - data is preloaded by route
-}
-
 // ✅ CORRECT: TanStack Query for mutations
 const createAgent = useMutation({
   mutationFn: (data: CreateAgentInput) => window.api.agents.create(data),
