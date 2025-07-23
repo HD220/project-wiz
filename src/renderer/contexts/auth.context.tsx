@@ -33,15 +33,10 @@ function AuthProvider({ children }: AuthProviderProps) {
 
   useEffect(() => {
     async function loadSession() {
-      if (!window.api?.auth) {
-        setIsLoading(false);
-        return;
-      }
-
       try {
         const response = await window.api.auth.getActiveSession();
 
-        if (response.success && response.data?.user) {
+        if (response.success) {
           setUser(response.data.user);
         }
       } catch (error) {
@@ -60,7 +55,7 @@ function AuthProvider({ children }: AuthProviderProps) {
     }
 
     const response = await window.api.auth.login(credentials);
-    if (response.success && response.data) {
+    if (response.success) {
       const authResult = response.data as AuthResult;
       setUser(authResult.user);
     } else {
@@ -70,9 +65,7 @@ function AuthProvider({ children }: AuthProviderProps) {
 
   const logout = async () => {
     try {
-      if (window.api?.auth) {
-        await window.api.auth.logout();
-      }
+      await window.api.auth.logout();
     } finally {
       setUser(null);
     }

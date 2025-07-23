@@ -21,6 +21,8 @@ const queryClient = new QueryClient({
 // Create router with undefined context (will be filled by InnerApp)
 const router = createRouter({
   routeTree,
+  defaultPreload: "intent",
+  scrollRestoration: true,
   context: {
     auth: undefined!,
   },

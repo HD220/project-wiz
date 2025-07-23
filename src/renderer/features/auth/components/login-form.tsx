@@ -1,5 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useRouter } from "@tanstack/react-router";
+import { useRouter, useSearch } from "@tanstack/react-router";
 import { Loader2 } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -33,6 +33,7 @@ function LoginForm(props: LoginFormProps) {
   const { className } = props;
   const router = useRouter();
   const { login } = useAuth();
+  const search = useSearch({ from: "/auth/login" });
 
   const form = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
@@ -47,7 +48,9 @@ function LoginForm(props: LoginFormProps) {
       await login(data);
       // Aguardar context update antes de navegar
       await new Promise((resolve) => setTimeout(resolve, 0));
-      router.navigate({ to: "/user" });
+      // Usar redirect param se disponível, senão ir para /user
+      const redirectTo = search.redirect || "/user";
+      router.navigate({ to: redirectTo });
     } catch (error) {
       form.setError("root", {
         message: error instanceof Error ? error.message : "Login failed",
