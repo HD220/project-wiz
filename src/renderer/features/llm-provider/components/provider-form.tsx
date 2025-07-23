@@ -43,10 +43,8 @@ function ProviderForm(props: ProviderFormProps) {
     onSuccess: (response) => {
       if (response.success) {
         toast.success("Provider created successfully");
-        // Only invalidate specific queries instead of all routes
-        router.invalidate({
-          filter: (route) => route.includes("/settings/llm-providers"),
-        });
+        // Invalidate all routes for simplicity
+        router.invalidate();
         onClose();
       } else {
         toast.error(response.error || "Failed to create provider");
@@ -70,10 +68,8 @@ function ProviderForm(props: ProviderFormProps) {
     onSuccess: (response) => {
       if (response.success) {
         toast.success("Provider updated successfully");
-        // Only invalidate specific queries instead of all routes
-        router.invalidate({
-          filter: (route) => route.includes("/settings/llm-providers"),
-        });
+        // Invalidate all routes for simplicity
+        router.invalidate();
         onClose();
       } else {
         toast.error(response.error || "Failed to update provider");
@@ -107,7 +103,6 @@ function ProviderForm(props: ProviderFormProps) {
   });
 
   const watchedType = form.watch("type");
-  const watchedApiKey = form.watch("apiKey");
 
   function onSubmit(data: ProviderFormData) {
     if (!user?.id) {

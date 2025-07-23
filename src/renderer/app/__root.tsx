@@ -2,13 +2,10 @@ import { createRootRouteWithContext, Outlet } from "@tanstack/react-router";
 
 import { Titlebar } from "@/renderer/components/layout/titlebar";
 import { Toaster } from "@/renderer/components/ui/sonner";
-import type { AuthContextValue } from "@/renderer/contexts/auth.context";
+import type { AuthContext } from "@/renderer/contexts/auth.context";
 
 interface RouterContext {
-  auth: AuthContextValue;
-  // Enhanced context from _authenticated route
-  user?: AuthContextValue["user"];
-  isAuthenticated?: boolean;
+  auth: AuthContext;
 }
 
 function RootComponent() {

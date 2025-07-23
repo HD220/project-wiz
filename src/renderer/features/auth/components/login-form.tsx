@@ -32,7 +32,7 @@ interface LoginFormProps {
 function LoginForm(props: LoginFormProps) {
   const { className } = props;
   const router = useRouter();
-  const { login, isLoading, error, clearError } = useAuth();
+  const { login } = useAuth();
 
   const form = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
@@ -42,18 +42,14 @@ function LoginForm(props: LoginFormProps) {
     },
   });
 
-  const handleSubmit = async (
-    data: LoginFormData,
-    event?: React.BaseSyntheticEvent,
-  ) => {
-    event?.preventDefault();
-    clearError();
-
+  const handleSubmit = async (data: LoginFormData) => {
     try {
       await login(data);
       router.navigate({ to: "/user" });
     } catch (error) {
-      // Error is handled by the store
+      form.setError("root", {
+        message: error instanceof Error ? error.message : "Login failed",
+      });
     }
   };
 
@@ -64,23 +60,7 @@ function LoginForm(props: LoginFormProps) {
       className={className}
     >
       <Form {...form}>
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            const data = form.getValues();
-            handleSubmit(data, e);
-          }}
-          className="space-y-4"
-        >
-          {error && (
-            <Alert
-              variant="destructive"
-              className="bg-red-900/50 border-red-800"
-            >
-              <AlertDescription>{error}</AlertDescription>
-            </Alert>
-          )}
-
+        <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
           <FormField
             control={form.control}
             name="username"
@@ -94,7 +74,7 @@ function LoginForm(props: LoginFormProps) {
                     {...field}
                     type="text"
                     placeholder="Enter your username"
-                    disabled={isLoading}
+                    disabled={form.formState.isSubmitting}
                   />
                 </FormControl>
                 <FormMessage />
@@ -115,7 +95,7 @@ function LoginForm(props: LoginFormProps) {
                     {...field}
                     type="password"
                     placeholder="Enter your password"
-                    disabled={isLoading}
+                    disabled={form.formState.isSubmitting}
                   />
                 </FormControl>
                 <FormMessage />
@@ -124,8 +104,12 @@ function LoginForm(props: LoginFormProps) {
           />
 
           <div className="flex flex-col space-y-3 pt-2">
-            <Button type="submit" disabled={isLoading} className="w-full">
-              {isLoading ? (
+            <Button
+              type="submit"
+              disabled={form.formState.isSubmitting}
+              className="w-full"
+            >
+              {form.formState.isSubmitting ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   Signing in...
@@ -134,6 +118,14 @@ function LoginForm(props: LoginFormProps) {
                 "Sign In"
               )}
             </Button>
+
+            {form.formState.errors.root && (
+              <Alert variant="destructive">
+                <AlertDescription>
+                  {form.formState.errors.root.message}
+                </AlertDescription>
+              </Alert>
+            )}
 
             <p className="text-sm text-muted-foreground text-center">
               Need an account?{" "}

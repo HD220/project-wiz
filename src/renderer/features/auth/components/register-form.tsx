@@ -48,7 +48,7 @@ type RegisterFormData = z.infer<typeof registerSchema>;
 
 function RegisterForm() {
   const router = useRouter();
-  const { isLoading, error, clearError, login } = useAuth();
+  const { login } = useAuth();
 
   const form = useForm<RegisterFormData>({
     resolver: zodResolver(registerSchema),
@@ -60,9 +60,7 @@ function RegisterForm() {
     },
   });
 
-  const onSubmit = async (data: RegisterFormData) => {
-    clearError();
-
+  const handleSubmit = async (data: RegisterFormData) => {
     try {
       const response = await window.api.auth.register({
         name: data.name,
@@ -70,38 +68,28 @@ function RegisterForm() {
         password: data.password,
       });
 
-      if (response.success) {
-        await login({
-          username: data.username,
-          password: data.password,
-        });
-        router.navigate({ to: "/user" });
-      } else {
-        const errorMessage = response.error || "Registration failed";
-        form.setError("root", { message: errorMessage });
+      if (!response.success) {
+        throw new Error(response.error || "Registration failed");
       }
+
+      // Logar automaticamente após registro
+      await login({
+        username: data.username,
+        password: data.password,
+      });
+
+      router.navigate({ to: "/user" });
     } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : "Registration failed";
-      form.setError("root", { message: errorMessage });
+      form.setError("root", {
+        message: error instanceof Error ? error.message : "Registration failed",
+      });
     }
   };
 
   return (
     <AuthCard title="Create an account" description="Join our community today!">
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-          {(error || form.formState.errors.root) && (
-            <Alert
-              variant="destructive"
-              className="bg-red-900/50 border-red-800"
-            >
-              <AlertDescription>
-                {error || form.formState.errors.root?.message}
-              </AlertDescription>
-            </Alert>
-          )}
-
+        <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
           <FormField
             control={form.control}
             name="name"
@@ -175,8 +163,12 @@ function RegisterForm() {
           />
 
           <div className="flex flex-col space-y-3 pt-2">
-            <Button type="submit" disabled={isLoading} className="w-full">
-              {isLoading ? (
+            <Button
+              type="submit"
+              disabled={form.formState.isSubmitting}
+              className="w-full"
+            >
+              {form.formState.isSubmitting ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   Creating account...
@@ -185,6 +177,14 @@ function RegisterForm() {
                 "Create Account"
               )}
             </Button>
+
+            {form.formState.errors.root && (
+              <Alert variant="destructive">
+                <AlertDescription>
+                  {form.formState.errors.root.message}
+                </AlertDescription>
+              </Alert>
+            )}
 
             <p className="text-sm text-muted-foreground text-center">
               Already have an account?{" "}

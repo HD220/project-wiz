@@ -10,7 +10,8 @@
       "Bash(ls:*)",
       "WebFetch(domain:tanstack.com)",
       "WebFetch(domain:stackoverflow.com)",
-      "WebFetch(domain:github.com)"
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:raw.githubusercontent.com)"
     ],
     "deny": []
   }

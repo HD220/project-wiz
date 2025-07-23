@@ -9,6 +9,7 @@ import type {
   AuthenticatedUser,
   AuthResult,
 } from "@/main/features/auth/auth.types";
+import { sessionManager } from "@/main/features/auth/session-manager";
 import { userSessionsTable } from "@/main/features/auth/user-sessions.model";
 import { userPreferencesTable } from "@/main/features/user/profile.model";
 import { usersTable } from "@/main/features/user/user.model";
@@ -79,6 +80,9 @@ export class AuthService {
       expiresAt,
     });
 
+    // Set session in memory for desktop app
+    sessionManager.setSession(user, sessionToken);
+
     return { user, sessionToken };
   }
 
@@ -123,6 +127,9 @@ export class AuthService {
       expiresAt,
     });
 
+    // Set session in memory for desktop app
+    sessionManager.setSession(result.user, sessionToken);
+
     return { user: result.user, sessionToken };
   }
 
@@ -164,17 +171,22 @@ export class AuthService {
   /**
    * Logout user by removing session token
    */
-  static async logout(sessionToken: string): Promise<void> {
-    if (!sessionToken) {
-      return; // Nothing to logout
-    }
-
+  static async logout(sessionToken?: string): Promise<void> {
     const db = getDatabase();
 
-    // Remove session from database
-    await db
-      .delete(userSessionsTable)
-      .where(eq(userSessionsTable.token, sessionToken));
+    // For desktop app, use internal session token if not provided
+    const tokenToLogout =
+      sessionToken || sessionManager.getCurrentSessionToken();
+
+    if (tokenToLogout) {
+      // Remove session from database
+      await db
+        .delete(userSessionsTable)
+        .where(eq(userSessionsTable.token, tokenToLogout));
+    }
+
+    // Clear internal session for desktop app
+    sessionManager.clearSession();
   }
 
   /**
@@ -268,5 +280,35 @@ export class AuthService {
     }
 
     return user;
+  }
+
+  // === ELECTRON DESKTOP METHODS (No session token required from frontend) ===
+
+  /**
+   * Get current user for desktop app (uses internal session)
+   */
+  static getCurrentUserDesktop(): AuthenticatedUser | null {
+    return sessionManager.getCurrentUser();
+  }
+
+  /**
+   * Check if user is logged in for desktop app (uses internal session)
+   */
+  static isLoggedInDesktop(): boolean {
+    return sessionManager.isLoggedIn();
+  }
+
+  /**
+   * Initialize session manager on app startup
+   */
+  static async initializeSession(): Promise<void> {
+    await sessionManager.loadSessionFromDatabase();
+  }
+
+  /**
+   * Logout for desktop app (clears internal session)
+   */
+  static async logoutDesktop(): Promise<void> {
+    await this.logout(); // Uses internal session token
   }
 }

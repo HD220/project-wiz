@@ -69,7 +69,6 @@ function EditProviderModal() {
   });
 
   const watchedType = form.watch("type");
-  const watchedApiKey = form.watch("apiKey");
 
   function onSubmit(data: ProviderFormData) {
     if (!provider || !auth.user?.id) return;
@@ -131,8 +130,14 @@ export const Route = createFileRoute(
   "/_authenticated/user/settings/llm-providers/$providerId/edit/",
 )({
   loader: async ({ context, params }) => {
-    const { user } = context; // Access user from enhanced context
-    const response = await window.api.llmProviders.list(user.id);
+    const { auth } = context;
+
+    // Defensive check - ensure user exists
+    if (!auth.user?.id) {
+      throw new Error("User not authenticated");
+    }
+
+    const response = await window.api.llmProviders.list(auth.user.id);
     if (!response.success) {
       throw new Error(response.error || "Failed to load providers");
     }

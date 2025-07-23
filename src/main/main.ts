@@ -7,6 +7,7 @@ import { setupAgentHandlers } from "@/main/features/agent/agent.handler";
 import { setupLlmProviderHandlers } from "@/main/features/agent/llm-provider/llm-provider.handler";
 import { setupAgentMemoryHandlers } from "@/main/features/agent/memory/memory.handler";
 import { setupAuthHandlers } from "@/main/features/auth/auth.handler";
+import { AuthService } from "@/main/features/auth/auth.service";
 import { setupConversationsHandlers } from "@/main/features/conversation/conversation.handler";
 import { setupProjectHandlers } from "@/main/features/project/project.handler";
 import { setupProfileHandlers } from "@/main/features/user/profile.handler";
@@ -75,8 +76,16 @@ function createMainWindow(): void {
 /**
  * App event handlers
  */
-app.whenReady().then(() => {
+app.whenReady().then(async () => {
   logger.info("App is ready, initializing IPC handlers and main window");
+
+  // Initialize session manager - load existing session from database
+  try {
+    await AuthService.initializeSession();
+    logger.info("Session manager initialized");
+  } catch (error) {
+    logger.error("Failed to initialize session manager:", error);
+  }
 
   // Setup IPC handlers
   setupAuthHandlers();

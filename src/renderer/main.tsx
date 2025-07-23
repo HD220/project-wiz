@@ -18,7 +18,13 @@ const queryClient = new QueryClient({
   },
 });
 
-const router = createRouter({ routeTree, context: undefined! });
+// Create router with undefined context (will be filled by InnerApp)
+const router = createRouter({
+  routeTree,
+  context: {
+    auth: undefined!,
+  },
+});
 
 // Declaração de módulo para o TanStack Router (mantida)
 declare module "@tanstack/react-router" {
@@ -35,7 +41,28 @@ const root = ReactDOMClient.createRoot(rootElement);
 
 function InnerApp() {
   const auth = useAuth();
+
+  // Aguarda o carregamento inicial da sessão
+  if (auth.isLoading) {
+    return (
+      <div className="h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
   return <RouterProvider router={router} context={{ auth }} />;
+}
+
+function App() {
+  return (
+    <AuthProvider>
+      <InnerApp />
+    </AuthProvider>
+  );
 }
 
 root.render(
@@ -46,9 +73,7 @@ root.render(
       enableSystem
       disableTransitionOnChange
     >
-      <AuthProvider>
-        <InnerApp />
-      </AuthProvider>
+      <App />
     </ThemeProvider>
   </QueryClientProvider>,
 );

@@ -34,20 +34,19 @@ contextBridge.exposeInMainWorld("api", {
   platform: process.platform,
   version: process.versions.electron,
 
-  // Authentication API
+  // Authentication API (Desktop - session managed by main process)
   auth: {
     register: (input: RegisterUserInput): Promise<IpcResponse> =>
       ipcRenderer.invoke("auth:register", input),
     login: (credentials: LoginCredentials): Promise<IpcResponse> =>
       ipcRenderer.invoke("auth:login", credentials),
-    getCurrentUser: (sessionToken: string): Promise<IpcResponse> =>
-      ipcRenderer.invoke("auth:getCurrentUser", sessionToken),
+    getCurrentUser: (): Promise<IpcResponse> =>
+      ipcRenderer.invoke("auth:getCurrentUser"),
     getActiveSession: (): Promise<IpcResponse> =>
       ipcRenderer.invoke("auth:getActiveSession"),
-    logout: (sessionToken: string): Promise<IpcResponse> =>
-      ipcRenderer.invoke("auth:logout", sessionToken),
-    isLoggedIn: (sessionToken: string): Promise<IpcResponse> =>
-      ipcRenderer.invoke("auth:isLoggedIn", sessionToken),
+    logout: (): Promise<IpcResponse> => ipcRenderer.invoke("auth:logout"),
+    isLoggedIn: (): Promise<IpcResponse> =>
+      ipcRenderer.invoke("auth:isLoggedIn"),
     getUserById: (userId: string): Promise<IpcResponse> =>
       ipcRenderer.invoke("auth:getUserById", userId),
   },

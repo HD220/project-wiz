@@ -137,14 +137,14 @@ const importAndBoundaryRules = {
       default: "allow",
       rules: [
         {
-          type: "main",
-          pattern: "src/main/**",
-          allow: ["type", "interface", "enum"],
+          from: "renderer",
+          disallow: ["main"],
+          message: "Renderer code cannot import main process code except types",
         },
         {
-          type: "renderer",
-          pattern: "src/renderer/**",
-          allow: ["type", "interface", "enum"],
+          from: "main",
+          disallow: ["renderer"],
+          message: "Main process code cannot import renderer code",
         },
       ],
     },
@@ -236,9 +236,9 @@ export default [
         },
       },
       "boundaries/elements": [
-        { type: "shared", pattern: "src/shared" },
-        { type: "main", pattern: "src/main" },
-        { type: "renderer", pattern: "src/renderer" },
+        { type: "shared", pattern: "src/shared/**" },
+        { type: "main", pattern: "src/main/**" },
+        { type: "renderer", pattern: "src/renderer/**" },
       ],
       react: {
         version: "detect",

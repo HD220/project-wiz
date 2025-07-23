@@ -49,12 +49,17 @@ function DMLayout() {
 export const Route = createFileRoute("/_authenticated/user/dm/$conversationId")(
   {
     loader: async ({ params, context }) => {
-      const { user } = context; // Access user from enhanced context
+      const { auth } = context;
       const { conversationId } = params;
+
+      // Defensive check - ensure user exists
+      if (!auth.user?.id) {
+        throw new Error("User not authenticated");
+      }
 
       // SIMPLE: Direct window.api calls
       const conversationsResponse =
-        await window.api.conversations.getUserConversations(user.id);
+        await window.api.conversations.getUserConversations(auth.user.id);
       if (!conversationsResponse.success) {
         throw new Error("Failed to load conversations");
       }
@@ -87,7 +92,7 @@ export const Route = createFileRoute("/_authenticated/user/dm/$conversationId")(
       return {
         conversation: { ...conversation, messages },
         availableUsers,
-        user,
+        user: auth.user,
       };
     },
     component: DMLayout,

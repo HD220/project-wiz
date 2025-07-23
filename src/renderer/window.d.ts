@@ -44,7 +44,7 @@ declare global {
       platform: string;
       version: string;
 
-      // Authentication API
+      // Authentication API (Desktop - session managed by main process)
       auth: {
         register: (
           input: RegisterUserInput,
@@ -52,12 +52,12 @@ declare global {
         login: (
           credentials: LoginCredentials,
         ) => Promise<IpcResponse<AuthResult>>;
-        getCurrentUser: (
-          sessionToken: string,
-        ) => Promise<IpcResponse<AuthenticatedUser>>;
-        getActiveSession: () => Promise<IpcResponse<AuthResult>>;
-        logout: (sessionToken: string) => Promise<IpcResponse<void>>;
-        isLoggedIn: (sessionToken: string) => Promise<IpcResponse<boolean>>;
+        getCurrentUser: () => Promise<IpcResponse<AuthenticatedUser>>;
+        getActiveSession: () => Promise<
+          IpcResponse<{ user: AuthenticatedUser }>
+        >;
+        logout: () => Promise<IpcResponse<void>>;
+        isLoggedIn: () => Promise<IpcResponse<{ isLoggedIn: boolean }>>;
         getUserById: (
           userId: string,
         ) => Promise<IpcResponse<AuthenticatedUser>>;

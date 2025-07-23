@@ -67,8 +67,13 @@ export const Route = createFileRoute(
   "/_authenticated/user/agents/edit/$agentId/",
 )({
   loader: async ({ params, context }) => {
-    const { user } = context; // Access user from enhanced context
+    const { auth } = context;
     const { agentId } = params;
+
+    // Defensive check - ensure user exists
+    if (!auth.user?.id) {
+      throw new Error("User not authenticated");
+    }
 
     // Load agent data
     const agentResponse = await window.api.agents.get(agentId);
@@ -77,7 +82,7 @@ export const Route = createFileRoute(
     }
 
     // Load providers data for the form
-    const providersResponse = await window.api.llmProviders.list(user!.id);
+    const providersResponse = await window.api.llmProviders.list(auth.user.id);
     if (!providersResponse.success) {
       throw new Error(providersResponse.error || "Failed to load providers");
     }
@@ -85,7 +90,6 @@ export const Route = createFileRoute(
     return {
       agent: agentResponse.data as SelectAgent,
       providers: providersResponse.data as LlmProvider[],
-      user,
     };
   },
   component: EditAgentPage,

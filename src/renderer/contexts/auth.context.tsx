@@ -1,23 +1,25 @@
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { createContext, useContext, useState, type ReactNode } from "react";
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  type ReactNode,
+} from "react";
 
 import type {
   AuthenticatedUser,
   AuthResult,
 } from "@/main/features/auth/auth.types";
 
-interface AuthContextValue {
-  user: AuthenticatedUser | null;
-  sessionToken: string | null;
+interface AuthContext {
   isAuthenticated: boolean;
-  isLoading: boolean;
-  error: string | null;
+  user: AuthenticatedUser | null;
   login: (credentials: { username: string; password: string }) => Promise<void>;
   logout: () => Promise<void>;
-  clearError: () => void;
+  isLoading: boolean;
 }
 
-const AuthContext = createContext<AuthContextValue | undefined>(undefined);
+const AuthContext = createContext<AuthContext | null>(null);
 
 interface AuthProviderProps {
   children: ReactNode;
@@ -25,96 +27,73 @@ interface AuthProviderProps {
 
 function AuthProvider({ children }: AuthProviderProps) {
   const [user, setUser] = useState<AuthenticatedUser | null>(null);
-  const [sessionToken, setSessionToken] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const queryClient = useQueryClient();
+  const [isLoading, setIsLoading] = useState(true);
 
-  // Use TanStack Query for session loading instead of useEffect
-  const { isLoading } = useQuery({
-    queryKey: ["auth", "activeSession"],
-    queryFn: async () => {
-      const response = await window.api.auth.getActiveSession();
-      if (response.success && response.data) {
-        const authResult = response.data as AuthResult;
-        setUser(authResult.user);
-        setSessionToken(authResult.sessionToken);
-        return authResult;
+  const isAuthenticated = !!user;
+
+  useEffect(() => {
+    async function loadSession() {
+      try {
+        // Check if window.api is available (Electron preload timing)
+        if (!window.api?.auth) {
+          return;
+        }
+
+        const response = await window.api.auth.getActiveSession();
+
+        if (response.success && response.data?.user) {
+          setUser(response.data.user);
+        }
+      } catch (error) {
+        console.warn("Failed to load active session:", error);
+      } finally {
+        setIsLoading(false);
       }
-      return null;
-    },
-    retry: false,
-    refetchOnWindowFocus: false,
-  });
+    }
 
-  function clearAuthState() {
-    setUser(null);
-    setSessionToken(null);
-    setError(null);
-    // Invalidate auth queries when clearing state
-    queryClient.invalidateQueries({ queryKey: ["auth"] });
-  }
-
-  function clearError() {
-    setError(null);
-  }
+    loadSession();
+  }, []);
 
   const login = async (credentials: { username: string; password: string }) => {
-    setError(null);
+    if (!window.api?.auth) {
+      throw new Error("Authentication API not available");
+    }
 
-    try {
-      const response = await window.api.auth.login(credentials);
-
-      if (response.success && response.data) {
-        const authResult = response.data as AuthResult;
-        setUser(authResult.user);
-        setSessionToken(authResult.sessionToken);
-
-        // Invalidate and refetch auth queries after successful login
-        await queryClient.invalidateQueries({ queryKey: ["auth"] });
-      } else {
-        const errorMessage = response.error || "Login failed";
-        setError(errorMessage);
-        throw new Error(errorMessage);
-      }
-    } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : "Login failed";
-      setError(errorMessage);
-      throw error;
+    const response = await window.api.auth.login(credentials);
+    if (response.success && response.data) {
+      const authResult = response.data as AuthResult;
+      setUser(authResult.user);
+    } else {
+      throw new Error(response.error || "Login failed");
     }
   };
 
   const logout = async () => {
     try {
-      if (sessionToken) {
-        await window.api.auth.logout(sessionToken);
+      if (window.api?.auth) {
+        await window.api.auth.logout();
       }
     } finally {
-      clearAuthState();
+      setUser(null);
     }
   };
 
-  const value: AuthContextValue = {
-    user,
-    sessionToken,
-    isAuthenticated: !!user && !!sessionToken,
-    isLoading,
-    error,
-    login,
-    logout,
-    clearError,
-  };
-
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+  return (
+    <AuthContext.Provider
+      value={{ isAuthenticated, user, login, logout, isLoading }}
+    >
+      {children}
+    </AuthContext.Provider>
+  );
 }
 
 function useAuth() {
   const context = useContext(AuthContext);
-  if (context === undefined) {
+  if (!context) {
     throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;
 }
 
 export { AuthProvider, useAuth };
-export type { AuthContextValue };
+export type { AuthContext };

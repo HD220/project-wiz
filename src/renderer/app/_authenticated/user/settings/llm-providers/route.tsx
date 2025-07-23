@@ -32,8 +32,14 @@ export const Route = createFileRoute(
   "/_authenticated/user/settings/llm-providers",
 )({
   loader: async ({ context }) => {
-    const { user } = context; // Access user from enhanced context
-    const response = await window.api.llmProviders.list(user.id);
+    const { auth } = context;
+
+    // Defensive check - ensure user exists
+    if (!auth.user?.id) {
+      throw new Error("User not authenticated");
+    }
+
+    const response = await window.api.llmProviders.list(auth.user.id);
     if (!response.success) {
       throw new Error(response.error || "Failed to load providers");
     }

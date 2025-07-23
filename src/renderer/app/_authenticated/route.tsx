@@ -14,25 +14,15 @@ function AuthenticatedLayout() {
 }
 
 export const Route = createFileRoute("/_authenticated")({
-  beforeLoad: async ({ context }) => {
-    const { isAuthenticated, isLoading, user } = context.auth;
-
-    // Wait for auth to finish loading
-    if (isLoading) {
-      // Let the component handle loading state
-      return;
+  beforeLoad: ({ context, location }) => {
+    if (!context.auth.isAuthenticated) {
+      throw redirect({
+        to: "/auth/login",
+        search: {
+          redirect: location.href,
+        },
+      });
     }
-
-    // If not authenticated, redirect to login
-    if (!isAuthenticated || !user) {
-      throw redirect({ to: "/auth/login" });
-    }
-
-    // Return enhanced context for child routes to ensure user is available
-    return {
-      user,
-      isAuthenticated: true,
-    };
   },
   component: AuthenticatedLayout,
 });
