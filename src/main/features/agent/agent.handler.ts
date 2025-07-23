@@ -6,7 +6,6 @@ import type {
   AgentStatus,
 } from "@/main/features/agent/agent.types";
 import { AuthService } from "@/main/features/auth/auth.service";
-import { withAuthUserId } from "@/main/middleware/auth.middleware";
 import type { IpcResponse } from "@/main/types";
 
 /**
@@ -16,9 +15,28 @@ function setupAgentCrudHandlers(): void {
   // Create agent
   ipcMain.handle(
     "agents:create",
-    withAuthUserId(async (_, userId, input: CreateAgentInput) => {
-      return await AgentService.create(input, userId);
-    }),
+    async (_, input: CreateAgentInput): Promise<IpcResponse> => {
+      try {
+        // Get session from main process for desktop authentication
+        const activeSession = await AuthService.getActiveSession();
+        if (!activeSession) {
+          throw new Error("User not authenticated");
+        }
+        const currentUser = activeSession.user;
+
+        const result = await AgentService.create(input, currentUser.id);
+        return {
+          success: true,
+          data: result,
+        };
+      } catch (error) {
+        return {
+          success: false,
+          error:
+            error instanceof Error ? error.message : "Failed to create agent",
+        };
+      }
+    },
   );
 
   // Update agent
@@ -30,6 +48,12 @@ function setupAgentCrudHandlers(): void {
       updates: Partial<CreateAgentInput>,
     ): Promise<IpcResponse> => {
       try {
+        // Get session from main process for desktop authentication
+        const activeSession = await AuthService.getActiveSession();
+        if (!activeSession) {
+          throw new Error("User not authenticated");
+        }
+
         const result = await AgentService.update(id, updates);
         return {
           success: true,
@@ -48,10 +72,27 @@ function setupAgentCrudHandlers(): void {
   // Delete agent
   ipcMain.handle(
     "agents:delete",
-    withAuthUserId(async (_, _userId, id: string) => {
-      await AgentService.delete(id);
-      return { message: "Agent deleted successfully" };
-    }),
+    async (_, id: string): Promise<IpcResponse> => {
+      try {
+        // Get session from main process for desktop authentication
+        const activeSession = await AuthService.getActiveSession();
+        if (!activeSession) {
+          throw new Error("User not authenticated");
+        }
+
+        await AgentService.delete(id);
+        return {
+          success: true,
+          data: { message: "Agent deleted successfully" },
+        };
+      } catch (error) {
+        return {
+          success: false,
+          error:
+            error instanceof Error ? error.message : "Failed to delete agent",
+        };
+      }
+    },
   );
 }
 
