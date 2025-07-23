@@ -64,18 +64,9 @@ export type SendMessageInput = Omit<
   "id" | "createdAt" | "updatedAt"
 >;
 
-// Agent chat service input types
-export interface SendAgentMessageInput {
-  agentId: string;
-  userId: string;
-  content: string;
-  useMemory?: boolean;
-}
-
 // Query filters
 export type ConversationFilters = {
   type?: ConversationType;
-  agentId?: string;
   participantId?: string;
   limit?: number;
   offset?: number;

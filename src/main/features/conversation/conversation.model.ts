@@ -1,10 +1,9 @@
 import { sql } from "drizzle-orm";
 import { sqliteTable, text, integer, index } from "drizzle-orm/sqlite-core";
 
-import { agentsTable } from "@/main/features/agent/agent.model";
 import { usersTable } from "@/main/features/user/user.model";
 
-export type ConversationType = "dm" | "agent_chat";
+export type ConversationType = "dm" | "channel";
 
 export const conversationsTable = sqliteTable(
   "conversations",
@@ -15,9 +14,6 @@ export const conversationsTable = sqliteTable(
     name: text("name"),
     description: text("description"),
     type: text("type").$type<ConversationType>().notNull().default("dm"),
-    agentId: text("agent_id").references(() => agentsTable.id, {
-      onDelete: "cascade",
-    }),
     createdAt: integer("created_at", { mode: "timestamp" })
       .notNull()
       .default(sql`CURRENT_TIMESTAMP`),
@@ -27,7 +23,6 @@ export const conversationsTable = sqliteTable(
   },
   (table) => ({
     // Performance indexes
-    agentIdIdx: index("conversations_agent_id_idx").on(table.agentId),
     typeIdx: index("conversations_type_idx").on(table.type),
     createdAtIdx: index("conversations_created_at_idx").on(table.createdAt),
   }),

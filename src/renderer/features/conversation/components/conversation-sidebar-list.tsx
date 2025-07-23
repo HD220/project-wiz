@@ -8,9 +8,14 @@ import { CreateConversationDialog } from "@/renderer/features/conversation/compo
 
 function ConversationSidebarList() {
   // PREFERRED: Use Router Context for data loaded in route
-  const { conversations, availableUsers, user } = useRouteContext({
+  const routeContext = useRouteContext({
     from: "/_authenticated/user",
   });
+
+  // Defensive protection against race conditions
+  const conversations = routeContext?.conversations || [];
+  const availableUsers = routeContext?.availableUsers || [];
+  const user = routeContext?.user;
 
   // SIMPLE: Local state for UI
   const [showCreateDialog, setShowCreateDialog] = useState(false);
@@ -86,9 +91,9 @@ function ConversationSidebarList() {
 
       {/* Conversations list - Discord style */}
       <div className="space-y-0.5">
-        {conversations.map((conversation) => {
+        {conversations.map((conversation: any) => {
           const otherParticipantIds = getOtherParticipants(conversation);
-          const otherParticipants = availableUsers.filter((user) =>
+          const otherParticipants = availableUsers.filter((user: any) =>
             otherParticipantIds.includes(user.id),
           );
 
@@ -121,6 +126,7 @@ function ConversationSidebarList() {
       {showCreateDialog && (
         <CreateConversationDialog
           availableUsers={availableUsers}
+          currentUser={user}
           onClose={handleCloseDialog}
           onConversationCreated={handleConversationCreated}
         />

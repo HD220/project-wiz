@@ -18,7 +18,7 @@ function DMLayout() {
   // Get conversation display info
   const otherParticipants = conversation.participants
     .filter((p) => p.participantId !== user?.id)
-    .map((p) => availableUsers.find((u) => u.id === p.participantId))
+    .map((p) => availableUsers.find((u: any) => u.id === p.participantId))
     .filter(Boolean);
 
   const displayName =
@@ -77,17 +77,11 @@ export const Route = createFileRoute("/_authenticated/user/dm/$conversationId")(
         ? messagesResponse.data || []
         : [];
 
-      const agentsResponse = await window.api.agents.list();
-      const agents = agentsResponse.success ? agentsResponse.data || [] : [];
-
-      const availableUsers = agents.map((agent) => ({
-        id: agent.id, // ✅ FIXED: was agent.userId
-        name: agent.name,
-        avatar: null, // Agent type doesn't have avatar field
-        type: "agent",
-        createdAt: new Date(agent.createdAt),
-        updatedAt: new Date(agent.updatedAt),
-      }));
+      const availableUsersResponse =
+        await window.api.users.listAvailableUsers();
+      const availableUsers = availableUsersResponse.success
+        ? availableUsersResponse.data || []
+        : [];
 
       return {
         conversation: { ...conversation, messages },

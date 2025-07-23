@@ -18,7 +18,7 @@ export type {
 export type { AuthenticatedUser } from "@/main/features/auth/auth.types";
 
 // Define ConversationType locally to avoid import issues
-export type ConversationType = "dm" | "agent_chat";
+export type ConversationType = "dm" | "channel";
 
 // ===========================
 // FRONTEND-SPECIFIC TYPES

@@ -110,7 +110,7 @@ function setupAgentQueryHandlers(): void {
       }
       const currentUser = activeSession.user;
 
-      const result = await AgentService.listByUserIdWithFilters(
+      const result = await AgentService.listByOwnerIdWithFilters(
         currentUser.id,
         filters,
       );

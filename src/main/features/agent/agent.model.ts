@@ -15,6 +15,9 @@ export const agentsTable = sqliteTable(
     userId: text("user_id")
       .notNull()
       .references(() => usersTable.id, { onDelete: "cascade" }),
+    ownerId: text("owner_id").references(() => usersTable.id, {
+      onDelete: "cascade",
+    }),
     providerId: text("provider_id")
       .notNull()
       .references(() => llmProvidersTable.id, { onDelete: "restrict" }),
@@ -35,6 +38,7 @@ export const agentsTable = sqliteTable(
   (table) => ({
     // Performance indexes for foreign keys
     userIdIdx: index("agents_user_id_idx").on(table.userId),
+    ownerIdIdx: index("agents_owner_id_idx").on(table.ownerId),
     providerIdIdx: index("agents_provider_id_idx").on(table.providerId),
     statusIdx: index("agents_status_idx").on(table.status),
   }),

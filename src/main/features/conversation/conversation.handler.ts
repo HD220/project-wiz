@@ -1,8 +1,6 @@
 import { ipcMain } from "electron";
 
 import { AuthService } from "@/main/features/auth/auth.service";
-import { AgentChatService } from "@/main/features/conversation/agent-chat.service";
-import type { SendAgentMessageInput } from "@/main/features/conversation/agent-chat.service";
 import { ConversationService } from "@/main/features/conversation/conversation.service";
 import type { CreateConversationInput } from "@/main/features/conversation/conversation.service";
 import { MessageService } from "@/main/features/conversation/message.service";
@@ -109,86 +107,7 @@ function setupMessageHandlers(): void {
   );
 }
 
-function setupAgentChatHandlers(): void {
-  ipcMain.handle(
-    "agent-chat:sendMessage",
-    async (_, input: SendAgentMessageInput): Promise<IpcResponse> => {
-      try {
-        // Get session from main process for desktop authentication
-        const activeSession = await AuthService.getActiveSession();
-        if (!activeSession) {
-          throw new Error("User not authenticated");
-        }
-
-        const response = await AgentChatService.sendMessageToAgent(input);
-        return { success: true, data: response };
-      } catch (error) {
-        return {
-          success: false,
-          error:
-            error instanceof Error
-              ? error.message
-              : "Failed to send message to agent",
-        };
-      }
-    },
-  );
-
-  ipcMain.handle(
-    "agent-chat:getConversation",
-    async (_, agentId: string): Promise<IpcResponse> => {
-      try {
-        // Get session from main process for desktop authentication
-        const activeSession = await AuthService.getActiveSession();
-        if (!activeSession) {
-          throw new Error("User not authenticated");
-        }
-        const currentUser = activeSession.user;
-
-        const data = await AgentChatService.getAgentConversation(
-          currentUser.id,
-          agentId,
-        );
-        return { success: true, data };
-      } catch (error) {
-        return {
-          success: false,
-          error:
-            error instanceof Error
-              ? error.message
-              : "Failed to get agent conversation",
-        };
-      }
-    },
-  );
-
-  ipcMain.handle(
-    "agent-chat:sendMessageWithMemory",
-    async (_, input: SendAgentMessageInput): Promise<IpcResponse> => {
-      try {
-        // Get session from main process for desktop authentication
-        const activeSession = await AuthService.getActiveSession();
-        if (!activeSession) {
-          throw new Error("User not authenticated");
-        }
-
-        const response = await AgentChatService.sendMessageToAgent(input);
-        return { success: true, data: response };
-      } catch (error) {
-        return {
-          success: false,
-          error:
-            error instanceof Error
-              ? error.message
-              : "Failed to send message to agent with memory",
-        };
-      }
-    },
-  );
-}
-
 export function setupConversationsHandlers(): void {
   setupConversationHandlers();
   setupMessageHandlers();
-  setupAgentChatHandlers();
 }

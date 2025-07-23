@@ -11,6 +11,7 @@ import { AuthService } from "@/main/features/auth/auth.service";
 import { setupConversationsHandlers } from "@/main/features/conversation/conversation.handler";
 import { setupProjectHandlers } from "@/main/features/project/project.handler";
 import { setupProfileHandlers } from "@/main/features/user/profile.handler";
+import { setupUserHandlers } from "@/main/features/user/user.handler";
 import { getLogger } from "@/main/utils/logger";
 
 declare const MAIN_WINDOW_VITE_DEV_SERVER_URL: string | undefined;
@@ -90,6 +91,9 @@ app.whenReady().then(async () => {
   // Setup IPC handlers
   setupAuthHandlers();
   logger.info("Authentication IPC handlers registered");
+
+  setupUserHandlers();
+  logger.info("User IPC handlers registered");
 
   setupProfileHandlers();
   logger.info("Profile IPC handlers registered");

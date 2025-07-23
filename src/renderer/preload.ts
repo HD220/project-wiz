@@ -17,7 +17,6 @@ import type {
   LoginCredentials,
   RegisterUserInput,
 } from "@/main/features/auth/auth.types";
-import type { SendAgentMessageInput } from "@/main/features/conversation/conversation.types";
 import type { CreateConversationInput } from "@/main/features/conversation/conversation.types";
 import type { SendMessageInput } from "@/main/features/conversation/conversation.types";
 import type {
@@ -57,6 +56,12 @@ contextBridge.exposeInMainWorld("api", {
       ipcRenderer.invoke("profile:getTheme", userId),
     updateTheme: (userId: string, theme: Theme): Promise<IpcResponse> =>
       ipcRenderer.invoke("profile:updateTheme", userId, theme),
+  },
+
+  // Users API
+  users: {
+    listAvailableUsers: (): Promise<IpcResponse> =>
+      ipcRenderer.invoke("user:listAvailableUsers"),
   },
 
   // Projects API
@@ -126,27 +131,6 @@ contextBridge.exposeInMainWorld("api", {
     ): Promise<IpcResponse> => ipcRenderer.invoke("agents:update", id, updates),
     delete: (id: string): Promise<IpcResponse> =>
       ipcRenderer.invoke("agents:delete", id),
-  },
-
-  // Agent Chat API
-  agentChat: {
-    sendMessage: (input: SendAgentMessageInput): Promise<IpcResponse> =>
-      ipcRenderer.invoke("agent-chat:sendMessage", input),
-    getConversation: (userId: string, agentId: string): Promise<IpcResponse> =>
-      ipcRenderer.invoke("agent-chat:getConversation", userId, agentId),
-    sendMessageWithMemory: (
-      input: SendAgentMessageInput,
-    ): Promise<IpcResponse> =>
-      ipcRenderer.invoke("agent-chat:sendMessageWithMemory", input),
-    getConversationWithMemory: (
-      userId: string,
-      agentId: string,
-    ): Promise<IpcResponse> =>
-      ipcRenderer.invoke(
-        "agent-chat:getConversationWithMemory",
-        userId,
-        agentId,
-      ),
   },
 
   // Agent Memory API

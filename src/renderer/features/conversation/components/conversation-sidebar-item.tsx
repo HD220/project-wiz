@@ -9,9 +9,9 @@ import {
   AvatarImage,
 } from "@/renderer/components/ui/avatar";
 import { Badge } from "@/renderer/components/ui/badge";
+import type { UserSummary } from "@/main/features/user/user.service";
 import type {
   ConversationWithLastMessage,
-  AuthenticatedUser,
   SelectMessage,
 } from "@/renderer/features/conversation/types";
 import { cn } from "@/renderer/lib/utils";
@@ -19,7 +19,7 @@ import { cn } from "@/renderer/lib/utils";
 interface ConversationSidebarItemProps {
   conversation: ConversationWithLastMessage;
   lastMessage?: SelectMessage | null;
-  otherParticipants: AuthenticatedUser[];
+  otherParticipants: UserSummary[];
   className?: string;
   unreadCount?: number;
 }

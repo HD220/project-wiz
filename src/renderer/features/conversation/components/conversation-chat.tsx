@@ -69,7 +69,7 @@ function ConversationChat(props: ConversationChatProps) {
   // Get user info by ID
   function getUserById(userId: string) {
     if (userId === currentUser?.id) return currentUser;
-    return availableUsers.find((user) => user.id === userId);
+    return availableUsers.find((user: any) => user.id === userId);
   }
 
   const messageGroups = useMemo(() => {

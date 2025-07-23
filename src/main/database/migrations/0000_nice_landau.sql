@@ -1,6 +1,7 @@
 CREATE TABLE `agents` (
 	`id` text PRIMARY KEY NOT NULL,
 	`user_id` text NOT NULL,
+	`owner_id` text,
 	`provider_id` text NOT NULL,
 	`name` text NOT NULL,
 	`role` text NOT NULL,
@@ -12,10 +13,12 @@ CREATE TABLE `agents` (
 	`created_at` integer DEFAULT (strftime('%s', 'now')) NOT NULL,
 	`updated_at` integer DEFAULT (strftime('%s', 'now')) NOT NULL,
 	FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON UPDATE no action ON DELETE cascade,
+	FOREIGN KEY (`owner_id`) REFERENCES `users`(`id`) ON UPDATE no action ON DELETE cascade,
 	FOREIGN KEY (`provider_id`) REFERENCES `llm_providers`(`id`) ON UPDATE no action ON DELETE restrict
 );
 --> statement-breakpoint
 CREATE INDEX `agents_user_id_idx` ON `agents` (`user_id`);--> statement-breakpoint
+CREATE INDEX `agents_owner_id_idx` ON `agents` (`owner_id`);--> statement-breakpoint
 CREATE INDEX `agents_provider_id_idx` ON `agents` (`provider_id`);--> statement-breakpoint
 CREATE INDEX `agents_status_idx` ON `agents` (`status`);--> statement-breakpoint
 CREATE TABLE `llm_providers` (
@@ -135,13 +138,10 @@ CREATE TABLE `conversations` (
 	`name` text,
 	`description` text,
 	`type` text DEFAULT 'dm' NOT NULL,
-	`agent_id` text,
 	`created_at` integer DEFAULT CURRENT_TIMESTAMP NOT NULL,
-	`updated_at` integer DEFAULT CURRENT_TIMESTAMP NOT NULL,
-	FOREIGN KEY (`agent_id`) REFERENCES `agents`(`id`) ON UPDATE no action ON DELETE cascade
+	`updated_at` integer DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
 --> statement-breakpoint
-CREATE INDEX `conversations_agent_id_idx` ON `conversations` (`agent_id`);--> statement-breakpoint
 CREATE INDEX `conversations_type_idx` ON `conversations` (`type`);--> statement-breakpoint
 CREATE INDEX `conversations_created_at_idx` ON `conversations` (`created_at`);--> statement-breakpoint
 CREATE TABLE `llm_messages` (

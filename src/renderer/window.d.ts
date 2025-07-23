@@ -25,10 +25,10 @@ import type {
   SelectProject,
 } from "@/main/features/project/project.types";
 import type { Theme } from "@/main/features/user/user.types";
+import type { UserSummary } from "@/main/features/user/user.service";
 import type { IpcResponse } from "@/main/types";
 
 import type {
-  SendAgentMessageInput,
   CreateConversationInput,
   SendMessageInput,
   SelectConversation,
@@ -70,6 +70,11 @@ declare global {
           userId: string,
           theme: Theme,
         ) => Promise<IpcResponse<{ theme: Theme }>>;
+      };
+
+      // Users API
+      users: {
+        listAvailableUsers: () => Promise<IpcResponse<UserSummary[]>>;
       };
 
       // Projects API
@@ -137,22 +142,6 @@ declare global {
           updates: Partial<CreateAgentInput>,
         ) => Promise<IpcResponse<SelectAgent>>;
         delete: (id: string) => Promise<IpcResponse<{ message: string }>>;
-      };
-
-      // Agent Chat API
-      agentChat: {
-        sendMessage: (input: SendAgentMessageInput) => Promise<IpcResponse>;
-        getConversation: (
-          userId: string,
-          agentId: string,
-        ) => Promise<IpcResponse>;
-        sendMessageWithMemory: (
-          input: SendAgentMessageInput,
-        ) => Promise<IpcResponse>;
-        getConversationWithMemory: (
-          userId: string,
-          agentId: string,
-        ) => Promise<IpcResponse>;
       };
 
       // Agent Memory API

@@ -21,16 +21,18 @@ import {
 } from "@/renderer/components/ui/dialog";
 import { Input } from "@/renderer/components/ui/input";
 import { ScrollArea } from "@/renderer/components/ui/scroll-area";
+import type { UserSummary } from "@/main/features/user/user.service";
 import type { AuthenticatedUser } from "@/renderer/features/conversation/types";
 
 interface CreateConversationDialogProps {
-  availableUsers: AuthenticatedUser[];
+  availableUsers: UserSummary[];
+  currentUser: AuthenticatedUser;
   onClose: () => void;
   onConversationCreated: (conversationId: string) => void;
 }
 
 function CreateConversationDialog(props: CreateConversationDialogProps) {
-  const { availableUsers, onClose, onConversationCreated } = props;
+  const { availableUsers, currentUser, onClose, onConversationCreated } = props;
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedUserIds, setSelectedUserIds] = useState<string[]>([]);
   const router = useRouter();
@@ -67,8 +69,11 @@ function CreateConversationDialog(props: CreateConversationDialogProps) {
   function handleCreateConversation() {
     if (selectedUserIds.length === 0) return;
 
+    // Include current user as participant
+    const participantIds = [currentUser.id, ...selectedUserIds];
+
     createConversationMutation.mutate({
-      participantIds: selectedUserIds,
+      participantIds,
       name: null,
       type: "dm" as const,
     });
@@ -84,7 +89,7 @@ function CreateConversationDialog(props: CreateConversationDialogProps) {
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Plus className="h-5 w-5" />
-            Start Chat with Agent
+            Start New Conversation
           </DialogTitle>
         </DialogHeader>
 
@@ -93,7 +98,7 @@ function CreateConversationDialog(props: CreateConversationDialogProps) {
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Search agents..."
+              placeholder="Search users..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-10"
@@ -133,7 +138,7 @@ function CreateConversationDialog(props: CreateConversationDialogProps) {
             <div className="space-y-1 p-2">
               {filteredUsers.length === 0 ? (
                 <div className="text-center text-muted-foreground py-8">
-                  <p className="text-sm">No agents found</p>
+                  <p className="text-sm">No users found</p>
                 </div>
               ) : (
                 filteredUsers.map((user) => {
@@ -217,7 +222,7 @@ function CreateConversationDialog(props: CreateConversationDialogProps) {
             >
               {createConversationMutation.isPending
                 ? "Creating..."
-                : `Start Chat${selectedUserIds.length > 1 ? " with " + selectedUserIds.length + " Agents" : ""} (${selectedUserIds.length})`}
+                : `Create Conversation (${selectedUserIds.length})`}
             </Button>
           </div>
         </div>

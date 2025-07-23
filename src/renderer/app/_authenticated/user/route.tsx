@@ -24,10 +24,10 @@ export const Route = createFileRoute("/_authenticated/user")({
       throw new Error("User not authenticated");
     }
 
-    // PREFERRED: Load conversations and agents in parallel using route loader
-    const [conversationsResponse, agentsResponse] = await Promise.all([
+    // Load conversations and available users in parallel using route loader
+    const [conversationsResponse, availableUsersResponse] = await Promise.all([
       window.api.conversations.getUserConversations(),
-      window.api.agents.list(),
+      window.api.users.listAvailableUsers(),
     ]);
 
     if (!conversationsResponse.success) {
@@ -36,22 +36,14 @@ export const Route = createFileRoute("/_authenticated/user")({
       );
     }
 
-    if (!agentsResponse.success) {
-      throw new Error(agentsResponse.error || "Failed to load agents");
+    if (!availableUsersResponse.success) {
+      throw new Error(
+        availableUsersResponse.error || "Failed to load available users",
+      );
     }
 
     const conversations = conversationsResponse.data || [];
-    const agents = agentsResponse.data || [];
-
-    // CORRECTED: Map agent.id (not agent.userId) as the user ID
-    const availableUsers = agents.map((agent) => ({
-      id: agent.id, // ✅ FIXED: was agent.userId
-      name: agent.name,
-      avatar: null, // Agent type doesn't have avatar field
-      type: "agent" as const,
-      createdAt: new Date(agent.createdAt),
-      updatedAt: new Date(agent.updatedAt),
-    }));
+    const availableUsers = availableUsersResponse.data || [];
 
     return {
       conversations,

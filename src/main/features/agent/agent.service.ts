@@ -11,6 +11,7 @@ import type {
 } from "@/main/features/agent/agent.types";
 import { createAgentSchema } from "@/main/features/agent/agent.types";
 import { llmProvidersTable } from "@/main/features/agent/llm-provider/llm-provider.model";
+import { usersTable } from "@/main/features/user/user.model";
 import { CrudService } from "@/main/features/base/crud.service";
 
 export class AgentService extends CrudService<
@@ -60,6 +61,20 @@ export class AgentService extends CrudService<
         );
       }
 
+      // Create user for the agent first
+      const [agentUser] = await tx
+        .insert(usersTable)
+        .values({
+          name: validatedInput.name,
+          avatar: validatedInput.avatar || "",
+          type: "agent",
+        })
+        .returning();
+
+      if (!agentUser) {
+        throw new Error("Failed to create user for agent");
+      }
+
       // Generate system prompt
       const systemPrompt = AgentService.generateSystemPrompt(
         validatedInput.role,
@@ -68,34 +83,40 @@ export class AgentService extends CrudService<
       );
 
       // Create the agent record
-      const agentData = {
-        name: validatedInput.name,
-        role: validatedInput.role,
-        backstory: validatedInput.backstory,
-        goal: validatedInput.goal,
-        systemPrompt,
-        providerId: validatedInput.providerId,
-        modelConfig: JSON.stringify(validatedInput.modelConfig),
-        userId: ownerId,
-        status: "inactive" as AgentStatus,
-        avatar: validatedInput.avatar || "",
-      };
+      const [agent] = await tx
+        .insert(agentsTable)
+        .values({
+          userId: agentUser.id, // Link to the user we just created
+          ownerId: ownerId, // Who created this agent
+          name: validatedInput.name,
+          role: validatedInput.role,
+          backstory: validatedInput.backstory,
+          goal: validatedInput.goal,
+          systemPrompt,
+          providerId: validatedInput.providerId,
+          modelConfig: JSON.stringify(validatedInput.modelConfig),
+          status: "inactive" as AgentStatus,
+        })
+        .returning();
 
-      const instance = new AgentService();
-      return await instance.create(agentData);
+      if (!agent) {
+        throw new Error("Failed to create agent");
+      }
+
+      return agent;
     });
   }
 
   /**
-   * List agents by user ID with status filter
+   * List agents by owner ID with status filter
    */
-  static async listByUserId(
-    userId: string,
+  static async listByOwnerId(
+    ownerId: string,
     status?: AgentStatus,
   ): Promise<SelectAgent[]> {
     const db = getDatabase();
 
-    const conditions = [eq(agentsTable.userId, userId)];
+    const conditions = [eq(agentsTable.ownerId, ownerId)];
     if (status) {
       conditions.push(eq(agentsTable.status, status));
     }
@@ -108,15 +129,15 @@ export class AgentService extends CrudService<
   }
 
   /**
-   * List agents by user ID with complete filtering support
+   * List agents by owner ID with complete filtering support
    */
-  static async listByUserIdWithFilters(
-    userId: string,
+  static async listByOwnerIdWithFilters(
+    ownerId: string,
     filters?: { status?: AgentStatus; search?: string },
   ): Promise<SelectAgent[]> {
     const db = getDatabase();
 
-    const conditions = [eq(agentsTable.userId, userId)];
+    const conditions = [eq(agentsTable.ownerId, ownerId)];
 
     // Add status filter
     if (filters?.status) {

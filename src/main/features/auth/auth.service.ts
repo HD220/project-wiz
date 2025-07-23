@@ -92,7 +92,7 @@ export class AuthService {
   static async login(credentials: LoginCredentials): Promise<AuthResult> {
     const db = getDatabase();
 
-    // Buscar por username na tabela accounts
+    // Buscar por username na tabela accounts (apenas humans podem fazer login)
     const [result] = await db
       .select({
         account: accountsTable,
@@ -100,7 +100,12 @@ export class AuthService {
       })
       .from(accountsTable)
       .innerJoin(usersTable, eq(accountsTable.userId, usersTable.id))
-      .where(eq(accountsTable.username, credentials.username))
+      .where(
+        and(
+          eq(accountsTable.username, credentials.username),
+          eq(usersTable.type, "human"),
+        ),
+      )
       .limit(1);
 
     if (!result) {
@@ -145,7 +150,7 @@ export class AuthService {
 
     const db = getDatabase();
 
-    // Find valid session with user
+    // Find valid session with user (apenas humans têm sessões)
     const [result] = await db
       .select({
         user: usersTable,
@@ -157,6 +162,7 @@ export class AuthService {
         and(
           eq(userSessionsTable.token, sessionToken),
           gt(userSessionsTable.expiresAt, new Date()),
+          eq(usersTable.type, "human"),
         ),
       )
       .limit(1);
@@ -241,7 +247,7 @@ export class AuthService {
   } | null> {
     const db = getDatabase();
 
-    // Find the most recent valid session
+    // Find the most recent valid session (apenas humans)
     const [result] = await db
       .select({
         user: usersTable,
@@ -249,7 +255,12 @@ export class AuthService {
       })
       .from(userSessionsTable)
       .innerJoin(usersTable, eq(userSessionsTable.userId, usersTable.id))
-      .where(gt(userSessionsTable.expiresAt, new Date()))
+      .where(
+        and(
+          gt(userSessionsTable.expiresAt, new Date()),
+          eq(usersTable.type, "human"),
+        ),
+      )
       .orderBy(desc(userSessionsTable.createdAt))
       .limit(1);
 
@@ -264,7 +275,7 @@ export class AuthService {
   }
 
   /**
-   * Get user by ID (utility method)
+   * Get human user by ID (utility method)
    */
   static async getUserById(userId: string): Promise<AuthenticatedUser | null> {
     const db = getDatabase();
@@ -272,7 +283,7 @@ export class AuthService {
     const [user] = await db
       .select()
       .from(usersTable)
-      .where(eq(usersTable.id, userId))
+      .where(and(eq(usersTable.id, userId), eq(usersTable.type, "human")))
       .limit(1);
 
     if (!user) {
