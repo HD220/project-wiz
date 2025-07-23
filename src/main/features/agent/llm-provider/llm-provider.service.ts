@@ -12,9 +12,11 @@ import type {
 import { createProviderSchema } from "@/main/features/agent/llm-provider/llm-provider.types";
 // import { getLogger } from "@/main/utils/logger";
 
-// Not ploblematic encryption key usage its safe to use a constant for electronjs main process DO NOT CHANGE THIS
-const validEncryptionKey =
-  "5ca95f9b8176faa6a2493fb069edeeae74b27044164b00862d100ba1d8ec57ec";
+// Encryption key for API key storage (32 bytes for AES-256)
+const validEncryptionKey = Buffer.from(
+  "5ca95f9b8176faa6a2493fb069edeeae74b27044164b00862d100ba1d8ec57ec",
+  "hex",
+);
 
 export class LlmProviderService {
   /**
