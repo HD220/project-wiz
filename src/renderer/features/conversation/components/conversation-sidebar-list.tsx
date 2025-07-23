@@ -1,5 +1,4 @@
 import { useRouteContext } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
 import { Plus, MessageCircle } from "lucide-react";
 import { useState } from "react";
 
@@ -8,46 +7,16 @@ import { ConversationSidebarItem } from "@/renderer/features/conversation/compon
 import { CreateConversationDialog } from "@/renderer/features/conversation/components/create-conversation-dialog";
 
 function ConversationSidebarList() {
-  const { auth } = useRouteContext({ from: "__root__" });
-  const { user } = auth;
+  // PREFERRED: Use Router Context for data loaded in route
+  const { conversations, availableUsers, user } = useRouteContext({
+    from: "/_authenticated/user",
+  });
 
   // SIMPLE: Local state for UI
   const [showCreateDialog, setShowCreateDialog] = useState(false);
 
-  // SIMPLE: Direct queries with window.api
-  const conversationsQuery = useQuery({
-    queryKey: ["conversations", user?.id],
-    queryFn: async () => {
-      if (!user?.id) return [];
-      const response = await window.api.conversations.getUserConversations(
-        user.id,
-      );
-      return response.success ? response.data || [] : [];
-    },
-    enabled: !!user?.id,
-  });
-
-  const availableUsersQuery = useQuery({
-    queryKey: ["availableUsers"],
-    queryFn: async () => {
-      const response = await window.api.agents.list();
-      if (!response.success) return [];
-      const agents = response.data || [];
-      return agents.map((agent) => ({
-        id: agent.userId,
-        name: agent.name,
-        avatar: null,
-        type: "agent" as const,
-        createdAt: new Date(agent.createdAt),
-        updatedAt: new Date(agent.updatedAt),
-      }));
-    },
-  });
-
-  const conversations = conversationsQuery.data || [];
-  const availableUsers = availableUsersQuery.data || [];
-  const isLoading =
-    conversationsQuery.isLoading || availableUsersQuery.isLoading;
+  // No loading states needed - data is preloaded by route
+  const isLoading = false;
 
   // Helper functions
   function getOtherParticipants(conversation: any) {

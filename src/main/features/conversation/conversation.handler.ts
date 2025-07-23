@@ -14,7 +14,7 @@ function setupConversationHandlers(): void {
     "conversations:create",
     async (_, input: CreateConversationInput): Promise<IpcResponse> => {
       try {
-        // Authentication check for desktop app
+        // Get session from main process for desktop authentication
         const activeSession = await AuthService.getActiveSession();
         if (!activeSession) {
           throw new Error("User not authenticated");
@@ -36,10 +36,18 @@ function setupConversationHandlers(): void {
 
   ipcMain.handle(
     "conversations:getUserConversations",
-    async (_, userId: string): Promise<IpcResponse> => {
+    async (): Promise<IpcResponse> => {
       try {
-        const conversations =
-          await ConversationService.getUserConversations(userId);
+        // Get session from main process for desktop authentication
+        const activeSession = await AuthService.getActiveSession();
+        if (!activeSession) {
+          throw new Error("User not authenticated");
+        }
+        const currentUser = activeSession.user;
+
+        const conversations = await ConversationService.getUserConversations(
+          currentUser.id,
+        );
         return { success: true, data: conversations };
       } catch (error) {
         return {
@@ -59,7 +67,7 @@ function setupMessageHandlers(): void {
     "messages:send",
     async (_, input: SendMessageInput): Promise<IpcResponse> => {
       try {
-        // Authentication check for desktop app
+        // Get session from main process for desktop authentication
         const activeSession = await AuthService.getActiveSession();
         if (!activeSession) {
           throw new Error("User not authenticated");
@@ -81,6 +89,12 @@ function setupMessageHandlers(): void {
     "messages:getConversationMessages",
     async (_, conversationId: string): Promise<IpcResponse> => {
       try {
+        // Get session from main process for desktop authentication
+        const activeSession = await AuthService.getActiveSession();
+        if (!activeSession) {
+          throw new Error("User not authenticated");
+        }
+
         const messages =
           await MessageService.getConversationMessages(conversationId);
         return { success: true, data: messages };
@@ -100,6 +114,12 @@ function setupAgentChatHandlers(): void {
     "agent-chat:sendMessage",
     async (_, input: SendAgentMessageInput): Promise<IpcResponse> => {
       try {
+        // Get session from main process for desktop authentication
+        const activeSession = await AuthService.getActiveSession();
+        if (!activeSession) {
+          throw new Error("User not authenticated");
+        }
+
         const response = await AgentChatService.sendMessageToAgent(input);
         return { success: true, data: response };
       } catch (error) {
@@ -116,10 +136,17 @@ function setupAgentChatHandlers(): void {
 
   ipcMain.handle(
     "agent-chat:getConversation",
-    async (_, userId: string, agentId: string): Promise<IpcResponse> => {
+    async (_, agentId: string): Promise<IpcResponse> => {
       try {
+        // Get session from main process for desktop authentication
+        const activeSession = await AuthService.getActiveSession();
+        if (!activeSession) {
+          throw new Error("User not authenticated");
+        }
+        const currentUser = activeSession.user;
+
         const data = await AgentChatService.getAgentConversation(
-          userId,
+          currentUser.id,
           agentId,
         );
         return { success: true, data };
@@ -139,6 +166,12 @@ function setupAgentChatHandlers(): void {
     "agent-chat:sendMessageWithMemory",
     async (_, input: SendAgentMessageInput): Promise<IpcResponse> => {
       try {
+        // Get session from main process for desktop authentication
+        const activeSession = await AuthService.getActiveSession();
+        if (!activeSession) {
+          throw new Error("User not authenticated");
+        }
+
         const response = await AgentChatService.sendMessageToAgent(input);
         return { success: true, data: response };
       } catch (error) {

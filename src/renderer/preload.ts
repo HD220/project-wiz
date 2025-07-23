@@ -76,8 +76,8 @@ contextBridge.exposeInMainWorld("api", {
   conversations: {
     create: (input: CreateConversationInput): Promise<IpcResponse> =>
       ipcRenderer.invoke("conversations:create", input),
-    getUserConversations: (userId: string): Promise<IpcResponse> =>
-      ipcRenderer.invoke("conversations:getUserConversations", userId),
+    getUserConversations: (): Promise<IpcResponse> =>
+      ipcRenderer.invoke("conversations:getUserConversations"),
   },
 
   // Messages API

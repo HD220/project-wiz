@@ -86,9 +86,9 @@ declare global {
         create: (
           input: CreateConversationInput,
         ) => Promise<IpcResponse<ConversationWithParticipants>>;
-        getUserConversations: (
-          userId: string,
-        ) => Promise<IpcResponse<ConversationWithLastMessage[]>>;
+        getUserConversations: () => Promise<
+          IpcResponse<ConversationWithLastMessage[]>
+        >;
       };
 
       // Messages API

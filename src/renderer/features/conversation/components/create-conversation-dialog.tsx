@@ -35,14 +35,14 @@ function CreateConversationDialog(props: CreateConversationDialogProps) {
   const [selectedUserIds, setSelectedUserIds] = useState<string[]>([]);
   const router = useRouter();
 
-  // SIMPLE: Direct mutation with window.api
+  // PREFERRED: Direct mutation with window.api and route invalidation
   const createConversationMutation = useMutation({
     mutationFn: (data: CreateConversationInput) =>
       window.api.conversations.create(data),
     onSuccess: (response) => {
       if (response.success && response.data) {
         toast.success("Conversation created successfully");
-        router.invalidate(); // Refresh conversation data
+        router.invalidate(); // Refresh route data (conversations + agents)
         onConversationCreated(response.data.id);
       }
     },

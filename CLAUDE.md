@@ -36,7 +36,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **NEVER use `localStorage`** - This is an Electron desktop app, use main process
 - **NEVER use `window.api` directly in component bodies** - Only in queries/beforeLoad/loader
 - **NEVER edit migration SQL files directly** - Only modify `*.model.ts` files and regenerate
-- **NEVER use Zustand for simple UI state** - Use local React state or URL params
+- **NEVER use Zustand for simple global UI state** - Use local React state or URL params
 
 #### **✅ ALLOWED window.api usage:**
 
@@ -111,7 +111,7 @@ const useAgent = () => {
 
 ```bash
 # Development
-npm run dev                    # Start Electron development server
+npm run dev                    # Start Electron development server - NOT EXECUTE
 
 # Build and Package
 npm run build                  # Build for production (includes i18n compile)
@@ -120,8 +120,7 @@ npm run package               # Package as executable
 # Database
 npm run db:generate           # Generate database migrations
 npm run db:migrate            # Run database migrations
-npm run db:studio             # Open Drizzle Studio (database GUI)
-npm run db:setup-demo         # Setup demo user for testing
+npm run db:studio             # Open Drizzle Studio (database GUI) - NOT EXECUTE
 
 # Testing
 npm run test                  # Run all tests
@@ -213,11 +212,9 @@ features/[feature-name]/
 └── components/            # Feature-specific components
 ```
 
-**Note**: API classes (`.api.ts`) and UI stores (`.store.ts`) are eliminated in favor of direct `window.api` usage and route-based data loading.
-
 ### React Component Standards
 
-- **Function declarations only** (not arrow functions or React.FC)
+- **Function declarations only** (not arrow functions file or React.FC)
 - **No React import** required (global React)
 - **shadcn/ui components** for all UI elements
 - **Props destructuring** in function parameters
@@ -453,7 +450,6 @@ export class AuthService {
 - Uses SQLite with WAL mode for better concurrency
 - Database file: `project-wiz.db` in project root
 - Migrations run automatically on `npm install` (postinstall script)
-- Use `npm run db:studio` for visual database inspection
 - **Always use database foreign keys and indexes** for relationships
 
 ### Type Organization Best Practices
@@ -501,11 +497,8 @@ export class AuthService {
 
 ## Development Tips
 
-- Run `npm run quality:check` before committing
-- Use `npm run db:studio` to inspect database schema and data
 - The app uses a Discord-like interface metaphor with projects as servers and channels for conversations
 - All AI interactions are designed to be conversational and context-aware
-- The system supports autonomous agent workflows and collaborative multi-agent scenarios
 - **Follow established patterns** - use existing service layer patterns as reference
 - **Maintain type safety** throughout IPC communication
 - **Use path aliases** (`@/`) - never relative imports
