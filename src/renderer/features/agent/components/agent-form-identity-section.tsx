@@ -64,7 +64,7 @@ function AgentIdentitySection(props: AgentIdentitySectionProps) {
           name="avatar"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Avatar URL (Optional)</FormLabel>
+              <FormLabel>Avatar URL</FormLabel>
               <FormControl>
                 <Input
                   placeholder="https://example.com/avatar.jpg"
