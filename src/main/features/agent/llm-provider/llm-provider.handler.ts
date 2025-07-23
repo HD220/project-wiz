@@ -15,8 +15,8 @@ function setupLlmProviderCrudHandlers(): void {
     async (_, input: CreateProviderInput): Promise<IpcResponse> => {
       try {
         // Authentication check for desktop app
-        const activeSession = await AuthService.getActiveSession();
-        if (!activeSession) {
+        const currentUser = await AuthService.getCurrentUser();
+        if (!currentUser) {
           throw new Error("User not authenticated");
         }
 

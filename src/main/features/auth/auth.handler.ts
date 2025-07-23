@@ -50,10 +50,10 @@ export function setupAuthHandlers(): void {
     },
   );
 
-  // Get current authenticated user (desktop - no session token needed)
+  // Get current authenticated user
   ipcMain.handle("auth:getCurrentUser", async (): Promise<IpcResponse> => {
     try {
-      const user = AuthService.getCurrentUserDesktop();
+      const user = await AuthService.getCurrentUser();
       return {
         success: true,
         data: user,
@@ -67,10 +67,10 @@ export function setupAuthHandlers(): void {
     }
   });
 
-  // Logout user (desktop - no session token needed)
+  // Logout user
   ipcMain.handle("auth:logout", async (): Promise<IpcResponse> => {
     try {
-      await AuthService.logoutDesktop();
+      await AuthService.logout();
       return {
         success: true,
         data: { message: "Logged out successfully" },
@@ -83,10 +83,10 @@ export function setupAuthHandlers(): void {
     }
   });
 
-  // Check if user is logged in (desktop - no session token needed)
+  // Check if user is logged in
   ipcMain.handle("auth:isLoggedIn", async (): Promise<IpcResponse> => {
     try {
-      const isLoggedIn = AuthService.isLoggedInDesktop();
+      const isLoggedIn = AuthService.isLoggedIn();
       return {
         success: true,
         data: { isLoggedIn },
@@ -102,13 +102,13 @@ export function setupAuthHandlers(): void {
     }
   });
 
-  // Get active session (desktop app - returns only user data)
+  // Get active session
   ipcMain.handle("auth:getActiveSession", async (): Promise<IpcResponse> => {
     try {
       // Initialize session from database if not already loaded
       await AuthService.initializeSession();
 
-      const user = AuthService.getCurrentUserDesktop();
+      const user = await AuthService.getCurrentUser();
       return {
         success: true,
         data: user ? { user } : null,

@@ -18,11 +18,10 @@ function setupAgentCrudHandlers(): void {
     async (_, input: CreateAgentInput): Promise<IpcResponse> => {
       try {
         // Get session from main process for desktop authentication
-        const activeSession = await AuthService.getActiveSession();
-        if (!activeSession) {
+        const currentUser = await AuthService.getCurrentUser();
+        if (!currentUser) {
           throw new Error("User not authenticated");
         }
-        const currentUser = activeSession.user;
 
         const result = await AgentService.create(input, currentUser.id);
         return {
@@ -49,8 +48,8 @@ function setupAgentCrudHandlers(): void {
     ): Promise<IpcResponse> => {
       try {
         // Get session from main process for desktop authentication
-        const activeSession = await AuthService.getActiveSession();
-        if (!activeSession) {
+        const currentUser = await AuthService.getCurrentUser();
+        if (!currentUser) {
           throw new Error("User not authenticated");
         }
 
@@ -75,8 +74,8 @@ function setupAgentCrudHandlers(): void {
     async (_, id: string): Promise<IpcResponse> => {
       try {
         // Get session from main process for desktop authentication
-        const activeSession = await AuthService.getActiveSession();
-        if (!activeSession) {
+        const currentUser = await AuthService.getCurrentUser();
+        if (!currentUser) {
           throw new Error("User not authenticated");
         }
 
@@ -104,11 +103,10 @@ function setupAgentQueryHandlers(): void {
   ipcMain.handle("agents:list", async (_, filters?): Promise<IpcResponse> => {
     try {
       // Get session from main process for desktop authentication
-      const activeSession = await AuthService.getActiveSession();
-      if (!activeSession) {
+      const currentUser = await AuthService.getCurrentUser();
+      if (!currentUser) {
         throw new Error("User not authenticated");
       }
-      const currentUser = activeSession.user;
 
       const result = await AgentService.listByOwnerIdWithFilters(
         currentUser.id,

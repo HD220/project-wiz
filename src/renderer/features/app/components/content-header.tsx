@@ -9,10 +9,10 @@ interface ContentHeaderProps {
 }
 
 function ContentHeader(props: ContentHeaderProps) {
-  const { 
-    title = "general", 
+  const {
+    title = "general",
     description = "Welcome to your workspace",
-    icon: IconComponent = Hash 
+    icon: IconComponent = Hash,
   } = props;
 
   return (

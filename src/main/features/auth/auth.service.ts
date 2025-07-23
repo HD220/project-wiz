@@ -9,7 +9,7 @@ import type {
   AuthenticatedUser,
   AuthResult,
 } from "@/main/features/auth/auth.types";
-import { sessionManager } from "@/main/features/auth/session-manager";
+import { sessionCache } from "@/main/features/auth/session-manager";
 import { userSessionsTable } from "@/main/features/auth/user-sessions.model";
 import { userPreferencesTable } from "@/main/features/user/profile.model";
 import { usersTable } from "@/main/features/user/user.model";
@@ -80,8 +80,8 @@ export class AuthService {
       expiresAt,
     });
 
-    // Set session in memory for desktop app
-    sessionManager.setSession(user, sessionToken);
+    // Cache session for desktop app
+    sessionCache.set(user);
 
     return { user, sessionToken };
   }
@@ -132,25 +132,26 @@ export class AuthService {
       expiresAt,
     });
 
-    // Set session in memory for desktop app
-    sessionManager.setSession(result.user, sessionToken);
+    // Cache session for desktop app
+    sessionCache.set(result.user);
 
     return { user: result.user, sessionToken };
   }
 
   /**
-   * Get current authenticated user by session token
+   * Get current authenticated user (uses cache first, then database)
    */
-  static async getCurrentUser(
-    sessionToken: string,
-  ): Promise<AuthenticatedUser> {
-    if (!sessionToken) {
-      throw new Error("No session token provided");
+  static async getCurrentUser(): Promise<AuthenticatedUser | null> {
+    // Try cache first
+    const cachedUser = sessionCache.get();
+    if (cachedUser) {
+      return cachedUser;
     }
 
+    // Load from database
     const db = getDatabase();
 
-    // Find valid session with user (apenas humans têm sessões)
+    // Find the most recent valid session (apenas humans)
     const [result] = await db
       .select({
         user: usersTable,
@@ -160,63 +161,45 @@ export class AuthService {
       .innerJoin(usersTable, eq(userSessionsTable.userId, usersTable.id))
       .where(
         and(
-          eq(userSessionsTable.token, sessionToken),
           gt(userSessionsTable.expiresAt, new Date()),
           eq(usersTable.type, "human"),
         ),
       )
+      .orderBy(desc(userSessionsTable.createdAt))
       .limit(1);
 
-    if (!result) {
-      throw new Error("Invalid or expired session");
+    if (result) {
+      // Cache the user
+      sessionCache.set(result.user);
+      return result.user;
     }
 
-    return result.user;
+    return null;
   }
 
   /**
-   * Logout user by removing session token
+   * Logout current user
    */
-  static async logout(sessionToken?: string): Promise<void> {
+  static async logout(): Promise<void> {
     const db = getDatabase();
+    const currentUser = sessionCache.get();
 
-    // For desktop app, use internal session token if not provided
-    const tokenToLogout =
-      sessionToken || sessionManager.getCurrentSessionToken();
-
-    if (tokenToLogout) {
-      // Remove session from database
+    if (currentUser) {
+      // Remove all sessions for this user
       await db
         .delete(userSessionsTable)
-        .where(eq(userSessionsTable.token, tokenToLogout));
+        .where(eq(userSessionsTable.userId, currentUser.id));
     }
 
-    // Clear internal session for desktop app
-    sessionManager.clearSession();
+    // Clear cache
+    sessionCache.clear();
   }
 
   /**
-   * Check if session token is valid
+   * Check if user is currently logged in
    */
-  static async isLoggedIn(sessionToken: string): Promise<boolean> {
-    if (!sessionToken) {
-      return false;
-    }
-
-    const db = getDatabase();
-
-    const [session] = await db
-      .select({ id: userSessionsTable.id })
-      .from(userSessionsTable)
-      .where(
-        and(
-          eq(userSessionsTable.token, sessionToken),
-          gt(userSessionsTable.expiresAt, new Date()),
-        ),
-      )
-      .limit(1);
-
-    return !!session;
+  static isLoggedIn(): boolean {
+    return sessionCache.get() !== null;
   }
 
   /**
@@ -238,44 +221,7 @@ export class AuthService {
   }
 
   /**
-   * Get active session for desktop app
-   * Since this is a desktop app, we can get the most recent valid session
-   */
-  static async getActiveSession(): Promise<{
-    user: AuthenticatedUser;
-    sessionToken: string;
-  } | null> {
-    const db = getDatabase();
-
-    // Find the most recent valid session (apenas humans)
-    const [result] = await db
-      .select({
-        user: usersTable,
-        session: userSessionsTable,
-      })
-      .from(userSessionsTable)
-      .innerJoin(usersTable, eq(userSessionsTable.userId, usersTable.id))
-      .where(
-        and(
-          gt(userSessionsTable.expiresAt, new Date()),
-          eq(usersTable.type, "human"),
-        ),
-      )
-      .orderBy(desc(userSessionsTable.createdAt))
-      .limit(1);
-
-    if (!result) {
-      return null;
-    }
-
-    return {
-      user: result.user,
-      sessionToken: result.session.token,
-    };
-  }
-
-  /**
-   * Get human user by ID (utility method)
+   * Get user by ID (utility method)
    */
   static async getUserById(userId: string): Promise<AuthenticatedUser | null> {
     const db = getDatabase();
@@ -286,40 +232,13 @@ export class AuthService {
       .where(and(eq(usersTable.id, userId), eq(usersTable.type, "human")))
       .limit(1);
 
-    if (!user) {
-      return null;
-    }
-
-    return user;
-  }
-
-  // === ELECTRON DESKTOP METHODS (No session token required from frontend) ===
-
-  /**
-   * Get current user for desktop app (uses internal session)
-   */
-  static getCurrentUserDesktop(): AuthenticatedUser | null {
-    return sessionManager.getCurrentUser();
+    return user || null;
   }
 
   /**
-   * Check if user is logged in for desktop app (uses internal session)
-   */
-  static isLoggedInDesktop(): boolean {
-    return sessionManager.isLoggedIn();
-  }
-
-  /**
-   * Initialize session manager on app startup
+   * Initialize session on app startup
    */
   static async initializeSession(): Promise<void> {
-    await sessionManager.loadSessionFromDatabase();
-  }
-
-  /**
-   * Logout for desktop app (clears internal session)
-   */
-  static async logoutDesktop(): Promise<void> {
-    await this.logout(); // Uses internal session token
+    await this.getCurrentUser(); // This will load from database and cache
   }
 }

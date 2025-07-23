@@ -138,7 +138,7 @@ export class ConversationService {
     return result.sort((a, b) => {
       const aTime = a.lastMessage?.createdAt || a.updatedAt;
       const bTime = b.lastMessage?.createdAt || b.updatedAt;
-      return new Date(bTime).getTime() - new Date(aTime).getTime();
+      return bTime.getTime() - aTime.getTime();
     });
   }
 }

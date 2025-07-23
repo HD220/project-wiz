@@ -15,7 +15,7 @@ export function setupUserHandlers(): void {
     async (): Promise<IpcResponse<UserSummary[]>> => {
       try {
         // Get current authenticated user
-        const currentUser = AuthService.getCurrentUserDesktop();
+        const currentUser = await AuthService.getCurrentUser();
         if (!currentUser) {
           throw new Error("User not authenticated");
         }

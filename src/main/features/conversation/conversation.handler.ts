@@ -13,8 +13,8 @@ function setupConversationHandlers(): void {
     async (_, input: CreateConversationInput): Promise<IpcResponse> => {
       try {
         // Get session from main process for desktop authentication
-        const activeSession = await AuthService.getActiveSession();
-        if (!activeSession) {
+        const currentUser = await AuthService.getCurrentUser();
+        if (!currentUser) {
           throw new Error("User not authenticated");
         }
 
@@ -37,11 +37,10 @@ function setupConversationHandlers(): void {
     async (): Promise<IpcResponse> => {
       try {
         // Get session from main process for desktop authentication
-        const activeSession = await AuthService.getActiveSession();
-        if (!activeSession) {
+        const currentUser = await AuthService.getCurrentUser();
+        if (!currentUser) {
           throw new Error("User not authenticated");
         }
-        const currentUser = activeSession.user;
 
         const conversations = await ConversationService.getUserConversations(
           currentUser.id,
@@ -66,8 +65,8 @@ function setupMessageHandlers(): void {
     async (_, input: SendMessageInput): Promise<IpcResponse> => {
       try {
         // Get session from main process for desktop authentication
-        const activeSession = await AuthService.getActiveSession();
-        if (!activeSession) {
+        const currentUser = await AuthService.getCurrentUser();
+        if (!currentUser) {
           throw new Error("User not authenticated");
         }
 
@@ -88,8 +87,8 @@ function setupMessageHandlers(): void {
     async (_, conversationId: string): Promise<IpcResponse> => {
       try {
         // Get session from main process for desktop authentication
-        const activeSession = await AuthService.getActiveSession();
-        if (!activeSession) {
+        const currentUser = await AuthService.getCurrentUser();
+        if (!currentUser) {
           throw new Error("User not authenticated");
         }
 
