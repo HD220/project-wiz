@@ -55,12 +55,12 @@ function MemberSidebar(props: MemberSidebarProps) {
   const MemberItem = ({ member }: { member: Member }) => (
     <Button
       variant="ghost"
-      className="w-full justify-start px-2 h-10 text-sm font-normal hover:bg-accent group"
+      className="w-full justify-start px-2 h-9 text-sm font-normal hover:bg-accent/80 transition-colors group rounded-md"
     >
       <div className="flex items-center w-full">
         <div className="relative">
-          <Avatar className="w-6 h-6">
-            <AvatarFallback className="text-xs bg-muted">
+          <Avatar className="w-7 h-7">
+            <AvatarFallback className="text-xs bg-primary/10 text-primary font-medium">
               {member.name.charAt(0).toUpperCase()}
             </AvatarFallback>
           </Avatar>
@@ -73,12 +73,19 @@ function MemberSidebar(props: MemberSidebarProps) {
           />
         </div>
         <div className="ml-2 flex-1 min-w-0">
-          <div className="flex items-center">
+          <div className="flex items-center gap-1">
             {member.role === "owner" && (
-              <Crown className="w-3 h-3 mr-1 text-yellow-500 flex-shrink-0" />
+              <Crown className="w-3 h-3 text-yellow-500 flex-shrink-0" />
             )}
-            <span className="text-foreground truncate">{member.name}</span>
+            <span className="text-foreground truncate text-sm group-hover:text-foreground/90 transition-colors">
+              {member.name}
+            </span>
           </div>
+          {member.username && (
+            <div className="text-xs text-muted-foreground truncate opacity-0 group-hover:opacity-100 transition-opacity">
+              @{member.username}
+            </div>
+          )}
         </div>
       </div>
     </Button>

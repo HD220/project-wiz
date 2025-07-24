@@ -106,19 +106,20 @@ function ConversationSidebarItem(props: ConversationSidebarItemProps) {
       params={{ conversationId: conversation.id }}
       variant="ghost"
       className={cn(
-        "flex items-center gap-3 px-2 py-2 mx-1 rounded text-sm transition-all duration-150 group h-auto justify-start",
-        "hover:bg-muted/50 text-muted-foreground hover:text-foreground",
+        "flex items-center gap-3 px-2 py-2 mx-1 rounded-md text-sm transition-all duration-200 group h-auto justify-start",
+        "hover:bg-accent/60 text-muted-foreground hover:text-foreground",
+        unreadCount > 0 && "font-medium",
         className,
       )}
       activeProps={{
-        className: "bg-muted text-foreground",
+        className: "bg-accent text-foreground",
       }}
     >
       {/* Avatar */}
       <div className="relative flex-shrink-0">
         <Avatar className="w-8 h-8">
           <AvatarImage src={avatar.image || undefined} />
-          <AvatarFallback className="text-xs font-medium">
+          <AvatarFallback className="text-xs font-medium bg-primary/10 text-primary">
             {avatar.isGroup ? (
               <MessageCircle className="h-4 w-4" />
             ) : (
@@ -129,7 +130,7 @@ function ConversationSidebarItem(props: ConversationSidebarItemProps) {
 
         {/* Online indicator for 1:1 chats */}
         {!avatar.isGroup && (
-          <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-500 rounded-full border-2 border-background" />
+          <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-500 rounded-full border-2 border-card" />
         )}
       </div>
 

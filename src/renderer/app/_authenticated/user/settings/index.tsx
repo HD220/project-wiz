@@ -14,116 +14,142 @@ import { Label } from "@/renderer/components/ui/label";
 
 function MyAccountPage() {
   return (
-    <div className="space-y-6">
+    <div className="pt-8">
       {/* Page Header */}
-      <div className="space-y-2">
-        <h1 className="text-2xl font-semibold text-foreground">My Account</h1>
-        <p className="text-muted-foreground text-sm">
-          Manage your account settings and personal information
-        </p>
+      <div className="mb-8">
+        <h1 className="text-2xl font-semibold text-foreground mb-2">
+          Minha conta
+        </h1>
       </div>
 
-      {/* Account Information */}
-      <Card>
-        <CardHeader className="pb-4">
-          <CardTitle className="flex items-center gap-2">
-            <User className="h-5 w-5" />
-            Account Information
-          </CardTitle>
-          <CardDescription>Update your basic account details</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="username" className="text-sm font-medium">
-                Username
-              </Label>
-              <Input id="username" defaultValue="admin" />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="email" className="text-sm font-medium">
-                Email
-              </Label>
-              <Input id="email" type="email" defaultValue="admin@example.com" />
-            </div>
-          </div>
+      {/* Tabs - igual Discord */}
+      <div className="flex gap-8 border-b border-border mb-8">
+        <button className="pb-3 border-b-2 border-blue-500 text-sm font-medium text-blue-500">
+          Segurança
+        </button>
+        <button className="pb-3 border-b-2 border-transparent text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
+          Status
+        </button>
+      </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="displayName" className="text-sm font-medium">
-              Display Name
+      {/* Profile Banner - IGUAL DISCORD */}
+      <div className="relative mb-8">
+        {/* Banner background cinza claro */}
+        <div className="h-[100px] bg-muted/20 rounded-t-lg"></div>
+
+        {/* Profile info sobreposto */}
+        <div className="bg-background rounded-b-lg p-6 -mt-8 relative">
+          <div className="flex items-center gap-4">
+            {/* Avatar grande */}
+            <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center border-4 border-background -mt-8">
+              <User className="w-6 h-6 text-primary" />
+            </div>
+
+            {/* Nome e badges */}
+            <div className="flex-1 pt-2">
+              <h2 className="text-xl font-semibold">Nicolas Fraga Faust</h2>
+              <div className="flex items-center gap-2 mt-1">
+                <div className="w-4 h-4 bg-purple-500 rounded flex items-center justify-center">
+                  <span className="text-white text-xs">💜</span>
+                </div>
+                <div className="w-4 h-4 bg-green-500 rounded flex items-center justify-center">
+                  <span className="text-white text-xs">+</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Botão editar */}
+            <Button
+              variant="outline"
+              className="bg-blue-500 text-white border-blue-500 hover:bg-blue-600"
+            >
+              Editar perfil de usuário
+            </Button>
+          </div>
+        </div>
+      </div>
+
+      {/* Campos sem cards - igual Discord */}
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <Label className="text-sm font-medium text-foreground">
+              Nome Exibido
             </Label>
-            <Input id="displayName" defaultValue="Administrator" />
-            <p className="text-xs text-muted-foreground">
-              This is how your name will appear to other users
+            <p className="text-sm text-muted-foreground mt-1">
+              Nicolas Fraga Faust
             </p>
           </div>
+          <Button variant="outline" size="sm">
+            Editar
+          </Button>
+        </div>
 
-          <div className="flex justify-end pt-4">
-            <Button>Save Changes</Button>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Security Settings */}
-      <Card>
-        <CardHeader className="pb-4">
-          <CardTitle className="flex items-center gap-2">
-            <Shield className="h-5 w-5" />
-            Security
-          </CardTitle>
-          <CardDescription>
-            Manage your password and security preferences
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="currentPassword" className="text-sm font-medium">
-              Current Password
+        <div className="flex items-center justify-between">
+          <div>
+            <Label className="text-sm font-medium text-foreground">
+              Nome De Usuário
             </Label>
-            <Input id="currentPassword" type="password" />
+            <p className="text-sm text-muted-foreground mt-1">
+              nicolasfragafaust
+            </p>
           </div>
+          <Button variant="outline" size="sm">
+            Editar
+          </Button>
+        </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="newPassword" className="text-sm font-medium">
-                New Password
-              </Label>
-              <Input id="newPassword" type="password" />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="confirmPassword" className="text-sm font-medium">
-                Confirm Password
-              </Label>
-              <Input id="confirmPassword" type="password" />
-            </div>
+        <div className="flex items-center justify-between">
+          <div>
+            <Label className="text-sm font-medium text-foreground">
+              E-Mail
+            </Label>
+            <p className="text-sm text-muted-foreground mt-1">
+              ************@gmail.com{" "}
+              <button className="text-blue-500 hover:underline">Mostrar</button>
+            </p>
           </div>
+          <Button variant="outline" size="sm">
+            Editar
+          </Button>
+        </div>
 
-          <div className="flex justify-end pt-4">
-            <Button variant="outline">Change Password</Button>
+        <div className="flex items-center justify-between">
+          <div>
+            <Label className="text-sm font-medium text-foreground">
+              Telefone
+            </Label>
+            <p className="text-sm text-muted-foreground mt-1">
+              ********8037{" "}
+              <button className="text-blue-500 hover:underline">Mostrar</button>
+            </p>
           </div>
-        </CardContent>
-      </Card>
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              className="text-red-500 border-red-500 hover:bg-red-50"
+            >
+              Remover
+            </Button>
+            <Button variant="outline" size="sm">
+              Editar
+            </Button>
+          </div>
+        </div>
+      </div>
 
-      {/* Danger Zone */}
-      <Card className="border-destructive">
-        <CardHeader className="pb-4">
-          <CardTitle className="text-destructive">Danger Zone</CardTitle>
-          <CardDescription>
-            Irreversible and destructive actions
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="flex items-center justify-between">
-            <div>
-              <h4 className="font-medium">Delete Account</h4>
-              <p className="text-sm text-muted-foreground">
-                Permanently delete your account and all associated data
-              </p>
-            </div>
-            <Button variant="destructive">Delete Account</Button>
-          </div>
-        </CardContent>
-      </Card>
+      {/* Seção autenticação */}
+      <div className="mt-12">
+        <h2 className="text-xl font-semibold mb-4">Senha e autenticação</h2>
+
+        <div className="flex items-center gap-2">
+          <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+          <span className="text-sm font-medium text-green-600">
+            Autenticação Multifatorial Ativada
+          </span>
+        </div>
+      </div>
     </div>
   );
 }

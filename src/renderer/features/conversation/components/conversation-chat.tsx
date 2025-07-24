@@ -115,91 +115,103 @@ function ConversationChat(props: ConversationChatProps) {
   }
 
   return (
-    <div className={`flex flex-col h-full ${className || ""}`}>
+    <div className={`flex flex-col h-full bg-background ${className || ""}`}>
       {/* Messages Area */}
       <div className="flex-1 overflow-hidden">
         <ScrollArea ref={scrollAreaRef} className="h-full w-full">
-          <div className="p-4 space-y-4">
+          <div className="pb-4">
             {/* Welcome Message - only show when no messages */}
             {messageGroups.length === 0 && (
-              <>
-                <div className="text-center py-8">
-                  <div className="text-2xl font-semibold mb-2">
-                    Welcome to the conversation!
+              <div className="px-4 py-8">
+                <div className="text-center">
+                  <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
+                    <span className="text-2xl font-bold text-primary">
+                      {conversation.name?.charAt(0).toUpperCase() || "#"}
+                    </span>
                   </div>
-                  <div className="text-muted-foreground">
-                    This is the beginning of your direct message with{" "}
-                    <strong>{conversation.name || "this conversation"}</strong>.
+                  <div className="text-xl font-semibold mb-2">
+                    Bem-vindo a {conversation.name || "esta conversa"}!
+                  </div>
+                  <div className="text-muted-foreground text-sm">
+                    Este é o início da sua conversa direta.
                   </div>
                 </div>
-                <Separator />
-              </>
+                <Separator className="mt-8" />
+              </div>
             )}
 
-            {/* Message Groups */}
+            {/* Message Groups - Discord style */}
             {messageGroups.map((group, groupIndex) => {
-              const author = getUserById(group.authorId);
+              const author = getUserById(group.authorId) as AuthenticatedUser;
               const isCurrentUser = group.authorId === currentUser.id;
+              const timeDiff =
+                groupIndex > 0
+                  ? new Date(group.messages[0]?.createdAt).getTime() -
+                    new Date(
+                      messageGroups[groupIndex - 1].messages[
+                        messageGroups[groupIndex - 1].messages.length - 1
+                      ]?.createdAt,
+                    ).getTime()
+                  : 0;
+
+              // Show avatar and header if it's first group or if more than 7 minutes passed
+              const showAvatar = groupIndex === 0 || timeDiff > 7 * 60 * 1000;
 
               return (
-                <div key={groupIndex} className="space-y-1">
-                  {/* Author Header (only shown once per group) */}
-                  <div className="flex items-center gap-3 px-1">
-                    <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-sm font-medium">
-                      {(author as UserBasic)?.name?.charAt(0).toUpperCase() ||
-                        "?"}
-                    </div>
-                    <div className="font-medium">
-                      {(author as UserBasic)?.name || "Unknown User"}
-                      {isCurrentUser && (
-                        <span className="ml-2 text-xs text-muted-foreground">
-                          (you)
-                        </span>
-                      )}
-                    </div>
-                    <div className="text-xs text-muted-foreground">
-                      {group.messages[0]?.createdAt
-                        ? new Date(group.messages[0].createdAt).toLocaleString()
-                        : "Unknown time"}
-                    </div>
-                  </div>
+                <div key={groupIndex}>
+                  {/* First message in group - shows avatar and name */}
+                  <MessageBubble
+                    message={group.messages[0]}
+                    author={author}
+                    isCurrentUser={isCurrentUser}
+                    showAvatar={showAvatar}
+                    isSending={
+                      sendMessageMutation.isPending &&
+                      groupIndex === messageGroups.length - 1
+                    }
+                  />
 
-                  {/* Messages in Group */}
-                  <div className="space-y-1">
-                    {group.messages.map((message) => (
-                      <MessageBubble
-                        key={message.id}
-                        message={message}
-                        isCurrentUser={isCurrentUser}
-                        showAvatar={false} // Already shown in group header
-                      />
-                    ))}
-                  </div>
+                  {/* Subsequent messages in same group - no avatar */}
+                  {group.messages.slice(1).map((message) => (
+                    <MessageBubble
+                      key={message.id}
+                      message={message}
+                      author={author}
+                      isCurrentUser={isCurrentUser}
+                      showAvatar={false}
+                      isSending={
+                        sendMessageMutation.isPending &&
+                        message === group.messages[group.messages.length - 1]
+                      }
+                    />
+                  ))}
                 </div>
               );
             })}
 
             {/* Empty state */}
             {messageGroups.length === 0 && (
-              <div className="text-center py-8 text-muted-foreground">
-                No messages yet. Start the conversation!
+              <div className="px-4 py-8 text-center text-muted-foreground">
+                <div className="text-4xl mb-4">💬</div>
+                <div className="text-sm">
+                  Nenhuma mensagem ainda. Comece a conversa!
+                </div>
               </div>
             )}
+
+            {/* Scroll padding */}
+            <div className="h-4" />
           </div>
         </ScrollArea>
       </div>
 
-      <Separator />
-
       {/* Message Input */}
-      <div className="p-4">
-        <MessageInput
-          onSendMessage={handleSendMessage}
-          disabled={sendMessageMutation.isPending}
-          isSending={sendMessageMutation.isPending}
-          placeholder={`Message ${conversation.name || "conversation"}...`}
-        />
-      </div>
+      <MessageInput
+        onSendMessage={handleSendMessage}
+        disabled={sendMessageMutation.isPending}
+        isSending={sendMessageMutation.isPending}
+        placeholder={`Conversar em ${conversation.name || "conversa"}...`}
+      />
     </div>
   );
 }

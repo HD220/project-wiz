@@ -24,16 +24,18 @@ function ContentHeader(props: ContentHeaderProps) {
   } = props;
 
   return (
-    <header className="h-12 bg-background border-b flex items-center px-4 justify-between">
-      <div className="flex items-center gap-2">
-        <div className="flex items-center gap-2">
-          <IconComponent className="w-5 h-5 text-muted-foreground" />
-          <h1 className="text-foreground font-semibold">{title}</h1>
+    <header className="h-12 bg-background border-b flex items-center px-4 justify-between shadow-sm">
+      <div className="flex items-center gap-3 min-w-0 flex-1">
+        <div className="flex items-center gap-2 min-w-0">
+          <IconComponent className="w-5 h-5 text-muted-foreground flex-shrink-0" />
+          <h1 className="text-foreground font-semibold truncate">{title}</h1>
         </div>
 
-        <Separator orientation="vertical" className="mx-4 h-6" />
+        <Separator orientation="vertical" className="h-6 flex-shrink-0" />
 
-        <p className="text-sm text-muted-foreground">{description}</p>
+        <p className="text-sm text-muted-foreground/80 truncate">
+          {description}
+        </p>
       </div>
 
       {/* Members Toggle */}
@@ -42,10 +44,14 @@ function ContentHeader(props: ContentHeaderProps) {
           variant="ghost"
           size="icon"
           className={cn(
-            "w-8 h-8",
-            !isMemberSidebarCollapsed && "bg-accent text-accent-foreground",
+            "w-8 h-8 transition-colors hover:bg-accent/80 flex-shrink-0",
+            !isMemberSidebarCollapsed &&
+              "bg-accent text-accent-foreground hover:bg-accent",
           )}
           onClick={onToggleMemberSidebar}
+          title={
+            isMemberSidebarCollapsed ? "Mostrar membros" : "Ocultar membros"
+          }
         >
           <Users className="w-4 h-4" />
         </Button>

@@ -68,11 +68,17 @@ function ProjectSidebar(props: ProjectSidebarProps) {
               <Button
                 variant="ghost"
                 className={cn(
-                  "w-full justify-start px-2 h-8 text-sm font-normal text-muted-foreground hover:text-foreground hover:bg-accent",
-                  isActive && "bg-accent text-foreground",
+                  "w-full justify-start px-2 h-8 text-sm font-normal transition-colors rounded-md",
+                  "text-muted-foreground hover:text-foreground hover:bg-accent/80",
+                  isActive && "bg-accent text-foreground font-medium",
                 )}
               >
-                <Hash className="w-4 h-4 mr-2 text-muted-foreground" />
+                <Hash
+                  className={cn(
+                    "w-4 h-4 mr-2 transition-colors",
+                    isActive ? "text-foreground" : "text-muted-foreground",
+                  )}
+                />
                 Dashboard
               </Button>
             )}
@@ -109,14 +115,22 @@ function ProjectSidebar(props: ProjectSidebarProps) {
                       <Button
                         variant="ghost"
                         className={cn(
-                          "w-full justify-start px-2 h-8 text-sm font-normal text-muted-foreground hover:text-foreground hover:bg-accent",
-                          isActive && "bg-accent text-foreground",
+                          "w-full justify-start px-2 h-8 text-sm font-normal transition-colors rounded-md",
+                          "text-muted-foreground hover:text-foreground hover:bg-accent/80",
+                          isActive && "bg-accent text-foreground font-medium",
                         )}
                       >
-                        <Hash className="w-4 h-4 mr-2 text-muted-foreground" />
-                        {channel.name}
+                        <Hash
+                          className={cn(
+                            "w-4 h-4 mr-2 transition-colors",
+                            isActive
+                              ? "text-foreground"
+                              : "text-muted-foreground",
+                          )}
+                        />
+                        <span className="truncate">{channel.name}</span>
                         {channel.hasNotification && !isActive && (
-                          <div className="ml-auto w-2 h-2 bg-destructive rounded-full" />
+                          <div className="ml-auto w-2 h-2 bg-destructive rounded-full flex-shrink-0" />
                         )}
                       </Button>
                     )}
