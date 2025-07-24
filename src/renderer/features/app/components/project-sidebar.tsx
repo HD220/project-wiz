@@ -27,7 +27,6 @@ interface Agent {
 }
 
 interface ProjectSidebarProps {
-  projectId: string;
   project: SelectProject;
   conversations?: any[]; // TODO: Type this properly when conversation types are available
   agents?: any[]; // TODO: Type this properly when agent types are available
@@ -35,13 +34,7 @@ interface ProjectSidebarProps {
 }
 
 function ProjectSidebar(props: ProjectSidebarProps) {
-  const {
-    projectId,
-    project,
-    conversations = [],
-    agents = [],
-    className,
-  } = props;
+  const { project, conversations = [], agents = [], className } = props;
 
   // Transform conversations into channels format
   const channels: Channel[] = conversations.map((conv: any) => ({
@@ -94,7 +87,7 @@ function ProjectSidebar(props: ProjectSidebarProps) {
                   <Link
                     key={channel.id}
                     to="/project/$projectId/channel/$channelId"
-                    params={{ projectId, channelId: channel.id }}
+                    params={{ projectId: project.id, channelId: channel.id }}
                     className="block"
                     activeProps={{
                       className: "active",
