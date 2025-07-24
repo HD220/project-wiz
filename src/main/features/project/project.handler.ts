@@ -1,131 +1,40 @@
-import { ipcMain } from "electron";
-
 import { AuthService } from "@/main/features/auth/auth.service";
 import type {
   InsertProject,
   UpdateProject,
 } from "@/main/features/project/project.model";
 import { ProjectService } from "@/main/features/project/project.service";
-import type { IpcResponse } from "@/main/types";
-
-function setupCreateHandler(): void {
-  ipcMain.handle(
-    "projects:create",
-    async (_, input: InsertProject): Promise<IpcResponse> => {
-      try {
-        // Authentication check for desktop app
-        const currentUser = await AuthService.getCurrentUser();
-        if (!currentUser) {
-          throw new Error("User not authenticated");
-        }
-
-        const result = await ProjectService.create(input);
-        return {
-          success: true,
-          data: result,
-        };
-      } catch (error) {
-        return {
-          success: false,
-          error:
-            error instanceof Error ? error.message : "Failed to create project",
-        };
-      }
-    },
-  );
-}
-
-function setupFindByIdHandler(): void {
-  ipcMain.handle(
-    "projects:findById",
-    async (_, id: string): Promise<IpcResponse> => {
-      try {
-        const project = await ProjectService.findById(id);
-        return {
-          success: true,
-          data: project,
-        };
-      } catch (error) {
-        return {
-          success: false,
-          error:
-            error instanceof Error ? error.message : "Failed to find project",
-        };
-      }
-    },
-  );
-}
-
-function setupListAllHandler(): void {
-  ipcMain.handle("projects:listAll", async (): Promise<IpcResponse> => {
-    try {
-      const projects = await ProjectService.listAll();
-      return {
-        success: true,
-        data: projects,
-      };
-    } catch (error) {
-      return {
-        success: false,
-        error:
-          error instanceof Error ? error.message : "Failed to list projects",
-      };
-    }
-  });
-}
-
-function setupUpdateHandler(): void {
-  ipcMain.handle(
-    "projects:update",
-    async (_, input: UpdateProject): Promise<IpcResponse> => {
-      try {
-        const result = await ProjectService.update(input);
-        return {
-          success: true,
-          data: result,
-        };
-      } catch (error) {
-        return {
-          success: false,
-          error:
-            error instanceof Error ? error.message : "Failed to update project",
-        };
-      }
-    },
-  );
-}
-
-function setupArchiveHandler(): void {
-  ipcMain.handle(
-    "projects:archive",
-    async (_, id: string): Promise<IpcResponse> => {
-      try {
-        const result = await ProjectService.archive(id);
-        return {
-          success: true,
-          data: result,
-        };
-      } catch (error) {
-        return {
-          success: false,
-          error:
-            error instanceof Error
-              ? error.message
-              : "Failed to archive project",
-        };
-      }
-    },
-  );
-}
+import { createIpcHandler } from "@/main/utils/ipc-handler";
 
 /**
  * Setup project IPC handlers
  * Exposes ProjectService methods to the frontend via IPC
  */
 export function setupProjectHandlers(): void {
-  setupCreateHandler();
-  setupFindByIdHandler();
-  setupListAllHandler();
-  setupUpdateHandler();
-  setupArchiveHandler();
+  // Create project (with session-based auth)
+  createIpcHandler("projects:create", async (input: InsertProject) => {
+    const currentUser = await AuthService.getCurrentUser();
+    if (!currentUser) {
+      throw new Error("User not authenticated");
+    }
+    return ProjectService.create(input);
+  });
+
+  // Find project by ID
+  createIpcHandler("projects:findById", (id: string) =>
+    ProjectService.findById(id),
+  );
+
+  // List all projects
+  createIpcHandler("projects:listAll", () => ProjectService.listAll());
+
+  // Update project
+  createIpcHandler("projects:update", (input: UpdateProject) =>
+    ProjectService.update(input),
+  );
+
+  // Archive project
+  createIpcHandler("projects:archive", (id: string) =>
+    ProjectService.archive(id),
+  );
 }

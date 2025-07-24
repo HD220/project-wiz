@@ -1,10 +1,4 @@
-import { useMutation } from "@tanstack/react-query";
-import {
-  Link,
-  useNavigate,
-  useRouter,
-  useSearch,
-} from "@tanstack/react-router";
+import { Link, useNavigate, useSearch } from "@tanstack/react-router";
 import { Filter, Plus, Search } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -24,6 +18,7 @@ import type {
 } from "@/renderer/features/agent/agent.types";
 import { AgentDeleteDialog } from "@/renderer/features/agent/components/agent-delete-dialog";
 import { AgentListCard } from "@/renderer/features/agent/components/agent-list-card";
+import { useCrudMutation, useApiMutation } from "@/renderer/lib/api-mutation";
 
 interface AgentListProps {
   agents: SelectAgent[];
@@ -35,34 +30,25 @@ function AgentList(props: AgentListProps) {
   // SIMPLE: Get URL search params and navigation
   const search = useSearch({ from: "/_authenticated/user/agents" });
   const navigate = useNavigate();
-  const router = useRouter();
 
   // SIMPLE: Local state for UI only
   const [agentToDelete, setAgentToDelete] = useState<SelectAgent | null>(null);
 
-  // SIMPLE: Direct mutations with window.api - mutations handle loading/error states
-  const deleteAgentMutation = useMutation({
-    mutationFn: (id: string) => window.api.agents.delete(id),
-    onSuccess: () => {
-      toast.success("Agent deleted successfully");
-      router.invalidate(); // Refresh route data
-      setAgentToDelete(null);
-    },
-    onError: () => {
-      toast.error("Failed to delete agent");
-    },
-  });
+  // Standardized CRUD mutation for delete
+  const deleteAgentMutation = useCrudMutation(
+    "delete",
+    (id: string) => window.api.agents.delete(id),
+    "Agent",
+  );
 
-  const toggleStatusMutation = useMutation({
-    mutationFn: ({ id, status }: { id: string; status: AgentStatus }) =>
+  // Custom mutation for status toggle
+  const toggleStatusMutation = useApiMutation(
+    ({ id, status }: { id: string; status: AgentStatus }) =>
       window.api.agents.updateStatus(id, status),
-    onSuccess: () => {
-      router.invalidate(); // Refresh route data
+    {
+      errorMessage: "Failed to update agent status",
     },
-    onError: () => {
-      toast.error("Failed to update agent status");
-    },
-  });
+  );
 
   function handleDelete(agent: SelectAgent) {
     setAgentToDelete(agent);
@@ -71,6 +57,7 @@ function AgentList(props: AgentListProps) {
   function confirmDelete() {
     if (!agentToDelete) return;
     deleteAgentMutation.mutate(agentToDelete.id);
+    setAgentToDelete(null);
   }
 
   function handleToggleStatus(agent: SelectAgent) {

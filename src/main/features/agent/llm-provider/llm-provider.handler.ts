@@ -1,178 +1,67 @@
-import { ipcMain } from "electron";
-
 import { LlmProviderService } from "@/main/features/agent/llm-provider/llm-provider.service";
 import type { CreateProviderInput } from "@/main/features/agent/llm-provider/llm-provider.types";
 import { AuthService } from "@/main/features/auth/auth.service";
-import type { IpcResponse } from "@/main/types";
-
-/**
- * Setup LLM provider CRUD operation handlers
- */
-function setupLlmProviderCrudHandlers(): void {
-  // Create LLM provider
-  ipcMain.handle(
-    "llm-providers:create",
-    async (_, input: CreateProviderInput): Promise<IpcResponse> => {
-      try {
-        // Authentication check for desktop app
-        const currentUser = await AuthService.getCurrentUser();
-        if (!currentUser) {
-          throw new Error("User not authenticated");
-        }
-
-        const result = await LlmProviderService.create(input);
-        return { success: true, data: result };
-      } catch (error) {
-        return {
-          success: false,
-          error:
-            error instanceof Error
-              ? error.message
-              : "Failed to create provider",
-        };
-      }
-    },
-  );
-
-  // List LLM providers for a user
-  ipcMain.handle(
-    "llm-providers:list",
-    async (_, userId: string): Promise<IpcResponse> => {
-      try {
-        const result = await LlmProviderService.findByUserId(userId);
-        return { success: true, data: result };
-      } catch (error) {
-        return {
-          success: false,
-          error:
-            error instanceof Error ? error.message : "Failed to list providers",
-        };
-      }
-    },
-  );
-
-  // Get LLM provider by ID
-  ipcMain.handle(
-    "llm-providers:getById",
-    async (_, id: string): Promise<IpcResponse> => {
-      try {
-        const result = await LlmProviderService.findById(id);
-        return {
-          success: true,
-          data: result,
-        };
-      } catch (error) {
-        return {
-          success: false,
-          error:
-            error instanceof Error ? error.message : "Failed to get provider",
-        };
-      }
-    },
-  );
-
-  // Update LLM provider
-  ipcMain.handle(
-    "llm-providers:update",
-    async (
-      _,
-      id: string,
-      updates: Partial<CreateProviderInput>,
-    ): Promise<IpcResponse> => {
-      try {
-        const result = await LlmProviderService.update(id, updates);
-        return {
-          success: true,
-          data: result,
-        };
-      } catch (error) {
-        return {
-          success: false,
-          error:
-            error instanceof Error
-              ? error.message
-              : "Failed to update provider",
-        };
-      }
-    },
-  );
-
-  // Delete LLM provider
-  ipcMain.handle(
-    "llm-providers:delete",
-    async (_, id: string): Promise<IpcResponse> => {
-      try {
-        await LlmProviderService.delete(id);
-        return {
-          success: true,
-          data: { message: "Provider deleted successfully" },
-        };
-      } catch (error) {
-        return {
-          success: false,
-          error:
-            error instanceof Error
-              ? error.message
-              : "Failed to delete provider",
-        };
-      }
-    },
-  );
-}
-
-/**
- * Setup default provider management handlers
- */
-function setupLlmProviderDefaultHandlers(): void {
-  // Set provider as default
-  ipcMain.handle(
-    "llm-providers:setDefault",
-    async (_, providerId: string, userId: string): Promise<IpcResponse> => {
-      try {
-        await LlmProviderService.setAsDefault(providerId, userId);
-        return {
-          success: true,
-          data: { message: "Provider set as default" },
-        };
-      } catch (error) {
-        return {
-          success: false,
-          error:
-            error instanceof Error
-              ? error.message
-              : "Failed to set provider as default",
-        };
-      }
-    },
-  );
-
-  // Get default provider for user
-  ipcMain.handle(
-    "llm-providers:getDefault",
-    async (_, userId: string): Promise<IpcResponse> => {
-      try {
-        const result = await LlmProviderService.getDefaultProvider(userId);
-        return {
-          success: true,
-          data: result,
-        };
-      } catch (error) {
-        return {
-          success: false,
-          error:
-            error instanceof Error
-              ? error.message
-              : "Failed to get default provider",
-        };
-      }
-    },
-  );
-}
+import { createIpcHandler } from "@/main/utils/ipc-handler";
 
 /**
  * Setup LLM provider IPC handlers
  */
 export function setupLlmProviderHandlers(): void {
-  setupLlmProviderCrudHandlers();
-  setupLlmProviderDefaultHandlers();
+  // Create LLM provider (with session-based auth)
+  createIpcHandler(
+    "llm-providers:create",
+    async (input: CreateProviderInput) => {
+      const currentUser = await AuthService.getCurrentUser();
+      if (!currentUser) {
+        throw new Error("User not authenticated");
+      }
+      return LlmProviderService.create(input);
+    },
+  );
+
+  // List LLM providers (use session instead of userId parameter)
+  createIpcHandler("llm-providers:list", async () => {
+    const currentUser = await AuthService.getCurrentUser();
+    if (!currentUser) {
+      throw new Error("User not authenticated");
+    }
+    return LlmProviderService.findByUserId(currentUser.id);
+  });
+
+  // Get LLM provider by ID
+  createIpcHandler("llm-providers:getById", (id: string) =>
+    LlmProviderService.findById(id),
+  );
+
+  // Update LLM provider
+  createIpcHandler(
+    "llm-providers:update",
+    (id: string, updates: Partial<CreateProviderInput>) =>
+      LlmProviderService.update(id, updates),
+  );
+
+  // Delete LLM provider
+  createIpcHandler("llm-providers:delete", async (id: string) => {
+    await LlmProviderService.delete(id);
+    return { message: "Provider deleted successfully" };
+  });
+
+  // Set provider as default (use session instead of userId parameter)
+  createIpcHandler("llm-providers:setDefault", async (providerId: string) => {
+    const currentUser = await AuthService.getCurrentUser();
+    if (!currentUser) {
+      throw new Error("User not authenticated");
+    }
+    await LlmProviderService.setAsDefault(providerId, currentUser.id);
+    return { message: "Provider set as default" };
+  });
+
+  // Get default provider (use session instead of userId parameter)
+  createIpcHandler("llm-providers:getDefault", async () => {
+    const currentUser = await AuthService.getCurrentUser();
+    if (!currentUser) {
+      throw new Error("User not authenticated");
+    }
+    return LlmProviderService.getDefaultProvider(currentUser.id);
+  });
 }

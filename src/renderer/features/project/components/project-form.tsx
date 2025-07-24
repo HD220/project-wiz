@@ -1,8 +1,9 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "@tanstack/react-router";
-import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
+
+import type { InsertProject } from "@/main/features/project/project.types";
 
 import { Button } from "@/renderer/components/ui/button";
 import {
@@ -21,6 +22,7 @@ import {
 } from "@/renderer/components/ui/radio-group";
 import { Textarea } from "@/renderer/components/ui/textarea";
 import { useAuth } from "@/renderer/contexts/auth.context";
+import { useApiMutation } from "@/renderer/lib/api-mutation";
 
 const ProjectFormSchema = z.object({
   name: z.string().min(1, "Nome é obrigatório"),
@@ -39,9 +41,21 @@ interface ProjectFormProps {
 
 function ProjectForm(props: ProjectFormProps) {
   const { onSuccess, onCancel } = props;
-  const [isCreating, setIsCreating] = useState(false);
   const router = useRouter();
   const { user } = useAuth();
+
+  // Standardized mutation with automatic error handling
+  const createProjectMutation = useApiMutation(
+    (data: InsertProject) => window.api.projects.create(data),
+    {
+      successMessage: "Project created successfully",
+      errorMessage: "Failed to create project",
+      onSuccess: (project) => {
+        router.invalidate();
+        onSuccess?.(project.id);
+      },
+    },
+  );
 
   const form = useForm<ProjectFormData>({
     resolver: zodResolver(ProjectFormSchema),
@@ -56,38 +70,22 @@ function ProjectForm(props: ProjectFormProps) {
 
   const projectType = form.watch("type");
 
-  async function onSubmit(data: ProjectFormData) {
-    setIsCreating(true);
-    try {
-      // Generate local path based on project name
-      const localPath = `/projects/${data.name.toLowerCase().replace(/\s+/g, "-")}`;
+  function onSubmit(data: ProjectFormData) {
+    // Generate local path based on project name
+    const localPath = `/projects/${data.name.toLowerCase().replace(/\s+/g, "-")}`;
 
-      const projectData = {
-        name: data.name,
-        description: data.description || "",
-        localPath,
-        ownerId: user?.id || "",
-        ...(data.type === "github" && {
-          gitUrl: data.gitUrl,
-          branch: data.branch || "main",
-        }),
-      };
+    const projectData = {
+      name: data.name,
+      description: data.description || "",
+      localPath,
+      ownerId: user?.id || "",
+      ...(data.type === "github" && {
+        gitUrl: data.gitUrl,
+        branch: data.branch || "main",
+      }),
+    };
 
-      const response = await window.api.projects.create(projectData);
-
-      if (response.success && response.data) {
-        // Simply invalidate the route to refresh project list
-        router.invalidate();
-        onSuccess?.(response.data.id);
-      } else {
-        throw new Error(response.error || "Falha ao criar projeto");
-      }
-    } catch (error) {
-      console.error("Error creating project:", error);
-      // TODO: Show error toast
-    } finally {
-      setIsCreating(false);
-    }
+    createProjectMutation.mutate(projectData);
   }
 
   return (
@@ -188,12 +186,12 @@ function ProjectForm(props: ProjectFormProps) {
             type="button"
             variant="outline"
             onClick={onCancel}
-            disabled={isCreating}
+            disabled={createProjectMutation.isPending}
           >
             Cancelar
           </Button>
-          <Button type="submit" disabled={isCreating}>
-            {isCreating ? "Criando..." : "Criar Projeto"}
+          <Button type="submit" disabled={createProjectMutation.isPending}>
+            {createProjectMutation.isPending ? "Criando..." : "Criar Projeto"}
           </Button>
         </div>
       </form>

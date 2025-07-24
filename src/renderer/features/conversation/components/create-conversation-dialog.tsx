@@ -1,8 +1,5 @@
-import { useMutation } from "@tanstack/react-query";
-import { useRouter } from "@tanstack/react-router";
 import { X, Search, Plus, User, Bot } from "lucide-react";
 import { useState } from "react";
-import { toast } from "sonner";
 
 import type { UserSummary } from "@/main/features/user/user.service";
 
@@ -23,6 +20,7 @@ import { Input } from "@/renderer/components/ui/input";
 import { ScrollArea } from "@/renderer/components/ui/scroll-area";
 import type { CreateConversationInput } from "@/renderer/features/conversation/types";
 import type { AuthenticatedUser } from "@/renderer/features/conversation/types";
+import { useApiMutation } from "@/renderer/lib/api-mutation";
 
 interface CreateConversationDialogProps {
   availableUsers: UserSummary[];
@@ -35,23 +33,20 @@ function CreateConversationDialog(props: CreateConversationDialogProps) {
   const { availableUsers, currentUser, onClose, onConversationCreated } = props;
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedUserIds, setSelectedUserIds] = useState<string[]>([]);
-  const router = useRouter();
 
-  // PREFERRED: Direct mutation with window.api and route invalidation
-  const createConversationMutation = useMutation({
-    mutationFn: (data: CreateConversationInput) =>
-      window.api.conversations.create(data),
-    onSuccess: (response) => {
-      if (response.success && response.data) {
-        toast.success("Conversation created successfully");
-        router.invalidate(); // Refresh route data (conversations + agents)
-        onConversationCreated(response.data.id);
-      }
+  // Standardized mutation with automatic error handling
+  const createConversationMutation = useApiMutation(
+    (data: CreateConversationInput) => window.api.conversations.create(data),
+    {
+      successMessage: "Conversation created successfully",
+      errorMessage: "Failed to create conversation",
+      onSuccess: (conversation) => {
+        if (conversation?.id) {
+          onConversationCreated(conversation.id);
+        }
+      },
     },
-    onError: () => {
-      toast.error("Failed to create conversation");
-    },
-  });
+  );
 
   // Filter agents based on search
   const filteredUsers = availableUsers.filter((user) =>

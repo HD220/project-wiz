@@ -1,8 +1,6 @@
-import { useMutation } from "@tanstack/react-query";
-import { Link, useRouter } from "@tanstack/react-router";
+import { Link } from "@tanstack/react-router";
 import { MoreHorizontal, Edit2, Trash2, Star, StarOff } from "lucide-react";
 import { useState } from "react";
-import { toast } from "sonner";
 
 import type { LlmProvider } from "@/main/features/agent/llm-provider/llm-provider.types";
 
@@ -26,7 +24,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/renderer/components/ui/dropdown-menu";
-import { useAuth } from "@/renderer/contexts/auth.context";
+import { useCrudMutation, useApiMutation } from "@/renderer/lib/api-mutation";
 
 const getProviderLabel = (type: string): string => {
   const labels: Record<string, string> = {
@@ -46,32 +44,21 @@ interface ProviderCardProps {
 function ProviderCard(props: ProviderCardProps) {
   const { provider } = props;
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-  const router = useRouter();
-  const { user } = useAuth();
 
-  // SIMPLE: Direct mutations with window.api
-  const deleteProviderMutation = useMutation({
-    mutationFn: (id: string) => window.api.llmProviders.delete(id),
-    onSuccess: () => {
-      toast.success("Provider deleted successfully");
-      router.invalidate(); // Refresh route data
-      setShowDeleteDialog(false);
-    },
-    onError: () => {
-      toast.error("Failed to delete provider");
-    },
-  });
+  // Standardized CRUD mutation for delete
+  const deleteProviderMutation = useCrudMutation<void, string>(
+    "delete",
+    (id: string) => window.api.llmProviders.delete(id),
+    "Provider",
+  );
 
-  const setDefaultProviderMutation = useMutation({
-    mutationFn: ({ id, userId }: { id: string; userId: string }) =>
-      window.api.llmProviders.setDefault(id, userId),
-    onSuccess: () => {
-      toast.success("Default provider updated");
-      router.invalidate(); // Refresh route data
-    },
-    onError: () => {
-      toast.error("Failed to update default provider");
-    },
+  // Custom mutation for setting default (no userId parameter needed now)
+  const setDefaultProviderMutation = useApiMutation<
+    string,
+    { message: string }
+  >((id: string) => window.api.llmProviders.setDefault(id), {
+    successMessage: "Default provider updated",
+    errorMessage: "Failed to update default provider",
   });
 
   const isLoading =
@@ -79,13 +66,11 @@ function ProviderCard(props: ProviderCardProps) {
 
   function handleDelete() {
     deleteProviderMutation.mutate(provider.id);
+    setShowDeleteDialog(false);
   }
 
   function handleSetDefault() {
-    setDefaultProviderMutation.mutate({
-      id: provider.id,
-      userId: user?.id || "",
-    });
+    setDefaultProviderMutation.mutate(provider.id);
   }
 
   return (

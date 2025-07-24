@@ -1,10 +1,4 @@
-import { useMutation } from "@tanstack/react-query";
-import {
-  createFileRoute,
-  useNavigate,
-  useRouter,
-} from "@tanstack/react-router";
-import { toast } from "sonner";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 
 import type { LlmProvider } from "@/main/features/agent/llm-provider/llm-provider.types";
 
@@ -16,24 +10,21 @@ import {
 } from "@/renderer/components/ui/dialog";
 import type { CreateAgentInput } from "@/renderer/features/agent/agent.types";
 import { AgentForm } from "@/renderer/features/agent/components/agent-form";
+import { useApiMutation } from "@/renderer/lib/api-mutation";
 
 function NewAgentPage() {
   const navigate = useNavigate();
-  const router = useRouter();
   const { providers } = Route.useLoaderData();
 
-  // SIMPLE: Direct mutation with window.api
-  const createAgentMutation = useMutation({
-    mutationFn: (data: CreateAgentInput) => window.api.agents.create(data),
-    onSuccess: () => {
-      toast.success("Agent created successfully");
-      router.invalidate(); // Refresh agents list
-      handleClose();
+  // Standardized mutation with automatic error handling
+  const createAgentMutation = useApiMutation(
+    (data: CreateAgentInput) => window.api.agents.create(data),
+    {
+      successMessage: "Agent created successfully",
+      errorMessage: "Failed to create agent",
+      onSuccess: () => handleClose(),
     },
-    onError: () => {
-      toast.error("Failed to create agent");
-    },
-  });
+  );
 
   function handleClose() {
     navigate({ to: "/user/agents" });
@@ -70,7 +61,7 @@ export const Route = createFileRoute("/_authenticated/user/agents/new/")({
       throw new Error("User not authenticated");
     }
 
-    const providersResponse = await window.api.llmProviders.list(auth.user.id);
+    const providersResponse = await window.api.llmProviders.list();
     if (!providersResponse.success) {
       throw new Error(providersResponse.error || "Failed to load providers");
     }

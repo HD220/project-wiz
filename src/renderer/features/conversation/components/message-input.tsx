@@ -38,8 +38,8 @@ function MessageInput(props: MessageInputProps) {
         textareaRef.current.style.height = "auto";
         textareaRef.current.focus();
       }
-    } catch (error) {
-      console.error("Failed to send message:", error);
+    } catch (_error) {
+      // Error handling is done by useApiMutation in parent component
     }
   }
 

@@ -1,8 +1,4 @@
-import {
-  createFileRoute,
-  useNavigate,
-  useRouter,
-} from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 
 import type { LlmProvider } from "@/main/features/agent/llm-provider/llm-provider.types";
 
@@ -17,37 +13,34 @@ import type {
   SelectAgent,
 } from "@/renderer/features/agent/agent.types";
 import { AgentForm } from "@/renderer/features/agent/components/agent-form";
+import { useApiMutation } from "@/renderer/lib/api-mutation";
+import { loadApiDataParallel } from "@/renderer/lib/route-loader";
 
 function EditAgentPage() {
   const navigate = useNavigate();
-  const router = useRouter();
   const { agent, providers } = Route.useLoaderData();
+
+  // Standardized mutation with automatic error handling
+  const updateAgentMutation = useApiMutation(
+    (data: CreateAgentInput) =>
+      window.api.agents.update((agent as SelectAgent).id, data),
+    {
+      successMessage: "Agent updated successfully",
+      errorMessage: "Failed to update agent",
+      onSuccess: () => handleClose(),
+    },
+  );
 
   function handleClose() {
     navigate({ to: "/user/agents" });
   }
 
-  async function handleSubmit(data: CreateAgentInput) {
-    try {
-      const response = await window.api.agents.update(
-        (agent as SelectAgent).id,
-        data,
-      );
-      if (response.success) {
-        // Invalidate route to refresh data
-        router.invalidate();
-        handleClose();
-      } else {
-        // Handle error - could show toast here
-        console.error("Failed to update agent:", response.error);
-      }
-    } catch (error) {
-      console.error("Error updating agent:", error);
-    }
+  async function handleSubmit(data: CreateAgentInput): Promise<void> {
+    updateAgentMutation.mutate(data);
   }
 
   return (
-    <Dialog open onOpenChange={handleClose}>
+    <Dialog open onOpenChange={(open) => !open && handleClose()}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Edit Agent</DialogTitle>
@@ -58,7 +51,7 @@ function EditAgentPage() {
           providers={providers as LlmProvider[]}
           onSubmit={handleSubmit}
           onCancel={handleClose}
-          isLoading={false}
+          isLoading={updateAgentMutation.isPending}
         />
       </DialogContent>
     </Dialog>
@@ -68,26 +61,14 @@ function EditAgentPage() {
 export const Route = createFileRoute(
   "/_authenticated/user/agents/edit/$agentId/",
 )({
-  loader: async ({ params, context }) => {
-    const { auth } = context;
+  loader: async ({ params }) => {
     const { agentId } = params;
 
-    // Load agent data
-    const agentResponse = await window.api.agents.get(agentId);
-    if (!agentResponse.success) {
-      throw new Error(agentResponse.error || "Failed to load agent");
-    }
-
-    // Load providers data for the form
-    const providersResponse = await window.api.llmProviders.list(auth.user!.id);
-    if (!providersResponse.success) {
-      throw new Error(providersResponse.error || "Failed to load providers");
-    }
-
-    return {
-      agent: agentResponse.data as SelectAgent,
-      providers: providersResponse.data as LlmProvider[],
-    };
+    // Load multiple API calls in parallel with standardized error handling
+    return await loadApiDataParallel({
+      agent: () => window.api.agents.get(agentId),
+      providers: () => window.api.llmProviders.list(),
+    });
   },
   component: EditAgentPage,
 });

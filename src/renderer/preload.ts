@@ -3,6 +3,7 @@
 
 import { contextBridge, ipcRenderer } from "electron";
 
+import type { AgentFiltersInput } from "@/main/features/agent/agent.schema";
 import type {
   CreateAgentInput,
   AgentStatus,
@@ -11,7 +12,6 @@ import type { CreateProviderInput } from "@/main/features/agent/llm-provider/llm
 import type {
   MemoryCreationInput,
   MemoryUpdateInput,
-  MemorySearchInput,
 } from "@/main/features/agent/memory/memory.types";
 import type {
   LoginCredentials,
@@ -52,10 +52,10 @@ contextBridge.exposeInMainWorld("api", {
 
   // Profile API
   profile: {
-    getTheme: (userId: string): Promise<IpcResponse> =>
-      ipcRenderer.invoke("profile:getTheme", userId),
-    updateTheme: (userId: string, theme: Theme): Promise<IpcResponse> =>
-      ipcRenderer.invoke("profile:updateTheme", userId, theme),
+    getTheme: (): Promise<IpcResponse> =>
+      ipcRenderer.invoke("profile:getTheme"),
+    updateTheme: (theme: Theme): Promise<IpcResponse> =>
+      ipcRenderer.invoke("profile:updateTheme", theme),
   },
 
   // Users API
@@ -103,8 +103,7 @@ contextBridge.exposeInMainWorld("api", {
   llmProviders: {
     create: (input: CreateProviderInput): Promise<IpcResponse> =>
       ipcRenderer.invoke("llm-providers:create", input),
-    list: (userId: string): Promise<IpcResponse> =>
-      ipcRenderer.invoke("llm-providers:list", userId),
+    list: (): Promise<IpcResponse> => ipcRenderer.invoke("llm-providers:list"),
     getById: (id: string): Promise<IpcResponse> =>
       ipcRenderer.invoke("llm-providers:getById", id),
     update: (
@@ -114,17 +113,18 @@ contextBridge.exposeInMainWorld("api", {
       ipcRenderer.invoke("llm-providers:update", id, updates),
     delete: (id: string): Promise<IpcResponse> =>
       ipcRenderer.invoke("llm-providers:delete", id),
-    setDefault: (providerId: string, userId: string): Promise<IpcResponse> =>
-      ipcRenderer.invoke("llm-providers:setDefault", providerId, userId),
-    getDefault: (userId: string): Promise<IpcResponse> =>
-      ipcRenderer.invoke("llm-providers:getDefault", userId),
+    setDefault: (providerId: string): Promise<IpcResponse> =>
+      ipcRenderer.invoke("llm-providers:setDefault", providerId),
+    getDefault: (): Promise<IpcResponse> =>
+      ipcRenderer.invoke("llm-providers:getDefault"),
   },
 
   // Agents API
   agents: {
     create: (input: CreateAgentInput): Promise<IpcResponse> =>
       ipcRenderer.invoke("agents:create", input),
-    list: (): Promise<IpcResponse> => ipcRenderer.invoke("agents:list"),
+    list: (filters?: AgentFiltersInput): Promise<IpcResponse> =>
+      ipcRenderer.invoke("agents:list", filters),
     get: (id: string): Promise<IpcResponse> =>
       ipcRenderer.invoke("agents:get", id),
     getWithProvider: (id: string): Promise<IpcResponse> =>
@@ -139,72 +139,18 @@ contextBridge.exposeInMainWorld("api", {
       ipcRenderer.invoke("agents:delete", id),
   },
 
-  // Agent Memory API
+  // Agent Memory API (simplified - only implemented methods)
   agentMemory: {
     create: (input: MemoryCreationInput): Promise<IpcResponse> =>
       ipcRenderer.invoke("agent-memory:create", input),
+    retrieve: (agentId: string, limit?: number): Promise<IpcResponse> =>
+      ipcRenderer.invoke("agent-memory:retrieve", agentId, limit),
     findById: (id: string): Promise<IpcResponse> =>
       ipcRenderer.invoke("agent-memory:find-by-id", id),
-    search: (criteria: MemorySearchInput): Promise<IpcResponse> =>
-      ipcRenderer.invoke("agent-memory:search", criteria),
-    getRecent: (
-      agentId: string,
-      userId: string,
-      limit?: number,
-    ): Promise<IpcResponse> =>
-      ipcRenderer.invoke("agent-memory:get-recent", agentId, userId, limit),
-    getByConversation: (
-      conversationId: string,
-      limit?: number,
-    ): Promise<IpcResponse> =>
-      ipcRenderer.invoke(
-        "agent-memory:get-by-conversation",
-        conversationId,
-        limit,
-      ),
     update: (id: string, updates: MemoryUpdateInput): Promise<IpcResponse> =>
       ipcRenderer.invoke("agent-memory:update", id, updates),
-    archive: (id: string): Promise<IpcResponse> =>
-      ipcRenderer.invoke("agent-memory:archive", id),
     delete: (id: string): Promise<IpcResponse> =>
       ipcRenderer.invoke("agent-memory:delete", id),
-    createRelation: (
-      sourceMemoryId: string,
-      targetMemoryId: string,
-      relationType: string,
-      strength?: number,
-    ): Promise<IpcResponse> =>
-      ipcRenderer.invoke(
-        "agent-memory:create-relation",
-        sourceMemoryId,
-        targetMemoryId,
-        relationType,
-        strength,
-      ),
-    getRelated: (memoryId: string): Promise<IpcResponse> =>
-      ipcRenderer.invoke("agent-memory:get-related", memoryId),
-    prune: (
-      agentId: string,
-      daysOld?: number,
-      minImportanceScore?: number,
-    ): Promise<IpcResponse> =>
-      ipcRenderer.invoke(
-        "agent-memory:prune",
-        agentId,
-        daysOld,
-        minImportanceScore,
-      ),
-    performMaintenance: (
-      agentId: string,
-      config?: Record<string, unknown>,
-    ): Promise<IpcResponse> =>
-      ipcRenderer.invoke("agent-memory:perform-maintenance", agentId, config),
-    getStatistics: (agentId: string): Promise<IpcResponse> =>
-      ipcRenderer.invoke("agent-memory:get-statistics", agentId),
-    runAutomatedMaintenance: (
-      config?: Record<string, unknown>,
-    ): Promise<IpcResponse> =>
-      ipcRenderer.invoke("agent-memory:run-automated-maintenance", config),
   },
 
   // General invoke method

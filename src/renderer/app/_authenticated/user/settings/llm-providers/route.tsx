@@ -1,8 +1,7 @@
 import { createFileRoute, Outlet } from "@tanstack/react-router";
 
-import type { LlmProvider } from "@/main/features/agent/llm-provider/llm-provider.types";
-
 import { ProviderList } from "@/renderer/features/llm-provider/components/provider-list";
+import { loadApiData } from "@/renderer/lib/route-loader";
 
 function LLMProvidersLayout() {
   const { providers } = Route.useLoaderData();
@@ -33,16 +32,12 @@ function LLMProvidersLayout() {
 export const Route = createFileRoute(
   "/_authenticated/user/settings/llm-providers",
 )({
-  loader: async ({ context }) => {
-    const { auth } = context;
-
-    const response = await window.api.llmProviders.list(auth.user!.id);
-    if (!response.success) {
-      throw new Error(response.error || "Failed to load providers");
-    }
-    return {
-      providers: response.data as LlmProvider[],
-    };
+  loader: async () => {
+    const providers = await loadApiData(
+      () => window.api.llmProviders.list(),
+      "Failed to load providers",
+    );
+    return { providers };
   },
   component: LLMProvidersLayout,
 });

@@ -3,6 +3,7 @@ import { createFileRoute, Outlet } from "@tanstack/react-router";
 import { AgentFiltersSchema } from "@/renderer/features/agent/agent.schema";
 import { AgentList } from "@/renderer/features/agent/components/agent-list";
 import { ContentHeader } from "@/renderer/features/app/components/content-header";
+import { loadApiData } from "@/renderer/lib/route-loader";
 
 function AgentsLayout() {
   const agents = Route.useLoaderData();
@@ -29,13 +30,11 @@ export const Route = createFileRoute("/_authenticated/user/agents")({
   validateSearch: (search) => AgentFiltersSchema.parse(search),
   loaderDeps: ({ search }) => ({ search }),
   loader: async ({ deps }) => {
-    // Simple data loading with filtering
-    const response = await window.api.agents.list();
-    if (!response.success) {
-      throw new Error(response.error || "Failed to load agents");
-    }
-
-    let agents = response.data || [];
+    // Standardized data loading with error handling
+    let agents = await loadApiData(
+      () => window.api.agents.list(),
+      "Failed to load agents",
+    );
 
     // Client-side filtering for now (simpler implementation)
     if (deps.search.status) {

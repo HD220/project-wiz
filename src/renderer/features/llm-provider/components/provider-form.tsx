@@ -1,8 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation } from "@tanstack/react-query";
-import { useRouter } from "@tanstack/react-router";
 import { useForm } from "react-hook-form";
-import { toast } from "sonner";
 
 import type { CreateProviderInput } from "@/main/features/agent/llm-provider/llm-provider.types";
 import type { LlmProvider } from "@/main/features/agent/llm-provider/llm-provider.types";
@@ -15,6 +12,7 @@ import {
 } from "@/renderer/components/ui/dialog";
 import { Form } from "@/renderer/components/ui/form";
 import { useAuth } from "@/renderer/contexts/auth.context";
+import { useApiMutation } from "@/renderer/lib/api-mutation";
 
 import {
   PROVIDER_CONFIGS,
@@ -33,54 +31,27 @@ interface ProviderFormProps {
 
 function ProviderForm(props: ProviderFormProps) {
   const { provider, onClose } = props;
-  const router = useRouter();
   const { user } = useAuth();
 
-  // SIMPLE: Direct mutations with window.api
-  const createProviderMutation = useMutation({
-    mutationFn: (data: CreateProviderInput) =>
-      window.api.llmProviders.create(data),
-    onSuccess: (response) => {
-      if (response.success) {
-        toast.success("Provider created successfully");
-        // Invalidate all routes for simplicity
-        router.invalidate();
-        onClose();
-      } else {
-        toast.error(response.error || "Failed to create provider");
-      }
+  // Standardized mutations with automatic error handling
+  const createProviderMutation = useApiMutation(
+    (data: CreateProviderInput) => window.api.llmProviders.create(data),
+    {
+      successMessage: "Provider created successfully",
+      errorMessage: "Failed to create provider",
+      onSuccess: () => onClose(),
     },
-    onError: (error) => {
-      const errorMessage =
-        error instanceof Error ? error.message : "Failed to create provider";
-      toast.error(errorMessage);
-    },
-  });
+  );
 
-  const updateProviderMutation = useMutation({
-    mutationFn: ({
-      id,
-      data,
-    }: {
-      id: string;
-      data: Partial<CreateProviderInput>;
-    }) => window.api.llmProviders.update(id, data),
-    onSuccess: (response) => {
-      if (response.success) {
-        toast.success("Provider updated successfully");
-        // Invalidate all routes for simplicity
-        router.invalidate();
-        onClose();
-      } else {
-        toast.error(response.error || "Failed to update provider");
-      }
+  const updateProviderMutation = useApiMutation(
+    ({ id, data }: { id: string; data: Partial<CreateProviderInput> }) =>
+      window.api.llmProviders.update(id, data),
+    {
+      successMessage: "Provider updated successfully",
+      errorMessage: "Failed to update provider",
+      onSuccess: () => onClose(),
     },
-    onError: (error) => {
-      const errorMessage =
-        error instanceof Error ? error.message : "Failed to update provider";
-      toast.error(errorMessage);
-    },
-  });
+  );
 
   const isLoading =
     createProviderMutation.isPending || updateProviderMutation.isPending;
@@ -106,7 +77,7 @@ function ProviderForm(props: ProviderFormProps) {
 
   function onSubmit(data: ProviderFormData) {
     if (!user?.id) {
-      toast.error("User not authenticated");
+      // This shouldn't happen with session-based auth, but keeping as safety check
       return;
     }
 
@@ -121,7 +92,7 @@ function ProviderForm(props: ProviderFormProps) {
     } else {
       const createData = {
         ...data,
-        userId: user.id,
+        userId: user.id, // Still needed for provider creation
         baseUrl: data.baseUrl || null,
       };
       createProviderMutation.mutate(createData);

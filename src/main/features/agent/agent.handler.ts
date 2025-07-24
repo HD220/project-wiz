@@ -1,207 +1,81 @@
-import { ipcMain } from "electron";
-
+import type { AgentFiltersInput } from "@/main/features/agent/agent.schema";
 import { AgentService } from "@/main/features/agent/agent.service";
 import type {
   CreateAgentInput,
   AgentStatus,
 } from "@/main/features/agent/agent.types";
 import { AuthService } from "@/main/features/auth/auth.service";
-import type { IpcResponse } from "@/main/types";
-
-/**
- * Setup agent CRUD operation handlers
- */
-function setupAgentCrudHandlers(): void {
-  // Create agent
-  ipcMain.handle(
-    "agents:create",
-    async (_, input: CreateAgentInput): Promise<IpcResponse> => {
-      try {
-        // Get session from main process for desktop authentication
-        const currentUser = await AuthService.getCurrentUser();
-        if (!currentUser) {
-          throw new Error("User not authenticated");
-        }
-
-        const result = await AgentService.create(input, currentUser.id);
-        return {
-          success: true,
-          data: result,
-        };
-      } catch (error) {
-        return {
-          success: false,
-          error:
-            error instanceof Error ? error.message : "Failed to create agent",
-        };
-      }
-    },
-  );
-
-  // Update agent
-  ipcMain.handle(
-    "agents:update",
-    async (
-      _,
-      id: string,
-      updates: Partial<CreateAgentInput>,
-    ): Promise<IpcResponse> => {
-      try {
-        // Get session from main process for desktop authentication
-        const currentUser = await AuthService.getCurrentUser();
-        if (!currentUser) {
-          throw new Error("User not authenticated");
-        }
-
-        const result = await AgentService.update(id, updates);
-        return {
-          success: true,
-          data: result,
-        };
-      } catch (error) {
-        return {
-          success: false,
-          error:
-            error instanceof Error ? error.message : "Failed to update agent",
-        };
-      }
-    },
-  );
-
-  // Delete agent
-  ipcMain.handle(
-    "agents:delete",
-    async (_, id: string): Promise<IpcResponse> => {
-      try {
-        // Get session from main process for desktop authentication
-        const currentUser = await AuthService.getCurrentUser();
-        if (!currentUser) {
-          throw new Error("User not authenticated");
-        }
-
-        await AgentService.delete(id);
-        return {
-          success: true,
-          data: { message: "Agent deleted successfully" },
-        };
-      } catch (error) {
-        return {
-          success: false,
-          error:
-            error instanceof Error ? error.message : "Failed to delete agent",
-        };
-      }
-    },
-  );
-}
-
-/**
- * Setup agent query operation handlers
- */
-function setupAgentQueryHandlers(): void {
-  // List agents
-  ipcMain.handle("agents:list", async (_, filters?): Promise<IpcResponse> => {
-    try {
-      // Get session from main process for desktop authentication
-      const currentUser = await AuthService.getCurrentUser();
-      if (!currentUser) {
-        throw new Error("User not authenticated");
-      }
-
-      const result = await AgentService.listByOwnerIdWithFilters(
-        currentUser.id,
-        filters,
-      );
-      return {
-        success: true,
-        data: result,
-      };
-    } catch (error) {
-      return {
-        success: false,
-        error: error instanceof Error ? error.message : "Failed to list agents",
-      };
-    }
-  });
-
-  // Get agent by ID
-  ipcMain.handle("agents:get", async (_, id: string): Promise<IpcResponse> => {
-    try {
-      const result = await AgentService.findById(id);
-      if (!result) {
-        throw new Error("Agent not found");
-      }
-      return {
-        success: true,
-        data: result,
-      };
-    } catch (error) {
-      return {
-        success: false,
-        error: error instanceof Error ? error.message : "Failed to get agent",
-      };
-    }
-  });
-
-  // Get agent with provider information
-  ipcMain.handle(
-    "agents:getWithProvider",
-    async (_, id: string): Promise<IpcResponse> => {
-      try {
-        const result = await AgentService.getWithProvider(id);
-        if (!result) {
-          throw new Error("Agent not found");
-        }
-        return {
-          success: true,
-          data: result,
-        };
-      } catch (error) {
-        return {
-          success: false,
-          error:
-            error instanceof Error
-              ? error.message
-              : "Failed to get agent with provider",
-        };
-      }
-    },
-  );
-}
-
-/**
- * Setup agent status management handlers
- */
-function setupAgentStatusHandlers(): void {
-  // Update agent status
-  ipcMain.handle(
-    "agents:updateStatus",
-    async (_, id: string, status: AgentStatus): Promise<IpcResponse> => {
-      try {
-        await AgentService.updateStatus(id, status);
-        return {
-          success: true,
-          data: { message: "Agent status updated successfully" },
-        };
-      } catch (error) {
-        return {
-          success: false,
-          error:
-            error instanceof Error
-              ? error.message
-              : "Failed to update agent status",
-        };
-      }
-    },
-  );
-}
+import { createIpcHandler } from "@/main/utils/ipc-handler";
 
 /**
  * Setup agent IPC handlers
  * Exposes AgentService methods to the frontend via IPC
  */
 export function setupAgentHandlers(): void {
-  setupAgentCrudHandlers();
-  setupAgentQueryHandlers();
-  setupAgentStatusHandlers();
+  // Create agent (with session-based auth)
+  createIpcHandler("agents:create", async (input: CreateAgentInput) => {
+    const currentUser = await AuthService.getCurrentUser();
+    if (!currentUser) {
+      throw new Error("User not authenticated");
+    }
+    return AgentService.create(input, currentUser.id);
+  });
+
+  // Update agent (with session-based auth)
+  createIpcHandler(
+    "agents:update",
+    async (id: string, updates: Partial<CreateAgentInput>) => {
+      const currentUser = await AuthService.getCurrentUser();
+      if (!currentUser) {
+        throw new Error("User not authenticated");
+      }
+      return AgentService.update(id, updates);
+    },
+  );
+
+  // Delete agent (with session-based auth)
+  createIpcHandler("agents:delete", async (id: string) => {
+    const currentUser = await AuthService.getCurrentUser();
+    if (!currentUser) {
+      throw new Error("User not authenticated");
+    }
+    await AgentService.delete(id);
+    return { message: "Agent deleted successfully" };
+  });
+
+  // List agents (with session-based auth and filters)
+  createIpcHandler("agents:list", async (filters?: AgentFiltersInput) => {
+    const currentUser = await AuthService.getCurrentUser();
+    if (!currentUser) {
+      throw new Error("User not authenticated");
+    }
+    return AgentService.listByOwnerIdWithFilters(currentUser.id, filters);
+  });
+
+  // Get agent by ID
+  createIpcHandler("agents:get", async (id: string) => {
+    const result = await AgentService.findById(id);
+    if (!result) {
+      throw new Error("Agent not found");
+    }
+    return result;
+  });
+
+  // Get agent with provider information
+  createIpcHandler("agents:getWithProvider", async (id: string) => {
+    const result = await AgentService.getWithProvider(id);
+    if (!result) {
+      throw new Error("Agent not found");
+    }
+    return result;
+  });
+
+  // Update agent status
+  createIpcHandler(
+    "agents:updateStatus",
+    async (id: string, status: AgentStatus) => {
+      await AgentService.updateStatus(id, status);
+      return { message: "Agent status updated successfully" };
+    },
+  );
 }

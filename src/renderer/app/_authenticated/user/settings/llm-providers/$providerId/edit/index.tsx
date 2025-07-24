@@ -124,10 +124,8 @@ function EditProviderModal() {
 export const Route = createFileRoute(
   "/_authenticated/user/settings/llm-providers/$providerId/edit/",
 )({
-  loader: async ({ context, params }) => {
-    const { auth } = context;
-
-    const response = await window.api.llmProviders.list(auth.user!.id);
+  loader: async ({ params }) => {
+    const response = await window.api.llmProviders.list();
     if (!response.success) {
       throw new Error(response.error || "Failed to load providers");
     }

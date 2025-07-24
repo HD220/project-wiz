@@ -1,6 +1,7 @@
 import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
 
 import { RootSidebar } from "@/renderer/features/app/components/root-sidebar";
+import { loadApiDataWithFallback } from "@/renderer/lib/route-loader";
 
 function AuthenticatedLayout() {
   const { projects } = Route.useLoaderData();
@@ -27,15 +28,14 @@ export const Route = createFileRoute("/_authenticated")({
     }
   },
   loader: async () => {
-    // Load all projects for the authenticated user
-    const response = await window.api.projects.listAll();
+    // Load projects with fallback (non-critical data)
+    const projects = await loadApiDataWithFallback(
+      () => window.api.projects.listAll(),
+      [], // Fallback to empty array
+      "Failed to load projects",
+    );
 
-    // Don't fail if projects can't be loaded - return empty array
-    const projects = response.success ? response.data : [];
-
-    return {
-      projects: projects || [],
-    };
+    return { projects };
   },
   component: AuthenticatedLayout,
 });

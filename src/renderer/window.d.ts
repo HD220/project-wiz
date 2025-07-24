@@ -1,3 +1,4 @@
+import type { AgentFiltersInput } from "@/main/features/agent/agent.schema";
 import type {
   CreateAgentInput,
   AgentStatus,
@@ -108,7 +109,7 @@ declare global {
         create: (
           input: CreateProviderInput,
         ) => Promise<IpcResponse<LlmProvider>>;
-        list: (userId: string) => Promise<IpcResponse<LlmProvider[]>>;
+        list: () => Promise<IpcResponse<LlmProvider[]>>;
         getById: (id: string) => Promise<IpcResponse<LlmProvider | null>>;
         update: (
           id: string,
@@ -117,17 +118,16 @@ declare global {
         delete: (id: string) => Promise<IpcResponse<void>>;
         setDefault: (
           providerId: string,
-          userId: string,
-        ) => Promise<IpcResponse<LlmProvider>>;
-        getDefault: (
-          userId: string,
-        ) => Promise<IpcResponse<LlmProvider | null>>;
+        ) => Promise<IpcResponse<{ message: string }>>;
+        getDefault: () => Promise<IpcResponse<LlmProvider | null>>;
       };
 
       // Agents API
       agents: {
         create: (input: CreateAgentInput) => Promise<IpcResponse<SelectAgent>>;
-        list: () => Promise<IpcResponse<SelectAgent[]>>;
+        list: (
+          filters?: AgentFiltersInput,
+        ) => Promise<IpcResponse<SelectAgent[]>>;
         get: (id: string) => Promise<IpcResponse<SelectAgent | null>>;
         getWithProvider: (
           id: string,

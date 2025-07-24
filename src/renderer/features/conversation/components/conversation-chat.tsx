@@ -1,7 +1,4 @@
-import { useMutation } from "@tanstack/react-query";
-import { useRouter } from "@tanstack/react-router";
 import { useEffect, useRef, useMemo } from "react";
-import { toast } from "sonner";
 
 import { ScrollArea } from "@/renderer/components/ui/scroll-area";
 import { Separator } from "@/renderer/components/ui/separator";
@@ -13,6 +10,7 @@ import type {
   Message,
 } from "@/renderer/features/conversation/message.types";
 import type { AuthenticatedUser } from "@/renderer/features/user/user.types";
+import { useApiMutation } from "@/renderer/lib/api-mutation";
 
 interface UserBasic {
   id: string;
@@ -30,18 +28,15 @@ interface ConversationChatProps {
 function ConversationChat(props: ConversationChatProps) {
   const { conversation, availableUsers, currentUser, className } = props;
   const scrollAreaRef = useRef<HTMLDivElement>(null);
-  const router = useRouter();
 
-  // SIMPLE: Direct mutation with window.api
-  const sendMessageMutation = useMutation({
-    mutationFn: (input: SendMessageInput) => window.api.messages.send(input),
-    onSuccess: () => {
-      router.invalidate(); // Refresh conversation data
+  // Standardized mutation with automatic error handling
+  const sendMessageMutation = useApiMutation(
+    (input: SendMessageInput) => window.api.messages.send(input),
+    {
+      errorMessage: "Failed to send message",
+      // No success message for chat messages (too noisy)
     },
-    onError: () => {
-      toast.error("Failed to send message");
-    },
-  });
+  );
 
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {

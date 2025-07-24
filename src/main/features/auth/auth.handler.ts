@@ -1,160 +1,42 @@
-import { ipcMain } from "electron";
-
 import { AuthService } from "@/main/features/auth/auth.service";
 import type {
   LoginCredentials,
   RegisterUserInput,
 } from "@/main/features/auth/auth.types";
-import type { IpcResponse } from "@/main/types";
-
-function setupRegisterHandler(): void {
-  ipcMain.handle(
-    "auth:register",
-    async (_, input: RegisterUserInput): Promise<IpcResponse> => {
-      try {
-        const result = await AuthService.register(input);
-        return {
-          success: true,
-          data: result,
-        };
-      } catch (error) {
-        return {
-          success: false,
-          error: error instanceof Error ? error.message : "Registration failed",
-        };
-      }
-    },
-  );
-}
-
-function setupLoginHandler(): void {
-  ipcMain.handle(
-    "auth:login",
-    async (_, credentials: LoginCredentials): Promise<IpcResponse> => {
-      try {
-        const result = await AuthService.login(credentials);
-        return {
-          success: true,
-          data: result,
-        };
-      } catch (error) {
-        return {
-          success: false,
-          error: error instanceof Error ? error.message : "Login failed",
-        };
-      }
-    },
-  );
-}
-
-function setupGetCurrentUserHandler(): void {
-  ipcMain.handle("auth:getCurrentUser", async (): Promise<IpcResponse> => {
-    try {
-      const user = await AuthService.getCurrentUser();
-      return {
-        success: true,
-        data: user,
-      };
-    } catch (error) {
-      return {
-        success: false,
-        error:
-          error instanceof Error ? error.message : "Failed to get current user",
-      };
-    }
-  });
-}
-
-function setupLogoutHandler(): void {
-  ipcMain.handle("auth:logout", async (): Promise<IpcResponse> => {
-    try {
-      await AuthService.logout();
-      return {
-        success: true,
-        data: { message: "Logged out successfully" },
-      };
-    } catch (error) {
-      return {
-        success: false,
-        error: error instanceof Error ? error.message : "Logout failed",
-      };
-    }
-  });
-}
-
-function setupIsLoggedInHandler(): void {
-  ipcMain.handle("auth:isLoggedIn", async (): Promise<IpcResponse> => {
-    try {
-      const isLoggedIn = AuthService.isLoggedIn();
-      return {
-        success: true,
-        data: { isLoggedIn },
-      };
-    } catch (error) {
-      return {
-        success: false,
-        error:
-          error instanceof Error
-            ? error.message
-            : "Failed to check login status",
-      };
-    }
-  });
-}
-
-function setupGetActiveSessionHandler(): void {
-  ipcMain.handle("auth:getActiveSession", async (): Promise<IpcResponse> => {
-    try {
-      // Initialize session from database if not already loaded
-      await AuthService.initializeSession();
-
-      const user = await AuthService.getCurrentUser();
-      return {
-        success: true,
-        data: user ? { user } : null,
-      };
-    } catch (error) {
-      return {
-        success: false,
-        error:
-          error instanceof Error
-            ? error.message
-            : "Failed to get active session",
-      };
-    }
-  });
-}
-
-function setupGetUserByIdHandler(): void {
-  ipcMain.handle(
-    "auth:getUserById",
-    async (_, userId: string): Promise<IpcResponse> => {
-      try {
-        const user = await AuthService.getUserById(userId);
-        return {
-          success: true,
-          data: user,
-        };
-      } catch (error) {
-        return {
-          success: false,
-          error: error instanceof Error ? error.message : "Failed to get user",
-        };
-      }
-    },
-  );
-}
+import { createIpcHandler } from "@/main/utils/ipc-handler";
 
 /**
  * Setup authentication IPC handlers
  * Exposes AuthService methods to the frontend via IPC
  */
 export function setupAuthHandlers(): void {
-  setupRegisterHandler();
-  setupLoginHandler();
-  setupGetCurrentUserHandler();
-  setupLogoutHandler();
-  setupIsLoggedInHandler();
-  setupGetActiveSessionHandler();
-  setupGetUserByIdHandler();
+  createIpcHandler("auth:register", (input: RegisterUserInput) =>
+    AuthService.register(input),
+  );
+
+  createIpcHandler("auth:login", (credentials: LoginCredentials) =>
+    AuthService.login(credentials),
+  );
+
+  createIpcHandler("auth:getCurrentUser", () => AuthService.getCurrentUser());
+
+  createIpcHandler("auth:logout", async () => {
+    await AuthService.logout();
+    return { message: "Logged out successfully" };
+  });
+
+  createIpcHandler("auth:isLoggedIn", () =>
+    Promise.resolve({ isLoggedIn: AuthService.isLoggedIn() }),
+  );
+
+  createIpcHandler("auth:getActiveSession", async () => {
+    // Initialize session from database if not already loaded
+    await AuthService.initializeSession();
+    const user = await AuthService.getCurrentUser();
+    return user ? { user } : null;
+  });
+
+  createIpcHandler("auth:getUserById", (userId: string) =>
+    AuthService.getUserById(userId),
+  );
 }

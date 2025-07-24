@@ -10,6 +10,7 @@ import { ConversationChat } from "@/renderer/features/conversation/components/co
 import type { SelectConversation } from "@/renderer/features/conversation/conversation.types";
 import type { Message } from "@/renderer/features/conversation/message.types";
 import type { AuthenticatedUser } from "@/renderer/features/user/user.types";
+import { loadApiDataParallel, loadApiData } from "@/renderer/lib/route-loader";
 
 // Helper function to convert main Message to renderer Message
 function convertToRendererMessage(mainMessage: SelectMessage): Message {
@@ -142,41 +143,34 @@ function DMLayout() {
 
 export const Route = createFileRoute("/_authenticated/user/dm/$conversationId")(
   {
-    loader: async ({ params, context }) => {
-      const { auth } = context;
+    loader: async ({ params }) => {
       const { conversationId } = params;
 
-      // SIMPLE: Direct window.api calls
-      const conversationsResponse =
-        await window.api.conversations.getUserConversations();
-      if (!conversationsResponse.success) {
-        throw new Error("Failed to load conversations");
-      }
+      // Load conversations first to validate conversation exists
+      const conversations = await loadApiData(
+        () => window.api.conversations.getUserConversations(),
+        "Failed to load conversations",
+      );
 
-      const conversation = conversationsResponse.data?.find(
+      const conversation = conversations.find(
         (conv) => conv.id === conversationId,
       );
       if (!conversation) {
         throw new Error("Conversation not found");
       }
 
-      const messagesResponse =
-        await window.api.messages.getConversationMessages(conversationId);
-
-      const messages = messagesResponse.success
-        ? messagesResponse.data || []
-        : [];
-
-      const availableUsersResponse =
-        await window.api.users.listAvailableUsers();
-      const availableUsers = availableUsersResponse.success
-        ? availableUsersResponse.data || []
-        : [];
+      // Load messages, users, and current user in parallel
+      const { messages, availableUsers, user } = await loadApiDataParallel({
+        messages: () =>
+          window.api.messages.getConversationMessages(conversationId),
+        availableUsers: () => window.api.users.listAvailableUsers(),
+        user: () => window.api.auth.getCurrentUser(),
+      });
 
       return {
         conversation: { ...conversation, messages },
         availableUsers,
-        user: auth.user,
+        user,
       };
     },
     component: DMLayout,
