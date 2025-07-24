@@ -33,7 +33,7 @@ function AgentList(props: AgentListProps) {
   const { agents } = props;
 
   // SIMPLE: Get URL search params and navigation
-  const search = useSearch({ from: "/_authenticated/user/agents" }) as any;
+  const search = useSearch({ from: "/_authenticated/user/agents" });
   const navigate = useNavigate();
   const router = useRouter();
 
@@ -168,7 +168,7 @@ function AgentList(props: AgentListProps) {
               <Input
                 placeholder="Search agents..."
                 value={search.search || ""}
-                onChange={(e) => handleSearchChange(e.target.value)}
+                onChange={(event) => handleSearchChange(event.target.value)}
                 className="pl-9 w-64"
               />
             </div>

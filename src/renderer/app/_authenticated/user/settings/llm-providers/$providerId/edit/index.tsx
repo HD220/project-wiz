@@ -102,10 +102,7 @@ function EditProviderModal() {
             <Separator />
 
             {/* API Configuration */}
-            <EditProviderApiSection
-              form={form}
-              watchedType={watchedType as any}
-            />
+            <EditProviderApiSection form={form} watchedType={watchedType} />
 
             <Separator />
 
@@ -134,7 +131,9 @@ export const Route = createFileRoute(
     if (!response.success) {
       throw new Error(response.error || "Failed to load providers");
     }
-    const provider = response.data?.find((p) => p.id === params.providerId);
+    const provider = response.data?.find(
+      (providerItem) => providerItem.id === params.providerId,
+    );
 
     if (!provider) {
       throw new Error("Provider not found");

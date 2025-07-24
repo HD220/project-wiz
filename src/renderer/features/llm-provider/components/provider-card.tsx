@@ -185,8 +185,8 @@ function ProviderCard(props: ProviderCardProps) {
           <AlertDialogHeader>
             <AlertDialogTitle>Delete Provider</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete "{provider.name}"? This action
-              cannot be undone.
+              Are you sure you want to delete &quot;{provider.name}&quot;? This
+              action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

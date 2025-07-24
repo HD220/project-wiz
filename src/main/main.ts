@@ -75,20 +75,21 @@ function createMainWindow(): void {
 }
 
 /**
- * App event handlers
+ * Initialize session manager
  */
-app.whenReady().then(async () => {
-  logger.info("App is ready, initializing IPC handlers and main window");
-
-  // Initialize session manager - load existing session from database
+async function initializeSessionManager(): Promise<void> {
   try {
     await AuthService.initializeSession();
     logger.info("Session manager initialized");
   } catch (error) {
     logger.error("Failed to initialize session manager:", error);
   }
+}
 
-  // Setup IPC handlers
+/**
+ * Setup all IPC handlers
+ */
+function setupAllIpcHandlers(): void {
   setupAuthHandlers();
   logger.info("Authentication IPC handlers registered");
 
@@ -113,12 +114,14 @@ app.whenReady().then(async () => {
   setupAgentMemoryHandlers();
   logger.info("Agent Memory IPC handlers registered");
 
-  // Setup window control handlers
   setupWindowHandlers();
   logger.info("Window control IPC handlers registered");
+}
 
-  createMainWindow();
-
+/**
+ * Setup macOS specific event handlers
+ */
+function setupMacOSHandlers(): void {
   // On macOS, re-create window when dock icon is clicked
   app.on("activate", () => {
     if (BrowserWindow.getAllWindows().length === 0) {
@@ -126,6 +129,18 @@ app.whenReady().then(async () => {
       createMainWindow();
     }
   });
+}
+
+/**
+ * App event handlers
+ */
+app.whenReady().then(async () => {
+  logger.info("App is ready, initializing IPC handlers and main window");
+
+  await initializeSessionManager();
+  setupAllIpcHandlers();
+  createMainWindow();
+  setupMacOSHandlers();
 });
 
 // Quit when all windows are closed, except on macOS

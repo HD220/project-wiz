@@ -11,7 +11,7 @@ import type {
   AuthResult,
 } from "@/main/features/auth/auth.types";
 
-interface AuthContext {
+export interface AuthContextType {
   isAuthenticated: boolean;
   user: AuthenticatedUser | null;
   login: (credentials: { username: string; password: string }) => Promise<void>;
@@ -19,7 +19,7 @@ interface AuthContext {
   isLoading: boolean;
 }
 
-const AuthContext = createContext<AuthContext | null>(null);
+export const AuthContext = createContext<AuthContextType | null>(null);
 
 interface AuthProviderProps {
   children: ReactNode;
@@ -89,4 +89,3 @@ function useAuth() {
 }
 
 export { AuthProvider, useAuth };
-export type { AuthContext };

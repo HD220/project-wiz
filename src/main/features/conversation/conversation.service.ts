@@ -71,7 +71,9 @@ export class ConversationService {
       .from(conversationParticipantsTable)
       .where(eq(conversationParticipantsTable.participantId, userId));
 
-    const conversationIds = userConversations.map((c) => c.conversationId);
+    const conversationIds = userConversations.map(
+      (userConv) => userConv.conversationId,
+    );
 
     // 2. Get all conversations data in one query
     const conversations = await db
@@ -123,7 +125,7 @@ export class ConversationService {
 
     for (const conversation of conversations) {
       const participants = allParticipants.filter(
-        (p) => p.conversationId === conversation.id,
+        (participant) => participant.conversationId === conversation.id,
       );
       const lastMessage = latestMessagesMap.get(conversation.id);
 
@@ -135,9 +137,9 @@ export class ConversationService {
     }
 
     // Sort by last message time (most recent first)
-    return result.sort((a, b) => {
-      const aTime = a.lastMessage?.createdAt || a.updatedAt;
-      const bTime = b.lastMessage?.createdAt || b.updatedAt;
+    return result.sort((convA, convB) => {
+      const aTime = convA.lastMessage?.createdAt || convA.updatedAt;
+      const bTime = convB.lastMessage?.createdAt || convB.updatedAt;
       return bTime.getTime() - aTime.getTime();
     });
   }

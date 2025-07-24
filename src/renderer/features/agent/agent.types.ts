@@ -1,17 +1,49 @@
-// Re-export types from backend
-import type {
-  SelectAgent as BackendSelectAgent,
-  CreateAgentInput as BackendCreateAgentInput,
-  AgentStatus as BackendAgentStatus,
-  ModelConfig as BackendModelConfig,
-  AgentWithProvider as BackendAgentWithProvider,
-} from "@/main/features/agent/agent.types";
+/**
+ * Agent types for renderer process
+ */
 
-export type SelectAgent = BackendSelectAgent;
-export type CreateAgentInput = BackendCreateAgentInput;
-export type AgentStatus = BackendAgentStatus;
-export type ModelConfig = BackendModelConfig;
-export type AgentWithProvider = BackendAgentWithProvider;
+export type AgentStatus = "active" | "inactive" | "busy";
+
+export interface ModelConfig {
+  model: string;
+  temperature: number;
+  maxTokens: number;
+  topP?: number;
+}
+
+export interface SelectAgent {
+  id: string;
+  userId: string;
+  name: string;
+  role: string;
+  backstory: string;
+  goal: string;
+  providerId: string;
+  modelConfig: string; // JSON string
+  status: AgentStatus;
+  systemPrompt: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface CreateAgentInput {
+  name: string;
+  role: string;
+  backstory: string;
+  goal: string;
+  providerId: string;
+  modelConfig: string;
+  status?: AgentStatus;
+  avatar?: string;
+}
+
+export interface AgentWithProvider extends SelectAgent {
+  provider: {
+    id: string;
+    name: string;
+    type: string;
+  };
+}
 
 // Extended agent type with avatar from user table
 export interface AgentWithAvatar extends SelectAgent {

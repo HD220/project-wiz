@@ -1,12 +1,14 @@
 import { Hash, Bot } from "lucide-react";
 
+import type { ConversationWithLastMessage } from "@/main/features/conversation/conversation.types";
+
 import { Separator } from "@/renderer/components/ui/separator";
 import { NavigationItem } from "@/renderer/features/app/components/navigation-item";
 import { ConversationSidebarList } from "@/renderer/features/conversation/components/conversation-sidebar-list";
 
 interface SidebarNavigationProps {
-  conversations: any[];
-  availableUsers: any[];
+  conversations: ConversationWithLastMessage[];
+  availableUsers: unknown[];
 }
 
 function SidebarNavigation(props: SidebarNavigationProps) {

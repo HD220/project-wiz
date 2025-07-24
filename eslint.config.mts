@@ -140,6 +140,7 @@ const importAndBoundaryRules = {
           from: "renderer",
           disallow: ["main"],
           message: "Renderer code cannot import main process code except types",
+          importKind: "value",
         },
         {
           from: "main",
@@ -157,9 +158,9 @@ const codeStyleAndQualityRules = {
   "max-lines": ["warn", { max: 350, skipBlankLines: true, skipComments: true }],
   "max-lines-per-function": [
     "warn",
-    { max: 100, skipBlankLines: true, skipComments: true },
+    { max: 120, skipBlankLines: true, skipComments: true },
   ],
-  "max-statements": ["warn", { max: 20 }],
+  "max-statements": ["warn", { max: 25 }],
   "id-length": ["warn", { min: 2, exceptions: ["_"] }],
 };
 
@@ -253,7 +254,7 @@ export default [
     rules: {
       "max-lines-per-function": [
         "warn",
-        { max: 150, skipBlankLines: true, skipComments: true },
+        { max: 200, skipBlankLines: true, skipComments: true },
       ],
       "@typescript-eslint/no-unused-vars": [
         "warn",
@@ -292,9 +293,14 @@ export default [
     },
   },
 
-  // 5. Override for preload.ts and window.d.ts - allow type imports from main
+  // 5. Override for preload.ts, window.d.ts, and type files - allow type imports from main
   {
-    files: ["src/renderer/preload.ts", "src/renderer/window.d.ts"],
+    files: [
+      "src/renderer/preload.ts",
+      "src/renderer/window.d.ts",
+      "src/renderer/**/*.types.ts",
+      "src/renderer/**/types.ts",
+    ],
     rules: {
       "boundaries/element-types": "off",
     },

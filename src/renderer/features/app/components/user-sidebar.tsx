@@ -1,10 +1,12 @@
+import type { ConversationWithLastMessage } from "@/main/features/conversation/conversation.types";
+
 import { SidebarHeader } from "@/renderer/features/app/components/sidebar-header";
 import { SidebarNavigation } from "@/renderer/features/app/components/sidebar-navigation";
 import { SidebarUserArea } from "@/renderer/features/app/components/sidebar-user-area";
 
 interface UserSidebarProps {
-  conversations: any[];
-  availableUsers: any[];
+  conversations: ConversationWithLastMessage[];
+  availableUsers: unknown[];
   className?: string;
 }
 

@@ -1,15 +1,44 @@
-// User types for frontend - focused on UI concerns
+/**
+ * User types for renderer process
+ */
 
-// Import types first
-import type {
-  AuthenticatedUser,
-  Theme,
-  UserProfile,
-  UserPreferences,
-} from "@/main/features/user/user.types";
+export type Theme = "light" | "dark" | "system";
 
-// Re-export backend types for consistency
-export type { AuthenticatedUser, Theme, UserProfile, UserPreferences };
+export interface AuthenticatedUser {
+  id: string;
+  username: string;
+  email: string;
+  displayName: string | null;
+  name?: string;
+  avatar: string | null;
+  theme: Theme;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface UserProfile {
+  id: string;
+  username: string;
+  displayName: string | null;
+  avatar: string | null;
+  email: string;
+  theme: Theme;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface UserPreferences {
+  theme: Theme;
+}
+
+export interface UserSummary {
+  id: string;
+  name: string;
+  type: string;
+  username?: string;
+  displayName?: string | null;
+  avatar?: string | null;
+}
 
 // Frontend-specific types for user UI
 export interface UserStatusType {

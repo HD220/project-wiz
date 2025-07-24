@@ -1,4 +1,4 @@
-import { useController } from "react-hook-form";
+import { useController, type Control } from "react-hook-form";
 
 import {
   FormControl,
@@ -21,7 +21,7 @@ interface ModelConfigFieldProps {
   name: string;
   label?: string;
   description?: string;
-  control: any;
+  control: Control<Record<string, unknown>>;
   defaultValue?: ModelConfig;
 }
 
@@ -45,7 +45,7 @@ function ModelConfigField({
 
   const parseConfig = (): ModelConfig => {
     try {
-      return JSON.parse(field.value);
+      return JSON.parse(field.value as string);
     } catch {
       return defaultValue;
     }
@@ -65,17 +65,25 @@ function ModelConfigField({
       <FormControl>
         <div className="space-y-6 p-4 border rounded-lg">
           <div className="space-y-2">
-            <label className="text-sm font-medium">Model</label>
+            <label htmlFor={`${name}-model`} className="text-sm font-medium">
+              Model
+            </label>
             <Input
+              id={`${name}-model`}
               value={config.model}
-              onChange={(e) => updateConfig({ model: e.target.value })}
+              onChange={(event) => updateConfig({ model: event.target.value })}
               placeholder="e.g., gpt-4o"
             />
           </div>
 
           <div className="space-y-3">
             <div className="flex justify-between">
-              <label className="text-sm font-medium">Temperature</label>
+              <label
+                htmlFor={`${name}-temperature`}
+                className="text-sm font-medium"
+              >
+                Temperature
+              </label>
               <span className="text-sm text-muted-foreground">
                 {config.temperature}
               </span>
@@ -91,12 +99,18 @@ function ModelConfigField({
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-medium">Max Tokens</label>
+            <label
+              htmlFor={`${name}-maxTokens`}
+              className="text-sm font-medium"
+            >
+              Max Tokens
+            </label>
             <Input
+              id={`${name}-maxTokens`}
               type="number"
               value={config.maxTokens}
-              onChange={(e) =>
-                updateConfig({ maxTokens: parseInt(e.target.value) })
+              onChange={(event) =>
+                updateConfig({ maxTokens: parseInt(event.target.value) })
               }
               min={1}
               max={32000}
@@ -105,7 +119,9 @@ function ModelConfigField({
 
           <div className="space-y-3">
             <div className="flex justify-between">
-              <label className="text-sm font-medium">Top P</label>
+              <label htmlFor={`${name}-topP`} className="text-sm font-medium">
+                Top P
+              </label>
               <span className="text-sm text-muted-foreground">
                 {config.topP}
               </span>

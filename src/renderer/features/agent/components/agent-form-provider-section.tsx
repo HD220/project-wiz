@@ -1,10 +1,6 @@
 import { UseFormReturn } from "react-hook-form";
 import { z } from "zod";
 
-import { AI_DEFAULTS } from "@/main/constants/ai-defaults";
-import { createAgentSchema } from "@/main/features/agent/agent.types";
-import type { LlmProvider } from "@/main/features/agent/llm-provider/llm-provider.types";
-
 import {
   FormControl,
   FormField,
@@ -21,9 +17,12 @@ import {
   SelectValue,
 } from "@/renderer/components/ui/select";
 import { Separator } from "@/renderer/components/ui/separator";
+import { AI_DEFAULTS } from "@/renderer/constants/ai-defaults";
+import { CreateAgentSchema } from "@/renderer/features/agent/agent.schema";
 import type { ModelConfig } from "@/renderer/features/agent/agent.types";
+import type { LlmProvider } from "@/renderer/features/agent/llm-provider.types";
 
-type AgentFormData = z.infer<typeof createAgentSchema>;
+type AgentFormData = z.infer<typeof CreateAgentSchema>;
 
 interface AgentProviderSectionProps {
   form: UseFormReturn<AgentFormData>;
@@ -67,7 +66,7 @@ function AgentProviderSection(props: AgentProviderSectionProps) {
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  {activeProviders.map((provider: any) => (
+                  {activeProviders.map((provider) => (
                     <SelectItem key={provider.id} value={provider.id}>
                       {provider.name}
                       {provider.isDefault && " (Default)"}
@@ -102,10 +101,10 @@ function AgentProviderSection(props: AgentProviderSectionProps) {
                     <FormControl>
                       <Input
                         value={config.model}
-                        onChange={(e) => {
+                        onChange={(event) => {
                           const newConfig = {
                             ...config,
-                            model: e.target.value,
+                            model: event.target.value,
                           };
                           field.onChange(JSON.stringify(newConfig));
                         }}
@@ -135,10 +134,10 @@ function AgentProviderSection(props: AgentProviderSectionProps) {
                         max="2"
                         step="0.1"
                         value={config.temperature}
-                        onChange={(e) => {
+                        onChange={(event) => {
                           const newConfig = {
                             ...config,
-                            temperature: parseFloat(e.target.value),
+                            temperature: parseFloat(event.target.value),
                           };
                           field.onChange(JSON.stringify(newConfig));
                         }}
@@ -168,10 +167,10 @@ function AgentProviderSection(props: AgentProviderSectionProps) {
                         type="number"
                         min="1"
                         value={config.maxTokens}
-                        onChange={(e) => {
+                        onChange={(event) => {
                           const newConfig = {
                             ...config,
-                            maxTokens: parseInt(e.target.value),
+                            maxTokens: parseInt(event.target.value),
                           };
                           field.onChange(JSON.stringify(newConfig));
                         }}
@@ -201,11 +200,11 @@ function AgentProviderSection(props: AgentProviderSectionProps) {
                         max="1"
                         step="0.1"
                         value={config.topP || ""}
-                        onChange={(e) => {
+                        onChange={(event) => {
                           const newConfig = {
                             ...config,
-                            topP: e.target.value
-                              ? parseFloat(e.target.value)
+                            topP: event.target.value
+                              ? parseFloat(event.target.value)
                               : undefined,
                           };
                           field.onChange(JSON.stringify(newConfig));

@@ -1,4 +1,4 @@
-import { useController } from "react-hook-form";
+import { useController, type Control } from "react-hook-form";
 
 import {
   FormControl,
@@ -28,7 +28,7 @@ interface ProviderSelectFieldProps {
   label?: string;
   description?: string;
   placeholder?: string;
-  control: any;
+  control: Control<Record<string, unknown>>;
   providers: Provider[];
   filterActive?: boolean;
 }
@@ -48,17 +48,19 @@ function ProviderSelectField({
   });
 
   const availableProviders = filterActive
-    ? providers.filter((p) => p.isActive)
+    ? providers.filter((provider) => provider.isActive)
     : providers;
 
-  const defaultProvider = availableProviders.find((p) => p.isDefault);
+  const defaultProvider = availableProviders.find(
+    (provider) => provider.isDefault,
+  );
 
   return (
     <FormItem>
       <FormLabel>{label}</FormLabel>
       <Select
         onValueChange={field.onChange}
-        defaultValue={field.value || defaultProvider?.id}
+        defaultValue={(field.value as string) || defaultProvider?.id}
       >
         <FormControl>
           <SelectTrigger>

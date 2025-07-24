@@ -11,15 +11,41 @@ import type {
 } from "@/main/features/agent/agent.types";
 import { createAgentSchema } from "@/main/features/agent/agent.types";
 import { llmProvidersTable } from "@/main/features/agent/llm-provider/llm-provider.model";
-import { CrudService } from "@/main/features/base/crud.service";
 import { usersTable } from "@/main/features/user/user.model";
 
-export class AgentService extends CrudService<
-  typeof agentsTable,
-  SelectAgent,
-  InsertAgent
-> {
-  protected table = agentsTable;
+export class AgentService {
+  async findById(id: string): Promise<SelectAgent | null> {
+    const db = getDatabase();
+
+    const [record] = await db
+      .select()
+      .from(agentsTable)
+      .where(eq(agentsTable.id, id))
+      .limit(1);
+
+    return record || null;
+  }
+
+  async update(id: string, input: Partial<InsertAgent>): Promise<SelectAgent> {
+    const db = getDatabase();
+
+    const [record] = await db
+      .update(agentsTable)
+      .set(input)
+      .where(eq(agentsTable.id, id))
+      .returning();
+
+    if (!record) {
+      throw new Error("Agent not found or update failed");
+    }
+
+    return record;
+  }
+
+  async delete(id: string): Promise<void> {
+    const db = getDatabase();
+    await db.delete(agentsTable).where(eq(agentsTable.id, id));
+  }
 
   /**
    * Generate a comprehensive system prompt for the agent

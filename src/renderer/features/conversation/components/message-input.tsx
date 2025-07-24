@@ -43,19 +43,19 @@ function MessageInput(props: MessageInputProps) {
     }
   }
 
-  function handleKeyDown(e: KeyboardEvent<HTMLTextAreaElement>) {
+  function handleKeyDown(event: KeyboardEvent<HTMLTextAreaElement>) {
     // Send on Enter (but not Shift+Enter)
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
+    if (event.key === "Enter" && !event.shiftKey) {
+      event.preventDefault();
       handleSend();
     }
   }
 
-  function handleTextareaChange(e: React.ChangeEvent<HTMLTextAreaElement>) {
-    setMessage(e.target.value);
+  function handleTextareaChange(event: React.ChangeEvent<HTMLTextAreaElement>) {
+    setMessage(event.target.value);
 
     // Auto-resize textarea
-    const textarea = e.target;
+    const textarea = event.target;
     textarea.style.height = "auto";
     textarea.style.height = `${Math.min(textarea.scrollHeight, 120)}px`;
   }

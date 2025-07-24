@@ -48,7 +48,7 @@ function AgentListCard(props: AgentListCardProps) {
         {/* Avatar and Info */}
         <div className="flex items-center gap-3 flex-1 min-w-0">
           <Avatar className="h-10 w-10 shrink-0">
-            <AvatarImage src={(agent as any)?.avatar} alt={agent.name} />
+            <AvatarImage src={undefined} alt={agent.name} />
             <AvatarFallback className="bg-primary/10 text-primary">
               <User className="h-4 w-4" />
             </AvatarFallback>

@@ -1,8 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { Hash, Users, Bot, Settings, ChevronDown } from "lucide-react";
 
-import type { SelectProject } from "@/main/features/project/project.types";
-
 import { Button } from "@/renderer/components/ui/button";
 import {
   Collapsible,
@@ -11,6 +9,9 @@ import {
 } from "@/renderer/components/ui/collapsible";
 import { ScrollArea } from "@/renderer/components/ui/scroll-area";
 import { Separator } from "@/renderer/components/ui/separator";
+import type { SelectAgent } from "@/renderer/features/agent/agent.types";
+import type { SelectConversation } from "@/renderer/features/conversation/conversation.types";
+import type { SelectProject } from "@/renderer/features/project/project.types";
 import { cn } from "@/renderer/lib/utils";
 
 interface Channel {
@@ -28,8 +29,8 @@ interface Agent {
 
 interface ProjectSidebarProps {
   project: SelectProject;
-  conversations?: any[]; // TODO: Type this properly when conversation types are available
-  agents?: any[]; // TODO: Type this properly when agent types are available
+  conversations?: SelectConversation[];
+  agents?: SelectAgent[];
   className?: string;
 }
 
@@ -37,9 +38,9 @@ function ProjectSidebar(props: ProjectSidebarProps) {
   const { project, conversations = [], agents = [], className } = props;
 
   // Transform conversations into channels format
-  const channels: Channel[] = conversations.map((conv: any) => ({
-    id: conv.id,
-    name: conv.title || conv.name || "Conversa sem nome",
+  const channels: Channel[] = conversations.map((conversation) => ({
+    id: conversation.id,
+    name: conversation.title || "Conversa sem nome",
     type: "text" as const,
     hasNotification: false, // TODO: Add notification logic from conversation data
   }));
@@ -47,7 +48,7 @@ function ProjectSidebar(props: ProjectSidebarProps) {
   // Transform agents data to match the expected format
   const projectAgents: Agent[] =
     agents.length > 0
-      ? agents.map((agent: any) => ({
+      ? agents.map((agent) => ({
           id: agent.id,
           name: agent.name || "Unnamed Agent",
           status: agent.status === "active" ? "online" : ("offline" as const),

@@ -31,7 +31,6 @@ import type { IpcResponse } from "@/main/types";
 import type {
   CreateConversationInput,
   SendMessageInput,
-  SelectConversation,
   SelectMessage,
   ConversationWithLastMessage,
   ConversationWithParticipants,

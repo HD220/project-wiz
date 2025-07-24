@@ -1,7 +1,6 @@
 import { createFileRoute, Outlet } from "@tanstack/react-router";
 
-import { AgentFiltersSchema } from "@/main/features/agent/agent.schema";
-
+import { AgentFiltersSchema } from "@/renderer/features/agent/agent.schema";
 import { AgentList } from "@/renderer/features/agent/components/agent-list";
 import { ContentHeader } from "@/renderer/features/app/components/content-header";
 

@@ -1,14 +1,19 @@
 import { Plus, MessageCircle } from "lucide-react";
 import { useState } from "react";
 
+import type { ConversationWithLastMessage } from "@/main/features/conversation/conversation.types";
+import type { UserSummary } from "@/main/features/user/user.service";
+
 import { Button } from "@/renderer/components/ui/button";
 import { useAuth } from "@/renderer/contexts/auth.context";
 import { ConversationSidebarItem } from "@/renderer/features/conversation/components/conversation-sidebar-item";
 import { CreateConversationDialog } from "@/renderer/features/conversation/components/create-conversation-dialog";
+import type { ConversationWithLastMessage as RendererConversationWithLastMessage } from "@/renderer/features/conversation/types";
+import type { AuthenticatedUser } from "@/renderer/features/user/user.types";
 
 interface ConversationSidebarListProps {
-  conversations: any[];
-  availableUsers: any[];
+  conversations: ConversationWithLastMessage[];
+  availableUsers: unknown[];
 }
 
 function ConversationSidebarList(props: ConversationSidebarListProps) {
@@ -22,11 +27,49 @@ function ConversationSidebarList(props: ConversationSidebarListProps) {
   const isLoading = false;
 
   // Helper functions
-  function getOtherParticipants(conversation: any) {
+  function getOtherParticipants(
+    _conversation: ConversationWithLastMessage,
+  ): string[] {
     if (!currentUser) return [];
-    return conversation.participants
-      .filter((p: any) => p.participantId !== currentUser.id)
-      .map((p: any) => p.participantId);
+    // Return participant IDs that are not the current user
+    return (
+      _conversation.participants
+        ?.filter((participant) => participant.participantId !== currentUser.id)
+        .map((participant) => participant.participantId) || []
+    );
+  }
+
+  function convertToUserSummary(user: unknown): UserSummary {
+    const typedUser = user as {
+      id: string;
+      name?: string;
+      displayName?: string;
+      username?: string;
+      avatar?: string | null;
+      type?: string;
+    };
+    return {
+      id: typedUser.id,
+      name:
+        typedUser.name ||
+        typedUser.displayName ||
+        typedUser.username ||
+        "Unknown",
+      avatar: typedUser.avatar ?? null,
+      type: (typedUser.type as "human" | "agent") || "human",
+    };
+  }
+
+  function convertToConversationWithLastMessage(
+    conversation: ConversationWithLastMessage,
+  ): RendererConversationWithLastMessage {
+    return {
+      ...conversation,
+      name: conversation.name || "Untitled Conversation",
+      description: conversation.description ?? null,
+      agentId: null,
+      participants: conversation.participants || [],
+    };
   }
 
   function handleCreateDialog() {
@@ -52,9 +95,9 @@ function ConversationSidebarList(props: ConversationSidebarListProps) {
         </div>
 
         {/* Conversation items skeleton - Discord style */}
-        {Array.from({ length: 4 }).map((_, i) => (
+        {Array.from({ length: 4 }).map((_, index) => (
           <div
-            key={i}
+            key={index}
             className="flex items-center gap-3 px-2 py-2 mx-1 rounded"
           >
             <div className="w-8 h-8 bg-muted animate-pulse rounded-full flex-shrink-0" />
@@ -89,16 +132,16 @@ function ConversationSidebarList(props: ConversationSidebarListProps) {
 
       {/* Conversations list - Discord style */}
       <div className="space-y-0.5">
-        {conversations.map((conversation: any) => {
+        {conversations.map((conversation) => {
           const otherParticipantIds = getOtherParticipants(conversation);
-          const otherParticipants = availableUsers.filter((user: any) =>
-            otherParticipantIds.includes(user.id),
-          );
+          const otherParticipants = (availableUsers as AuthenticatedUser[])
+            .filter((user) => otherParticipantIds.includes(user.id))
+            .map(convertToUserSummary);
 
           return (
             <ConversationSidebarItem
               key={conversation.id}
-              conversation={conversation}
+              conversation={convertToConversationWithLastMessage(conversation)}
               lastMessage={conversation.lastMessage || null}
               otherParticipants={otherParticipants}
               unreadCount={0}
@@ -123,7 +166,9 @@ function ConversationSidebarList(props: ConversationSidebarListProps) {
       {/* Create Dialog */}
       {showCreateDialog && currentUser && (
         <CreateConversationDialog
-          availableUsers={availableUsers}
+          availableUsers={(availableUsers as AuthenticatedUser[]).map(
+            convertToUserSummary,
+          )}
           currentUser={currentUser}
           onClose={handleCloseDialog}
           onConversationCreated={handleConversationCreated}

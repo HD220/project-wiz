@@ -2,22 +2,21 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
-import { AI_DEFAULTS } from "@/main/constants/ai-defaults";
-import { createAgentSchema } from "@/main/features/agent/agent.types";
-import type { LlmProvider } from "@/main/features/agent/llm-provider/llm-provider.types";
-
 import { Form } from "@/renderer/components/ui/form";
+import { AI_DEFAULTS } from "@/renderer/constants/ai-defaults";
+import { CreateAgentSchema } from "@/renderer/features/agent/agent.schema";
 import type {
   SelectAgent,
   CreateAgentInput,
   ModelConfig,
 } from "@/renderer/features/agent/agent.types";
+import type { LlmProvider } from "@/renderer/features/agent/llm-provider.types";
 
 import { AgentFormActions } from "./agent-form-actions";
 import { AgentIdentitySection } from "./agent-form-identity-section";
 import { AgentProviderSection } from "./agent-form-provider-section";
 
-type FormData = z.infer<typeof createAgentSchema>;
+type FormData = z.infer<typeof CreateAgentSchema>;
 
 interface AgentFormProps {
   initialData?: SelectAgent | null;
@@ -30,7 +29,8 @@ interface AgentFormProps {
 function AgentForm(props: AgentFormProps) {
   const { initialData, providers = [], onSubmit, onCancel, isLoading } = props;
 
-  const defaultProvider = providers.find((p) => p.isDefault) || null;
+  const defaultProvider =
+    providers.find((provider) => provider.isDefault) || null;
 
   const isEditing = !!initialData;
 
@@ -43,7 +43,7 @@ function AgentForm(props: AgentFormProps) {
   };
 
   const form = useForm<FormData>({
-    resolver: zodResolver(createAgentSchema),
+    resolver: zodResolver(CreateAgentSchema),
     defaultValues: {
       name: initialData?.name || "",
       role: initialData?.role || "",

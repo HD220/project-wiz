@@ -108,9 +108,9 @@ function ConversationItem(props: ConversationItemProps) {
         ${className || ""}
       `}
       onClick={onClick}
-      onKeyDown={(e) => {
-        if (e.key === "Enter" || e.key === " ") {
-          e.preventDefault();
+      onKeyDown={(event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
           onClick();
         }
       }}
@@ -171,7 +171,7 @@ function ConversationItem(props: ConversationItemProps) {
               <span className="text-xs text-muted-foreground truncate">
                 {otherParticipants
                   .slice(0, 2)
-                  .map((p) => p.name)
+                  .map((participant) => participant.name)
                   .join(", ")}
                 {otherParticipants.length > 2 &&
                   ` +${otherParticipants.length - 2}`}

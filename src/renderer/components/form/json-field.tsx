@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useController } from "react-hook-form";
+import { useController, type Control } from "react-hook-form";
 
 import { Button } from "@/renderer/components/ui/button";
 import {
@@ -16,8 +16,8 @@ interface JsonFieldProps {
   label: string;
   description?: string;
   placeholder?: string;
-  control: any;
-  defaultValue?: any;
+  control: Control<Record<string, unknown>>;
+  defaultValue?: Record<string, unknown>;
 }
 
 function JsonField({
@@ -49,7 +49,7 @@ function JsonField({
 
   function formatJson() {
     try {
-      const parsed = JSON.parse(field.value);
+      const parsed = JSON.parse(field.value as string);
       const formatted = JSON.stringify(parsed, null, 2);
       field.onChange(formatted);
     } catch {
@@ -64,8 +64,9 @@ function JsonField({
         <div className="space-y-2">
           <Textarea
             {...field}
+            value={field.value as string}
             placeholder={placeholder}
-            onChange={(e) => handleChange(e.target.value)}
+            onChange={(event) => handleChange(event.target.value)}
             className={`font-mono text-sm ${!isValid ? "border-destructive" : ""}`}
             rows={8}
           />

@@ -3,18 +3,27 @@ import { useRouter } from "@tanstack/react-router";
 import { useEffect, useRef, useMemo } from "react";
 import { toast } from "sonner";
 
-import type { SendMessageInput } from "@/main/features/conversation/conversation.types";
-
 import { ScrollArea } from "@/renderer/components/ui/scroll-area";
 import { Separator } from "@/renderer/components/ui/separator";
 import { MessageBubble } from "@/renderer/features/conversation/components/message-bubble";
 import { MessageInput } from "@/renderer/features/conversation/components/message-input";
+import type { SelectConversation } from "@/renderer/features/conversation/conversation.types";
+import type {
+  SendMessageInput,
+  Message,
+} from "@/renderer/features/conversation/message.types";
+import type { AuthenticatedUser } from "@/renderer/features/user/user.types";
+
+interface UserBasic {
+  id: string;
+  name?: string;
+}
 
 interface ConversationChatProps {
   conversationId: string;
-  conversation: any;
-  availableUsers: any[];
-  currentUser: any;
+  conversation: SelectConversation & { messages: Message[] };
+  availableUsers: unknown[];
+  currentUser: AuthenticatedUser | null;
   className?: string;
 }
 
@@ -64,21 +73,22 @@ function ConversationChat(props: ConversationChatProps) {
   // Get user info by ID
   function getUserById(userId: string) {
     if (userId === currentUser?.id) return currentUser;
-    return availableUsers.find((user: any) => user.id === userId);
+    return (availableUsers as UserBasic[]).find((user) => user.id === userId);
   }
 
   const messageGroups = useMemo(() => {
     const groups: {
       authorId: string;
-      messages: typeof conversation.messages;
+      messages: Message[];
     }[] = [];
 
     const uniqueMessages = conversation.messages.filter(
-      (message: any, index: number, array: any[]) =>
-        array.findIndex((m: any) => m.id === message.id) === index,
+      (message, index, array) =>
+        array.findIndex((messageItem) => messageItem.id === message.id) ===
+        index,
     );
 
-    uniqueMessages.forEach((message: any) => {
+    uniqueMessages.forEach((message) => {
       const lastGroup = groups[groups.length - 1];
 
       if (lastGroup && lastGroup.authorId === message.authorId) {
@@ -134,10 +144,11 @@ function ConversationChat(props: ConversationChatProps) {
                   {/* Author Header (only shown once per group) */}
                   <div className="flex items-center gap-3 px-1">
                     <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-sm font-medium">
-                      {author?.name?.charAt(0).toUpperCase() || "?"}
+                      {(author as UserBasic)?.name?.charAt(0).toUpperCase() ||
+                        "?"}
                     </div>
                     <div className="font-medium">
-                      {author?.name || "Unknown User"}
+                      {(author as UserBasic)?.name || "Unknown User"}
                       {isCurrentUser && (
                         <span className="ml-2 text-xs text-muted-foreground">
                           (you)
@@ -153,7 +164,7 @@ function ConversationChat(props: ConversationChatProps) {
 
                   {/* Messages in Group */}
                   <div className="space-y-1">
-                    {group.messages.map((message: any) => (
+                    {group.messages.map((message) => (
                       <MessageBubble
                         key={message.id}
                         message={message}

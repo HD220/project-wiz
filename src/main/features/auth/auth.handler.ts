@@ -7,12 +7,7 @@ import type {
 } from "@/main/features/auth/auth.types";
 import type { IpcResponse } from "@/main/types";
 
-/**
- * Setup authentication IPC handlers
- * Exposes AuthService methods to the frontend via IPC
- */
-export function setupAuthHandlers(): void {
-  // Register user
+function setupRegisterHandler(): void {
   ipcMain.handle(
     "auth:register",
     async (_, input: RegisterUserInput): Promise<IpcResponse> => {
@@ -30,8 +25,9 @@ export function setupAuthHandlers(): void {
       }
     },
   );
+}
 
-  // Login user
+function setupLoginHandler(): void {
   ipcMain.handle(
     "auth:login",
     async (_, credentials: LoginCredentials): Promise<IpcResponse> => {
@@ -49,8 +45,9 @@ export function setupAuthHandlers(): void {
       }
     },
   );
+}
 
-  // Get current authenticated user
+function setupGetCurrentUserHandler(): void {
   ipcMain.handle("auth:getCurrentUser", async (): Promise<IpcResponse> => {
     try {
       const user = await AuthService.getCurrentUser();
@@ -66,8 +63,9 @@ export function setupAuthHandlers(): void {
       };
     }
   });
+}
 
-  // Logout user
+function setupLogoutHandler(): void {
   ipcMain.handle("auth:logout", async (): Promise<IpcResponse> => {
     try {
       await AuthService.logout();
@@ -82,8 +80,9 @@ export function setupAuthHandlers(): void {
       };
     }
   });
+}
 
-  // Check if user is logged in
+function setupIsLoggedInHandler(): void {
   ipcMain.handle("auth:isLoggedIn", async (): Promise<IpcResponse> => {
     try {
       const isLoggedIn = AuthService.isLoggedIn();
@@ -101,8 +100,9 @@ export function setupAuthHandlers(): void {
       };
     }
   });
+}
 
-  // Get active session
+function setupGetActiveSessionHandler(): void {
   ipcMain.handle("auth:getActiveSession", async (): Promise<IpcResponse> => {
     try {
       // Initialize session from database if not already loaded
@@ -123,8 +123,9 @@ export function setupAuthHandlers(): void {
       };
     }
   });
+}
 
-  // Get user by ID
+function setupGetUserByIdHandler(): void {
   ipcMain.handle(
     "auth:getUserById",
     async (_, userId: string): Promise<IpcResponse> => {
@@ -142,4 +143,18 @@ export function setupAuthHandlers(): void {
       }
     },
   );
+}
+
+/**
+ * Setup authentication IPC handlers
+ * Exposes AuthService methods to the frontend via IPC
+ */
+export function setupAuthHandlers(): void {
+  setupRegisterHandler();
+  setupLoginHandler();
+  setupGetCurrentUserHandler();
+  setupLogoutHandler();
+  setupIsLoggedInHandler();
+  setupGetActiveSessionHandler();
+  setupGetUserByIdHandler();
 }

@@ -1,4 +1,5 @@
 import { UseFormReturn } from "react-hook-form";
+import { z } from "zod";
 
 import {
   FormControl,
@@ -11,9 +12,12 @@ import {
 import { Input } from "@/renderer/components/ui/input";
 import { Separator } from "@/renderer/components/ui/separator";
 import { Textarea } from "@/renderer/components/ui/textarea";
+import { CreateAgentSchema } from "@/renderer/features/agent/agent.schema";
+
+type AgentFormData = z.infer<typeof CreateAgentSchema>;
 
 interface AgentIdentitySectionProps {
-  form: UseFormReturn<any>;
+  form: UseFormReturn<AgentFormData>;
 }
 
 function AgentIdentitySection(props: AgentIdentitySectionProps) {
@@ -25,7 +29,7 @@ function AgentIdentitySection(props: AgentIdentitySectionProps) {
         <div className="space-y-1">
           <h4 className="font-medium text-sm">Agent Identity</h4>
           <p className="text-muted-foreground text-xs">
-            Define your agent's name, role, and purpose
+            Define your agent&apos;s name, role, and purpose
           </p>
         </div>
 
@@ -86,7 +90,7 @@ function AgentIdentitySection(props: AgentIdentitySectionProps) {
         <div className="space-y-1">
           <h4 className="font-medium text-sm">Agent Configuration</h4>
           <p className="text-muted-foreground text-xs">
-            Configure your agent's personality and behavior
+            Configure your agent&apos;s personality and behavior
           </p>
         </div>
 
@@ -104,7 +108,7 @@ function AgentIdentitySection(props: AgentIdentitySectionProps) {
                 />
               </FormControl>
               <FormDescription>
-                Describe your agent's background and expertise (10-1000
+                Describe your agent&apos;s background and expertise (10-1000
                 characters)
               </FormDescription>
               <FormMessage />
@@ -126,7 +130,7 @@ function AgentIdentitySection(props: AgentIdentitySectionProps) {
                 />
               </FormControl>
               <FormDescription>
-                Define your agent's primary goal and objectives (10-500
+                Define your agent&apos;s primary goal and objectives (10-500
                 characters)
               </FormDescription>
               <FormMessage />

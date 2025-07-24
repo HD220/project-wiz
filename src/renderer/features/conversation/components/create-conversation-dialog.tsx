@@ -100,7 +100,7 @@ function CreateConversationDialog(props: CreateConversationDialogProps) {
             <Input
               placeholder="Search users..."
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onChange={(event) => setSearchTerm(event.target.value)}
               className="pl-10"
             />
           </div>
@@ -155,9 +155,9 @@ function CreateConversationDialog(props: CreateConversationDialogProps) {
                         ${isSelected ? "bg-muted" : ""}
                       `}
                       onClick={() => handleUserToggle(user.id)}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter" || e.key === " ") {
-                          e.preventDefault();
+                      onKeyDown={(event) => {
+                        if (event.key === "Enter" || event.key === " ") {
+                          event.preventDefault();
                           handleUserToggle(user.id);
                         }
                       }}
