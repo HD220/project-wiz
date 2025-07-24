@@ -40,7 +40,7 @@ function AgentList() {
   // SIMPLE: Local state for UI only
   const [agentToDelete, setAgentToDelete] = useState<SelectAgent | null>(null);
 
-  // SIMPLE: Direct mutations with window.api
+  // SIMPLE: Direct mutations with window.api - mutations handle loading/error states
   const deleteAgentMutation = useMutation({
     mutationFn: (id: string) => window.api.agents.delete(id),
     onSuccess: () => {

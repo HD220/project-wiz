@@ -4,7 +4,15 @@ import { Separator } from "@/renderer/components/ui/separator";
 import { NavigationItem } from "@/renderer/features/app/components/navigation-item";
 import { ConversationSidebarList } from "@/renderer/features/conversation/components/conversation-sidebar-list";
 
-function SidebarNavigation() {
+interface SidebarNavigationProps {
+  conversations: any[];
+  availableUsers: any[];
+  currentUser: any;
+}
+
+function SidebarNavigation(props: SidebarNavigationProps) {
+  const { conversations, availableUsers, currentUser } = props;
+
   return (
     <div className="flex-1 p-2 space-y-1">
       <NavigationItem
@@ -19,7 +27,11 @@ function SidebarNavigation() {
       <Separator className="my-2" />
 
       {/* Conversations List */}
-      <ConversationSidebarList />
+      <ConversationSidebarList
+        conversations={conversations}
+        availableUsers={availableUsers}
+        currentUser={currentUser}
+      />
     </div>
   );
 }

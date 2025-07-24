@@ -3,16 +3,23 @@ import { SidebarNavigation } from "@/renderer/features/app/components/sidebar-na
 import { SidebarUserArea } from "@/renderer/features/app/components/sidebar-user-area";
 
 interface UserSidebarProps {
+  conversations: any[];
+  availableUsers: any[];
+  currentUser: any;
   className?: string;
 }
 
 function UserSidebar(props: UserSidebarProps) {
-  const { className } = props;
+  const { conversations, availableUsers, currentUser, className } = props;
 
   return (
     <div className={`h-full flex flex-col bg-card ${className || ""}`}>
       <SidebarHeader />
-      <SidebarNavigation />
+      <SidebarNavigation
+        conversations={conversations}
+        availableUsers={availableUsers}
+        currentUser={currentUser}
+      />
       <SidebarUserArea />
     </div>
   );

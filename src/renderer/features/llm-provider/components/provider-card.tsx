@@ -1,4 +1,4 @@
-import { Link, useRouteContext, useRouter } from "@tanstack/react-router";
+import { Link, useRouter } from "@tanstack/react-router";
 import { useMutation } from "@tanstack/react-query";
 import { MoreHorizontal, Edit2, Trash2, Star, StarOff } from "lucide-react";
 import { useState } from "react";
@@ -40,14 +40,12 @@ const getProviderLabel = (type: string): string => {
 
 interface ProviderCardProps {
   provider: LlmProvider;
+  userId: string;
 }
 
 function ProviderCard(props: ProviderCardProps) {
-  const { provider } = props;
+  const { provider, userId } = props;
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-
-  const { auth } = useRouteContext({ from: "__root__" });
-  const { user } = auth;
   const router = useRouter();
 
   // SIMPLE: Direct mutations with window.api
@@ -79,15 +77,13 @@ function ProviderCard(props: ProviderCardProps) {
     deleteProviderMutation.isPending || setDefaultProviderMutation.isPending;
 
   function handleDelete() {
-    if (!user?.id) return;
     deleteProviderMutation.mutate(provider.id);
   }
 
   function handleSetDefault() {
-    if (!user?.id) return;
     setDefaultProviderMutation.mutate({
       id: provider.id,
-      userId: user.id,
+      userId: userId,
     });
   }
 

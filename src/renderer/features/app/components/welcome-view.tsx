@@ -1,5 +1,3 @@
-import { useRouteContext } from "@tanstack/react-router";
-
 import { Badge } from "@/renderer/components/ui/badge";
 import {
   Card,
@@ -10,15 +8,18 @@ import {
 } from "@/renderer/components/ui/card";
 import { ActivityItem } from "@/renderer/features/app/components/activity-item";
 
-function WelcomeView() {
-  const { auth } = useRouteContext({ from: "__root__" });
-  const { user } = auth;
+interface WelcomeViewProps {
+  userName: string;
+}
+
+function WelcomeView(props: WelcomeViewProps) {
+  const { userName } = props;
 
   return (
     <div className="p-6 space-y-6">
       <div className="space-y-2">
         <h1 className="text-2xl font-bold text-foreground">
-          Welcome back, {user?.name}! 👋
+          Welcome back, {userName}! 👋
         </h1>
         <p className="text-muted-foreground">
           Ready to start collaborating with AI agents?

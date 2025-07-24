@@ -43,7 +43,10 @@ export const Route = createFileRoute(
     if (!response.success) {
       throw new Error(response.error || "Failed to load providers");
     }
-    return { providers: response.data as LlmProvider[] };
+    return {
+      providers: response.data as LlmProvider[],
+      userId: auth.user.id,
+    };
   },
   component: LLMProvidersLayout,
 });

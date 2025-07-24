@@ -1,7 +1,7 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
-import { useRouter, useRouteContext } from "@tanstack/react-router";
+import { useRouter } from "@tanstack/react-router";
 import { z } from "zod";
 
 import { Button } from "@/renderer/components/ui/button";
@@ -32,15 +32,15 @@ const ProjectFormSchema = z.object({
 type ProjectFormData = z.infer<typeof ProjectFormSchema>;
 
 interface ProjectFormProps {
+  userId: string;
   onSuccess?: (projectId: string) => void;
   onCancel?: () => void;
 }
 
 function ProjectForm(props: ProjectFormProps) {
-  const { onSuccess, onCancel } = props;
+  const { userId, onSuccess, onCancel } = props;
   const [isCreating, setIsCreating] = useState(false);
   const router = useRouter();
-  const { auth } = useRouteContext({ from: "__root__" });
 
   const form = useForm<ProjectFormData>({
     resolver: zodResolver(ProjectFormSchema),
@@ -56,8 +56,6 @@ function ProjectForm(props: ProjectFormProps) {
   const projectType = form.watch("type");
 
   async function onSubmit(data: ProjectFormData) {
-    if (!auth.user) return;
-
     setIsCreating(true);
     try {
       // Generate local path based on project name
@@ -67,7 +65,7 @@ function ProjectForm(props: ProjectFormProps) {
         name: data.name,
         description: data.description || "",
         localPath,
-        ownerId: auth.user.id,
+        ownerId: userId,
         ...(data.type === "github" && {
           gitUrl: data.gitUrl,
           branch: data.branch || "main",

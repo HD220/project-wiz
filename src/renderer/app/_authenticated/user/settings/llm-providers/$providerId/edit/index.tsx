@@ -4,7 +4,6 @@ import {
   useNavigate,
   useRouter,
 } from "@tanstack/react-router";
-import { useRouteContext } from "@tanstack/react-router";
 import { useMutation } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -31,7 +30,6 @@ import {
 function EditProviderModal() {
   const navigate = useNavigate();
   const { providerId } = Route.useParams();
-  const { auth } = useRouteContext({ from: "__root__" });
   const router = useRouter();
 
   // SIMPLE: Get provider from route loader
@@ -71,7 +69,7 @@ function EditProviderModal() {
   const watchedType = form.watch("type");
 
   function onSubmit(data: ProviderFormData) {
-    if (!provider || !auth.user?.id) return;
+    if (!provider) return;
 
     const updateData = {
       ...data,

@@ -1,5 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useRouteContext, useRouter } from "@tanstack/react-router";
+import { useRouter } from "@tanstack/react-router";
 import { useMutation } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -28,12 +28,11 @@ import { ProviderSettingsSection } from "./provider-form-settings-section";
 interface ProviderFormProps {
   provider?: LlmProvider | null;
   onClose: () => void;
+  userId: string;
 }
 
 function ProviderForm(props: ProviderFormProps) {
-  const { provider, onClose } = props;
-  const { auth } = useRouteContext({ from: "__root__" });
-  const { user } = auth;
+  const { provider, onClose, userId } = props;
   const router = useRouter();
 
   // SIMPLE: Direct mutations with window.api
@@ -105,7 +104,7 @@ function ProviderForm(props: ProviderFormProps) {
   const watchedType = form.watch("type");
 
   function onSubmit(data: ProviderFormData) {
-    if (!user?.id) {
+    if (!userId) {
       toast.error("User not authenticated");
       return;
     }
@@ -121,7 +120,7 @@ function ProviderForm(props: ProviderFormProps) {
     } else {
       const createData = {
         ...data,
-        userId: user.id,
+        userId: userId,
         baseUrl: data.baseUrl || null,
       };
       createProviderMutation.mutate(createData);

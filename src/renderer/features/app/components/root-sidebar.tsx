@@ -1,4 +1,4 @@
-import { Link, useRouteContext } from "@tanstack/react-router";
+import { Link } from "@tanstack/react-router";
 import { Plus, Settings } from "lucide-react";
 
 import type { SelectProject } from "@/main/features/project/project.types";
@@ -19,13 +19,13 @@ import { cn } from "@/renderer/lib/utils";
 
 interface RootSidebarProps {
   projects: SelectProject[];
+  userName: string;
+  userId: string;
   className?: string;
 }
 
 function RootSidebar(props: RootSidebarProps) {
-  const { projects, className } = props;
-  const { auth } = useRouteContext({ from: "__root__" });
-  const { user } = auth;
+  const { projects, userName, userId, className } = props;
 
   return (
     <div
@@ -59,7 +59,7 @@ function RootSidebar(props: RootSidebarProps) {
                   >
                     <Avatar className="w-6 h-6">
                       <AvatarFallback className="bg-transparent text-inherit font-medium text-sm">
-                        {user?.name?.charAt(0).toUpperCase() || "U"}
+                        {userName?.charAt(0).toUpperCase() || "U"}
                       </AvatarFallback>
                     </Avatar>
                   </Button>
@@ -138,7 +138,7 @@ function RootSidebar(props: RootSidebarProps) {
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
-              <CreateProjectDialog>
+              <CreateProjectDialog userId={userId}>
                 <Button
                   variant="ghost"
                   size="icon"

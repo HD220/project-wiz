@@ -1,4 +1,3 @@
-import { useRouteContext } from "@tanstack/react-router";
 import { Plus, MessageCircle } from "lucide-react";
 import { useState } from "react";
 
@@ -6,16 +5,14 @@ import { Button } from "@/renderer/components/ui/button";
 import { ConversationSidebarItem } from "@/renderer/features/conversation/components/conversation-sidebar-item";
 import { CreateConversationDialog } from "@/renderer/features/conversation/components/create-conversation-dialog";
 
-function ConversationSidebarList() {
-  // PREFERRED: Use Router Context for data loaded in route
-  const routeContext = useRouteContext({
-    from: "/_authenticated/user",
-  });
+interface ConversationSidebarListProps {
+  conversations: any[];
+  availableUsers: any[];
+  currentUser: any;
+}
 
-  // Defensive protection against race conditions
-  const conversations = routeContext?.conversations || [];
-  const availableUsers = routeContext?.availableUsers || [];
-  const user = routeContext?.user;
+function ConversationSidebarList(props: ConversationSidebarListProps) {
+  const { conversations, availableUsers, currentUser } = props;
 
   // SIMPLE: Local state for UI
   const [showCreateDialog, setShowCreateDialog] = useState(false);
@@ -25,9 +22,8 @@ function ConversationSidebarList() {
 
   // Helper functions
   function getOtherParticipants(conversation: any) {
-    const currentUserId = user?.id;
     return conversation.participants
-      .filter((p: any) => p.participantId !== currentUserId)
+      .filter((p: any) => p.participantId !== currentUser.id)
       .map((p: any) => p.participantId);
   }
 
@@ -126,7 +122,7 @@ function ConversationSidebarList() {
       {showCreateDialog && (
         <CreateConversationDialog
           availableUsers={availableUsers}
-          currentUser={user}
+          currentUser={currentUser}
           onClose={handleCloseDialog}
           onConversationCreated={handleConversationCreated}
         />
