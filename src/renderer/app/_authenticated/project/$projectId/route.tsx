@@ -7,10 +7,10 @@ function ProjectLayout() {
 
   return (
     <>
-      <div className="w-60">
+      <div className="w-60 h-full">
         <ProjectSidebar project={project} conversations={[]} agents={[]} />
       </div>
-      <main className="flex-1">
+      <main className="flex-1 h-full">
         <Outlet />
       </main>
     </>

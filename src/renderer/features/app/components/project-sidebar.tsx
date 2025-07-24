@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { Hash, Users, Bot, Settings, ChevronDown } from "lucide-react";
+import { Hash, Settings, ChevronDown } from "lucide-react";
 
 import { Button } from "@/renderer/components/ui/button";
 import {
@@ -21,12 +21,6 @@ interface Channel {
   hasNotification?: boolean;
 }
 
-interface Agent {
-  id: string;
-  name: string;
-  status: "online" | "offline" | "busy";
-}
-
 interface ProjectSidebarProps {
   project: SelectProject;
   conversations?: SelectConversation[];
@@ -35,7 +29,7 @@ interface ProjectSidebarProps {
 }
 
 function ProjectSidebar(props: ProjectSidebarProps) {
-  const { project, conversations = [], agents = [], className } = props;
+  const { project, conversations = [], className } = props;
 
   // Transform conversations into channels format
   const channels: Channel[] = conversations.map((conversation) => ({
@@ -44,16 +38,6 @@ function ProjectSidebar(props: ProjectSidebarProps) {
     type: "text" as const,
     hasNotification: false, // TODO: Add notification logic from conversation data
   }));
-
-  // Transform agents data to match the expected format
-  const projectAgents: Agent[] =
-    agents.length > 0
-      ? agents.map((agent) => ({
-          id: agent.id,
-          name: agent.name || "Unnamed Agent",
-          status: agent.status === "active" ? "online" : ("offline" as const),
-        }))
-      : [];
 
   return (
     <div className={cn("h-full flex flex-col bg-card", className)}>
@@ -71,6 +55,33 @@ function ProjectSidebar(props: ProjectSidebarProps) {
 
       <ScrollArea className="flex-1">
         <div className="p-2 space-y-1">
+          {/* Dashboard */}
+          <Link
+            to="/project/$projectId"
+            params={{ projectId: project.id }}
+            className="block"
+            activeProps={{
+              className: "active",
+            }}
+          >
+            {({ isActive }: { isActive: boolean }) => (
+              <Button
+                variant="ghost"
+                className={cn(
+                  "w-full justify-start px-2 h-8 text-sm font-normal text-muted-foreground hover:text-foreground hover:bg-accent",
+                  isActive && "bg-accent text-foreground",
+                )}
+              >
+                <Hash className="w-4 h-4 mr-2 text-muted-foreground" />
+                Dashboard
+              </Button>
+            )}
+          </Link>
+
+          <div className="my-2">
+            <Separator />
+          </div>
+
           {/* Text Channels */}
           <Collapsible defaultOpen>
             <CollapsibleTrigger asChild>
@@ -116,75 +127,6 @@ function ProjectSidebar(props: ProjectSidebarProps) {
                   Nenhuma conversa ainda
                 </div>
               )}
-            </CollapsibleContent>
-          </Collapsible>
-
-          <div className="my-2">
-            <Separator />
-          </div>
-
-          {/* Project Agents */}
-          <Collapsible defaultOpen>
-            <CollapsibleTrigger asChild>
-              <Button
-                variant="ghost"
-                className="w-full justify-start px-2 h-7 text-xs font-medium text-muted-foreground hover:text-foreground"
-              >
-                <ChevronDown className="w-3 h-3 mr-1" />
-                AGENTES DO PROJETO
-              </Button>
-            </CollapsibleTrigger>
-            <CollapsibleContent className="space-y-1">
-              {projectAgents.length > 0 ? (
-                projectAgents.map((agent) => (
-                  <Button
-                    key={agent.id}
-                    variant="ghost"
-                    className="w-full justify-start px-2 h-8 text-sm font-normal text-muted-foreground hover:text-foreground hover:bg-accent"
-                  >
-                    <Bot className="w-4 h-4 mr-2 text-muted-foreground" />
-                    {agent.name}
-                    <div
-                      className={cn(
-                        "ml-auto w-2 h-2 rounded-full",
-                        agent.status === "online" && "bg-green-500",
-                        agent.status === "offline" && "bg-gray-400",
-                        agent.status === "busy" && "bg-yellow-500",
-                      )}
-                    />
-                  </Button>
-                ))
-              ) : (
-                <div className="px-2 py-1 text-xs text-muted-foreground">
-                  Nenhum agente configurado
-                </div>
-              )}
-            </CollapsibleContent>
-          </Collapsible>
-
-          <div className="my-2">
-            <Separator />
-          </div>
-
-          {/* Members */}
-          <Collapsible defaultOpen>
-            <CollapsibleTrigger asChild>
-              <Button
-                variant="ghost"
-                className="w-full justify-start px-2 h-7 text-xs font-medium text-muted-foreground hover:text-foreground"
-              >
-                <ChevronDown className="w-3 h-3 mr-1" />
-                MEMBROS
-              </Button>
-            </CollapsibleTrigger>
-            <CollapsibleContent className="space-y-1">
-              <Button
-                variant="ghost"
-                className="w-full justify-start px-2 h-8 text-sm font-normal text-muted-foreground hover:text-foreground hover:bg-accent"
-              >
-                <Users className="w-4 h-4 mr-2 text-muted-foreground" />
-                View all members
-              </Button>
             </CollapsibleContent>
           </Collapsible>
         </div>
