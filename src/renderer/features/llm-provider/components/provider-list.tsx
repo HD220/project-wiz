@@ -3,13 +3,16 @@ import { Plus } from "lucide-react";
 
 import type { LlmProvider } from "@/main/features/agent/llm-provider/llm-provider.types";
 
-import { Route } from "@/renderer/app/_authenticated/user/settings/llm-providers/route";
 import { Button } from "@/renderer/components/ui/button";
 import { EmptyState } from "@/renderer/features/llm-provider/components/empty-state";
 import { ProviderCard } from "@/renderer/features/llm-provider/components/provider-card";
 
-function ProviderList() {
-  const { providers } = Route.useLoaderData();
+interface ProviderListProps {
+  providers: LlmProvider[];
+}
+
+function ProviderList(props: ProviderListProps) {
+  const { providers } = props;
 
   if (providers.length === 0) {
     return <EmptyState />;

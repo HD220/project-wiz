@@ -1,5 +1,5 @@
 /* eslint-disable max-lines-per-function */
-import { useLoaderData, useRouter } from "@tanstack/react-router";
+import { useRouter } from "@tanstack/react-router";
 import { useMutation } from "@tanstack/react-query";
 import { useEffect, useRef, useMemo } from "react";
 import { toast } from "sonner";
@@ -12,22 +12,16 @@ import type { SendMessageInput } from "@/main/features/conversation/conversation
 
 interface ConversationChatProps {
   conversationId: string;
+  conversation: any;
+  availableUsers: any[];
+  currentUser: any;
   className?: string;
 }
 
 function ConversationChat(props: ConversationChatProps) {
-  const { className } = props;
+  const { conversation, availableUsers, currentUser, className } = props;
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
-
-  // SIMPLE: Get data from route loader
-  const {
-    conversation,
-    availableUsers,
-    user: currentUser,
-  } = useLoaderData({
-    from: "/_authenticated/user/dm/$conversationId",
-  });
 
   // SIMPLE: Direct mutation with window.api
   const sendMessageMutation = useMutation({
@@ -80,11 +74,11 @@ function ConversationChat(props: ConversationChatProps) {
     }[] = [];
 
     const uniqueMessages = conversation.messages.filter(
-      (message, index, array) =>
-        array.findIndex((m) => m.id === message.id) === index,
+      (message: any, index: number, array: any[]) =>
+        array.findIndex((m: any) => m.id === message.id) === index,
     );
 
-    uniqueMessages.forEach((message) => {
+    uniqueMessages.forEach((message: any) => {
       const lastGroup = groups[groups.length - 1];
 
       if (lastGroup && lastGroup.authorId === message.authorId) {
@@ -159,7 +153,7 @@ function ConversationChat(props: ConversationChatProps) {
 
                   {/* Messages in Group */}
                   <div className="space-y-1">
-                    {group.messages.map((message) => (
+                    {group.messages.map((message: any) => (
                       <MessageBubble
                         key={message.id}
                         message={message}

@@ -1,5 +1,8 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import {
+  createFileRoute,
+  useNavigate,
+  useRouter,
+} from "@tanstack/react-router";
 
 import type { LlmProvider } from "@/main/features/agent/llm-provider/llm-provider.types";
 
@@ -17,31 +20,30 @@ import { AgentForm } from "@/renderer/features/agent/components/agent-form";
 
 function EditAgentPage() {
   const navigate = useNavigate();
+  const router = useRouter();
   const { agent, providers } = Route.useLoaderData();
-  const queryClient = useQueryClient();
-
-  // Mutation for updating agent
-  const updateMutation = useMutation({
-    mutationFn: ({
-      agentId,
-      data,
-    }: {
-      agentId: string;
-      data: CreateAgentInput;
-    }) => window.api.agents.update(agentId, data),
-    onSuccess: () => {
-      // Invalidate and refetch agents list
-      queryClient.invalidateQueries({ queryKey: ["agents"] });
-      handleClose();
-    },
-  });
 
   function handleClose() {
     navigate({ to: "/user/agents" });
   }
 
   async function handleSubmit(data: CreateAgentInput) {
-    updateMutation.mutate({ agentId: (agent as SelectAgent).id, data });
+    try {
+      const response = await window.api.agents.update(
+        (agent as SelectAgent).id,
+        data,
+      );
+      if (response.success) {
+        // Invalidate route to refresh data
+        router.invalidate();
+        handleClose();
+      } else {
+        // Handle error - could show toast here
+        console.error("Failed to update agent:", response.error);
+      }
+    } catch (error) {
+      console.error("Error updating agent:", error);
+    }
   }
 
   return (
@@ -56,7 +58,7 @@ function EditAgentPage() {
           providers={providers as LlmProvider[]}
           onSubmit={handleSubmit}
           onCancel={handleClose}
-          isLoading={updateMutation.isPending}
+          isLoading={false}
         />
       </DialogContent>
     </Dialog>
@@ -70,11 +72,6 @@ export const Route = createFileRoute(
     const { auth } = context;
     const { agentId } = params;
 
-    // Defensive check - ensure user exists
-    if (!auth.user?.id) {
-      throw new Error("User not authenticated");
-    }
-
     // Load agent data
     const agentResponse = await window.api.agents.get(agentId);
     if (!agentResponse.success) {
@@ -82,7 +79,7 @@ export const Route = createFileRoute(
     }
 
     // Load providers data for the form
-    const providersResponse = await window.api.llmProviders.list(auth.user.id);
+    const providersResponse = await window.api.llmProviders.list(auth.user!.id);
     if (!providersResponse.success) {
       throw new Error(providersResponse.error || "Failed to load providers");
     }

@@ -42,7 +42,12 @@ function DMLayout() {
         icon={MessageCircle}
       />
       <main className="flex-1 overflow-hidden">
-        <ConversationChat conversationId={conversationId} />
+        <ConversationChat
+          conversationId={conversationId}
+          conversation={conversation}
+          availableUsers={availableUsers}
+          currentUser={user}
+        />
       </main>
 
       {/* Child Routes */}
@@ -56,11 +61,6 @@ export const Route = createFileRoute("/_authenticated/user/dm/$conversationId")(
     loader: async ({ params, context }) => {
       const { auth } = context;
       const { conversationId } = params;
-
-      // Defensive check - ensure user exists
-      if (!auth.user?.id) {
-        throw new Error("User not authenticated");
-      }
 
       // SIMPLE: Direct window.api calls
       const conversationsResponse =

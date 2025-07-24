@@ -130,12 +130,7 @@ export const Route = createFileRoute(
   loader: async ({ context, params }) => {
     const { auth } = context;
 
-    // Defensive check - ensure user exists
-    if (!auth.user?.id) {
-      throw new Error("User not authenticated");
-    }
-
-    const response = await window.api.llmProviders.list(auth.user.id);
+    const response = await window.api.llmProviders.list(auth.user!.id);
     if (!response.success) {
       throw new Error(response.error || "Failed to load providers");
     }

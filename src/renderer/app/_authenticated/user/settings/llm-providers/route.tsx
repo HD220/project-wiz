@@ -5,6 +5,8 @@ import type { LlmProvider } from "@/main/features/agent/llm-provider/llm-provide
 import { ProviderList } from "@/renderer/features/llm-provider/components/provider-list";
 
 function LLMProvidersLayout() {
+  const { providers } = Route.useLoaderData();
+
   return (
     <>
       <div className="space-y-6">
@@ -19,7 +21,7 @@ function LLMProvidersLayout() {
         </div>
 
         {/* Provider List */}
-        <ProviderList />
+        <ProviderList providers={providers} />
       </div>
 
       {/* Modals/Child Routes */}
@@ -34,12 +36,7 @@ export const Route = createFileRoute(
   loader: async ({ context }) => {
     const { auth } = context;
 
-    // Defensive check - ensure user exists
-    if (!auth.user?.id) {
-      throw new Error("User not authenticated");
-    }
-
-    const response = await window.api.llmProviders.list(auth.user.id);
+    const response = await window.api.llmProviders.list(auth.user!.id);
     if (!response.success) {
       throw new Error(response.error || "Failed to load providers");
     }

@@ -6,6 +6,8 @@ import { AgentList } from "@/renderer/features/agent/components/agent-list";
 import { ContentHeader } from "@/renderer/features/app/components/content-header";
 
 function AgentsLayout() {
+  const agents = Route.useLoaderData();
+
   return (
     <div className="flex-1 flex flex-col">
       <ContentHeader
@@ -14,7 +16,7 @@ function AgentsLayout() {
       />
       <main className="flex-1 overflow-auto">
         <div className="h-full p-6">
-          <AgentList />
+          <AgentList agents={agents} />
         </div>
       </main>
 

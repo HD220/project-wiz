@@ -1,7 +1,6 @@
 import { useMutation } from "@tanstack/react-query";
 import {
   Link,
-  useLoaderData,
   useNavigate,
   useRouter,
   useSearch,
@@ -26,11 +25,12 @@ import type {
 import { AgentDeleteDialog } from "@/renderer/features/agent/components/agent-delete-dialog";
 import { AgentListCard } from "@/renderer/features/agent/components/agent-list-card";
 
-function AgentList() {
-  // SIMPLE: Get data from loader (already filtered)
-  const agents = useLoaderData({
-    from: "/_authenticated/user/agents",
-  }) as SelectAgent[];
+interface AgentListProps {
+  agents: SelectAgent[];
+}
+
+function AgentList(props: AgentListProps) {
+  const { agents } = props;
 
   // SIMPLE: Get URL search params and navigation
   const search = useSearch({ from: "/_authenticated/user/agents" }) as any;
