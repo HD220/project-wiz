@@ -7,19 +7,16 @@ import {
   CardTitle,
 } from "@/renderer/components/ui/card";
 import { ActivityItem } from "@/renderer/features/app/components/activity-item";
+import { useAuth } from "@/renderer/contexts/auth.context";
 
-interface WelcomeViewProps {
-  userName: string;
-}
-
-function WelcomeView(props: WelcomeViewProps) {
-  const { userName } = props;
+function WelcomeView() {
+  const { user } = useAuth();
 
   return (
     <div className="p-6 space-y-6">
       <div className="space-y-2">
         <h1 className="text-2xl font-bold text-foreground">
-          Welcome back, {userName}! 👋
+          Welcome back, {user?.name || "User"}! 👋
         </h1>
         <p className="text-muted-foreground">
           Ready to start collaborating with AI agents?

@@ -4,6 +4,8 @@ import { useMutation } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
+import { useAuth } from "@/renderer/contexts/auth.context";
+
 import type { CreateProviderInput } from "@/main/features/agent/llm-provider/llm-provider.types";
 
 import type { LlmProvider } from "@/main/features/agent/llm-provider/llm-provider.types";
@@ -28,12 +30,12 @@ import { ProviderSettingsSection } from "./provider-form-settings-section";
 interface ProviderFormProps {
   provider?: LlmProvider | null;
   onClose: () => void;
-  userId: string;
 }
 
 function ProviderForm(props: ProviderFormProps) {
-  const { provider, onClose, userId } = props;
+  const { provider, onClose } = props;
   const router = useRouter();
+  const { user } = useAuth();
 
   // SIMPLE: Direct mutations with window.api
   const createProviderMutation = useMutation({
@@ -104,7 +106,7 @@ function ProviderForm(props: ProviderFormProps) {
   const watchedType = form.watch("type");
 
   function onSubmit(data: ProviderFormData) {
-    if (!userId) {
+    if (!user?.id) {
       toast.error("User not authenticated");
       return;
     }
@@ -120,7 +122,7 @@ function ProviderForm(props: ProviderFormProps) {
     } else {
       const createData = {
         ...data,
-        userId: userId,
+        userId: user.id,
         baseUrl: data.baseUrl || null,
       };
       createProviderMutation.mutate(createData);

@@ -4,6 +4,8 @@ import { MoreHorizontal, Edit2, Trash2, Star, StarOff } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
+import { useAuth } from "@/renderer/contexts/auth.context";
+
 import type { LlmProvider } from "@/main/features/agent/llm-provider/llm-provider.types";
 
 import {
@@ -40,13 +42,13 @@ const getProviderLabel = (type: string): string => {
 
 interface ProviderCardProps {
   provider: LlmProvider;
-  userId: string;
 }
 
 function ProviderCard(props: ProviderCardProps) {
-  const { provider, userId } = props;
+  const { provider } = props;
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const router = useRouter();
+  const { user } = useAuth();
 
   // SIMPLE: Direct mutations with window.api
   const deleteProviderMutation = useMutation({
@@ -83,7 +85,7 @@ function ProviderCard(props: ProviderCardProps) {
   function handleSetDefault() {
     setDefaultProviderMutation.mutate({
       id: provider.id,
-      userId: userId,
+      userId: user?.id || "",
     });
   }
 

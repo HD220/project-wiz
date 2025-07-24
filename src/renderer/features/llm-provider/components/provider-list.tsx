@@ -9,7 +9,7 @@ import { EmptyState } from "@/renderer/features/llm-provider/components/empty-st
 import { ProviderCard } from "@/renderer/features/llm-provider/components/provider-card";
 
 function ProviderList() {
-  const { providers, userId } = Route.useLoaderData();
+  const { providers } = Route.useLoaderData();
 
   if (providers.length === 0) {
     return <EmptyState />;
@@ -46,7 +46,7 @@ function ProviderList() {
       {/* Providers List */}
       <div className="space-y-2">
         {providers.map((provider: LlmProvider) => (
-          <ProviderCard key={provider.id} provider={provider} userId={userId} />
+          <ProviderCard key={provider.id} provider={provider} />
         ))}
       </div>
     </div>

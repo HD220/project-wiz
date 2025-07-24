@@ -7,11 +7,10 @@ import { ConversationSidebarList } from "@/renderer/features/conversation/compon
 interface SidebarNavigationProps {
   conversations: any[];
   availableUsers: any[];
-  currentUser: any;
 }
 
 function SidebarNavigation(props: SidebarNavigationProps) {
-  const { conversations, availableUsers, currentUser } = props;
+  const { conversations, availableUsers } = props;
 
   return (
     <div className="flex-1 p-2 space-y-1">
@@ -30,7 +29,6 @@ function SidebarNavigation(props: SidebarNavigationProps) {
       <ConversationSidebarList
         conversations={conversations}
         availableUsers={availableUsers}
-        currentUser={currentUser}
       />
     </div>
   );

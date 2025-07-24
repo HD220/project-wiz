@@ -45,7 +45,6 @@ export const Route = createFileRoute(
     }
     return {
       providers: response.data as LlmProvider[],
-      userId: auth.user.id,
     };
   },
   component: LLMProvidersLayout,

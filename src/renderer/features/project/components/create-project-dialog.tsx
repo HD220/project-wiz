@@ -13,12 +13,11 @@ import { ProjectForm } from "./project-form";
 
 interface CreateProjectDialogProps {
   children: React.ReactNode;
-  userId: string;
   onSuccess?: () => void;
 }
 
 function CreateProjectDialog(props: CreateProjectDialogProps) {
-  const { children, userId, onSuccess } = props;
+  const { children, onSuccess } = props;
   const [open, setOpen] = useState(false);
   const navigate = useNavigate();
 
@@ -47,7 +46,6 @@ function CreateProjectDialog(props: CreateProjectDialogProps) {
           </DialogDescription>
         </DialogHeader>
         <ProjectForm
-          userId={userId}
           onSuccess={handleSuccess}
           onCancel={() => setOpen(false)}
         />

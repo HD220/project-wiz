@@ -3,7 +3,7 @@ import { createFileRoute, Outlet } from "@tanstack/react-router";
 import { UserSidebar } from "@/renderer/features/app/components/user-sidebar";
 
 function UserLayout() {
-  const { conversations, availableUsers, user } = Route.useLoaderData();
+  const { conversations, availableUsers } = Route.useLoaderData();
 
   return (
     <div className="h-full w-full flex">
@@ -11,7 +11,6 @@ function UserLayout() {
         <UserSidebar
           conversations={conversations}
           availableUsers={availableUsers}
-          currentUser={user}
         />
       </div>
       <main className="flex-1 h-full">
@@ -54,7 +53,6 @@ export const Route = createFileRoute("/_authenticated/user")({
     return {
       conversations,
       availableUsers,
-      user: auth.user,
     };
   },
   component: UserLayout,

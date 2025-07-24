@@ -4,6 +4,7 @@ import { Plus, Settings } from "lucide-react";
 import type { SelectProject } from "@/main/features/project/project.types";
 
 import { CreateProjectDialog } from "@/renderer/features/project/components";
+import { useAuth } from "@/renderer/contexts/auth.context";
 
 import { CustomLink } from "@/renderer/components/custom-link";
 import { Avatar, AvatarFallback } from "@/renderer/components/ui/avatar";
@@ -19,13 +20,12 @@ import { cn } from "@/renderer/lib/utils";
 
 interface RootSidebarProps {
   projects: SelectProject[];
-  userName: string;
-  userId: string;
   className?: string;
 }
 
 function RootSidebar(props: RootSidebarProps) {
-  const { projects, userName, userId, className } = props;
+  const { projects, className } = props;
+  const { user } = useAuth();
 
   return (
     <div
@@ -59,7 +59,7 @@ function RootSidebar(props: RootSidebarProps) {
                   >
                     <Avatar className="w-6 h-6">
                       <AvatarFallback className="bg-transparent text-inherit font-medium text-sm">
-                        {userName?.charAt(0).toUpperCase() || "U"}
+                        {user?.name?.charAt(0).toUpperCase() || "U"}
                       </AvatarFallback>
                     </Avatar>
                   </Button>
@@ -138,7 +138,7 @@ function RootSidebar(props: RootSidebarProps) {
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
-              <CreateProjectDialog userId={userId}>
+              <CreateProjectDialog>
                 <Button
                   variant="ghost"
                   size="icon"

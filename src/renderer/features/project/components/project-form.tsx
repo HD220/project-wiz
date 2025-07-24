@@ -4,6 +4,8 @@ import { useState } from "react";
 import { useRouter } from "@tanstack/react-router";
 import { z } from "zod";
 
+import { useAuth } from "@/renderer/contexts/auth.context";
+
 import { Button } from "@/renderer/components/ui/button";
 import {
   Form,
@@ -32,15 +34,15 @@ const ProjectFormSchema = z.object({
 type ProjectFormData = z.infer<typeof ProjectFormSchema>;
 
 interface ProjectFormProps {
-  userId: string;
   onSuccess?: (projectId: string) => void;
   onCancel?: () => void;
 }
 
 function ProjectForm(props: ProjectFormProps) {
-  const { userId, onSuccess, onCancel } = props;
+  const { onSuccess, onCancel } = props;
   const [isCreating, setIsCreating] = useState(false);
   const router = useRouter();
+  const { user } = useAuth();
 
   const form = useForm<ProjectFormData>({
     resolver: zodResolver(ProjectFormSchema),
@@ -65,7 +67,7 @@ function ProjectForm(props: ProjectFormProps) {
         name: data.name,
         description: data.description || "",
         localPath,
-        ownerId: userId,
+        ownerId: user?.id || "",
         ...(data.type === "github" && {
           gitUrl: data.gitUrl,
           branch: data.branch || "main",

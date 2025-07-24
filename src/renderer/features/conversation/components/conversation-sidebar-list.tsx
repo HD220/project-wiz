@@ -4,15 +4,16 @@ import { useState } from "react";
 import { Button } from "@/renderer/components/ui/button";
 import { ConversationSidebarItem } from "@/renderer/features/conversation/components/conversation-sidebar-item";
 import { CreateConversationDialog } from "@/renderer/features/conversation/components/create-conversation-dialog";
+import { useAuth } from "@/renderer/contexts/auth.context";
 
 interface ConversationSidebarListProps {
   conversations: any[];
   availableUsers: any[];
-  currentUser: any;
 }
 
 function ConversationSidebarList(props: ConversationSidebarListProps) {
-  const { conversations, availableUsers, currentUser } = props;
+  const { conversations, availableUsers } = props;
+  const { user: currentUser } = useAuth();
 
   // SIMPLE: Local state for UI
   const [showCreateDialog, setShowCreateDialog] = useState(false);
@@ -22,6 +23,7 @@ function ConversationSidebarList(props: ConversationSidebarListProps) {
 
   // Helper functions
   function getOtherParticipants(conversation: any) {
+    if (!currentUser) return [];
     return conversation.participants
       .filter((p: any) => p.participantId !== currentUser.id)
       .map((p: any) => p.participantId);
@@ -119,7 +121,7 @@ function ConversationSidebarList(props: ConversationSidebarListProps) {
       </div>
 
       {/* Create Dialog */}
-      {showCreateDialog && (
+      {showCreateDialog && currentUser && (
         <CreateConversationDialog
           availableUsers={availableUsers}
           currentUser={currentUser}

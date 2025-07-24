@@ -5,12 +5,11 @@ import { SidebarUserArea } from "@/renderer/features/app/components/sidebar-user
 interface UserSidebarProps {
   conversations: any[];
   availableUsers: any[];
-  currentUser: any;
   className?: string;
 }
 
 function UserSidebar(props: UserSidebarProps) {
-  const { conversations, availableUsers, currentUser, className } = props;
+  const { conversations, availableUsers, className } = props;
 
   return (
     <div className={`h-full flex flex-col bg-card ${className || ""}`}>
@@ -18,7 +17,6 @@ function UserSidebar(props: UserSidebarProps) {
       <SidebarNavigation
         conversations={conversations}
         availableUsers={availableUsers}
-        currentUser={currentUser}
       />
       <SidebarUserArea />
     </div>
