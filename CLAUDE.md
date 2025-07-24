@@ -2,497 +2,297 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## 🚨 CRITICAL RULES - MUST FOLLOW
+## 🚨 CRITICAL ARCHITECTURE RULES
 
-### **Data Loading & API Usage**
+### **Code Simplicity (HIGHEST PRIORITY)** - @docs/developer/code-simplicity-principles.md
 
-#### **✅ PREFERRED DATA LOADING HIERARCHY (Follow this order):**
+**INLINE-FIRST PHILOSOPHY:**
 
-1. **TanStack Router beforeLoad/loader** - For initial page data (HIGHEST PRIORITY)
-   - Use `beforeLoad` for route guards and validation
-   - Use `loader` for data that must be available before render
-   - Direct `window.api` usage (fully typed via preload.ts)
-   - Best performance with route-level preloading
+- ✅ **WRITE INLINE** when < 15 lines, single use, related operations
+- ✅ **EXTRACT FUNCTION** only when 3+ exact duplications OR > 20 lines
+- ✅ **OPTIMIZE FOR JUNIOR DEVELOPERS** - readable without file jumping
+- ✅ **COPY-PASTE IS OK** for simple, contextually different logic
+- ❌ **NEVER** over-abstract or create unnecessary functions
+- ❌ **NEVER** split simple logic across multiple files
 
-2. **TanStack Query** - For mutations and reactive data (SECOND PRIORITY)
-   - Use for data that changes frequently or needs caching
-   - Use for mutations with optimistic updates
-   - Direct `window.api` usage in queryFn/mutationFn
+### **Data Loading Hierarchy** - @docs/developer/data-loading-patterns.md
 
-3. **Router Context** - For sharing route data (THIRD PRIORITY)
-   - Share data loaded in routes with child components
-   - Eliminate prop drilling
-   - Type-safe access to route data
+**MANDATORY ORDER:**
 
-4. **Custom Hooks** - Only for specific behaviors (LAST RESORT)
-   - Only when above patterns cannot handle the use case
-   - Focus on single responsibility
-   - Avoid combining multiple concerns
+1. **TanStack Router beforeLoad/loader** (HIGHEST PRIORITY)
+2. **TanStack Query** (mutations/reactive data)
+3. **Router Context** (share route data)
+4. **Custom Hooks** (LAST RESORT)
 
-#### **❌ PROHIBITED:**
+**PROHIBITED:**
 
-- **NEVER use API wrapper classes** - They add unnecessary abstraction over `window.api`
-- **NEVER use `useEffect` for data loading** - Use route loading or TanStack Query
-- **NEVER use `localStorage`** - This is an Electron desktop app, use main process
-- **NEVER use `window.api` directly in component bodies** - Only in queries/beforeLoad/loader
-- **NEVER edit migration SQL files directly** - Only modify `*.model.ts` files and regenerate
-- **NEVER use Zustand for simple global UI state** - Use local React state or URL params
+- ❌ **NEVER** API wrapper classes
+- ❌ **NEVER** `useEffect` for data loading
+- ❌ **NEVER** `localStorage` (desktop app - use main process)
+- ❌ **NEVER** `window.api` in component bodies
+- ❌ **NEVER** Zustand for simple UI state
 
-#### **✅ ALLOWED window.api usage:**
+### **Database Patterns** - @docs/developer/database-patterns.md
 
-- **Route beforeLoad/loader** - `beforeLoad: async () => window.api.agents.list()`
-- **TanStack Query functions** - `queryFn: () => window.api.auth.getCurrentUser()`
-- **TanStack Query mutations** - `mutationFn: (data) => window.api.users.update(data)`
+**CRITICAL MIGRATION RULE:**
 
-#### **✅ CORRECT patterns:**
+- ❌ **NEVER EDIT SQL MIGRATION FILES DIRECTLY**
+- ✅ **ONLY** modify `*.model.ts` files → `npm run db:generate` → `npm run db:migrate`
 
-```typescript
-// ✅ CORRECT: Route beforeLoad with direct window.api (PREFERRED)
-export const Route = createFileRoute("/_authenticated/user/agents/")({
-  validateSearch: (search) => AgentFiltersSchema.parse(search),
-  beforeLoad: async ({ search }) => {
-    const response = await window.api.agents.list(search);
-    if (!response.success) throw new Error(response.error);
-    return { agents: response.data };
-  },
-  component: AgentsPage,
-});
+**MANDATORY:**
 
-// ✅ CORRECT: TanStack Query for mutations
-const createAgent = useMutation({
-  mutationFn: (data: CreateAgentInput) => window.api.agents.create(data),
-  onSuccess: () => {
-    router.invalidate(); // Refresh route data
-  },
-});
+- Foreign key constraints on ALL relationships
+- Indexes on ALL foreign keys and query columns
+- Type inference: `typeof table.$inferSelect`
+- Services return data directly, throw errors
 
-// ✅ CORRECT: URL params for filters (shareable, bookmarkable)
-const { search } = useSearch({ from: "/_authenticated/user/agents/" });
-const navigate = useNavigate({ from: "/_authenticated/user/agents/" });
-```
+### **IPC Communication** - @docs/developer/ipc-communication-patterns.md
 
-#### **❌ INCORRECT patterns:**
+**PATTERN:**
 
-```typescript
-// ❌ WRONG: API wrapper classes (unnecessary abstraction)
-class AgentAPI {
-  static async list() {
-    return window.api.agents.list(); // Pointless wrapper
-  }
-}
+- Services: Return data directly, throw errors
+- Handlers: Try/catch → standardized `IpcResponse<T>`
+- Preload: Type-safe `window.api` exposure
+- Security: `contextIsolation: true`, `nodeIntegration: false`
 
-// ❌ WRONG: useEffect for data loading
-useEffect(() => {
-  window.api.users.get(userId).then(setUser); // NEVER DO THIS
-}, [userId]);
-
-// ❌ WRONG: Zustand store for simple UI state
-const useAgentStore = create((set) => ({
-  selectedAgent: null,
-  setSelectedAgent: (agent) => set({ selectedAgent: agent }),
-}));
-
-// ❌ WRONG: Complex hooks combining multiple concerns
-const useAgent = () => {
-  // 50+ lines mixing queries, stores, filters, etc.
-  // Split into focused hooks or use route loading
-};
-```
-
-## Development Commands
-
-### Core Commands
+## **CRITICAL COMMANDS**
 
 ```bash
+# Database (CRITICAL WORKFLOW)
+npm run db:generate           # Generate migrations from *.model.ts
+npm run db:migrate            # Apply migrations to database
+npm run db:studio             # Database GUI - DO NOT EXECUTE
+
 # Development
-npm run dev                    # Start Electron development server - NOT EXECUTE
+npm run dev                   # Electron dev server - DO NOT EXECUTE
+npm run build                 # Production build + i18n compile
+npm run package              # Package executable
 
-# Build and Package
-npm run build                  # Build for production (includes i18n compile)
-npm run package               # Package as executable
-
-# Database
-npm run db:generate           # Generate database migrations
-npm run db:migrate            # Run database migrations
-npm run db:studio             # Open Drizzle Studio (database GUI) - NOT EXECUTE
-
-# Testing
-npm run test                  # Run all tests
-npm run test:watch           # Run tests in watch mode
-npm run test:coverage        # Run tests with coverage report
-
-# Code Quality
-npm run lint                 # Check code linting
-npm run lint:fix            # Fix auto-fixable linting issues
-npm run type-check          # TypeScript type checking
-npm run format              # Format code with Prettier
-npm run format:check        # Check code formatting
+# Quality Assurance (RUN BEFORE COMMITS)
+npm run quality:check        # Comprehensive: lint + type + format + test
+npm run lint                 # ESLint check
+npm run lint:fix            # Auto-fix ESLint issues
+npm run type-check          # TypeScript validation
+npm run format              # Prettier formatting
+npm run test                # Vitest run
+npm run test:coverage       # Coverage report
 
 # Internationalization
-npm run extract             # Extract translatable strings
+npm run extract             # Extract i18n strings
 npm run compile             # Compile translations
-
-# Complete Quality Check
-npm run quality:check       # Run linting, type-check, formatting, and tests
 ```
 
-## Architecture Overview
+## **ARCHITECTURE OVERVIEW**
 
-This is an Electron desktop application built with React and TypeScript, designed as an AI-powered software development automation platform. The architecture follows a clear separation between main process (backend) and renderer process (frontend).
+**AI-powered software development automation platform** - Electron desktop app with Discord-like interface metaphor (projects as servers, channels for conversations).
 
-### Key Architectural Components
+### **Core Technologies**
 
-#### Main Process (Backend)
+- **Electron 35.1.4** + **React 19.0.0** + **TypeScript** (strict)
+- **SQLite + Drizzle ORM** (WAL mode, foreign keys enabled)
+- **TanStack Router 1.115.2** (file-based routing)
+- **TanStack Query 5.83.0** (server state)
+- **shadcn/ui** + **Tailwind CSS 4.0.14**
+- **Vercel AI SDK** (multi-provider LLM support)
+- **Vitest** (testing) + **LinguiJS** (i18n)
 
-- **Database**: SQLite with Drizzle ORM for data persistence
-- **Feature-based structure**: Each domain (auth, agents, projects, conversations) has its own module
-- **IPC Handlers**: Electron IPC communication layer between main and renderer
-- **Service Layer**: Business logic separated from data access
+### **Main Process (Backend)**
 
-#### Renderer Process (Frontend)
+**Feature Structure:** `features/[domain]/[domain].{model,schema,service,handler,types}.ts`
 
-- **React with TypeScript**: Modern React patterns using function declarations
-- **TanStack Router**: File-based routing with beforeLoad/loader for data loading
-- **shadcn/ui**: Component library for consistent UI
-- **State Management**: Router context for shared state, TanStack Query for server state, local state for UI
-- **Internationalization**: LinguiJS for multi-language support
+- **Database**: SQLite + WAL mode + foreign key constraints
+- **Service Layer**: Business logic, throws errors directly
+- **IPC Handlers**: Try/catch → `IpcResponse<T>`
+- **Session Management**: Database-based (NOT localStorage)
 
-#### Database Schema
+### **Renderer Process (Frontend)**
 
-- **Users & Authentication**: User accounts and session management
-- **Projects**: Git repository integration and project management
-- **Agents**: AI agent configurations and LLM provider settings
-- **Conversations**: Chat system for human-AI interaction
-- **Memory**: Agent memory and context management
+**Route Structure:** File-based with `beforeLoad/loader` data loading
 
-### Process Communication
+- **Components**: Function declarations only (NOT React.FC)
+- **State**: Router context → URL params → Local state → TanStack Query → Zustand (exceptional)
+- **Forms**: shadcn/ui FormField pattern
+- **Security**: `contextIsolation: true`, `nodeIntegration: false`
 
-All communication between main and renderer processes happens via Electron IPC:
+## **CODING STANDARDS**
 
-- **Main Process**: Exposes handlers via `ipcMain.handle()`
-- **Renderer Process**: Communicates via `window.electronAPI` (preload script)
-- **Type Safety**: Shared types ensure end-to-end type safety
+### **File Naming** (kebab-case)
 
-## Code Organization Standards
+- **All files**: `kebab-case` (user-profile.tsx, auth-service.ts)
+- **Suffixes**: `.model.ts` (Drizzle), `.schema.ts` (Zod), `.service.ts`, `.handler.ts`
+- **Hooks**: `use-` prefix (use-auth.hook.ts)
+- **Components**: No suffix (login-form.tsx)
 
-### File Naming Convention
+### **Feature Structure**
 
-- **All files**: `kebab-case` (e.g., `user-profile.tsx`, `auth-service.ts`)
-- **Suffixes with dots**: `.model.ts` (Drizzle), `.schema.ts` (Zod), `.service.ts`, `.handler.ts`, `.store.ts`, `.api.ts`
-- **Hook prefix**: `use-` (e.g., `use-auth.hook.ts`)
-- **Components**: No suffix (e.g., `login-form.tsx`)
+**Main Process:** `[feature].{types,model,schema,service,handler}.ts`
+**Renderer:** `[feature].queries.ts`, `use-[feature].hook.ts`, `components/`
 
-### Feature Structure Pattern
+### **React Components** (**MANDATORY**)
 
-Each feature follows this simplified structure:
+- ✅ **Function declarations ONLY** (NEVER React.FC or arrow functions)
+- ✅ **No React import** (global React)
+- ✅ **shadcn/ui components** (NEVER HTML elements)
+- ✅ **Props destructuring** in parameters
+- ✅ **Named exports** (`export { Component }`)
+- ✅ **INLINE LOGIC** - validation, handlers, state updates in component body
+- ❌ **NEVER** extract single-use handler functions
 
-#### Main Process (Backend)
+### **Data Layer**
 
-```
-features/[feature-name]/
-├── [feature].types.ts     # TypeScript interfaces (shared with renderer)
-├── [feature].model.ts     # Drizzle database schema
-├── [feature].schema.ts    # Zod validation schemas (shared with renderer)
-├── [feature].service.ts   # Business logic
-└── [feature].handler.ts   # IPC handlers
-```
+- `.model.ts` - Drizzle database schemas
+- `.schema.ts` - Zod validation (forms/API)
+- `.types.ts` - TypeScript interfaces
 
-#### Renderer Process (Frontend)
+### **State Management Priority**
 
-```
-features/[feature-name]/
-├── [feature].queries.ts   # TanStack Query hooks (only for mutations)
-├── use-[feature].hook.ts  # Custom hooks (only when necessary)
-└── components/            # Feature-specific components
-```
+1. **TanStack Router Context** (share route data)
+2. **URL Parameters** (filters, search - shareable)
+3. **Local React State** (simple UI)
+4. **TanStack Query** (server state, mutations)
+5. **Zustand** (EXCEPTIONAL global state ONLY)
 
-### React Component Standards
+### **Session Management**
 
-- **Function declarations only** (not arrow functions file or React.FC)
-- **No React import** required (global React)
-- **shadcn/ui components** for all UI elements
-- **Props destructuring** in function parameters
-- **Named exports** (e.g., `export { LoginForm }`)
+- ✅ **Database sessions** (main process)
+- ❌ **NEVER localStorage** (desktop app security)
+- ✅ **Router Context** for auth state
+- ✅ **Foreign key constraints** for data integrity
 
-Example:
+## **TESTING & QUALITY**
 
-```typescript
-interface LoginFormProps {
-  onSuccess?: () => void;
-  className?: string;
-}
+### **Testing Stack**
 
-function LoginForm(props: LoginFormProps) {
-  const { onSuccess, className } = props;
-  // Component logic
-  return <div>...</div>;
-}
+- **Vitest** (Node.js environment) + **v8 coverage**
+- **Setup**: `tests/test-setup.ts` auto-runs migrations
+- **Patterns**: `src/**/*.{spec,test}.ts`
 
-export { LoginForm };
-```
+### **Quality Assurance**
 
-### Data Layer Separation
+- **ESLint**: Architectural boundaries + TypeScript rules
+- **Prettier**: Code formatting
+- **Strict TypeScript**: End-to-end type safety
+- **Import organization**: Dependency boundaries enforced
 
-- **`.model.ts`**: Drizzle schemas for database tables
-- **`.schema.ts`**: Zod schemas for validation and forms
-- **`.types.ts`**: TypeScript interfaces and types
+## **DEVELOPMENT PRINCIPLES**
 
-### State Management
+### **INLINE-FIRST PRINCIPLES** - @docs/developer/code-simplicity-principles.md
 
-**Priority Order:**
+- ✅ **< 15 LINES** → Write inline (validation + logic + persistence)
+- ✅ **3+ EXACT DUPLICATIONS** → Extract function
+- ✅ **JUNIOR DEVELOPER READABLE** → No file jumping for simple operations
+- ✅ **DEBUGGING IN SECONDS** → Bug location immediately visible
+- ❌ **NEVER** create single-use helper functions
+- ❌ **NEVER** abstract until actually needed (3+ times)
 
-1. **TanStack Router Context**: Share route data with child components (no prop drilling)
-2. **URL Parameters**: Filters, search, pagination (shareable, bookmarkable)
-3. **Local React State**: Simple UI state (modals, selections, form inputs)
-4. **TanStack Query**: Server state, mutations, caching, and synchronization
-5. **Zustand**: Only for exceptional global state used across multiple routes
-
-**Avoid:** Creating stores for simple UI state that could be local React state or URL parameters.
-
-### Session Management (Electron Desktop)
-
-- **Sessions managed by main process** - Never localStorage
-- **Auth state via Router Context** - Shared across routes
-- **Session persistence in database** - With automatic cleanup and expiration
-- **Database-persisted sessions** with foreign key constraints for data integrity
-
-## Testing Strategy
-
-- **Framework**: Vitest with Node.js environment
-- **Setup**: `tests/test-setup.ts` handles database migrations for tests
-- **Coverage**: v8 provider with HTML, text, and JSON reporting
-- **File patterns**: `src/**/*.spec.ts` and `src/**/*.test.ts`
-
-## Development Principles
-
-### YAGNI (You Aren't Gonna Need It)
-
-- **NO ABSTRACTIONS** until actually needed
-- **NO FRAMEWORKS** for simple problems
-- **NO PREMATURE OPTIMIZATION**
-- **SOLVE TODAY'S PROBLEM** only
-
-### KISS Principle
-
-- **Simplicity above all** - avoid over-engineering
-- **One responsibility per function/class**
-- **Clear, descriptive names** that eliminate need for comments
-- **Prefer simple solutions** to complex ones
-
-### Boy Scout Rule
+### **Boy Scout Rule**
 
 **"Always leave code cleaner than you found it"**
 
-- **Refactor while working** - don't leave technical debt
-- **Extract duplicated code** into reusable functions
-- **Simplify complex logic** when encountered
-- **Remove unused imports/variables/functions**
+- ✅ **Refactor while working** (no technical debt)
+- ✅ **Extract duplicated code**
+- ✅ **Simplify complex logic**
+- ✅ **Remove unused imports/variables/functions**
 
-## Database Patterns
+## **CORE PATTERNS** (See detailed docs)
 
-### Schema Definition & Type Safety
+### **Service Layer (INLINE-FIRST)**
 
-```typescript
-// ✅ CORRECT: Use type inference and custom types
-export type ProjectStatus = "active" | "archived";
+- ✅ **Validation + Business Logic + Database** in single function
+- ✅ **< 20 lines total** - keep everything visible
+- ✅ **Zod inline** - `CreateAgentSchema.parse(input)`
+- ✅ **Direct database operations** - no repository abstractions
+- ❌ **NEVER** split simple CRUD across multiple functions
 
-export const projectsTable = sqliteTable("projects", {
-  id: text("id")
-    .primaryKey()
-    .$defaultFn(() => crypto.randomUUID()),
-  name: text("name").notNull(),
-  status: text("status").$type<ProjectStatus>().notNull().default("active"),
-  createdAt: integer("created_at", { mode: "timestamp_ms" })
-    .notNull()
-    .default(sql`CURRENT_TIMESTAMP`),
-});
+### **Database** - @docs/developer/database-patterns.md
 
-// Type inference - don't recreate manually
-export type SelectProject = typeof projectsTable.$inferSelect;
-export type InsertProject = typeof projectsTable.$inferInsert;
-export type UpdateProject = Partial<InsertProject> & { id: string };
-```
+- ✅ Type inference: `typeof table.$inferSelect`
+- ✅ Foreign keys + indexes on ALL relationships
+- ✅ Services return data directly, throw errors
+- ❌ **NEVER** edit SQL migrations directly
 
-### Migration Workflow & Critical Rules
+### **IPC Communication** - @docs/developer/ipc-communication-patterns.md
 
-1. Create/modify schema in `src/main/features/**/*.model.ts`
-2. `npm run db:generate` - auto-detects via `drizzle.config.ts`
-3. `npm run db:migrate` - applies migrations
-4. Update service layer if needed
+- **Services**: Return data, throw errors
+- **Handlers**: Try/catch → `IpcResponse<T>`
+- **Preload**: Type-safe `window.api`
+- **Security**: Context isolation enabled
 
-**🚨 CRITICAL RULE: NEVER edit migration SQL files directly!**
+### **Data Loading** - @docs/developer/data-loading-patterns.md
 
-- Migrations are auto-generated by Drizzle from `*.model.ts` files
-- Always modify the `*.model.ts` files and regenerate migrations
-- Direct SQL edits will be overwritten and can break the migration system
+- **1st**: TanStack Router `beforeLoad/loader`
+- **2nd**: TanStack Query (mutations)
+- **3rd**: Router Context (share data)
+- **4th**: Custom Hooks (last resort)
 
-### Drizzle Query Patterns
+## **IMPLEMENTATION NOTES**
 
-```typescript
-// ✅ CORRECT: Use db.select().from().where() with destructuring
-const [user] = await db
-  .select({ theme: usersTable.theme })
-  .from(usersTable)
-  .where(eq(usersTable.id, userId))
-  .limit(1);
+### **Database Management**
 
-if (!user) {
-  throw new Error("User not found");
-}
+- **SQLite + WAL mode** for concurrency
+- **Database file**: `project-wiz.db` (project root)
+- **Auto-migrations**: `npm install` → `postinstall` script
+- **ALWAYS**: Foreign keys + indexes for relationships
 
-// ❌ AVOID: db.query requires schema registration
-const user = await db.query.usersTable.findFirst({
-  where: eq(usersTable.id, userId),
-});
-```
+### **Type Safety**
 
-## IPC Communication Patterns
+- ✅ **`export type`** (never inline declarations)
+- ✅ **Drizzle inference** (leverage `$inferSelect`)
+- ✅ **Generic parameters** for expected typing
+- ✅ **Omit/Pick** for derived types (don't recreate)
 
-### Service & Handler Pattern
+### **Security (Desktop App)**
 
-```typescript
-// ✅ CORRECT: Services return data directly - handlers do try/catch
-export class ProjectService {
-  static async create(input: InsertProject): Promise<SelectProject> {
-    const db = getDatabase();
+- ✅ **`nodeIntegration: false`**
+- ✅ **`contextIsolation: true`**
+- ✅ **Database sessions** (NOT JWT/localStorage)
+- ✅ **Session validation** with expiration checks
 
-    const [newProject] = await db
-      .insert(projectsTable)
-      .values(input)
-      .returning();
+### **Development Workflow**
 
-    if (!newProject) {
-      throw new Error("Failed to create project");
-    }
+1. **Model First**: Modify `*.model.ts`
+2. **Generate**: `npm run db:generate`
+3. **Migrate**: `npm run db:migrate`
+4. **Validate**: Create `*.schema.ts` (Zod)
+5. **Service**: Business logic `*.service.ts`
+6. **Handler**: IPC `*.handler.ts`
+7. **Frontend**: Route loading + components
+8. **Quality**: `npm run quality:check`
 
-    return newProject; // Return data directly
-  }
-}
+### **Library Usage**
 
-// ✅ CORRECT: IPC Handler Pattern with error handling
-export function setupProjectHandlers(): void {
-  ipcMain.handle(
-    "project:create",
-    async (_, input: InsertProject): Promise<IpcResponse<SelectProject>> => {
-      try {
-        const result = await ProjectService.create(input);
-        return { success: true, data: result };
-      } catch (error) {
-        return {
-          success: false,
-          error: error instanceof Error ? error.message : "Creation failed",
-        };
-      }
-    },
-  );
-}
-```
+- ✅ **shadcn/ui** (NEVER HTML elements)
+- ✅ **Function declarations** (NEVER React.FC)
+- ✅ **FormField pattern** for forms
+- ✅ **Path aliases** (`@/`) - never relative imports
+- ✅ **Leverage existing solutions** (don't reinvent)
 
-### Authentication Patterns (Desktop Security)
+### **Interface Metaphor**
 
-```typescript
-// ✅ CORRECT: Database sessions + main process management
-export class AuthService {
-  static async login(credentials: LoginCredentials): Promise<AuthResult> {
-    const db = getDatabase();
+- **Projects = Discord servers**
+- **Channels = Conversations within projects**
+- **AI interactions**: Conversational + context-aware
 
-    // 1. Verify credentials with bcrypt
-    const isValid = await bcrypt.compare(credentials.password, storedHash);
-    if (!isValid) throw new Error("Invalid credentials");
+## 🤖 **CRITICAL REMINDERS FOR LLMs**
 
-    // 2. Create session token in database
-    const sessionToken = crypto.randomUUID();
-    const expiresAt = new Date(Date.now() + SESSION_DURATION_MS);
+### **RESIST These Natural Tendencies:**
 
-    await db.insert(userSessionsTable).values({
-      userId: user.id,
-      sessionToken,
-      expiresAt,
-    });
+- ❌ Creating unnecessary validation functions (use Zod inline)
+- ❌ Extracting single-use helper functions
+- ❌ Over-abstracting simple operations
+- ❌ Creating interface/class hierarchies for simple logic
+- ❌ Splitting related logic across multiple files
 
-    // 3. Return user + token (stored in main process, NOT localStorage)
-    return { user: userWithoutPassword, sessionToken };
-  }
+### **ALWAYS Ask Before Coding:**
 
-  static async getCurrentUser(
-    sessionToken: string,
-  ): Promise<AuthenticatedUser> {
-    const db = getDatabase();
+- "Can this be < 15 lines inline?"
+- "Is this used 3+ times exactly?"
+- "Would a junior dev understand this instantly?"
+- "Can I debug this without opening other files?"
 
-    // Verify session is valid and not expired
-    const [result] = await db
-      .select()
-      .from(userSessionsTable)
-      .innerJoin(usersTable, eq(userSessionsTable.userId, usersTable.id))
-      .where(
-        and(
-          eq(userSessionsTable.token, sessionToken),
-          gt(userSessionsTable.expiresAt, new Date()),
-        ),
-      );
+### **DEFAULT to INLINE-FIRST:**
 
-    if (!result) throw new Error("Invalid or expired session");
-    return result.user;
-  }
-}
-```
-
-## Important Implementation Notes
-
-### Database Management
-
-- Uses SQLite with WAL mode for better concurrency
-- Database file: `project-wiz.db` in project root
-- Migrations run automatically on `npm install` (postinstall script)
-- **Always use database foreign keys and indexes** for relationships
-
-### Type Organization Best Practices
-
-- **Don't declare types inline** - always create using `export type`
-- **Reuse types whenever possible** - leverage Drizzle inference
-- **Pass types in generic parameters** to get expected typing
-- **Use Omit/Pick for derived types** instead of recreating manually
-
-### Security Considerations
-
-- No `nodeIntegration` in renderer process
-- Context isolation enabled
-- Preload script for secure IPC communication
-- **Database-based session management** (not JWT for desktop apps)
-- **Session validation** checks expiration on each request
-
-### Development Workflow
-
-1. **Model First**: Define/modify database schema in `*.model.ts`
-2. **Generate Migration**: `npm run db:generate`
-3. **Apply Migration**: `npm run db:migrate`
-4. **Validation Schema**: Create Zod schemas in `*.schema.ts`
-5. **Service Layer**: Implement business logic in `*.service.ts`
-6. **IPC Handlers**: Create type-safe handlers in `*.handler.ts`
-7. **Frontend Integration**: Implement route loading, queries for mutations, and components
-8. **Components**: Build UI with function declarations and shadcn/ui
-9. **Quality Check**: `npm run quality:check`
-
-### Quality Assurance
-
-- ESLint with TypeScript, React, and architectural boundary rules
-- Prettier for code formatting
-- Strict TypeScript configuration
-- Import organization and dependency boundaries enforced
-- Maximum function/file length limits to maintain readability
-
-### Key Library Usage Best Practices
-
-- **Always utilize maximum functionality** from libraries: Zustand, TanStack, React Hook Form, Zod, shadcn/ui components
-- **Avoid reinventing the wheel** - leverage existing solutions
-- **Components**: ALWAYS function declaration, NEVER React.FC
-- **Forms**: ALWAYS use shadcn/ui Form components with FormField pattern
-- **UI**: ALWAYS use shadcn/ui, NEVER HTML native elements
-
-## Development Tips
-
-- The app uses a Discord-like interface metaphor with projects as servers and channels for conversations
-- All AI interactions are designed to be conversational and context-aware
-- **Follow established patterns** - use existing service layer patterns as reference
-- **Maintain type safety** throughout IPC communication
-- **Use path aliases** (`@/`) - never relative imports
+- **Service methods**: Validation + logic + database in one function
+- **Components**: Handlers + state + render logic together
+- **Utils**: Only extract after 3+ exact duplications
+- **Validation**: Always use Zod schemas inline, never custom functions
