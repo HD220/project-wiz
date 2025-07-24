@@ -1,13 +1,10 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useRouter } from "@tanstack/react-router";
 import { useMutation } from "@tanstack/react-query";
+import { useRouter } from "@tanstack/react-router";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
-import { useAuth } from "@/renderer/contexts/auth.context";
-
 import type { CreateProviderInput } from "@/main/features/agent/llm-provider/llm-provider.types";
-
 import type { LlmProvider } from "@/main/features/agent/llm-provider/llm-provider.types";
 
 import {
@@ -17,12 +14,14 @@ import {
   DialogTitle,
 } from "@/renderer/components/ui/dialog";
 import { Form } from "@/renderer/components/ui/form";
+import { useAuth } from "@/renderer/contexts/auth.context";
 
 import {
   PROVIDER_CONFIGS,
   providerFormSchema,
   type ProviderFormData,
 } from "../constants";
+
 import { ProviderFormActions } from "./provider-form-actions";
 import { ProviderConfigSection } from "./provider-form-config-section";
 import { ProviderSettingsSection } from "./provider-form-settings-section";

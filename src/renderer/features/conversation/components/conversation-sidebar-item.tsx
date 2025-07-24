@@ -2,6 +2,8 @@ import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { MessageCircle } from "lucide-react";
 
+import type { UserSummary } from "@/main/features/user/user.service";
+
 import { CustomLink } from "@/renderer/components/custom-link";
 import {
   Avatar,
@@ -9,7 +11,6 @@ import {
   AvatarImage,
 } from "@/renderer/components/ui/avatar";
 import { Badge } from "@/renderer/components/ui/badge";
-import type { UserSummary } from "@/main/features/user/user.service";
 import type {
   ConversationWithLastMessage,
   SelectMessage,

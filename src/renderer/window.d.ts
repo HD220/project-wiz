@@ -24,8 +24,8 @@ import type {
   UpdateProject,
   SelectProject,
 } from "@/main/features/project/project.types";
-import type { Theme } from "@/main/features/user/user.types";
 import type { UserSummary } from "@/main/features/user/user.service";
+import type { Theme } from "@/main/features/user/user.types";
 import type { IpcResponse } from "@/main/types";
 
 import type {

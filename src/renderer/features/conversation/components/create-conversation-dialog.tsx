@@ -1,10 +1,10 @@
-import { useRouter } from "@tanstack/react-router";
 import { useMutation } from "@tanstack/react-query";
+import { useRouter } from "@tanstack/react-router";
 import { X, Search, Plus, User, Bot } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
-import type { CreateConversationInput } from "@/renderer/features/conversation/types";
+import type { UserSummary } from "@/main/features/user/user.service";
 
 import {
   Avatar,
@@ -21,7 +21,7 @@ import {
 } from "@/renderer/components/ui/dialog";
 import { Input } from "@/renderer/components/ui/input";
 import { ScrollArea } from "@/renderer/components/ui/scroll-area";
-import type { UserSummary } from "@/main/features/user/user.service";
+import type { CreateConversationInput } from "@/renderer/features/conversation/types";
 import type { AuthenticatedUser } from "@/renderer/features/conversation/types";
 
 interface CreateConversationDialogProps {

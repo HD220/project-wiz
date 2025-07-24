@@ -1,10 +1,8 @@
-import { Link, useRouter } from "@tanstack/react-router";
 import { useMutation } from "@tanstack/react-query";
+import { Link, useRouter } from "@tanstack/react-router";
 import { MoreHorizontal, Edit2, Trash2, Star, StarOff } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
-
-import { useAuth } from "@/renderer/contexts/auth.context";
 
 import type { LlmProvider } from "@/main/features/agent/llm-provider/llm-provider.types";
 
@@ -28,6 +26,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/renderer/components/ui/dropdown-menu";
+import { useAuth } from "@/renderer/contexts/auth.context";
 
 const getProviderLabel = (type: string): string => {
   const labels: Record<string, string> = {

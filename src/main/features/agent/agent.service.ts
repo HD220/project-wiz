@@ -11,8 +11,8 @@ import type {
 } from "@/main/features/agent/agent.types";
 import { createAgentSchema } from "@/main/features/agent/agent.types";
 import { llmProvidersTable } from "@/main/features/agent/llm-provider/llm-provider.model";
-import { usersTable } from "@/main/features/user/user.model";
 import { CrudService } from "@/main/features/base/crud.service";
+import { usersTable } from "@/main/features/user/user.model";
 
 export class AgentService extends CrudService<
   typeof agentsTable,

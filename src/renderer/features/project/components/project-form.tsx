@@ -1,10 +1,8 @@
-import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useState } from "react";
 import { useRouter } from "@tanstack/react-router";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
 import { z } from "zod";
-
-import { useAuth } from "@/renderer/contexts/auth.context";
 
 import { Button } from "@/renderer/components/ui/button";
 import {
@@ -16,12 +14,13 @@ import {
   FormMessage,
 } from "@/renderer/components/ui/form";
 import { Input } from "@/renderer/components/ui/input";
-import { Textarea } from "@/renderer/components/ui/textarea";
+import { Label } from "@/renderer/components/ui/label";
 import {
   RadioGroup,
   RadioGroupItem,
 } from "@/renderer/components/ui/radio-group";
-import { Label } from "@/renderer/components/ui/label";
+import { Textarea } from "@/renderer/components/ui/textarea";
+import { useAuth } from "@/renderer/contexts/auth.context";
 
 const ProjectFormSchema = z.object({
   name: z.string().min(1, "Nome é obrigatório"),

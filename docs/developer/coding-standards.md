@@ -511,11 +511,8 @@ const UserDashboard = () => {
 1. **Definir Tipos** → `feature.types.ts`
 2. **Criar Model** → `feature.model.ts` (Drizzle)
 3. **Criar Schema** → `feature.schema.ts` (Zod)
-4. **Implementar API** → `feature.api.ts`
-5. **Criar Store** → `feature.store.ts`
-6. **Desenvolver Hook** → `use-feature.hook.ts`
-7. **Construir Componente** → `feature-form.tsx` (sem sufixo)
-8. **Integrar Handlers** → `feature.handler.ts` (main)
+4. **Construir Componente** → `feature-form.tsx` (sem sufixo)
+5. **Integrar Handlers** → `feature.handler.ts` (main)
 
 ## 📝 Estrutura de Feature Completa
 
@@ -524,9 +521,6 @@ feature/
 ├── feature.types.ts         # Tipos TypeScript
 ├── feature.model.ts         # Schema Drizzle (database)
 ├── feature.schema.ts        # Schema Zod (validação)
-├── feature.api.ts           # Comunicação IPC
-├── feature.store.ts         # Estado Zustand
-├── use-feature.hook.ts      # Hook customizado
 ├── feature-form.tsx         # Componente React (sem sufixo)
 └── feature.handler.ts       # IPC Handler (main)
 ```

@@ -1,14 +1,14 @@
-/* eslint-disable max-lines-per-function */
-import { useRouter } from "@tanstack/react-router";
 import { useMutation } from "@tanstack/react-query";
+import { useRouter } from "@tanstack/react-router";
 import { useEffect, useRef, useMemo } from "react";
 import { toast } from "sonner";
+
+import type { SendMessageInput } from "@/main/features/conversation/conversation.types";
 
 import { ScrollArea } from "@/renderer/components/ui/scroll-area";
 import { Separator } from "@/renderer/components/ui/separator";
 import { MessageBubble } from "@/renderer/features/conversation/components/message-bubble";
 import { MessageInput } from "@/renderer/features/conversation/components/message-input";
-import type { SendMessageInput } from "@/main/features/conversation/conversation.types";
 
 interface ConversationChatProps {
   conversationId: string;

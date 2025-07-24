@@ -1,10 +1,10 @@
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useMutation } from "@tanstack/react-query";
 import {
   createFileRoute,
   useNavigate,
   useRouter,
 } from "@tanstack/react-router";
-import { useMutation } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
@@ -18,10 +18,10 @@ import {
 } from "@/renderer/components/ui/dialog";
 import { Form } from "@/renderer/components/ui/form";
 import { Separator } from "@/renderer/components/ui/separator";
-import { EditProviderBasicSection } from "@/renderer/features/llm-provider/components/edit-provider-basic-section";
-import { EditProviderApiSection } from "@/renderer/features/llm-provider/components/edit-provider-api-section";
-import { EditProviderSettingsSection } from "@/renderer/features/llm-provider/components/edit-provider-settings-section";
 import { EditProviderActionsSection } from "@/renderer/features/llm-provider/components/edit-provider-actions-section";
+import { EditProviderApiSection } from "@/renderer/features/llm-provider/components/edit-provider-api-section";
+import { EditProviderBasicSection } from "@/renderer/features/llm-provider/components/edit-provider-basic-section";
+import { EditProviderSettingsSection } from "@/renderer/features/llm-provider/components/edit-provider-settings-section";
 import {
   providerFormSchema,
   type ProviderFormData,

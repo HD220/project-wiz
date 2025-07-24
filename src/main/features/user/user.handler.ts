@@ -1,9 +1,9 @@
 import { ipcMain } from "electron";
 
-import type { IpcResponse } from "@/main/types";
+import { AuthService } from "@/main/features/auth/auth.service";
 import type { UserSummary } from "@/main/features/user/user.service";
 import { UserService } from "@/main/features/user/user.service";
-import { AuthService } from "@/main/features/auth/auth.service";
+import type { IpcResponse } from "@/main/types";
 
 export function setupUserHandlers(): void {
   /**

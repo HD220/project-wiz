@@ -4,9 +4,9 @@ import { z } from "zod";
 
 import { AI_DEFAULTS } from "@/main/constants/ai-defaults";
 import { createAgentSchema } from "@/main/features/agent/agent.types";
+import type { LlmProvider } from "@/main/features/agent/llm-provider/llm-provider.types";
 
 import { Form } from "@/renderer/components/ui/form";
-import type { LlmProvider } from "@/main/features/agent/llm-provider/llm-provider.types";
 import type {
   SelectAgent,
   CreateAgentInput,

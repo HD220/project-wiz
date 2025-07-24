@@ -3,9 +3,6 @@ import { Plus, Settings } from "lucide-react";
 
 import type { SelectProject } from "@/main/features/project/project.types";
 
-import { CreateProjectDialog } from "@/renderer/features/project/components";
-import { useAuth } from "@/renderer/contexts/auth.context";
-
 import { CustomLink } from "@/renderer/components/custom-link";
 import { Avatar, AvatarFallback } from "@/renderer/components/ui/avatar";
 import { Button } from "@/renderer/components/ui/button";
@@ -16,6 +13,8 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/renderer/components/ui/tooltip";
+import { useAuth } from "@/renderer/contexts/auth.context";
+import { CreateProjectDialog } from "@/renderer/features/project/components";
 import { cn } from "@/renderer/lib/utils";
 
 interface RootSidebarProps {

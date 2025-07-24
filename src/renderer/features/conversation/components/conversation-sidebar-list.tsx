@@ -2,9 +2,9 @@ import { Plus, MessageCircle } from "lucide-react";
 import { useState } from "react";
 
 import { Button } from "@/renderer/components/ui/button";
+import { useAuth } from "@/renderer/contexts/auth.context";
 import { ConversationSidebarItem } from "@/renderer/features/conversation/components/conversation-sidebar-item";
 import { CreateConversationDialog } from "@/renderer/features/conversation/components/create-conversation-dialog";
-import { useAuth } from "@/renderer/contexts/auth.context";
 
 interface ConversationSidebarListProps {
   conversations: any[];

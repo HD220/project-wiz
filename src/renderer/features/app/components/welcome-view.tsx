@@ -6,8 +6,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/renderer/components/ui/card";
-import { ActivityItem } from "@/renderer/features/app/components/activity-item";
 import { useAuth } from "@/renderer/contexts/auth.context";
+import { ActivityItem } from "@/renderer/features/app/components/activity-item";
 
 function WelcomeView() {
   const { user } = useAuth();
