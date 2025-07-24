@@ -102,16 +102,6 @@ export class LlmProviderService {
   }
 
   /**
-   * Sanitize provider for display (hide API keys)
-   */
-  private static sanitizeForDisplay(provider: LlmProvider): LlmProvider {
-    return {
-      ...provider,
-      apiKey: "••••••••", // Mask API key for UI
-    };
-  }
-
-  /**
    * Find all providers for a user (sorted newest first, API keys masked)
    */
   static async findByUserId(userId: string): Promise<LlmProvider[]> {
@@ -124,7 +114,10 @@ export class LlmProviderService {
       .orderBy(desc(llmProvidersTable.createdAt));
 
     // Sanitize API keys for display
-    return providers.map((provider) => this.sanitizeForDisplay(provider));
+    return providers.map((provider) => ({
+      ...provider,
+      apiKey: "••••••••", // Mask API key for UI
+    }));
   }
 
   /**
@@ -255,14 +248,5 @@ export class LlmProviderService {
       .limit(1);
 
     return provider || null;
-  }
-
-  /**
-   * Find default provider by user ID (alias for getDefaultProvider)
-   */
-  static async findDefaultByUserId(
-    userId: string,
-  ): Promise<LlmProvider | null> {
-    return this.getDefaultProvider(userId);
   }
 }

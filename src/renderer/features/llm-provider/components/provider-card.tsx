@@ -24,7 +24,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/renderer/components/ui/dropdown-menu";
-import { useCrudMutation, useApiMutation } from "@/renderer/lib/api-mutation";
+import { useApiMutation } from "@/renderer/hooks/use-api-mutation.hook";
 
 const getProviderLabel = (type: string): string => {
   const labels: Record<string, string> = {
@@ -45,11 +45,14 @@ function ProviderCard(props: ProviderCardProps) {
   const { provider } = props;
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
-  // Standardized CRUD mutation for delete
-  const deleteProviderMutation = useCrudMutation<void, string>(
-    "delete",
+  // Delete provider mutation with inline messages
+  const deleteProviderMutation = useApiMutation(
     (id: string) => window.api.llmProviders.delete(id),
-    "Provider",
+    {
+      successMessage: "Provider deleted successfully",
+      errorMessage: "Failed to delete provider",
+      invalidateRouter: true,
+    },
   );
 
   // Custom mutation for setting default (no userId parameter needed now)

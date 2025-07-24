@@ -7,10 +7,16 @@ import type { AuthenticatedUser as MainAuthUser } from "@/main/features/user/use
 
 import { ContentHeader } from "@/renderer/features/app/components/content-header";
 import { ConversationChat } from "@/renderer/features/conversation/components/conversation-chat";
-import type { SelectConversation } from "@/renderer/features/conversation/conversation.types";
-import type { Message } from "@/renderer/features/conversation/message.types";
+import type { SelectConversation } from "@/renderer/features/conversation/types";
 import type { AuthenticatedUser } from "@/renderer/features/user/user.types";
-import { loadApiDataParallel, loadApiData } from "@/renderer/lib/route-loader";
+import { loadApiData } from "@/renderer/lib/route-loader";
+
+// Message type for renderer
+type Message = SelectMessage & {
+  senderId: string;
+  senderType: "user" | "agent";
+  metadata: unknown;
+};
 
 // Helper function to convert main Message to renderer Message
 function convertToRendererMessage(mainMessage: SelectMessage): Message {
@@ -42,7 +48,23 @@ function convertToRendererUser(mainUser: MainAuthUser): AuthenticatedUser {
   };
 }
 
-// Helper function to convert main Conversation to renderer SelectConversation
+// Extended conversation type for rendering
+type RendererConversation = SelectConversation & {
+  title?: string | null;
+  projectId?: string | null;
+  agentId?: string | null;
+  isArchived?: boolean;
+  lastMessage?: Message;
+  participants?: Array<{
+    id: string;
+    conversationId: string;
+    userId: string;
+    joinedAt: Date;
+  }>;
+  messages?: Message[];
+};
+
+// Helper function to convert main Conversation to renderer conversation
 function convertToRendererConversation(mainConversation: {
   id: string;
   name: string | null;
@@ -52,16 +74,18 @@ function convertToRendererConversation(mainConversation: {
   participants?: SelectConversationParticipant[];
   createdAt: Date;
   updatedAt: Date;
-}): SelectConversation {
+}): RendererConversation {
   return {
     id: mainConversation.id,
-    userId: undefined,
+    name: mainConversation.name,
+    description: mainConversation.description || null,
+    type: mainConversation.type || "dm",
+    createdAt: mainConversation.createdAt,
+    updatedAt: mainConversation.updatedAt,
+    // Additional renderer properties
+    title: mainConversation.name,
     projectId: null,
     agentId: null,
-    title: mainConversation.name,
-    name: mainConversation.name,
-    description: mainConversation.description,
-    type: (mainConversation.type as "dm" | "channel" | "direct") || "dm",
     isArchived: false,
     lastMessage: mainConversation.lastMessage
       ? convertToRendererMessage(mainConversation.lastMessage)
@@ -73,8 +97,6 @@ function convertToRendererConversation(mainConversation: {
         userId: participant.participantId,
         joinedAt: participant.createdAt,
       })) || [],
-    createdAt: mainConversation.createdAt,
-    updatedAt: mainConversation.updatedAt,
   };
 }
 
@@ -160,12 +182,20 @@ export const Route = createFileRoute("/_authenticated/user/dm/$conversationId")(
       }
 
       // Load messages, users, and current user in parallel
-      const { messages, availableUsers, user } = await loadApiDataParallel({
-        messages: () =>
-          window.api.messages.getConversationMessages(conversationId),
-        availableUsers: () => window.api.users.listAvailableUsers(),
-        user: () => window.api.auth.getCurrentUser(),
-      });
+      const [messages, availableUsers, user] = await Promise.all([
+        loadApiData(
+          () => window.api.messages.getConversationMessages(conversationId),
+          "Failed to load messages",
+        ),
+        loadApiData(
+          () => window.api.users.listAvailableUsers(),
+          "Failed to load available users",
+        ),
+        loadApiData(
+          () => window.api.auth.getCurrentUser(),
+          "Failed to load current user",
+        ),
+      ]);
 
       return {
         conversation: { ...conversation, messages },

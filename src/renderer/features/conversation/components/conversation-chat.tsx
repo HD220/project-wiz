@@ -4,13 +4,20 @@ import { ScrollArea } from "@/renderer/components/ui/scroll-area";
 import { Separator } from "@/renderer/components/ui/separator";
 import { MessageBubble } from "@/renderer/features/conversation/components/message-bubble";
 import { MessageInput } from "@/renderer/features/conversation/components/message-input";
-import type { SelectConversation } from "@/renderer/features/conversation/conversation.types";
 import type {
+  SelectConversation,
   SendMessageInput,
-  Message,
-} from "@/renderer/features/conversation/message.types";
+  SelectMessage,
+} from "@/renderer/features/conversation/types";
 import type { AuthenticatedUser } from "@/renderer/features/user/user.types";
-import { useApiMutation } from "@/renderer/lib/api-mutation";
+import { useApiMutation } from "@/renderer/hooks/use-api-mutation.hook";
+
+// Message type for chat component
+type Message = SelectMessage & {
+  senderId?: string;
+  senderType?: "user" | "agent";
+  metadata?: unknown;
+};
 
 interface UserBasic {
   id: string;

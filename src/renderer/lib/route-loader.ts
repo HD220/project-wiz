@@ -44,44 +44,6 @@ export async function loadApiData<T>(
 }
 
 /**
- * Load multiple API calls in parallel with proper error handling
- *
- * @param calls - Object mapping keys to API call functions
- * @returns Promise<T> - Object with same keys containing unwrapped data
- * @throws Error if any API call fails
- *
- * @example
- * ```typescript
- * export const Route = createFileRoute("/agents/new")({
- *   loader: async ({ context }) => {
- *     return await loadApiDataParallel({
- *       providers: () => window.api.llmProviders.list(),
- *       models: () => window.api.models.list(),
- *     });
- *     // Returns: { providers: Provider[], models: Model[] }
- *   },
- * });
- * ```
- */
-export async function loadApiDataParallel<
-  T extends Record<string, unknown>,
->(calls: { [K in keyof T]: () => Promise<IpcResponse<T[K]>> }): Promise<T> {
-  const entries = Object.entries(calls) as [
-    keyof T,
-    () => Promise<IpcResponse<T[keyof T]>>,
-  ][];
-
-  const results = await Promise.all(
-    entries.map(async ([key, apiCall]) => {
-      const data = await loadApiData(apiCall, `Failed to load ${String(key)}`);
-      return [key, data] as const;
-    }),
-  );
-
-  return Object.fromEntries(results) as T;
-}
-
-/**
  * Load API data with optional fallback value (doesn't throw on failure)
  * Use this for non-critical data that shouldn't block route loading
  *

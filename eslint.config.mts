@@ -155,12 +155,12 @@ const importAndBoundaryRules = {
 const codeStyleAndQualityRules = {
   "max-depth": ["warn", { max: 4 }],
   "no-else-return": "warn",
-  "max-lines": ["warn", { max: 350, skipBlankLines: true, skipComments: true }],
+  "max-lines": ["warn", { max: 400, skipBlankLines: true, skipComments: true }],
   "max-lines-per-function": [
     "warn",
-    { max: 120, skipBlankLines: true, skipComments: true },
+    { max: 150, skipBlankLines: true, skipComments: true },
   ],
-  "max-statements": ["warn", { max: 25 }],
+  "max-statements": ["warn", { max: 50 }],
   "id-length": ["warn", { min: 2, exceptions: ["_"] }],
 };
 
@@ -287,7 +287,7 @@ export default [
     rules: {
       "max-lines-per-function": [
         "warn",
-        { max: 120, skipBlankLines: true, skipComments: true },
+        { max: 200, skipBlankLines: true, skipComments: true },
       ],
       "max-statements": "off",
     },

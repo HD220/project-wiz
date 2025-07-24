@@ -22,7 +22,7 @@ import {
 } from "@/renderer/components/ui/radio-group";
 import { Textarea } from "@/renderer/components/ui/textarea";
 import { useAuth } from "@/renderer/contexts/auth.context";
-import { useApiMutation } from "@/renderer/lib/api-mutation";
+import { useApiMutation } from "@/renderer/hooks/use-api-mutation.hook";
 
 const ProjectFormSchema = z.object({
   name: z.string().min(1, "Nome é obrigatório"),

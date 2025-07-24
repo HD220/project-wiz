@@ -2,6 +2,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
+import { Button } from "@/renderer/components/ui/button";
 import { Form } from "@/renderer/components/ui/form";
 import { AI_DEFAULTS } from "@/renderer/constants/ai-defaults";
 import { CreateAgentSchema } from "@/renderer/features/agent/agent.schema";
@@ -12,7 +13,6 @@ import type {
 } from "@/renderer/features/agent/agent.types";
 import type { LlmProvider } from "@/renderer/features/agent/llm-provider.types";
 
-import { AgentFormActions } from "./agent-form-actions";
 import { AgentIdentitySection } from "./agent-form-identity-section";
 import { AgentProviderSection } from "./agent-form-provider-section";
 
@@ -67,11 +67,23 @@ function AgentForm(props: AgentFormProps) {
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
         <AgentIdentitySection form={form} />
         <AgentProviderSection form={form} providers={providers} />
-        <AgentFormActions
-          onCancel={onCancel}
-          isLoading={isLoading}
-          isEditing={isEditing}
-        />
+        <div className="flex items-center gap-3 pt-4">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={onCancel}
+            disabled={isLoading}
+          >
+            Cancel
+          </Button>
+          <Button type="submit" disabled={isLoading}>
+            {isLoading
+              ? "Saving..."
+              : isEditing
+                ? "Update Agent"
+                : "Create Agent"}
+          </Button>
+        </div>
       </form>
     </Form>
   );

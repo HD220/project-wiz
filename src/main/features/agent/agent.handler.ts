@@ -49,7 +49,7 @@ export function setupAgentHandlers(): void {
     if (!currentUser) {
       throw new Error("User not authenticated");
     }
-    return AgentService.listByOwnerIdWithFilters(currentUser.id, filters);
+    return AgentService.listByOwnerId(currentUser.id, filters);
   });
 
   // Get agent by ID

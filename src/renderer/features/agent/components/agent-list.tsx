@@ -18,7 +18,7 @@ import type {
 } from "@/renderer/features/agent/agent.types";
 import { AgentDeleteDialog } from "@/renderer/features/agent/components/agent-delete-dialog";
 import { AgentListCard } from "@/renderer/features/agent/components/agent-list-card";
-import { useCrudMutation, useApiMutation } from "@/renderer/lib/api-mutation";
+import { useApiMutation } from "@/renderer/hooks/use-api-mutation.hook";
 
 interface AgentListProps {
   agents: SelectAgent[];
@@ -34,11 +34,14 @@ function AgentList(props: AgentListProps) {
   // SIMPLE: Local state for UI only
   const [agentToDelete, setAgentToDelete] = useState<SelectAgent | null>(null);
 
-  // Standardized CRUD mutation for delete
-  const deleteAgentMutation = useCrudMutation(
-    "delete",
+  // Delete agent mutation with inline messages
+  const deleteAgentMutation = useApiMutation(
     (id: string) => window.api.agents.delete(id),
-    "Agent",
+    {
+      successMessage: "Agent deleted successfully",
+      errorMessage: "Failed to delete agent",
+      invalidateRouter: true,
+    },
   );
 
   // Custom mutation for status toggle

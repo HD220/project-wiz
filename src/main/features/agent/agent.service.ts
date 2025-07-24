@@ -14,50 +14,6 @@ import { llmProvidersTable } from "@/main/features/agent/llm-provider/llm-provid
 import { usersTable } from "@/main/features/user/user.model";
 
 export class AgentService {
-  async findById(id: string): Promise<SelectAgent | null> {
-    const db = getDatabase();
-
-    const [record] = await db
-      .select()
-      .from(agentsTable)
-      .where(eq(agentsTable.id, id))
-      .limit(1);
-
-    return record || null;
-  }
-
-  async update(id: string, input: Partial<InsertAgent>): Promise<SelectAgent> {
-    const db = getDatabase();
-
-    const [record] = await db
-      .update(agentsTable)
-      .set(input)
-      .where(eq(agentsTable.id, id))
-      .returning();
-
-    if (!record) {
-      throw new Error("Agent not found or update failed");
-    }
-
-    return record;
-  }
-
-  async delete(id: string): Promise<void> {
-    const db = getDatabase();
-    await db.delete(agentsTable).where(eq(agentsTable.id, id));
-  }
-
-  /**
-   * Generate a comprehensive system prompt for the agent
-   */
-  private static generateSystemPrompt(
-    role: string,
-    backstory: string,
-    goal: string,
-  ): string {
-    return `You are a ${role}. ${backstory}. Your current goal is ${goal}. Always be helpful, professional, and focus on best practices in your domain. Provide clear, actionable advice and maintain a collaborative approach when working with humans and other agents.`;
-  }
-
   /**
    * Create a new agent with validation
    */
@@ -102,11 +58,7 @@ export class AgentService {
       }
 
       // Generate system prompt
-      const systemPrompt = AgentService.generateSystemPrompt(
-        validatedInput.role,
-        validatedInput.backstory,
-        validatedInput.goal,
-      );
+      const systemPrompt = `You are a ${validatedInput.role}. ${validatedInput.backstory}. Your current goal is ${validatedInput.goal}. Always be helpful, professional, and focus on best practices in your domain. Provide clear, actionable advice and maintain a collaborative approach when working with humans and other agents.`;
 
       // Create the agent record
       const [agent] = await tx
@@ -134,30 +86,9 @@ export class AgentService {
   }
 
   /**
-   * List agents by owner ID with status filter
+   * List agents by owner ID with comprehensive filtering support
    */
   static async listByOwnerId(
-    ownerId: string,
-    status?: AgentStatus,
-  ): Promise<SelectAgent[]> {
-    const db = getDatabase();
-
-    const conditions = [eq(agentsTable.ownerId, ownerId)];
-    if (status) {
-      conditions.push(eq(agentsTable.status, status));
-    }
-
-    return await db
-      .select()
-      .from(agentsTable)
-      .where(and(...conditions))
-      .orderBy(desc(agentsTable.createdAt));
-  }
-
-  /**
-   * List agents by owner ID with complete filtering support
-   */
-  static async listByOwnerIdWithFilters(
     ownerId: string,
     filters?: { status?: AgentStatus; search?: string },
   ): Promise<SelectAgent[]> {
@@ -196,8 +127,19 @@ export class AgentService {
     id: string,
     status: AgentStatus,
   ): Promise<SelectAgent> {
-    const instance = new AgentService();
-    return await instance.update(id, { status });
+    const db = getDatabase();
+
+    const [record] = await db
+      .update(agentsTable)
+      .set({ status })
+      .where(eq(agentsTable.id, id))
+      .returning();
+
+    if (!record) {
+      throw new Error("Agent not found or update failed");
+    }
+
+    return record;
   }
 
   /**
@@ -224,22 +166,48 @@ export class AgentService {
     };
   }
 
-  // Static wrappers for backward compatibility
+  /**
+   * Find agent by ID
+   */
   static async findById(id: string): Promise<SelectAgent | null> {
-    const instance = new AgentService();
-    return await instance.findById(id);
+    const db = getDatabase();
+
+    const [record] = await db
+      .select()
+      .from(agentsTable)
+      .where(eq(agentsTable.id, id))
+      .limit(1);
+
+    return record || null;
   }
 
+  /**
+   * Update agent by ID
+   */
   static async update(
     id: string,
     input: Partial<InsertAgent>,
   ): Promise<SelectAgent> {
-    const instance = new AgentService();
-    return await instance.update(id, input);
+    const db = getDatabase();
+
+    const [record] = await db
+      .update(agentsTable)
+      .set(input)
+      .where(eq(agentsTable.id, id))
+      .returning();
+
+    if (!record) {
+      throw new Error("Agent not found or update failed");
+    }
+
+    return record;
   }
 
+  /**
+   * Delete agent by ID
+   */
   static async delete(id: string): Promise<void> {
-    const instance = new AgentService();
-    return await instance.delete(id);
+    const db = getDatabase();
+    await db.delete(agentsTable).where(eq(agentsTable.id, id));
   }
 }

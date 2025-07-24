@@ -10,7 +10,7 @@ import {
 } from "@/renderer/components/ui/dialog";
 import type { CreateAgentInput } from "@/renderer/features/agent/agent.types";
 import { AgentForm } from "@/renderer/features/agent/components/agent-form";
-import { useApiMutation } from "@/renderer/lib/api-mutation";
+import { useApiMutation } from "@/renderer/hooks/use-api-mutation.hook";
 
 function NewAgentPage() {
   const navigate = useNavigate();

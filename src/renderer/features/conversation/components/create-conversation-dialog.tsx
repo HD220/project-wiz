@@ -20,7 +20,7 @@ import { Input } from "@/renderer/components/ui/input";
 import { ScrollArea } from "@/renderer/components/ui/scroll-area";
 import type { CreateConversationInput } from "@/renderer/features/conversation/types";
 import type { AuthenticatedUser } from "@/renderer/features/conversation/types";
-import { useApiMutation } from "@/renderer/lib/api-mutation";
+import { useApiMutation } from "@/renderer/hooks/use-api-mutation.hook";
 
 interface CreateConversationDialogProps {
   availableUsers: UserSummary[];

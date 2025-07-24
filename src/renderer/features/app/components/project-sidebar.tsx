@@ -10,7 +10,7 @@ import {
 import { ScrollArea } from "@/renderer/components/ui/scroll-area";
 import { Separator } from "@/renderer/components/ui/separator";
 import type { SelectAgent } from "@/renderer/features/agent/agent.types";
-import type { SelectConversation } from "@/renderer/features/conversation/conversation.types";
+import type { SelectConversation } from "@/renderer/features/conversation/types";
 import type { SelectProject } from "@/renderer/features/project/project.types";
 import { cn } from "@/renderer/lib/utils";
 
@@ -40,7 +40,7 @@ function ProjectSidebar(props: ProjectSidebarProps) {
   // Transform conversations into channels format
   const channels: Channel[] = conversations.map((conversation) => ({
     id: conversation.id,
-    name: conversation.title || "Conversa sem nome",
+    name: conversation.name || "Conversa sem nome",
     type: "text" as const,
     hasNotification: false, // TODO: Add notification logic from conversation data
   }));

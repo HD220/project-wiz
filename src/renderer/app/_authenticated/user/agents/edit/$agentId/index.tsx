@@ -13,8 +13,8 @@ import type {
   SelectAgent,
 } from "@/renderer/features/agent/agent.types";
 import { AgentForm } from "@/renderer/features/agent/components/agent-form";
-import { useApiMutation } from "@/renderer/lib/api-mutation";
-import { loadApiDataParallel } from "@/renderer/lib/route-loader";
+import { useApiMutation } from "@/renderer/hooks/use-api-mutation.hook";
+import { loadApiData } from "@/renderer/lib/route-loader";
 
 function EditAgentPage() {
   const navigate = useNavigate();
@@ -65,10 +65,15 @@ export const Route = createFileRoute(
     const { agentId } = params;
 
     // Load multiple API calls in parallel with standardized error handling
-    return await loadApiDataParallel({
-      agent: () => window.api.agents.get(agentId),
-      providers: () => window.api.llmProviders.list(),
-    });
+    const [agent, providers] = await Promise.all([
+      loadApiData(() => window.api.agents.get(agentId), "Failed to load agent"),
+      loadApiData(
+        () => window.api.llmProviders.list(),
+        "Failed to load providers",
+      ),
+    ]);
+
+    return { agent, providers };
   },
   component: EditAgentPage,
 });

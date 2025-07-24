@@ -96,37 +96,3 @@ export interface ConversationUIState {
   selectedConversationId: string | null;
   showCreateDialog: boolean;
 }
-
-// ===========================
-// HOOK RETURN TYPES
-// ===========================
-
-// Conversations query result
-export interface ConversationsQueryResult {
-  conversations: ConversationWithLastMessage[];
-  isLoading: boolean;
-  error: Error | null;
-  refetch: () => void;
-}
-
-// Messages query result
-export interface MessagesQueryResult {
-  conversation: ConversationWithMessages | null;
-  isLoading: boolean;
-  error: Error | null;
-  refetch: () => void;
-}
-
-// Send message mutation result
-export interface SendMessageMutationResult {
-  sendMessage: (input: SendMessageInput) => Promise<void>;
-  isSending: boolean;
-  error: Error | null;
-}
-
-// Create conversation mutation result
-export interface CreateConversationMutationResult {
-  createConversation: (participantIds: string[]) => Promise<string>;
-  isCreating: boolean;
-  error: Error | null;
-}

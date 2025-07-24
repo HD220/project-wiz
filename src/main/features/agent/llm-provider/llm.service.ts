@@ -72,8 +72,7 @@ export class LLMService {
     }
 
     // Get default provider for user
-    const defaultProvider =
-      await LlmProviderService.findDefaultByUserId(userId);
+    const defaultProvider = await LlmProviderService.getDefaultProvider(userId);
     if (!defaultProvider) {
       throw new Error("No default provider configured for user");
     }
@@ -87,7 +86,7 @@ export class LLMService {
    * @returns Default provider ID
    */
   static async getUserDefaultProviderId(userId: string): Promise<string> {
-    const provider = await LlmProviderService.findDefaultByUserId(userId);
+    const provider = await LlmProviderService.getDefaultProvider(userId);
     if (!provider) {
       throw new Error("No default provider configured for user");
     }

@@ -50,7 +50,7 @@ export class AuthService {
     }
 
     // 2. Create account
-    const passwordHash = await this.hashPassword(input.password);
+    const passwordHash = await bcrypt.hash(input.password, 12);
     const [account] = await db
       .insert(accountsTable)
       .values({
@@ -113,7 +113,7 @@ export class AuthService {
     }
 
     // Verify password
-    const isPasswordValid = await this.comparePassword(
+    const isPasswordValid = await bcrypt.compare(
       credentials.password,
       result.account.passwordHash,
     );
@@ -200,24 +200,6 @@ export class AuthService {
    */
   static isLoggedIn(): boolean {
     return sessionCache.get() !== null;
-  }
-
-  /**
-   * Hash password using bcrypt
-   */
-  private static async hashPassword(password: string): Promise<string> {
-    const saltRounds = 12;
-    return await bcrypt.hash(password, saltRounds);
-  }
-
-  /**
-   * Compare password with hash
-   */
-  private static async comparePassword(
-    password: string,
-    hash: string,
-  ): Promise<boolean> {
-    return await bcrypt.compare(password, hash);
   }
 
   /**
