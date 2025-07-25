@@ -16,7 +16,7 @@ function AgentsLayout() {
       />
       <main className="flex-1 overflow-auto">
         <div className="h-full p-6">
-          <AgentList agents={agents} />
+          <AgentList agents={agents} showInactive={false} />
         </div>
       </main>
 
@@ -30,13 +30,13 @@ export const Route = createFileRoute("/_authenticated/user/agents")({
   validateSearch: (search) => AgentFiltersSchema.parse(search),
   loaderDeps: ({ search }) => ({ search }),
   loader: async ({ deps }) => {
-    // Standardized data loading with error handling
+    // Load agents without includeInactive (removed from schema)
     let agents = await loadApiData(
-      () => window.api.agents.list(),
+      () => window.api.agents.list(deps.search),
       "Failed to load agents",
     );
 
-    // Client-side filtering for now (simpler implementation)
+    // Client-side filtering for status and search
     if (deps.search.status) {
       agents = agents.filter((agent) => agent.status === deps.search.status);
     }

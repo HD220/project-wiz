@@ -110,11 +110,10 @@ function ConversationItem(props: ConversationItemProps) {
         });
 
         return formatted;
-      } else {
-        // Mais de 24h - mostrar dias
-        const days = Math.floor(diffInHours / 24);
-        return `${days}d`;
       }
+      // Mais de 24h - mostrar dias
+      const days = Math.floor(diffInHours / 24);
+      return `${days}d`;
     } catch (error) {
       console.error("❌ CONVERSATION ITEM TIME ERROR:", error);
       return "";

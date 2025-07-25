@@ -28,6 +28,12 @@ export const agentsTable = sqliteTable(
     systemPrompt: text("system_prompt").notNull(),
     status: text("status").$type<AgentStatus>().notNull().default("inactive"),
     modelConfig: text("model_config").notNull(), // JSON string
+
+    // Soft deletion fields
+    isActive: integer("is_active", { mode: "boolean" }).notNull().default(true),
+    deactivatedAt: integer("deactivated_at", { mode: "timestamp_ms" }),
+    deactivatedBy: text("deactivated_by").references(() => usersTable.id),
+
     createdAt: integer("created_at", { mode: "timestamp_ms" })
       .notNull()
       .default(sql`(strftime('%s', 'now'))`),
@@ -41,6 +47,16 @@ export const agentsTable = sqliteTable(
     ownerIdIdx: index("agents_owner_id_idx").on(table.ownerId),
     providerIdIdx: index("agents_provider_id_idx").on(table.providerId),
     statusIdx: index("agents_status_idx").on(table.status),
+    deactivatedByIdx: index("agents_deactivated_by_idx").on(
+      table.deactivatedBy,
+    ),
+
+    // Soft deletion indexes
+    isActiveIdx: index("agents_is_active_idx").on(table.isActive),
+    isActiveCreatedAtIdx: index("agents_is_active_created_at_idx").on(
+      table.isActive,
+      table.createdAt,
+    ),
   }),
 );
 

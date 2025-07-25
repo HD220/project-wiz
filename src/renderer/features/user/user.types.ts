@@ -12,6 +12,10 @@ export interface AuthenticatedUser {
   name?: string;
   avatar: string | null;
   theme: Theme;
+  type: string;
+  isActive: boolean;
+  deactivatedAt: Date | null;
+  deactivatedBy: string | null;
   createdAt: Date;
   updatedAt: Date;
 }

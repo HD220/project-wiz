@@ -1,7 +1,7 @@
 import { useState, useRef, KeyboardEvent, useEffect } from "react";
 
-import { Textarea } from "@/renderer/components/ui/textarea";
 import { ScrollArea } from "@/renderer/components/ui/scroll-area";
+import { Textarea } from "@/renderer/components/ui/textarea";
 import { cn } from "@/renderer/lib/utils";
 
 interface MessageInputProps {

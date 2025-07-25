@@ -81,8 +81,17 @@ contextBridge.exposeInMainWorld("api", {
   conversations: {
     create: (input: CreateConversationInput): Promise<IpcResponse> =>
       ipcRenderer.invoke("conversations:create", input),
-    getUserConversations: (): Promise<IpcResponse> =>
-      ipcRenderer.invoke("conversations:getUserConversations"),
+    getUserConversations: (options?: {
+      includeInactive?: boolean;
+      includeArchived?: boolean;
+    }): Promise<IpcResponse> =>
+      ipcRenderer.invoke("conversations:getUserConversations", options),
+    archive: (conversationId: string): Promise<IpcResponse> =>
+      ipcRenderer.invoke("conversations:archive", conversationId),
+    unarchive: (conversationId: string): Promise<IpcResponse> =>
+      ipcRenderer.invoke("conversations:unarchive", conversationId),
+    isBlocked: (conversationId: string): Promise<IpcResponse> =>
+      ipcRenderer.invoke("conversations:isBlocked", conversationId),
   },
 
   // Messages API
@@ -104,6 +113,8 @@ contextBridge.exposeInMainWorld("api", {
     create: (input: CreateProviderInput): Promise<IpcResponse> =>
       ipcRenderer.invoke("llm-providers:create", input),
     list: (): Promise<IpcResponse> => ipcRenderer.invoke("llm-providers:list"),
+    get: (id: string): Promise<IpcResponse> =>
+      ipcRenderer.invoke("llm-providers:getById", id),
     getById: (id: string): Promise<IpcResponse> =>
       ipcRenderer.invoke("llm-providers:getById", id),
     update: (
@@ -137,6 +148,8 @@ contextBridge.exposeInMainWorld("api", {
     ): Promise<IpcResponse> => ipcRenderer.invoke("agents:update", id, updates),
     delete: (id: string): Promise<IpcResponse> =>
       ipcRenderer.invoke("agents:delete", id),
+    restore: (id: string): Promise<IpcResponse> =>
+      ipcRenderer.invoke("agents:restore", id),
   },
 
   // Agent Memory API (simplified - only implemented methods)

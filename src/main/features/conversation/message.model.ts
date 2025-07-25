@@ -17,6 +17,12 @@ export const messagesTable = sqliteTable(
       .notNull()
       .references(() => usersTable.id, { onDelete: "cascade" }),
     content: text("content").notNull(),
+
+    // Soft deletion fields
+    isActive: integer("is_active", { mode: "boolean" }).notNull().default(true),
+    deactivatedAt: integer("deactivated_at", { mode: "timestamp_ms" }),
+    deactivatedBy: text("deactivated_by").references(() => usersTable.id),
+
     createdAt: integer("created_at", { mode: "timestamp_ms" })
       .notNull()
       .default(sql`CURRENT_TIMESTAMP`),
@@ -31,6 +37,17 @@ export const messagesTable = sqliteTable(
     ),
     authorIdIdx: index("messages_author_id_idx").on(table.authorId),
     createdAtIdx: index("messages_created_at_idx").on(table.createdAt),
+    deactivatedByIdx: index("messages_deactivated_by_idx").on(
+      table.deactivatedBy,
+    ),
+
+    // Soft deletion indexes
+    isActiveIdx: index("messages_is_active_idx").on(table.isActive),
+    isActiveCreatedAtIdx: index("messages_is_active_created_at_idx").on(
+      table.isActive,
+      table.createdAt,
+    ),
+
     // Composite index for conversation messages ordered by time
     conversationTimeIdx: index("messages_conversation_time_idx").on(
       table.conversationId,
@@ -52,6 +69,12 @@ export const llmMessagesTable = sqliteTable(
       .$type<"user" | "assistant" | "system" | "tool">()
       .notNull(),
     content: text("content").notNull(),
+
+    // Soft deletion fields
+    isActive: integer("is_active", { mode: "boolean" }).notNull().default(true),
+    deactivatedAt: integer("deactivated_at", { mode: "timestamp_ms" }),
+    deactivatedBy: text("deactivated_by").references(() => usersTable.id),
+
     createdAt: integer("created_at", { mode: "timestamp_ms" })
       .notNull()
       .default(sql`CURRENT_TIMESTAMP`),
@@ -64,6 +87,16 @@ export const llmMessagesTable = sqliteTable(
     messageIdIdx: index("llm_messages_message_id_idx").on(table.messageId),
     roleIdx: index("llm_messages_role_idx").on(table.role),
     createdAtIdx: index("llm_messages_created_at_idx").on(table.createdAt),
+    deactivatedByIdx: index("llm_messages_deactivated_by_idx").on(
+      table.deactivatedBy,
+    ),
+
+    // Soft deletion indexes
+    isActiveIdx: index("llm_messages_is_active_idx").on(table.isActive),
+    isActiveCreatedAtIdx: index("llm_messages_is_active_created_at_idx").on(
+      table.isActive,
+      table.createdAt,
+    ),
   }),
 );
 

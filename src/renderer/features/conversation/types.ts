@@ -26,17 +26,25 @@ export type ConversationType = "dm" | "channel";
 
 // Conversation with participants (for list display)
 export interface ConversationWithParticipants {
-  id: string;
-  name: string | null;
-  description: string | null;
   type: ConversationType;
-  agentId: string | null;
+  name: string | null;
+  id: string;
+  isActive: boolean;
+  deactivatedAt: Date | null;
+  deactivatedBy: string | null;
   createdAt: Date;
   updatedAt: Date;
+  description: string | null;
+  archivedAt: Date | null;
+  archivedBy: string | null;
+  agentId?: string | null;
   participants: Array<{
     id: string;
     conversationId: string;
     participantId: string;
+    isActive: boolean;
+    deactivatedAt: Date | null;
+    deactivatedBy: string | null;
     createdAt: Date;
     updatedAt: Date;
   }>;
@@ -47,11 +55,14 @@ export interface ConversationWithLastMessage
   extends ConversationWithParticipants {
   lastMessage?: {
     id: string;
-    conversationId: string;
-    authorId: string;
-    content: string;
+    isActive: boolean;
+    deactivatedAt: Date | null;
+    deactivatedBy: string | null;
     createdAt: Date;
     updatedAt: Date;
+    conversationId: string;
+    content: string;
+    authorId: string;
   };
 }
 
@@ -59,11 +70,14 @@ export interface ConversationWithLastMessage
 export interface ConversationWithMessages extends ConversationWithParticipants {
   messages: Array<{
     id: string;
-    conversationId: string;
-    authorId: string;
-    content: string;
+    isActive: boolean;
+    deactivatedAt: Date | null;
+    deactivatedBy: string | null;
     createdAt: Date;
     updatedAt: Date;
+    conversationId: string;
+    content: string;
+    authorId: string;
   }>;
 }
 
@@ -87,6 +101,11 @@ export interface SendMessageInput {
   content: string;
 }
 
+// Archive conversation input (without reason - removed per user request)
+export interface ArchiveConversationInput {
+  conversationId: string;
+}
+
 // ===========================
 // UI STATE TYPES
 // ===========================
@@ -95,4 +114,11 @@ export interface SendMessageInput {
 export interface ConversationUIState {
   selectedConversationId: string | null;
   showCreateDialog: boolean;
+  showArchived: boolean; // New field for archive toggle
+}
+
+// Filters for conversation list
+export interface ConversationFilters {
+  includeArchived?: boolean;
+  includeInactive?: boolean;
 }

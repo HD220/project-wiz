@@ -27,7 +27,7 @@ function NewAgentPage() {
   );
 
   function handleClose() {
-    navigate({ to: "/user/agents" });
+    navigate({ to: "/user/agents", search: { showArchived: false } });
   }
 
   async function handleSubmit(data: CreateAgentInput) {

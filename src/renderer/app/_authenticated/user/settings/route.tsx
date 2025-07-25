@@ -1,43 +1,22 @@
-import { createFileRoute, Outlet, useLocation } from "@tanstack/react-router";
-import { Bot, Palette, X, Search } from "lucide-react";
+import {
+  createFileRoute,
+  Outlet,
+  useNavigate,
+  useLocation,
+} from "@tanstack/react-router";
+import { X, Settings, Bot } from "lucide-react";
+import React from "react";
 
 import { Button } from "@/renderer/components/ui/button";
-import { Input } from "@/renderer/components/ui/input";
-import { ScrollArea } from "@/renderer/components/ui/scroll-area";
-
-const settingsCategories = [
-  {
-    label: "CONFIGURAÇÕES DE APP",
-    items: [
-      {
-        id: "appearance",
-        label: "Aparência",
-        icon: Palette,
-        path: "/user/settings/appearance",
-      },
-    ],
-  },
-  {
-    label: "CONFIGURAÇÕES DE IA",
-    items: [
-      {
-        id: "llm-providers",
-        label: "Provedores LLM",
-        icon: Bot,
-        path: "/user/settings/llm-providers",
-      },
-    ],
-  },
-];
 
 function SettingsLayout() {
-  const navigate = Route.useNavigate();
+  const navigate = useNavigate();
   const location = useLocation();
 
   // Handle ESC key to close
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Escape") {
-      navigate({ to: "/user" });
+      navigate({ to: "/user", search: { showArchived: false } });
     }
   };
 
@@ -47,45 +26,63 @@ function SettingsLayout() {
       onKeyDown={handleKeyDown}
       tabIndex={-1}
     >
-      {/* Left Sidebar - Exatamente como Discord */}
-      <div className="w-[232px] bg-[#2b2d31] flex flex-col">
-        {/* Search bar no topo */}
-        <div className="p-5 pb-4">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-            <Input
-              placeholder="Buscar"
-              className="pl-10 bg-[#1e1f22] border-0 text-white placeholder:text-gray-400 focus-visible:ring-1 focus-visible:ring-gray-500"
-            />
-          </div>
+      {/* Sidebar */}
+      <div className="w-60 bg-[#2f3136] border-r border-[#202225] p-4">
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-white font-semibold">Settings</h2>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="w-6 h-6 rounded-full hover:bg-accent/80 text-gray-400"
+            onClick={() =>
+              navigate({ to: "/user", search: { showArchived: false } })
+            }
+          >
+            <X className="w-4 h-4" />
+          </Button>
         </div>
 
-        {/* Navigation - sem header */}
-        <div className="flex-1 px-5 pb-4">
-          {settingsCategories.map((category, categoryIndex) => (
-            <div key={categoryIndex} className="mb-8">
-              <div className="mb-4">
-                <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wide">
-                  {category.label}
-                </h3>
-              </div>
-
-              <div className="space-y-2">
-                {category.items.map((item) => {
-                  const isActive =
-                    location.pathname === item.path ||
-                    (item.path === "/user/settings" &&
-                      location.pathname === "/user/settings/");
-
+        {/* Navigation */}
+        <div className="space-y-6">
+          {[
+            {
+              category: "User Settings",
+              items: [
+                {
+                  path: "/user/settings/appearance",
+                  label: "Appearance",
+                  icon: Settings,
+                },
+              ],
+            },
+            {
+              category: "App Settings",
+              items: [
+                {
+                  path: "/user/settings/llm-providers",
+                  label: "AI Providers",
+                  icon: Bot,
+                },
+              ],
+            },
+          ].map((section) => (
+            <div key={section.category}>
+              <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">
+                {section.category}
+              </h3>
+              <div className="space-y-1">
+                {section.items.map((item) => {
+                  const Icon = item.icon;
+                  const isActive = location.pathname === item.path;
                   return (
                     <button
-                      key={item.id}
-                      className={`w-full text-left px-3 py-2 rounded text-sm transition-colors ${
+                      key={item.path}
+                      className={`w-full flex items-center gap-3 px-3 py-2 rounded text-sm transition-colors ${
                         isActive
                           ? "bg-[#404249] text-white"
                           : "text-gray-300 hover:text-white hover:bg-[#35373c]"
                       }`}
-                      onClick={() => navigate({ to: item.path })}
+                      onClick={() => navigate({ to: item.path, search: {} })}
                     >
                       {item.label}
                     </button>
@@ -97,17 +94,24 @@ function SettingsLayout() {
         </div>
       </div>
 
-      {/* Main Content */}
-      <div className="flex-1 flex flex-col">
-        {/* Top bar com close - igual Discord */}
-        <div className="h-16 flex items-center justify-end px-6">
+      {/* Content */}
+      <div className="flex-1 overflow-auto">
+        {/* Header */}
+        <div className="bg-background border-b px-6 py-4 flex items-center justify-between">
+          <div className="text-sm text-muted-foreground">
+            Press{" "}
+            <span className="text-xs text-muted-foreground font-mono">ESC</span>{" "}
+            to close
+          </div>
           <div className="flex items-center gap-2">
             <span className="text-xs text-muted-foreground font-mono">ESC</span>
             <Button
               variant="ghost"
               size="icon"
               className="w-8 h-8 rounded-full hover:bg-accent/80"
-              onClick={() => navigate({ to: "/user" })}
+              onClick={() =>
+                navigate({ to: "/user", search: { showArchived: false } })
+              }
               title="Fechar configurações"
             >
               <X className="w-4 h-4" />
@@ -115,11 +119,9 @@ function SettingsLayout() {
           </div>
         </div>
 
-        {/* Content area com scroll */}
-        <div className="flex-1 overflow-auto">
-          <div className="max-w-[740px] px-10 pb-20">
-            <Outlet />
-          </div>
+        {/* Page Content */}
+        <div className="p-6">
+          <Outlet />
         </div>
       </div>
     </div>

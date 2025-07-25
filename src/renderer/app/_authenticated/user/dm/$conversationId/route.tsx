@@ -7,12 +7,20 @@ import type { AuthenticatedUser as MainAuthUser } from "@/main/features/user/use
 
 import { ContentHeader } from "@/renderer/features/app/components/content-header";
 import { ConversationChat } from "@/renderer/features/conversation/components/conversation-chat";
-import type { SelectConversation } from "@/renderer/features/conversation/types";
 import type { AuthenticatedUser } from "@/renderer/features/user/user.types";
 import { loadApiData } from "@/renderer/lib/route-loader";
 
 // Message type for renderer
-type Message = SelectMessage & {
+type Message = {
+  id: string;
+  isActive: boolean;
+  deactivatedAt: Date | null;
+  deactivatedBy: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+  conversationId: string;
+  content: string;
+  authorId: string;
   senderId: string;
   senderType: "user" | "agent";
   metadata: unknown;
@@ -22,14 +30,17 @@ type Message = SelectMessage & {
 function convertToRendererMessage(mainMessage: SelectMessage): Message {
   return {
     id: mainMessage.id,
+    isActive: mainMessage.isActive,
+    deactivatedAt: mainMessage.deactivatedAt,
+    deactivatedBy: mainMessage.deactivatedBy,
+    createdAt: mainMessage.createdAt,
+    updatedAt: mainMessage.updatedAt,
     conversationId: mainMessage.conversationId,
+    content: mainMessage.content,
     authorId: mainMessage.authorId,
     senderId: mainMessage.authorId, // Map authorId to senderId
     senderType: "user", // Default to user, could be enhanced based on user type
-    content: mainMessage.content,
     metadata: null, // Default metadata
-    createdAt: mainMessage.createdAt,
-    updatedAt: mainMessage.updatedAt,
   };
 }
 
@@ -43,13 +54,28 @@ function convertToRendererUser(mainUser: MainAuthUser): AuthenticatedUser {
     name: mainUser.name,
     avatar: mainUser.avatar,
     theme: "system",
+    type: "user",
+    isActive: true,
+    deactivatedAt: null,
+    deactivatedBy: null,
     createdAt: mainUser.createdAt,
     updatedAt: mainUser.updatedAt,
   };
 }
 
 // Extended conversation type for rendering
-type RendererConversation = SelectConversation & {
+type RendererConversation = {
+  type: "dm" | "channel";
+  name: string | null;
+  id: string;
+  isActive: boolean;
+  deactivatedAt: Date | null;
+  deactivatedBy: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+  description: string | null;
+  archivedAt: Date | null;
+  archivedBy: string | null;
   title?: string | null;
   projectId?: string | null;
   agentId?: string | null;
@@ -70,6 +96,11 @@ function convertToRendererConversation(mainConversation: {
   name: string | null;
   description?: string | null;
   type?: "dm" | "channel";
+  archivedAt?: Date | null;
+  archivedBy?: string | null;
+  isActive: boolean;
+  deactivatedAt: Date | null;
+  deactivatedBy: string | null;
   lastMessage?: SelectMessage;
   participants?: SelectConversationParticipant[];
   createdAt: Date;
@@ -80,13 +111,18 @@ function convertToRendererConversation(mainConversation: {
     name: mainConversation.name,
     description: mainConversation.description || null,
     type: mainConversation.type || "dm",
+    archivedAt: mainConversation.archivedAt || null,
+    archivedBy: mainConversation.archivedBy || null,
+    isActive: mainConversation.isActive,
+    deactivatedAt: mainConversation.deactivatedAt,
+    deactivatedBy: mainConversation.deactivatedBy,
     createdAt: mainConversation.createdAt,
     updatedAt: mainConversation.updatedAt,
     // Additional renderer properties
     title: mainConversation.name,
     projectId: null,
     agentId: null,
-    isArchived: false,
+    isArchived: !!mainConversation.archivedAt,
     lastMessage: mainConversation.lastMessage
       ? convertToRendererMessage(mainConversation.lastMessage)
       : undefined,
@@ -132,7 +168,7 @@ function DMLayout() {
 
   const description =
     otherParticipants.length === 1
-      ? `Direct message with ${otherParticipants[0]?.name || "Unknown"}`
+      ? `Direct message with ${otherParticipants[0]?.name || `Unknown`}`
       : `Group conversation with ${otherParticipants.length + 1} participants`;
 
   return (
@@ -149,6 +185,9 @@ function DMLayout() {
             ...convertToRendererConversation({
               ...conversation,
               name: conversation.name || "Untitled Conversation",
+              isActive: conversation.isActive ?? true,
+              deactivatedAt: conversation.deactivatedAt ?? null,
+              deactivatedBy: conversation.deactivatedBy ?? null,
             }),
             messages: conversation.messages.map(convertToRendererMessage),
           }}
@@ -168,9 +207,13 @@ export const Route = createFileRoute("/_authenticated/user/dm/$conversationId")(
     loader: async ({ params }) => {
       const { conversationId } = params;
 
-      // Load conversations first to validate conversation exists
+      // Load conversations first to validate conversation exists (include archived)
       const conversations = await loadApiData(
-        () => window.api.conversations.getUserConversations(),
+        () =>
+          window.api.conversations.getUserConversations({
+            includeArchived: true, // Include archived to allow viewing archived conversations
+            includeInactive: false,
+          }),
         "Failed to load conversations",
       );
 

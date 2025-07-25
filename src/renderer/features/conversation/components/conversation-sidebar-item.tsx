@@ -1,198 +1,172 @@
-import { MessageCircle } from "lucide-react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { Link } from "@tanstack/react-router";
+import { MoreHorizontal, Archive, Trash2, MessageSquare } from "lucide-react";
+import { toast } from "sonner";
 
-import type { UserSummary } from "@/main/features/user/user.service";
-
-import { CustomLink } from "@/renderer/components/custom-link";
+import { Button } from "@/renderer/components/ui/button";
 import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
-} from "@/renderer/components/ui/avatar";
-import { Badge } from "@/renderer/components/ui/badge";
-import type {
-  ConversationWithLastMessage,
-  SelectMessage,
-} from "@/renderer/features/conversation/types";
-import { cn } from "@/renderer/lib/utils";
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/renderer/components/ui/dropdown-menu";
+import { useApiMutation } from "@/renderer/hooks/use-api-mutation.hook";
+
+import type { ConversationWithLastMessage } from "../types";
 
 interface ConversationSidebarItemProps {
   conversation: ConversationWithLastMessage;
-  lastMessage?: SelectMessage | null;
-  otherParticipants: UserSummary[];
-  className?: string;
-  unreadCount?: number;
 }
 
-function ConversationSidebarItem(props: ConversationSidebarItemProps) {
-  const {
-    conversation,
-    lastMessage,
-    otherParticipants,
-    className,
-    unreadCount = 0,
-  } = props;
+function ConversationSidebarItem({
+  conversation,
+}: ConversationSidebarItemProps) {
+  const queryClient = useQueryClient();
 
-  // Get display name for conversation
-  const getDisplayName = () => {
+  // Archive conversation mutation
+  const archiveMutation = useApiMutation(
+    () => window.api.conversations.archive(conversation.id),
+    {
+      successMessage: "Conversation archived",
+      errorMessage: "Failed to archive conversation",
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ["conversations"] });
+      },
+    },
+  );
+
+  // Get conversation display name
+  const getConversationName = () => {
     if (conversation.name) {
       return conversation.name;
     }
 
-    if (otherParticipants.length === 1) {
-      return otherParticipants[0]?.name || "Unknown";
-    } else if (otherParticipants.length > 1) {
-      return `Group ${otherParticipants.length + 1}`;
+    // For DM conversations, use participant names
+    if (conversation.type === "dm") {
+      // This would typically show other participants' names
+      return "Direct Message";
     }
 
-    return "New Conversation";
+    return "Unnamed Conversation";
   };
 
-  // Get avatar for conversation
-  const getAvatar = () => {
-    if (otherParticipants.length === 1) {
-      const participant = otherParticipants[0];
-      return {
-        image: participant?.avatar || null,
-        fallback: participant?.name?.charAt(0).toUpperCase() || "?",
-        isGroup: false,
-      };
+  // Get the last message preview
+  const getLastMessagePreview = () => {
+    if (!conversation.lastMessage) {
+      return "No messages yet";
     }
 
-    return {
-      image: null,
-      fallback: otherParticipants.length.toString(),
-      isGroup: true,
-    };
+    const content = conversation.lastMessage.content;
+    return content.length > 50 ? `${content.substring(0, 50)}...` : content;
   };
 
-  // Get message preview
-  const getMessagePreview = () => {
-    if (!lastMessage) return "No messages yet";
-
-    const maxLength = 30;
-    if (lastMessage.content.length > maxLength) {
-      return `${lastMessage.content.substring(0, maxLength)}...`;
-    }
-
-    return lastMessage.content;
-  };
-
-  // Format timestamp - simples: horário pt-BR ou dias
-  const getTimeAgo = () => {
-    if (!lastMessage) return "";
-
-    try {
-      console.log("🔍 SIDEBAR DEBUG:", {
-        "Raw createdAt": lastMessage.createdAt,
-        "Type of createdAt": typeof lastMessage.createdAt,
-        "Date constructor": new Date(lastMessage.createdAt),
-        "Date toString": new Date(lastMessage.createdAt).toString(),
-        "Date getTime": new Date(lastMessage.createdAt).getTime(),
-        Now: new Date().toString(),
-        "Timezone offset (minutes)": new Date().getTimezoneOffset(),
-      });
-
-      const messageDate = new Date(lastMessage.createdAt);
-      const now = new Date();
-      const diffInHours =
-        (now.getTime() - messageDate.getTime()) / (1000 * 60 * 60);
-
-      if (diffInHours < 24) {
-        // Menos de 24h - mostrar horário
-        const formatted = new Intl.DateTimeFormat("pt-BR", {
-          hour: "2-digit",
-          minute: "2-digit",
-        }).format(messageDate);
-
-        console.log("🕐 SIDEBAR TIME:", {
-          "Formatted time": formatted,
-          "Message date": messageDate.toString(),
-          "Hours diff": diffInHours,
-        });
-
-        return formatted;
-      } else {
-        // Mais de 24h - mostrar dias
-        const days = Math.floor(diffInHours / 24);
-        return `${days}d`;
-      }
-    } catch (error) {
-      console.error("❌ SIDEBAR TIME ERROR:", error);
+  // Format the last message time
+  const formatLastMessageTime = () => {
+    if (!conversation.lastMessage) {
       return "";
     }
+
+    const now = new Date();
+    const messageTime = new Date(conversation.lastMessage.createdAt);
+    const diffInHours = Math.abs(now.getTime() - messageTime.getTime()) / 36e5;
+
+    if (diffInHours < 24) {
+      return messageTime.toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+    }
+    return messageTime.toLocaleDateString([], {
+      month: "short",
+      day: "numeric",
+    });
   };
 
-  const avatar = getAvatar();
-  const displayName = getDisplayName();
-  const messagePreview = getMessagePreview();
-  const timeAgo = getTimeAgo();
+  const handleArchive = () => {
+    if (
+      window.confirm(
+        "Are you sure you want to archive this conversation? It will be moved to archived conversations.",
+      )
+    ) {
+      archiveMutation.mutate(conversation.id);
+    }
+  };
+
+  const handleUnarchive = () => {
+    // TODO: Implement unarchive functionality
+  };
+
+  const handleDelete = () => {
+    // TODO: Implement delete functionality
+  };
 
   return (
-    <CustomLink
-      to="/user/dm/$conversationId"
-      params={{ conversationId: conversation.id }}
-      variant="ghost"
-      className={cn(
-        "flex items-center gap-3 px-2 py-2 mx-1 rounded-md text-sm transition-all duration-200 group h-auto justify-start",
-        "hover:bg-accent/60 text-muted-foreground hover:text-foreground",
-        unreadCount > 0 && "font-medium",
-        className,
-      )}
-      activeProps={{
-        className: "bg-accent text-foreground",
-      }}
-    >
-      {/* Avatar */}
-      <div className="relative flex-shrink-0">
-        <Avatar className="w-8 h-8">
-          <AvatarImage src={avatar.image || undefined} />
-          <AvatarFallback className="text-xs font-medium bg-primary/10 text-primary">
-            {avatar.isGroup ? (
-              <MessageCircle className="h-4 w-4" />
-            ) : (
-              avatar.fallback
-            )}
-          </AvatarFallback>
-        </Avatar>
+    <div className="group">
+      <Link
+        to="/user/dm/$conversationId"
+        params={{ conversationId: conversation.id }}
+        search={{ showArchived: false }}
+        className="flex items-center gap-3 px-3 py-2 hover:bg-accent/50 rounded-md transition-colors"
+        activeProps={{
+          className: "bg-accent text-accent-foreground",
+        }}
+      >
+        <div className="flex-shrink-0">
+          <div className="w-8 h-8 bg-muted rounded-full flex items-center justify-center">
+            <MessageSquare className="w-4 h-4" />
+          </div>
+        </div>
 
-        {/* Online indicator for 1:1 chats */}
-        {!avatar.isGroup && (
-          <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-500 rounded-full border-2 border-card" />
-        )}
-      </div>
-
-      {/* Content */}
-      <div className="flex-1 min-w-0">
-        {/* Top row: name and timestamp */}
-        <div className="flex items-center justify-between gap-2 mb-0.5">
-          <span className="font-medium text-sm truncate">{displayName}</span>
-
-          {/* Timestamp */}
-          {timeAgo && (
-            <span className="text-xs text-muted-foreground/70 flex-shrink-0">
-              {timeAgo}
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center justify-between">
+            <span className="text-sm font-medium truncate">
+              {getConversationName()}
             </span>
-          )}
+            <span className="text-xs text-muted-foreground ml-2">
+              {formatLastMessageTime()}
+            </span>
+          </div>
+          <div className="text-xs text-muted-foreground truncate">
+            {getLastMessagePreview()}
+          </div>
         </div>
 
-        {/* Bottom row: last message preview */}
-        <div className="flex items-center justify-between gap-2">
-          <p className="text-xs text-muted-foreground/80 truncate flex-1">
-            {messagePreview}
-          </p>
-
-          {/* Unread badge */}
-          {unreadCount > 0 && (
-            <Badge
-              variant="destructive"
-              className="h-4 px-1.5 text-xs font-medium min-w-[16px] flex items-center justify-center"
-            >
-              {unreadCount > 99 ? "99+" : unreadCount}
-            </Badge>
-          )}
+        <div
+          className="opacity-0 group-hover:opacity-100 transition-opacity"
+          onClick={(e) => e.preventDefault()}
+        >
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
+                <MoreHorizontal className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              {!conversation.archivedAt ? (
+                <DropdownMenuItem onClick={handleArchive}>
+                  <Archive className="h-4 w-4 mr-2" />
+                  Archive
+                </DropdownMenuItem>
+              ) : (
+                <DropdownMenuItem onClick={handleUnarchive}>
+                  <Archive className="h-4 w-4 mr-2" />
+                  Unarchive
+                </DropdownMenuItem>
+              )}
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                onClick={handleDelete}
+                className="text-destructive"
+              >
+                <Trash2 className="h-4 w-4 mr-2" />
+                Delete
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
-      </div>
-    </CustomLink>
+      </Link>
+    </div>
   );
 }
 

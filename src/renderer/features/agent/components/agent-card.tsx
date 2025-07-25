@@ -72,6 +72,7 @@ function AgentCard(props: AgentCardProps) {
                 <Link
                   to="/user/agents/edit/$agentId"
                   params={{ agentId: agent.id }}
+                  search={{ showArchived: false }}
                 >
                   <Pencil className="mr-2 h-4 w-4" />
                   Edit

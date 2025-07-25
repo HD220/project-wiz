@@ -1,6 +1,7 @@
-import { eq, inArray, sql } from "drizzle-orm";
+import { eq, inArray, sql, and, isNull } from "drizzle-orm";
 
 import { getDatabase } from "@/main/database/connection";
+import { AgentService } from "@/main/features/agent/agent.service";
 import {
   conversationsTable,
   conversationParticipantsTable,
@@ -58,38 +59,92 @@ export class ConversationService {
     };
   }
 
+  /**
+   * Get user conversations with archiving support
+   * includeArchived: false (default) - only active non-archived conversations
+   * includeArchived: true - include archived conversations
+   * includeInactive: false (default) - exclude soft-deleted conversations
+   */
   static async getUserConversations(
     userId: string,
+    options: {
+      includeInactive?: boolean;
+      includeArchived?: boolean;
+    } = {},
   ): Promise<ConversationWithLastMessage[]> {
+    const { includeInactive = false, includeArchived = false } = options;
     const db = getDatabase();
 
-    // 1. Get all conversation IDs for the user
+    // 1. Get all conversation IDs for the user (only active participants)
+    const participantConditions = [
+      eq(conversationParticipantsTable.participantId, userId),
+    ];
+
+    if (!includeInactive) {
+      participantConditions.push(
+        eq(conversationParticipantsTable.isActive, true),
+      );
+    }
+
     const userConversations = await db
       .select({
         conversationId: conversationParticipantsTable.conversationId,
       })
       .from(conversationParticipantsTable)
-      .where(eq(conversationParticipantsTable.participantId, userId));
+      .where(and(...participantConditions));
 
     const conversationIds = userConversations.map(
       (userConv) => userConv.conversationId,
     );
 
-    // 2. Get all conversations data in one query
+    if (conversationIds.length === 0) {
+      return [];
+    }
+
+    // 2. Get all conversations data with archiving logic
+    const conversationConditions = [
+      inArray(conversationsTable.id, conversationIds),
+    ];
+
+    if (!includeInactive) {
+      conversationConditions.push(eq(conversationsTable.isActive, true));
+    }
+
+    // Archiving filter logic
+    if (!includeArchived) {
+      conversationConditions.push(isNull(conversationsTable.archivedAt));
+    }
+
     const conversations = await db
       .select()
       .from(conversationsTable)
-      .where(inArray(conversationsTable.id, conversationIds));
+      .where(and(...conversationConditions));
 
-    // 3. Get all participants for these conversations in one query
+    // 3. Get all participants for these conversations in one query (only active participants)
+    const participantsConditions = [
+      inArray(conversationParticipantsTable.conversationId, conversationIds),
+    ];
+
+    if (!includeInactive) {
+      participantsConditions.push(
+        eq(conversationParticipantsTable.isActive, true),
+      );
+    }
+
     const allParticipants = await db
       .select()
       .from(conversationParticipantsTable)
-      .where(
-        inArray(conversationParticipantsTable.conversationId, conversationIds),
-      );
+      .where(and(...participantsConditions));
 
-    // 4. Get latest message for each conversation using window function
+    // 4. Get latest message for each conversation using window function (only active messages)
+    const messageConditions = [
+      inArray(messagesTable.conversationId, conversationIds),
+    ];
+
+    if (!includeInactive) {
+      messageConditions.push(eq(messagesTable.isActive, true));
+    }
+
     const latestMessages = await db
       .select({
         id: messagesTable.id,
@@ -103,7 +158,7 @@ export class ConversationService {
         ),
       })
       .from(messagesTable)
-      .where(inArray(messagesTable.conversationId, conversationIds));
+      .where(and(...messageConditions));
 
     // Filter to get only the latest message per conversation
     const latestMessagesMap = new Map();
@@ -142,5 +197,328 @@ export class ConversationService {
       const bTime = convB.lastMessage?.createdAt || convB.updatedAt;
       return bTime.getTime() - aTime.getTime();
     });
+  }
+
+  /**
+   * Find conversation by ID - only returns active conversations by default
+   */
+  static async findById(
+    id: string,
+    includeInactive = false,
+  ): Promise<ConversationWithParticipants | null> {
+    const db = getDatabase();
+
+    const conversationConditions = [eq(conversationsTable.id, id)];
+
+    if (!includeInactive) {
+      conversationConditions.push(eq(conversationsTable.isActive, true));
+    }
+
+    const [conversation] = await db
+      .select()
+      .from(conversationsTable)
+      .where(and(...conversationConditions))
+      .limit(1);
+
+    if (!conversation) {
+      return null;
+    }
+
+    // Get active participants
+    const participantConditions = [
+      eq(conversationParticipantsTable.conversationId, id),
+    ];
+
+    if (!includeInactive) {
+      participantConditions.push(
+        eq(conversationParticipantsTable.isActive, true),
+      );
+    }
+
+    const participants = await db
+      .select()
+      .from(conversationParticipantsTable)
+      .where(and(...participantConditions));
+
+    return {
+      ...conversation,
+      participants,
+    };
+  }
+
+  /**
+   * Archive conversation
+   */
+  static async archive(
+    conversationId: string,
+    archivedBy: string,
+  ): Promise<void> {
+    const db = getDatabase();
+
+    // Verify conversation exists and is active
+    const [conversation] = await db
+      .select()
+      .from(conversationsTable)
+      .where(
+        and(
+          eq(conversationsTable.id, conversationId),
+          eq(conversationsTable.isActive, true),
+          isNull(conversationsTable.archivedAt), // Not already archived
+        ),
+      )
+      .limit(1);
+
+    if (!conversation) {
+      throw new Error("Conversation not found, inactive, or already archived");
+    }
+
+    // Archive the conversation
+    const [updated] = await db
+      .update(conversationsTable)
+      .set({
+        archivedAt: new Date(),
+        archivedBy,
+        updatedAt: new Date(),
+      })
+      .where(eq(conversationsTable.id, conversationId))
+      .returning();
+
+    if (!updated) {
+      throw new Error("Failed to archive conversation");
+    }
+  }
+
+  /**
+   * Unarchive conversation
+   */
+  static async unarchive(conversationId: string): Promise<void> {
+    const db = getDatabase();
+
+    // Verify conversation exists and is archived
+    const [conversation] = await db
+      .select()
+      .from(conversationsTable)
+      .where(
+        and(
+          eq(conversationsTable.id, conversationId),
+          eq(conversationsTable.isActive, true),
+        ),
+      )
+      .limit(1);
+
+    if (!conversation) {
+      throw new Error("Conversation not found or inactive");
+    }
+
+    if (!conversation.archivedAt) {
+      throw new Error("Conversation is not archived");
+    }
+
+    // Unarchive the conversation
+    const [updated] = await db
+      .update(conversationsTable)
+      .set({
+        archivedAt: null,
+        archivedBy: null,
+        updatedAt: new Date(),
+      })
+      .where(eq(conversationsTable.id, conversationId))
+      .returning();
+
+    if (!updated) {
+      throw new Error("Failed to unarchive conversation");
+    }
+  }
+
+  /**
+   * Soft delete conversation with cascading deletion
+   */
+  static async softDelete(id: string, deletedBy: string): Promise<void> {
+    const db = getDatabase();
+
+    await db.transaction(async (tx) => {
+      // Verify conversation exists and is active
+      const [conversation] = await tx
+        .select()
+        .from(conversationsTable)
+        .where(
+          and(
+            eq(conversationsTable.id, id),
+            eq(conversationsTable.isActive, true),
+          ),
+        )
+        .limit(1);
+
+      if (!conversation) {
+        throw new Error("Conversation not found or already inactive");
+      }
+
+      // Soft delete the conversation
+      await tx
+        .update(conversationsTable)
+        .set({
+          isActive: false,
+          deactivatedAt: new Date(),
+          deactivatedBy: deletedBy,
+          updatedAt: new Date(),
+        })
+        .where(eq(conversationsTable.id, id));
+
+      // Cascade soft delete to conversation participants
+      await tx
+        .update(conversationParticipantsTable)
+        .set({
+          isActive: false,
+          deactivatedAt: new Date(),
+          deactivatedBy: deletedBy,
+          updatedAt: new Date(),
+        })
+        .where(
+          and(
+            eq(conversationParticipantsTable.conversationId, id),
+            eq(conversationParticipantsTable.isActive, true),
+          ),
+        );
+
+      // Cascade soft delete to all messages in the conversation
+      await tx
+        .update(messagesTable)
+        .set({
+          isActive: false,
+          deactivatedAt: new Date(),
+          deactivatedBy: deletedBy,
+          updatedAt: new Date(),
+        })
+        .where(
+          and(
+            eq(messagesTable.conversationId, id),
+            eq(messagesTable.isActive, true),
+          ),
+        );
+    });
+  }
+
+  /**
+   * Restore a soft deleted conversation
+   */
+  static async restore(id: string): Promise<ConversationWithParticipants> {
+    const db = getDatabase();
+
+    return await db.transaction(async (tx) => {
+      // Restore the conversation
+      const [restored] = await tx
+        .update(conversationsTable)
+        .set({
+          isActive: true,
+          deactivatedAt: null,
+          deactivatedBy: null,
+          updatedAt: new Date(),
+        })
+        .where(
+          and(
+            eq(conversationsTable.id, id),
+            eq(conversationsTable.isActive, false),
+          ),
+        )
+        .returning();
+
+      if (!restored) {
+        throw new Error("Conversation not found or not in soft deleted state");
+      }
+
+      // Restore conversation participants
+      await tx
+        .update(conversationParticipantsTable)
+        .set({
+          isActive: true,
+          deactivatedAt: null,
+          deactivatedBy: null,
+          updatedAt: new Date(),
+        })
+        .where(eq(conversationParticipantsTable.conversationId, id));
+
+      // Get restored participants
+      const participants = await tx
+        .select()
+        .from(conversationParticipantsTable)
+        .where(eq(conversationParticipantsTable.conversationId, id));
+
+      return {
+        ...restored,
+        participants,
+      };
+    });
+  }
+
+  /**
+   * FIXED: Check if conversation is blocked based on SPECIFIC PARTICIPANT agents
+   * Only checks agents that are actually participants in this conversation
+   */
+  static async isConversationBlocked(conversationId: string): Promise<{
+    isBlocked: boolean;
+    reason?: string;
+    activeAgentsCount: number;
+  }> {
+    // Get active agents that are SPECIFIC PARTICIPANTS in this conversation
+    const activeAgents =
+      await AgentService.getActiveAgentsForConversation(conversationId);
+    const activeAgentsCount = activeAgents.length;
+
+    if (activeAgentsCount === 0) {
+      return {
+        isBlocked: true,
+        reason: "No active agent participants available for this conversation",
+        activeAgentsCount: 0,
+      };
+    }
+
+    return {
+      isBlocked: false,
+      activeAgentsCount,
+    };
+  }
+
+  /**
+   * Update conversation metadata
+   */
+  static async update(
+    id: string,
+    input: Partial<InsertConversation>,
+  ): Promise<ConversationWithParticipants> {
+    const db = getDatabase();
+
+    const [updated] = await db
+      .update(conversationsTable)
+      .set({
+        ...input,
+        updatedAt: new Date(),
+      })
+      .where(
+        and(
+          eq(conversationsTable.id, id),
+          eq(conversationsTable.isActive, true),
+        ),
+      )
+      .returning();
+
+    if (!updated) {
+      throw new Error("Conversation not found, inactive, or update failed");
+    }
+
+    // Get participants
+    const participants = await db
+      .select()
+      .from(conversationParticipantsTable)
+      .where(
+        and(
+          eq(conversationParticipantsTable.conversationId, id),
+          eq(conversationParticipantsTable.isActive, true),
+        ),
+      );
+
+    return {
+      ...updated,
+      participants,
+    };
   }
 }

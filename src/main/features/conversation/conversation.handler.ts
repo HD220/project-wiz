@@ -18,14 +18,56 @@ export function setupConversationsHandlers(): void {
     },
   );
 
-  // Get user conversations (with session-based auth)
-  createIpcHandler("conversations:getUserConversations", async () => {
+  // Get user conversations with archiving support (with session-based auth)
+  createIpcHandler(
+    "conversations:getUserConversations",
+    async (options?: {
+      includeInactive?: boolean;
+      includeArchived?: boolean;
+    }) => {
+      const currentUser = await AuthService.getCurrentUser();
+      if (!currentUser) {
+        throw new Error("User not authenticated");
+      }
+      return ConversationService.getUserConversations(
+        currentUser.id,
+        options || {},
+      );
+    },
+  );
+
+  // Archive conversation (with session-based auth)
+  createIpcHandler("conversations:archive", async (conversationId: string) => {
     const currentUser = await AuthService.getCurrentUser();
     if (!currentUser) {
       throw new Error("User not authenticated");
     }
-    return ConversationService.getUserConversations(currentUser.id);
+    return ConversationService.archive(conversationId, currentUser.id);
   });
+
+  // Unarchive conversation (with session-based auth)
+  createIpcHandler(
+    "conversations:unarchive",
+    async (conversationId: string) => {
+      const currentUser = await AuthService.getCurrentUser();
+      if (!currentUser) {
+        throw new Error("User not authenticated");
+      }
+      return ConversationService.unarchive(conversationId);
+    },
+  );
+
+  // Check if conversation is blocked (with session-based auth)
+  createIpcHandler(
+    "conversations:isBlocked",
+    async (conversationId: string) => {
+      const currentUser = await AuthService.getCurrentUser();
+      if (!currentUser) {
+        throw new Error("User not authenticated");
+      }
+      return ConversationService.isConversationBlocked(conversationId);
+    },
+  );
 
   // Send message (with session-based auth)
   createIpcHandler("messages:send", async (input: SendMessageInput) => {

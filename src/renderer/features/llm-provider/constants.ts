@@ -35,3 +35,24 @@ export const providerFormSchema = z.object({
 });
 
 export type ProviderFormData = z.infer<typeof providerFormSchema>;
+
+// LLM Provider types
+export interface SelectLlmProvider {
+  id: string;
+  name: string;
+  type: "openai" | "deepseek" | "anthropic" | "google" | "custom";
+  apiKey: string;
+  baseUrl?: string | null;
+  defaultModelConfig?: string | null;
+  status: "active" | "inactive" | "error";
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface CreateProviderInput {
+  name: string;
+  type: "openai" | "deepseek" | "anthropic" | "google" | "custom";
+  apiKey: string;
+  baseUrl?: string | null;
+  defaultModelConfig?: string | null;
+}

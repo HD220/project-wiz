@@ -1,7 +1,11 @@
+import { useQuery } from "@tanstack/react-query";
 import { useEffect, useRef, useMemo } from "react";
 
 import { ScrollArea } from "@/renderer/components/ui/scroll-area";
 import { Separator } from "@/renderer/components/ui/separator";
+import type { ConversationBlockingInfo } from "@/renderer/features/agent/agent.types";
+import { ArchivedConversationBanner } from "@/renderer/features/conversation/components/archived-conversation-banner";
+import { BlockedConversation } from "@/renderer/features/conversation/components/blocked-conversation";
 import { MessageBubble } from "@/renderer/features/conversation/components/message-bubble";
 import { MessageInput } from "@/renderer/features/conversation/components/message-input";
 import type {
@@ -11,6 +15,7 @@ import type {
 } from "@/renderer/features/conversation/types";
 import type { AuthenticatedUser } from "@/renderer/features/user/user.types";
 import { useApiMutation } from "@/renderer/hooks/use-api-mutation.hook";
+import { loadApiData } from "@/renderer/lib/route-loader";
 
 // Message type for chat component
 type Message = SelectMessage & {
@@ -26,7 +31,11 @@ interface UserBasic {
 
 interface ConversationChatProps {
   conversationId: string;
-  conversation: SelectConversation & { messages: Message[] };
+  conversation: SelectConversation & {
+    messages: Message[];
+    archivedAt?: Date | null;
+    archivedBy?: string | null;
+  };
   availableUsers: unknown[];
   currentUser: AuthenticatedUser | null;
   className?: string;
@@ -35,6 +44,21 @@ interface ConversationChatProps {
 function ConversationChat(props: ConversationChatProps) {
   const { conversation, availableUsers, currentUser, className } = props;
   const scrollAreaRef = useRef<HTMLDivElement>(null);
+
+  // Check if conversation is blocked
+  const { data: blockingInfo, isLoading: blockingInfoLoading } = useQuery({
+    queryKey: ["conversation", conversation.id, "blocking"],
+    queryFn: async (): Promise<ConversationBlockingInfo> => {
+      return await loadApiData(
+        () => window.api.conversations.isBlocked(conversation.id),
+        "Failed to check conversation status",
+      );
+    },
+    refetchInterval: 30000, // Refresh every 30 seconds
+  });
+
+  // Check if conversation is archived
+  const isArchived = !!conversation.archivedAt;
 
   // Standardized mutation with automatic error handling
   const sendMessageMutation = useApiMutation(
@@ -72,10 +96,18 @@ function ConversationChat(props: ConversationChatProps) {
     });
   }
 
-  // Get user info by ID
+  // Get user info by ID with enhanced logic for inactive agents
   function getUserById(userId: string) {
     if (userId === currentUser?.id) return currentUser;
-    return (availableUsers as UserBasic[]).find((user) => user.id === userId);
+
+    // Try to find in available users first
+    const foundUser = (availableUsers as UserBasic[]).find(
+      (user) => user.id === userId,
+    );
+    if (foundUser) return foundUser;
+
+    // If not found, it might be an inactive agent - return null to trigger fallback
+    return null;
   }
 
   const messageGroups = useMemo(() => {
@@ -114,8 +146,30 @@ function ConversationChat(props: ConversationChatProps) {
     );
   }
 
+  // Show blocked conversation screen if conversation is blocked
+  if (blockingInfo?.isBlocked && !blockingInfoLoading) {
+    return (
+      <div className={`flex flex-col h-full bg-background ${className || ""}`}>
+        <BlockedConversation
+          blockingInfo={blockingInfo}
+          conversationName={conversation.name || undefined}
+        />
+      </div>
+    );
+  }
+
   return (
     <div className={`flex flex-col h-full bg-background ${className || ""}`}>
+      {/* Archived conversation banner */}
+      {isArchived && conversation.archivedAt && (
+        <ArchivedConversationBanner
+          conversationId={conversation.id}
+          conversationName={conversation.name || undefined}
+          archivedAt={conversation.archivedAt}
+          archivedBy={conversation.archivedBy}
+        />
+      )}
+
       {/* Messages Area */}
       <div className="flex-1 overflow-hidden">
         <ScrollArea ref={scrollAreaRef} className="h-full w-full">
@@ -133,7 +187,9 @@ function ConversationChat(props: ConversationChatProps) {
                     Bem-vindo a {conversation.name || "esta conversa"}!
                   </div>
                   <div className="text-muted-foreground text-sm">
-                    Este é o início da sua conversa direta.
+                    {isArchived
+                      ? "Esta conversa foi arquivada."
+                      : "Este é o início da sua conversa direta."}
                   </div>
                 </div>
                 <Separator className="mt-8" />
@@ -157,6 +213,9 @@ function ConversationChat(props: ConversationChatProps) {
               // Show avatar and header if it's first group or if more than 7 minutes passed
               const showAvatar = groupIndex === 0 || timeDiff > 7 * 60 * 1000;
 
+              // Determine if author is inactive (missing from available users)
+              const authorIsInactive = !author && !isCurrentUser;
+
               return (
                 <div key={groupIndex}>
                   {/* First message in group - shows avatar and name */}
@@ -165,6 +224,8 @@ function ConversationChat(props: ConversationChatProps) {
                     author={author}
                     isCurrentUser={isCurrentUser}
                     showAvatar={showAvatar}
+                    authorIsInactive={authorIsInactive}
+                    originalAuthorName={authorIsInactive ? "Agente" : undefined}
                     isSending={
                       sendMessageMutation.isPending &&
                       groupIndex === messageGroups.length - 1
@@ -179,6 +240,10 @@ function ConversationChat(props: ConversationChatProps) {
                       author={author}
                       isCurrentUser={isCurrentUser}
                       showAvatar={false}
+                      authorIsInactive={authorIsInactive}
+                      originalAuthorName={
+                        authorIsInactive ? "Agente" : undefined
+                      }
                       isSending={
                         sendMessageMutation.isPending &&
                         message === group.messages[group.messages.length - 1]
@@ -194,7 +259,9 @@ function ConversationChat(props: ConversationChatProps) {
               <div className="px-4 py-8 text-center text-muted-foreground">
                 <div className="text-4xl mb-4">💬</div>
                 <div className="text-sm">
-                  Nenhuma mensagem ainda. Comece a conversa!
+                  {isArchived
+                    ? "Esta conversa foi arquivada."
+                    : "Nenhuma mensagem ainda. Comece a conversa!"}
                 </div>
               </div>
             )}
@@ -205,13 +272,25 @@ function ConversationChat(props: ConversationChatProps) {
         </ScrollArea>
       </div>
 
-      {/* Message Input */}
-      <MessageInput
-        onSendMessage={handleSendMessage}
-        disabled={sendMessageMutation.isPending}
-        isSending={sendMessageMutation.isPending}
-        placeholder={`Conversar em ${conversation.name || "conversa"}...`}
-      />
+      {/* Message Input - hide if conversation is blocked or archived */}
+      {!blockingInfo?.isBlocked && !blockingInfoLoading && !isArchived && (
+        <MessageInput
+          onSendMessage={handleSendMessage}
+          disabled={sendMessageMutation.isPending || blockingInfoLoading}
+          isSending={sendMessageMutation.isPending}
+          placeholder={`Conversar em ${conversation.name || "conversa"}...`}
+        />
+      )}
+
+      {/* Archived conversation message input replacement */}
+      {isArchived && (
+        <div className="border-t bg-muted/30 px-4 py-3">
+          <div className="text-center text-sm text-muted-foreground">
+            Esta conversa foi arquivada. Para enviar mensagens, desarquive a
+            conversa primeiro.
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -33,39 +33,55 @@ export function setupAgentHandlers(): void {
     },
   );
 
-  // Delete agent (with session-based auth)
+  // Soft delete agent (with session-based auth)
   createIpcHandler("agents:delete", async (id: string) => {
     const currentUser = await AuthService.getCurrentUser();
     if (!currentUser) {
       throw new Error("User not authenticated");
     }
-    await AgentService.delete(id);
-    return { message: "Agent deleted successfully" };
+    await AgentService.softDelete(id, currentUser.id);
+    return { message: "Agent deactivated successfully" };
   });
 
-  // List agents (with session-based auth and filters)
-  createIpcHandler("agents:list", async (filters?: AgentFiltersInput) => {
+  // Restore agent (with session-based auth)
+  createIpcHandler("agents:restore", async (id: string) => {
     const currentUser = await AuthService.getCurrentUser();
     if (!currentUser) {
       throw new Error("User not authenticated");
     }
-    return AgentService.listByOwnerId(currentUser.id, filters);
+    const restored = await AgentService.restore(id);
+    return { message: "Agent restored successfully", agent: restored };
   });
 
+  // List agents (with session-based auth and filters)
+  createIpcHandler(
+    "agents:list",
+    async (filters?: AgentFiltersInput & { includeInactive?: boolean }) => {
+      const currentUser = await AuthService.getCurrentUser();
+      if (!currentUser) {
+        throw new Error("User not authenticated");
+      }
+      return AgentService.listByOwnerId(currentUser.id, filters);
+    },
+  );
+
   // Get agent by ID
-  createIpcHandler("agents:get", async (id: string) => {
-    const result = await AgentService.findById(id);
-    if (!result) {
-      throw new Error("Agent not found");
-    }
-    return result;
-  });
+  createIpcHandler(
+    "agents:get",
+    async (id: string, includeInactive?: boolean) => {
+      const result = await AgentService.findById(id, includeInactive);
+      if (!result) {
+        throw new Error("Agent not found or inactive");
+      }
+      return result;
+    },
+  );
 
   // Get agent with provider information
   createIpcHandler("agents:getWithProvider", async (id: string) => {
     const result = await AgentService.getWithProvider(id);
     if (!result) {
-      throw new Error("Agent not found");
+      throw new Error("Agent not found or inactive");
     }
     return result;
   });
@@ -78,4 +94,35 @@ export function setupAgentHandlers(): void {
       return { message: "Agent status updated successfully" };
     },
   );
+
+  // Get active agents count for user
+  createIpcHandler("agents:getActiveCount", async () => {
+    const currentUser = await AuthService.getCurrentUser();
+    if (!currentUser) {
+      throw new Error("User not authenticated");
+    }
+    const count = await AgentService.getActiveAgentsCount(currentUser.id);
+    return { count };
+  });
+
+  // Get active agents for conversation
+  createIpcHandler(
+    "agents:getActiveForConversation",
+    async (conversationId: string) => {
+      return AgentService.getActiveAgentsForConversation(conversationId);
+    },
+  );
+
+  // DEPRECATED: Hard delete (for backward compatibility)
+  createIpcHandler("agents:hardDelete", async (id: string) => {
+    const currentUser = await AuthService.getCurrentUser();
+    if (!currentUser) {
+      throw new Error("User not authenticated");
+    }
+    console.warn(
+      "agents:hardDelete is deprecated. Use agents:delete (soft delete) instead.",
+    );
+    await AgentService.delete(id);
+    return { message: "Agent permanently deleted" };
+  });
 }

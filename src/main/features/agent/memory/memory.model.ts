@@ -60,6 +60,11 @@ export const agentMemoriesTable = sqliteTable(
       .default(false),
     archivedAt: integer("archived_at", { mode: "timestamp_ms" }),
 
+    // Soft deletion fields
+    isActive: integer("is_active", { mode: "boolean" }).notNull().default(true),
+    deactivatedAt: integer("deactivated_at", { mode: "timestamp_ms" }),
+    deactivatedBy: text("deactivated_by").references(() => usersTable.id),
+
     createdAt: integer("created_at", { mode: "timestamp_ms" })
       .notNull()
       .default(sql`(strftime('%s', 'now'))`),
@@ -73,6 +78,9 @@ export const agentMemoriesTable = sqliteTable(
     userIdIdx: index("agent_memories_user_id_idx").on(table.userId),
     conversationIdIdx: index("agent_memories_conversation_id_idx").on(
       table.conversationId,
+    ),
+    deactivatedByIdx: index("agent_memories_deactivated_by_idx").on(
+      table.deactivatedBy,
     ),
 
     // Indexes for frequently queried columns
@@ -89,6 +97,13 @@ export const agentMemoriesTable = sqliteTable(
     ),
     isArchivedIdx: index("agent_memories_is_archived_idx").on(table.isArchived),
     createdAtIdx: index("agent_memories_created_at_idx").on(table.createdAt),
+
+    // Soft deletion indexes
+    isActiveIdx: index("agent_memories_is_active_idx").on(table.isActive),
+    isActiveCreatedAtIdx: index("agent_memories_is_active_created_at_idx").on(
+      table.isActive,
+      table.createdAt,
+    ),
 
     // Composite indexes for common query patterns
     agentUserIdx: index("agent_memories_agent_user_idx").on(
@@ -124,6 +139,12 @@ export const memoryRelationsTable = sqliteTable(
       .references(() => agentMemoriesTable.id, { onDelete: "cascade" }),
     relationType: text("relation_type").notNull(), // "relates_to", "caused_by", "contradicts", etc.
     strength: real("strength").notNull().default(0.5), // 0.0 to 1.0
+
+    // Soft deletion fields
+    isActive: integer("is_active", { mode: "boolean" }).notNull().default(true),
+    deactivatedAt: integer("deactivated_at", { mode: "timestamp_ms" }),
+    deactivatedBy: text("deactivated_by").references(() => usersTable.id),
+
     createdAt: integer("created_at", { mode: "timestamp_ms" })
       .notNull()
       .default(sql`(strftime('%s', 'now'))`),
@@ -140,6 +161,16 @@ export const memoryRelationsTable = sqliteTable(
       table.relationType,
     ),
     strengthIdx: index("memory_relations_strength_idx").on(table.strength),
+    deactivatedByIdx: index("memory_relations_deactivated_by_idx").on(
+      table.deactivatedBy,
+    ),
+
+    // Soft deletion indexes
+    isActiveIdx: index("memory_relations_is_active_idx").on(table.isActive),
+    isActiveCreatedAtIdx: index("memory_relations_is_active_created_at_idx").on(
+      table.isActive,
+      table.createdAt,
+    ),
 
     // Composite indexes for relationship queries
     sourceRelationIdx: index("memory_relations_source_relation_idx").on(

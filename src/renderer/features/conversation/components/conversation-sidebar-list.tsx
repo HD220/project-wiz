@@ -1,177 +1,139 @@
-import { Plus, MessageCircle } from "lucide-react";
+import { useNavigate, useSearch } from "@tanstack/react-router";
+import { MessageCircle, Archive, Plus } from "lucide-react";
 import { useState } from "react";
 
-import type { ConversationWithLastMessage } from "@/main/features/conversation/conversation.types";
-import type { UserSummary } from "@/main/features/user/user.service";
-
 import { Button } from "@/renderer/components/ui/button";
+import { Switch } from "@/renderer/components/ui/switch";
 import { useAuth } from "@/renderer/contexts/auth.context";
 import { ConversationSidebarItem } from "@/renderer/features/conversation/components/conversation-sidebar-item";
 import { CreateConversationDialog } from "@/renderer/features/conversation/components/create-conversation-dialog";
-import type { ConversationWithLastMessage as RendererConversationWithLastMessage } from "@/renderer/features/conversation/types";
-import type { AuthenticatedUser } from "@/renderer/features/user/user.types";
+import type { ConversationWithLastMessage } from "@/renderer/features/conversation/types";
 
 interface ConversationSidebarListProps {
   conversations: ConversationWithLastMessage[];
-  availableUsers: unknown[];
+  availableUsers: Array<{
+    id: string;
+    name: string | null;
+    username?: string;
+    avatar?: string | null;
+  }>;
 }
 
 function ConversationSidebarList(props: ConversationSidebarListProps) {
   const { conversations, availableUsers } = props;
   const { user: currentUser } = useAuth();
+  const navigate = useNavigate({ from: "/_authenticated/user" });
+
+  // Get current search params for showArchived toggle
+  const search = useSearch({
+    from: "/_authenticated/user",
+    select: (search: any) => ({ showArchived: search?.showArchived || false }),
+  });
 
   // SIMPLE: Local state for UI
   const [showCreateDialog, setShowCreateDialog] = useState(false);
 
-  // No loading states needed - data is preloaded by route
-  const isLoading = false;
+  // Toggle archive filter
+  function toggleShowArchived() {
+    navigate({
+      search: { showArchived: !search.showArchived },
+    });
+  }
 
-  // Helper functions
-  function getOtherParticipants(
-    _conversation: ConversationWithLastMessage,
-  ): string[] {
-    if (!currentUser) return [];
-    // Return participant IDs that are not the current user
+  // Filter conversations based on archive status
+  const activeConversations = conversations.filter((conv) => !conv.archivedAt);
+  const archivedConversations = conversations.filter((conv) => conv.archivedAt);
+
+  const displayConversations = search.showArchived
+    ? archivedConversations
+    : activeConversations;
+
+  if (!currentUser) {
     return (
-      _conversation.participants
-        ?.filter((participant) => participant.participantId !== currentUser.id)
-        .map((participant) => participant.participantId) || []
-    );
-  }
-
-  function convertToUserSummary(user: unknown): UserSummary {
-    const typedUser = user as {
-      id: string;
-      name?: string;
-      displayName?: string;
-      username?: string;
-      avatar?: string | null;
-      type?: string;
-    };
-    return {
-      id: typedUser.id,
-      name:
-        typedUser.name ||
-        typedUser.displayName ||
-        typedUser.username ||
-        "Unknown",
-      avatar: typedUser.avatar ?? null,
-      type: (typedUser.type as "human" | "agent") || "human",
-    };
-  }
-
-  function convertToConversationWithLastMessage(
-    conversation: ConversationWithLastMessage,
-  ): RendererConversationWithLastMessage {
-    return {
-      ...conversation,
-      name: conversation.name || "Untitled Conversation",
-      description: conversation.description ?? null,
-      agentId: null,
-      participants: conversation.participants || [],
-    };
-  }
-
-  function handleCreateDialog() {
-    setShowCreateDialog(true);
-  }
-
-  function handleCloseDialog() {
-    setShowCreateDialog(false);
-  }
-
-  function handleConversationCreated() {
-    setShowCreateDialog(false);
-  }
-
-  // Loading skeleton - Discord style
-  if (isLoading) {
-    return (
-      <div className="space-y-1">
-        {/* Header skeleton */}
-        <div className="flex items-center justify-between px-2 py-1">
-          <div className="h-3 w-20 bg-muted animate-pulse rounded" />
-          <div className="h-6 w-6 bg-muted animate-pulse rounded" />
-        </div>
-
-        {/* Conversation items skeleton - Discord style */}
-        {Array.from({ length: 4 }).map((_, index) => (
-          <div
-            key={index}
-            className="flex items-center gap-3 px-2 py-2 mx-1 rounded"
-          >
-            <div className="w-8 h-8 bg-muted animate-pulse rounded-full flex-shrink-0" />
-            <div className="flex-1 space-y-1">
-              <div className="h-3.5 w-20 bg-muted animate-pulse rounded" />
-              <div className="h-3 w-32 bg-muted/70 animate-pulse rounded" />
-            </div>
-            <div className="h-2.5 w-8 bg-muted/50 animate-pulse rounded" />
-          </div>
-        ))}
+      <div className="flex items-center justify-center h-full text-muted-foreground">
+        <MessageCircle className="w-8 h-8" />
       </div>
     );
   }
 
   return (
-    <div className="space-y-1">
-      {/* Header with create button */}
-      <div className="flex items-center justify-between px-2 py-1">
-        <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
-          Direct Messages
-        </h3>
-        <Button
-          variant="ghost"
-          size="sm"
-          className="h-5 w-5 p-0 hover:bg-muted"
-          onClick={handleCreateDialog}
-          title="Create conversation"
-        >
-          <Plus className="h-3 w-3" />
-        </Button>
+    <div className="flex flex-col h-full">
+      {/* Header */}
+      <div className="p-4 border-b">
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="font-semibold text-foreground">Direct Messages</h2>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="w-6 h-6"
+            onClick={() => setShowCreateDialog(true)}
+          >
+            <Plus className="w-4 h-4" />
+          </Button>
+        </div>
+
+        {/* Archive Toggle */}
+        <div className="flex items-center justify-between text-sm">
+          <div className="flex items-center gap-2">
+            <Archive className="w-4 h-4 text-muted-foreground" />
+            <span className="text-muted-foreground">Show Archived</span>
+          </div>
+          <Switch
+            checked={search.showArchived}
+            onCheckedChange={toggleShowArchived}
+            size="sm"
+          />
+        </div>
       </div>
 
-      {/* Conversations list - Discord style */}
-      <div className="space-y-0.5">
-        {conversations.map((conversation) => {
-          const otherParticipantIds = getOtherParticipants(conversation);
-          const otherParticipants = (availableUsers as AuthenticatedUser[])
-            .filter((user) => otherParticipantIds.includes(user.id))
-            .map(convertToUserSummary);
-
-          return (
-            <ConversationSidebarItem
-              key={conversation.id}
-              conversation={convertToConversationWithLastMessage(conversation)}
-              lastMessage={conversation.lastMessage || null}
-              otherParticipants={otherParticipants}
-              unreadCount={0}
-            />
-          );
-        })}
-
-        {/* Empty state when no conversations */}
-        {conversations.length === 0 && !isLoading && (
-          <div className="px-4 py-6 text-center">
-            <MessageCircle className="w-8 h-8 text-muted-foreground/50 mx-auto mb-2" />
-            <p className="text-sm text-muted-foreground mb-1 font-medium">
-              No conversations yet
-            </p>
-            <p className="text-xs text-muted-foreground/70">
-              Click the + button to start chatting
-            </p>
+      {/* Conversation List */}
+      <div className="flex-1 overflow-y-auto">
+        {displayConversations.length === 0 ? (
+          <div className="flex flex-col items-center justify-center h-full text-center px-4">
+            <MessageCircle className="w-12 h-12 text-muted-foreground/50 mb-4" />
+            <div className="space-y-2">
+              <h3 className="font-medium text-foreground">
+                {search.showArchived
+                  ? "No Archived Conversations"
+                  : "No Direct Messages"}
+              </h3>
+              <p className="text-sm text-muted-foreground max-w-48">
+                {search.showArchived
+                  ? "You haven't archived any conversations yet."
+                  : "Start a conversation with someone to begin chatting."}
+              </p>
+              {!search.showArchived && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowCreateDialog(true)}
+                  className="mt-3"
+                >
+                  <Plus className="w-4 h-4 mr-2" />
+                  New Message
+                </Button>
+              )}
+            </div>
+          </div>
+        ) : (
+          <div className="py-2">
+            {displayConversations.map((conversation) => (
+              <ConversationSidebarItem
+                key={conversation.id}
+                conversation={conversation}
+                currentUser={currentUser}
+                availableUsers={availableUsers}
+              />
+            ))}
           </div>
         )}
       </div>
 
       {/* Create Dialog */}
-      {showCreateDialog && currentUser && (
+      {showCreateDialog && (
         <CreateConversationDialog
-          availableUsers={(availableUsers as AuthenticatedUser[]).map(
-            convertToUserSummary,
-          )}
-          currentUser={currentUser}
-          onClose={handleCloseDialog}
-          onConversationCreated={handleConversationCreated}
+          availableUsers={availableUsers}
+          onClose={() => setShowCreateDialog(false)}
         />
       )}
     </div>

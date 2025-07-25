@@ -1,9 +1,10 @@
+import { Crown, Users, ChevronDown, ChevronRight } from "lucide-react";
 import { useState } from "react";
+
 import { Avatar, AvatarFallback } from "@/renderer/components/ui/avatar";
 import { Button } from "@/renderer/components/ui/button";
 import { ScrollArea } from "@/renderer/components/ui/scroll-area";
 import { Separator } from "@/renderer/components/ui/separator";
-import { Crown, Users, ChevronDown, ChevronRight } from "lucide-react";
 import { cn } from "@/renderer/lib/utils";
 
 interface Member {

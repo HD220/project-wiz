@@ -1,11 +1,11 @@
-import { Loader2 } from "lucide-react";
+import { Loader2, User } from "lucide-react";
 
 import {
   Avatar,
   AvatarFallback,
   AvatarImage,
 } from "@/renderer/components/ui/avatar";
-import { Button } from "@/renderer/components/ui/button";
+import { Badge } from "@/renderer/components/ui/badge";
 import type {
   SelectMessage,
   AuthenticatedUser,
@@ -19,6 +19,9 @@ interface MessageBubbleProps {
   showAvatar?: boolean;
   isSending?: boolean;
   className?: string;
+  // Extended props for handling inactive agents
+  authorIsInactive?: boolean;
+  originalAuthorName?: string;
 }
 
 function MessageBubble(props: MessageBubbleProps) {
@@ -28,6 +31,8 @@ function MessageBubble(props: MessageBubbleProps) {
     showAvatar = true,
     isSending = false,
     className,
+    authorIsInactive = false,
+    originalAuthorName,
   } = props;
 
   // Format timestamp - simples: horário ou dias
@@ -63,37 +68,75 @@ function MessageBubble(props: MessageBubbleProps) {
         });
 
         return formatted;
-      } else {
-        // Mais de 24h - mostrar dias
-        const days = Math.floor(diffInHours / 24);
-        return `${days} dias`;
       }
+      // Mais de 24h - mostrar dias
+      const days = Math.floor(diffInHours / 24);
+      return `${days} dias`;
     } catch (error) {
       console.error("❌ MESSAGE BUBBLE TIME ERROR:", error);
       return "agora";
     }
   };
 
-  // Get author display info
-  const authorName = author?.name || "Unknown";
-  const authorAvatar = author?.avatar;
-  const authorInitials = authorName.charAt(0).toUpperCase();
+  // Get author display info with proper fallbacks for inactive agents
+  const getAuthorInfo = () => {
+    // If we have author info, use that
+    if (author) {
+      return {
+        name: author.name,
+        avatar: author.avatar,
+        isInactive: authorIsInactive,
+      };
+    }
+
+    // If author is missing but we have original name (from when agent was active)
+    if (originalAuthorName) {
+      return {
+        name: originalAuthorName,
+        avatar: null,
+        isInactive: true,
+      };
+    }
+
+    // Complete fallback for when we have no author info at all
+    return {
+      name: "Agente Removido",
+      avatar: null,
+      isInactive: true,
+    };
+  };
+
+  const authorInfo = getAuthorInfo();
+  const authorInitials = authorInfo.name.charAt(0).toUpperCase();
 
   return (
     <div
       className={cn(
         "relative flex gap-3 group hover:bg-muted/20 transition-colors px-4",
         showAvatar ? "py-2 mt-0.5" : "py-0.5",
+        // Add visual distinction for inactive agent messages
+        authorInfo.isInactive && "opacity-75",
         className,
       )}
     >
       {/* Avatar - only show when needed */}
       {showAvatar ? (
         <div className="flex-shrink-0 w-10">
-          <Avatar className="w-10 h-10">
-            <AvatarImage src={authorAvatar || undefined} />
-            <AvatarFallback className="text-sm font-medium bg-primary/10 text-primary">
-              {authorInitials}
+          <Avatar
+            className={cn("w-10 h-10", authorInfo.isInactive && "opacity-60")}
+          >
+            <AvatarImage src={authorInfo.avatar || undefined} />
+            <AvatarFallback
+              className={cn(
+                "text-sm font-medium bg-primary/10 text-primary",
+                authorInfo.isInactive && "bg-muted/50 text-muted-foreground",
+              )}
+            >
+              {authorInfo.isInactive ? (
+                <User className="h-4 w-4" />
+              ) : (
+                authorInitials
+              )}
             </AvatarFallback>
           </Avatar>
         </div>
@@ -110,9 +153,28 @@ function MessageBubble(props: MessageBubbleProps) {
         {/* Author and timestamp header - only show for first message in group */}
         {showAvatar && (
           <div className="flex items-baseline gap-2 mb-0.5">
-            <span className="text-sm font-semibold text-foreground hover:underline cursor-pointer">
-              {authorName}
-            </span>
+            <div className="flex items-center gap-2">
+              <span
+                className={cn(
+                  "text-sm font-semibold hover:underline cursor-pointer",
+                  authorInfo.isInactive
+                    ? "text-muted-foreground"
+                    : "text-foreground",
+                )}
+              >
+                {authorInfo.name}
+              </span>
+
+              {/* Inactive badge for removed agents */}
+              {authorInfo.isInactive && (
+                <Badge
+                  variant="secondary"
+                  className="h-4 px-1.5 text-xs font-medium bg-muted/50 text-muted-foreground border-0"
+                >
+                  Inativo
+                </Badge>
+              )}
+            </div>
 
             <span className="text-xs text-muted-foreground/70">
               {getTimeAgo()}
@@ -121,7 +183,12 @@ function MessageBubble(props: MessageBubbleProps) {
         )}
 
         {/* Message text - Discord style (no bubbles) */}
-        <div className="text-sm text-foreground leading-[1.375] break-words">
+        <div
+          className={cn(
+            "text-sm leading-[1.375] break-words",
+            authorInfo.isInactive ? "text-muted-foreground" : "text-foreground",
+          )}
+        >
           <div className="flex items-start gap-2">
             <p className="whitespace-pre-wrap flex-1 min-w-0">
               {message.content}

@@ -1,13 +1,12 @@
-import { useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
+import { useState } from "react";
 
-import { ContentHeader } from "@/renderer/features/app/components/content-header";
-import { ProjectView } from "@/renderer/features/app/components/server-view";
 import {
   MemberSidebar,
   type Member,
 } from "@/renderer/components/members/member-sidebar";
-import { Users } from "lucide-react";
+import { ContentHeader } from "@/renderer/features/app/components/content-header";
+import { ProjectView } from "@/renderer/features/app/components/server-view";
 
 function ProjectPage() {
   const { project } = Route.useLoaderData();

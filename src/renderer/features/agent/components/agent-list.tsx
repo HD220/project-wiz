@@ -1,5 +1,5 @@
 import { Link, useNavigate, useSearch } from "@tanstack/react-router";
-import { Filter, Plus, Search } from "lucide-react";
+import { Filter, Plus, Search, Eye, EyeOff } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
@@ -12,6 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/renderer/components/ui/select";
+import { Switch } from "@/renderer/components/ui/switch";
 import type {
   SelectAgent,
   AgentStatus,
@@ -22,10 +23,11 @@ import { useApiMutation } from "@/renderer/hooks/use-api-mutation.hook";
 
 interface AgentListProps {
   agents: SelectAgent[];
+  showInactive?: boolean;
 }
 
 function AgentList(props: AgentListProps) {
-  const { agents } = props;
+  const { agents, showInactive = false } = props;
 
   // SIMPLE: Get URL search params and navigation
   const search = useSearch({ from: "/_authenticated/user/agents" });
@@ -44,6 +46,16 @@ function AgentList(props: AgentListProps) {
     },
   );
 
+  // Restore agent mutation
+  const restoreAgentMutation = useApiMutation(
+    (id: string) => window.api.agents.restore(id),
+    {
+      successMessage: "Agent restored successfully",
+      errorMessage: "Failed to restore agent",
+      invalidateRouter: true,
+    },
+  );
+
   // Custom mutation for status toggle
   const toggleStatusMutation = useApiMutation(
     ({ id, status }: { id: string; status: AgentStatus }) =>
@@ -55,6 +67,10 @@ function AgentList(props: AgentListProps) {
 
   function handleDelete(agent: SelectAgent) {
     setAgentToDelete(agent);
+  }
+
+  function handleRestore(agent: SelectAgent) {
+    restoreAgentMutation.mutate(agent.id);
   }
 
   function confirmDelete() {
@@ -93,21 +109,35 @@ function AgentList(props: AgentListProps) {
     });
   }
 
+  function handleToggleInactive(checked: boolean) {
+    navigate({
+      to: "/user/agents",
+      search: {
+        ...search,
+        showArchived: checked,
+      },
+    });
+  }
+
   function clearFilters() {
     navigate({
       to: "/user/agents",
-      search: {},
+      search: { showArchived: false },
     });
   }
 
   // SIMPLE: Check if we have filters for UI purposes
-  const hasFilters = search.status || search.search;
+  const hasFilters = search.status || search.search || search.showArchived;
 
-  // NO LOADING STATES NEEDED - data comes from loader
-  // NO ERROR STATES NEEDED - loader throws on error
+  // Filter agents based on active/inactive state
+  const filteredAgents = showInactive
+    ? agents
+    : agents.filter((agent) => agent.isActive);
+  const activeAgents = agents.filter((agent) => agent.isActive);
+  const inactiveAgents = agents.filter((agent) => !agent.isActive);
 
   // SIMPLE: Empty state when no agents and no filters
-  if (agents.length === 0 && !hasFilters) {
+  if (filteredAgents.length === 0 && !hasFilters) {
     return (
       <div className="space-y-6">
         {/* Header with Add Button */}
@@ -118,7 +148,7 @@ function AgentList(props: AgentListProps) {
               Create and manage your AI agents
             </p>
           </div>
-          <Link to="/user/agents/new">
+          <Link to="/user/agents/new" search={{ showArchived: false }}>
             <Button className="gap-2 shrink-0">
               <Plus className="h-4 w-4" />
               Create Agent
@@ -135,7 +165,7 @@ function AgentList(props: AgentListProps) {
           <p className="text-muted-foreground text-sm mb-4">
             Create your first AI agent to get started
           </p>
-          <Link to="/user/agents/new">
+          <Link to="/user/agents/new" search={{ showArchived: false }}>
             <Button>
               <Plus className="h-4 w-4 mr-2" />
               Create Your First Agent
@@ -180,6 +210,26 @@ function AgentList(props: AgentListProps) {
               </SelectContent>
             </Select>
 
+            {/* Show Inactive Toggle */}
+            <div className="flex items-center gap-2">
+              <Switch
+                id="show-inactive"
+                checked={!!search.showArchived}
+                onCheckedChange={handleToggleInactive}
+              />
+              <label
+                htmlFor="show-inactive"
+                className="text-sm font-medium flex items-center gap-2 cursor-pointer"
+              >
+                {search.showArchived ? (
+                  <Eye className="h-4 w-4" />
+                ) : (
+                  <EyeOff className="h-4 w-4" />
+                )}
+                Show Inactive
+              </label>
+            </div>
+
             {/* Clear Filters */}
             {hasFilters && (
               <Button variant="ghost" size="sm" onClick={clearFilters}>
@@ -189,7 +239,7 @@ function AgentList(props: AgentListProps) {
           </div>
 
           {/* New Agent Button */}
-          <Link to="/user/agents/new">
+          <Link to="/user/agents/new" search={{ showArchived: false }}>
             <Button className="gap-2 shrink-0">
               <Plus className="h-4 w-4" />
               Create Agent
@@ -198,17 +248,25 @@ function AgentList(props: AgentListProps) {
         </div>
 
         {/* Results Info */}
-        {agents.length > 0 && (
-          <div className="flex items-center gap-2">
+        {filteredAgents.length > 0 && (
+          <div className="flex items-center gap-4">
             <h3 className="font-medium">Your AI Agents</h3>
-            <span className="text-sm text-muted-foreground">
-              ({agents.length})
-            </span>
+            <div className="flex items-center gap-4 text-sm text-muted-foreground">
+              <span>({filteredAgents.length} total)</span>
+              <span>•</span>
+              <span>{activeAgents.length} active</span>
+              {inactiveAgents.length > 0 && (
+                <>
+                  <span>•</span>
+                  <span>{inactiveAgents.length} inactive</span>
+                </>
+              )}
+            </div>
           </div>
         )}
 
         {/* Empty Filter Results */}
-        {agents.length === 0 && hasFilters && (
+        {filteredAgents.length === 0 && hasFilters && (
           <div className="text-center py-12">
             <div className="mx-auto h-12 w-12 bg-muted rounded-lg flex items-center justify-center mb-4">
               <Filter className="h-6 w-6 text-muted-foreground" />
@@ -224,13 +282,14 @@ function AgentList(props: AgentListProps) {
         )}
 
         {/* Agents List */}
-        {agents.length > 0 && (
+        {filteredAgents.length > 0 && (
           <div className="space-y-2">
-            {agents.map((agent) => (
+            {filteredAgents.map((agent) => (
               <AgentListCard
                 key={agent.id}
                 agent={agent}
                 onDelete={() => handleDelete(agent)}
+                onRestore={() => handleRestore(agent)}
                 onToggleStatus={() => handleToggleStatus(agent)}
               />
             ))}

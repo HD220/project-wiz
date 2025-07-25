@@ -1,12 +1,11 @@
-import { useState } from "react";
 import { createFileRoute, Outlet } from "@tanstack/react-router";
+import { useState } from "react";
 
-import { ContentHeader } from "@/renderer/features/app/components/content-header";
 import {
   MemberSidebar,
   type Member,
 } from "@/renderer/components/members/member-sidebar";
-import { Users } from "lucide-react";
+import { ContentHeader } from "@/renderer/features/app/components/content-header";
 
 function ChannelLayout() {
   const { channelId } = Route.useParams();

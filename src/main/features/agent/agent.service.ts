@@ -1,4 +1,4 @@
-import { eq, and, desc, ilike, or } from "drizzle-orm";
+import { eq, and, desc, ilike, or, inArray } from "drizzle-orm";
 
 import { getDatabase } from "@/main/database/connection";
 import { agentsTable } from "@/main/features/agent/agent.model";
@@ -11,6 +11,8 @@ import type {
 } from "@/main/features/agent/agent.types";
 import { createAgentSchema } from "@/main/features/agent/agent.types";
 import { llmProvidersTable } from "@/main/features/agent/llm-provider/llm-provider.model";
+import { agentMemoriesTable } from "@/main/features/agent/memory/memory.model";
+import { conversationParticipantsTable } from "@/main/features/conversation/conversation.model";
 import { usersTable } from "@/main/features/user/user.model";
 
 export class AgentService {
@@ -87,14 +89,24 @@ export class AgentService {
 
   /**
    * List agents by owner ID with comprehensive filtering support
+   * Only returns active agents by default
    */
   static async listByOwnerId(
     ownerId: string,
-    filters?: { status?: AgentStatus; search?: string },
+    filters?: {
+      status?: AgentStatus;
+      search?: string;
+      includeInactive?: boolean;
+    },
   ): Promise<SelectAgent[]> {
     const db = getDatabase();
 
     const conditions = [eq(agentsTable.ownerId, ownerId)];
+
+    // Filter by active status unless explicitly including inactive
+    if (!filters?.includeInactive) {
+      conditions.push(eq(agentsTable.isActive, true));
+    }
 
     // Add status filter
     if (filters?.status) {
@@ -131,12 +143,15 @@ export class AgentService {
 
     const [record] = await db
       .update(agentsTable)
-      .set({ status })
-      .where(eq(agentsTable.id, id))
+      .set({
+        status,
+        updatedAt: new Date(),
+      })
+      .where(and(eq(agentsTable.id, id), eq(agentsTable.isActive, true)))
       .returning();
 
     if (!record) {
-      throw new Error("Agent not found or update failed");
+      throw new Error("Agent not found, inactive, or update failed");
     }
 
     return record;
@@ -144,6 +159,7 @@ export class AgentService {
 
   /**
    * Get agent with provider information
+   * Only returns active agents
    */
   static async getWithProvider(id: string): Promise<AgentWithProvider | null> {
     const db = getDatabase();
@@ -155,7 +171,13 @@ export class AgentService {
         llmProvidersTable,
         eq(agentsTable.providerId, llmProvidersTable.id),
       )
-      .where(eq(agentsTable.id, id))
+      .where(
+        and(
+          eq(agentsTable.id, id),
+          eq(agentsTable.isActive, true),
+          eq(llmProvidersTable.isActive, true),
+        ),
+      )
       .limit(1);
 
     if (!result) return null;
@@ -168,14 +190,24 @@ export class AgentService {
 
   /**
    * Find agent by ID
+   * Only returns active agents by default
    */
-  static async findById(id: string): Promise<SelectAgent | null> {
+  static async findById(
+    id: string,
+    includeInactive = false,
+  ): Promise<SelectAgent | null> {
     const db = getDatabase();
+
+    const conditions = [eq(agentsTable.id, id)];
+
+    if (!includeInactive) {
+      conditions.push(eq(agentsTable.isActive, true));
+    }
 
     const [record] = await db
       .select()
       .from(agentsTable)
-      .where(eq(agentsTable.id, id))
+      .where(and(...conditions))
       .limit(1);
 
     return record || null;
@@ -183,6 +215,7 @@ export class AgentService {
 
   /**
    * Update agent by ID
+   * Only updates active agents
    */
   static async update(
     id: string,
@@ -192,21 +225,173 @@ export class AgentService {
 
     const [record] = await db
       .update(agentsTable)
-      .set(input)
-      .where(eq(agentsTable.id, id))
+      .set({
+        ...input,
+        updatedAt: new Date(),
+      })
+      .where(and(eq(agentsTable.id, id), eq(agentsTable.isActive, true)))
       .returning();
 
     if (!record) {
-      throw new Error("Agent not found or update failed");
+      throw new Error("Agent not found, inactive, or update failed");
     }
 
     return record;
   }
 
   /**
-   * Delete agent by ID
+   * Soft delete agent by ID with cascading deletion
+   */
+  static async softDelete(id: string, deletedBy: string): Promise<void> {
+    const db = getDatabase();
+
+    await db.transaction(async (tx) => {
+      // Verify agent exists and is active
+      const [agent] = await tx
+        .select()
+        .from(agentsTable)
+        .where(and(eq(agentsTable.id, id), eq(agentsTable.isActive, true)))
+        .limit(1);
+
+      if (!agent) {
+        throw new Error("Agent not found or already inactive");
+      }
+
+      // Soft delete the agent
+      await tx
+        .update(agentsTable)
+        .set({
+          isActive: false,
+          deactivatedAt: new Date(),
+          deactivatedBy: deletedBy,
+          updatedAt: new Date(),
+        })
+        .where(eq(agentsTable.id, id));
+
+      // Cascade soft delete to agent memories
+      await tx
+        .update(agentMemoriesTable)
+        .set({
+          isActive: false,
+          deactivatedAt: new Date(),
+          deactivatedBy: deletedBy,
+          updatedAt: new Date(),
+        })
+        .where(
+          and(
+            eq(agentMemoriesTable.agentId, id),
+            eq(agentMemoriesTable.isActive, true),
+          ),
+        );
+
+      // Note: Memory relations will be handled by the MemoryService if needed
+    });
+  }
+
+  /**
+   * Restore a soft deleted agent
+   */
+  static async restore(id: string): Promise<SelectAgent> {
+    const db = getDatabase();
+
+    const [restored] = await db
+      .update(agentsTable)
+      .set({
+        isActive: true,
+        deactivatedAt: null,
+        deactivatedBy: null,
+        updatedAt: new Date(),
+      })
+      .where(and(eq(agentsTable.id, id), eq(agentsTable.isActive, false)))
+      .returning();
+
+    if (!restored) {
+      throw new Error("Agent not found or not in soft deleted state");
+    }
+
+    return restored;
+  }
+
+  /**
+   * Get active agents count for a user
+   */
+  static async getActiveAgentsCount(ownerId: string): Promise<number> {
+    const db = getDatabase();
+
+    const result = await db
+      .select({ count: agentsTable.id })
+      .from(agentsTable)
+      .where(
+        and(
+          eq(agentsTable.ownerId, ownerId),
+          eq(agentsTable.isActive, true),
+          eq(agentsTable.status, "active"),
+        ),
+      );
+
+    return result.length;
+  }
+
+  /**
+   * FIXED: Get active agents that are SPECIFIC PARTICIPANTS in a conversation
+   * This fixes the critical blocking logic issue
+   */
+  static async getActiveAgentsForConversation(
+    conversationId: string,
+  ): Promise<SelectAgent[]> {
+    const db = getDatabase();
+
+    // Get all participants of this specific conversation
+    const participants = await db
+      .select({ participantId: conversationParticipantsTable.participantId })
+      .from(conversationParticipantsTable)
+      .where(
+        and(
+          eq(conversationParticipantsTable.conversationId, conversationId),
+          eq(conversationParticipantsTable.isActive, true),
+        ),
+      );
+
+    if (participants.length === 0) {
+      return [];
+    }
+
+    const participantIds = participants.map((p) => p.participantId);
+
+    // Find agents among those participants that are active
+    const activeAgentParticipants = await db
+      .select({
+        agent: agentsTable,
+      })
+      .from(agentsTable)
+      .innerJoin(usersTable, eq(agentsTable.userId, usersTable.id))
+      .where(
+        and(
+          // Must be a participant in this conversation
+          inArray(usersTable.id, participantIds),
+          // Must be an agent user type
+          eq(usersTable.type, "agent"),
+          // User must be active
+          eq(usersTable.isActive, true),
+          // Agent must be active
+          eq(agentsTable.isActive, true),
+          // Agent must have "active" status
+          eq(agentsTable.status, "active"),
+        ),
+      )
+      .orderBy(desc(agentsTable.createdAt));
+
+    return activeAgentParticipants.map((result) => result.agent);
+  }
+
+  /**
+   * DEPRECATED: Use softDelete instead
+   * Hard delete agent by ID - kept for backward compatibility
    */
   static async delete(id: string): Promise<void> {
+    console.warn(
+      "AgentService.delete() is deprecated. Use softDelete() instead.",
+    );
     const db = getDatabase();
     await db.delete(agentsTable).where(eq(agentsTable.id, id));
   }

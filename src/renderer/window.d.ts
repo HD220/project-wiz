@@ -91,8 +91,17 @@ declare global {
         create: (
           input: CreateConversationInput,
         ) => Promise<IpcResponse<ConversationWithParticipants>>;
-        getUserConversations: () => Promise<
-          IpcResponse<ConversationWithLastMessage[]>
+        getUserConversations: (options?: {
+          includeInactive?: boolean;
+          includeArchived?: boolean;
+        }) => Promise<IpcResponse<ConversationWithLastMessage[]>>;
+        archive: (conversationId: string) => Promise<IpcResponse<void>>;
+        unarchive: (conversationId: string) => Promise<IpcResponse<void>>;
+        isBlocked: (conversationId: string) => Promise<
+          IpcResponse<{
+            isBlocked: boolean;
+            activeAgentsCount: number;
+          }>
         >;
       };
 
@@ -141,6 +150,7 @@ declare global {
           updates: Partial<CreateAgentInput>,
         ) => Promise<IpcResponse<SelectAgent>>;
         delete: (id: string) => Promise<IpcResponse<{ message: string }>>;
+        restore: (id: string) => Promise<IpcResponse<SelectAgent>>;
       };
 
       // Agent Memory API

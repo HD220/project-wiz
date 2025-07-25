@@ -22,6 +22,12 @@ export interface SelectAgent {
   modelConfig: string; // JSON string
   status: AgentStatus;
   systemPrompt: string;
+
+  // Soft deletion fields
+  isActive: boolean;
+  deactivatedAt: Date | null;
+  deactivatedBy: string | null;
+
   createdAt: Date;
   updatedAt: Date;
 }
@@ -67,6 +73,8 @@ export interface AgentListItem {
   name: string;
   role: string;
   status: AgentStatus;
+  isActive: boolean;
+  deactivatedAt: Date | null;
   avatar?: string;
   createdAt: Date;
   updatedAt: Date;
@@ -75,4 +83,11 @@ export interface AgentListItem {
 export interface AgentFilters {
   status?: AgentStatus;
   search?: string;
+  includeInactive?: boolean;
+}
+
+// Conversation blocking info
+export interface ConversationBlockingInfo {
+  isBlocked: boolean;
+  activeAgentsCount: number;
 }
