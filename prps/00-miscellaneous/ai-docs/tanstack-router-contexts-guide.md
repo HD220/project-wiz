@@ -1,6 +1,12 @@
 # TanStack Router Context: Comprehensive Research
 
+⚠️ **DEPRECATED - DO NOT USE IN PROJECT WIZ**
+
+This documentation is for reference only. **Project Wiz does NOT use router contexts or `useRouteContext`**.
+
 Based on my research of the latest TanStack Router documentation and examples, here's a comprehensive guide to router contexts covering all aspects you requested.
+
+**❌ IMPORTANT: This pattern is NOT used in Project Wiz. Use the data loading hierarchy from `/docs/developer/data-loading-patterns.md` instead.**
 
 ## 1. Router Context Creation and Usage
 

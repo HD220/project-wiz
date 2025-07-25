@@ -71,31 +71,36 @@ const useConversationMessages = (conversationId: string) => {
 };
 ```
 
-### 3. Router Context (THIRD PRIORITY)
+### 3. Local React State (THIRD PRIORITY)
 
-**MUST USE FOR:** Sharing route data with child components, eliminating prop drilling
+**MUST USE FOR:** Component-specific UI state, form state, modal states
 
 ```typescript
-// ✅ CORRECT: Share route data via context
-function ProjectLayout() {
-  const { project } = useRouteContext({ from: "/_authenticated/project/$projectId" });
+// ✅ CORRECT: Local state for UI interactions
+function AgentForm() {
+  const [isLoading, setIsLoading] = useState(false);
+  const [showAdvanced, setShowAdvanced] = useState(false);
+
+  // Form handling and validation inline
+  const handleSubmit = async (data: CreateAgentInput) => {
+    setIsLoading(true);
+    try {
+      await window.api.agents.create(data);
+      router.invalidate();
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
-    <div>
-      <ProjectHeader project={project} />
-      <Outlet />
-    </div>
+    <form onSubmit={handleSubmit}>
+      {/* Form implementation */}
+    </form>
   );
-}
-
-// ✅ CORRECT: Access route context in child components
-function ProjectHeader() {
-  const { project } = useRouteContext({ from: "/_authenticated/project/$projectId" });
-  return <h1>{project.name}</h1>;
 }
 ```
 
-### 4. Custom Hooks (LAST RESORT)
+### 4. Custom Hooks (FOURTH PRIORITY)
 
 **ONLY USE WHEN:** Above patterns cannot handle the use case, focus on single responsibility
 
@@ -225,10 +230,14 @@ loader: async ({ deps }) => {
 
 ## State Priority Order
 
-1. **TanStack Router Context** - Share route data (no prop drilling)
-2. **URL Parameters** - Filters, search, pagination
-3. **Local React State** - Simple UI state (modals, forms)
+1. **TanStack Router beforeLoad/loader** - Initial page data loading
+2. **URL Parameters** - Filters, search, pagination (ONLY for actual search/filters)
+3. **Local React State** - Simple UI state (modals, forms, toggles)
 4. **TanStack Query** - Server state, mutations, caching
 5. **Zustand** - **EXCEPTIONAL** global state only
 
-**AVOID:** Creating stores for simple UI state that could be local React state or URL parameters.
+**CRITICAL NOTES:**
+
+- **NEVER use `useRouteContext`** - This is NOT part of our patterns
+- **`search` parameter** should ONLY be used for actual URL-based search/filtering, NOT for every Link
+- **AVOID:** Creating stores for simple UI state that could be local React state or URL parameters

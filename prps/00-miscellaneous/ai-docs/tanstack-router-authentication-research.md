@@ -1,5 +1,9 @@
 # TanStack Router Authentication & Masked Routes - Comprehensive Research
 
+⚠️ **PARTIALLY DEPRECATED - SOME PATTERNS NOT USED IN PROJECT WIZ**
+
+**❌ IMPORTANT: Project Wiz does NOT use `useRouteContext` or router contexts. We use beforeLoad/loader for authentication checks only.**
+
 This document provides comprehensive research on TanStack Router authentication patterns and masked routes based on the latest 2024/2025 documentation and community best practices.
 
 ## Table of Contents

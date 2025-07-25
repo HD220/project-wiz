@@ -21,16 +21,18 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 1. **TanStack Router beforeLoad/loader** (HIGHEST PRIORITY)
 2. **TanStack Query** (mutations/reactive data)
-3. **Router Context** (share route data)
+3. **Local React State** (simple UI state)
 4. **Custom Hooks** (LAST RESORT)
 
 **PROHIBITED:**
 
+- ❌ **NEVER** `useRouteContext` - NOT part of our patterns
 - ❌ **NEVER** API wrapper classes
 - ❌ **NEVER** `useEffect` for data loading
 - ❌ **NEVER** `localStorage` (desktop app - use main process)
 - ❌ **NEVER** `window.api` in component bodies
 - ❌ **NEVER** Zustand for simple UI state
+- ❌ **NEVER** `search` parameter unless actual URL search/filters
 
 ### **Database Patterns** - @docs/developer/database-patterns.md
 
@@ -146,17 +148,22 @@ npm run compile             # Compile translations
 
 ### **State Management Priority**
 
-1. **TanStack Router Context** (share route data)
-2. **URL Parameters** (filters, search - shareable)
+1. **TanStack Router beforeLoad/loader** (initial page data)
+2. **URL Parameters** (ONLY for actual filters/search - shareable)
 3. **Local React State** (simple UI)
 4. **TanStack Query** (server state, mutations)
 5. **Zustand** (EXCEPTIONAL global state ONLY)
+
+**CRITICAL:**
+
+- ❌ **NEVER use `useRouteContext`** - NOT part of our patterns
+- ❌ **NEVER use `search` parameter** unless actual URL-based search/filters
 
 ### **Session Management**
 
 - ✅ **Database sessions** (main process)
 - ❌ **NEVER localStorage** (desktop app security)
-- ✅ **Router Context** for auth state
+- ✅ **beforeLoad/loader** for auth checks
 - ✅ **Foreign key constraints** for data integrity
 
 ## **TESTING & QUALITY**

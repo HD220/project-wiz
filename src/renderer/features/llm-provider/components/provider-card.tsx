@@ -131,6 +131,7 @@ function ProviderCard(props: ProviderCardProps) {
                 <Link
                   to="/user/settings/llm-providers/$providerId/edit"
                   params={{ providerId: provider.id }}
+                  search={{}}
                 >
                   <DropdownMenuItem>
                     <Edit2 className="mr-2 h-4 w-4" />
