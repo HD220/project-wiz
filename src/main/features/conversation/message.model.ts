@@ -51,8 +51,7 @@ export const llmMessagesTable = sqliteTable(
     role: text("role")
       .$type<"user" | "assistant" | "system" | "tool">()
       .notNull(),
-    toolCalls: text("tool_calls"), // JSON string
-    metadata: text("metadata"), // JSON string
+    content: text("content").notNull(),
     createdAt: integer("created_at", { mode: "timestamp_ms" })
       .notNull()
       .default(sql`CURRENT_TIMESTAMP`),

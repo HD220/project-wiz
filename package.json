@@ -134,7 +134,6 @@
     "clsx": "^2.1.1",
     "cmdk": "^1.1.1",
     "cors": "^2.8.5",
-    "date-fns": "^3.6.0",
     "dompurify": "^3.2.5",
     "drizzle-orm": "^0.44.2",
     "electron-squirrel-startup": "^1.0.1",

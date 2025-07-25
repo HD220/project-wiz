@@ -1,5 +1,3 @@
-import { formatDistance } from "date-fns";
-import { ptBR } from "date-fns/locale";
 import { Users, User } from "lucide-react";
 
 import {
@@ -83,11 +81,42 @@ function ConversationItem(props: ConversationItemProps) {
     if (!lastMessage) return "";
 
     try {
-      return formatDistance(new Date(lastMessage.createdAt), new Date(), {
-        addSuffix: true,
-        locale: ptBR,
+      console.log("🔍 CONVERSATION ITEM DEBUG:", {
+        "Raw createdAt": lastMessage.createdAt,
+        "Type of createdAt": typeof lastMessage.createdAt,
+        "Date constructor": new Date(lastMessage.createdAt),
+        "Date toString": new Date(lastMessage.createdAt).toString(),
+        "Date getTime": new Date(lastMessage.createdAt).getTime(),
+        Now: new Date().toString(),
+        "Timezone offset (minutes)": new Date().getTimezoneOffset(),
       });
-    } catch {
+
+      const messageDate = new Date(lastMessage.createdAt);
+      const now = new Date();
+      const diffInHours =
+        (now.getTime() - messageDate.getTime()) / (1000 * 60 * 60);
+
+      if (diffInHours < 24) {
+        // Menos de 24h - mostrar horário
+        const formatted = new Intl.DateTimeFormat("pt-BR", {
+          hour: "2-digit",
+          minute: "2-digit",
+        }).format(messageDate);
+
+        console.log("🕐 CONVERSATION ITEM TIME:", {
+          "Formatted time": formatted,
+          "Message date": messageDate.toString(),
+          "Hours diff": diffInHours,
+        });
+
+        return formatted;
+      } else {
+        // Mais de 24h - mostrar dias
+        const days = Math.floor(diffInHours / 24);
+        return `${days}d`;
+      }
+    } catch (error) {
+      console.error("❌ CONVERSATION ITEM TIME ERROR:", error);
       return "";
     }
   };

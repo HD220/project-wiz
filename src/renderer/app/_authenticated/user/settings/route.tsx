@@ -1,34 +1,11 @@
 import { createFileRoute, Outlet, useLocation } from "@tanstack/react-router";
-import { Bot, User, Palette, X, Search } from "lucide-react";
+import { Bot, Palette, X, Search } from "lucide-react";
 
 import { Button } from "@/renderer/components/ui/button";
 import { Input } from "@/renderer/components/ui/input";
 import { ScrollArea } from "@/renderer/components/ui/scroll-area";
 
 const settingsCategories = [
-  {
-    label: "CONFIGURAÇÕES DE USUÁRIO",
-    items: [
-      {
-        id: "account",
-        label: "Minha conta",
-        icon: User,
-        path: "/user/settings",
-      },
-      {
-        id: "profile",
-        label: "Perfil",
-        icon: User,
-        path: "/user/settings/profile",
-      },
-      {
-        id: "privacy",
-        label: "Privacidade & Segurança",
-        icon: User,
-        path: "/user/settings/privacy",
-      },
-    ],
-  },
   {
     label: "CONFIGURAÇÕES DE APP",
     items: [

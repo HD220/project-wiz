@@ -1,5 +1,3 @@
-import { formatDistanceToNow } from "date-fns";
-import { ptBR } from "date-fns/locale";
 import { MessageCircle } from "lucide-react";
 
 import type { UserSummary } from "@/main/features/user/user.service";
@@ -79,18 +77,47 @@ function ConversationSidebarItem(props: ConversationSidebarItemProps) {
     return lastMessage.content;
   };
 
-  // Format timestamp
+  // Format timestamp - simples: horário pt-BR ou dias
   const getTimeAgo = () => {
     if (!lastMessage) return "";
 
     try {
-      return formatDistanceToNow(new Date(lastMessage.createdAt), {
-        addSuffix: false,
-        locale: ptBR,
-      })
-        .replace("cerca de ", "")
-        .replace("aproximadamente ", "");
-    } catch {
+      console.log("🔍 SIDEBAR DEBUG:", {
+        "Raw createdAt": lastMessage.createdAt,
+        "Type of createdAt": typeof lastMessage.createdAt,
+        "Date constructor": new Date(lastMessage.createdAt),
+        "Date toString": new Date(lastMessage.createdAt).toString(),
+        "Date getTime": new Date(lastMessage.createdAt).getTime(),
+        Now: new Date().toString(),
+        "Timezone offset (minutes)": new Date().getTimezoneOffset(),
+      });
+
+      const messageDate = new Date(lastMessage.createdAt);
+      const now = new Date();
+      const diffInHours =
+        (now.getTime() - messageDate.getTime()) / (1000 * 60 * 60);
+
+      if (diffInHours < 24) {
+        // Menos de 24h - mostrar horário
+        const formatted = new Intl.DateTimeFormat("pt-BR", {
+          hour: "2-digit",
+          minute: "2-digit",
+        }).format(messageDate);
+
+        console.log("🕐 SIDEBAR TIME:", {
+          "Formatted time": formatted,
+          "Message date": messageDate.toString(),
+          "Hours diff": diffInHours,
+        });
+
+        return formatted;
+      } else {
+        // Mais de 24h - mostrar dias
+        const days = Math.floor(diffInHours / 24);
+        return `${days}d`;
+      }
+    } catch (error) {
+      console.error("❌ SIDEBAR TIME ERROR:", error);
       return "";
     }
   };

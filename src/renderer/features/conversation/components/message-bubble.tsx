@@ -1,6 +1,4 @@
-import { formatDistanceToNow } from "date-fns";
-import { ptBR } from "date-fns/locale";
-import { Loader2, MoreHorizontal, Reply, Smile, Copy } from "lucide-react";
+import { Loader2 } from "lucide-react";
 
 import {
   Avatar,
@@ -32,27 +30,46 @@ function MessageBubble(props: MessageBubbleProps) {
     className,
   } = props;
 
-  // Format timestamp - Discord style (short format)
+  // Format timestamp - simples: horário ou dias
   const getTimeAgo = () => {
     try {
-      const now = new Date();
+      console.log("🔍 MESSAGE BUBBLE DEBUG:", {
+        "Raw createdAt": message.createdAt,
+        "Type of createdAt": typeof message.createdAt,
+        "Date constructor": new Date(message.createdAt),
+        "Date toString": new Date(message.createdAt).toString(),
+        "Date getTime": new Date(message.createdAt).getTime(),
+        Now: new Date().toString(),
+        "Timezone offset (minutes)": new Date().getTimezoneOffset(),
+      });
+
       const messageDate = new Date(message.createdAt);
+      const now = new Date();
+
       const diffInHours =
-        Math.abs(now.getTime() - messageDate.getTime()) / (1000 * 60 * 60);
+        (now.getTime() - messageDate.getTime()) / (1000 * 60 * 60);
 
       if (diffInHours < 24) {
-        // Same day - show time
-        return messageDate.toLocaleTimeString("pt-BR", {
+        // Menos de 24h - mostrar horário
+        const formatted = new Intl.DateTimeFormat(undefined, {
           hour: "2-digit",
           minute: "2-digit",
+        }).format(messageDate);
+
+        console.log("🕐 MESSAGE BUBBLE TIME:", {
+          "Formatted time": formatted,
+          "Message date": messageDate.toString(),
+          "Hours diff": diffInHours,
         });
+
+        return formatted;
+      } else {
+        // Mais de 24h - mostrar dias
+        const days = Math.floor(diffInHours / 24);
+        return `${days} dias`;
       }
-      // Different day - show relative time
-      return formatDistanceToNow(messageDate, {
-        addSuffix: false,
-        locale: ptBR,
-      });
-    } catch {
+    } catch (error) {
+      console.error("❌ MESSAGE BUBBLE TIME ERROR:", error);
       return "agora";
     }
   };
@@ -116,36 +133,6 @@ function MessageBubble(props: MessageBubbleProps) {
               </div>
             )}
           </div>
-        </div>
-      </div>
-
-      {/* Message Actions - Discord style (appear on hover) */}
-      <div className="absolute -top-2 right-4 opacity-0 group-hover:opacity-100 transition-all duration-200 transform translate-y-1 group-hover:translate-y-0">
-        <div className="flex items-center bg-background border rounded-lg shadow-lg px-1">
-          <Button
-            variant="ghost"
-            size="sm"
-            className="h-7 w-7 p-0 hover:bg-accent/80"
-            title="Reagir"
-          >
-            <Smile className="w-4 h-4" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            className="h-7 w-7 p-0 hover:bg-accent/80"
-            title="Responder"
-          >
-            <Reply className="w-4 h-4" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            className="h-7 w-7 p-0 hover:bg-accent/80"
-            title="Mais opções"
-          >
-            <MoreHorizontal className="w-4 h-4" />
-          </Button>
         </div>
       </div>
     </div>
