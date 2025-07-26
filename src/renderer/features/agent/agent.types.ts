@@ -85,9 +85,3 @@ export interface AgentFilters {
   search?: string;
   includeInactive?: boolean;
 }
-
-// Conversation blocking info
-export interface ConversationBlockingInfo {
-  isBlocked: boolean;
-  activeAgentsCount: number;
-}

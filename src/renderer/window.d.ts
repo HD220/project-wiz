@@ -97,12 +97,6 @@ declare global {
         }) => Promise<IpcResponse<ConversationWithLastMessage[]>>;
         archive: (conversationId: string) => Promise<IpcResponse<void>>;
         unarchive: (conversationId: string) => Promise<IpcResponse<void>>;
-        isBlocked: (conversationId: string) => Promise<
-          IpcResponse<{
-            isBlocked: boolean;
-            activeAgentsCount: number;
-          }>
-        >;
       };
 
       // Messages API

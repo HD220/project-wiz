@@ -1,14 +1,7 @@
 import { useRouter } from "@tanstack/react-router";
-import { Archive, ArchiveRestore, User } from "lucide-react";
+import { Archive, ArchiveRestore } from "lucide-react";
 
-import { Badge } from "@/renderer/components/ui/badge";
 import { Button } from "@/renderer/components/ui/button";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/renderer/components/ui/tooltip";
 import { useApiMutation } from "@/renderer/hooks/use-api-mutation.hook";
 import { cn } from "@/renderer/lib/utils";
 
@@ -16,18 +9,11 @@ interface ArchivedConversationBannerProps {
   conversationId: string;
   conversationName?: string;
   archivedAt: Date;
-  archivedBy: string | null;
   className?: string;
 }
 
 function ArchivedConversationBanner(props: ArchivedConversationBannerProps) {
-  const {
-    conversationId,
-    conversationName,
-    archivedAt,
-    archivedBy,
-    className,
-  } = props;
+  const { conversationId, conversationName, archivedAt, className } = props;
   const router = useRouter();
 
   // Unarchive mutation with automatic error handling
@@ -80,36 +66,12 @@ function ArchivedConversationBanner(props: ArchivedConversationBannerProps) {
           </div>
 
           <div className="min-w-0 flex-1">
-            <div className="flex items-center gap-2 mb-1">
-              <p className="text-sm font-medium text-orange-900 dark:text-orange-100">
-                Esta conversa foi arquivada
-              </p>
-              <Badge
-                variant="secondary"
-                className="h-5 px-2 text-xs bg-orange-100 text-orange-800 border-orange-200 dark:bg-orange-900/30 dark:text-orange-200 dark:border-orange-800"
-              >
-                Arquivada
-              </Badge>
-            </div>
+            <p className="text-sm font-medium text-orange-900 dark:text-orange-100 mb-1">
+              Esta conversa foi arquivada
+            </p>
 
-            <div className="flex items-center gap-4 text-xs text-orange-700 dark:text-orange-300">
+            <div className="text-xs text-orange-700 dark:text-orange-300">
               <span>em {formatArchivedDate()}</span>
-
-              {archivedBy && (
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <div className="flex items-center gap-1 cursor-help">
-                        <User className="h-3 w-3" />
-                        <span>por usuário</span>
-                      </div>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>ID do usuário: {archivedBy}</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-              )}
             </div>
           </div>
         </div>

@@ -26,7 +26,7 @@ export interface SendLlmMessageInput {
 
 export class MessageService {
   /**
-   * Send a message 
+   * Send a message
    */
   static async send(input: SendMessageInput): Promise<SelectMessage> {
     const db = getDatabase();
@@ -308,5 +308,4 @@ export class MessageService {
 
     return result.length;
   }
-
 }

@@ -67,7 +67,11 @@ export const CreateAgentSchema = z.object({
     })
     .default("inactive")
     .optional(),
-  avatar: z.string().url("Avatar must be a valid URL").optional(),
+  avatar: z
+    .string()
+    .url("Avatar must be a valid URL")
+    .optional()
+    .or(z.literal("")),
 });
 
 /**
@@ -126,7 +130,11 @@ export const UpdateAgentSchema = z
         }),
       })
       .optional(),
-    avatar: z.string().url("Avatar must be a valid URL").optional(),
+    avatar: z
+      .string()
+      .url("Avatar must be a valid URL")
+      .optional()
+      .or(z.literal("")),
   })
   .partial();
 

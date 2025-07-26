@@ -90,8 +90,6 @@ contextBridge.exposeInMainWorld("api", {
       ipcRenderer.invoke("conversations:archive", conversationId),
     unarchive: (conversationId: string): Promise<IpcResponse> =>
       ipcRenderer.invoke("conversations:unarchive", conversationId),
-    isBlocked: (conversationId: string): Promise<IpcResponse> =>
-      ipcRenderer.invoke("conversations:isBlocked", conversationId),
     regenerateTitles: (): Promise<IpcResponse> =>
       ipcRenderer.invoke("conversations:regenerateTitles"),
   },

@@ -1,6 +1,6 @@
-import { useNavigate, useSearch, useRouter } from "@tanstack/react-router";
+import { useNavigate, useRouter, useLocation } from "@tanstack/react-router";
 import { MessageCircle, Archive, Plus } from "lucide-react";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 
 import type { UserSummary } from "@/main/features/user/user.service";
 
@@ -20,32 +20,55 @@ function ConversationSidebarList(props: ConversationSidebarListProps) {
   const { conversations, availableUsers } = props;
   const { user: currentUser } = useAuth();
   const router = useRouter();
-
-  // Get showArchived state from URL parameter instead of local state
-  const search = useSearch({ from: "/_authenticated/user" });
-  const showArchived = search.showArchived || false;
-
-  // Navigate to update URL parameter when toggling
   const navigate = useNavigate();
+  const location = useLocation();
 
-  // Local state for UI only
+  // Use local state for switch - no URL manipulation
+  const [showArchived, setShowArchived] = useState(false);
   const [showCreateDialog, setShowCreateDialog] = useState(false);
 
-  // Toggle archive filter by updating URL parameter
-  function toggleShowArchived() {
-    navigate({
-      to: "/user",
-      search: { showArchived: !showArchived },
-    });
-  }
+  // Handle intelligent navigation when turning off archived mode in archived conversation
+  const handleToggleShowArchived = (checked: boolean) => {
+    setShowArchived(checked);
+
+    // If turning off archived mode and currently in an archived conversation
+    if (!checked && location.pathname.includes("/dm/")) {
+      const currentConversationId = location.pathname.split("/dm/")[1];
+      const currentConversation = conversations.find(
+        (conv) => conv.id === currentConversationId,
+      );
+
+      if (currentConversation?.archivedAt) {
+        // Find first active conversation or go to dashboard
+        const firstActiveConversation = conversations.find(
+          (conv) => !conv.archivedAt,
+        );
+
+        if (firstActiveConversation) {
+          navigate({
+            to: "/user/dm/$conversationId",
+            params: { conversationId: firstActiveConversation.id },
+          });
+        } else {
+          navigate({ to: "/user" });
+        }
+      }
+    }
+  };
 
   // Filter conversations based on archive status
-  const activeConversations = conversations.filter((conv) => !conv.archivedAt);
-  const archivedConversations = conversations.filter((conv) => conv.archivedAt);
+  const displayConversations = useMemo(() => {
+    const activeConversations = conversations.filter(
+      (conv) => !conv.archivedAt,
+    );
+    const archivedConversations = conversations.filter(
+      (conv) => conv.archivedAt,
+    );
 
-  const displayConversations = showArchived
-    ? archivedConversations
-    : activeConversations;
+    return showArchived
+      ? [...activeConversations, ...archivedConversations] // Show all when archived mode is on
+      : activeConversations; // Show only active when archived mode is off
+  }, [conversations, showArchived]);
 
   if (!currentUser) {
     return (
@@ -77,7 +100,11 @@ function ConversationSidebarList(props: ConversationSidebarListProps) {
             <Archive className="w-4 h-4 text-muted-foreground" />
             <span className="text-muted-foreground">Show Archived</span>
           </div>
-          <Switch checked={showArchived} onCheckedChange={toggleShowArchived} />
+          <Switch
+            checked={showArchived}
+            onCheckedChange={handleToggleShowArchived}
+            disabled={false} // Always enabled
+          />
         </div>
       </div>
 
@@ -116,6 +143,7 @@ function ConversationSidebarList(props: ConversationSidebarListProps) {
               <ConversationSidebarItem
                 key={conversation.id}
                 conversation={conversation}
+                availableUsers={availableUsers}
               />
             ))}
           </div>

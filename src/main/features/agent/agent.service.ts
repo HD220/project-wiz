@@ -331,7 +331,6 @@ export class AgentService {
     return result.length;
   }
 
-
   /**
    * Get active agents for a specific conversation
    * Returns agents that are available for conversation participation
@@ -347,10 +346,7 @@ export class AgentService {
       .select()
       .from(agentsTable)
       .where(
-        and(
-          eq(agentsTable.isActive, true),
-          eq(agentsTable.status, "active"),
-        ),
+        and(eq(agentsTable.isActive, true), eq(agentsTable.status, "active")),
       )
       .orderBy(desc(agentsTable.createdAt));
   }

@@ -54,7 +54,7 @@ function AgentForm(props: AgentFormProps) {
       modelConfig:
         initialData?.modelConfig || JSON.stringify(defaultModelConfig),
       status: "inactive", // Always default to inactive
-      avatar: initialData ? "" : "", // Avatar from form
+      avatar: initialData?.avatar || "", // Optional avatar URL
     },
   });
 

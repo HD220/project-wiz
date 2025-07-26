@@ -1,6 +1,9 @@
+import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
-import { MoreHorizontal, Archive, Trash2, MessageSquare } from "lucide-react";
+import { MoreHorizontal, Archive } from "lucide-react";
+
+import type { UserSummary } from "@/main/features/user/user.service";
 
 import { Button } from "@/renderer/components/ui/button";
 import {
@@ -10,18 +13,25 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/renderer/components/ui/dropdown-menu";
+import { useAuth } from "@/renderer/contexts/auth.context";
 import { useApiMutation } from "@/renderer/hooks/use-api-mutation.hook";
+import { ArchiveConversationDialog } from "./archive-conversation-dialog";
+import { ConversationAvatar } from "./conversation-avatar";
 
 import type { ConversationWithLastMessage } from "../types";
 
 interface ConversationSidebarItemProps {
   conversation: ConversationWithLastMessage;
+  availableUsers?: UserSummary[];
 }
 
 function ConversationSidebarItem({
   conversation,
+  availableUsers = [],
 }: ConversationSidebarItemProps) {
   const queryClient = useQueryClient();
+  const [showArchiveDialog, setShowArchiveDialog] = useState(false);
+  const { user } = useAuth();
 
   // Archive conversation mutation
   const archiveMutation = useApiMutation(
@@ -74,21 +84,15 @@ function ConversationSidebarItem({
   };
 
   const handleArchive = () => {
-    if (
-      window.confirm(
-        "Are you sure you want to archive this conversation? It will be moved to archived conversations.",
-      )
-    ) {
-      archiveMutation.mutate(conversation.id);
-    }
+    setShowArchiveDialog(true);
+  };
+
+  const handleConfirmArchive = () => {
+    archiveMutation.mutate(conversation.id);
   };
 
   const handleUnarchive = () => {
     // TODO: Implement unarchive functionality
-  };
-
-  const handleDelete = () => {
-    // TODO: Implement delete functionality
   };
 
   return (
@@ -102,9 +106,12 @@ function ConversationSidebarItem({
         }}
       >
         <div className="flex-shrink-0">
-          <div className="w-8 h-8 bg-muted rounded-full flex items-center justify-center">
-            <MessageSquare className="w-4 h-4" />
-          </div>
+          <ConversationAvatar
+            participants={conversation.participants}
+            availableUsers={availableUsers}
+            currentUserId={user?.id}
+            size="md"
+          />
         </div>
 
         <div className="flex-1 min-w-0">
@@ -143,18 +150,19 @@ function ConversationSidebarItem({
                   Unarchive
                 </DropdownMenuItem>
               )}
-              <DropdownMenuSeparator />
-              <DropdownMenuItem
-                onClick={handleDelete}
-                className="text-destructive"
-              >
-                <Trash2 className="h-4 w-4 mr-2" />
-                Delete
-              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
       </Link>
+
+      {/* Archive confirmation dialog */}
+      <ArchiveConversationDialog
+        open={showArchiveDialog}
+        onClose={() => setShowArchiveDialog(false)}
+        onConfirm={handleConfirmArchive}
+        conversationName={getConversationName()}
+        isLoading={archiveMutation.isPending}
+      />
     </div>
   );
 }

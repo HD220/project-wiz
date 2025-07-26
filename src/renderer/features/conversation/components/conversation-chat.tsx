@@ -1,11 +1,8 @@
-import { useQuery } from "@tanstack/react-query";
 import { useEffect, useRef, useMemo } from "react";
 
 import { ScrollArea } from "@/renderer/components/ui/scroll-area";
 import { Separator } from "@/renderer/components/ui/separator";
-import type { ConversationBlockingInfo } from "@/renderer/features/agent/agent.types";
 import { ArchivedConversationBanner } from "@/renderer/features/conversation/components/archived-conversation-banner";
-import { BlockedConversation } from "@/renderer/features/conversation/components/blocked-conversation";
 import { MessageBubble } from "@/renderer/features/conversation/components/message-bubble";
 import { MessageInput } from "@/renderer/features/conversation/components/message-input";
 import type {
@@ -15,7 +12,6 @@ import type {
 } from "@/renderer/features/conversation/types";
 import type { AuthenticatedUser } from "@/renderer/features/user/user.types";
 import { useApiMutation } from "@/renderer/hooks/use-api-mutation.hook";
-import { loadApiData } from "@/renderer/lib/route-loader";
 
 // Message type for chat component
 type Message = SelectMessage & {
@@ -34,7 +30,6 @@ interface ConversationChatProps {
   conversation: SelectConversation & {
     messages: Message[];
     archivedAt?: Date | null;
-    archivedBy?: string | null;
   };
   availableUsers: unknown[];
   currentUser: AuthenticatedUser | null;
@@ -44,18 +39,6 @@ interface ConversationChatProps {
 function ConversationChat(props: ConversationChatProps) {
   const { conversation, availableUsers, currentUser, className } = props;
   const scrollAreaRef = useRef<HTMLDivElement>(null);
-
-  // Check if conversation is blocked
-  const { data: blockingInfo, isLoading: blockingInfoLoading } = useQuery({
-    queryKey: ["conversation", conversation.id, "blocking"],
-    queryFn: async (): Promise<ConversationBlockingInfo> => {
-      return await loadApiData(
-        () => window.api.conversations.isBlocked(conversation.id),
-        "Failed to check conversation status",
-      );
-    },
-    refetchInterval: 30000, // Refresh every 30 seconds
-  });
 
   // Check if conversation is archived
   const isArchived = !!conversation.archivedAt;
@@ -146,18 +129,6 @@ function ConversationChat(props: ConversationChatProps) {
     );
   }
 
-  // Show blocked conversation screen if conversation is blocked
-  if (blockingInfo?.isBlocked && !blockingInfoLoading) {
-    return (
-      <div className={`flex flex-col h-full bg-background ${className || ""}`}>
-        <BlockedConversation
-          blockingInfo={blockingInfo}
-          conversationName={conversation.name || undefined}
-        />
-      </div>
-    );
-  }
-
   return (
     <div className={`flex flex-col h-full bg-background ${className || ""}`}>
       {/* Archived conversation banner */}
@@ -166,7 +137,6 @@ function ConversationChat(props: ConversationChatProps) {
           conversationId={conversation.id}
           conversationName={conversation.name || undefined}
           archivedAt={conversation.archivedAt}
-          archivedBy={conversation.archivedBy}
         />
       )}
 
@@ -216,6 +186,12 @@ function ConversationChat(props: ConversationChatProps) {
               // Determine if author is inactive (missing from available users)
               const authorIsInactive = !author && !isCurrentUser;
 
+              // Check if this is the last group from current user and we're sending a message
+              const isLastCurrentUserGroup =
+                sendMessageMutation.isPending &&
+                isCurrentUser &&
+                groupIndex === messageGroups.length - 1;
+
               return (
                 <div key={groupIndex}>
                   {/* First message in group - shows avatar and name */}
@@ -227,29 +203,33 @@ function ConversationChat(props: ConversationChatProps) {
                     authorIsInactive={authorIsInactive}
                     originalAuthorName={authorIsInactive ? "Agente" : undefined}
                     isSending={
-                      sendMessageMutation.isPending &&
-                      groupIndex === messageGroups.length - 1
+                      isLastCurrentUserGroup && group.messages.length === 1
                     }
                   />
 
                   {/* Subsequent messages in same group - no avatar */}
-                  {group.messages.slice(1).map((message) => (
-                    <MessageBubble
-                      key={message.id}
-                      message={message}
-                      author={author}
-                      isCurrentUser={isCurrentUser}
-                      showAvatar={false}
-                      authorIsInactive={authorIsInactive}
-                      originalAuthorName={
-                        authorIsInactive ? "Agente" : undefined
-                      }
-                      isSending={
-                        sendMessageMutation.isPending &&
-                        message === group.messages[group.messages.length - 1]
-                      }
-                    />
-                  ))}
+                  {group.messages.slice(1).map((message, messageIndex) => {
+                    // Only show sending indicator on the very last message in the group
+                    const isLastMessageInGroup =
+                      messageIndex === group.messages.length - 2; // -2 because we sliced the first one
+
+                    return (
+                      <MessageBubble
+                        key={message.id}
+                        message={message}
+                        author={author}
+                        isCurrentUser={isCurrentUser}
+                        showAvatar={false}
+                        authorIsInactive={authorIsInactive}
+                        originalAuthorName={
+                          authorIsInactive ? "Agente" : undefined
+                        }
+                        isSending={
+                          isLastCurrentUserGroup && isLastMessageInGroup
+                        }
+                      />
+                    );
+                  })}
                 </div>
               );
             })}
@@ -272,11 +252,11 @@ function ConversationChat(props: ConversationChatProps) {
         </ScrollArea>
       </div>
 
-      {/* Message Input - hide if conversation is blocked or archived */}
-      {!blockingInfo?.isBlocked && !blockingInfoLoading && !isArchived && (
+      {/* Message Input - hide if conversation is archived */}
+      {!isArchived && (
         <MessageInput
           onSendMessage={handleSendMessage}
-          disabled={sendMessageMutation.isPending || blockingInfoLoading}
+          disabled={sendMessageMutation.isPending}
           isSending={sendMessageMutation.isPending}
           placeholder={`Conversar em ${conversation.name || "conversa"}...`}
         />

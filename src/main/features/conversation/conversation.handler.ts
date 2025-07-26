@@ -14,7 +14,11 @@ export function setupConversationsHandlers(): void {
       if (!currentUser) {
         throw new Error("User not authenticated");
       }
-      return ConversationService.create(input);
+      // Pass currentUserId for title generation (exclude current user from title)
+      return ConversationService.create({
+        ...input,
+        currentUserId: currentUser.id,
+      });
     },
   );
 
@@ -56,7 +60,6 @@ export function setupConversationsHandlers(): void {
       return ConversationService.unarchive(conversationId);
     },
   );
-
 
   // Send message (with session-based auth)
   createIpcHandler("messages:send", async (input: SendMessageInput) => {

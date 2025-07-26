@@ -56,7 +56,11 @@ export const createAgentSchema = z.object({
     { message: "Invalid model configuration" },
   ),
   status: z.enum(["active", "inactive", "busy"]).default("inactive"),
-  avatar: z.string().url("Invalid avatar URL").optional().or(z.literal("")),
+  avatar: z
+    .string()
+    .url("Avatar must be a valid URL")
+    .optional()
+    .or(z.literal("")),
 });
 
 // Response types

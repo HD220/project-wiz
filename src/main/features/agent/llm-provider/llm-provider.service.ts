@@ -162,6 +162,26 @@ export class LlmProviderService {
       updates.apiKey = this.encryptApiKey(updates.apiKey);
     }
 
+    // If setting this provider as default, unset all other providers as default first
+    if (updates.isDefault === true) {
+      // Get the provider to find the userId
+      const [currentProvider] = await db
+        .select({ userId: llmProvidersTable.userId })
+        .from(llmProvidersTable)
+        .where(eq(llmProvidersTable.id, id))
+        .limit(1);
+
+      if (!currentProvider) {
+        throw new Error("Provider not found");
+      }
+
+      // Unset all other providers as default for this user
+      await db
+        .update(llmProvidersTable)
+        .set({ isDefault: false })
+        .where(eq(llmProvidersTable.userId, currentProvider.userId));
+    }
+
     const [provider] = await db
       .update(llmProvidersTable)
       .set({

@@ -25,10 +25,10 @@ export const messagesTable = sqliteTable(
 
     createdAt: integer("created_at", { mode: "timestamp_ms" })
       .notNull()
-      .$defaultFn(() => Date.now()),
+      .default(sql`(unixepoch() * 1000)`),
     updatedAt: integer("updated_at", { mode: "timestamp_ms" })
       .notNull()
-      .$defaultFn(() => Date.now()),
+      .default(sql`(unixepoch() * 1000)`),
   },
   (table) => ({
     // Performance indexes
@@ -77,10 +77,10 @@ export const llmMessagesTable = sqliteTable(
 
     createdAt: integer("created_at", { mode: "timestamp_ms" })
       .notNull()
-      .$defaultFn(() => Date.now()),
+      .default(sql`(unixepoch() * 1000)`),
     updatedAt: integer("updated_at", { mode: "timestamp_ms" })
       .notNull()
-      .$defaultFn(() => Date.now()),
+      .default(sql`(unixepoch() * 1000)`),
   },
   (table) => ({
     // Performance indexes

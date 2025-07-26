@@ -1,12 +1,6 @@
 import { createFileRoute, Outlet } from "@tanstack/react-router";
-import { z } from "zod";
 
 import { UserSidebar } from "@/renderer/features/app/components/user-sidebar";
-
-// Search params schema for user routes
-const UserSearchSchema = z.object({
-  showArchived: z.boolean().optional().default(false),
-});
 
 function UserLayout() {
   const { conversations, availableUsers } = Route.useLoaderData();
@@ -27,21 +21,18 @@ function UserLayout() {
 }
 
 export const Route = createFileRoute("/_authenticated/user")({
-  validateSearch: (search) => UserSearchSchema.parse(search),
-  loaderDeps: ({ search }) => ({ search }),
-  loader: async ({ context, deps }) => {
+  loader: async ({ context }) => {
     const { auth } = context;
-    const { search } = deps;
 
     // Defensive check - ensure user exists
     if (!auth.user?.id) {
       throw new Error("User not authenticated");
     }
 
-    // Load conversations with archive filter based on search params
+    // Load all conversations (including archived) - filtering handled in component
     const [conversationsResponse, availableUsersResponse] = await Promise.all([
       window.api.conversations.getUserConversations({
-        includeArchived: search.showArchived,
+        includeArchived: true, // Always load all conversations
         includeInactive: false, // Always exclude inactive conversations
       }),
       window.api.users.listAvailableUsers(),

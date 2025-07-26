@@ -1,11 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/renderer/components/ui/dialog";
 import { ProviderForm } from "@/renderer/features/llm-provider/components/provider-form";
 
 function NewProviderDialog() {
@@ -17,17 +11,7 @@ function NewProviderDialog() {
     });
   }
 
-  return (
-    <Dialog open onOpenChange={(open) => !open && handleClose()}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>Add New Provider</DialogTitle>
-        </DialogHeader>
-
-        <ProviderForm provider={null} onClose={handleClose} />
-      </DialogContent>
-    </Dialog>
-  );
+  return <ProviderForm provider={null} onClose={handleClose} />;
 }
 
 export const Route = createFileRoute(

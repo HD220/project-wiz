@@ -23,7 +23,7 @@ export class ConversationService {
   /**
    * Generate conversation title based on participants (excluding currentUser)
    * 1 participant: "João Silva"
-   * 2 participants: "João Silva, Maria Santos"  
+   * 2 participants: "João Silva, Maria Santos"
    * 3 participants: "João Silva, Maria Santos, Pedro Costa"
    * 4+ participants: "João Silva, Maria Santos, Pedro Costa..."
    */
@@ -502,7 +502,6 @@ export class ConversationService {
       };
     });
   }
-
 
   /**
    * Update conversation metadata
