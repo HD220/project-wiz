@@ -63,7 +63,7 @@ export class MessageService {
   ): Promise<SelectMessage> {
     const db = getDatabase();
 
-    return await db.transaction(async (tx) => {
+    return db.transaction(async (tx) => {
       // Inserir mensagem principal
       const [message] = await tx
         .insert(messagesTable)
@@ -201,9 +201,9 @@ export class MessageService {
         .update(messagesTable)
         .set({
           isActive: false,
-          deactivatedAt: Date.now(),
+          deactivatedAt: new Date(),
           deactivatedBy: deletedBy,
-          updatedAt: Date.now(),
+          updatedAt: new Date(),
         })
         .where(eq(messagesTable.id, id));
 
@@ -212,9 +212,9 @@ export class MessageService {
         .update(llmMessagesTable)
         .set({
           isActive: false,
-          deactivatedAt: Date.now(),
+          deactivatedAt: new Date(),
           deactivatedBy: deletedBy,
-          updatedAt: Date.now(),
+          updatedAt: new Date(),
         })
         .where(
           and(
@@ -231,7 +231,7 @@ export class MessageService {
   static async restore(id: string): Promise<SelectMessage> {
     const db = getDatabase();
 
-    return await db.transaction(async (tx) => {
+    return db.transaction(async (tx) => {
       // Restore the message
       const [restored] = await tx
         .update(messagesTable)
@@ -239,7 +239,7 @@ export class MessageService {
           isActive: true,
           deactivatedAt: null,
           deactivatedBy: null,
-          updatedAt: Date.now(),
+          updatedAt: new Date(),
         })
         .where(and(eq(messagesTable.id, id), eq(messagesTable.isActive, false)))
         .returning();
@@ -255,7 +255,7 @@ export class MessageService {
           isActive: true,
           deactivatedAt: null,
           deactivatedBy: null,
-          updatedAt: Date.now(),
+          updatedAt: new Date(),
         })
         .where(eq(llmMessagesTable.messageId, id));
 
@@ -276,7 +276,7 @@ export class MessageService {
       .update(messagesTable)
       .set({
         ...input,
-        updatedAt: Date.now(),
+        updatedAt: new Date(),
       })
       .where(and(eq(messagesTable.id, id), eq(messagesTable.isActive, true)))
       .returning();

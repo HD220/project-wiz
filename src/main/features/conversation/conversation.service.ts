@@ -246,9 +246,9 @@ export class ConversationService {
 
     // Sort by last message time (most recent first)
     return result.sort((convA, convB) => {
-      const aTime = convA.lastMessage?.createdAt || convA.updatedAt;
-      const bTime = convB.lastMessage?.createdAt || convB.updatedAt;
-      return bTime.getTime() - aTime.getTime();
+      const aTime = (convA.lastMessage?.createdAt || convA.updatedAt) as number;
+      const bTime = (convB.lastMessage?.createdAt || convB.updatedAt) as number;
+      return bTime - aTime; // Direct number comparison since timestamps are already numbers
     });
   }
 
@@ -457,7 +457,7 @@ export class ConversationService {
   static async restore(id: string): Promise<ConversationWithParticipants> {
     const db = getDatabase();
 
-    return await db.transaction(async (tx) => {
+    return db.transaction(async (tx) => {
       // Restore the conversation
       const [restored] = await tx
         .update(conversationsTable)
