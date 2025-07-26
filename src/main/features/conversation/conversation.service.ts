@@ -1,7 +1,6 @@
 import { eq, inArray, sql, and, isNull } from "drizzle-orm";
 
 import { getDatabase } from "@/main/database/connection";
-import { AgentService } from "@/main/features/agent/agent.service";
 import {
   conversationsTable,
   conversationParticipantsTable,
@@ -17,26 +16,33 @@ import { UserService } from "@/main/features/user/user.service";
 export interface CreateConversationInput
   extends Omit<InsertConversation, "id" | "createdAt" | "updatedAt"> {
   participantIds: string[];
+  currentUserId?: string; // For title generation (exclude from title)
 }
 
 export class ConversationService {
   /**
-   * Generate conversation title based on participants
+   * Generate conversation title based on participants (excluding currentUser)
    * 1 participant: "João Silva"
-   * 2 participants: "João Silva, Maria Santos"
+   * 2 participants: "João Silva, Maria Santos"  
    * 3 participants: "João Silva, Maria Santos, Pedro Costa"
    * 4+ participants: "João Silva, Maria Santos, Pedro Costa..."
    */
   private static async generateConversationTitle(
     participantIds: string[],
+    currentUserId?: string,
   ): Promise<string> {
-    if (participantIds.length === 0) {
-      return "Empty Conversation";
+    // Filter out currentUser from participants for title generation
+    const otherParticipantIds = currentUserId
+      ? participantIds.filter((id) => id !== currentUserId)
+      : participantIds;
+
+    if (otherParticipantIds.length === 0) {
+      return "Self Conversation";
     }
 
     // Get participant names - inline for simplicity
     const participantNames: string[] = [];
-    for (const participantId of participantIds) {
+    for (const participantId of otherParticipantIds) {
       const user = await UserService.findById(participantId);
       if (user) {
         participantNames.push(user.name);
@@ -67,6 +73,7 @@ export class ConversationService {
       (input.participantIds.length > 0
         ? await ConversationService.generateConversationTitle(
             input.participantIds,
+            input.currentUserId,
           )
         : null);
 
@@ -496,33 +503,6 @@ export class ConversationService {
     });
   }
 
-  /**
-   * FIXED: Check if conversation is blocked based on SPECIFIC PARTICIPANT agents
-   * Only checks agents that are actually participants in this conversation
-   */
-  static async isConversationBlocked(conversationId: string): Promise<{
-    isBlocked: boolean;
-    reason?: string;
-    activeAgentsCount: number;
-  }> {
-    // Get active agents that are SPECIFIC PARTICIPANTS in this conversation
-    const activeAgents =
-      await AgentService.getActiveAgentsForConversation(conversationId);
-    const activeAgentsCount = activeAgents.length;
-
-    if (activeAgentsCount === 0) {
-      return {
-        isBlocked: true,
-        reason: "No active agent participants available for this conversation",
-        activeAgentsCount: 0,
-      };
-    }
-
-    return {
-      isBlocked: false,
-      activeAgentsCount,
-    };
-  }
 
   /**
    * Update conversation metadata

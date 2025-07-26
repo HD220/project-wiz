@@ -1,4 +1,4 @@
-import { eq, and, desc, ilike, or, inArray } from "drizzle-orm";
+import { eq, and, desc, ilike, or } from "drizzle-orm";
 
 import { getDatabase } from "@/main/database/connection";
 import { agentsTable } from "@/main/features/agent/agent.model";
@@ -12,7 +12,6 @@ import type {
 import { createAgentSchema } from "@/main/features/agent/agent.types";
 import { llmProvidersTable } from "@/main/features/agent/llm-provider/llm-provider.model";
 import { agentMemoriesTable } from "@/main/features/agent/memory/memory.model";
-import { conversationParticipantsTable } from "@/main/features/conversation/conversation.model";
 import { usersTable } from "@/main/features/user/user.model";
 
 export class AgentService {
@@ -332,57 +331,6 @@ export class AgentService {
     return result.length;
   }
 
-  /**
-   * FIXED: Get active agents that are SPECIFIC PARTICIPANTS in a conversation
-   * This fixes the critical blocking logic issue
-   */
-  static async getActiveAgentsForConversation(
-    conversationId: string,
-  ): Promise<SelectAgent[]> {
-    const db = getDatabase();
-
-    // Get all participants of this specific conversation
-    const participants = await db
-      .select({ participantId: conversationParticipantsTable.participantId })
-      .from(conversationParticipantsTable)
-      .where(
-        and(
-          eq(conversationParticipantsTable.conversationId, conversationId),
-          eq(conversationParticipantsTable.isActive, true),
-        ),
-      );
-
-    if (participants.length === 0) {
-      return [];
-    }
-
-    const participantIds = participants.map((p) => p.participantId);
-
-    // Find agents among those participants that are active
-    const activeAgentParticipants = await db
-      .select({
-        agent: agentsTable,
-      })
-      .from(agentsTable)
-      .innerJoin(usersTable, eq(agentsTable.userId, usersTable.id))
-      .where(
-        and(
-          // Must be a participant in this conversation
-          inArray(usersTable.id, participantIds),
-          // Must be an agent user type
-          eq(usersTable.type, "agent"),
-          // User must be active
-          eq(usersTable.isActive, true),
-          // Agent must be active
-          eq(agentsTable.isActive, true),
-          // Agent must have "active" status
-          eq(agentsTable.status, "active"),
-        ),
-      )
-      .orderBy(desc(agentsTable.createdAt));
-
-    return activeAgentParticipants.map((result) => result.agent);
-  }
 
   /**
    * DEPRECATED: Use softDelete instead

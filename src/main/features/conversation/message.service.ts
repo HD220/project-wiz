@@ -1,7 +1,6 @@
 import { eq, asc, and } from "drizzle-orm";
 
 import { getDatabase } from "@/main/database/connection";
-import { ConversationService } from "@/main/features/conversation/conversation.service";
 import {
   messagesTable,
   llmMessagesTable,
@@ -27,26 +26,16 @@ export interface SendLlmMessageInput {
 
 export class MessageService {
   /**
-   * Send a message with conversation blocking validation
+   * Send a message 
    */
   static async send(input: SendMessageInput): Promise<SelectMessage> {
     const db = getDatabase();
-
-    // Check if conversation is blocked (no active agents)
-    const conversationStatus = await ConversationService.isConversationBlocked(
-      input.conversationId,
-    );
-
-    if (conversationStatus.isBlocked) {
-      throw new Error(`Cannot send message: ${conversationStatus.reason}`);
-    }
 
     console.log("🔍 MESSAGE SERVICE SEND - Input:", {
       "Input data": input,
       "Current time": new Date().toString(),
       "Current timestamp": Date.now(),
       "Timezone offset": new Date().getTimezoneOffset(),
-      "Active agents": conversationStatus.activeAgentsCount,
     });
 
     const [message] = await db.insert(messagesTable).values(input).returning();
@@ -67,21 +56,12 @@ export class MessageService {
   }
 
   /**
-   * Send message with LLM data and conversation blocking validation
+   * Send message with LLM data
    */
   static async sendWithLlmData(
     input: SendLlmMessageInput,
   ): Promise<SelectMessage> {
     const db = getDatabase();
-
-    // Check if conversation is blocked (no active agents)
-    const conversationStatus = await ConversationService.isConversationBlocked(
-      input.messageInput.conversationId,
-    );
-
-    if (conversationStatus.isBlocked) {
-      throw new Error(`Cannot send message: ${conversationStatus.reason}`);
-    }
 
     return await db.transaction(async (tx) => {
       // Inserir mensagem principal
@@ -221,9 +201,9 @@ export class MessageService {
         .update(messagesTable)
         .set({
           isActive: false,
-          deactivatedAt: new Date(),
+          deactivatedAt: Date.now(),
           deactivatedBy: deletedBy,
-          updatedAt: new Date(),
+          updatedAt: Date.now(),
         })
         .where(eq(messagesTable.id, id));
 
@@ -232,9 +212,9 @@ export class MessageService {
         .update(llmMessagesTable)
         .set({
           isActive: false,
-          deactivatedAt: new Date(),
+          deactivatedAt: Date.now(),
           deactivatedBy: deletedBy,
-          updatedAt: new Date(),
+          updatedAt: Date.now(),
         })
         .where(
           and(
@@ -259,7 +239,7 @@ export class MessageService {
           isActive: true,
           deactivatedAt: null,
           deactivatedBy: null,
-          updatedAt: new Date(),
+          updatedAt: Date.now(),
         })
         .where(and(eq(messagesTable.id, id), eq(messagesTable.isActive, false)))
         .returning();
@@ -275,7 +255,7 @@ export class MessageService {
           isActive: true,
           deactivatedAt: null,
           deactivatedBy: null,
-          updatedAt: new Date(),
+          updatedAt: Date.now(),
         })
         .where(eq(llmMessagesTable.messageId, id));
 
@@ -296,7 +276,7 @@ export class MessageService {
       .update(messagesTable)
       .set({
         ...input,
-        updatedAt: new Date(),
+        updatedAt: Date.now(),
       })
       .where(and(eq(messagesTable.id, id), eq(messagesTable.isActive, true)))
       .returning();
@@ -329,21 +309,4 @@ export class MessageService {
     return result.length;
   }
 
-  /**
-   * Validate if message can be sent to conversation
-   */
-  static async validateMessageSend(conversationId: string): Promise<{
-    canSend: boolean;
-    reason?: string;
-    activeAgentsCount: number;
-  }> {
-    const conversationStatus =
-      await ConversationService.isConversationBlocked(conversationId);
-
-    return {
-      canSend: !conversationStatus.isBlocked,
-      reason: conversationStatus.reason,
-      activeAgentsCount: conversationStatus.activeAgentsCount,
-    };
-  }
 }

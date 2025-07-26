@@ -57,17 +57,6 @@ export function setupConversationsHandlers(): void {
     },
   );
 
-  // Check if conversation is blocked (with session-based auth)
-  createIpcHandler(
-    "conversations:isBlocked",
-    async (conversationId: string) => {
-      const currentUser = await AuthService.getCurrentUser();
-      if (!currentUser) {
-        throw new Error("User not authenticated");
-      }
-      return ConversationService.isConversationBlocked(conversationId);
-    },
-  );
 
   // Send message (with session-based auth)
   createIpcHandler("messages:send", async (input: SendMessageInput) => {
