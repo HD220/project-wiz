@@ -16,7 +16,7 @@ function SettingsLayout() {
   // Handle ESC key to close
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Escape") {
-      navigate({ to: "/user", search: { showArchived: false } });
+      navigate({ to: "/user" });
     }
   };
 
@@ -34,9 +34,7 @@ function SettingsLayout() {
             variant="ghost"
             size="icon"
             className="w-6 h-6 rounded-full hover:bg-accent/80 text-gray-400"
-            onClick={() =>
-              navigate({ to: "/user", search: { showArchived: false } })
-            }
+            onClick={() => navigate({ to: "/user" })}
           >
             <X className="w-4 h-4" />
           </Button>
@@ -82,7 +80,7 @@ function SettingsLayout() {
                           ? "bg-[#404249] text-white"
                           : "text-gray-300 hover:text-white hover:bg-[#35373c]"
                       }`}
-                      onClick={() => navigate({ to: item.path, search: {} })}
+                      onClick={() => navigate({ to: item.path })}
                     >
                       {item.label}
                     </button>
@@ -109,9 +107,7 @@ function SettingsLayout() {
               variant="ghost"
               size="icon"
               className="w-8 h-8 rounded-full hover:bg-accent/80"
-              onClick={() =>
-                navigate({ to: "/user", search: { showArchived: false } })
-              }
+              onClick={() => navigate({ to: "/user" })}
               title="Fechar configurações"
             >
               <X className="w-4 h-4" />

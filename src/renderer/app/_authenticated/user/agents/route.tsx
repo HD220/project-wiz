@@ -7,6 +7,7 @@ import { loadApiData } from "@/renderer/lib/route-loader";
 
 function AgentsLayout() {
   const agents = Route.useLoaderData();
+  const search = Route.useSearch();
 
   return (
     <div className="flex-1 flex flex-col">
@@ -16,7 +17,7 @@ function AgentsLayout() {
       />
       <main className="flex-1 overflow-auto">
         <div className="h-full p-6">
-          <AgentList agents={agents} showInactive={false} />
+          <AgentList agents={agents} showInactive={search.showInactive} />
         </div>
       </main>
 
@@ -30,25 +31,11 @@ export const Route = createFileRoute("/_authenticated/user/agents")({
   validateSearch: (search) => AgentFiltersSchema.parse(search),
   loaderDeps: ({ search }) => ({ search }),
   loader: async ({ deps }) => {
-    // Load agents without includeInactive (removed from schema)
-    let agents = await loadApiData(
+    // Load agents with proper filtering
+    const agents = await loadApiData(
       () => window.api.agents.list(deps.search),
       "Failed to load agents",
     );
-
-    // Client-side filtering for status and search
-    if (deps.search.status) {
-      agents = agents.filter((agent) => agent.status === deps.search.status);
-    }
-
-    if (deps.search.search) {
-      const searchTerm = deps.search.search.toLowerCase();
-      agents = agents.filter(
-        (agent) =>
-          agent.name.toLowerCase().includes(searchTerm) ||
-          agent.role.toLowerCase().includes(searchTerm),
-      );
-    }
 
     return agents;
   },

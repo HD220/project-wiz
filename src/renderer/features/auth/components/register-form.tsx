@@ -78,7 +78,7 @@ function RegisterForm() {
         password: data.password,
       });
 
-      router.navigate({ to: "/user", search: { showArchived: false } });
+      router.navigate({ to: "/user" });
     } catch (error) {
       form.setError("root", {
         message: error instanceof Error ? error.message : "Registration failed",
@@ -191,9 +191,7 @@ function RegisterForm() {
               <Button
                 variant="link"
                 className="p-0 h-auto font-normal"
-                onClick={() =>
-                  router.navigate({ to: "/auth/login", search: {} })
-                }
+                onClick={() => router.navigate({ to: "/auth/login" })}
               >
                 Sign In
               </Button>

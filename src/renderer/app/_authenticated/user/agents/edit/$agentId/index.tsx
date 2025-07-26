@@ -1,4 +1,8 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import {
+  createFileRoute,
+  useNavigate,
+  useSearch,
+} from "@tanstack/react-router";
 
 import type { LlmProvider } from "@/main/features/agent/llm-provider/llm-provider.types";
 
@@ -20,6 +24,9 @@ function EditAgentPage() {
   const navigate = useNavigate();
   const { agent, providers } = Route.useLoaderData();
 
+  // Get current search state from parent route to preserve filters
+  const parentSearch = useSearch({ from: "/_authenticated/user/agents" });
+
   // Standardized mutation with automatic error handling
   const updateAgentMutation = useApiMutation(
     (data: CreateAgentInput) =>
@@ -32,7 +39,8 @@ function EditAgentPage() {
   );
 
   function handleClose() {
-    navigate({ to: "/user/agents", search: { showArchived: false } });
+    // Preserve user's current filter state when closing
+    navigate({ to: "/user/agents", search: parentSearch });
   }
 
   async function handleSubmit(data: CreateAgentInput): Promise<void> {

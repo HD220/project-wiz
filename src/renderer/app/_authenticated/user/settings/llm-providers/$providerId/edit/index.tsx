@@ -16,7 +16,6 @@ function EditProviderDialog() {
   function handleClose() {
     navigate({
       to: "/user/settings/llm-providers",
-      search: { showArchived: false },
     });
   }
 

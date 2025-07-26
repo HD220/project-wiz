@@ -155,7 +155,6 @@ function AgentListCard(props: AgentListCardProps) {
                     <Link
                       to="/user/agents/edit/$agentId"
                       params={{ agentId: agent.id }}
-                      search={{ showArchived: false }}
                     >
                       <Edit2 className="mr-2 h-4 w-4" />
                       Edit

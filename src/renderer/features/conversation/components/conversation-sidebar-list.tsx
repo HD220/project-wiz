@@ -1,6 +1,6 @@
-import { useNavigate, useSearch } from "@tanstack/react-router";
 import { MessageCircle, Archive, Plus } from "lucide-react";
 import { useState } from "react";
+import { useNavigate, useSearch } from "@tanstack/react-router";
 
 import { Button } from "@/renderer/components/ui/button";
 import { Switch } from "@/renderer/components/ui/switch";
@@ -22,29 +22,27 @@ interface ConversationSidebarListProps {
 function ConversationSidebarList(props: ConversationSidebarListProps) {
   const { conversations, availableUsers } = props;
   const { user: currentUser } = useAuth();
+
+  // Get showArchived state from URL parameter instead of local state
+  const search = useSearch({ from: "/_authenticated/user" });
+  const showArchived = search.showArchived || false;
+
+  // Navigate to update URL parameter when toggling
   const navigate = useNavigate({ from: "/_authenticated/user" });
 
-  // Get current search params for showArchived toggle
-  const search = useSearch({
-    from: "/_authenticated/user",
-    select: (search: any) => ({ showArchived: search?.showArchived || false }),
-  });
-
-  // SIMPLE: Local state for UI
+  // Local state for UI only
   const [showCreateDialog, setShowCreateDialog] = useState(false);
 
-  // Toggle archive filter
+  // Toggle archive filter by updating URL parameter
   function toggleShowArchived() {
-    navigate({
-      search: { showArchived: !search.showArchived },
-    });
+    navigate({ search: { showArchived: !showArchived } });
   }
 
   // Filter conversations based on archive status
   const activeConversations = conversations.filter((conv) => !conv.archivedAt);
   const archivedConversations = conversations.filter((conv) => conv.archivedAt);
 
-  const displayConversations = search.showArchived
+  const displayConversations = showArchived
     ? archivedConversations
     : activeConversations;
 
@@ -79,7 +77,7 @@ function ConversationSidebarList(props: ConversationSidebarListProps) {
             <span className="text-muted-foreground">Show Archived</span>
           </div>
           <Switch
-            checked={search.showArchived}
+            checked={showArchived}
             onCheckedChange={toggleShowArchived}
             size="sm"
           />
@@ -93,16 +91,16 @@ function ConversationSidebarList(props: ConversationSidebarListProps) {
             <MessageCircle className="w-12 h-12 text-muted-foreground/50 mb-4" />
             <div className="space-y-2">
               <h3 className="font-medium text-foreground">
-                {search.showArchived
+                {showArchived
                   ? "No Archived Conversations"
                   : "No Direct Messages"}
               </h3>
               <p className="text-sm text-muted-foreground max-w-48">
-                {search.showArchived
+                {showArchived
                   ? "You haven't archived any conversations yet."
                   : "Start a conversation with someone to begin chatting."}
               </p>
-              {!search.showArchived && (
+              {!showArchived && (
                 <Button
                   variant="outline"
                   size="sm"

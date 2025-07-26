@@ -114,7 +114,7 @@ function AgentList(props: AgentListProps) {
       to: "/user/agents",
       search: {
         ...search,
-        showArchived: checked,
+        showInactive: checked,
       },
     });
   }
@@ -122,19 +122,19 @@ function AgentList(props: AgentListProps) {
   function clearFilters() {
     navigate({
       to: "/user/agents",
-      search: { showArchived: false },
+      search: {},
     });
   }
 
   // SIMPLE: Check if we have filters for UI purposes
-  const hasFilters = search.status || search.search || search.showArchived;
+  const hasFilters = search.status || search.search || search.showInactive;
 
   // Filter agents based on active/inactive state
   const filteredAgents = showInactive
     ? agents
-    : agents.filter((agent) => agent.isActive);
-  const activeAgents = agents.filter((agent) => agent.isActive);
-  const inactiveAgents = agents.filter((agent) => !agent.isActive);
+    : agents.filter((agent) => agent.status === "active");
+  const activeAgents = agents.filter((agent) => agent.status === "active");
+  const inactiveAgents = agents.filter((agent) => agent.status === "inactive");
 
   // SIMPLE: Empty state when no agents and no filters
   if (filteredAgents.length === 0 && !hasFilters) {
@@ -148,7 +148,7 @@ function AgentList(props: AgentListProps) {
               Create and manage your AI agents
             </p>
           </div>
-          <Link to="/user/agents/new" search={{ showArchived: false }}>
+          <Link to="/user/agents/new">
             <Button className="gap-2 shrink-0">
               <Plus className="h-4 w-4" />
               Create Agent
@@ -165,7 +165,7 @@ function AgentList(props: AgentListProps) {
           <p className="text-muted-foreground text-sm mb-4">
             Create your first AI agent to get started
           </p>
-          <Link to="/user/agents/new" search={{ showArchived: false }}>
+          <Link to="/user/agents/new">
             <Button>
               <Plus className="h-4 w-4 mr-2" />
               Create Your First Agent
@@ -214,14 +214,14 @@ function AgentList(props: AgentListProps) {
             <div className="flex items-center gap-2">
               <Switch
                 id="show-inactive"
-                checked={!!search.showArchived}
+                checked={!!search.showInactive}
                 onCheckedChange={handleToggleInactive}
               />
               <label
                 htmlFor="show-inactive"
                 className="text-sm font-medium flex items-center gap-2 cursor-pointer"
               >
-                {search.showArchived ? (
+                {search.showInactive ? (
                   <Eye className="h-4 w-4" />
                 ) : (
                   <EyeOff className="h-4 w-4" />
@@ -239,7 +239,7 @@ function AgentList(props: AgentListProps) {
           </div>
 
           {/* New Agent Button */}
-          <Link to="/user/agents/new" search={{ showArchived: false }}>
+          <Link to="/user/agents/new">
             <Button className="gap-2 shrink-0">
               <Plus className="h-4 w-4" />
               Create Agent

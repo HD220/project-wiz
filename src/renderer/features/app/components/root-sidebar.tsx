@@ -40,7 +40,6 @@ function RootSidebar(props: RootSidebarProps) {
             <TooltipTrigger asChild>
               <Link
                 to="/user"
-                search={{ showArchived: false }}
                 className=""
                 activeProps={{
                   className: "active",
@@ -85,7 +84,6 @@ function RootSidebar(props: RootSidebarProps) {
                   <Link
                     to="/project/$projectId"
                     params={{ projectId: project.id }}
-                    search={{}}
                     className="relative"
                     activeProps={{
                       className: "active",
