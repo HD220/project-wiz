@@ -81,13 +81,15 @@ function ConversationSidebarList(props: ConversationSidebarListProps) {
   return (
     <div className="flex flex-col h-full">
       {/* Header */}
-      <div className="p-4 border-b">
-        <div className="flex items-center justify-between mb-3">
-          <h2 className="font-semibold text-foreground">Direct Messages</h2>
+      <div className="p-4 border-b border-border/50 bg-background/95 backdrop-blur-sm">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="font-semibold text-foreground text-base tracking-tight">
+            Direct Messages
+          </h2>
           <Button
             variant="ghost"
             size="icon"
-            className="w-6 h-6"
+            className="w-7 h-7 hover:bg-accent/80 transition-colors"
             onClick={() => setShowCreateDialog(true)}
           >
             <Plus className="w-4 h-4" />
@@ -95,31 +97,34 @@ function ConversationSidebarList(props: ConversationSidebarListProps) {
         </div>
 
         {/* Archive Toggle */}
-        <div className="flex items-center justify-between text-sm">
+        <div className="flex items-center justify-between text-sm bg-muted/30 rounded-lg p-2 hover:bg-muted/50 transition-colors">
           <div className="flex items-center gap-2">
             <Archive className="w-4 h-4 text-muted-foreground" />
-            <span className="text-muted-foreground">Show Archived</span>
+            <span className="text-muted-foreground font-medium">Show Archived</span>
           </div>
           <Switch
             checked={showArchived}
             onCheckedChange={handleToggleShowArchived}
-            disabled={false} // Always enabled
+            disabled={false}
+            className="data-[state=checked]:bg-primary"
           />
         </div>
       </div>
 
       {/* Conversation List */}
-      <div className="flex-1 overflow-y-auto">
+      <div className="flex-1 overflow-y-auto scrollbar-thin">
         {displayConversations.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full text-center px-4">
-            <MessageCircle className="w-12 h-12 text-muted-foreground/50 mb-4" />
-            <div className="space-y-2">
-              <h3 className="font-medium text-foreground">
+            <div className="w-16 h-16 rounded-full bg-muted/50 flex items-center justify-center mb-4">
+              <MessageCircle className="w-8 h-8 text-muted-foreground/60" />
+            </div>
+            <div className="space-y-3">
+              <h3 className="font-semibold text-foreground">
                 {showArchived
                   ? "No Archived Conversations"
                   : "No Direct Messages"}
               </h3>
-              <p className="text-sm text-muted-foreground max-w-48">
+              <p className="text-sm text-muted-foreground max-w-48 leading-relaxed">
                 {showArchived
                   ? "You haven't archived any conversations yet."
                   : "Start a conversation with someone to begin chatting."}
@@ -129,7 +134,7 @@ function ConversationSidebarList(props: ConversationSidebarListProps) {
                   variant="outline"
                   size="sm"
                   onClick={() => setShowCreateDialog(true)}
-                  className="mt-3"
+                  className="mt-4 shadow-sm hover:shadow-md transition-shadow"
                 >
                   <Plus className="w-4 h-4 mr-2" />
                   New Message
@@ -138,8 +143,8 @@ function ConversationSidebarList(props: ConversationSidebarListProps) {
             </div>
           </div>
         ) : (
-          <div className="py-2">
-            {displayConversations.map((conversation) => (
+          <div className="py-1 space-y-0.5">
+            {displayConversations.map((conversation, index) => (
               <ConversationSidebarItem
                 key={conversation.id}
                 conversation={conversation}
@@ -158,12 +163,12 @@ function ConversationSidebarList(props: ConversationSidebarListProps) {
           onClose={() => setShowCreateDialog(false)}
           onConversationCreated={(conversationId) => {
             setShowCreateDialog(false);
-            // Navigate to the new conversation and invalidate to refresh data
-            router.navigate({
-              to: "/user/dm/$conversationId",
+            // Navigate to the new conversation
+            // Don't call router.invalidate() here - useApiMutation already handles it
+            navigate({
+              to: "/user/dm/$conversationId", 
               params: { conversationId },
             });
-            router.invalidate();
           }}
         />
       )}

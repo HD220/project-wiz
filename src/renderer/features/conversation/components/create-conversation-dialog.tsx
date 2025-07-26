@@ -42,6 +42,7 @@ function CreateConversationDialog(props: CreateConversationDialogProps) {
     {
       successMessage: "Conversation created successfully",
       errorMessage: "Failed to create conversation",
+      invalidateRouter: false, // Disable automatic invalidation to prevent double invalidation
       onSuccess: (conversation) => {
         if (conversation?.id) {
           onConversationCreated(conversation.id);
