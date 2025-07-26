@@ -159,17 +159,17 @@ function DMLayout() {
     )
     .filter(Boolean);
 
-  const displayName =
+  // Use generated title from backend or create fallback
+  const displayName = conversation.name || "Unknown Conversation";
+
+  // Use the generated title as description, or create appropriate fallback
+  const description =
     conversation.name ||
     (otherParticipants.length === 1
-      ? otherParticipants[0]?.name
-      : `Group ${otherParticipants.length + 1}`) ||
-    "Unknown";
-
-  const description =
-    otherParticipants.length === 1
-      ? `Direct message with ${otherParticipants[0]?.name || `Unknown`}`
-      : `Group conversation with ${otherParticipants.length + 1} participants`;
+      ? otherParticipants[0]?.name || "Unknown Participant"
+      : otherParticipants.length > 1
+        ? `${otherParticipants.length + 1} participants`
+        : "Conversation");
 
   return (
     <div className="h-full w-full flex flex-col">

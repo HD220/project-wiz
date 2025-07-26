@@ -1,4 +1,5 @@
 import type { ConversationWithLastMessage } from "@/main/features/conversation/conversation.types";
+import type { UserSummary } from "@/main/features/user/user.service";
 
 import { SidebarHeader } from "@/renderer/features/app/components/sidebar-header";
 import { SidebarNavigation } from "@/renderer/features/app/components/sidebar-navigation";
@@ -6,7 +7,7 @@ import { SidebarUserArea } from "@/renderer/features/app/components/sidebar-user
 
 interface UserSidebarProps {
   conversations: ConversationWithLastMessage[];
-  availableUsers: unknown[];
+  availableUsers: UserSummary[];
   className?: string;
 }
 

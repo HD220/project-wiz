@@ -10,7 +10,7 @@ import type {
   SelectMessage,
   AuthenticatedUser,
 } from "@/renderer/features/conversation/types";
-import { cn } from "@/renderer/lib/utils";
+import { cn, isValidAvatarUrl } from "@/renderer/lib/utils";
 
 interface MessageBubbleProps {
   message: SelectMessage;
@@ -125,7 +125,9 @@ function MessageBubble(props: MessageBubbleProps) {
           <Avatar
             className={cn("w-10 h-10", authorInfo.isInactive && "opacity-60")}
           >
-            <AvatarImage src={authorInfo.avatar || undefined} />
+            <AvatarImage
+              src={isValidAvatarUrl(authorInfo.avatar) || undefined}
+            />
             <AvatarFallback
               className={cn(
                 "text-sm font-medium bg-primary/10 text-primary",

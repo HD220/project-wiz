@@ -1,7 +1,6 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { MoreHorizontal, Archive, Trash2, MessageSquare } from "lucide-react";
-import { toast } from "sonner";
 
 import { Button } from "@/renderer/components/ui/button";
 import {
@@ -38,17 +37,8 @@ function ConversationSidebarItem({
 
   // Get conversation display name
   const getConversationName = () => {
-    if (conversation.name) {
-      return conversation.name;
-    }
-
-    // For DM conversations, use participant names
-    if (conversation.type === "dm") {
-      // This would typically show other participants' names
-      return "Direct Message";
-    }
-
-    return "Unnamed Conversation";
+    // Use the generated name from backend (should always exist now)
+    return conversation.name || "Unnamed Conversation";
   };
 
   // Get the last message preview
@@ -106,7 +96,6 @@ function ConversationSidebarItem({
       <Link
         to="/user/dm/$conversationId"
         params={{ conversationId: conversation.id }}
-        search={{ showArchived: false }}
         className="flex items-center gap-3 px-3 py-2 hover:bg-accent/50 rounded-md transition-colors"
         activeProps={{
           className: "bg-accent text-accent-foreground",

@@ -17,7 +17,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/renderer/components/ui/card";
-import { cn } from "@/renderer/lib/utils";
+import { cn, isValidAvatarUrl } from "@/renderer/lib/utils";
 
 interface ProjectCardProps {
   project: SelectProject;
@@ -35,7 +35,9 @@ function ProjectCard(props: ProjectCardProps) {
       <CardHeader className={cn("pb-4", isCompact && "pb-2")}>
         <div className="flex items-start space-x-3">
           <Avatar className={cn("h-10 w-10", isCompact && "h-8 w-8")}>
-            <AvatarImage src={project.avatarUrl || undefined} />
+            <AvatarImage
+              src={isValidAvatarUrl(project.avatarUrl) || undefined}
+            />
             <AvatarFallback>
               {project.name.charAt(0).toUpperCase()}
             </AvatarFallback>

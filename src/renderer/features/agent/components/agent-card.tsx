@@ -22,7 +22,7 @@ import {
 } from "@/renderer/components/ui/dropdown-menu";
 import type { AgentWithAvatar } from "@/renderer/features/agent/agent.types";
 import { AgentStatusBadge } from "@/renderer/features/agent/components/agent-status-badge";
-import { cn } from "@/renderer/lib/utils";
+import { cn, isValidAvatarUrl } from "@/renderer/lib/utils";
 
 interface AgentCardProps {
   agent: AgentWithAvatar;
@@ -48,7 +48,10 @@ function AgentCard(props: AgentCardProps) {
         <div className="flex items-start justify-between">
           <div className="flex items-center space-x-3">
             <Avatar className="h-10 w-10">
-              <AvatarImage src={agent.avatar} alt={agent.name} />
+              <AvatarImage
+                src={isValidAvatarUrl(agent.avatar) || undefined}
+                alt={agent.name}
+              />
               <AvatarFallback className="bg-primary/10 text-primary">
                 <User className="h-4 w-4" />
               </AvatarFallback>

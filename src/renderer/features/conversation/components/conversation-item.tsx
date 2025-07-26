@@ -11,6 +11,7 @@ import type {
   AuthenticatedUser,
 } from "@/renderer/features/conversation/types";
 import type { SelectMessage } from "@/renderer/features/conversation/types";
+import { isValidAvatarUrl } from "@/renderer/lib/utils";
 
 interface ConversationItemProps {
   conversation: ConversationWithParticipants;
@@ -51,7 +52,7 @@ function ConversationItem(props: ConversationItemProps) {
     if (otherParticipants.length === 1) {
       const participant = otherParticipants[0];
       return {
-        image: participant?.avatar || null,
+        image: isValidAvatarUrl(participant?.avatar) || null,
         fallback: participant?.name?.charAt(0).toUpperCase() || "?",
         isGroup: false,
       };

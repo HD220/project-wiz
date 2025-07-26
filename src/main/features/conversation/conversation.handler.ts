@@ -89,4 +89,13 @@ export function setupConversationsHandlers(): void {
       return MessageService.getConversationMessages(conversationId);
     },
   );
+
+  // Regenerate missing conversation titles (with session-based auth)
+  createIpcHandler("conversations:regenerateTitles", async () => {
+    const currentUser = await AuthService.getCurrentUser();
+    if (!currentUser) {
+      throw new Error("User not authenticated");
+    }
+    return ConversationService.regenerateMissingTitles();
+  });
 }

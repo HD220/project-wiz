@@ -13,6 +13,7 @@ import { Button } from "@/renderer/components/ui/button";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from "@/renderer/components/ui/dialog";
@@ -21,6 +22,7 @@ import { ScrollArea } from "@/renderer/components/ui/scroll-area";
 import type { CreateConversationInput } from "@/renderer/features/conversation/types";
 import type { AuthenticatedUser } from "@/renderer/features/conversation/types";
 import { useApiMutation } from "@/renderer/hooks/use-api-mutation.hook";
+import { isValidAvatarUrl } from "@/renderer/lib/utils";
 
 interface CreateConversationDialogProps {
   availableUsers: UserSummary[];
@@ -48,7 +50,7 @@ function CreateConversationDialog(props: CreateConversationDialogProps) {
     },
   );
 
-  // Filter agents based on search
+  // Filter users based on search
   const filteredUsers = availableUsers.filter((user) =>
     user.name.toLowerCase().includes(searchTerm.toLowerCase()),
   );
@@ -86,6 +88,10 @@ function CreateConversationDialog(props: CreateConversationDialogProps) {
             <Plus className="h-5 w-5" />
             Start New Conversation
           </DialogTitle>
+          <DialogDescription>
+            Select users to start a new conversation with. Search for users and
+            click to add them to the conversation.
+          </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4">
@@ -160,7 +166,9 @@ function CreateConversationDialog(props: CreateConversationDialogProps) {
                       {/* Avatar */}
                       <div className="relative flex-shrink-0">
                         <Avatar className="w-8 h-8">
-                          <AvatarImage src={user.avatar || undefined} />
+                          <AvatarImage
+                            src={isValidAvatarUrl(user.avatar) || undefined}
+                          />
                           <AvatarFallback className="text-xs">
                             {user.name.charAt(0).toUpperCase()}
                           </AvatarFallback>

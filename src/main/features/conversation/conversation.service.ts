@@ -12,6 +12,7 @@ import {
   ConversationWithParticipants,
 } from "@/main/features/conversation/conversation.types";
 import { messagesTable } from "@/main/features/conversation/message.model";
+import { UserService } from "@/main/features/user/user.service";
 
 export interface CreateConversationInput
   extends Omit<InsertConversation, "id" | "createdAt" | "updatedAt"> {
@@ -19,15 +20,60 @@ export interface CreateConversationInput
 }
 
 export class ConversationService {
+  /**
+   * Generate conversation title based on participants
+   * 1 participant: "João Silva"
+   * 2 participants: "João Silva, Maria Santos"
+   * 3 participants: "João Silva, Maria Santos, Pedro Costa"
+   * 4+ participants: "João Silva, Maria Santos, Pedro Costa..."
+   */
+  private static async generateConversationTitle(
+    participantIds: string[],
+  ): Promise<string> {
+    if (participantIds.length === 0) {
+      return "Empty Conversation";
+    }
+
+    // Get participant names - inline for simplicity
+    const participantNames: string[] = [];
+    for (const participantId of participantIds) {
+      const user = await UserService.findById(participantId);
+      if (user) {
+        participantNames.push(user.name);
+      }
+    }
+
+    if (participantNames.length === 0) {
+      return "Unknown Participants";
+    }
+
+    // Generate title based on participant count
+    if (participantNames.length <= 3) {
+      return participantNames.join(", ");
+    }
+
+    // For 4+ participants, show first 3 + "..."
+    return `${participantNames.slice(0, 3).join(", ")}...`;
+  }
+
   static async create(
     input: CreateConversationInput,
   ): Promise<ConversationWithParticipants> {
     const db = getDatabase();
 
+    // Generate title if name is null/undefined
+    const conversationName =
+      input.name ||
+      (input.participantIds.length > 0
+        ? await ConversationService.generateConversationTitle(
+            input.participantIds,
+          )
+        : null);
+
     const [conversation] = await db
       .insert(conversationsTable)
       .values({
-        name: input.name,
+        name: conversationName,
         description: input.description,
         type: input.type,
       })
@@ -520,5 +566,68 @@ export class ConversationService {
       ...updated,
       participants,
     };
+  }
+
+  /**
+   * Regenerate titles for conversations that don't have names
+   * Useful for existing conversations created before title generation was implemented
+   */
+  static async regenerateMissingTitles(): Promise<void> {
+    const db = getDatabase();
+
+    // Find conversations without names that are active
+    const conversationsWithoutNames = await db
+      .select({
+        id: conversationsTable.id,
+      })
+      .from(conversationsTable)
+      .where(
+        and(
+          eq(conversationsTable.isActive, true),
+          sql`${conversationsTable.name} IS NULL OR ${conversationsTable.name} = ''`,
+        ),
+      );
+
+    if (conversationsWithoutNames.length === 0) {
+      return;
+    }
+
+    // Process each conversation
+    for (const conversation of conversationsWithoutNames) {
+      try {
+        // Get participants for this conversation
+        const participants = await db
+          .select({
+            participantId: conversationParticipantsTable.participantId,
+          })
+          .from(conversationParticipantsTable)
+          .where(
+            and(
+              eq(conversationParticipantsTable.conversationId, conversation.id),
+              eq(conversationParticipantsTable.isActive, true),
+            ),
+          );
+
+        const participantIds = participants.map((p) => p.participantId);
+
+        // Generate title for this conversation
+        const generatedTitle =
+          await ConversationService.generateConversationTitle(participantIds);
+
+        // Update conversation with generated title
+        await db
+          .update(conversationsTable)
+          .set({
+            name: generatedTitle,
+            updatedAt: new Date(),
+          })
+          .where(eq(conversationsTable.id, conversation.id));
+      } catch (error) {
+        console.error(
+          `Failed to regenerate title for conversation ${conversation.id}:`,
+          error,
+        );
+      }
+    }
   }
 }

@@ -1,6 +1,8 @@
+import { useNavigate, useSearch, useRouter } from "@tanstack/react-router";
 import { MessageCircle, Archive, Plus } from "lucide-react";
 import { useState } from "react";
-import { useNavigate, useSearch } from "@tanstack/react-router";
+
+import type { UserSummary } from "@/main/features/user/user.service";
 
 import { Button } from "@/renderer/components/ui/button";
 import { Switch } from "@/renderer/components/ui/switch";
@@ -11,31 +13,30 @@ import type { ConversationWithLastMessage } from "@/renderer/features/conversati
 
 interface ConversationSidebarListProps {
   conversations: ConversationWithLastMessage[];
-  availableUsers: Array<{
-    id: string;
-    name: string | null;
-    username?: string;
-    avatar?: string | null;
-  }>;
+  availableUsers: UserSummary[];
 }
 
 function ConversationSidebarList(props: ConversationSidebarListProps) {
   const { conversations, availableUsers } = props;
   const { user: currentUser } = useAuth();
+  const router = useRouter();
 
   // Get showArchived state from URL parameter instead of local state
   const search = useSearch({ from: "/_authenticated/user" });
   const showArchived = search.showArchived || false;
 
   // Navigate to update URL parameter when toggling
-  const navigate = useNavigate({ from: "/_authenticated/user" });
+  const navigate = useNavigate();
 
   // Local state for UI only
   const [showCreateDialog, setShowCreateDialog] = useState(false);
 
   // Toggle archive filter by updating URL parameter
   function toggleShowArchived() {
-    navigate({ search: { showArchived: !showArchived } });
+    navigate({
+      to: "/user",
+      search: { showArchived: !showArchived },
+    });
   }
 
   // Filter conversations based on archive status
@@ -76,11 +77,7 @@ function ConversationSidebarList(props: ConversationSidebarListProps) {
             <Archive className="w-4 h-4 text-muted-foreground" />
             <span className="text-muted-foreground">Show Archived</span>
           </div>
-          <Switch
-            checked={showArchived}
-            onCheckedChange={toggleShowArchived}
-            size="sm"
-          />
+          <Switch checked={showArchived} onCheckedChange={toggleShowArchived} />
         </div>
       </div>
 
@@ -119,8 +116,6 @@ function ConversationSidebarList(props: ConversationSidebarListProps) {
               <ConversationSidebarItem
                 key={conversation.id}
                 conversation={conversation}
-                currentUser={currentUser}
-                availableUsers={availableUsers}
               />
             ))}
           </div>
@@ -131,7 +126,17 @@ function ConversationSidebarList(props: ConversationSidebarListProps) {
       {showCreateDialog && (
         <CreateConversationDialog
           availableUsers={availableUsers}
+          currentUser={currentUser}
           onClose={() => setShowCreateDialog(false)}
+          onConversationCreated={(conversationId) => {
+            setShowCreateDialog(false);
+            // Navigate to the new conversation and invalidate to refresh data
+            router.navigate({
+              to: "/user/dm/$conversationId",
+              params: { conversationId },
+            });
+            router.invalidate();
+          }}
         />
       )}
     </div>
