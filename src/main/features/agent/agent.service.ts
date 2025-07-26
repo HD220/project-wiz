@@ -25,7 +25,7 @@ export class AgentService {
     const validatedInput = createAgentSchema.parse(input);
     const db = getDatabase();
 
-    return await db.transaction(async (tx) => {
+    return db.transaction(async (tx) => {
       // Verify provider exists and is active
       const [provider] = await tx
         .select()
@@ -331,6 +331,29 @@ export class AgentService {
     return result.length;
   }
 
+
+  /**
+   * Get active agents for a specific conversation
+   * Returns agents that are available for conversation participation
+   */
+  static async getActiveAgentsForConversation(
+    _conversationId: string,
+  ): Promise<SelectAgent[]> {
+    const db = getDatabase();
+
+    // For now, return all active agents
+    // In the future, this could be filtered by conversation context or project
+    return await db
+      .select()
+      .from(agentsTable)
+      .where(
+        and(
+          eq(agentsTable.isActive, true),
+          eq(agentsTable.status, "active"),
+        ),
+      )
+      .orderBy(desc(agentsTable.createdAt));
+  }
 
   /**
    * DEPRECATED: Use softDelete instead
