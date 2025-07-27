@@ -1,7 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { FolderIcon, GitBranch, FileText, Github } from "lucide-react";
+import { FolderIcon, GitBranch, FileText, Github, Loader2 } from "lucide-react";
 
 import type { InsertProject } from "@/main/features/project/project.types";
 
@@ -83,7 +83,7 @@ interface ProjectFormProps {
   disabled?: boolean;
 }
 
-function ProjectForm(props: ProjectFormProps) {
+export function ProjectForm(props: ProjectFormProps) {
   const {
     onSuccess,
     onCancel,
@@ -363,13 +363,8 @@ function ProjectForm(props: ProjectFormProps) {
           >
             {isLoading ? (
               <>
-                <span className="animate-spin mr-2" aria-hidden="true">
-                  ⚡
-                </span>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 Criando...
-                <span id="loading-status" className="sr-only">
-                  Criando projeto, aguarde...
-                </span>
               </>
             ) : (
               submitLabel
@@ -380,5 +375,3 @@ function ProjectForm(props: ProjectFormProps) {
     </Form>
   );
 }
-
-export { ProjectForm };

@@ -31,7 +31,7 @@ interface CreateConversationDialogProps {
   onConversationCreated: (conversationId: string) => void;
 }
 
-function CreateConversationDialog(props: CreateConversationDialogProps) {
+export function CreateConversationDialog(props: CreateConversationDialogProps) {
   const { availableUsers, currentUser, onClose, onConversationCreated } = props;
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedUserIds, setSelectedUserIds] = useState<string[]>([]);
@@ -234,5 +234,3 @@ function CreateConversationDialog(props: CreateConversationDialogProps) {
     </Dialog>
   );
 }
-
-export { CreateConversationDialog };

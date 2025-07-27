@@ -12,7 +12,7 @@ interface UserSidebarProps {
   className?: string;
 }
 
-function UserSidebar(props: UserSidebarProps) {
+export function UserSidebar(props: UserSidebarProps) {
   const { conversations, availableUsers, className } = props;
 
   return (
@@ -33,5 +33,3 @@ function UserSidebar(props: UserSidebarProps) {
     </aside>
   );
 }
-
-export { UserSidebar };

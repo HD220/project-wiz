@@ -28,7 +28,7 @@ interface ProjectSidebarProps {
   className?: string;
 }
 
-function ProjectSidebar(props: ProjectSidebarProps) {
+export function ProjectSidebar(props: ProjectSidebarProps) {
   const { project, conversations = [], className } = props;
 
   // Transform conversations into channels format
@@ -170,5 +170,3 @@ function ProjectSidebar(props: ProjectSidebarProps) {
     </aside>
   );
 }
-
-export { ProjectSidebar };

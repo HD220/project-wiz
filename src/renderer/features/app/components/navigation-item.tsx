@@ -1,6 +1,5 @@
 import { LinkProps } from "@tanstack/react-router";
 import { LucideIcon } from "lucide-react";
-import { forwardRef } from "react";
 
 import { CustomLink } from "@/renderer/components/custom-link";
 import { buttonVariants } from "@/renderer/components/ui/button";
@@ -17,53 +16,46 @@ interface NavigationItemProps
   children?: React.ReactNode;
 }
 
-const NavigationItem = forwardRef<HTMLAnchorElement, NavigationItemProps>(
-  (props, ref) => {
-    const {
-      icon: IconComponent,
-      label,
-      children,
-      variant = "ghost",
-      size,
-      className,
-      to,
-      activeOptions,
-      ...restLinkProps
-    } = props;
+export function NavigationItem(props: NavigationItemProps) {
+  const {
+    icon: IconComponent,
+    label,
+    children,
+    variant = "ghost",
+    size,
+    className,
+    to,
+    activeOptions,
+    ...restLinkProps
+  } = props;
 
-    return (
-      <CustomLink
-        ref={ref}
-        to={to}
-        variant={variant}
-        size={size}
-        className={cn(
-          "w-full justify-start h-9 px-3 text-sm font-normal transition-all duration-200 rounded-lg",
-          "text-muted-foreground hover:text-foreground hover:bg-accent/60 focus-visible:ring-2 focus-visible:ring-ring",
+  return (
+    <CustomLink
+      to={to}
+      variant={variant}
+      size={size}
+      className={cn(
+        "w-full justify-start h-10 px-4 text-sm font-normal transition-all duration-200 rounded-lg",
+        "text-muted-foreground hover:text-foreground hover:bg-accent/60 focus-visible:ring-2 focus-visible:ring-ring",
+        className,
+      )}
+      activeProps={{
+        className: cn(
+          "bg-accent text-foreground font-medium shadow-sm",
           className,
-        )}
-        activeProps={{
-          className: cn(
-            "bg-accent text-foreground font-medium shadow-sm",
-            className,
-          ),
-        }}
-        activeOptions={activeOptions}
-        {...restLinkProps}
-      >
-        {children || (
-          <>
-            {IconComponent && (
-              <IconComponent className="w-4 h-4 mr-3 flex-shrink-0" />
-            )}
-            {label && <span className="truncate">{label}</span>}
-          </>
-        )}
-      </CustomLink>
-    );
-  },
-);
-
-NavigationItem.displayName = "NavigationItem";
-
-export { NavigationItem };
+        ),
+      }}
+      activeOptions={activeOptions}
+      {...restLinkProps}
+    >
+      {children || (
+        <>
+          {IconComponent && (
+            <IconComponent className="w-4 h-4 mr-4 flex-shrink-0" />
+          )}
+          {label && <span className="truncate">{label}</span>}
+        </>
+      )}
+    </CustomLink>
+  );
+}

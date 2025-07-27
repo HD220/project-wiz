@@ -6,7 +6,7 @@ interface TitlebarProps {
   className?: string;
 }
 
-function Titlebar(props: TitlebarProps) {
+export function Titlebar(props: TitlebarProps) {
   const { title = "Project Wiz", className } = props;
 
   function handleMinimize() {
@@ -31,7 +31,7 @@ function Titlebar(props: TitlebarProps) {
       role="banner"
       aria-label="Application titlebar"
     >
-      <div className="flex items-center px-3">
+      <div className="flex items-center px-4">
         <span className="text-foreground text-sm font-medium">{title}</span>
       </div>
 
@@ -111,5 +111,3 @@ function CloseIcon() {
     </svg>
   );
 }
-
-export { Titlebar };

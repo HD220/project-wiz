@@ -18,7 +18,7 @@ interface EditProviderApiSectionProps {
   watchedType: ProviderType;
 }
 
-function EditProviderApiSection(props: EditProviderApiSectionProps) {
+export function EditProviderApiSection(props: EditProviderApiSectionProps) {
   const { form, watchedType } = props;
 
   const showBaseUrl =
@@ -73,5 +73,3 @@ function EditProviderApiSection(props: EditProviderApiSectionProps) {
     </div>
   );
 }
-
-export { EditProviderApiSection };

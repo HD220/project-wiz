@@ -35,7 +35,7 @@ interface MessageAuthorAvatarProps {
   timeAgo: string;
 }
 
-function MessageAuthorAvatar({
+export function MessageAuthorAvatar({
   authorInfo,
   showAvatar,
   timeAgo,
@@ -84,7 +84,7 @@ interface MessageAuthorHeaderProps {
   timeAgo: string;
 }
 
-function MessageAuthorHeader({
+export function MessageAuthorHeader({
   authorInfo,
   timeAgo,
 }: MessageAuthorHeaderProps) {
@@ -124,7 +124,7 @@ interface MessageContentProps {
   isSending: boolean;
 }
 
-function MessageContent({
+export function MessageContent({
   message,
   authorInfo,
   isSending,
@@ -149,7 +149,7 @@ function MessageContent({
   );
 }
 
-function MessageBubble(props: MessageBubbleProps) {
+export function MessageBubble(props: MessageBubbleProps) {
   const {
     message,
     author,
@@ -232,5 +232,3 @@ function MessageBubble(props: MessageBubbleProps) {
     </div>
   );
 }
-
-export { MessageBubble };

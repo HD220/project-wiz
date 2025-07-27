@@ -22,7 +22,7 @@ interface RootSidebarProps {
   className?: string;
 }
 
-function RootSidebar(props: RootSidebarProps) {
+export function RootSidebar(props: RootSidebarProps) {
   const { projects, className } = props;
   const { user } = useAuth();
 
@@ -178,5 +178,3 @@ function RootSidebar(props: RootSidebarProps) {
     </nav>
   );
 }
-
-export { RootSidebar };

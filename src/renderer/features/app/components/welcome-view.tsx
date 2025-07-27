@@ -9,7 +9,7 @@ import {
 import { useAuth } from "@/renderer/contexts/auth.context";
 import { ActivityItem } from "@/renderer/features/app/components/activity-item";
 
-function WelcomeView() {
+export function WelcomeView() {
   const { user } = useAuth();
 
   return (
@@ -93,5 +93,3 @@ function WelcomeView() {
     </div>
   );
 }
-
-export { WelcomeView };

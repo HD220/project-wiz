@@ -7,7 +7,7 @@ interface UserAvatarProps {
   className?: string;
 }
 
-function UserAvatar(props: UserAvatarProps) {
+export function UserAvatar(props: UserAvatarProps) {
   const { name = "User", size = "md", className } = props;
 
   const sizeClasses = {
@@ -24,5 +24,3 @@ function UserAvatar(props: UserAvatarProps) {
     </Avatar>
   );
 }
-
-export { UserAvatar };

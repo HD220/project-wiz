@@ -10,7 +10,12 @@ import {
 } from "@/renderer/components/ui/avatar";
 import { Badge } from "@/renderer/components/ui/badge";
 import { Button } from "@/renderer/components/ui/button";
-import { FeatureCard } from "@/renderer/components/shared/feature-card";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+} from "@/renderer/components/ui/card";
 import { cn, isValidAvatarUrl } from "@/renderer/lib/utils";
 
 interface ProjectCardProps {
@@ -20,12 +25,10 @@ interface ProjectCardProps {
   interactive?: boolean;
 }
 
-function ProjectCard(props: ProjectCardProps) {
+export function ProjectCard(props: ProjectCardProps) {
   const { project, variant = "default", className, interactive = true } = props;
 
   const isCompact = variant === "compact";
-  const featureCardVariant =
-    project.status === "active" ? "default" : "compact";
 
   // Format creation date with better UX
   const createdDate = new Date(project.createdAt).toLocaleDateString("pt-BR", {
@@ -34,17 +37,40 @@ function ProjectCard(props: ProjectCardProps) {
     year: "numeric",
   });
 
+  // Inline styling based on variant and status
+  const cardVariantStyles = cn(
+    "transition-all duration-200 group",
+    {
+      "hover:shadow-md": project.status === "active" && !isCompact,
+      "hover:shadow-sm": isCompact,
+      "cursor-pointer hover:scale-[1.02]": interactive,
+    },
+    className,
+  );
+
   return (
-    <FeatureCard.Root
-      variant={featureCardVariant}
-      interactive={interactive}
-      className={className}
+    <Card
+      className={cardVariantStyles}
       role="article"
       aria-label={`Projeto ${project.name}`}
     >
-      <FeatureCard.Header>
-        <div className="flex items-start gap-3">
-          <FeatureCard.Icon asChild>
+      <CardHeader
+        className={cn("transition-colors duration-200", {
+          "pb-2": isCompact,
+        })}
+      >
+        <div className="flex items-start gap-4">
+          <div
+            className={cn(
+              "flex items-center justify-center rounded-lg transition-all duration-200 shrink-0",
+              isCompact
+                ? "h-8 w-8 bg-muted text-muted-foreground"
+                : "h-10 w-10 bg-primary/10 text-primary group-hover:bg-primary/20",
+              {
+                "group-hover:scale-110": interactive,
+              },
+            )}
+          >
             <Avatar
               className={cn("shrink-0", isCompact ? "h-8 w-8" : "h-10 w-10")}
             >
@@ -56,16 +82,21 @@ function ProjectCard(props: ProjectCardProps) {
                 {project.name.charAt(0).toUpperCase()}
               </AvatarFallback>
             </Avatar>
-          </FeatureCard.Icon>
+          </div>
 
           <div className="flex-1 min-w-0">
-            <FeatureCard.Title className="truncate">
+            <h3
+              className={cn(
+                "font-semibold transition-colors duration-200 truncate",
+                isCompact ? "text-base" : "text-lg",
+              )}
+            >
               {project.name}
-            </FeatureCard.Title>
+            </h3>
             {project.description && !isCompact && (
-              <FeatureCard.Description className="mt-1">
+              <p className="text-muted-foreground transition-colors duration-200 text-base mt-2">
                 {project.description}
-              </FeatureCard.Description>
+              </p>
             )}
           </div>
 
@@ -77,41 +108,46 @@ function ProjectCard(props: ProjectCardProps) {
             {project.status === "active" ? "Ativo" : "Arquivado"}
           </Badge>
         </div>
-      </FeatureCard.Header>
+      </CardHeader>
 
-      <FeatureCard.Content className={isCompact ? "pt-0" : undefined}>
+      <CardContent
+        className={cn({
+          "space-y-4": !isCompact,
+          "space-y-2 pt-0": isCompact,
+        })}
+      >
         {!isCompact && (
-          <div className="space-y-3">
-            <div className="space-y-2">
+          <div className="space-y-4">
+            <div className="space-y-4">
               {project.localPath && (
-                <FeatureCard.Meta className="flex items-center gap-2">
+                <div className="text-sm text-muted-foreground flex items-center gap-2">
                   <Folder className="h-4 w-4 shrink-0" aria-hidden="true" />
                   <span className="truncate" title={project.localPath}>
                     {project.localPath}
                   </span>
-                </FeatureCard.Meta>
+                </div>
               )}
 
               {project.gitUrl && (
-                <FeatureCard.Meta className="flex items-center gap-2">
+                <div className="text-sm text-muted-foreground flex items-center gap-2">
                   <GitBranch className="h-4 w-4 shrink-0" aria-hidden="true" />
                   <span className="truncate" title={project.gitUrl}>
                     {project.branch || "main"}
                   </span>
-                </FeatureCard.Meta>
+                </div>
               )}
 
-              <FeatureCard.Meta className="flex items-center gap-2">
+              <div className="text-xs text-muted-foreground flex items-center gap-2">
                 <Calendar className="h-4 w-4 shrink-0" aria-hidden="true" />
                 <span>Criado em {createdDate}</span>
-              </FeatureCard.Meta>
+              </div>
             </div>
           </div>
         )}
-      </FeatureCard.Content>
+      </CardContent>
 
-      <FeatureCard.Footer>
-        <FeatureCard.Action asChild>
+      <CardFooter className="flex items-center justify-between">
+        <div className="flex items-center gap-2 w-full">
           <Link
             to="/project/$projectId"
             params={{ projectId: project.id }}
@@ -129,10 +165,8 @@ function ProjectCard(props: ProjectCardProps) {
               {isCompact ? "Abrir" : "Abrir Projeto"}
             </Button>
           </Link>
-        </FeatureCard.Action>
-      </FeatureCard.Footer>
-    </FeatureCard.Root>
+        </div>
+      </CardFooter>
+    </Card>
   );
 }
-
-export { ProjectCard };

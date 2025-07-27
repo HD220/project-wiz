@@ -18,7 +18,9 @@ interface ArchiveConversationDialogProps {
   isLoading?: boolean;
 }
 
-function ArchiveConversationDialog(props: ArchiveConversationDialogProps) {
+export function ArchiveConversationDialog(
+  props: ArchiveConversationDialogProps,
+) {
   const {
     open,
     onClose,
@@ -60,5 +62,3 @@ function ArchiveConversationDialog(props: ArchiveConversationDialogProps) {
     </Dialog>
   );
 }
-
-export { ArchiveConversationDialog };

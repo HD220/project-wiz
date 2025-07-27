@@ -12,7 +12,9 @@ interface ArchivedConversationBannerProps {
   className?: string;
 }
 
-function ArchivedConversationBanner(props: ArchivedConversationBannerProps) {
+export function ArchivedConversationBanner(
+  props: ArchivedConversationBannerProps,
+) {
   const { conversationId, archivedAt, className } = props;
   const router = useRouter();
 
@@ -102,5 +104,3 @@ function ArchivedConversationBanner(props: ArchivedConversationBannerProps) {
     </div>
   );
 }
-
-export { ArchivedConversationBanner };

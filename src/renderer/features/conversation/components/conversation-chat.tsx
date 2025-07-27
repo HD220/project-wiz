@@ -43,19 +43,22 @@ interface WelcomeMessageProps {
   isArchived: boolean;
 }
 
-function WelcomeMessage({ conversation, isArchived }: WelcomeMessageProps) {
+export function WelcomeMessage({
+  conversation,
+  isArchived,
+}: WelcomeMessageProps) {
   return (
-    <div className="px-4 py-8">
+    <div className="px-6 py-8">
       <div className="text-center">
         <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
           <span className="text-2xl font-bold text-primary">
             {conversation.name?.charAt(0).toUpperCase() || "#"}
           </span>
         </div>
-        <div className="text-xl font-semibold mb-2">
+        <div className="text-2xl font-semibold tracking-tight mb-4">
           Bem-vindo a {conversation.name || "esta conversa"}!
         </div>
-        <div className="text-muted-foreground text-sm">
+        <div className="text-base text-muted-foreground">
           {isArchived
             ? "Esta conversa foi arquivada."
             : "Este é o início da sua conversa direta."}
@@ -71,11 +74,11 @@ interface EmptyStateProps {
   isArchived: boolean;
 }
 
-function EmptyState({ isArchived }: EmptyStateProps) {
+export function EmptyState({ isArchived }: EmptyStateProps) {
   return (
-    <div className="px-4 py-8 text-center text-muted-foreground">
-      <div className="text-4xl mb-4">💬</div>
-      <div className="text-sm">
+    <div className="px-6 py-8 text-center text-muted-foreground">
+      <div className="text-4xl mb-6">💬</div>
+      <div className="text-base">
         {isArchived
           ? "Esta conversa foi arquivada."
           : "Nenhuma mensagem ainda. Comece a conversa!"}
@@ -100,7 +103,7 @@ interface MessageGroupProps {
   isSendingMessage: boolean;
 }
 
-function MessageGroup({
+export function MessageGroup({
   group,
   groupIndex,
   messageGroups,
@@ -182,12 +185,12 @@ interface ArchivedInputPlaceholderProps {
   className?: string;
 }
 
-function ArchivedInputPlaceholder({
+export function ArchivedInputPlaceholder({
   className,
 }: ArchivedInputPlaceholderProps) {
   return (
-    <div className={cn("border-t bg-muted/30 px-4 py-3", className)}>
-      <div className="text-center text-sm text-muted-foreground">
+    <div className={cn("border-t bg-muted/30 px-6 py-4", className)}>
+      <div className="text-center text-base text-muted-foreground">
         Esta conversa foi arquivada. Para enviar mensagens, desarquive a
         conversa primeiro.
       </div>
@@ -195,7 +198,7 @@ function ArchivedInputPlaceholder({
   );
 }
 
-function ConversationChat(props: ConversationChatProps) {
+export function ConversationChat(props: ConversationChatProps) {
   const { conversation, availableUsers, currentUser, className } = props;
   const scrollAreaRef = useRef<HTMLDivElement>(null);
 
@@ -348,5 +351,3 @@ function ConversationChat(props: ConversationChatProps) {
     </div>
   );
 }
-
-export { ConversationChat };

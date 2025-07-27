@@ -25,7 +25,7 @@ interface AuthProviderProps {
   children: ReactNode;
 }
 
-function AuthProvider({ children }: AuthProviderProps) {
+export function AuthProvider({ children }: AuthProviderProps) {
   const [user, setUser] = useState<AuthenticatedUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -80,12 +80,10 @@ function AuthProvider({ children }: AuthProviderProps) {
   );
 }
 
-function useAuth() {
+export function useAuth() {
   const context = useContext(AuthContext);
   if (!context) {
     throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;
 }
-
-export { AuthProvider, useAuth };

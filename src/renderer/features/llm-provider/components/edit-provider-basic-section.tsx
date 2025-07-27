@@ -22,7 +22,7 @@ interface EditProviderBasicSectionProps {
   form: UseFormReturn<ProviderFormData>;
 }
 
-function EditProviderBasicSection(props: EditProviderBasicSectionProps) {
+export function EditProviderBasicSection(props: EditProviderBasicSectionProps) {
   const { form } = props;
 
   return (
@@ -75,5 +75,3 @@ function EditProviderBasicSection(props: EditProviderBasicSectionProps) {
     </div>
   );
 }
-
-export { EditProviderBasicSection };

@@ -17,7 +17,7 @@ interface ProjectViewProps {
   project: SelectProject;
 }
 
-function ProjectView(props: ProjectViewProps) {
+export function ProjectView(props: ProjectViewProps) {
   const { project } = props;
 
   return (
@@ -132,5 +132,3 @@ function ProjectView(props: ProjectViewProps) {
     </div>
   );
 }
-
-export { ProjectView };

@@ -15,7 +15,7 @@ interface ContentHeaderProps {
   onToggleMemberSidebar?: () => void;
 }
 
-function ContentHeader(props: ContentHeaderProps) {
+export function ContentHeader(props: ContentHeaderProps) {
   const {
     title = "general",
     description = "Welcome to your workspace",
@@ -27,20 +27,20 @@ function ContentHeader(props: ContentHeaderProps) {
   } = props;
 
   return (
-    <header className="h-12 bg-background border-b flex items-center px-4 justify-between shadow-sm">
-      <div className="flex items-center gap-3 min-w-0 flex-1">
+    <header className="h-12 bg-background border-b flex items-center px-6 justify-between shadow-sm">
+      <div className="flex items-center gap-4 min-w-0 flex-1">
         <div className="flex items-center gap-2 min-w-0">
           {customIcon || (
             <IconComponent className="w-5 h-5 text-muted-foreground flex-shrink-0" />
           )}
-          <h1 className="text-foreground font-semibold truncate">{title}</h1>
+          <h1 className="text-xl font-medium text-foreground truncate">
+            {title}
+          </h1>
         </div>
 
         <Separator orientation="vertical" className="h-6 flex-shrink-0" />
 
-        <p className="text-sm text-muted-foreground/80 truncate">
-          {description}
-        </p>
+        <p className="text-sm text-muted-foreground truncate">{description}</p>
       </div>
 
       {/* Members Toggle */}
@@ -64,5 +64,3 @@ function ContentHeader(props: ContentHeaderProps) {
     </header>
   );
 }
-
-export { ContentHeader };

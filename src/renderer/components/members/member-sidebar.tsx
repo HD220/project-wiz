@@ -23,7 +23,7 @@ interface MemberSidebarProps {
   onToggle?: () => void;
 }
 
-function MemberSidebar(props: MemberSidebarProps) {
+export function MemberSidebar(props: MemberSidebarProps) {
   const { members, className, isCollapsed = false } = props;
 
   // Group members by status with better organization
@@ -65,10 +65,10 @@ function MemberSidebar(props: MemberSidebarProps) {
   const MemberItem = ({ member }: { member: Member }) => (
     <Button
       variant="ghost"
-      className="w-full justify-start px-3 h-10 text-sm font-normal hover:bg-accent/60 transition-all duration-200 group rounded-lg focus-visible:ring-2 focus-visible:ring-ring"
+      className="w-full justify-start px-4 h-10 text-sm font-normal hover:bg-accent/60 transition-all duration-200 group rounded-lg focus-visible:ring-2 focus-visible:ring-ring"
       aria-label={`${member.name} - ${getStatusLabel(member.status)}${member.role === "owner" ? " (Owner)" : ""}`}
     >
-      <div className="flex items-center w-full gap-3">
+      <div className="flex items-center w-full gap-4">
         <div className="relative flex-shrink-0">
           <Avatar className="w-8 h-8">
             <AvatarFallback className="text-xs bg-primary/10 text-primary font-medium">
@@ -125,15 +125,15 @@ function MemberSidebar(props: MemberSidebarProps) {
         role="group"
         aria-labelledby={`${status}-members-heading`}
       >
-        <div className="px-3 py-2">
+        <div className="px-4 py-2">
           <h3
             id={`${status}-members-heading`}
-            className="text-xs font-semibold text-muted-foreground uppercase tracking-wider"
+            className="text-xs font-semibold text-muted-foreground uppercase tracking-wide"
           >
             {title} — {count}
           </h3>
         </div>
-        <div className="space-y-1" role="list">
+        <div className="space-y-2" role="list">
           {sectionMembers.map((member) => (
             <div key={member.id} role="listitem">
               <MemberItem member={member} />
@@ -162,7 +162,7 @@ function MemberSidebar(props: MemberSidebarProps) {
       aria-label="Member list"
     >
       <ScrollArea className="flex-1">
-        <div className="p-3 space-y-2">
+        <div className="p-4 space-y-4">
           {/* Online Members */}
           <MemberSection
             title="Online"
@@ -219,4 +219,4 @@ function MemberSidebar(props: MemberSidebarProps) {
   );
 }
 
-export { MemberSidebar, type Member };
+export type { Member };

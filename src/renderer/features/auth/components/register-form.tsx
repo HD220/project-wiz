@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "@tanstack/react-router";
-import { UserPlus, User, Lock, Eye, EyeOff } from "lucide-react";
+import { UserPlus, User, Lock, Eye, EyeOff, Loader2 } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { useState } from "react";
 import { z } from "zod";
@@ -16,9 +16,8 @@ import {
   FormMessage,
 } from "@/renderer/components/ui/form";
 import { Input } from "@/renderer/components/ui/input";
-import { StatusIndicator } from "@/renderer/components/shared";
 import { useAuth } from "@/renderer/contexts/auth.context";
-import { AuthCard } from "@/renderer/features/auth/components/auth-card";
+import { AuthCard } from "@/renderer/features/auth/components/auth-layout";
 
 const registerSchema = z
   .object({
@@ -52,7 +51,7 @@ interface RegisterFormProps {
   className?: string;
 }
 
-function RegisterForm(props: RegisterFormProps) {
+export function RegisterForm(props: RegisterFormProps) {
   const { className } = props;
   const router = useRouter();
   const { login } = useAuth();
@@ -104,7 +103,7 @@ function RegisterForm(props: RegisterFormProps) {
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(handleSubmit)}
-          className="space-y-[var(--spacing-component-lg)]"
+          className="space-y-6"
           noValidate
           aria-label="Create account form"
         >
@@ -113,7 +112,7 @@ function RegisterForm(props: RegisterFormProps) {
             name="name"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-[var(--font-size-sm)] font-[var(--font-weight-medium)] text-foreground">
+                <FormLabel className="text-sm font-medium">
                   Display Name
                 </FormLabel>
                 <FormControl>
@@ -126,7 +125,7 @@ function RegisterForm(props: RegisterFormProps) {
                       {...field}
                       placeholder="Enter your display name"
                       disabled={form.formState.isSubmitting}
-                      className="pl-10 h-11 text-[var(--font-size-base)] transition-all duration-200 focus:ring-2 focus:ring-primary/20"
+                      className="pl-10 h-11"
                       aria-describedby={field.name + "-error"}
                       autoComplete="name"
                     />
@@ -142,15 +141,13 @@ function RegisterForm(props: RegisterFormProps) {
             name="username"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-[var(--font-size-sm)] font-[var(--font-weight-medium)] text-foreground">
-                  Username
-                </FormLabel>
+                <FormLabel className="text-sm font-medium">Username</FormLabel>
                 <FormControl>
                   <Input
                     {...field}
                     placeholder="Choose a unique username"
                     disabled={form.formState.isSubmitting}
-                    className="h-11 text-[var(--font-size-base)] transition-all duration-200 focus:ring-2 focus:ring-primary/20"
+                    className="h-11"
                     aria-describedby={field.name + "-error"}
                     autoComplete="username"
                   />
@@ -165,9 +162,7 @@ function RegisterForm(props: RegisterFormProps) {
             name="password"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-[var(--font-size-sm)] font-[var(--font-weight-medium)] text-foreground">
-                  Password
-                </FormLabel>
+                <FormLabel className="text-sm font-medium">Password</FormLabel>
                 <FormControl>
                   <div className="relative">
                     <Lock
@@ -179,7 +174,7 @@ function RegisterForm(props: RegisterFormProps) {
                       type={showPassword ? "text" : "password"}
                       placeholder="Create a secure password"
                       disabled={form.formState.isSubmitting}
-                      className="pl-10 pr-10 h-11 text-[var(--font-size-base)] transition-all duration-200 focus:ring-2 focus:ring-primary/20"
+                      className="pl-10 pr-10 h-11"
                       aria-describedby={field.name + "-error"}
                       autoComplete="new-password"
                     />
@@ -212,7 +207,7 @@ function RegisterForm(props: RegisterFormProps) {
             name="confirmPassword"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-[var(--font-size-sm)] font-[var(--font-weight-medium)] text-foreground">
+                <FormLabel className="text-sm font-medium">
                   Confirm Password
                 </FormLabel>
                 <FormControl>
@@ -226,7 +221,7 @@ function RegisterForm(props: RegisterFormProps) {
                       type={showConfirmPassword ? "text" : "password"}
                       placeholder="Confirm your password"
                       disabled={form.formState.isSubmitting}
-                      className="pl-10 pr-10 h-11 text-[var(--font-size-base)] transition-all duration-200 focus:ring-2 focus:ring-primary/20"
+                      className="pl-10 pr-10 h-11"
                       aria-describedby={field.name + "-error"}
                       autoComplete="new-password"
                     />
@@ -256,26 +251,22 @@ function RegisterForm(props: RegisterFormProps) {
             )}
           />
 
-          <div className="flex flex-col space-y-[var(--spacing-component-md)] pt-[var(--spacing-component-sm)]">
+          <div className="flex flex-col space-y-4 pt-2">
             <Button
               type="submit"
               disabled={form.formState.isSubmitting}
-              className="w-full h-11 text-[var(--font-size-base)] font-[var(--font-weight-medium)] transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
+              className="w-full h-11"
               aria-describedby="register-status"
             >
               {form.formState.isSubmitting ? (
                 <>
-                  <StatusIndicator.Loading
-                    size="sm"
-                    showLabel={false}
-                    className="mr-2"
-                  />
-                  <span>Creating account...</span>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Creating account...
                 </>
               ) : (
                 <>
                   <UserPlus className="mr-2 h-4 w-4" aria-hidden="true" />
-                  <span>Create Account</span>
+                  Create Account
                 </>
               )}
             </Button>
@@ -289,11 +280,11 @@ function RegisterForm(props: RegisterFormProps) {
             )}
 
             <div className="text-center">
-              <p className="text-[var(--font-size-sm)] text-muted-foreground">
+              <p className="text-sm text-muted-foreground">
                 Already have an account?{" "}
                 <Button
                   variant="link"
-                  className="p-0 h-auto font-[var(--font-weight-medium)] text-[var(--font-size-sm)] hover:underline focus:underline transition-colors"
+                  className="p-0 h-auto font-medium text-sm"
                   onClick={() => router.navigate({ to: "/auth/login" })}
                   type="button"
                 >
@@ -308,5 +299,4 @@ function RegisterForm(props: RegisterFormProps) {
   );
 }
 
-export { RegisterForm };
 export type { RegisterFormProps };

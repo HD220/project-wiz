@@ -25,25 +25,21 @@ import {
   DropdownMenuTrigger,
 } from "@/renderer/components/ui/dropdown-menu";
 import type { AgentWithAvatar } from "@/renderer/features/agent/agent.types";
-import {
-  StatusIndicator,
-  StatusDot,
-  StatusLabel,
-} from "@/renderer/features/agent/components/agent-status-badge";
+import { AgentStatus } from "@/renderer/components/agent-status/agent-status";
 import { cn, isValidAvatarUrl } from "@/renderer/lib/utils";
 
 // Base AgentCard container component
-interface AgentCardRootProps extends React.HTMLAttributes<HTMLDivElement> {
+interface AgentCardProps extends React.HTMLAttributes<HTMLDivElement> {
   agent: AgentWithAvatar;
   children?: React.ReactNode;
 }
 
-function AgentCardRoot({
+export function AgentCard({
   agent,
   className,
   children,
   ...props
-}: AgentCardRootProps) {
+}: AgentCardProps) {
   return (
     <Card
       className={cn(
@@ -63,7 +59,7 @@ interface AgentCardHeaderProps extends React.HTMLAttributes<HTMLDivElement> {
   children?: React.ReactNode;
 }
 
-function AgentCardHeader({
+export function AgentCardHeader({
   agent,
   className,
   children,
@@ -83,10 +79,10 @@ function AgentCardHeader({
         </Avatar>
 
         <div className="flex-1 min-w-0 space-y-1">
-          <CardTitle className="text-sm font-semibold leading-tight truncate">
+          <CardTitle className="text-base font-semibold leading-tight truncate">
             {agent.name}
           </CardTitle>
-          <CardDescription className="text-xs truncate">
+          <CardDescription className="text-sm truncate">
             {agent.role}
           </CardDescription>
         </div>
@@ -104,7 +100,7 @@ interface AgentCardActionsProps extends React.HTMLAttributes<HTMLDivElement> {
   onToggleStatus?: (agent: AgentWithAvatar) => void;
 }
 
-function AgentCardActions({
+export function AgentCardActions({
   agent,
   onDelete,
   onToggleStatus,
@@ -167,14 +163,14 @@ interface AgentCardContentProps extends React.HTMLAttributes<HTMLDivElement> {
   agent: AgentWithAvatar;
 }
 
-function AgentCardContent({
+export function AgentCardContent({
   agent,
   className,
   ...props
 }: AgentCardContentProps) {
   return (
     <CardContent className={cn("pb-4", className)} {...props}>
-      <p className="text-xs text-muted-foreground line-clamp-2 leading-relaxed">
+      <p className="text-sm text-muted-foreground line-clamp-2 leading-relaxed">
         {agent.backstory || "No backstory provided."}
       </p>
     </CardContent>
@@ -186,7 +182,11 @@ interface AgentCardFooterProps extends React.HTMLAttributes<HTMLDivElement> {
   agent: AgentWithAvatar;
 }
 
-function AgentCardFooter({ agent, className, ...props }: AgentCardFooterProps) {
+export function AgentCardFooter({
+  agent,
+  className,
+  ...props
+}: AgentCardFooterProps) {
   // Inline date formatting following INLINE-FIRST principles
   const formattedDate = new Date(agent.createdAt).toLocaleDateString(
     undefined,
@@ -203,14 +203,11 @@ function AgentCardFooter({ agent, className, ...props }: AgentCardFooterProps) {
       {...props}
     >
       <div className="flex items-center justify-between w-full">
-        <StatusIndicator status={agent.status} size="sm" className="border">
-          <StatusDot status={agent.status} size="sm" />
-          <StatusLabel status={agent.status} />
-        </StatusIndicator>
+        <AgentStatus status={agent.status} size="sm" className="border" />
 
         <time
           dateTime={agent.createdAt.toISOString()}
-          className="text-xs text-muted-foreground font-medium"
+          className="text-sm text-muted-foreground font-medium"
         >
           {formattedDate}
         </time>
@@ -220,21 +217,21 @@ function AgentCardFooter({ agent, className, ...props }: AgentCardFooterProps) {
 }
 
 // Complete AgentCard component for backward compatibility
-interface CompleteAgentCardProps {
+interface AgentCardWithActionsProps {
   agent: AgentWithAvatar;
   onDelete?: (agent: AgentWithAvatar) => void;
   onToggleStatus?: (agent: AgentWithAvatar) => void;
   className?: string;
 }
 
-function AgentCard({
+export function AgentCardWithActions({
   agent,
   onDelete,
   onToggleStatus,
   className,
-}: CompleteAgentCardProps) {
+}: AgentCardWithActionsProps) {
   return (
-    <AgentCardRoot agent={agent} className={className}>
+    <AgentCard agent={agent} className={className}>
       <AgentCardHeader agent={agent}>
         <AgentCardActions
           agent={agent}
@@ -244,15 +241,6 @@ function AgentCard({
       </AgentCardHeader>
       <AgentCardContent agent={agent} />
       <AgentCardFooter agent={agent} />
-    </AgentCardRoot>
+    </AgentCard>
   );
 }
-
-export {
-  AgentCard,
-  AgentCardRoot,
-  AgentCardHeader,
-  AgentCardActions,
-  AgentCardContent,
-  AgentCardFooter,
-};

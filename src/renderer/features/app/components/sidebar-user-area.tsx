@@ -6,7 +6,7 @@ import { useAuth } from "@/renderer/contexts/auth.context";
 import { UserAvatar } from "@/renderer/features/user/components/user-avatar";
 import { UserStatus } from "@/renderer/features/user/components/user-status";
 
-function SidebarUserArea() {
+export function SidebarUserArea() {
   const router = useRouter();
   const { user, logout } = useAuth();
 
@@ -40,5 +40,3 @@ function SidebarUserArea() {
     </footer>
   );
 }
-
-export { SidebarUserArea };

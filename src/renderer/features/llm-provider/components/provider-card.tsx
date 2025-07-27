@@ -16,7 +16,7 @@ import {
 } from "@/renderer/components/ui/alert-dialog";
 import { Badge } from "@/renderer/components/ui/badge";
 import { Button } from "@/renderer/components/ui/button";
-import { Card } from "@/renderer/components/ui/card";
+import { Card, CardContent } from "@/renderer/components/ui/card";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -41,7 +41,7 @@ interface ProviderCardProps {
   provider: LlmProvider;
 }
 
-function ProviderCard(props: ProviderCardProps) {
+export function ProviderCard(props: ProviderCardProps) {
   const { provider } = props;
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
@@ -79,93 +79,97 @@ function ProviderCard(props: ProviderCardProps) {
   return (
     <>
       <Card
-        className={`p-4 transition-colors hover:bg-accent/50 ${
+        className={`transition-colors hover:bg-accent/50 ${
           provider.isDefault ? "ring-1 ring-primary" : ""
         }`}
       >
-        <div className="flex items-center gap-4">
-          {/* Icon and Info */}
-          <div className="flex items-center gap-3 flex-1 min-w-0">
-            <div className="text-xl shrink-0">🤖</div>
-            <div className="min-w-0 flex-1">
-              <div className="flex items-center gap-2 mb-1">
-                <h3 className="font-medium truncate">{provider.name}</h3>
-                {provider.isDefault && (
-                  <Badge variant="default" className="text-xs shrink-0">
-                    Default
-                  </Badge>
-                )}
+        <CardContent className="p-6">
+          <div className="flex items-center gap-6">
+            {/* Icon and Info */}
+            <div className="flex items-center gap-4 flex-1 min-w-0">
+              <div className="text-xl shrink-0">🤖</div>
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center gap-2 mb-1">
+                  <h3 className="text-lg font-medium truncate">
+                    {provider.name}
+                  </h3>
+                  {provider.isDefault && (
+                    <Badge variant="default" className="text-xs shrink-0">
+                      Default
+                    </Badge>
+                  )}
+                </div>
+                <p className="text-base text-muted-foreground truncate">
+                  {getProviderLabel(provider.type)} • {provider.defaultModel}
+                </p>
               </div>
-              <p className="text-sm text-muted-foreground truncate">
-                {getProviderLabel(provider.type)} • {provider.defaultModel}
-              </p>
-            </div>
-          </div>
-
-          {/* Status */}
-          <div className="flex items-center gap-3 shrink-0">
-            <div className="flex items-center gap-2">
-              <div
-                className={`w-2 h-2 rounded-full ${
-                  provider.isActive ? "bg-green-500" : "bg-muted-foreground"
-                }`}
-              />
-              <span className="text-sm text-muted-foreground">
-                {provider.isActive ? "Active" : "Inactive"}
-              </span>
             </div>
 
-            {/* Actions Menu */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="h-8 w-8 p-0"
-                  disabled={isLoading}
-                >
-                  <MoreHorizontal className="h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <Link
-                  to="/user/settings/llm-providers/$providerId/edit"
-                  params={{ providerId: provider.id }}
-                  search={{}}
-                >
-                  <DropdownMenuItem>
-                    <Edit2 className="mr-2 h-4 w-4" />
-                    Edit
+            {/* Status */}
+            <div className="flex items-center gap-4 shrink-0">
+              <div className="flex items-center gap-2">
+                <div
+                  className={`w-2 h-2 rounded-full ${
+                    provider.isActive ? "bg-primary" : "bg-muted-foreground"
+                  }`}
+                />
+                <span className="text-base text-muted-foreground">
+                  {provider.isActive ? "Active" : "Inactive"}
+                </span>
+              </div>
+
+              {/* Actions Menu */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-8 w-8 p-0"
+                    disabled={isLoading}
+                  >
+                    <MoreHorizontal className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <Link
+                    to="/user/settings/llm-providers/$providerId/edit"
+                    params={{ providerId: provider.id }}
+                    search={{}}
+                  >
+                    <DropdownMenuItem>
+                      <Edit2 className="mr-2 h-4 w-4" />
+                      Edit
+                    </DropdownMenuItem>
+                  </Link>
+
+                  {!provider.isDefault && (
+                    <DropdownMenuItem onClick={handleSetDefault}>
+                      <Star className="mr-2 h-4 w-4" />
+                      Set as Default
+                    </DropdownMenuItem>
+                  )}
+
+                  {provider.isDefault && (
+                    <DropdownMenuItem disabled>
+                      <StarOff className="mr-2 h-4 w-4" />
+                      Current Default
+                    </DropdownMenuItem>
+                  )}
+
+                  <DropdownMenuSeparator />
+
+                  <DropdownMenuItem
+                    onClick={() => setShowDeleteDialog(true)}
+                    className="text-destructive"
+                  >
+                    <Trash2 className="mr-2 h-4 w-4" />
+                    Delete
                   </DropdownMenuItem>
-                </Link>
-
-                {!provider.isDefault && (
-                  <DropdownMenuItem onClick={handleSetDefault}>
-                    <Star className="mr-2 h-4 w-4" />
-                    Set as Default
-                  </DropdownMenuItem>
-                )}
-
-                {provider.isDefault && (
-                  <DropdownMenuItem disabled>
-                    <StarOff className="mr-2 h-4 w-4" />
-                    Current Default
-                  </DropdownMenuItem>
-                )}
-
-                <DropdownMenuSeparator />
-
-                <DropdownMenuItem
-                  onClick={() => setShowDeleteDialog(true)}
-                  className="text-destructive"
-                >
-                  <Trash2 className="mr-2 h-4 w-4" />
-                  Delete
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
           </div>
-        </div>
+        </CardContent>
       </Card>
 
       {/* Delete Confirmation Dialog */}
@@ -192,5 +196,3 @@ function ProviderCard(props: ProviderCardProps) {
     </>
   );
 }
-
-export { ProviderCard };

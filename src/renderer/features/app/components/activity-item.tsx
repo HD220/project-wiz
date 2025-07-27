@@ -10,7 +10,7 @@ interface ActivityItemProps {
   className?: string;
 }
 
-function ActivityItem(props: ActivityItemProps) {
+export function ActivityItem(props: ActivityItemProps) {
   const { icon, title, timestamp, variant = "info", className } = props;
 
   const variantStyles = {
@@ -29,5 +29,3 @@ function ActivityItem(props: ActivityItemProps) {
     </div>
   );
 }
-
-export { ActivityItem };

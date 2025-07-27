@@ -1,5 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
+import { Loader2 } from "lucide-react";
 
 import type { CreateProviderInput } from "@/main/features/agent/llm-provider/llm-provider.types";
 import type { LlmProvider } from "@/main/features/agent/llm-provider/llm-provider.types";
@@ -43,7 +44,7 @@ interface ProviderFormProps {
   onClose: () => void;
 }
 
-function ProviderForm(props: ProviderFormProps) {
+export function ProviderForm(props: ProviderFormProps) {
   const { provider, onClose } = props;
   const { user } = useAuth();
 
@@ -312,7 +313,16 @@ function ProviderForm(props: ProviderFormProps) {
                 Cancel
               </Button>
               <Button type="submit" disabled={isLoading}>
-                {isLoading ? "Saving..." : isEditing ? "Update" : "Create"}
+                {isLoading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Saving...
+                  </>
+                ) : isEditing ? (
+                  "Update"
+                ) : (
+                  "Create"
+                )}
               </Button>
             </div>
           </form>
@@ -321,5 +331,3 @@ function ProviderForm(props: ProviderFormProps) {
     </Dialog>
   );
 }
-
-export { ProviderForm };

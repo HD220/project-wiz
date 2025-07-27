@@ -11,7 +11,7 @@ interface ProviderListProps {
   providers: LlmProvider[];
 }
 
-function ProviderList(props: ProviderListProps) {
+export function ProviderList(props: ProviderListProps) {
   const { providers } = props;
 
   if (providers.length === 0) {
@@ -55,5 +55,3 @@ function ProviderList(props: ProviderListProps) {
     </div>
   );
 }
-
-export { ProviderList };

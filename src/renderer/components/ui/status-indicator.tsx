@@ -30,7 +30,7 @@ function useStatusIndicatorContext() {
   const context = useContext(StatusIndicatorContext);
   if (!context) {
     throw new Error(
-      "StatusIndicator components must be used within StatusIndicator.Root",
+      "StatusIndicator components must be used within StatusIndicator",
     );
   }
   return context;
@@ -111,7 +111,7 @@ interface StatusIndicatorRootProps
   animated?: boolean;
 }
 
-export function StatusIndicatorRoot(props: StatusIndicatorRootProps) {
+export function StatusIndicator(props: StatusIndicatorRootProps) {
   const {
     status,
     variant = "dot",
@@ -296,10 +296,10 @@ export function ActiveStatus(props: QuickStatusProps) {
   const { label = getStatusText("active"), showLabel = true, ...rest } = props;
 
   return (
-    <StatusIndicatorRoot status="active" {...rest}>
+    <StatusIndicator status="active" {...rest}>
       <StatusIndicatorDot />
       {showLabel && <StatusIndicatorLabel>{label}</StatusIndicatorLabel>}
-    </StatusIndicatorRoot>
+    </StatusIndicator>
   );
 }
 
@@ -311,10 +311,10 @@ export function InactiveStatus(props: QuickStatusProps) {
   } = props;
 
   return (
-    <StatusIndicatorRoot status="inactive" {...rest}>
+    <StatusIndicator status="inactive" {...rest}>
       <StatusIndicatorDot />
       {showLabel && <StatusIndicatorLabel>{label}</StatusIndicatorLabel>}
-    </StatusIndicatorRoot>
+    </StatusIndicator>
   );
 }
 
@@ -327,10 +327,10 @@ export function LoadingStatus(props: QuickStatusProps) {
   } = props;
 
   return (
-    <StatusIndicatorRoot status="loading" animated={animated} {...rest}>
+    <StatusIndicator status="loading" animated={animated} {...rest}>
       <StatusIndicatorDot />
       {showLabel && <StatusIndicatorLabel>{label}</StatusIndicatorLabel>}
-    </StatusIndicatorRoot>
+    </StatusIndicator>
   );
 }
 
@@ -338,16 +338,16 @@ export function ErrorStatus(props: QuickStatusProps) {
   const { label = getStatusText("error"), showLabel = true, ...rest } = props;
 
   return (
-    <StatusIndicatorRoot status="error" {...rest}>
+    <StatusIndicator status="error" {...rest}>
       <StatusIndicatorDot />
       {showLabel && <StatusIndicatorLabel>{label}</StatusIndicatorLabel>}
-    </StatusIndicatorRoot>
+    </StatusIndicator>
   );
 }
 
-// Export compound component
-export const StatusIndicator = {
-  Root: StatusIndicatorRoot,
+// Export compound component object for legacy compatibility
+export const StatusIndicatorCompound = {
+  Root: StatusIndicator,
   Dot: StatusIndicatorDot,
   Label: StatusIndicatorLabel,
   Badge: StatusIndicatorBadge,

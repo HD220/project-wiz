@@ -5,7 +5,9 @@ interface EditProviderActionsSectionProps {
   onClose: () => void;
 }
 
-function EditProviderActionsSection(props: EditProviderActionsSectionProps) {
+export function EditProviderActionsSection(
+  props: EditProviderActionsSectionProps,
+) {
   const { isLoading, onClose } = props;
 
   return (
@@ -26,5 +28,3 @@ function EditProviderActionsSection(props: EditProviderActionsSectionProps) {
     </div>
   );
 }
-
-export { EditProviderActionsSection };

@@ -18,7 +18,7 @@ interface AgentDeleteDialogProps {
   isLoading?: boolean;
 }
 
-function AgentDeleteDialog(props: AgentDeleteDialogProps) {
+export function AgentDeleteDialog(props: AgentDeleteDialogProps) {
   const { agent, open, onOpenChange, onConfirm, isLoading } = props;
 
   if (!agent) return null;
@@ -48,5 +48,3 @@ function AgentDeleteDialog(props: AgentDeleteDialogProps) {
     </AlertDialog>
   );
 }
-
-export { AgentDeleteDialog };

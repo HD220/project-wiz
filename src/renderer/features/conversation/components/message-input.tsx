@@ -22,7 +22,7 @@ interface SendButtonProps {
   hasContent: boolean;
 }
 
-function SendButton({
+export function SendButton({
   onSend,
   disabled,
   isSending,
@@ -50,7 +50,7 @@ function SendButton({
   );
 }
 
-function MessageInput(props: MessageInputProps) {
+export function MessageInput(props: MessageInputProps) {
   const {
     onSendMessage,
     isSending,
@@ -191,5 +191,3 @@ function MessageInput(props: MessageInputProps) {
     </div>
   );
 }
-
-export { MessageInput };

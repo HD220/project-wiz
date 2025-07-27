@@ -36,7 +36,7 @@ interface AgentListProps {
   showInactive?: boolean;
 }
 
-function AgentList(props: AgentListProps) {
+export function AgentList(props: AgentListProps) {
   const { agents } = props;
 
   // Get URL search params and navigation following INLINE-FIRST principles
@@ -160,7 +160,7 @@ function AgentList(props: AgentListProps) {
           <div className="space-y-2">
             <div className="flex items-center gap-2">
               <Users className="size-5 text-muted-foreground" />
-              <h2 className="text-lg font-semibold tracking-tight">
+              <h2 className="text-2xl font-semibold tracking-tight">
                 AI Agents
               </h2>
             </div>
@@ -183,7 +183,7 @@ function AgentList(props: AgentListProps) {
           <div className="mb-6 rounded-2xl bg-muted/50 p-4">
             <Users className="size-8 text-muted-foreground" />
           </div>
-          <h3 className="mb-2 text-lg font-semibold">No agents created yet</h3>
+          <h3 className="mb-2 text-xl font-semibold">No agents created yet</h3>
           <p className="mb-6 max-w-sm text-sm text-muted-foreground">
             Create your first AI agent to start automating tasks and improving
             productivity
@@ -207,7 +207,7 @@ function AgentList(props: AgentListProps) {
           <div className="space-y-2">
             <div className="flex items-center gap-2">
               <Users className="size-5 text-muted-foreground" />
-              <h2 className="text-lg font-semibold tracking-tight">
+              <h2 className="text-2xl font-semibold tracking-tight">
                 AI Agents
               </h2>
               {agentStats.total > 0 && (
@@ -300,7 +300,7 @@ function AgentList(props: AgentListProps) {
               <span className="text-sm font-medium">Active:</span>
               <Badge
                 variant="default"
-                className="bg-emerald-500 hover:bg-emerald-600"
+                className="bg-primary hover:bg-primary/90"
               >
                 {agentStats.active}
               </Badge>
@@ -316,7 +316,7 @@ function AgentList(props: AgentListProps) {
                 <span className="text-sm font-medium">Busy:</span>
                 <Badge
                   variant="outline"
-                  className="border-orange-500 text-orange-600"
+                  className="border-destructive text-destructive"
                 >
                   {agentStats.busy}
                 </Badge>
@@ -331,7 +331,7 @@ function AgentList(props: AgentListProps) {
             <div className="mb-6 rounded-2xl bg-muted/50 p-4">
               <AlertCircle className="size-8 text-muted-foreground" />
             </div>
-            <h3 className="mb-2 text-lg font-semibold">
+            <h3 className="mb-2 text-xl font-semibold">
               No agents match your filters
             </h3>
             <p className="mb-6 max-w-sm text-sm text-muted-foreground">
@@ -374,5 +374,3 @@ function AgentList(props: AgentListProps) {
     </>
   );
 }
-
-export { AgentList };

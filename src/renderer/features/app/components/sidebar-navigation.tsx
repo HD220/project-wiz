@@ -5,14 +5,14 @@ import type { UserSummary } from "@/main/features/user/user.service";
 
 import { Separator } from "@/renderer/components/ui/separator";
 import { NavigationItem } from "@/renderer/features/app/components/navigation-item";
-import { ConversationSidebarList } from "@/renderer/features/conversation/components/conversation-sidebar-list";
+import { ConversationList } from "@/renderer/features/conversation/components/conversation-list";
 
 interface SidebarNavigationProps {
   conversations: ConversationWithLastMessage[];
   availableUsers: UserSummary[];
 }
 
-function SidebarNavigation(props: SidebarNavigationProps) {
+export function SidebarNavigation(props: SidebarNavigationProps) {
   const { conversations, availableUsers } = props;
 
   return (
@@ -34,7 +34,7 @@ function SidebarNavigation(props: SidebarNavigationProps) {
 
       {/* Conversations List */}
       <div role="region" aria-label="Conversations">
-        <ConversationSidebarList
+        <ConversationList
           conversations={conversations}
           availableUsers={availableUsers}
         />
@@ -42,5 +42,3 @@ function SidebarNavigation(props: SidebarNavigationProps) {
     </nav>
   );
 }
-
-export { SidebarNavigation };

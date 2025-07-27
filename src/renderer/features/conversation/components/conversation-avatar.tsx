@@ -56,7 +56,7 @@ interface ConversationAvatarProps {
   showStatus?: boolean;
 }
 
-function ConversationAvatar(props: ConversationAvatarProps) {
+export function ConversationAvatar(props: ConversationAvatarProps) {
   const {
     participants,
     availableUsers,
@@ -246,5 +246,3 @@ function ConversationAvatar(props: ConversationAvatarProps) {
     </div>
   );
 }
-
-export { ConversationAvatar };

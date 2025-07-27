@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter, useSearch } from "@tanstack/react-router";
-import { LogIn, User } from "lucide-react";
+import { LogIn, User, Loader2 } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
@@ -15,9 +15,8 @@ import {
   FormMessage,
 } from "@/renderer/components/ui/form";
 import { Input } from "@/renderer/components/ui/input";
-import { StatusIndicator } from "@/renderer/components/shared";
 import { useAuth } from "@/renderer/contexts/auth.context";
-import { AuthCard } from "@/renderer/features/auth/components/auth-card";
+import { AuthCard } from "@/renderer/features/auth/components/auth-layout";
 
 const loginSchema = z.object({
   username: z
@@ -37,7 +36,7 @@ interface LoginFormProps {
   className?: string;
 }
 
-function LoginForm(props: LoginFormProps) {
+export function LoginForm(props: LoginFormProps) {
   const { className } = props;
   const router = useRouter();
   const { login } = useAuth();
@@ -75,7 +74,7 @@ function LoginForm(props: LoginFormProps) {
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(handleSubmit)}
-          className="space-y-[var(--spacing-component-lg)]"
+          className="space-y-8"
           noValidate
           aria-label="Sign in form"
         >
@@ -84,9 +83,7 @@ function LoginForm(props: LoginFormProps) {
             name="username"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-[var(--font-size-sm)] font-[var(--font-weight-medium)] text-foreground">
-                  Username
-                </FormLabel>
+                <FormLabel>Username</FormLabel>
                 <FormControl>
                   <div className="relative">
                     <User
@@ -98,7 +95,7 @@ function LoginForm(props: LoginFormProps) {
                       type="text"
                       placeholder="Enter your username"
                       disabled={form.formState.isSubmitting}
-                      className="pl-10 h-11 text-[var(--font-size-base)] transition-all duration-200 focus:ring-2 focus:ring-primary/20"
+                      className="pl-10"
                       aria-describedby={field.name + "-error"}
                       autoComplete="username"
                     />
@@ -114,16 +111,14 @@ function LoginForm(props: LoginFormProps) {
             name="password"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-[var(--font-size-sm)] font-[var(--font-weight-medium)] text-foreground">
-                  Password
-                </FormLabel>
+                <FormLabel>Password</FormLabel>
                 <FormControl>
                   <Input
                     {...field}
                     type="password"
                     placeholder="Enter your password"
                     disabled={form.formState.isSubmitting}
-                    className="h-11 text-[var(--font-size-base)] transition-all duration-200 focus:ring-2 focus:ring-primary/20"
+                    className=""
                     aria-describedby={field.name + "-error"}
                     autoComplete="current-password"
                   />
@@ -133,26 +128,22 @@ function LoginForm(props: LoginFormProps) {
             )}
           />
 
-          <div className="flex flex-col space-y-[var(--spacing-component-md)] pt-[var(--spacing-component-sm)]">
+          <div className="flex flex-col space-y-6 pt-4">
             <Button
               type="submit"
               disabled={form.formState.isSubmitting}
-              className="w-full h-11 text-[var(--font-size-base)] font-[var(--font-weight-medium)] transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
+              className="w-full"
               aria-describedby="login-status"
             >
               {form.formState.isSubmitting ? (
                 <>
-                  <StatusIndicator.Loading
-                    size="sm"
-                    showLabel={false}
-                    className="mr-2"
-                  />
-                  <span>Signing in...</span>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Signing in...
                 </>
               ) : (
                 <>
                   <LogIn className="mr-2 h-4 w-4" aria-hidden="true" />
-                  <span>Sign In</span>
+                  Sign In
                 </>
               )}
             </Button>
@@ -166,11 +157,11 @@ function LoginForm(props: LoginFormProps) {
             )}
 
             <div className="text-center">
-              <p className="text-[var(--font-size-sm)] text-muted-foreground">
+              <p className="text-sm text-muted-foreground">
                 Need an account?{" "}
                 <Button
                   variant="link"
-                  className="p-0 h-auto font-[var(--font-weight-medium)] text-[var(--font-size-sm)] hover:underline focus:underline transition-colors"
+                  className="p-0 h-auto font-medium"
                   onClick={() => router.navigate({ to: "/auth/register" })}
                   type="button"
                 >
@@ -184,5 +175,3 @@ function LoginForm(props: LoginFormProps) {
     </AuthCard>
   );
 }
-
-export { LoginForm };

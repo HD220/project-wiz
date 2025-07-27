@@ -31,11 +31,7 @@ import {
   TooltipTrigger,
 } from "@/renderer/components/ui/tooltip";
 import type { SelectAgent } from "@/renderer/features/agent/agent.types";
-import {
-  StatusIndicator,
-  StatusDot,
-  StatusLabel,
-} from "@/renderer/features/agent/components/agent-status-badge";
+import { AgentStatus } from "@/renderer/components/agent-status";
 import { cn } from "@/renderer/lib/utils";
 
 interface AgentListCardProps {
@@ -45,7 +41,7 @@ interface AgentListCardProps {
   onToggleStatus?: (agent: SelectAgent) => void;
 }
 
-function AgentListCard(props: AgentListCardProps) {
+export function AgentListCard(props: AgentListCardProps) {
   const { agent, onDelete, onRestore, onToggleStatus } = props;
 
   function handleDelete() {
@@ -143,10 +139,7 @@ function AgentListCard(props: AgentListCardProps) {
         <div className="flex items-center gap-3 shrink-0">
           {/* Only show status indicator for active agents */}
           {agent.isActive && (
-            <StatusIndicator status={agent.status} size="sm" className="border">
-              <StatusDot status={agent.status} size="sm" />
-              <StatusLabel status={agent.status} />
-            </StatusIndicator>
+            <AgentStatus status={agent.status} size="sm" className="border" />
           )}
 
           {/* Actions Menu */}
@@ -220,5 +213,3 @@ function AgentListCard(props: AgentListCardProps) {
     </Card>
   );
 }
-
-export { AgentListCard };

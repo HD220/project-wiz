@@ -14,7 +14,9 @@ interface EditProviderSettingsSectionProps {
   form: UseFormReturn<ProviderFormData>;
 }
 
-function EditProviderSettingsSection(props: EditProviderSettingsSectionProps) {
+export function EditProviderSettingsSection(
+  props: EditProviderSettingsSectionProps,
+) {
   const { form } = props;
 
   return (
@@ -63,5 +65,3 @@ function EditProviderSettingsSection(props: EditProviderSettingsSectionProps) {
     </div>
   );
 }
-
-export { EditProviderSettingsSection };

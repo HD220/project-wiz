@@ -21,7 +21,7 @@ interface CreateProjectDialogProps {
   className?: string;
 }
 
-function CreateProjectDialog(props: CreateProjectDialogProps) {
+export function CreateProjectDialog(props: CreateProjectDialogProps) {
   const { children, onSuccess, variant = "default", className } = props;
   const [open, setOpen] = useState(false);
   const navigate = useNavigate();
@@ -93,21 +93,8 @@ function CreateProjectDialog(props: CreateProjectDialogProps) {
 }
 
 // Compound component pattern for better composition
-const CreateProjectDialogTrigger = DialogTrigger;
-const CreateProjectDialogContent = DialogContent;
-const CreateProjectDialogHeader = DialogHeader;
-const CreateProjectDialogTitle = DialogTitle;
-const CreateProjectDialogDescription = DialogDescription;
-
-// Export main component and compound parts
-export {
-  CreateProjectDialog,
-  CreateProjectDialogTrigger,
-  CreateProjectDialogContent,
-  CreateProjectDialogHeader,
-  CreateProjectDialogTitle,
-  CreateProjectDialogDescription,
-};
-
-// Re-export for backwards compatibility
-export { CreateProjectDialog as default };
+export const CreateProjectDialogTrigger = DialogTrigger;
+export const CreateProjectDialogContent = DialogContent;
+export const CreateProjectDialogHeader = DialogHeader;
+export const CreateProjectDialogTitle = DialogTitle;
+export const CreateProjectDialogDescription = DialogDescription;

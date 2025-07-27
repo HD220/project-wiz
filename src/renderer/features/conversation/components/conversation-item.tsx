@@ -28,7 +28,7 @@ interface ConversationAvatarProps {
   className?: string;
 }
 
-function ConversationAvatar({
+export function ConversationAvatar({
   otherParticipants,
   className,
 }: ConversationAvatarProps) {
@@ -66,7 +66,7 @@ interface ConversationHeaderProps {
   otherParticipants: AuthenticatedUser[];
 }
 
-function ConversationHeader({
+export function ConversationHeader({
   displayName,
   otherParticipants,
 }: ConversationHeaderProps) {
@@ -91,7 +91,7 @@ interface MessagePreviewProps {
   timeAgo: string;
 }
 
-function MessagePreview({ lastMessage, timeAgo }: MessagePreviewProps) {
+export function MessagePreview({ lastMessage, timeAgo }: MessagePreviewProps) {
   const messagePreview = lastMessage
     ? lastMessage.content.length > 60
       ? `${lastMessage.content.substring(0, 60)}...`
@@ -118,7 +118,9 @@ interface GroupParticipantsProps {
   otherParticipants: AuthenticatedUser[];
 }
 
-function GroupParticipants({ otherParticipants }: GroupParticipantsProps) {
+export function GroupParticipants({
+  otherParticipants,
+}: GroupParticipantsProps) {
   if (otherParticipants.length <= 1) return null;
 
   return (
@@ -135,7 +137,7 @@ function GroupParticipants({ otherParticipants }: GroupParticipantsProps) {
   );
 }
 
-function ConversationItem(props: ConversationItemProps) {
+export function ConversationItem(props: ConversationItemProps) {
   const {
     conversation,
     lastMessage,
@@ -213,5 +215,3 @@ function ConversationItem(props: ConversationItemProps) {
     </div>
   );
 }
-
-export { ConversationItem };

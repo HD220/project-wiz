@@ -12,7 +12,7 @@ interface UserStatusProps {
   className?: string;
 }
 
-function UserStatus(props: UserStatusProps) {
+export function UserStatus(props: UserStatusProps) {
   const { status = "online", className } = props;
 
   const statusConfig: Record<UserStatusType, UserStatusConfig> = {
@@ -32,5 +32,4 @@ function UserStatus(props: UserStatusProps) {
   );
 }
 
-export { UserStatus };
 export type { UserStatusType, UserStatusConfig };
