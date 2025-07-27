@@ -1,1 +1,0 @@
-ALTER TABLE `conversations` DROP COLUMN `archived_reason`;

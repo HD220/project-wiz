@@ -384,3 +384,33 @@ class ConversationService {
 4. **LLMs can understand** the full context at once
 
 **Abstraction is a tool, not a goal. Use it when it genuinely helps, not because "clean code" says so.**
+
+---
+
+## 🔗 Related Documentation
+
+### **📖 Must Read Next**
+
+- **[Contributing Guide](./contributing.md)** - Workflow that implements these principles **(15 min)**
+- **[Coding Standards](./coding-standards.md)** - File naming and structure patterns **(10 min)**
+- **[Data Loading Patterns](./data-loading-patterns.md)** - INLINE-FIRST in frontend **(15 min)**
+
+### **🏗️ Implementation Patterns**
+
+- **[Database Patterns](./database-patterns.md)** - INLINE-FIRST in services **(15 min)**
+- **[IPC Communication](./ipc-communication-patterns.md)** - Simple service → handler pattern **(15 min)**
+- **[Error Handling](./error-handling-patterns.md)** - Consistent error management **(15 min)**
+
+### **🔙 Navigation**
+
+- **[← Back to Developer Guide](./README.md)**
+- **[↑ Main Documentation](../README.md)**
+- **[🔍 Search & Glossary](../glossary-and-search.md)** - Find specific concepts
+
+### **🎯 Apply These Principles**
+
+- **Next Step:** Read [Contributing Guide](./contributing.md) to see these principles in practice
+- **Practice:** Review existing code with the [Red Flags checklist](#red-flags-refactor-these)
+- **Implement:** Start with a small feature following [Database Patterns](./database-patterns.md)
+
+**💡 Remember:** These principles guide ALL development patterns in Project Wiz. When in doubt, choose the more inline, more readable option.

@@ -241,3 +241,39 @@ loader: async ({ deps }) => {
 - **NEVER use `useRouteContext`** - This is NOT part of our patterns
 - **`search` parameter** should ONLY be used for actual URL-based search/filtering, NOT for every Link
 - **AVOID:** Creating stores for simple UI state that could be local React state or URL parameters
+
+---
+
+## 🔗 Related Documentation
+
+### **📖 Essential Context**
+
+- **[Code Simplicity Principles](./code-simplicity-principles.md)** - INLINE-FIRST philosophy **(10 min)**
+- **[IPC Communication](./ipc-communication-patterns.md)** - How `window.api` calls work **(15 min)**
+- **[Database Patterns](./database-patterns.md)** - Backend data that gets loaded **(15 min)**
+
+### **🏗️ Frontend Implementation**
+
+- **[Coding Standards](./coding-standards.md)** - React component patterns **(10 min)**
+- **[Error Handling](./error-handling-patterns.md)** - Frontend error management **(15 min)**
+- **[Folder Structure](./folder-structure.md)** - Where to place components and hooks **(5 min)**
+
+### **⚡ Advanced Topics**
+
+- **[Technical Guides](../technical-guides/)** - Performance optimization and AI integration
+- **[Architecture Documentation](./architecture/)** - System design decisions
+
+### **🔙 Navigation**
+
+- **[← Back to Developer Guide](./README.md)**
+- **[↑ Main Documentation](../README.md)**
+- **[🔍 Search & Glossary](../glossary-and-search.md)** - Find specific patterns
+
+### **🎯 Implementation Flow**
+
+1. **Start Here** - Learn the hierarchy and patterns
+2. **Next:** [IPC Communication](./ipc-communication-patterns.md) - Understand `window.api`
+3. **Then:** [Database Patterns](./database-patterns.md) - See backend data sources
+4. **Finally:** [Coding Standards](./coding-standards.md) - Apply in React components
+
+**💡 Remember:** This hierarchy is MANDATORY. Always check if a higher-priority pattern can handle your use case before creating custom solutions.

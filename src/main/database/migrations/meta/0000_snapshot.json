@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "3a22b3db-f8d4-4ae1-be71-ad1931829d46",
+  "id": "7ee92a25-c3a4-44a2-a94b-0f1e1136858d",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "agents": {
@@ -85,13 +85,35 @@
           "notNull": true,
           "autoincrement": false
         },
+        "is_active": {
+          "name": "is_active",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": true
+        },
+        "deactivated_at": {
+          "name": "deactivated_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "deactivated_by": {
+          "name": "deactivated_by",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
         "created_at": {
           "name": "created_at",
           "type": "integer",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false,
-          "default": "(strftime('%s', 'now'))"
+          "default": "(strftime('%s', 'now') * 1000)"
         },
         "updated_at": {
           "name": "updated_at",
@@ -99,7 +121,7 @@
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false,
-          "default": "(strftime('%s', 'now'))"
+          "default": "(strftime('%s', 'now') * 1000)"
         }
       },
       "indexes": {
@@ -121,6 +143,21 @@
         "agents_status_idx": {
           "name": "agents_status_idx",
           "columns": ["status"],
+          "isUnique": false
+        },
+        "agents_deactivated_by_idx": {
+          "name": "agents_deactivated_by_idx",
+          "columns": ["deactivated_by"],
+          "isUnique": false
+        },
+        "agents_is_active_idx": {
+          "name": "agents_is_active_idx",
+          "columns": ["is_active"],
+          "isUnique": false
+        },
+        "agents_is_active_created_at_idx": {
+          "name": "agents_is_active_created_at_idx",
+          "columns": ["is_active", "created_at"],
           "isUnique": false
         }
       },
@@ -150,6 +187,15 @@
           "columnsFrom": ["provider_id"],
           "columnsTo": ["id"],
           "onDelete": "restrict",
+          "onUpdate": "no action"
+        },
+        "agents_deactivated_by_users_id_fk": {
+          "name": "agents_deactivated_by_users_id_fk",
+          "tableFrom": "agents",
+          "tableTo": "users",
+          "columnsFrom": ["deactivated_by"],
+          "columnsTo": ["id"],
+          "onDelete": "no action",
           "onUpdate": "no action"
         }
       },
@@ -226,6 +272,20 @@
           "autoincrement": false,
           "default": true
         },
+        "deactivated_at": {
+          "name": "deactivated_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "deactivated_by": {
+          "name": "deactivated_by",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
         "created_at": {
           "name": "created_at",
           "type": "integer",
@@ -263,6 +323,16 @@
           "name": "llm_providers_is_active_idx",
           "columns": ["is_active"],
           "isUnique": false
+        },
+        "llm_providers_deactivated_by_idx": {
+          "name": "llm_providers_deactivated_by_idx",
+          "columns": ["deactivated_by"],
+          "isUnique": false
+        },
+        "llm_providers_is_active_created_at_idx": {
+          "name": "llm_providers_is_active_created_at_idx",
+          "columns": ["is_active", "created_at"],
+          "isUnique": false
         }
       },
       "foreignKeys": {
@@ -273,6 +343,15 @@
           "columnsFrom": ["user_id"],
           "columnsTo": ["id"],
           "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "llm_providers_deactivated_by_users_id_fk": {
+          "name": "llm_providers_deactivated_by_users_id_fk",
+          "tableFrom": "llm_providers",
+          "tableTo": "users",
+          "columnsFrom": ["deactivated_by"],
+          "columnsTo": ["id"],
+          "onDelete": "no action",
           "onUpdate": "no action"
         }
       },
@@ -393,6 +472,28 @@
           "notNull": false,
           "autoincrement": false
         },
+        "is_active": {
+          "name": "is_active",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": true
+        },
+        "deactivated_at": {
+          "name": "deactivated_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "deactivated_by": {
+          "name": "deactivated_by",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
         "created_at": {
           "name": "created_at",
           "type": "integer",
@@ -424,6 +525,11 @@
         "agent_memories_conversation_id_idx": {
           "name": "agent_memories_conversation_id_idx",
           "columns": ["conversation_id"],
+          "isUnique": false
+        },
+        "agent_memories_deactivated_by_idx": {
+          "name": "agent_memories_deactivated_by_idx",
+          "columns": ["deactivated_by"],
           "isUnique": false
         },
         "agent_memories_type_idx": {
@@ -459,6 +565,16 @@
         "agent_memories_created_at_idx": {
           "name": "agent_memories_created_at_idx",
           "columns": ["created_at"],
+          "isUnique": false
+        },
+        "agent_memories_is_active_idx": {
+          "name": "agent_memories_is_active_idx",
+          "columns": ["is_active"],
+          "isUnique": false
+        },
+        "agent_memories_is_active_created_at_idx": {
+          "name": "agent_memories_is_active_created_at_idx",
+          "columns": ["is_active", "created_at"],
           "isUnique": false
         },
         "agent_memories_agent_user_idx": {
@@ -509,6 +625,15 @@
           "columnsTo": ["id"],
           "onDelete": "set null",
           "onUpdate": "no action"
+        },
+        "agent_memories_deactivated_by_users_id_fk": {
+          "name": "agent_memories_deactivated_by_users_id_fk",
+          "tableFrom": "agent_memories",
+          "tableTo": "users",
+          "columnsFrom": ["deactivated_by"],
+          "columnsTo": ["id"],
+          "onDelete": "no action",
+          "onUpdate": "no action"
         }
       },
       "compositePrimaryKeys": {},
@@ -554,6 +679,28 @@
           "autoincrement": false,
           "default": 0.5
         },
+        "is_active": {
+          "name": "is_active",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": true
+        },
+        "deactivated_at": {
+          "name": "deactivated_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "deactivated_by": {
+          "name": "deactivated_by",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
         "created_at": {
           "name": "created_at",
           "type": "integer",
@@ -584,6 +731,21 @@
           "columns": ["strength"],
           "isUnique": false
         },
+        "memory_relations_deactivated_by_idx": {
+          "name": "memory_relations_deactivated_by_idx",
+          "columns": ["deactivated_by"],
+          "isUnique": false
+        },
+        "memory_relations_is_active_idx": {
+          "name": "memory_relations_is_active_idx",
+          "columns": ["is_active"],
+          "isUnique": false
+        },
+        "memory_relations_is_active_created_at_idx": {
+          "name": "memory_relations_is_active_created_at_idx",
+          "columns": ["is_active", "created_at"],
+          "isUnique": false
+        },
         "memory_relations_source_relation_idx": {
           "name": "memory_relations_source_relation_idx",
           "columns": ["source_memory_id", "relation_type"],
@@ -612,6 +774,15 @@
           "columnsFrom": ["target_memory_id"],
           "columnsTo": ["id"],
           "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "memory_relations_deactivated_by_users_id_fk": {
+          "name": "memory_relations_deactivated_by_users_id_fk",
+          "tableFrom": "memory_relations",
+          "tableTo": "users",
+          "columnsFrom": ["deactivated_by"],
+          "columnsTo": ["id"],
+          "onDelete": "no action",
           "onUpdate": "no action"
         }
       },
@@ -723,6 +894,28 @@
           "notNull": true,
           "autoincrement": false
         },
+        "is_active": {
+          "name": "is_active",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": true
+        },
+        "deactivated_at": {
+          "name": "deactivated_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "deactivated_by": {
+          "name": "deactivated_by",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
         "created_at": {
           "name": "created_at",
           "type": "integer",
@@ -759,6 +952,21 @@
           "name": "user_sessions_expires_at_idx",
           "columns": ["expires_at"],
           "isUnique": false
+        },
+        "user_sessions_deactivated_by_idx": {
+          "name": "user_sessions_deactivated_by_idx",
+          "columns": ["deactivated_by"],
+          "isUnique": false
+        },
+        "user_sessions_is_active_idx": {
+          "name": "user_sessions_is_active_idx",
+          "columns": ["is_active"],
+          "isUnique": false
+        },
+        "user_sessions_is_active_created_at_idx": {
+          "name": "user_sessions_is_active_created_at_idx",
+          "columns": ["is_active", "created_at"],
+          "isUnique": false
         }
       },
       "foreignKeys": {
@@ -769,6 +977,15 @@
           "columnsFrom": ["user_id"],
           "columnsTo": ["id"],
           "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "user_sessions_deactivated_by_users_id_fk": {
+          "name": "user_sessions_deactivated_by_users_id_fk",
+          "tableFrom": "user_sessions",
+          "tableTo": "users",
+          "columnsFrom": ["deactivated_by"],
+          "columnsTo": ["id"],
+          "onDelete": "no action",
           "onUpdate": "no action"
         }
       },
@@ -800,6 +1017,28 @@
           "notNull": true,
           "autoincrement": false
         },
+        "is_active": {
+          "name": "is_active",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": true
+        },
+        "deactivated_at": {
+          "name": "deactivated_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "deactivated_by": {
+          "name": "deactivated_by",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
         "created_at": {
           "name": "created_at",
           "type": "integer",
@@ -828,6 +1067,21 @@
           "columns": ["participant_id"],
           "isUnique": false
         },
+        "conversation_participants_deactivated_by_idx": {
+          "name": "conversation_participants_deactivated_by_idx",
+          "columns": ["deactivated_by"],
+          "isUnique": false
+        },
+        "conversation_participants_is_active_idx": {
+          "name": "conversation_participants_is_active_idx",
+          "columns": ["is_active"],
+          "isUnique": false
+        },
+        "conversation_participants_is_active_created_at_idx": {
+          "name": "conversation_participants_is_active_created_at_idx",
+          "columns": ["is_active", "created_at"],
+          "isUnique": false
+        },
         "conversation_participants_conversation_participant_idx": {
           "name": "conversation_participants_conversation_participant_idx",
           "columns": ["conversation_id", "participant_id"],
@@ -851,6 +1105,15 @@
           "columnsFrom": ["participant_id"],
           "columnsTo": ["id"],
           "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "conversation_participants_deactivated_by_users_id_fk": {
+          "name": "conversation_participants_deactivated_by_users_id_fk",
+          "tableFrom": "conversation_participants",
+          "tableTo": "users",
+          "columnsFrom": ["deactivated_by"],
+          "columnsTo": ["id"],
+          "onDelete": "no action",
           "onUpdate": "no action"
         }
       },
@@ -890,6 +1153,42 @@
           "autoincrement": false,
           "default": "'dm'"
         },
+        "archived_at": {
+          "name": "archived_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "archived_by": {
+          "name": "archived_by",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "is_active": {
+          "name": "is_active",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": true
+        },
+        "deactivated_at": {
+          "name": "deactivated_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "deactivated_by": {
+          "name": "deactivated_by",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
         "created_at": {
           "name": "created_at",
           "type": "integer",
@@ -917,9 +1216,58 @@
           "name": "conversations_created_at_idx",
           "columns": ["created_at"],
           "isUnique": false
+        },
+        "conversations_deactivated_by_idx": {
+          "name": "conversations_deactivated_by_idx",
+          "columns": ["deactivated_by"],
+          "isUnique": false
+        },
+        "conversations_archived_by_idx": {
+          "name": "conversations_archived_by_idx",
+          "columns": ["archived_by"],
+          "isUnique": false
+        },
+        "conversations_is_active_idx": {
+          "name": "conversations_is_active_idx",
+          "columns": ["is_active"],
+          "isUnique": false
+        },
+        "conversations_is_active_created_at_idx": {
+          "name": "conversations_is_active_created_at_idx",
+          "columns": ["is_active", "created_at"],
+          "isUnique": false
+        },
+        "conversations_archived_at_idx": {
+          "name": "conversations_archived_at_idx",
+          "columns": ["archived_at"],
+          "isUnique": false
+        },
+        "conversations_is_active_archived_at_idx": {
+          "name": "conversations_is_active_archived_at_idx",
+          "columns": ["is_active", "archived_at"],
+          "isUnique": false
         }
       },
-      "foreignKeys": {},
+      "foreignKeys": {
+        "conversations_archived_by_users_id_fk": {
+          "name": "conversations_archived_by_users_id_fk",
+          "tableFrom": "conversations",
+          "tableTo": "users",
+          "columnsFrom": ["archived_by"],
+          "columnsTo": ["id"],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "conversations_deactivated_by_users_id_fk": {
+          "name": "conversations_deactivated_by_users_id_fk",
+          "tableFrom": "conversations",
+          "tableTo": "users",
+          "columnsFrom": ["deactivated_by"],
+          "columnsTo": ["id"],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},
       "checkConstraints": {}
@@ -948,15 +1296,30 @@
           "notNull": true,
           "autoincrement": false
         },
-        "tool_calls": {
-          "name": "tool_calls",
+        "content": {
+          "name": "content",
           "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "is_active": {
+          "name": "is_active",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": true
+        },
+        "deactivated_at": {
+          "name": "deactivated_at",
+          "type": "integer",
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false
         },
-        "metadata": {
-          "name": "metadata",
+        "deactivated_by": {
+          "name": "deactivated_by",
           "type": "text",
           "primaryKey": false,
           "notNull": false,
@@ -968,7 +1331,7 @@
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false,
-          "default": "CURRENT_TIMESTAMP"
+          "default": "(unixepoch() * 1000)"
         },
         "updated_at": {
           "name": "updated_at",
@@ -976,7 +1339,7 @@
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false,
-          "default": "CURRENT_TIMESTAMP"
+          "default": "(unixepoch() * 1000)"
         }
       },
       "indexes": {
@@ -994,6 +1357,21 @@
           "name": "llm_messages_created_at_idx",
           "columns": ["created_at"],
           "isUnique": false
+        },
+        "llm_messages_deactivated_by_idx": {
+          "name": "llm_messages_deactivated_by_idx",
+          "columns": ["deactivated_by"],
+          "isUnique": false
+        },
+        "llm_messages_is_active_idx": {
+          "name": "llm_messages_is_active_idx",
+          "columns": ["is_active"],
+          "isUnique": false
+        },
+        "llm_messages_is_active_created_at_idx": {
+          "name": "llm_messages_is_active_created_at_idx",
+          "columns": ["is_active", "created_at"],
+          "isUnique": false
         }
       },
       "foreignKeys": {
@@ -1004,6 +1382,15 @@
           "columnsFrom": ["message_id"],
           "columnsTo": ["id"],
           "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "llm_messages_deactivated_by_users_id_fk": {
+          "name": "llm_messages_deactivated_by_users_id_fk",
+          "tableFrom": "llm_messages",
+          "tableTo": "users",
+          "columnsFrom": ["deactivated_by"],
+          "columnsTo": ["id"],
+          "onDelete": "no action",
           "onUpdate": "no action"
         }
       },
@@ -1042,13 +1429,35 @@
           "notNull": true,
           "autoincrement": false
         },
+        "is_active": {
+          "name": "is_active",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": true
+        },
+        "deactivated_at": {
+          "name": "deactivated_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "deactivated_by": {
+          "name": "deactivated_by",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
         "created_at": {
           "name": "created_at",
           "type": "integer",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false,
-          "default": "CURRENT_TIMESTAMP"
+          "default": "(unixepoch() * 1000)"
         },
         "updated_at": {
           "name": "updated_at",
@@ -1056,7 +1465,7 @@
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false,
-          "default": "CURRENT_TIMESTAMP"
+          "default": "(unixepoch() * 1000)"
         }
       },
       "indexes": {
@@ -1073,6 +1482,21 @@
         "messages_created_at_idx": {
           "name": "messages_created_at_idx",
           "columns": ["created_at"],
+          "isUnique": false
+        },
+        "messages_deactivated_by_idx": {
+          "name": "messages_deactivated_by_idx",
+          "columns": ["deactivated_by"],
+          "isUnique": false
+        },
+        "messages_is_active_idx": {
+          "name": "messages_is_active_idx",
+          "columns": ["is_active"],
+          "isUnique": false
+        },
+        "messages_is_active_created_at_idx": {
+          "name": "messages_is_active_created_at_idx",
+          "columns": ["is_active", "created_at"],
           "isUnique": false
         },
         "messages_conversation_time_idx": {
@@ -1098,6 +1522,15 @@
           "columnsFrom": ["author_id"],
           "columnsTo": ["id"],
           "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "messages_deactivated_by_users_id_fk": {
+          "name": "messages_deactivated_by_users_id_fk",
+          "tableFrom": "messages",
+          "tableTo": "users",
+          "columnsFrom": ["deactivated_by"],
+          "columnsTo": ["id"],
+          "onDelete": "no action",
           "onUpdate": "no action"
         }
       },
@@ -1172,6 +1605,28 @@
           "autoincrement": false,
           "default": "'active'"
         },
+        "is_active": {
+          "name": "is_active",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": true
+        },
+        "deactivated_at": {
+          "name": "deactivated_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "deactivated_by": {
+          "name": "deactivated_by",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
         "created_at": {
           "name": "created_at",
           "type": "integer",
@@ -1189,7 +1644,33 @@
           "default": "(strftime('%s', 'now'))"
         }
       },
-      "indexes": {},
+      "indexes": {
+        "projects_owner_id_idx": {
+          "name": "projects_owner_id_idx",
+          "columns": ["owner_id"],
+          "isUnique": false
+        },
+        "projects_status_idx": {
+          "name": "projects_status_idx",
+          "columns": ["status"],
+          "isUnique": false
+        },
+        "projects_deactivated_by_idx": {
+          "name": "projects_deactivated_by_idx",
+          "columns": ["deactivated_by"],
+          "isUnique": false
+        },
+        "projects_is_active_idx": {
+          "name": "projects_is_active_idx",
+          "columns": ["is_active"],
+          "isUnique": false
+        },
+        "projects_is_active_created_at_idx": {
+          "name": "projects_is_active_created_at_idx",
+          "columns": ["is_active", "created_at"],
+          "isUnique": false
+        }
+      },
       "foreignKeys": {
         "projects_owner_id_users_id_fk": {
           "name": "projects_owner_id_users_id_fk",
@@ -1198,6 +1679,15 @@
           "columnsFrom": ["owner_id"],
           "columnsTo": ["id"],
           "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "projects_deactivated_by_users_id_fk": {
+          "name": "projects_deactivated_by_users_id_fk",
+          "tableFrom": "projects",
+          "tableTo": "users",
+          "columnsFrom": ["deactivated_by"],
+          "columnsTo": ["id"],
+          "onDelete": "no action",
           "onUpdate": "no action"
         }
       },
@@ -1306,6 +1796,28 @@
           "autoincrement": false,
           "default": "'human'"
         },
+        "is_active": {
+          "name": "is_active",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": true
+        },
+        "deactivated_at": {
+          "name": "deactivated_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "deactivated_by": {
+          "name": "deactivated_by",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
         "created_at": {
           "name": "created_at",
           "type": "integer",
@@ -1323,7 +1835,23 @@
           "default": "CURRENT_TIMESTAMP"
         }
       },
-      "indexes": {},
+      "indexes": {
+        "users_is_active_idx": {
+          "name": "users_is_active_idx",
+          "columns": ["is_active"],
+          "isUnique": false
+        },
+        "users_is_active_created_at_idx": {
+          "name": "users_is_active_created_at_idx",
+          "columns": ["is_active", "created_at"],
+          "isUnique": false
+        },
+        "users_deactivated_by_idx": {
+          "name": "users_deactivated_by_idx",
+          "columns": ["deactivated_by"],
+          "isUnique": false
+        }
+      },
       "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},
