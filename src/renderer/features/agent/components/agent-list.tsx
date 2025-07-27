@@ -1,5 +1,13 @@
 import { Link, useNavigate, useSearch } from "@tanstack/react-router";
-import { Filter, Plus, Search, Eye, EyeOff } from "lucide-react";
+import {
+  Filter,
+  Plus,
+  Search,
+  Eye,
+  EyeOff,
+  Users,
+  AlertCircle,
+} from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
@@ -13,6 +21,8 @@ import {
   SelectValue,
 } from "@/renderer/components/ui/select";
 import { Switch } from "@/renderer/components/ui/switch";
+import { Separator } from "@/renderer/components/ui/separator";
+import { Badge } from "@/renderer/components/ui/badge";
 import type {
   SelectAgent,
   AgentStatus,
@@ -27,16 +37,16 @@ interface AgentListProps {
 }
 
 function AgentList(props: AgentListProps) {
-  const { agents, showInactive = false } = props;
+  const { agents } = props;
 
-  // SIMPLE: Get URL search params and navigation
+  // Get URL search params and navigation following INLINE-FIRST principles
   const search = useSearch({ from: "/_authenticated/user/agents" });
   const navigate = useNavigate();
 
-  // SIMPLE: Local state for UI only
+  // Local state for UI interactions only
   const [agentToDelete, setAgentToDelete] = useState<SelectAgent | null>(null);
 
-  // Delete agent mutation with inline messages
+  // Inline API mutations with proper error handling
   const deleteAgentMutation = useApiMutation(
     (id: string) => window.api.agents.delete(id),
     {
@@ -46,7 +56,6 @@ function AgentList(props: AgentListProps) {
     },
   );
 
-  // Restore agent mutation
   const restoreAgentMutation = useApiMutation(
     (id: string) => window.api.agents.restore(id),
     {
@@ -56,7 +65,6 @@ function AgentList(props: AgentListProps) {
     },
   );
 
-  // Custom mutation for status toggle
   const toggleStatusMutation = useApiMutation(
     ({ id, status }: { id: string; status: AgentStatus }) =>
       window.api.agents.updateStatus(id, status),
@@ -65,6 +73,7 @@ function AgentList(props: AgentListProps) {
     },
   );
 
+  // Inline action handlers following INLINE-FIRST principles
   function handleDelete(agent: SelectAgent) {
     setAgentToDelete(agent);
   }
@@ -83,6 +92,8 @@ function AgentList(props: AgentListProps) {
     const newStatus: AgentStatus =
       agent.status === "active" ? "inactive" : "active";
     toggleStatusMutation.mutate({ id: agent.id, status: newStatus });
+
+    // Inline success message with proper status text
     toast.success(
       `Agent ${newStatus === "active" ? "activated" : "deactivated"}`,
     );
@@ -126,47 +137,60 @@ function AgentList(props: AgentListProps) {
     });
   }
 
-  // SIMPLE: Check if we have filters for UI purposes
-  const hasFilters = search.status || search.search || search.showInactive;
-
-  // Filter agents based on soft deletion state (isActive field)
-  // Note: Backend already filters by isActive, this is just for UI consistency
-  const filteredAgents = agents; // Backend already handles isActive filtering
+  // Inline filter checking and agent categorization following INLINE-FIRST principles
+  const hasFilters = !!(search.status || search.search || search.showInactive);
+  const filteredAgents = agents; // Backend already handles filtering
   const activeAgents = agents.filter((agent) => agent.isActive);
   const inactiveAgents = agents.filter((agent) => !agent.isActive);
 
-  // SIMPLE: Empty state when no agents and no filters
+  // Inline statistics calculation for UI display
+  const agentStats = {
+    total: filteredAgents.length,
+    active: activeAgents.length,
+    inactive: inactiveAgents.length,
+    busy: agents.filter((agent) => agent.status === "busy").length,
+  };
+
+  // Render empty state when no agents exist and no filters are applied
   if (filteredAgents.length === 0 && !hasFilters) {
     return (
-      <div className="space-y-6">
-        {/* Header with Add Button */}
+      <div className="space-y-8">
+        {/* Page Header */}
         <div className="flex items-center justify-between">
-          <div className="space-y-1">
-            <h3 className="font-medium">Your AI Agents</h3>
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              <Users className="size-5 text-muted-foreground" />
+              <h2 className="text-lg font-semibold tracking-tight">
+                AI Agents
+              </h2>
+            </div>
             <p className="text-sm text-muted-foreground">
-              Create and manage your AI agents
+              Create and manage intelligent AI agents for your projects
             </p>
           </div>
           <Link to="/user/agents/new">
-            <Button className="gap-2 shrink-0">
-              <Plus className="h-4 w-4" />
+            <Button className="gap-2">
+              <Plus className="size-4" />
               Create Agent
             </Button>
           </Link>
         </div>
 
+        <Separator />
+
         {/* Empty State */}
-        <div className="text-center py-12">
-          <div className="mx-auto h-12 w-12 bg-muted rounded-lg flex items-center justify-center mb-4">
-            <Plus className="h-6 w-6 text-muted-foreground" />
+        <div className="flex flex-col items-center justify-center py-16 text-center">
+          <div className="mb-6 rounded-2xl bg-muted/50 p-4">
+            <Users className="size-8 text-muted-foreground" />
           </div>
-          <h3 className="text-lg font-semibold mb-2">No agents created yet</h3>
-          <p className="text-muted-foreground text-sm mb-4">
-            Create your first AI agent to get started
+          <h3 className="mb-2 text-lg font-semibold">No agents created yet</h3>
+          <p className="mb-6 max-w-sm text-sm text-muted-foreground">
+            Create your first AI agent to start automating tasks and improving
+            productivity
           </p>
           <Link to="/user/agents/new">
-            <Button>
-              <Plus className="h-4 w-4 mr-2" />
+            <Button size="lg" className="gap-2">
+              <Plus className="size-4" />
               Create Your First Agent
             </Button>
           </Link>
@@ -177,28 +201,55 @@ function AgentList(props: AgentListProps) {
 
   return (
     <>
-      <div className="space-y-6">
-        {/* Header Actions */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            {/* Search */}
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Search agents..."
-                value={search.search || ""}
-                onChange={(event) => handleSearchChange(event.target.value)}
-                className="pl-9 w-64"
-              />
+      <div className="space-y-8">
+        {/* Page Header with Stats */}
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              <Users className="size-5 text-muted-foreground" />
+              <h2 className="text-lg font-semibold tracking-tight">
+                AI Agents
+              </h2>
+              {agentStats.total > 0 && (
+                <Badge variant="secondary" className="ml-2">
+                  {agentStats.total}
+                </Badge>
+              )}
             </div>
+            <p className="text-sm text-muted-foreground">
+              Manage your intelligent AI agents and their configurations
+            </p>
+          </div>
 
+          <Link to="/user/agents/new">
+            <Button className="gap-2 lg:shrink-0">
+              <Plus className="size-4" />
+              Create Agent
+            </Button>
+          </Link>
+        </div>
+
+        {/* Filters and Search */}
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
+          {/* Search Input */}
+          <div className="relative flex-1 max-w-sm">
+            <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              placeholder="Search agents by name or role..."
+              value={search.search || ""}
+              onChange={(event) => handleSearchChange(event.target.value)}
+              className="pl-9"
+            />
+          </div>
+
+          <div className="flex items-center gap-3">
             {/* Status Filter */}
             <Select
               value={search.status || "all"}
               onValueChange={handleStatusFilter}
             >
-              <SelectTrigger className="w-40">
-                <Filter className="h-4 w-4 mr-2" />
+              <SelectTrigger className="w-36">
+                <Filter className="mr-2 size-4" />
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -218,12 +269,12 @@ function AgentList(props: AgentListProps) {
               />
               <label
                 htmlFor="show-inactive"
-                className="text-sm font-medium flex items-center gap-2 cursor-pointer"
+                className="flex cursor-pointer items-center gap-2 text-sm font-medium"
               >
                 {search.showInactive ? (
-                  <Eye className="h-4 w-4" />
+                  <Eye className="size-4" />
                 ) : (
-                  <EyeOff className="h-4 w-4" />
+                  <EyeOff className="size-4" />
                 )}
                 Show Inactive
               </label>
@@ -236,63 +287,79 @@ function AgentList(props: AgentListProps) {
               </Button>
             )}
           </div>
-
-          {/* New Agent Button */}
-          <Link to="/user/agents/new">
-            <Button className="gap-2 shrink-0">
-              <Plus className="h-4 w-4" />
-              Create Agent
-            </Button>
-          </Link>
         </div>
 
-        {/* Results Info */}
-        {filteredAgents.length > 0 && (
-          <div className="flex items-center gap-4">
-            <h3 className="font-medium">Your AI Agents</h3>
-            <div className="flex items-center gap-4 text-sm text-muted-foreground">
-              <span>({filteredAgents.length} total)</span>
-              <span>•</span>
-              <span>{activeAgents.length} active</span>
-              {inactiveAgents.length > 0 && (
-                <>
-                  <span>•</span>
-                  <span>{inactiveAgents.length} inactive</span>
-                </>
-              )}
+        {/* Agent Statistics */}
+        {agentStats.total > 0 && (
+          <div className="flex items-center gap-6">
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-medium">Total:</span>
+              <Badge variant="outline">{agentStats.total}</Badge>
             </div>
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-medium">Active:</span>
+              <Badge
+                variant="default"
+                className="bg-emerald-500 hover:bg-emerald-600"
+              >
+                {agentStats.active}
+              </Badge>
+            </div>
+            {agentStats.inactive > 0 && (
+              <div className="flex items-center gap-2">
+                <span className="text-sm font-medium">Inactive:</span>
+                <Badge variant="secondary">{agentStats.inactive}</Badge>
+              </div>
+            )}
+            {agentStats.busy > 0 && (
+              <div className="flex items-center gap-2">
+                <span className="text-sm font-medium">Busy:</span>
+                <Badge
+                  variant="outline"
+                  className="border-orange-500 text-orange-600"
+                >
+                  {agentStats.busy}
+                </Badge>
+              </div>
+            )}
           </div>
         )}
 
         {/* Empty Filter Results */}
         {filteredAgents.length === 0 && hasFilters && (
-          <div className="text-center py-12">
-            <div className="mx-auto h-12 w-12 bg-muted rounded-lg flex items-center justify-center mb-4">
-              <Filter className="h-6 w-6 text-muted-foreground" />
+          <div className="flex flex-col items-center justify-center py-16 text-center">
+            <div className="mb-6 rounded-2xl bg-muted/50 p-4">
+              <AlertCircle className="size-8 text-muted-foreground" />
             </div>
-            <h3 className="text-lg font-semibold mb-2">No agents found</h3>
-            <p className="text-muted-foreground text-sm mb-4">
-              Try adjusting your search filters
+            <h3 className="mb-2 text-lg font-semibold">
+              No agents match your filters
+            </h3>
+            <p className="mb-6 max-w-sm text-sm text-muted-foreground">
+              Try adjusting your search criteria or clear the filters to see all
+              agents
             </p>
-            <Button variant="ghost" onClick={clearFilters}>
-              Clear Filters
+            <Button variant="outline" onClick={clearFilters}>
+              Clear All Filters
             </Button>
           </div>
         )}
 
-        {/* Agents List */}
+        {/* Agents Grid/List */}
         {filteredAgents.length > 0 && (
-          <div className="space-y-2">
-            {filteredAgents.map((agent) => (
-              <AgentListCard
-                key={agent.id}
-                agent={agent}
-                onDelete={() => handleDelete(agent)}
-                onRestore={() => handleRestore(agent)}
-                onToggleStatus={() => handleToggleStatus(agent)}
-              />
-            ))}
-          </div>
+          <>
+            <Separator />
+            <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+              {filteredAgents.map((agent) => (
+                <AgentListCard
+                  key={agent.id}
+                  agent={agent}
+                  onDelete={() => handleDelete(agent)}
+                  onRestore={() => handleRestore(agent)}
+                  onToggleStatus={() => handleToggleStatus(agent)}
+                />
+              ))}
+            </div>
+          </>
         )}
       </div>
 

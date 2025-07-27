@@ -16,8 +16,8 @@ function SidebarUserArea() {
   };
 
   return (
-    <div className="p-2 bg-muted/50">
-      <div className="flex items-center gap-2">
+    <footer className="p-3 bg-muted/30 backdrop-blur-sm border-t border-border/50">
+      <div className="flex items-center gap-3 group">
         <UserAvatar name={user?.name} />
 
         <div className="flex-1 min-w-0">
@@ -29,14 +29,15 @@ function SidebarUserArea() {
 
         <Button
           variant="ghost"
-          size="sm"
+          size="icon"
           onClick={handleLogout}
-          className="text-muted-foreground hover:text-foreground hover:bg-destructive hover:text-destructive-foreground p-1"
+          className="h-8 w-8 text-muted-foreground hover:text-foreground hover:bg-destructive hover:text-destructive-foreground transition-all duration-200 focus-visible:ring-2 focus-visible:ring-destructive opacity-0 group-hover:opacity-100"
+          aria-label="Sign out"
         >
           <LogOut className="w-4 h-4" />
         </Button>
       </div>
-    </div>
+    </footer>
   );
 }
 

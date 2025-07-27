@@ -40,26 +40,39 @@ function ProjectSidebar(props: ProjectSidebarProps) {
   }));
 
   return (
-    <div className={cn("h-full flex flex-col bg-card", className)}>
+    <aside
+      className={cn(
+        "h-full flex flex-col bg-card/50 backdrop-blur-sm",
+        className,
+      )}
+      role="complementary"
+      aria-label={`${project.name} navigation`}
+    >
       {/* Project Header */}
-      <div className="h-12 bg-card border-b flex items-center justify-center relative">
-        <h1 className="text-foreground font-semibold">{project.name}</h1>
+      <header className="h-12 bg-card/80 border-b border-border/50 flex items-center justify-between px-4 backdrop-blur-sm">
+        <h1 className="text-foreground font-semibold text-base truncate">
+          {project.name}
+        </h1>
         <Button
           variant="ghost"
           size="icon"
-          className="absolute right-2 w-6 h-6"
+          className="w-8 h-8 text-muted-foreground hover:text-foreground hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring"
+          aria-label="Project settings"
         >
           <Settings className="w-4 h-4" />
         </Button>
-      </div>
+      </header>
 
       <ScrollArea className="flex-1">
-        <div className="p-2 space-y-1">
+        <nav
+          className="p-3 space-y-1"
+          role="navigation"
+          aria-label="Project sections"
+        >
           {/* Dashboard */}
           <Link
             to="/project/$projectId"
             params={{ projectId: project.id }}
-            className="block"
             activeProps={{
               className: "active",
             }}
@@ -68,84 +81,93 @@ function ProjectSidebar(props: ProjectSidebarProps) {
               <Button
                 variant="ghost"
                 className={cn(
-                  "w-full justify-start px-2 h-8 text-sm font-normal transition-colors rounded-md",
-                  "text-muted-foreground hover:text-foreground hover:bg-accent/80",
-                  isActive && "bg-accent text-foreground font-medium",
+                  "w-full justify-start px-3 h-9 text-sm font-normal transition-all duration-200 rounded-lg",
+                  "text-muted-foreground hover:text-foreground hover:bg-accent/60",
+                  isActive && "bg-accent text-foreground font-medium shadow-sm",
                 )}
+                aria-current={isActive ? "page" : undefined}
               >
                 <Hash
                   className={cn(
-                    "w-4 h-4 mr-2 transition-colors",
+                    "w-4 h-4 mr-3 transition-colors flex-shrink-0",
                     isActive ? "text-foreground" : "text-muted-foreground",
                   )}
                 />
-                Dashboard
+                <span className="truncate">Dashboard</span>
               </Button>
             )}
           </Link>
 
-          <div className="my-2">
-            <Separator />
-          </div>
+          <Separator className="my-3" />
 
           {/* Text Channels */}
           <Collapsible defaultOpen>
             <CollapsibleTrigger asChild>
               <Button
                 variant="ghost"
-                className="w-full justify-start px-2 h-7 text-xs font-medium text-muted-foreground hover:text-foreground"
+                className="w-full justify-start px-3 h-8 text-xs font-semibold text-muted-foreground hover:text-foreground uppercase tracking-wider transition-colors focus-visible:ring-2 focus-visible:ring-ring"
+                aria-expanded="true"
               >
-                <ChevronDown className="w-3 h-3 mr-1" />
-                CANAIS DE TEXTO
+                <ChevronDown className="w-3 h-3 mr-2 transition-transform duration-200" />
+                <span>Canais de Texto</span>
               </Button>
             </CollapsibleTrigger>
-            <CollapsibleContent className="space-y-1">
+            <CollapsibleContent className="space-y-1 mt-1">
               {channels.length > 0 ? (
-                channels.map((channel) => (
-                  <Link
-                    key={channel.id}
-                    to="/project/$projectId/channel/$channelId"
-                    params={{ projectId: project.id, channelId: channel.id }}
-                    className="block"
-                    activeProps={{
-                      className: "active",
-                    }}
-                  >
-                    {({ isActive }: { isActive: boolean }) => (
-                      <Button
-                        variant="ghost"
-                        className={cn(
-                          "w-full justify-start px-2 h-8 text-sm font-normal transition-colors rounded-md",
-                          "text-muted-foreground hover:text-foreground hover:bg-accent/80",
-                          isActive && "bg-accent text-foreground font-medium",
-                        )}
-                      >
-                        <Hash
+                <div role="list" aria-label="Text channels">
+                  {channels.map((channel) => (
+                    <Link
+                      key={channel.id}
+                      to="/project/$projectId/channel/$channelId"
+                      params={{ projectId: project.id, channelId: channel.id }}
+                      activeProps={{
+                        className: "active",
+                      }}
+                    >
+                      {({ isActive }: { isActive: boolean }) => (
+                        <Button
+                          variant="ghost"
                           className={cn(
-                            "w-4 h-4 mr-2 transition-colors",
-                            isActive
-                              ? "text-foreground"
-                              : "text-muted-foreground",
+                            "w-full justify-start px-3 h-8 text-sm font-normal transition-all duration-200 rounded-lg group",
+                            "text-muted-foreground hover:text-foreground hover:bg-accent/60",
+                            isActive &&
+                              "bg-accent text-foreground font-medium shadow-sm",
                           )}
-                        />
-                        <span className="truncate">{channel.name}</span>
-                        {channel.hasNotification && !isActive && (
-                          <div className="ml-auto w-2 h-2 bg-destructive rounded-full flex-shrink-0" />
-                        )}
-                      </Button>
-                    )}
-                  </Link>
-                ))
+                          role="listitem"
+                          aria-current={isActive ? "page" : undefined}
+                        >
+                          <Hash
+                            className={cn(
+                              "w-4 h-4 mr-3 transition-colors flex-shrink-0",
+                              isActive
+                                ? "text-foreground"
+                                : "text-muted-foreground group-hover:text-foreground",
+                            )}
+                          />
+                          <span className="truncate flex-1 text-left">
+                            {channel.name}
+                          </span>
+                          {channel.hasNotification && !isActive && (
+                            <div
+                              className="ml-2 w-2 h-2 bg-destructive rounded-full flex-shrink-0"
+                              aria-label="Unread messages"
+                            />
+                          )}
+                        </Button>
+                      )}
+                    </Link>
+                  ))}
+                </div>
               ) : (
-                <div className="px-2 py-1 text-xs text-muted-foreground">
+                <div className="px-3 py-2 text-xs text-muted-foreground text-center">
                   Nenhuma conversa ainda
                 </div>
               )}
             </CollapsibleContent>
           </Collapsible>
-        </div>
+        </nav>
       </ScrollArea>
-    </div>
+    </aside>
   );
 }
 

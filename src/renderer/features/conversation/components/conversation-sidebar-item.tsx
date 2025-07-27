@@ -10,7 +10,6 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/renderer/components/ui/dropdown-menu";
 import { cn } from "@/renderer/lib/utils";
@@ -47,65 +46,51 @@ function ConversationSidebarItem({
     },
   );
 
-  // Get conversation display name
-  const getConversationName = () => {
-    // Use the generated name from backend (should always exist now)
-    return conversation.name || "Unnamed Conversation";
-  };
+  // Inline logic for display name - simplified
+  const conversationName = conversation.name || "Unnamed Conversation";
 
-  // Get the last message preview
-  const getLastMessagePreview = () => {
-    if (!conversation.lastMessage) {
-      return "No messages yet";
-    }
+  // Inline logic for message preview with proper truncation
+  const messagePreview = conversation.lastMessage
+    ? conversation.lastMessage.content.length > 30
+      ? `${conversation.lastMessage.content.substring(0, 30)}...`
+      : conversation.lastMessage.content
+    : "No messages yet";
 
-    const content = conversation.lastMessage.content;
-    return content.length > 30 ? `${content.substring(0, 30)}...` : content;
-  };
+  // Inline logic for time formatting - consistent with other components
+  const formattedTime = conversation.lastMessage
+    ? (() => {
+        try {
+          const now = new Date();
+          const messageTime = new Date(conversation.lastMessage.createdAt);
+          const diffInMinutes =
+            Math.abs(now.getTime() - messageTime.getTime()) / 60000;
+          const diffInHours = diffInMinutes / 60;
+          const diffInDays = diffInHours / 24;
 
-  // Format the last message time
-  const formatLastMessageTime = () => {
-    if (!conversation.lastMessage) {
-      return "";
-    }
+          if (diffInMinutes < 1) return "now";
+          if (diffInMinutes < 60) return `${Math.floor(diffInMinutes)}m`;
+          if (diffInHours < 24) return `${Math.floor(diffInHours)}h`;
+          if (diffInDays < 7) return `${Math.floor(diffInDays)}d`;
 
-    const now = new Date();
-    const messageTime = new Date(conversation.lastMessage.createdAt);
-    const diffInMinutes =
-      Math.abs(now.getTime() - messageTime.getTime()) / 60000;
-    const diffInHours = diffInMinutes / 60;
-    const diffInDays = diffInHours / 24;
+          return messageTime.toLocaleDateString([], {
+            month: "short",
+            day: "numeric",
+          });
+        } catch {
+          return "";
+        }
+      })()
+    : "";
 
-    if (diffInMinutes < 1) {
-      return "now";
-    } else if (diffInMinutes < 60) {
-      return `${Math.floor(diffInMinutes)}m`;
-    } else if (diffInHours < 24) {
-      return `${Math.floor(diffInHours)}h`;
-    } else if (diffInDays < 7) {
-      return `${Math.floor(diffInDays)}d`;
-    } else {
-      return messageTime.toLocaleDateString([], {
-        month: "short",
-        day: "numeric",
-      });
-    }
-  };
-
-  const handleArchive = () => {
-    setShowArchiveDialog(true);
-  };
-
-  const handleConfirmArchive = () => {
-    archiveMutation.mutate(conversation.id);
-  };
-
+  // Archive handlers - inline logic
+  const handleArchive = () => setShowArchiveDialog(true);
+  const handleConfirmArchive = () => archiveMutation.mutate(conversation.id);
   const handleUnarchive = () => {
-    // TODO: Implement unarchive functionality
+    // TODO: Implement unarchive functionality when backend supports it
   };
 
-  // Check if conversation has unread messages (placeholder logic)
-  const hasUnreadMessages = conversation.lastMessage && false; // TODO: Implement unread logic
+  // Unread messages logic - placeholder for future implementation
+  const hasUnreadMessages = conversation.lastMessage && false; // TODO: Implement proper unread logic
 
   return (
     <div className="group relative conversation-item-enter">
@@ -113,14 +98,14 @@ function ConversationSidebarItem({
         to="/user/dm/$conversationId"
         params={{ conversationId: conversation.id }}
         className={cn(
-          "flex items-center gap-3 px-2 py-2 mx-2 rounded-lg transition-all duration-200",
-          "hover:bg-accent/70 hover:shadow-sm hover:scale-[1.02]",
-          "active:scale-[0.98] active:bg-accent/90",
+          "flex items-center gap-3 px-3 py-2.5 mx-2 rounded-lg transition-all duration-200",
+          "hover:bg-accent/70 hover:shadow-sm",
+          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
           conversation.archivedAt && "opacity-60",
           hasUnreadMessages && "bg-accent/30",
         )}
         activeProps={{
-          className: "bg-accent text-accent-foreground shadow-md scale-[1.02]",
+          className: "bg-accent text-accent-foreground shadow-sm",
         }}
       >
         {/* Avatar with status indicator */}
@@ -145,17 +130,16 @@ function ConversationSidebarItem({
                   "text-sm font-semibold truncate transition-colors",
                   conversation.archivedAt &&
                     "line-through text-muted-foreground",
-                  hasUnreadMessages && "text-foreground",
-                  !hasUnreadMessages && "text-foreground/90",
+                  hasUnreadMessages ? "text-foreground" : "text-foreground/90",
                 )}
               >
-                {getConversationName()}
+                {conversationName}
               </span>
               {hasUnreadMessages && (
-                <div className="w-2 h-2 bg-primary rounded-full flex-shrink-0 status-pulse" />
+                <div className="w-2 h-2 bg-primary rounded-full flex-shrink-0 animate-pulse" />
               )}
             </div>
-            {formatLastMessageTime() && (
+            {formattedTime && (
               <span
                 className={cn(
                   "text-xs whitespace-nowrap transition-colors",
@@ -164,7 +148,7 @@ function ConversationSidebarItem({
                     : "text-muted-foreground",
                 )}
               >
-                {formatLastMessageTime()}
+                {formattedTime}
               </span>
             )}
           </div>
@@ -178,15 +162,14 @@ function ConversationSidebarItem({
                 : "text-muted-foreground/80",
             )}
           >
-            {getLastMessagePreview()}
+            {messagePreview}
           </div>
         </div>
 
         {/* Actions menu */}
         <div
           className={cn(
-            "opacity-0 group-hover:opacity-100 transition-all duration-200 flex-shrink-0",
-            "hover:bg-accent-foreground/10 rounded-md p-1.5 transform hover:scale-110",
+            "opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex-shrink-0",
           )}
           onClick={(e) => e.preventDefault()}
         >
@@ -195,29 +178,33 @@ function ConversationSidebarItem({
               <Button
                 variant="ghost"
                 size="sm"
-                className="h-5 w-5 p-0 hover:bg-accent-foreground/20 transition-colors"
+                className={cn(
+                  "h-6 w-6 p-0 rounded-md transition-colors",
+                  "hover:bg-accent/50 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1",
+                )}
               >
                 <MoreHorizontal className="h-3.5 w-3.5" />
+                <span className="sr-only">Conversation options</span>
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent
               align="end"
-              className="w-52 shadow-lg border-border/50"
+              className="w-48 shadow-lg border-border/50"
             >
               {!conversation.archivedAt ? (
                 <DropdownMenuItem
                   onClick={handleArchive}
-                  className="text-sm py-2.5 focus:bg-accent/80"
+                  className="text-sm py-2.5 px-3 focus:bg-accent/80 cursor-pointer"
                 >
-                  <Archive className="h-4 w-4 mr-3" />
+                  <Archive className="h-4 w-4 mr-3 text-muted-foreground" />
                   Archive Conversation
                 </DropdownMenuItem>
               ) : (
                 <DropdownMenuItem
                   onClick={handleUnarchive}
-                  className="text-sm py-2.5 focus:bg-accent/80"
+                  className="text-sm py-2.5 px-3 focus:bg-accent/80 cursor-pointer"
                 >
-                  <Archive className="h-4 w-4 mr-3" />
+                  <Archive className="h-4 w-4 mr-3 text-muted-foreground" />
                   Unarchive Conversation
                 </DropdownMenuItem>
               )}
@@ -231,7 +218,7 @@ function ConversationSidebarItem({
         open={showArchiveDialog}
         onClose={() => setShowArchiveDialog(false)}
         onConfirm={handleConfirmArchive}
-        conversationName={getConversationName()}
+        conversationName={conversationName}
         isLoading={archiveMutation.isPending}
       />
     </div>

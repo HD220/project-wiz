@@ -38,19 +38,25 @@ const NavigationItem = forwardRef<HTMLAnchorElement, NavigationItemProps>(
         variant={variant}
         size={size}
         className={cn(
-          "w-full justify-start text-muted-foreground hover:text-foreground hover:bg-accent",
+          "w-full justify-start h-9 px-3 text-sm font-normal transition-all duration-200 rounded-lg",
+          "text-muted-foreground hover:text-foreground hover:bg-accent/60 focus-visible:ring-2 focus-visible:ring-ring",
           className,
         )}
         activeProps={{
-          className: cn("bg-accent text-foreground", className),
+          className: cn(
+            "bg-accent text-foreground font-medium shadow-sm",
+            className,
+          ),
         }}
         activeOptions={activeOptions}
         {...restLinkProps}
       >
         {children || (
           <>
-            {IconComponent && <IconComponent className="w-4 h-4 mr-2" />}
-            {label}
+            {IconComponent && (
+              <IconComponent className="w-4 h-4 mr-3 flex-shrink-0" />
+            )}
+            {label && <span className="truncate">{label}</span>}
           </>
         )}
       </CustomLink>

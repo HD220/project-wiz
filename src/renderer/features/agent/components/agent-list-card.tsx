@@ -31,7 +31,11 @@ import {
   TooltipTrigger,
 } from "@/renderer/components/ui/tooltip";
 import type { SelectAgent } from "@/renderer/features/agent/agent.types";
-import { AgentStatusBadge } from "@/renderer/features/agent/components/agent-status-badge";
+import {
+  StatusIndicator,
+  StatusDot,
+  StatusLabel,
+} from "@/renderer/features/agent/components/agent-status-badge";
 import { cn } from "@/renderer/lib/utils";
 
 interface AgentListCardProps {
@@ -137,8 +141,13 @@ function AgentListCard(props: AgentListCardProps) {
 
         {/* Status and Actions */}
         <div className="flex items-center gap-3 shrink-0">
-          {/* Only show status badge for active agents */}
-          {agent.isActive && <AgentStatusBadge status={agent.status} />}
+          {/* Only show status indicator for active agents */}
+          {agent.isActive && (
+            <StatusIndicator status={agent.status} size="sm" className="border">
+              <StatusDot status={agent.status} size="sm" />
+              <StatusLabel status={agent.status} />
+            </StatusIndicator>
+          )}
 
           {/* Actions Menu */}
           <DropdownMenu>

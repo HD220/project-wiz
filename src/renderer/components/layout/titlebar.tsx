@@ -24,33 +24,38 @@ function Titlebar(props: TitlebarProps) {
   return (
     <div
       className={cn(
-        "h-8 bg-[#202225] flex items-center justify-between select-none border-b border-[#36393f]",
+        "h-8 bg-background/95 backdrop-blur-sm flex items-center justify-between select-none border-b border-border/50",
         className,
       )}
       style={{ WebkitAppRegion: "drag" } as React.CSSProperties}
+      role="banner"
+      aria-label="Application titlebar"
     >
       <div className="flex items-center px-3">
-        <span className="text-white text-sm font-medium">{title}</span>
+        <span className="text-foreground text-sm font-medium">{title}</span>
       </div>
 
       <div
         className="flex"
         style={{ WebkitAppRegion: "no-drag" } as React.CSSProperties}
+        role="group"
+        aria-label="Window controls"
       >
-        <TitlebarButton onClick={handleMinimize}>
+        <TitlebarButton onClick={handleMinimize} aria-label="Minimize window">
           <MinimizeIcon />
         </TitlebarButton>
 
-        <TitlebarButton onClick={handleMaximize}>
+        <TitlebarButton onClick={handleMaximize} aria-label="Maximize window">
           <MaximizeIcon />
         </TitlebarButton>
 
         <Button
           variant="ghost"
           size="sm"
-          className="h-8 w-12 rounded-none p-0 text-white/70 hover:!bg-destructive hover:!text-destructive-foreground transition-colors"
+          className="h-8 w-12 rounded-none p-0 text-muted-foreground hover:!bg-destructive hover:!text-destructive-foreground transition-colors focus-visible:ring-1 focus-visible:ring-destructive"
           onClick={handleClose}
           style={{ WebkitAppRegion: "no-drag" } as React.CSSProperties}
+          aria-label="Close window"
         >
           <CloseIcon />
         </Button>
@@ -62,15 +67,21 @@ function Titlebar(props: TitlebarProps) {
 interface TitlebarButtonProps {
   onClick: () => void;
   children: React.ReactNode;
+  "aria-label"?: string;
 }
 
-function TitlebarButton({ onClick, children }: TitlebarButtonProps) {
+function TitlebarButton({
+  onClick,
+  children,
+  "aria-label": ariaLabel,
+}: TitlebarButtonProps) {
   return (
     <Button
       variant="ghost"
       size="sm"
-      className="h-8 w-12 rounded-none p-0 text-white/70 hover:bg-white/10 hover:text-white transition-colors"
+      className="h-8 w-12 rounded-none p-0 text-muted-foreground hover:bg-accent hover:text-foreground transition-colors focus-visible:ring-1 focus-visible:ring-ring"
       onClick={onClick}
+      aria-label={ariaLabel}
     >
       {children}
     </Button>

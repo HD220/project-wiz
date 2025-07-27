@@ -1,5 +1,4 @@
-import { Crown, Users, ChevronDown, ChevronRight } from "lucide-react";
-import { useState } from "react";
+import { Crown, Users } from "lucide-react";
 
 import { Avatar, AvatarFallback } from "@/renderer/components/ui/avatar";
 import { Button } from "@/renderer/components/ui/button";
@@ -25,19 +24,15 @@ interface MemberSidebarProps {
 }
 
 function MemberSidebar(props: MemberSidebarProps) {
-  const {
-    members,
-    memberCount = members.length,
-    className,
-    isCollapsed = false,
-    onToggle,
-  } = props;
+  const { members, className, isCollapsed = false } = props;
 
-  // Group members by status
-  const onlineMembers = members.filter((m) => m.status === "online");
-  const offlineMembers = members.filter((m) => m.status === "offline");
-  const awayMembers = members.filter((m) => m.status === "away");
-  const busyMembers = members.filter((m) => m.status === "busy");
+  // Group members by status with better organization
+  const memberGroups = {
+    online: members.filter((m) => m.status === "online"),
+    away: members.filter((m) => m.status === "away"),
+    busy: members.filter((m) => m.status === "busy"),
+    offline: members.filter((m) => m.status === "offline"),
+  } as const;
 
   const getStatusColor = (status: Member["status"]) => {
     switch (status) {
@@ -49,18 +44,33 @@ function MemberSidebar(props: MemberSidebarProps) {
         return "bg-red-500";
       case "offline":
       default:
-        return "bg-gray-400";
+        return "bg-muted-foreground";
+    }
+  };
+
+  const getStatusLabel = (status: Member["status"]) => {
+    switch (status) {
+      case "online":
+        return "Online";
+      case "away":
+        return "Ausente";
+      case "busy":
+        return "Ocupado";
+      case "offline":
+      default:
+        return "Offline";
     }
   };
 
   const MemberItem = ({ member }: { member: Member }) => (
     <Button
       variant="ghost"
-      className="w-full justify-start px-2 h-9 text-sm font-normal hover:bg-accent/80 transition-colors group rounded-md"
+      className="w-full justify-start px-3 h-10 text-sm font-normal hover:bg-accent/60 transition-all duration-200 group rounded-lg focus-visible:ring-2 focus-visible:ring-ring"
+      aria-label={`${member.name} - ${getStatusLabel(member.status)}${member.role === "owner" ? " (Owner)" : ""}`}
     >
-      <div className="flex items-center w-full">
-        <div className="relative">
-          <Avatar className="w-7 h-7">
+      <div className="flex items-center w-full gap-3">
+        <div className="relative flex-shrink-0">
+          <Avatar className="w-8 h-8">
             <AvatarFallback className="text-xs bg-primary/10 text-primary font-medium">
               {member.name.charAt(0).toUpperCase()}
             </AvatarFallback>
@@ -71,19 +81,23 @@ function MemberSidebar(props: MemberSidebarProps) {
               "absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-background",
               getStatusColor(member.status),
             )}
+            aria-hidden="true"
           />
         </div>
-        <div className="ml-2 flex-1 min-w-0">
-          <div className="flex items-center gap-1">
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2">
             {member.role === "owner" && (
-              <Crown className="w-3 h-3 text-yellow-500 flex-shrink-0" />
+              <Crown
+                className="w-3 h-3 text-yellow-500 flex-shrink-0"
+                aria-label="Owner"
+              />
             )}
-            <span className="text-foreground truncate text-sm group-hover:text-foreground/90 transition-colors">
+            <span className="text-foreground truncate text-sm group-hover:text-foreground transition-colors font-medium">
               {member.name}
             </span>
           </div>
           {member.username && (
-            <div className="text-xs text-muted-foreground truncate opacity-0 group-hover:opacity-100 transition-opacity">
+            <div className="text-xs text-muted-foreground truncate opacity-60 group-hover:opacity-100 transition-opacity">
               @{member.username}
             </div>
           )}
@@ -96,26 +110,37 @@ function MemberSidebar(props: MemberSidebarProps) {
     title,
     members: sectionMembers,
     count,
+    status,
   }: {
     title: string;
     members: Member[];
     count: number;
+    status: Member["status"];
   }) => {
     if (count === 0) return null;
 
     return (
-      <div className="mb-4">
-        <div className="px-2 py-1">
-          <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+      <section
+        className="mb-4"
+        role="group"
+        aria-labelledby={`${status}-members-heading`}
+      >
+        <div className="px-3 py-2">
+          <h3
+            id={`${status}-members-heading`}
+            className="text-xs font-semibold text-muted-foreground uppercase tracking-wider"
+          >
             {title} — {count}
           </h3>
         </div>
-        <div className="space-y-0.5">
+        <div className="space-y-1" role="list">
           {sectionMembers.map((member) => (
-            <MemberItem key={member.id} member={member} />
+            <div key={member.id} role="listitem">
+              <MemberItem member={member} />
+            </div>
           ))}
         </div>
-      </div>
+      </section>
     );
   };
 
@@ -123,48 +148,66 @@ function MemberSidebar(props: MemberSidebarProps) {
     return null; // Hide sidebar when collapsed
   }
 
+  const { online, away, busy, offline } = memberGroups;
+  const hasActiveMembers =
+    online.length > 0 || away.length > 0 || busy.length > 0;
+
   return (
-    <div className={cn("h-full flex flex-col bg-card border-l", className)}>
+    <aside
+      className={cn(
+        "h-full flex flex-col bg-card/50 backdrop-blur-sm border-l border-border/50",
+        className,
+      )}
+      role="complementary"
+      aria-label="Member list"
+    >
       <ScrollArea className="flex-1">
-        <div className="p-2 space-y-2">
+        <div className="p-3 space-y-2">
           {/* Online Members */}
           <MemberSection
             title="Online"
-            members={onlineMembers}
-            count={onlineMembers.length}
+            members={online}
+            count={online.length}
+            status="online"
           />
 
           {/* Away Members */}
           <MemberSection
             title="Ausente"
-            members={awayMembers}
-            count={awayMembers.length}
+            members={away}
+            count={away.length}
+            status="away"
           />
 
           {/* Busy Members */}
           <MemberSection
             title="Ocupado"
-            members={busyMembers}
-            count={busyMembers.length}
+            members={busy}
+            count={busy.length}
+            status="busy"
           />
 
-          {/* Separator between online and offline */}
-          {(onlineMembers.length > 0 ||
-            awayMembers.length > 0 ||
-            busyMembers.length > 0) &&
-            offlineMembers.length > 0 && <Separator className="my-2" />}
+          {/* Separator between active and offline */}
+          {hasActiveMembers && offline.length > 0 && (
+            <Separator className="my-3" />
+          )}
 
           {/* Offline Members */}
           <MemberSection
             title="Offline"
-            members={offlineMembers}
-            count={offlineMembers.length}
+            members={offline}
+            count={offline.length}
+            status="offline"
           />
 
           {/* Empty state */}
           {members.length === 0 && (
-            <div className="px-2 py-4 text-center">
-              <Users className="w-8 h-8 mx-auto mb-2 text-muted-foreground/50" />
+            <div
+              className="px-3 py-8 text-center"
+              role="status"
+              aria-live="polite"
+            >
+              <Users className="w-8 h-8 mx-auto mb-3 text-muted-foreground/50" />
               <p className="text-sm text-muted-foreground">
                 Nenhum membro encontrado
               </p>
@@ -172,7 +215,7 @@ function MemberSidebar(props: MemberSidebarProps) {
           )}
         </div>
       </ScrollArea>
-    </div>
+    </aside>
   );
 }
 

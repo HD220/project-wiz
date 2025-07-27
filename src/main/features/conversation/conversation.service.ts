@@ -246,9 +246,9 @@ export class ConversationService {
 
     // Sort by last message time (most recent first)
     return result.sort((convA, convB) => {
-      const aTime = (convA.lastMessage?.createdAt || convA.updatedAt) as number;
-      const bTime = (convB.lastMessage?.createdAt || convB.updatedAt) as number;
-      return bTime - aTime; // Direct number comparison since timestamps are already numbers
+      const aTime = convA.lastMessage?.createdAt || convA.updatedAt;
+      const bTime = convB.lastMessage?.createdAt || convB.updatedAt;
+      return new Date(bTime).getTime() - new Date(aTime).getTime();
     });
   }
 

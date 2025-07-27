@@ -6,6 +6,14 @@ import { loadApiData } from "@/renderer/lib/route-loader";
 function ProjectLayout() {
   const { project } = Route.useLoaderData();
 
+  if (!project) {
+    return (
+      <div className="flex-1 flex items-center justify-center">
+        <p className="text-muted-foreground">Project not found</p>
+      </div>
+    );
+  }
+
   return (
     <>
       <div className="w-60 h-full">

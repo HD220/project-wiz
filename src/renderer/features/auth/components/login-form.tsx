@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter, useSearch } from "@tanstack/react-router";
-import { Loader2 } from "lucide-react";
+import { LogIn, User } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
@@ -15,12 +15,20 @@ import {
   FormMessage,
 } from "@/renderer/components/ui/form";
 import { Input } from "@/renderer/components/ui/input";
+import { StatusIndicator } from "@/renderer/components/shared";
 import { useAuth } from "@/renderer/contexts/auth.context";
 import { AuthCard } from "@/renderer/features/auth/components/auth-card";
 
 const loginSchema = z.object({
-  username: z.string().min(1, "Username is required"),
-  password: z.string().min(1, "Password is required"),
+  username: z
+    .string()
+    .min(1, "Username is required")
+    .max(50, "Username too long")
+    .trim(),
+  password: z
+    .string()
+    .min(1, "Password is required")
+    .max(100, "Password too long"),
 });
 
 type LoginFormData = z.infer<typeof loginSchema>;
@@ -61,28 +69,42 @@ function LoginForm(props: LoginFormProps) {
   return (
     <AuthCard
       title="Welcome back!"
-      description="We're so excited to see you again!"
+      description="Sign in to continue to your workspace"
       className={className}
     >
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+        <form
+          onSubmit={form.handleSubmit(handleSubmit)}
+          className="space-y-[var(--spacing-component-lg)]"
+          noValidate
+          aria-label="Sign in form"
+        >
           <FormField
             control={form.control}
             name="username"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-xs font-bold uppercase">
+                <FormLabel className="text-[var(--font-size-sm)] font-[var(--font-weight-medium)] text-foreground">
                   Username
                 </FormLabel>
                 <FormControl>
-                  <Input
-                    {...field}
-                    type="text"
-                    placeholder="Enter your username"
-                    disabled={form.formState.isSubmitting}
-                  />
+                  <div className="relative">
+                    <User
+                      className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
+                      aria-hidden="true"
+                    />
+                    <Input
+                      {...field}
+                      type="text"
+                      placeholder="Enter your username"
+                      disabled={form.formState.isSubmitting}
+                      className="pl-10 h-11 text-[var(--font-size-base)] transition-all duration-200 focus:ring-2 focus:ring-primary/20"
+                      aria-describedby={field.name + "-error"}
+                      autoComplete="username"
+                    />
+                  </div>
                 </FormControl>
-                <FormMessage />
+                <FormMessage id={field.name + "-error"} />
               </FormItem>
             )}
           />
@@ -92,7 +114,7 @@ function LoginForm(props: LoginFormProps) {
             name="password"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-xs font-bold uppercase">
+                <FormLabel className="text-[var(--font-size-sm)] font-[var(--font-weight-medium)] text-foreground">
                   Password
                 </FormLabel>
                 <FormControl>
@@ -101,47 +123,61 @@ function LoginForm(props: LoginFormProps) {
                     type="password"
                     placeholder="Enter your password"
                     disabled={form.formState.isSubmitting}
+                    className="h-11 text-[var(--font-size-base)] transition-all duration-200 focus:ring-2 focus:ring-primary/20"
+                    aria-describedby={field.name + "-error"}
+                    autoComplete="current-password"
                   />
                 </FormControl>
-                <FormMessage />
+                <FormMessage id={field.name + "-error"} />
               </FormItem>
             )}
           />
 
-          <div className="flex flex-col space-y-3 pt-2">
+          <div className="flex flex-col space-y-[var(--spacing-component-md)] pt-[var(--spacing-component-sm)]">
             <Button
               type="submit"
               disabled={form.formState.isSubmitting}
-              className="w-full"
+              className="w-full h-11 text-[var(--font-size-base)] font-[var(--font-weight-medium)] transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
+              aria-describedby="login-status"
             >
               {form.formState.isSubmitting ? (
                 <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Signing in...
+                  <StatusIndicator.Loading
+                    size="sm"
+                    showLabel={false}
+                    className="mr-2"
+                  />
+                  <span>Signing in...</span>
                 </>
               ) : (
-                "Sign In"
+                <>
+                  <LogIn className="mr-2 h-4 w-4" aria-hidden="true" />
+                  <span>Sign In</span>
+                </>
               )}
             </Button>
 
             {form.formState.errors.root && (
-              <Alert variant="destructive">
-                <AlertDescription>
+              <Alert variant="destructive" role="alert" aria-live="polite">
+                <AlertDescription id="login-status">
                   {form.formState.errors.root.message}
                 </AlertDescription>
               </Alert>
             )}
 
-            <p className="text-sm text-muted-foreground text-center">
-              Need an account?{" "}
-              <Button
-                variant="link"
-                className="p-0 h-auto font-normal"
-                onClick={() => router.navigate({ to: "/auth/register" })}
-              >
-                Register
-              </Button>
-            </p>
+            <div className="text-center">
+              <p className="text-[var(--font-size-sm)] text-muted-foreground">
+                Need an account?{" "}
+                <Button
+                  variant="link"
+                  className="p-0 h-auto font-[var(--font-weight-medium)] text-[var(--font-size-sm)] hover:underline focus:underline transition-colors"
+                  onClick={() => router.navigate({ to: "/auth/register" })}
+                  type="button"
+                >
+                  Create account
+                </Button>
+              </p>
+            </div>
           </div>
         </form>
       </Form>

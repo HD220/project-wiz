@@ -14,6 +14,14 @@ function ProjectPage() {
   const [isMemberSidebarCollapsed, setIsMemberSidebarCollapsed] =
     useState(false);
 
+  if (!project) {
+    return (
+      <div className="flex-1 flex items-center justify-center">
+        <p className="text-muted-foreground">Project not found</p>
+      </div>
+    );
+  }
+
   // Mock members data - TODO: Replace with real project members + agents
   const mockMembers: Member[] = [
     {

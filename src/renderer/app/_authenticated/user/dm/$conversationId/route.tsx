@@ -2,12 +2,9 @@ import { createFileRoute, Outlet } from "@tanstack/react-router";
 
 import type { SelectConversationParticipant } from "@/main/features/conversation/conversation.model";
 import type { SelectMessage } from "@/main/features/conversation/message.model";
-import type { AuthenticatedUser as MainAuthUser } from "@/main/features/user/user.types";
-
 import { ContentHeader } from "@/renderer/features/app/components/content-header";
 import { ConversationAvatar } from "@/renderer/features/conversation/components/conversation-avatar";
 import { ConversationChat } from "@/renderer/features/conversation/components/conversation-chat";
-import type { AuthenticatedUser } from "@/renderer/features/user/user.types";
 import { loadApiData } from "@/renderer/lib/route-loader";
 
 // Message type for renderer
@@ -44,24 +41,24 @@ function convertToRendererMessage(mainMessage: SelectMessage): Message {
   };
 }
 
-// Helper function to convert main AuthenticatedUser to renderer AuthenticatedUser
-function convertToRendererUser(mainUser: MainAuthUser): AuthenticatedUser {
-  return {
-    id: mainUser.id,
-    username: mainUser.name,
-    email: "",
-    displayName: mainUser.name,
-    name: mainUser.name,
-    avatar: mainUser.avatar,
-    theme: "system",
-    type: "user",
-    isActive: true,
-    deactivatedAt: null,
-    deactivatedBy: null,
-    createdAt: mainUser.createdAt,
-    updatedAt: mainUser.updatedAt,
-  };
-}
+// Helper function to convert main AuthenticatedUser to renderer AuthenticatedUser (unused but kept for future use)
+// function convertToRendererUser(mainUser: MainAuthUser): AuthenticatedUser {
+//   return {
+//     id: mainUser.id,
+//     username: mainUser.name,
+//     email: "",
+//     displayName: mainUser.name,
+//     name: mainUser.name,
+//     avatar: mainUser.avatar,
+//     theme: "system",
+//     type: "user",
+//     isActive: true,
+//     deactivatedAt: null,
+//     deactivatedBy: null,
+//     createdAt: mainUser.createdAt,
+//     updatedAt: mainUser.updatedAt,
+//   };
+// }
 
 // Extended conversation type for rendering
 type RendererConversation = {
@@ -204,7 +201,7 @@ function DMLayout() {
             messages: conversation.messages.map(convertToRendererMessage),
           }}
           availableUsers={availableUsers}
-          currentUser={user ? convertToRendererUser(user) : null}
+          currentUser={user as any}
         />
       </main>
 

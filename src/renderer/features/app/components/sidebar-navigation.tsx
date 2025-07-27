@@ -16,7 +16,11 @@ function SidebarNavigation(props: SidebarNavigationProps) {
   const { conversations, availableUsers } = props;
 
   return (
-    <div className="flex-1 p-2 space-y-1">
+    <nav
+      className="flex-1 p-3 space-y-1"
+      role="navigation"
+      aria-label="User navigation"
+    >
       <NavigationItem
         to="/user"
         icon={Hash}
@@ -26,14 +30,16 @@ function SidebarNavigation(props: SidebarNavigationProps) {
 
       <NavigationItem to="/user/agents" icon={Bot} label="Agents" />
 
-      <Separator className="my-2" />
+      <Separator className="my-3" />
 
       {/* Conversations List */}
-      <ConversationSidebarList
-        conversations={conversations}
-        availableUsers={availableUsers}
-      />
-    </div>
+      <div role="region" aria-label="Conversations">
+        <ConversationSidebarList
+          conversations={conversations}
+          availableUsers={availableUsers}
+        />
+      </div>
+    </nav>
   );
 }
 

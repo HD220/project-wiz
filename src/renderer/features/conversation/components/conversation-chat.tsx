@@ -10,8 +10,9 @@ import type {
   SendMessageInput,
   SelectMessage,
 } from "@/renderer/features/conversation/types";
-import type { AuthenticatedUser } from "@/renderer/features/user/user.types";
+import type { AuthenticatedUser } from "@/main/features/user/user.types";
 import { useApiMutation } from "@/renderer/hooks/use-api-mutation.hook";
+import { cn } from "@/renderer/lib/utils";
 
 // Message type for chat component
 type Message = SelectMessage & {
@@ -34,6 +35,164 @@ interface ConversationChatProps {
   availableUsers: unknown[];
   currentUser: AuthenticatedUser | null;
   className?: string;
+}
+
+// Welcome message composition
+interface WelcomeMessageProps {
+  conversation: SelectConversation;
+  isArchived: boolean;
+}
+
+function WelcomeMessage({ conversation, isArchived }: WelcomeMessageProps) {
+  return (
+    <div className="px-4 py-8">
+      <div className="text-center">
+        <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
+          <span className="text-2xl font-bold text-primary">
+            {conversation.name?.charAt(0).toUpperCase() || "#"}
+          </span>
+        </div>
+        <div className="text-xl font-semibold mb-2">
+          Bem-vindo a {conversation.name || "esta conversa"}!
+        </div>
+        <div className="text-muted-foreground text-sm">
+          {isArchived
+            ? "Esta conversa foi arquivada."
+            : "Este é o início da sua conversa direta."}
+        </div>
+      </div>
+      <Separator className="mt-8" />
+    </div>
+  );
+}
+
+// Empty state composition
+interface EmptyStateProps {
+  isArchived: boolean;
+}
+
+function EmptyState({ isArchived }: EmptyStateProps) {
+  return (
+    <div className="px-4 py-8 text-center text-muted-foreground">
+      <div className="text-4xl mb-4">💬</div>
+      <div className="text-sm">
+        {isArchived
+          ? "Esta conversa foi arquivada."
+          : "Nenhuma mensagem ainda. Comece a conversa!"}
+      </div>
+    </div>
+  );
+}
+
+// Message group composition
+interface MessageGroupProps {
+  group: {
+    authorId: string;
+    messages: Message[];
+  };
+  groupIndex: number;
+  messageGroups: Array<{
+    authorId: string;
+    messages: Message[];
+  }>;
+  currentUser: AuthenticatedUser;
+  getUserById: (userId: string) => AuthenticatedUser | null;
+  isSendingMessage: boolean;
+}
+
+function MessageGroup({
+  group,
+  groupIndex,
+  messageGroups,
+  currentUser,
+  getUserById,
+  isSendingMessage,
+}: MessageGroupProps) {
+  const author = getUserById(group.authorId) as AuthenticatedUser;
+  const isCurrentUser = group.authorId === currentUser.id;
+
+  // Calculate time difference for avatar display logic
+  const timeDiff =
+    groupIndex > 0 && group.messages[0]?.createdAt
+      ? (() => {
+          const currentMessageTime = new Date(
+            group.messages[0].createdAt,
+          ).getTime();
+          const previousGroup = messageGroups[groupIndex - 1];
+          const lastMessage =
+            previousGroup?.messages[previousGroup.messages.length - 1];
+          const previousMessageTime = lastMessage?.createdAt
+            ? new Date(lastMessage.createdAt).getTime()
+            : 0;
+          return currentMessageTime - previousMessageTime;
+        })()
+      : 0;
+
+  // Show avatar and header if it's first group or if more than 7 minutes passed
+  const showAvatar = groupIndex === 0 || timeDiff > 7 * 60 * 1000;
+
+  // Determine if author is inactive (missing from available users)
+  const authorIsInactive = !author && !isCurrentUser;
+
+  // Check if this is the last group from current user and we're sending a message
+  const isLastCurrentUserGroup =
+    isSendingMessage &&
+    isCurrentUser &&
+    groupIndex === messageGroups.length - 1;
+
+  return (
+    <div>
+      {/* First message in group - shows avatar and name */}
+      {group.messages[0] && (
+        <MessageBubble
+          message={group.messages[0]}
+          author={author}
+          isCurrentUser={isCurrentUser}
+          showAvatar={showAvatar}
+          authorIsInactive={authorIsInactive}
+          originalAuthorName={authorIsInactive ? "Agente" : undefined}
+          isSending={isLastCurrentUserGroup && group.messages.length === 1}
+        />
+      )}
+
+      {/* Subsequent messages in same group - no avatar */}
+      {group.messages.slice(1).map((message, messageIndex) => {
+        // Only show sending indicator on the very last message in the group
+        const isLastMessageInGroup = messageIndex === group.messages.length - 2; // -2 because we sliced the first one
+
+        return (
+          <MessageBubble
+            key={message.id}
+            message={message}
+            author={author}
+            isCurrentUser={isCurrentUser}
+            showAvatar={false}
+            authorIsInactive={authorIsInactive}
+            originalAuthorName={authorIsInactive ? "Agente" : undefined}
+            isSending={isLastCurrentUserGroup && isLastMessageInGroup}
+          />
+        );
+      })}
+    </div>
+  );
+}
+
+// Archived input placeholder composition
+interface ArchivedInputPlaceholderProps {
+  className?: string;
+}
+
+function ArchivedInputPlaceholder({
+  className,
+}: ArchivedInputPlaceholderProps) {
+  return (
+    <div className={cn("border-t bg-muted/30 px-4 py-3", className)}>
+      <div className="text-center text-sm text-muted-foreground">
+        Esta conversa foi arquivada. Para enviar mensagens, desarquive a
+        conversa primeiro.
+      </div>
+    </div>
+  );
 }
 
 function ConversationChat(props: ConversationChatProps) {
@@ -69,6 +228,7 @@ function ConversationChat(props: ConversationChatProps) {
     return () => clearTimeout(timeoutId);
   }, [conversation.messages?.length]);
 
+  // Send message handler - inline logic
   async function handleSendMessage(content: string) {
     if (!currentUser) return;
 
@@ -79,18 +239,15 @@ function ConversationChat(props: ConversationChatProps) {
     });
   }
 
-  // Get user info by ID with enhanced logic for inactive agents
-  function getUserById(userId: string) {
+  // Get user info by ID - inline logic with fallback handling
+  function getUserById(userId: string): AuthenticatedUser | null {
     if (userId === currentUser?.id) return currentUser;
 
-    // Try to find in available users first
     const foundUser = (availableUsers as UserBasic[]).find(
       (user) => user.id === userId,
     );
-    if (foundUser) return foundUser;
-
-    // If not found, it might be an inactive agent - return null to trigger fallback
-    return null;
+    // Cast to AuthenticatedUser for compatibility, knowing this might be incomplete
+    return foundUser ? (foundUser as unknown as AuthenticatedUser) : null;
   }
 
   const messageGroups = useMemo(() => {
@@ -130,7 +287,7 @@ function ConversationChat(props: ConversationChatProps) {
   }
 
   return (
-    <div className={`flex flex-col h-full bg-background ${className || ""}`}>
+    <div className={cn("flex flex-col h-full bg-background", className)}>
       {/* Archived conversation banner */}
       {isArchived && conversation.archivedAt && (
         <ArchivedConversationBanner
@@ -146,104 +303,28 @@ function ConversationChat(props: ConversationChatProps) {
           <div className="pb-4">
             {/* Welcome Message - only show when no messages */}
             {messageGroups.length === 0 && (
-              <div className="px-4 py-8">
-                <div className="text-center">
-                  <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
-                    <span className="text-2xl font-bold text-primary">
-                      {conversation.name?.charAt(0).toUpperCase() || "#"}
-                    </span>
-                  </div>
-                  <div className="text-xl font-semibold mb-2">
-                    Bem-vindo a {conversation.name || "esta conversa"}!
-                  </div>
-                  <div className="text-muted-foreground text-sm">
-                    {isArchived
-                      ? "Esta conversa foi arquivada."
-                      : "Este é o início da sua conversa direta."}
-                  </div>
-                </div>
-                <Separator className="mt-8" />
-              </div>
+              <WelcomeMessage
+                conversation={conversation}
+                isArchived={isArchived}
+              />
             )}
 
             {/* Message Groups - Discord style */}
-            {messageGroups.map((group, groupIndex) => {
-              const author = getUserById(group.authorId) as AuthenticatedUser;
-              const isCurrentUser = group.authorId === currentUser.id;
-              const timeDiff =
-                groupIndex > 0
-                  ? new Date(group.messages[0]?.createdAt).getTime() -
-                    new Date(
-                      messageGroups[groupIndex - 1].messages[
-                        messageGroups[groupIndex - 1].messages.length - 1
-                      ]?.createdAt,
-                    ).getTime()
-                  : 0;
+            {messageGroups.map((group, groupIndex) => (
+              <MessageGroup
+                key={groupIndex}
+                group={group}
+                groupIndex={groupIndex}
+                messageGroups={messageGroups}
+                currentUser={currentUser}
+                getUserById={getUserById}
+                isSendingMessage={sendMessageMutation.isPending}
+              />
+            ))}
 
-              // Show avatar and header if it's first group or if more than 7 minutes passed
-              const showAvatar = groupIndex === 0 || timeDiff > 7 * 60 * 1000;
-
-              // Determine if author is inactive (missing from available users)
-              const authorIsInactive = !author && !isCurrentUser;
-
-              // Check if this is the last group from current user and we're sending a message
-              const isLastCurrentUserGroup =
-                sendMessageMutation.isPending &&
-                isCurrentUser &&
-                groupIndex === messageGroups.length - 1;
-
-              return (
-                <div key={groupIndex}>
-                  {/* First message in group - shows avatar and name */}
-                  <MessageBubble
-                    message={group.messages[0]}
-                    author={author}
-                    isCurrentUser={isCurrentUser}
-                    showAvatar={showAvatar}
-                    authorIsInactive={authorIsInactive}
-                    originalAuthorName={authorIsInactive ? "Agente" : undefined}
-                    isSending={
-                      isLastCurrentUserGroup && group.messages.length === 1
-                    }
-                  />
-
-                  {/* Subsequent messages in same group - no avatar */}
-                  {group.messages.slice(1).map((message, messageIndex) => {
-                    // Only show sending indicator on the very last message in the group
-                    const isLastMessageInGroup =
-                      messageIndex === group.messages.length - 2; // -2 because we sliced the first one
-
-                    return (
-                      <MessageBubble
-                        key={message.id}
-                        message={message}
-                        author={author}
-                        isCurrentUser={isCurrentUser}
-                        showAvatar={false}
-                        authorIsInactive={authorIsInactive}
-                        originalAuthorName={
-                          authorIsInactive ? "Agente" : undefined
-                        }
-                        isSending={
-                          isLastCurrentUserGroup && isLastMessageInGroup
-                        }
-                      />
-                    );
-                  })}
-                </div>
-              );
-            })}
-
-            {/* Empty state */}
+            {/* Empty state - fallback for unusual scenarios */}
             {messageGroups.length === 0 && (
-              <div className="px-4 py-8 text-center text-muted-foreground">
-                <div className="text-4xl mb-4">💬</div>
-                <div className="text-sm">
-                  {isArchived
-                    ? "Esta conversa foi arquivada."
-                    : "Nenhuma mensagem ainda. Comece a conversa!"}
-                </div>
-              </div>
+              <EmptyState isArchived={isArchived} />
             )}
 
             {/* Scroll padding */}
@@ -263,14 +344,7 @@ function ConversationChat(props: ConversationChatProps) {
       )}
 
       {/* Archived conversation message input replacement */}
-      {isArchived && (
-        <div className="border-t bg-muted/30 px-4 py-3">
-          <div className="text-center text-sm text-muted-foreground">
-            Esta conversa foi arquivada. Para enviar mensagens, desarquive a
-            conversa primeiro.
-          </div>
-        </div>
-      )}
+      {isArchived && <ArchivedInputPlaceholder />}
     </div>
   );
 }

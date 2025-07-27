@@ -37,6 +37,51 @@
   --sidebar-accent-foreground: oklch(0.21 0.006 285.885);
   --sidebar-border: oklch(0.92 0.004 286.32);
   --sidebar-ring: oklch(0.705 0.015 286.067);
+
+  /* Typography tokens */
+  --font-size-xs: 0.75rem;
+  --font-size-sm: 0.875rem;
+  --font-size-base: 1rem;
+  --font-size-lg: 1.125rem;
+  --font-size-xl: 1.25rem;
+  --font-size-2xl: 1.5rem;
+  --font-size-3xl: 1.875rem;
+
+  --line-height-tight: 1.25;
+  --line-height-normal: 1.5;
+  --line-height-relaxed: 1.75;
+
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+
+  /* Semantic spacing tokens */
+  --spacing-component-xs: 0.25rem;
+  --spacing-component-sm: 0.5rem;
+  --spacing-component-md: 0.75rem;
+  --spacing-component-lg: 1rem;
+  --spacing-component-xl: 1.5rem;
+  --spacing-component-2xl: 2rem;
+
+  --spacing-layout-xs: 0.5rem;
+  --spacing-layout-sm: 1rem;
+  --spacing-layout-md: 1.5rem;
+  --spacing-layout-lg: 2rem;
+  --spacing-layout-xl: 3rem;
+  --spacing-layout-2xl: 4rem;
+
+  /* Component-specific tokens */
+  --feature-card-padding: var(--spacing-component-lg);
+  --feature-card-gap: var(--spacing-component-md);
+  --feature-card-border-radius: var(--radius-lg);
+
+  --status-indicator-size-sm: 0.375rem;
+  --status-indicator-size-md: 0.5rem;
+  --status-indicator-size-lg: 0.625rem;
+
+  --data-display-padding: var(--spacing-component-lg);
+  --data-display-gap: var(--spacing-component-sm);
 }
 
 .dark {
@@ -71,6 +116,51 @@
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.552 0.016 285.938);
+
+  /* Dark mode typography tokens inherit the same values */
+  --font-size-xs: 0.75rem;
+  --font-size-sm: 0.875rem;
+  --font-size-base: 1rem;
+  --font-size-lg: 1.125rem;
+  --font-size-xl: 1.25rem;
+  --font-size-2xl: 1.5rem;
+  --font-size-3xl: 1.875rem;
+
+  --line-height-tight: 1.25;
+  --line-height-normal: 1.5;
+  --line-height-relaxed: 1.75;
+
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+
+  /* Dark mode spacing tokens inherit the same values */
+  --spacing-component-xs: 0.25rem;
+  --spacing-component-sm: 0.5rem;
+  --spacing-component-md: 0.75rem;
+  --spacing-component-lg: 1rem;
+  --spacing-component-xl: 1.5rem;
+  --spacing-component-2xl: 2rem;
+
+  --spacing-layout-xs: 0.5rem;
+  --spacing-layout-sm: 1rem;
+  --spacing-layout-md: 1.5rem;
+  --spacing-layout-lg: 2rem;
+  --spacing-layout-xl: 3rem;
+  --spacing-layout-2xl: 4rem;
+
+  /* Dark mode component-specific tokens inherit the same values */
+  --feature-card-padding: var(--spacing-component-lg);
+  --feature-card-gap: var(--spacing-component-md);
+  --feature-card-border-radius: var(--radius-lg);
+
+  --status-indicator-size-sm: 0.375rem;
+  --status-indicator-size-md: 0.5rem;
+  --status-indicator-size-lg: 0.625rem;
+
+  --data-display-padding: var(--spacing-component-lg);
+  --data-display-gap: var(--spacing-component-sm);
 }
 
 @theme inline {
@@ -112,6 +202,39 @@
   --color-sidebar-ring: var(--sidebar-ring);
   --animate-accordion-down: accordion-down 0.2s ease-out;
   --animate-accordion-up: accordion-up 0.2s ease-out;
+
+  /* Typography utilities */
+  --text-xs: var(--font-size-xs);
+  --text-sm: var(--font-size-sm);
+  --text-base: var(--font-size-base);
+  --text-lg: var(--font-size-lg);
+  --text-xl: var(--font-size-xl);
+  --text-2xl: var(--font-size-2xl);
+  --text-3xl: var(--font-size-3xl);
+
+  --leading-tight: var(--line-height-tight);
+  --leading-normal: var(--line-height-normal);
+  --leading-relaxed: var(--line-height-relaxed);
+
+  --font-normal: var(--font-weight-normal);
+  --font-medium: var(--font-weight-medium);
+  --font-semibold: var(--font-weight-semibold);
+  --font-bold: var(--font-weight-bold);
+
+  /* Spacing utilities */
+  --space-component-xs: var(--spacing-component-xs);
+  --space-component-sm: var(--spacing-component-sm);
+  --space-component-md: var(--spacing-component-md);
+  --space-component-lg: var(--spacing-component-lg);
+  --space-component-xl: var(--spacing-component-xl);
+  --space-component-2xl: var(--spacing-component-2xl);
+
+  --space-layout-xs: var(--spacing-layout-xs);
+  --space-layout-sm: var(--spacing-layout-sm);
+  --space-layout-md: var(--spacing-layout-md);
+  --space-layout-lg: var(--spacing-layout-lg);
+  --space-layout-xl: var(--spacing-layout-xl);
+  --space-layout-2xl: var(--spacing-layout-2xl);
 
   @keyframes accordion-down {
     from {
@@ -189,6 +312,36 @@
 
   .status-pulse {
     animation: status-pulse 2s ease-in-out infinite;
+  }
+
+  /* Auth form animations */
+  @keyframes auth-form-slide-up {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .auth-form-enter {
+    animation: auth-form-slide-up 0.3s ease-out;
+  }
+
+  /* Form field focus animation */
+  @keyframes field-focus {
+    from {
+      box-shadow: 0 0 0 0 oklch(var(--ring) / 0.4);
+    }
+    to {
+      box-shadow: 0 0 0 4px oklch(var(--ring) / 0.1);
+    }
+  }
+
+  .field-focus {
+    animation: field-focus 0.2s ease-out;
   }
 }
 

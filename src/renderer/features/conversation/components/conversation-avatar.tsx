@@ -35,7 +35,7 @@ const getUserStatus = (user: UserSummary): UserStatus => {
 
   const statusIndex = Math.abs(hash) % 4;
   const statuses: UserStatus[] = ["online", "away", "busy", "offline"];
-  return statuses[statusIndex];
+  return statuses[statusIndex] || "offline"; // Fallback to offline
 };
 
 interface ConversationAvatarProps {
@@ -110,6 +110,26 @@ function ConversationAvatar(props: ConversationAvatarProps) {
   // For 1:1 conversations, show the other participant's avatar
   if (otherParticipants.length === 1) {
     const participant = otherParticipants[0];
+    if (!participant) {
+      return (
+        <div className="relative">
+          <Avatar className={cn(sizeClasses[size], className)}>
+            <AvatarFallback className="bg-gradient-to-br from-gray-400 to-gray-600 text-white">
+              <MessageSquare className="w-1/2 h-1/2" />
+            </AvatarFallback>
+          </Avatar>
+          {showStatus && (
+            <div
+              className={cn(
+                "absolute -bottom-0.5 -right-0.5 bg-gray-400 rounded-full border-2 border-background",
+                statusSizeClasses[size],
+              )}
+            />
+          )}
+        </div>
+      );
+    }
+
     return (
       <div className="relative">
         <Avatar className={cn(sizeClasses[size], className)}>
@@ -120,7 +140,7 @@ function ConversationAvatar(props: ConversationAvatarProps) {
             {participant.name.charAt(0).toUpperCase()}
           </AvatarFallback>
         </Avatar>
-        {showStatus && (
+        {showStatus && participant && (
           <div
             className={cn(
               "absolute -bottom-0.5 -right-0.5 rounded-full border-2 border-background",
@@ -137,6 +157,26 @@ function ConversationAvatar(props: ConversationAvatarProps) {
   const firstParticipant = otherParticipants[0];
   const secondParticipant = otherParticipants[1];
   const remainingCount = Math.max(0, otherParticipants.length - 2);
+
+  if (!firstParticipant) {
+    return (
+      <div className="relative">
+        <Avatar className={cn(sizeClasses[size], className)}>
+          <AvatarFallback className="bg-gradient-to-br from-gray-400 to-gray-600 text-white">
+            <MessageSquare className="w-1/2 h-1/2" />
+          </AvatarFallback>
+        </Avatar>
+        {showStatus && (
+          <div
+            className={cn(
+              "absolute -bottom-0.5 -right-0.5 bg-gray-400 rounded-full border-2 border-background",
+              statusSizeClasses[size],
+            )}
+          />
+        )}
+      </div>
+    );
+  }
 
   return (
     <div className={cn("relative flex", className)}>

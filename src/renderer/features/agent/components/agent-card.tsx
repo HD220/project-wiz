@@ -1,3 +1,4 @@
+import * as React from "react";
 import { Link } from "@tanstack/react-router";
 import { MoreHorizontal, Pencil, Power, Trash2, User } from "lucide-react";
 
@@ -12,6 +13,9 @@ import {
   CardContent,
   CardFooter,
   CardHeader,
+  CardTitle,
+  CardDescription,
+  CardAction,
 } from "@/renderer/components/ui/card";
 import {
   DropdownMenu,
@@ -21,19 +25,93 @@ import {
   DropdownMenuTrigger,
 } from "@/renderer/components/ui/dropdown-menu";
 import type { AgentWithAvatar } from "@/renderer/features/agent/agent.types";
-import { AgentStatusBadge } from "@/renderer/features/agent/components/agent-status-badge";
+import {
+  StatusIndicator,
+  StatusDot,
+  StatusLabel,
+} from "@/renderer/features/agent/components/agent-status-badge";
 import { cn, isValidAvatarUrl } from "@/renderer/lib/utils";
 
-interface AgentCardProps {
+// Base AgentCard container component
+interface AgentCardRootProps extends React.HTMLAttributes<HTMLDivElement> {
+  agent: AgentWithAvatar;
+  children?: React.ReactNode;
+}
+
+function AgentCardRoot({
+  agent,
+  className,
+  children,
+  ...props
+}: AgentCardRootProps) {
+  return (
+    <Card
+      className={cn(
+        "group transition-all duration-200 hover:shadow-md hover:scale-[1.01]",
+        className,
+      )}
+      {...props}
+    >
+      {children}
+    </Card>
+  );
+}
+
+// AgentCard Header with avatar and info
+interface AgentCardHeaderProps extends React.HTMLAttributes<HTMLDivElement> {
+  agent: AgentWithAvatar;
+  children?: React.ReactNode;
+}
+
+function AgentCardHeader({
+  agent,
+  className,
+  children,
+  ...props
+}: AgentCardHeaderProps) {
+  return (
+    <CardHeader className={cn("pb-4", className)} {...props}>
+      <div className="flex items-start gap-3">
+        <Avatar className="size-10 shrink-0">
+          <AvatarImage
+            src={isValidAvatarUrl(agent.avatar) || undefined}
+            alt={`${agent.name} avatar`}
+          />
+          <AvatarFallback className="bg-primary/5 text-primary border border-primary/10">
+            <User className="size-4" />
+          </AvatarFallback>
+        </Avatar>
+
+        <div className="flex-1 min-w-0 space-y-1">
+          <CardTitle className="text-sm font-semibold leading-tight truncate">
+            {agent.name}
+          </CardTitle>
+          <CardDescription className="text-xs truncate">
+            {agent.role}
+          </CardDescription>
+        </div>
+
+        {children}
+      </div>
+    </CardHeader>
+  );
+}
+
+// AgentCard Actions (dropdown menu)
+interface AgentCardActionsProps extends React.HTMLAttributes<HTMLDivElement> {
   agent: AgentWithAvatar;
   onDelete?: (agent: AgentWithAvatar) => void;
   onToggleStatus?: (agent: AgentWithAvatar) => void;
-  className?: string;
 }
 
-function AgentCard(props: AgentCardProps) {
-  const { agent, onDelete, onToggleStatus, className } = props;
-
+function AgentCardActions({
+  agent,
+  onDelete,
+  onToggleStatus,
+  className,
+  ...props
+}: AgentCardActionsProps) {
+  // Inline handlers following INLINE-FIRST principles
   function handleDelete() {
     onDelete?.(agent);
   }
@@ -43,76 +121,138 @@ function AgentCard(props: AgentCardProps) {
   }
 
   return (
-    <Card className={cn("transition-all hover:shadow-md", className)}>
-      <CardHeader className="pb-3">
-        <div className="flex items-start justify-between">
-          <div className="flex items-center space-x-3">
-            <Avatar className="h-10 w-10">
-              <AvatarImage
-                src={isValidAvatarUrl(agent.avatar) || undefined}
-                alt={agent.name}
-              />
-              <AvatarFallback className="bg-primary/10 text-primary">
-                <User className="h-4 w-4" />
-              </AvatarFallback>
-            </Avatar>
-            <div className="space-y-1">
-              <h3 className="font-semibold text-sm leading-none">
-                {agent.name}
-              </h3>
-              <p className="text-xs text-muted-foreground">{agent.role}</p>
-            </div>
-          </div>
-
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                <MoreHorizontal className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-[160px]">
-              <DropdownMenuItem asChild>
-                <Link
-                  to="/user/agents/edit/$agentId"
-                  params={{ agentId: agent.id }}
-                >
-                  <Pencil className="mr-2 h-4 w-4" />
-                  Edit
-                </Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={handleToggleStatus}>
-                <Power className="mr-2 h-4 w-4" />
-                {agent.status === "active" ? "Deactivate" : "Activate"}
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem
-                onClick={handleDelete}
-                className="text-destructive focus:text-destructive"
-              >
-                <Trash2 className="mr-2 h-4 w-4" />
-                Delete
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-      </CardHeader>
-
-      <CardContent className="pb-3">
-        <p className="text-xs text-muted-foreground line-clamp-2">
-          {agent.backstory}
-        </p>
-      </CardContent>
-
-      <CardFooter className="pt-0">
-        <div className="flex items-center justify-between w-full">
-          <AgentStatusBadge status={agent.status} />
-          <div className="text-xs text-muted-foreground">
-            {new Date(agent.createdAt).toLocaleDateString()}
-          </div>
-        </div>
-      </CardFooter>
-    </Card>
+    <CardAction className={className} {...props}>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="size-8 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+            aria-label={`Actions for ${agent.name}`}
+          >
+            <MoreHorizontal className="size-4" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" className="w-40">
+          <DropdownMenuItem asChild>
+            <Link
+              to="/user/agents/edit/$agentId"
+              params={{ agentId: agent.id }}
+              className="cursor-pointer"
+            >
+              <Pencil className="mr-2 size-4" />
+              Edit Agent
+            </Link>
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={handleToggleStatus}>
+            <Power className="mr-2 size-4" />
+            {agent.status === "active" ? "Deactivate" : "Activate"}
+          </DropdownMenuItem>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem
+            onClick={handleDelete}
+            className="text-destructive focus:text-destructive"
+          >
+            <Trash2 className="mr-2 size-4" />
+            Delete Agent
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </CardAction>
   );
 }
 
-export { AgentCard };
+// AgentCard Content with backstory
+interface AgentCardContentProps extends React.HTMLAttributes<HTMLDivElement> {
+  agent: AgentWithAvatar;
+}
+
+function AgentCardContent({
+  agent,
+  className,
+  ...props
+}: AgentCardContentProps) {
+  return (
+    <CardContent className={cn("pb-4", className)} {...props}>
+      <p className="text-xs text-muted-foreground line-clamp-2 leading-relaxed">
+        {agent.backstory || "No backstory provided."}
+      </p>
+    </CardContent>
+  );
+}
+
+// AgentCard Footer with status and date
+interface AgentCardFooterProps extends React.HTMLAttributes<HTMLDivElement> {
+  agent: AgentWithAvatar;
+}
+
+function AgentCardFooter({ agent, className, ...props }: AgentCardFooterProps) {
+  // Inline date formatting following INLINE-FIRST principles
+  const formattedDate = new Date(agent.createdAt).toLocaleDateString(
+    undefined,
+    {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    },
+  );
+
+  return (
+    <CardFooter
+      className={cn("pt-0 border-t border-border/50", className)}
+      {...props}
+    >
+      <div className="flex items-center justify-between w-full">
+        <StatusIndicator status={agent.status} size="sm" className="border">
+          <StatusDot status={agent.status} size="sm" />
+          <StatusLabel status={agent.status} />
+        </StatusIndicator>
+
+        <time
+          dateTime={agent.createdAt.toISOString()}
+          className="text-xs text-muted-foreground font-medium"
+        >
+          {formattedDate}
+        </time>
+      </div>
+    </CardFooter>
+  );
+}
+
+// Complete AgentCard component for backward compatibility
+interface CompleteAgentCardProps {
+  agent: AgentWithAvatar;
+  onDelete?: (agent: AgentWithAvatar) => void;
+  onToggleStatus?: (agent: AgentWithAvatar) => void;
+  className?: string;
+}
+
+function AgentCard({
+  agent,
+  onDelete,
+  onToggleStatus,
+  className,
+}: CompleteAgentCardProps) {
+  return (
+    <AgentCardRoot agent={agent} className={className}>
+      <AgentCardHeader agent={agent}>
+        <AgentCardActions
+          agent={agent}
+          onDelete={onDelete}
+          onToggleStatus={onToggleStatus}
+        />
+      </AgentCardHeader>
+      <AgentCardContent agent={agent} />
+      <AgentCardFooter agent={agent} />
+    </AgentCardRoot>
+  );
+}
+
+export {
+  AgentCard,
+  AgentCardRoot,
+  AgentCardHeader,
+  AgentCardActions,
+  AgentCardContent,
+  AgentCardFooter,
+};

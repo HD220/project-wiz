@@ -27,20 +27,21 @@ function RootSidebar(props: RootSidebarProps) {
   const { user } = useAuth();
 
   return (
-    <div
+    <nav
       className={cn(
-        "w-14 bg-muted/50 flex flex-col items-center pb-2 border-r",
+        "w-16 bg-background/80 backdrop-blur-sm flex flex-col items-center py-3 border-r border-border/50",
         className,
       )}
+      role="navigation"
+      aria-label="Main navigation"
     >
       {/* User Space / Direct Messages */}
-      <div className="h-12 flex items-center justify-center">
+      <div className="mb-3">
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
               <Link
                 to="/user"
-                className=""
                 activeProps={{
                   className: "active",
                 }}
@@ -50,13 +51,14 @@ function RootSidebar(props: RootSidebarProps) {
                     variant="ghost"
                     size="icon"
                     className={cn(
-                      "w-10 h-10 p-0 rounded-full border transition-all duration-200",
+                      "w-12 h-12 p-0 rounded-2xl border-2 transition-all duration-200 focus-visible:ring-2 focus-visible:ring-ring",
                       isActive
-                        ? "bg-primary text-primary-foreground border-primary"
-                        : "bg-muted border-muted-foreground/30 hover:bg-primary hover:text-white hover:border-primary",
+                        ? "bg-primary text-primary-foreground border-primary rounded-[16px]"
+                        : "bg-muted/60 border-transparent hover:bg-primary hover:text-primary-foreground hover:rounded-[16px]",
                     )}
+                    aria-label="Personal area"
                   >
-                    <Avatar className="w-6 h-6">
+                    <Avatar className="w-7 h-7">
                       <AvatarFallback className="bg-transparent text-inherit font-medium text-sm">
                         {user?.name?.charAt(0).toUpperCase() || "U"}
                       </AvatarFallback>
@@ -65,17 +67,17 @@ function RootSidebar(props: RootSidebarProps) {
                 )}
               </Link>
             </TooltipTrigger>
-            <TooltipContent side="right">
+            <TooltipContent side="right" sideOffset={12}>
               <p>Área Pessoal</p>
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>
       </div>
 
-      <Separator className="w-10 -mt-px mb-2" />
+      <Separator className="w-8 mb-3" />
 
       {/* Projects List */}
-      <div className="flex-1 flex flex-col items-center space-y-2 py-1 overflow-hidden">
+      <div className="flex-1 flex flex-col items-center space-y-2 overflow-y-auto scrollbar-thin scrollbar-thumb-muted scrollbar-track-transparent">
         {projects.length > 0 ? (
           projects.map((project) => (
             <TooltipProvider key={project.id}>
@@ -84,7 +86,6 @@ function RootSidebar(props: RootSidebarProps) {
                   <Link
                     to="/project/$projectId"
                     params={{ projectId: project.id }}
-                    className="relative"
                     activeProps={{
                       className: "active",
                     }}
@@ -94,20 +95,21 @@ function RootSidebar(props: RootSidebarProps) {
                         variant="ghost"
                         size="icon"
                         className={cn(
-                          "w-10 h-10 p-0 rounded-full border transition-all duration-200 relative",
+                          "w-12 h-12 p-0 rounded-2xl border-2 transition-all duration-200 relative focus-visible:ring-2 focus-visible:ring-ring",
                           isActive
-                            ? "bg-primary text-primary-foreground border-primary"
-                            : "bg-muted border-muted-foreground/30 hover:bg-primary hover:text-white hover:border-primary",
+                            ? "bg-primary text-primary-foreground border-primary rounded-[16px]"
+                            : "bg-muted/60 border-transparent hover:bg-primary hover:text-primary-foreground hover:rounded-[16px]",
                         )}
+                        aria-label={`Open project: ${project.name}`}
                       >
                         {project.avatarUrl ? (
                           <img
                             src={project.avatarUrl}
-                            alt={project.name}
-                            className="w-6 h-6 rounded-full"
+                            alt=""
+                            className="w-7 h-7 rounded-full"
                           />
                         ) : (
-                          <span className="font-semibold text-sm">
+                          <span className="font-semibold text-base">
                             {project.name.charAt(0).toUpperCase()}
                           </span>
                         )}
@@ -115,7 +117,7 @@ function RootSidebar(props: RootSidebarProps) {
                     )}
                   </Link>
                 </TooltipTrigger>
-                <TooltipContent side="right">
+                <TooltipContent side="right" sideOffset={12}>
                   <p>{project.name}</p>
                 </TooltipContent>
               </Tooltip>
@@ -123,14 +125,14 @@ function RootSidebar(props: RootSidebarProps) {
           ))
         ) : (
           <div className="flex-1 flex items-center justify-center px-2">
-            <div className="text-xs text-muted-foreground text-center">
+            <p className="text-xs text-muted-foreground text-center max-w-[50px] leading-relaxed">
               Nenhum projeto
-            </div>
+            </p>
           </div>
         )}
       </div>
 
-      <Separator className="w-10 mt-2 mb-2" />
+      <Separator className="w-8 mt-3 mb-3" />
 
       {/* Action Buttons */}
       <div className="flex flex-col items-center space-y-2">
@@ -141,13 +143,14 @@ function RootSidebar(props: RootSidebarProps) {
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="w-10 h-10 p-0 rounded-full border bg-muted border-muted-foreground/30 hover:bg-primary hover:text-white hover:border-primary transition-all duration-200"
+                  className="w-12 h-12 p-0 rounded-2xl border-2 bg-muted/40 border-transparent hover:bg-accent hover:text-foreground hover:rounded-[16px] transition-all duration-200 focus-visible:ring-2 focus-visible:ring-ring"
+                  aria-label="Add new project"
                 >
-                  <Plus className="w-5 h-5" />
+                  <Plus className="w-6 h-6" />
                 </Button>
               </CreateProjectDialog>
             </TooltipTrigger>
-            <TooltipContent side="right">
+            <TooltipContent side="right" sideOffset={12}>
               <p>Adicionar Projeto</p>
             </TooltipContent>
           </Tooltip>
@@ -160,18 +163,19 @@ function RootSidebar(props: RootSidebarProps) {
                 to="/user/settings"
                 variant="ghost"
                 size="icon"
-                className="w-10 h-10 p-0 rounded-full border bg-muted border-muted-foreground/30 hover:bg-primary hover:text-white hover:border-primary transition-all duration-200"
+                className="w-12 h-12 p-0 rounded-2xl border-2 bg-muted/40 border-transparent hover:bg-accent hover:text-foreground hover:rounded-[16px] transition-all duration-200 focus-visible:ring-2 focus-visible:ring-ring"
+                aria-label="Open settings"
               >
-                <Settings className="w-5 h-5" />
+                <Settings className="w-6 h-6" />
               </CustomLink>
             </TooltipTrigger>
-            <TooltipContent side="right">
-              <p>Settings</p>
+            <TooltipContent side="right" sideOffset={12}>
+              <p>Configurações</p>
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>
       </div>
-    </div>
+    </nav>
   );
 }
 

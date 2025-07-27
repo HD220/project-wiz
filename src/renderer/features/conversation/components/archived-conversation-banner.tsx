@@ -13,7 +13,7 @@ interface ArchivedConversationBannerProps {
 }
 
 function ArchivedConversationBanner(props: ArchivedConversationBannerProps) {
-  const { conversationId, conversationName, archivedAt, className } = props;
+  const { conversationId, archivedAt, className } = props;
   const router = useRouter();
 
   // Unarchive mutation with automatic error handling

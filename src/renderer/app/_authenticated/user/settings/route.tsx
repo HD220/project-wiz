@@ -62,7 +62,6 @@ function SettingsLayout() {
               </h3>
               <div className="space-y-1">
                 {section.items.map((item) => {
-                  const Icon = item.icon;
                   const isActive = location.pathname === item.path;
                   return (
                     <button
