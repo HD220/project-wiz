@@ -28,11 +28,11 @@ const getStatusColor = (status: UserStatus): string => {
 const getUserStatus = (user: UserSummary): UserStatus => {
   // TODO: Implement actual user status logic based on real data
   // For demo purposes, randomly assign status based on user ID
-  const hash = user.id.split('').reduce((a, b) => {
-    a = ((a << 5) - a) + b.charCodeAt(0);
+  const hash = user.id.split("").reduce((a, b) => {
+    a = (a << 5) - a + b.charCodeAt(0);
     return a & a;
   }, 0);
-  
+
   const statusIndex = Math.abs(hash) % 4;
   const statuses: UserStatus[] = ["online", "away", "busy", "offline"];
   return statuses[statusIndex];
@@ -96,10 +96,12 @@ function ConversationAvatar(props: ConversationAvatarProps) {
           </AvatarFallback>
         </Avatar>
         {showStatus && (
-          <div className={cn(
-            "absolute -bottom-0.5 -right-0.5 bg-gray-400 rounded-full border-2 border-background",
-            statusSizeClasses[size]
-          )} />
+          <div
+            className={cn(
+              "absolute -bottom-0.5 -right-0.5 bg-gray-400 rounded-full border-2 border-background",
+              statusSizeClasses[size],
+            )}
+          />
         )}
       </div>
     );
@@ -111,17 +113,21 @@ function ConversationAvatar(props: ConversationAvatarProps) {
     return (
       <div className="relative">
         <Avatar className={cn(sizeClasses[size], className)}>
-          <AvatarImage src={isValidAvatarUrl(participant.avatar) || undefined} />
+          <AvatarImage
+            src={isValidAvatarUrl(participant.avatar) || undefined}
+          />
           <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-white font-semibold">
             {participant.name.charAt(0).toUpperCase()}
           </AvatarFallback>
         </Avatar>
         {showStatus && (
-          <div className={cn(
-            "absolute -bottom-0.5 -right-0.5 rounded-full border-2 border-background",
-            getStatusColor(getUserStatus(participant)),
-            statusSizeClasses[size]
-          )} />
+          <div
+            className={cn(
+              "absolute -bottom-0.5 -right-0.5 rounded-full border-2 border-background",
+              getStatusColor(getUserStatus(participant)),
+              statusSizeClasses[size],
+            )}
+          />
         )}
       </div>
     );
@@ -135,7 +141,12 @@ function ConversationAvatar(props: ConversationAvatarProps) {
   return (
     <div className={cn("relative flex", className)}>
       {/* First participant avatar */}
-      <Avatar className={cn(sizeClasses[size], "relative z-20 ring-2 ring-background")}>
+      <Avatar
+        className={cn(
+          sizeClasses[size],
+          "relative z-20 ring-2 ring-background",
+        )}
+      >
         <AvatarImage
           src={isValidAvatarUrl(firstParticipant.avatar) || undefined}
         />
@@ -145,10 +156,12 @@ function ConversationAvatar(props: ConversationAvatarProps) {
       </Avatar>
 
       {/* Second participant or counter */}
-      <Avatar className={cn(
-        sizeClasses[size], 
-        "relative z-10 -ml-3 ring-2 ring-background"
-      )}>
+      <Avatar
+        className={cn(
+          sizeClasses[size],
+          "relative z-10 -ml-3 ring-2 ring-background",
+        )}
+      >
         {secondParticipant ? (
           <>
             <AvatarImage
@@ -164,27 +177,31 @@ function ConversationAvatar(props: ConversationAvatarProps) {
           </AvatarFallback>
         )}
       </Avatar>
-      
+
       {/* Additional count indicator if more than 2 extra participants */}
       {remainingCount > 0 && secondParticipant && (
-        <div className={cn(
-          "absolute -bottom-1 -right-1 bg-primary text-primary-foreground rounded-full text-xs font-bold",
-          "flex items-center justify-center min-w-[1.25rem] h-5 px-1 z-30 ring-2 ring-background"
-        )}>
+        <div
+          className={cn(
+            "absolute -bottom-1 -right-1 bg-primary text-primary-foreground rounded-full text-xs font-bold",
+            "flex items-center justify-center min-w-[1.25rem] h-5 px-1 z-30 ring-2 ring-background",
+          )}
+        >
           +{remainingCount}
         </div>
       )}
-      
+
       {/* Status indicator for group - show if any user is online */}
       {showStatus && (
-        <div className={cn(
-          "absolute -bottom-0.5 -right-0.5 rounded-full border-2 border-background z-30",
-          // For group conversations, show green if any participant is online
-          otherParticipants.some(p => getUserStatus(p) === "online") 
-            ? "bg-green-500" 
-            : "bg-gray-400",
-          statusSizeClasses[size]
-        )} />
+        <div
+          className={cn(
+            "absolute -bottom-0.5 -right-0.5 rounded-full border-2 border-background z-30",
+            // For group conversations, show green if any participant is online
+            otherParticipants.some((p) => getUserStatus(p) === "online")
+              ? "bg-green-500"
+              : "bg-gray-400",
+            statusSizeClasses[size],
+          )}
+        />
       )}
     </div>
   );

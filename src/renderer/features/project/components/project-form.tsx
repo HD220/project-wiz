@@ -50,8 +50,8 @@ function ProjectForm(props: ProjectFormProps) {
     {
       successMessage: "Project created successfully",
       errorMessage: "Failed to create project",
+      invalidateRouter: false, // Disable automatic invalidation to prevent double invalidation
       onSuccess: (project) => {
-        router.invalidate();
         onSuccess?.(project.id);
       },
     },

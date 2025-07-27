@@ -54,16 +54,22 @@ export function setupAgentHandlers(): void {
   });
 
   // List agents (with session-based auth and filters)
-  createIpcHandler(
-    "agents:list",
-    async (filters?: AgentFiltersInput & { includeInactive?: boolean }) => {
-      const currentUser = await AuthService.getCurrentUser();
-      if (!currentUser) {
-        throw new Error("User not authenticated");
-      }
-      return AgentService.listByOwnerId(currentUser.id, filters);
-    },
-  );
+  createIpcHandler("agents:list", async (filters?: AgentFiltersInput) => {
+    const currentUser = await AuthService.getCurrentUser();
+    if (!currentUser) {
+      throw new Error("User not authenticated");
+    }
+
+    // Map frontend showInactive to backend includeInactive
+    const serviceFilters = filters
+      ? {
+          ...filters,
+          includeInactive: filters.showInactive || false,
+        }
+      : undefined;
+
+    return AgentService.listByOwnerId(currentUser.id, serviceFilters);
+  });
 
   // Get agent by ID
   createIpcHandler(

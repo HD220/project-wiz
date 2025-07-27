@@ -1,6 +1,7 @@
 import { createFileRoute, Outlet } from "@tanstack/react-router";
 
 import { ProjectSidebar } from "@/renderer/features/app/components/project-sidebar";
+import { loadApiData } from "@/renderer/lib/route-loader";
 
 function ProjectLayout() {
   const { project } = Route.useLoaderData();
@@ -19,17 +20,20 @@ function ProjectLayout() {
 
 export const Route = createFileRoute("/_authenticated/project/$projectId")({
   loader: async ({ params }) => {
-    // Get basic project info for sidebar
-    const projectResponse = await window.api.projects.findById(
-      params.projectId,
-    );
-    if (!projectResponse.success || !projectResponse.data) {
-      throw new Error("Project not found");
-    }
+    try {
+      // Get basic project info for sidebar using loadApiData for consistency
+      const project = await loadApiData(
+        () => window.api.projects.findById(params.projectId),
+        "Project not found",
+      );
 
-    return {
-      project: projectResponse.data,
-    };
+      return {
+        project,
+      };
+    } catch (error) {
+      console.error("Failed to load project:", error);
+      throw error;
+    }
   },
   component: ProjectLayout,
 });

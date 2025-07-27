@@ -22,6 +22,10 @@ export class AgentService {
     input: CreateAgentInput,
     ownerId: string,
   ): Promise<SelectAgent> {
+    if (!ownerId) {
+      throw new Error("Owner ID is required");
+    }
+
     const validatedInput = createAgentSchema.parse(input);
     const db = getDatabase();
 
@@ -58,6 +62,10 @@ export class AgentService {
         throw new Error("Failed to create user for agent");
       }
 
+      if (!agentUser.id) {
+        throw new Error("Created user missing ID");
+      }
+
       // Generate system prompt
       const systemPrompt = `You are a ${validatedInput.role}. ${validatedInput.backstory}. Your current goal is ${validatedInput.goal}. Always be helpful, professional, and focus on best practices in your domain. Provide clear, actionable advice and maintain a collaborative approach when working with humans and other agents.`;
 
@@ -73,13 +81,20 @@ export class AgentService {
           goal: validatedInput.goal,
           systemPrompt,
           providerId: validatedInput.providerId,
-          modelConfig: JSON.stringify(validatedInput.modelConfig),
+          modelConfig:
+            typeof validatedInput.modelConfig === "string"
+              ? validatedInput.modelConfig
+              : JSON.stringify(validatedInput.modelConfig),
           status: "inactive" as AgentStatus,
         })
         .returning();
 
       if (!agent) {
         throw new Error("Failed to create agent");
+      }
+
+      if (!agent.id) {
+        throw new Error("Created agent missing ID");
       }
 
       return agent;

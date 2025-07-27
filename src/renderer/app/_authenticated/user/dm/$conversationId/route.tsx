@@ -1,11 +1,11 @@
 import { createFileRoute, Outlet } from "@tanstack/react-router";
-import { MessageCircle } from "lucide-react";
 
 import type { SelectConversationParticipant } from "@/main/features/conversation/conversation.model";
 import type { SelectMessage } from "@/main/features/conversation/message.model";
 import type { AuthenticatedUser as MainAuthUser } from "@/main/features/user/user.types";
 
 import { ContentHeader } from "@/renderer/features/app/components/content-header";
+import { ConversationAvatar } from "@/renderer/features/conversation/components/conversation-avatar";
 import { ConversationChat } from "@/renderer/features/conversation/components/conversation-chat";
 import type { AuthenticatedUser } from "@/renderer/features/user/user.types";
 import { loadApiData } from "@/renderer/lib/route-loader";
@@ -162,21 +162,33 @@ function DMLayout() {
   // Use generated title from backend or create fallback
   const displayName = conversation.name || "Unknown Conversation";
 
-  // Use the generated title as description, or create appropriate fallback
+  // Create description based on participants, not duplicating the title
   const description =
-    conversation.name ||
-    (otherParticipants.length === 1
-      ? otherParticipants[0]?.name || "Unknown Participant"
+    otherParticipants.length === 1
+      ? "Conversa direta"
       : otherParticipants.length > 1
-        ? `${otherParticipants.length + 1} participants`
-        : "Conversation");
+        ? `${otherParticipants.length + 1} participantes`
+        : "Conversa";
+
+  // Create conversation avatar - use small size for header
+  const conversationAvatar = (
+    <div className="flex-shrink-0">
+      <ConversationAvatar
+        participants={conversation.participants}
+        availableUsers={availableUsers}
+        currentUserId={user?.id}
+        size="sm"
+        showStatus={false}
+      />
+    </div>
+  );
 
   return (
     <div className="h-full w-full flex flex-col">
       <ContentHeader
         title={displayName}
         description={description}
-        icon={MessageCircle}
+        customIcon={conversationAvatar}
       />
       <main className="flex-1 overflow-hidden">
         <ConversationChat
@@ -207,44 +219,53 @@ export const Route = createFileRoute("/_authenticated/user/dm/$conversationId")(
     loader: async ({ params }) => {
       const { conversationId } = params;
 
-      // Load conversations first to validate conversation exists (include archived)
-      const conversations = await loadApiData(
-        () =>
-          window.api.conversations.getUserConversations({
-            includeArchived: true, // Include archived to allow viewing archived conversations
-            includeInactive: false,
+      try {
+        // Load conversation with messages and required data in parallel
+        const [conversationResult, availableUsers, user] = await Promise.all([
+          // Direct conversation fetch with messages
+          Promise.all([
+            loadApiData(
+              () =>
+                window.api.conversations.getUserConversations({
+                  includeArchived: true,
+                  includeInactive: false,
+                }),
+              "Failed to load conversations",
+            ),
+            loadApiData(
+              () => window.api.messages.getConversationMessages(conversationId),
+              "Failed to load messages",
+            ),
+          ]).then(([conversations, messages]) => {
+            const conversation = conversations.find(
+              (conv) => conv.id === conversationId,
+            );
+            if (!conversation) {
+              throw new Error("Conversation not found");
+            }
+            return { ...conversation, messages };
           }),
-        "Failed to load conversations",
-      );
+          // Load users and auth in parallel
+          loadApiData(
+            () => window.api.users.listAvailableUsers(),
+            "Failed to load available users",
+          ),
+          loadApiData(
+            () => window.api.auth.getCurrentUser(),
+            "Failed to load current user",
+          ),
+        ]);
 
-      const conversation = conversations.find(
-        (conv) => conv.id === conversationId,
-      );
-      if (!conversation) {
-        throw new Error("Conversation not found");
+        return {
+          conversation: conversationResult,
+          availableUsers,
+          user,
+        };
+      } catch (error) {
+        // Enhanced error handling with more specific messages
+        console.error("Failed to load conversation data:", error);
+        throw error;
       }
-
-      // Load messages, users, and current user in parallel
-      const [messages, availableUsers, user] = await Promise.all([
-        loadApiData(
-          () => window.api.messages.getConversationMessages(conversationId),
-          "Failed to load messages",
-        ),
-        loadApiData(
-          () => window.api.users.listAvailableUsers(),
-          "Failed to load available users",
-        ),
-        loadApiData(
-          () => window.api.auth.getCurrentUser(),
-          "Failed to load current user",
-        ),
-      ]);
-
-      return {
-        conversation: { ...conversation, messages },
-        availableUsers,
-        user,
-      };
     },
     component: DMLayout,
   },

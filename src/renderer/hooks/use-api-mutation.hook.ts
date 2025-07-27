@@ -78,8 +78,9 @@ export function useApiMutation<TArgs, TReturn>(
         }
       }
     },
-    onError: (_error) => {
+    onError: (error) => {
       // Network/system errors (IPC communication failure)
+      console.error("API mutation error:", error);
       const errorMsg = options.errorMessage || "An unexpected error occurred";
       toast.error(errorMsg);
 

@@ -36,10 +36,10 @@ export const agentsTable = sqliteTable(
 
     createdAt: integer("created_at", { mode: "timestamp_ms" })
       .notNull()
-      .default(sql`(strftime('%s', 'now'))`),
+      .default(sql`(strftime('%s', 'now') * 1000)`),
     updatedAt: integer("updated_at", { mode: "timestamp_ms" })
       .notNull()
-      .default(sql`(strftime('%s', 'now'))`),
+      .default(sql`(strftime('%s', 'now') * 1000)`),
   },
   (table) => ({
     // Performance indexes for foreign keys

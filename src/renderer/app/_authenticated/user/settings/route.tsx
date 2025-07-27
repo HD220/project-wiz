@@ -28,16 +28,8 @@ function SettingsLayout() {
     >
       {/* Sidebar */}
       <div className="w-60 bg-[#2f3136] border-r border-[#202225] p-4">
-        <div className="flex items-center justify-between mb-6">
+        <div className="mb-6">
           <h2 className="text-white font-semibold">Settings</h2>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="w-6 h-6 rounded-full hover:bg-accent/80 text-gray-400"
-            onClick={() => navigate({ to: "/user" })}
-          >
-            <X className="w-4 h-4" />
-          </Button>
         </div>
 
         {/* Navigation */}

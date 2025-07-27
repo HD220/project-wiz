@@ -115,7 +115,7 @@ function ProviderForm(props: ProviderFormProps) {
 
   return (
     <Dialog open onOpenChange={onClose}>
-      <DialogContent className="max-w-lg">
+      <DialogContent className="max-w-lg" showCloseButton={false}>
         <DialogHeader>
           <DialogTitle>
             {isEditing ? "Edit Provider" : "Add New Provider"}

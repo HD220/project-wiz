@@ -54,12 +54,18 @@ function AgentForm(props: AgentFormProps) {
       modelConfig:
         initialData?.modelConfig || JSON.stringify(defaultModelConfig),
       status: "inactive", // Always default to inactive
-      avatar: initialData?.avatar || "", // Optional avatar URL
+      avatar: "", // Avatar is stored in user table, not agent table
     },
   });
 
   async function handleSubmit(data: FormData) {
-    await onSubmit(data as CreateAgentInput);
+    try {
+      await onSubmit(data as CreateAgentInput);
+    } catch (error) {
+      // Error handling is done by the parent component via useApiMutation
+      // This catch prevents unhandled promise rejection
+      console.error("Error in handleSubmit:", error);
+    }
   }
 
   return (

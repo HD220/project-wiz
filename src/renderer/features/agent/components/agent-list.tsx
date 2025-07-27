@@ -129,12 +129,11 @@ function AgentList(props: AgentListProps) {
   // SIMPLE: Check if we have filters for UI purposes
   const hasFilters = search.status || search.search || search.showInactive;
 
-  // Filter agents based on active/inactive state
-  const filteredAgents = showInactive
-    ? agents
-    : agents.filter((agent) => agent.status === "active");
-  const activeAgents = agents.filter((agent) => agent.status === "active");
-  const inactiveAgents = agents.filter((agent) => agent.status === "inactive");
+  // Filter agents based on soft deletion state (isActive field)
+  // Note: Backend already filters by isActive, this is just for UI consistency
+  const filteredAgents = agents; // Backend already handles isActive filtering
+  const activeAgents = agents.filter((agent) => agent.isActive);
+  const inactiveAgents = agents.filter((agent) => !agent.isActive);
 
   // SIMPLE: Empty state when no agents and no filters
   if (filteredAgents.length === 0 && !hasFilters) {

@@ -71,7 +71,8 @@ function ConversationSidebarItem({
 
     const now = new Date();
     const messageTime = new Date(conversation.lastMessage.createdAt);
-    const diffInMinutes = Math.abs(now.getTime() - messageTime.getTime()) / 60000;
+    const diffInMinutes =
+      Math.abs(now.getTime() - messageTime.getTime()) / 60000;
     const diffInHours = diffInMinutes / 60;
     const diffInDays = diffInHours / 24;
 
@@ -105,7 +106,7 @@ function ConversationSidebarItem({
 
   // Check if conversation has unread messages (placeholder logic)
   const hasUnreadMessages = conversation.lastMessage && false; // TODO: Implement unread logic
-  
+
   return (
     <div className="group relative conversation-item-enter">
       <Link
@@ -116,7 +117,7 @@ function ConversationSidebarItem({
           "hover:bg-accent/70 hover:shadow-sm hover:scale-[1.02]",
           "active:scale-[0.98] active:bg-accent/90",
           conversation.archivedAt && "opacity-60",
-          hasUnreadMessages && "bg-accent/30"
+          hasUnreadMessages && "bg-accent/30",
         )}
         activeProps={{
           className: "bg-accent text-accent-foreground shadow-md scale-[1.02]",
@@ -139,12 +140,15 @@ function ConversationSidebarItem({
           {/* Top row: Name and time */}
           <div className="flex items-center justify-between gap-2">
             <div className="flex items-center gap-2 min-w-0">
-              <span className={cn(
-                "text-sm font-semibold truncate transition-colors",
-                conversation.archivedAt && "line-through text-muted-foreground",
-                hasUnreadMessages && "text-foreground",
-                !hasUnreadMessages && "text-foreground/90"
-              )}>
+              <span
+                className={cn(
+                  "text-sm font-semibold truncate transition-colors",
+                  conversation.archivedAt &&
+                    "line-through text-muted-foreground",
+                  hasUnreadMessages && "text-foreground",
+                  !hasUnreadMessages && "text-foreground/90",
+                )}
+              >
                 {getConversationName()}
               </span>
               {hasUnreadMessages && (
@@ -152,20 +156,28 @@ function ConversationSidebarItem({
               )}
             </div>
             {formatLastMessageTime() && (
-              <span className={cn(
-                "text-xs whitespace-nowrap transition-colors",
-                hasUnreadMessages ? "text-primary font-medium" : "text-muted-foreground"
-              )}>
+              <span
+                className={cn(
+                  "text-xs whitespace-nowrap transition-colors",
+                  hasUnreadMessages
+                    ? "text-primary font-medium"
+                    : "text-muted-foreground",
+                )}
+              >
                 {formatLastMessageTime()}
               </span>
             )}
           </div>
-          
+
           {/* Bottom row: Last message preview */}
-          <div className={cn(
-            "text-xs truncate leading-tight transition-colors",
-            hasUnreadMessages ? "text-muted-foreground font-medium" : "text-muted-foreground/80"
-          )}>
+          <div
+            className={cn(
+              "text-xs truncate leading-tight transition-colors",
+              hasUnreadMessages
+                ? "text-muted-foreground font-medium"
+                : "text-muted-foreground/80",
+            )}
+          >
             {getLastMessagePreview()}
           </div>
         </div>
@@ -174,32 +186,35 @@ function ConversationSidebarItem({
         <div
           className={cn(
             "opacity-0 group-hover:opacity-100 transition-all duration-200 flex-shrink-0",
-            "hover:bg-accent-foreground/10 rounded-md p-1.5 transform hover:scale-110"
+            "hover:bg-accent-foreground/10 rounded-md p-1.5 transform hover:scale-110",
           )}
           onClick={(e) => e.preventDefault()}
         >
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button 
-                variant="ghost" 
-                size="sm" 
+              <Button
+                variant="ghost"
+                size="sm"
                 className="h-5 w-5 p-0 hover:bg-accent-foreground/20 transition-colors"
               >
                 <MoreHorizontal className="h-3.5 w-3.5" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-52 shadow-lg border-border/50">
+            <DropdownMenuContent
+              align="end"
+              className="w-52 shadow-lg border-border/50"
+            >
               {!conversation.archivedAt ? (
-                <DropdownMenuItem 
-                  onClick={handleArchive} 
+                <DropdownMenuItem
+                  onClick={handleArchive}
                   className="text-sm py-2.5 focus:bg-accent/80"
                 >
                   <Archive className="h-4 w-4 mr-3" />
                   Archive Conversation
                 </DropdownMenuItem>
               ) : (
-                <DropdownMenuItem 
-                  onClick={handleUnarchive} 
+                <DropdownMenuItem
+                  onClick={handleUnarchive}
                   className="text-sm py-2.5 focus:bg-accent/80"
                 >
                   <Archive className="h-4 w-4 mr-3" />

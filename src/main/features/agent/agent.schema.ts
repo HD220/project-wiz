@@ -173,6 +173,7 @@ export const AgentFiltersSchema = z
       .max(200, "Search term must not exceed 200 characters")
       .trim()
       .optional(),
+    showInactive: z.boolean().optional().default(false),
   })
   .partial();
 

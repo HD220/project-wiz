@@ -100,7 +100,9 @@ function ConversationSidebarList(props: ConversationSidebarListProps) {
         <div className="flex items-center justify-between text-sm bg-muted/30 rounded-lg p-2 hover:bg-muted/50 transition-colors">
           <div className="flex items-center gap-2">
             <Archive className="w-4 h-4 text-muted-foreground" />
-            <span className="text-muted-foreground font-medium">Show Archived</span>
+            <span className="text-muted-foreground font-medium">
+              Show Archived
+            </span>
           </div>
           <Switch
             checked={showArchived}
@@ -166,7 +168,7 @@ function ConversationSidebarList(props: ConversationSidebarListProps) {
             // Navigate to the new conversation
             // Don't call router.invalidate() here - useApiMutation already handles it
             navigate({
-              to: "/user/dm/$conversationId", 
+              to: "/user/dm/$conversationId",
               params: { conversationId },
             });
           }}

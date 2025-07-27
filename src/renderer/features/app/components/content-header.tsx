@@ -1,4 +1,5 @@
 import { Hash, Users, type LucideIcon } from "lucide-react";
+import type { ReactNode } from "react";
 
 import { Button } from "@/renderer/components/ui/button";
 import { Separator } from "@/renderer/components/ui/separator";
@@ -8,6 +9,7 @@ interface ContentHeaderProps {
   title?: string;
   description?: string;
   icon?: LucideIcon;
+  customIcon?: ReactNode;
   showMembersToggle?: boolean;
   isMemberSidebarCollapsed?: boolean;
   onToggleMemberSidebar?: () => void;
@@ -18,6 +20,7 @@ function ContentHeader(props: ContentHeaderProps) {
     title = "general",
     description = "Welcome to your workspace",
     icon: IconComponent = Hash,
+    customIcon,
     showMembersToggle = false,
     isMemberSidebarCollapsed = false,
     onToggleMemberSidebar,
@@ -27,7 +30,9 @@ function ContentHeader(props: ContentHeaderProps) {
     <header className="h-12 bg-background border-b flex items-center px-4 justify-between shadow-sm">
       <div className="flex items-center gap-3 min-w-0 flex-1">
         <div className="flex items-center gap-2 min-w-0">
-          <IconComponent className="w-5 h-5 text-muted-foreground flex-shrink-0" />
+          {customIcon || (
+            <IconComponent className="w-5 h-5 text-muted-foreground flex-shrink-0" />
+          )}
           <h1 className="text-foreground font-semibold truncate">{title}</h1>
         </div>
 

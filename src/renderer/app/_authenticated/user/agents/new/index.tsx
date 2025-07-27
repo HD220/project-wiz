@@ -39,7 +39,13 @@ function NewAgentPage() {
   }
 
   async function handleSubmit(data: CreateAgentInput) {
-    createAgentMutation.mutate(data);
+    try {
+      createAgentMutation.mutate(data);
+    } catch (error) {
+      // Error handling is done by useApiMutation
+      // This catch prevents unhandled promise rejection
+      console.error("Error in handleSubmit:", error);
+    }
   }
 
   return (
