@@ -55,7 +55,7 @@ interface FeatureCardRootProps
   interactive?: boolean;
 }
 
-function FeatureCardRoot(props: FeatureCardRootProps) {
+export function FeatureCardRoot(props: FeatureCardRootProps) {
   const {
     variant = "default",
     interactive = false,
@@ -93,7 +93,7 @@ const headerVariants = cva("transition-colors duration-200", {
 interface FeatureCardHeaderProps
   extends React.ComponentProps<typeof CardHeader> {}
 
-function FeatureCardHeader(props: FeatureCardHeaderProps) {
+export function FeatureCardHeader(props: FeatureCardHeaderProps) {
   const { className, children, ...rest } = props;
   const { variant } = useFeatureCardContext();
 
@@ -123,7 +123,7 @@ interface FeatureCardTitleProps extends React.ComponentProps<"h3"> {
   asChild?: boolean;
 }
 
-function FeatureCardTitle(props: FeatureCardTitleProps) {
+export function FeatureCardTitle(props: FeatureCardTitleProps) {
   const { className, asChild = false, children, ...rest } = props;
   const { variant } = useFeatureCardContext();
   const Comp = asChild ? Slot : "h3";
@@ -157,7 +157,7 @@ interface FeatureCardDescriptionProps extends React.ComponentProps<"p"> {
   asChild?: boolean;
 }
 
-function FeatureCardDescription(props: FeatureCardDescriptionProps) {
+export function FeatureCardDescription(props: FeatureCardDescriptionProps) {
   const { className, asChild = false, children, ...rest } = props;
   const { variant } = useFeatureCardContext();
   const Comp = asChild ? Slot : "p";
@@ -178,7 +178,7 @@ interface FeatureCardIconProps extends React.ComponentProps<"div"> {
   asChild?: boolean;
 }
 
-function FeatureCardIcon(props: FeatureCardIconProps) {
+export function FeatureCardIcon(props: FeatureCardIconProps) {
   const { className, asChild = false, children, ...rest } = props;
   const { variant, interactive } = useFeatureCardContext();
   const Comp = asChild ? Slot : "div";
@@ -209,7 +209,7 @@ function FeatureCardIcon(props: FeatureCardIconProps) {
 interface FeatureCardContentProps
   extends React.ComponentProps<typeof CardContent> {}
 
-function FeatureCardContent(props: FeatureCardContentProps) {
+export function FeatureCardContent(props: FeatureCardContentProps) {
   const { className, children, ...rest } = props;
   const { variant } = useFeatureCardContext();
 
@@ -234,7 +234,7 @@ function FeatureCardContent(props: FeatureCardContentProps) {
 interface FeatureCardFooterProps
   extends React.ComponentProps<typeof CardFooter> {}
 
-function FeatureCardFooter(props: FeatureCardFooterProps) {
+export function FeatureCardFooter(props: FeatureCardFooterProps) {
   const { className, children, ...rest } = props;
 
   return (
@@ -253,7 +253,7 @@ interface FeatureCardActionProps extends React.ComponentProps<"div"> {
   asChild?: boolean;
 }
 
-function FeatureCardAction(props: FeatureCardActionProps) {
+export function FeatureCardAction(props: FeatureCardActionProps) {
   const { className, asChild = false, children, ...rest } = props;
   const Comp = asChild ? Slot : "div";
 
@@ -273,7 +273,7 @@ interface FeatureCardMetaProps extends React.ComponentProps<"div"> {
   asChild?: boolean;
 }
 
-function FeatureCardMeta(props: FeatureCardMetaProps) {
+export function FeatureCardMeta(props: FeatureCardMetaProps) {
   const { className, asChild = false, children, ...rest } = props;
   const Comp = asChild ? Slot : "div";
 

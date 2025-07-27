@@ -111,7 +111,7 @@ interface StatusIndicatorRootProps
   animated?: boolean;
 }
 
-function StatusIndicatorRoot(props: StatusIndicatorRootProps) {
+export function StatusIndicatorRoot(props: StatusIndicatorRootProps) {
   const {
     status,
     variant = "dot",
@@ -163,7 +163,7 @@ const dotVariants = cva("rounded-full shrink-0", {
 
 interface StatusIndicatorDotProps extends React.ComponentProps<"div"> {}
 
-function StatusIndicatorDot(props: StatusIndicatorDotProps) {
+export function StatusIndicatorDot(props: StatusIndicatorDotProps) {
   const { className, ...rest } = props;
   const { status, size, animated } = useStatusIndicatorContext();
 
@@ -192,7 +192,7 @@ interface StatusIndicatorLabelProps extends React.ComponentProps<"span"> {
   asChild?: boolean;
 }
 
-function StatusIndicatorLabel(props: StatusIndicatorLabelProps) {
+export function StatusIndicatorLabel(props: StatusIndicatorLabelProps) {
   const { className, asChild = false, children, ...rest } = props;
   const { status, variant } = useStatusIndicatorContext();
   const Comp = asChild ? Slot : "span";
@@ -217,7 +217,7 @@ function StatusIndicatorLabel(props: StatusIndicatorLabelProps) {
 interface StatusIndicatorBadgeProps
   extends React.ComponentProps<typeof Badge> {}
 
-function StatusIndicatorBadge(props: StatusIndicatorBadgeProps) {
+export function StatusIndicatorBadge(props: StatusIndicatorBadgeProps) {
   const { className, children, ...rest } = props;
   const { status } = useStatusIndicatorContext();
 
@@ -240,7 +240,7 @@ interface StatusIndicatorIconProps extends React.ComponentProps<"div"> {
   asChild?: boolean;
 }
 
-function StatusIndicatorIcon(props: StatusIndicatorIconProps) {
+export function StatusIndicatorIcon(props: StatusIndicatorIconProps) {
   const { className, asChild = false, children, ...rest } = props;
   const { status, size } = useStatusIndicatorContext();
   const Comp = asChild ? Slot : "div";
@@ -292,7 +292,7 @@ interface QuickStatusProps {
   size?: "sm" | "md" | "lg";
 }
 
-function ActiveStatus(props: QuickStatusProps) {
+export function ActiveStatus(props: QuickStatusProps) {
   const { label = getStatusText("active"), showLabel = true, ...rest } = props;
 
   return (
@@ -303,7 +303,7 @@ function ActiveStatus(props: QuickStatusProps) {
   );
 }
 
-function InactiveStatus(props: QuickStatusProps) {
+export function InactiveStatus(props: QuickStatusProps) {
   const {
     label = getStatusText("inactive"),
     showLabel = true,
@@ -318,7 +318,7 @@ function InactiveStatus(props: QuickStatusProps) {
   );
 }
 
-function LoadingStatus(props: QuickStatusProps) {
+export function LoadingStatus(props: QuickStatusProps) {
   const {
     label = getStatusText("loading"),
     showLabel = true,
@@ -334,7 +334,7 @@ function LoadingStatus(props: QuickStatusProps) {
   );
 }
 
-function ErrorStatus(props: QuickStatusProps) {
+export function ErrorStatus(props: QuickStatusProps) {
   const { label = getStatusText("error"), showLabel = true, ...rest } = props;
 
   return (

@@ -67,7 +67,7 @@ npm run db:studio             # Database GUI - DO NOT EXECUTE
 
 # Development
 npm run dev                   # Electron dev server - DO NOT EXECUTE
-npm run build                 # Production build + i18n compile
+npm run build                 # Production build + i18n compile  - DO NOT EXECUTE
 npm run package              # Package executable
 
 # Quality Assurance (RUN BEFORE COMMITS)

@@ -86,7 +86,7 @@ interface DataDisplayRootProps
   extends React.ComponentProps<"div">,
     VariantProps<typeof dataDisplayVariants> {}
 
-function DataDisplayRoot(props: DataDisplayRootProps) {
+export function DataDisplayRoot(props: DataDisplayRootProps) {
   const {
     variant = "card",
     density = "comfortable",
@@ -152,7 +152,7 @@ interface DataDisplayGroupProps extends React.ComponentProps<"div"> {
   description?: string;
 }
 
-function DataDisplayGroup(props: DataDisplayGroupProps) {
+export function DataDisplayGroup(props: DataDisplayGroupProps) {
   const { title, description, className, children, ...rest } = props;
   const { variant, density } = useDataDisplayContext();
 
@@ -206,7 +206,7 @@ const itemVariants = cva("flex", {
 
 interface DataDisplayItemProps extends React.ComponentProps<"div"> {}
 
-function DataDisplayItem(props: DataDisplayItemProps) {
+export function DataDisplayItem(props: DataDisplayItemProps) {
   const { className, children, ...rest } = props;
   const { variant, density } = useDataDisplayContext();
 
@@ -237,7 +237,7 @@ interface DataDisplayLabelProps extends React.ComponentProps<"span"> {
   asChild?: boolean;
 }
 
-function DataDisplayLabel(props: DataDisplayLabelProps) {
+export function DataDisplayLabel(props: DataDisplayLabelProps) {
   const { className, asChild = false, children, ...rest } = props;
   const { variant } = useDataDisplayContext();
   const Comp = asChild ? Slot : "span";
@@ -269,7 +269,7 @@ interface DataDisplayValueProps extends React.ComponentProps<"span"> {
   asChild?: boolean;
 }
 
-function DataDisplayValue(props: DataDisplayValueProps) {
+export function DataDisplayValue(props: DataDisplayValueProps) {
   const { className, asChild = false, children, ...rest } = props;
   const { variant } = useDataDisplayContext();
   const Comp = asChild ? Slot : "span";
@@ -288,7 +288,7 @@ function DataDisplayValue(props: DataDisplayValueProps) {
 // Badge component wrapper for data values
 interface DataDisplayBadgeProps extends React.ComponentProps<typeof Badge> {}
 
-function DataDisplayBadge(props: DataDisplayBadgeProps) {
+export function DataDisplayBadge(props: DataDisplayBadgeProps) {
   const { className, children, ...rest } = props;
 
   return (
@@ -307,7 +307,7 @@ function DataDisplayBadge(props: DataDisplayBadgeProps) {
 interface DataDisplaySeparatorProps
   extends React.ComponentProps<typeof Separator> {}
 
-function DataDisplaySeparator(props: DataDisplaySeparatorProps) {
+export function DataDisplaySeparator(props: DataDisplaySeparatorProps) {
   const { className, ...rest } = props;
 
   return (
@@ -322,7 +322,7 @@ function DataDisplaySeparator(props: DataDisplaySeparatorProps) {
 // Header component for titles and actions
 interface DataDisplayHeaderProps extends React.ComponentProps<"div"> {}
 
-function DataDisplayHeader(props: DataDisplayHeaderProps) {
+export function DataDisplayHeader(props: DataDisplayHeaderProps) {
   const { className, children, ...rest } = props;
 
   return (
@@ -341,7 +341,7 @@ interface DataDisplayTitleProps extends React.ComponentProps<"h3"> {
   asChild?: boolean;
 }
 
-function DataDisplayTitle(props: DataDisplayTitleProps) {
+export function DataDisplayTitle(props: DataDisplayTitleProps) {
   const { className, asChild = false, children, ...rest } = props;
   const Comp = asChild ? Slot : "h3";
 
@@ -361,7 +361,7 @@ interface DataDisplayActionProps extends React.ComponentProps<"div"> {
   asChild?: boolean;
 }
 
-function DataDisplayAction(props: DataDisplayActionProps) {
+export function DataDisplayAction(props: DataDisplayActionProps) {
   const { className, asChild = false, children, ...rest } = props;
   const Comp = asChild ? Slot : "div";
 
@@ -382,7 +382,7 @@ interface DataDisplayEmptyProps extends React.ComponentProps<"div"> {
   description?: string;
 }
 
-function DataDisplayEmpty(props: DataDisplayEmptyProps) {
+export function DataDisplayEmpty(props: DataDisplayEmptyProps) {
   const {
     title = "No data available",
     description = "There is no data to display at the moment.",
@@ -416,7 +416,7 @@ interface KeyValueListProps {
   className?: string;
 }
 
-function KeyValueList(props: KeyValueListProps) {
+export function KeyValueList(props: KeyValueListProps) {
   const { data, title, className } = props;
 
   return (
@@ -450,7 +450,7 @@ interface StatGridProps {
   className?: string;
 }
 
-function StatGrid(props: StatGridProps) {
+export function StatGrid(props: StatGridProps) {
   const { stats, columns = 3, className } = props;
 
   return (
