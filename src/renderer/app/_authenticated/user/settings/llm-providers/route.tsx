@@ -8,24 +8,9 @@ function LLMProvidersLayout() {
 
   return (
     <>
-      <div className="h-full w-full overflow-auto">
-        <div className="space-y-6 p-6">
-          {/* Page Header */}
-          <div className="space-y-2">
-            <h1 className="text-2xl font-semibold text-foreground">
-              AI Providers
-            </h1>
-            <p className="text-muted-foreground text-sm">
-              Configure and manage your AI language model providers
-            </p>
-          </div>
-
-          {/* Provider List */}
-          <ProviderList providers={providers} />
-
-          {/* Bottom padding for visual spacing */}
-          <div className="h-6" />
-        </div>
+      {/* Discord-style Settings Layout */}
+      <div className="flex flex-col h-full bg-background">
+        <ProviderList providers={providers} />
       </div>
 
       {/* Modals/Child Routes */}

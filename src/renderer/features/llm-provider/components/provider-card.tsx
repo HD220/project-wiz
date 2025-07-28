@@ -5,8 +5,7 @@ import {
   Trash2,
   Star,
   StarOff,
-  Bot,
-  Check,
+  ExternalLink,
 } from "lucide-react";
 import { useState } from "react";
 
@@ -22,10 +21,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/renderer/components/ui/alert-dialog";
-import { Avatar, AvatarFallback } from "@/renderer/components/ui/avatar";
 import { Badge } from "@/renderer/components/ui/badge";
 import { Button } from "@/renderer/components/ui/button";
-import { Card, CardContent, CardHeader } from "@/renderer/components/ui/card";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -49,13 +46,13 @@ const getProviderLabel = (type: string): string => {
 
 const getProviderIcon = (type: string): string => {
   const icons: Record<string, string> = {
-    openai: "🤖",
-    deepseek: "🔮",
-    anthropic: "🧠",
-    google: "✨",
-    custom: "⚙️",
+    openai: "AI",
+    deepseek: "DS",
+    anthropic: "AN",
+    google: "GO",
+    custom: "CU",
   };
-  return icons[type] || "🤖";
+  return icons[type] || "AI";
 };
 
 interface ProviderCardProps {
@@ -99,178 +96,141 @@ export function ProviderCard(props: ProviderCardProps) {
 
   return (
     <>
-      <Card
+      {/* Compact Discord-style Provider Card */}
+      <div
         className={cn(
-          // Enhanced card styling with sophisticated hover effects
-          "group relative overflow-hidden",
-          "bg-card/50 backdrop-blur-sm border border-border/60",
-          "transition-all duration-200 ease-out",
-          "hover:shadow-md hover:scale-[1.01]",
-          "hover:border-primary/30 hover:bg-card/80",
-          // Subtle gradient overlay on hover
-          "before:absolute before:inset-0 before:bg-gradient-to-br before:from-primary/0 before:to-primary/0",
-          "hover:before:from-primary/5 hover:before:to-transparent before:transition-all before:duration-300",
-          // Default provider highlighting
-          provider.isDefault &&
-            "ring-1 ring-primary/20 bg-gradient-to-br from-primary/10 via-primary/5 to-primary/0",
+          "group flex items-center gap-3 p-3 rounded-lg border transition-all duration-150",
+          "hover:bg-accent/50 hover:border-accent-foreground/20",
+          provider.isDefault
+            ? "bg-primary/5 border-primary/20"
+            : "bg-card border-border",
+          isLoading && "opacity-50 pointer-events-none",
         )}
       >
-        <CardHeader className="pb-[var(--spacing-component-md)] relative z-10">
-          <div className="flex items-start gap-[var(--spacing-component-md)]">
-            {/* Enhanced Provider Avatar with icon */}
-            <div className="relative shrink-0">
-              <Avatar className="size-12 ring-2 ring-primary/10 transition-all duration-200 group-hover:ring-primary/20">
-                <AvatarFallback className="bg-gradient-to-br from-primary/10 to-primary/5 text-primary border border-primary/20 text-lg">
-                  {getProviderIcon(provider.type)}
-                </AvatarFallback>
-              </Avatar>
-              {/* Status indicator */}
-              <div
-                className={cn(
-                  "absolute -bottom-1 -right-1 w-4 h-4 rounded-full border-2 border-card transition-all duration-200",
-                  provider.isActive && "bg-chart-2",
-                  !provider.isActive && "bg-muted-foreground",
-                )}
-              />
-              {/* Default provider crown */}
-              {provider.isDefault && (
-                <div className="absolute -top-1 -left-1 w-5 h-5 bg-gradient-to-br from-primary to-primary/80 rounded-full flex items-center justify-center border-2 border-card">
-                  <Star className="size-2.5 text-primary-foreground fill-current" />
-                </div>
-              )}
-            </div>
-
-            {/* Provider Info */}
-            <div className="flex-1 min-w-0 space-y-[var(--spacing-component-xs)]">
-              <div className="flex items-center gap-[var(--spacing-component-sm)]">
-                <h3 className="text-lg font-semibold leading-tight truncate text-foreground group-hover:text-primary transition-colors duration-200">
-                  {provider.name}
-                </h3>
-                {provider.isDefault && (
-                  <Badge
-                    variant="default"
-                    className="text-xs shrink-0 bg-gradient-to-r from-primary to-primary/80 text-primary-foreground border-0 shadow-sm"
-                  >
-                    <Check className="size-2.5 mr-1" />
-                    Default
-                  </Badge>
-                )}
-              </div>
-              <div className="flex items-center gap-[var(--spacing-component-sm)] text-sm text-muted-foreground">
-                <span className="font-medium">
-                  {getProviderLabel(provider.type)}
-                </span>
-                <div className="w-1 h-1 rounded-full bg-muted-foreground/40" />
-                <span className="truncate">{provider.defaultModel}</span>
-              </div>
-            </div>
-
-            {/* Actions Menu */}
-            <div className="relative z-20 shrink-0">
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className={cn(
-                      "size-9 p-0 rounded-lg",
-                      "opacity-0 group-hover:opacity-100 transition-all duration-200",
-                      "hover:bg-accent/50",
-                      "focus:opacity-100 focus:bg-accent/50",
-                    )}
-                    disabled={isLoading}
-                    aria-label={`Actions for ${provider.name}`}
-                  >
-                    <MoreHorizontal className="size-4" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent
-                  align="end"
-                  className="w-48 bg-card/95 backdrop-blur-sm border border-border/60 shadow-lg"
-                >
-                  <DropdownMenuItem asChild>
-                    <Link
-                      to="/user/settings/llm-providers/$providerId/edit"
-                      params={{ providerId: provider.id }}
-                      search={{}}
-                      className="cursor-pointer focus:bg-accent/50 transition-colors"
-                    >
-                      <Edit2 className="mr-3 size-4 text-chart-3" />
-                      <span className="font-medium">Edit Provider</span>
-                    </Link>
-                  </DropdownMenuItem>
-
-                  {!provider.isDefault && (
-                    <DropdownMenuItem
-                      onClick={handleSetDefault}
-                      className="focus:bg-accent/50 transition-colors"
-                    >
-                      <Star className="mr-3 size-4 text-chart-4" />
-                      <span className="font-medium">Set as Default</span>
-                    </DropdownMenuItem>
-                  )}
-
-                  {provider.isDefault && (
-                    <DropdownMenuItem disabled className="opacity-60">
-                      <StarOff className="mr-3 size-4 text-muted-foreground" />
-                      <span className="font-medium">Current Default</span>
-                    </DropdownMenuItem>
-                  )}
-
-                  <DropdownMenuSeparator className="bg-border/50" />
-
-                  <DropdownMenuItem
-                    onClick={() => setShowDeleteDialog(true)}
-                    className="text-destructive focus:text-destructive focus:bg-destructive/10 transition-colors"
-                  >
-                    <Trash2 className="mr-3 size-4" />
-                    <span className="font-medium">Delete Provider</span>
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
+        {/* Provider Icon */}
+        <div className="relative shrink-0">
+          <div
+            className={cn(
+              "flex items-center justify-center size-10 rounded-full text-xs font-bold",
+              provider.isDefault
+                ? "bg-primary/20 text-primary"
+                : "bg-muted text-muted-foreground",
+            )}
+          >
+            {getProviderIcon(provider.type)}
           </div>
-        </CardHeader>
-
-        {/* Provider Details */}
-        <CardContent className="pt-0 px-[var(--spacing-component-lg)] pb-[var(--spacing-component-lg)] relative z-10">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-[var(--spacing-component-sm)]">
-              <div
-                className={cn(
-                  "flex items-center gap-[var(--spacing-component-sm)] px-[var(--spacing-component-sm)] py-[var(--spacing-component-xs)] rounded-md border transition-colors",
-                  provider.isActive
-                    ? "bg-chart-2/10 border-chart-2/20 text-chart-2"
-                    : "bg-muted/50 border-border/40 text-muted-foreground",
-                )}
-              >
-                <div
-                  className={cn(
-                    "w-1.5 h-1.5 rounded-full",
-                    provider.isActive ? "bg-chart-2" : "bg-muted-foreground",
-                  )}
-                />
-                <span className="text-xs font-medium">
-                  {provider.isActive ? "Active" : "Inactive"}
-                </span>
-              </div>
-
-              {/* Usage indicator */}
-              <div className="flex items-center gap-[var(--spacing-component-xs)]">
-                <div className="w-1 h-1 rounded-full bg-chart-1 opacity-60" />
-                <div className="w-1 h-1 rounded-full bg-chart-1 opacity-40" />
-                <div className="w-1 h-1 rounded-full bg-chart-1 opacity-20" />
-              </div>
+          {/* Status dot */}
+          <div
+            className={cn(
+              "absolute -bottom-0.5 -right-0.5 size-3 rounded-full border-2 border-card",
+              provider.isActive ? "bg-green-500" : "bg-gray-400",
+            )}
+          />
+          {/* Default indicator */}
+          {provider.isDefault && (
+            <div className="absolute -top-0.5 -left-0.5 size-3 bg-primary rounded-full flex items-center justify-center">
+              <Star className="size-1.5 text-primary-foreground fill-current" />
             </div>
+          )}
+        </div>
 
-            {provider.baseUrl && (
-              <div className="text-xs text-muted-foreground font-medium bg-muted/30 px-[var(--spacing-component-sm)] py-[var(--spacing-component-xs)] rounded-md">
-                Custom Endpoint
-              </div>
+        {/* Provider Info */}
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 mb-1">
+            <h3 className="text-sm font-medium text-foreground truncate">
+              {provider.name}
+            </h3>
+            {provider.isDefault && (
+              <Badge variant="secondary" className="h-4 px-1.5 text-xs">
+                Default
+              </Badge>
             )}
           </div>
-        </CardContent>
-      </Card>
+          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+            <span>{getProviderLabel(provider.type)}</span>
+            <span>•</span>
+            <span className="truncate">{provider.defaultModel}</span>
+            {provider.baseUrl && (
+              <>
+                <span>•</span>
+                <span className="flex items-center gap-1">
+                  <ExternalLink className="size-3" />
+                  Custom
+                </span>
+              </>
+            )}
+          </div>
+        </div>
+
+        {/* Status Badge */}
+        <div className="shrink-0">
+          <Badge
+            variant={provider.isActive ? "default" : "secondary"}
+            className={cn(
+              "h-5 px-2 text-xs",
+              provider.isActive
+                ? "bg-green-500/10 text-green-600 border-green-500/20"
+                : "bg-gray-500/10 text-gray-600 border-gray-500/20",
+            )}
+          >
+            {provider.isActive ? "Active" : "Inactive"}
+          </Badge>
+        </div>
+
+        {/* Actions Menu */}
+        <div className="shrink-0">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="size-8 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                disabled={isLoading}
+                aria-label={`Actions for ${provider.name}`}
+              >
+                <MoreHorizontal className="size-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-40">
+              <DropdownMenuItem asChild>
+                <Link
+                  to="/user/settings/llm-providers/$providerId/edit"
+                  params={{ providerId: provider.id }}
+                  search={{}}
+                  className="cursor-pointer"
+                >
+                  <Edit2 className="mr-2 size-4" />
+                  Edit
+                </Link>
+              </DropdownMenuItem>
+
+              {!provider.isDefault && (
+                <DropdownMenuItem onClick={handleSetDefault}>
+                  <Star className="mr-2 size-4" />
+                  Set Default
+                </DropdownMenuItem>
+              )}
+
+              {provider.isDefault && (
+                <DropdownMenuItem disabled>
+                  <StarOff className="mr-2 size-4" />
+                  Current Default
+                </DropdownMenuItem>
+              )}
+
+              <DropdownMenuSeparator />
+
+              <DropdownMenuItem
+                onClick={() => setShowDeleteDialog(true)}
+                className="text-destructive focus:text-destructive"
+              >
+                <Trash2 className="mr-2 size-4" />
+                Delete
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      </div>
 
       {/* Delete Confirmation Dialog */}
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>

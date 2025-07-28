@@ -1,18 +1,12 @@
 import { Link } from "@tanstack/react-router";
-import { Plus, Settings, Shield } from "lucide-react";
+import { Plus, Settings } from "lucide-react";
 
 import type { LlmProvider } from "@/main/features/agent/llm-provider/llm-provider.types";
 
 import { Button } from "@/renderer/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/renderer/components/ui/card";
+import { ScrollArea } from "@/renderer/components/ui/scroll-area";
 import { EmptyState } from "@/renderer/features/llm-provider/components/empty-state";
 import { ProviderCard } from "@/renderer/features/llm-provider/components/provider-card";
-import { cn } from "@/renderer/lib/utils";
 
 interface ProviderListProps {
   providers: LlmProvider[];
@@ -30,79 +24,65 @@ export function ProviderList(props: ProviderListProps) {
   const defaultProvider = providers.find((p) => p.isDefault);
 
   return (
-    <div className="space-y-[var(--spacing-layout-md)]">
-      {/* Enhanced Header Section */}
-      <Card className="bg-gradient-to-br from-primary/5 via-primary/3 to-primary/0 border border-border/60 backdrop-blur-sm">
-        <CardHeader className="pb-[var(--spacing-component-md)]">
-          <div className="flex items-center justify-between">
-            <div className="space-y-[var(--spacing-component-xs)]">
-              <div className="flex items-center gap-[var(--spacing-component-sm)]">
-                <div className="flex items-center gap-[var(--spacing-component-sm)]">
-                  <Settings className="size-5 text-primary" />
-                  <CardTitle className="text-xl font-bold">
-                    AI Providers
-                  </CardTitle>
-                </div>
-                <div className="flex items-center gap-[var(--spacing-component-sm)]">
-                  <div className="px-2 py-1 bg-primary/10 text-primary rounded-md text-xs font-medium border border-primary/20">
-                    {providers.length} Total
-                  </div>
-                  <div className="px-2 py-1 bg-chart-2/10 text-chart-2 rounded-md text-xs font-medium border border-chart-2/20">
-                    {activeProviders} Active
-                  </div>
-                </div>
-              </div>
-              <p className="text-sm text-muted-foreground leading-relaxed">
-                Manage your AI language model providers and configure settings
-                for agent interactions
-              </p>
-            </div>
-
-            <Link
-              to="/user/settings/llm-providers/$providerId/new"
-              params={{ providerId: "new" }}
-            >
-              <Button
-                className={cn(
-                  "gap-[var(--spacing-component-sm)] shrink-0 shadow-sm",
-                  "bg-gradient-to-r from-primary to-primary/90",
-                  "hover:from-primary/90 hover:to-primary/80",
-                  "transition-all duration-200 hover:shadow-md hover:scale-[1.01]",
-                )}
-              >
-                <Plus className="size-4" />
-                Add Provider
-              </Button>
-            </Link>
+    <div className="flex flex-col h-full">
+      {/* Compact Discord-style Header */}
+      <div className="flex items-center justify-between p-4 border-b border-border">
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
+            <Settings className="size-4 text-muted-foreground" />
+            <h2 className="text-sm font-semibold text-foreground">
+              AI Providers
+            </h2>
           </div>
-        </CardHeader>
+          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+            <span className="px-2 py-0.5 bg-primary/10 text-primary rounded text-xs font-medium">
+              {providers.length}
+            </span>
+            {activeProviders > 0 && (
+              <>
+                <span>•</span>
+                <span className="px-2 py-0.5 bg-green-500/10 text-green-600 rounded text-xs font-medium">
+                  {activeProviders} active
+                </span>
+              </>
+            )}
+          </div>
+        </div>
 
-        {/* Provider Summary */}
-        {defaultProvider && (
-          <CardContent className="pt-0 border-t border-border/40 bg-card/30">
-            <div className="flex items-center gap-[var(--spacing-component-sm)]">
-              <Shield className="size-4 text-chart-4" />
-              <span className="text-sm text-muted-foreground">
-                Default Provider:
-              </span>
-              <span className="text-sm font-medium text-foreground">
-                {defaultProvider.name}
-              </span>
-              <div className="w-1 h-1 rounded-full bg-muted-foreground/40" />
-              <span className="text-sm text-muted-foreground">
-                {defaultProvider.defaultModel}
-              </span>
-            </div>
-          </CardContent>
-        )}
-      </Card>
-
-      {/* Enhanced Providers Grid */}
-      <div className="space-y-[var(--spacing-component-md)]">
-        {providers.map((provider: LlmProvider) => (
-          <ProviderCard key={provider.id} provider={provider} />
-        ))}
+        <Link
+          to="/user/settings/llm-providers/$providerId/new"
+          params={{ providerId: "new" }}
+        >
+          <Button size="sm" className="gap-1.5 h-8 px-3 text-xs">
+            <Plus className="size-3" />
+            Add Provider
+          </Button>
+        </Link>
       </div>
+
+      {/* Default Provider Status */}
+      {defaultProvider && (
+        <div className="px-4 py-2 border-b border-border bg-muted/30">
+          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+            <div className="size-2 rounded-full bg-green-500" />
+            <span>Default:</span>
+            <span className="font-medium text-foreground">
+              {defaultProvider.name}
+            </span>
+            <span>•</span>
+            <span>{defaultProvider.defaultModel}</span>
+          </div>
+        </div>
+      )}
+
+      {/* Scrollable Provider List */}
+      <ScrollArea className="flex-1">
+        <div className="p-2 space-y-1">
+          {providers.map((provider: LlmProvider) => (
+            <ProviderCard key={provider.id} provider={provider} />
+          ))}
+        </div>
+      </ScrollArea>
     </div>
   );
 }
