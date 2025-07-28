@@ -1,26 +1,15 @@
-import { useNavigate, useSearch } from "@tanstack/react-router";
 import {
-  Plus,
-  Search,
-  Eye,
-  EyeOff,
-  AlertCircle,
-  LayoutGrid,
-} from "lucide-react";
+  validateSearchInput,
+  validateStatusFilter,
+} from "@/renderer/lib/search-validation";
+import { useNavigate, useSearch } from "@tanstack/react-router";
+import { Plus, Search, AlertCircle, LayoutGrid } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
 import { Button } from "@/renderer/components/ui/button";
-import { Input } from "@/renderer/components/ui/input";
 import { ScrollArea } from "@/renderer/components/ui/scroll-area";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/renderer/components/ui/select";
-import { Switch } from "@/renderer/components/ui/switch";
+import { SearchFilterBar } from "@/renderer/components/ui/search-filter-bar";
 import type {
   SelectAgent,
   AgentStatus,
@@ -95,27 +84,24 @@ export function AgentList(props: AgentListProps) {
       `Agent ${newStatus === "active" ? "activated" : "deactivated"}`,
     );
   }
-
-  // SIMPLE: URL params for filters (shareable and bookmarkable)
+  // IMPROVED: Type-safe status filter with validation
   function handleStatusFilter(value: string) {
     navigate({
       to: "/user/agents",
       search: {
         ...search,
-        status: value === "all" ? undefined : (value as AgentStatus),
+        status: validateStatusFilter(value),
       },
     });
   }
 
+  // IMPROVED: Centralized search validation - no more duplication
   function handleSearchChange(value: string) {
-    // Basic validation: limit search term length
-    if (value.length > 100) return;
-
     navigate({
       to: "/user/agents",
       search: {
         ...search,
-        search: value.trim() || undefined,
+        search: validateSearchInput(value),
       },
     });
   }
@@ -227,72 +213,26 @@ export function AgentList(props: AgentListProps) {
         </div>
 
         {/* Professional Filters */}
-        <div className="flex items-center gap-[var(--spacing-component-md)] px-[var(--spacing-component-lg)] py-[var(--spacing-component-sm)] border-b border-border/30 bg-background/50 shrink-0">
-          {/* Search Input */}
-          <div className="relative flex-1 max-w-sm">
-            <Search className="absolute left-3 top-1/2 w-4 h-4 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              placeholder="Search agents..."
-              value={search.search || ""}
-              onChange={(event) => handleSearchChange(event.target.value)}
-              className="pl-10 h-9 border-border/60 bg-background/50 focus:bg-background"
-              maxLength={100}
-            />
-          </div>
-
-          {/* Status Filter */}
-          <Select
-            value={search.status || "all"}
-            onValueChange={handleStatusFilter}
-          >
-            <SelectTrigger className="w-36 h-9 border-border/60 bg-background/50">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Status</SelectItem>
-              <SelectItem value="active">Active</SelectItem>
-              <SelectItem value="inactive">Inactive</SelectItem>
-              <SelectItem value="busy">Busy</SelectItem>
-            </SelectContent>
-          </Select>
-
-          {/* Show Inactive Toggle */}
-          <div className="flex items-center gap-[var(--spacing-component-sm)] px-[var(--spacing-component-sm)] py-[var(--spacing-component-sm)] rounded-md border border-border/60 bg-background/50">
-            <Switch
-              id="show-inactive-agents"
-              checked={!!search.showInactive}
-              onCheckedChange={handleToggleInactive}
-            />
-            <label
-              htmlFor="show-inactive-agents"
-              className="text-sm text-muted-foreground cursor-pointer flex items-center gap-1"
-            >
-              {search.showInactive ? (
-                <>
-                  <Eye className="w-4 h-4" />
-                  Show Inactive
-                </>
-              ) : (
-                <>
-                  <EyeOff className="w-4 h-4" />
-                  Hide Inactive
-                </>
-              )}
-            </label>
-          </div>
-
-          {/* Clear Filters */}
-          {hasFilters && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={clearFilters}
-              className="h-9 px-3"
-            >
-              Clear Filters
-            </Button>
-          )}
-        </div>
+        <SearchFilterBar
+          searchValue={search.search || ""}
+          onSearchChange={handleSearchChange}
+          searchPlaceholder="Search agents..."
+          filterValue={search.status || "all"}
+          onFilterChange={handleStatusFilter}
+          filterOptions={[
+            { value: "all", label: "All Status" },
+            { value: "active", label: "Active" },
+            { value: "inactive", label: "Inactive" },
+            { value: "busy", label: "Busy" },
+          ]}
+          filterPlaceholder="Status"
+          toggleValue={!!search.showInactive}
+          onToggleChange={handleToggleInactive}
+          toggleLabel="Show Inactive"
+          toggleId="show-inactive-agents"
+          hasFilters={hasFilters}
+          onClearFilters={clearFilters}
+        />
 
         {/* Empty Filter Results */}
         {filteredAgents.length === 0 && hasFilters && (

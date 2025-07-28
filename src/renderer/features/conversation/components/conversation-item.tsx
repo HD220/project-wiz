@@ -1,4 +1,4 @@
-import { Users, User, Hash } from "lucide-react";
+import { User, Hash } from "lucide-react";
 
 import { Badge } from "@/renderer/components/ui/badge";
 import {
@@ -94,6 +94,15 @@ export function ConversationItem(props: ConversationItemProps) {
 
             // For 1:1 conversations, show single avatar
             if (otherParticipants.length === 1) {
+              if (!participant) {
+                return (
+                  <ProfileAvatar size="sm">
+                    <ProfileAvatarImage
+                      fallbackIcon={<Hash className="w-1/2 h-1/2" />}
+                    />
+                  </ProfileAvatar>
+                );
+              }
               return (
                 <ProfileAvatar size="sm">
                   <ProfileAvatarImage
@@ -107,6 +116,15 @@ export function ConversationItem(props: ConversationItemProps) {
 
             // For group conversations, show main avatar + counter
             const remainingCount = otherParticipants.length - 1;
+            if (!participant) {
+              return (
+                <ProfileAvatar size="sm">
+                  <ProfileAvatarImage
+                    fallbackIcon={<Hash className="w-1/2 h-1/2" />}
+                  />
+                </ProfileAvatar>
+              );
+            }
             return (
               <ProfileAvatar size="sm">
                 <ProfileAvatarImage

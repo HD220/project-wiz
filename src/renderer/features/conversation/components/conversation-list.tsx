@@ -20,7 +20,6 @@ import {
 } from "@/renderer/components/ui/dropdown-menu";
 import { ScrollArea } from "@/renderer/components/ui/scroll-area";
 import { Switch } from "@/renderer/components/ui/switch";
-import { Separator } from "@/renderer/components/ui/separator";
 import { useAuth } from "@/renderer/contexts/auth.context";
 import { useApiMutation } from "@/renderer/hooks/use-api-mutation.hook";
 import { cn } from "@/renderer/lib/utils";

@@ -46,7 +46,6 @@ import {
   SelectValue,
 } from "@/renderer/components/ui/select";
 import { ScrollArea } from "@/renderer/components/ui/scroll-area";
-import { Separator } from "@/renderer/components/ui/separator";
 import { useAuth } from "@/renderer/contexts/auth.context";
 import { useApiMutation } from "@/renderer/hooks/use-api-mutation.hook";
 import { cn } from "@/renderer/lib/utils";

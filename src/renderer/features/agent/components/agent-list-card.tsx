@@ -5,9 +5,7 @@ import {
   Trash2,
   Power,
   PowerOff,
-  User,
   RotateCcw,
-  Circle,
 } from "lucide-react";
 
 import { Badge } from "@/renderer/components/ui/badge";
@@ -56,21 +54,6 @@ export function AgentListCard(props: AgentListCardProps) {
       return config.model || "Unknown";
     } catch {
       return "Unknown";
-    }
-  };
-
-  // Status indicator color based on agent status
-  const getStatusColor = () => {
-    if (!agent.isActive) return "text-muted-foreground";
-    switch (agent.status) {
-      case "active":
-        return "text-green-500";
-      case "busy":
-        return "text-orange-500";
-      case "inactive":
-        return "text-red-500";
-      default:
-        return "text-muted-foreground";
     }
   };
 

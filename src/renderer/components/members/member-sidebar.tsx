@@ -1,4 +1,4 @@
-import { Crown, Users, Bot } from "lucide-react";
+import { Crown, Users } from "lucide-react";
 
 import { Button } from "@/renderer/components/ui/button";
 import { ScrollArea } from "@/renderer/components/ui/scroll-area";

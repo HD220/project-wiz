@@ -1,5 +1,4 @@
 import * as React from "react";
-import { Bot } from "lucide-react";
 
 import {
   Avatar,

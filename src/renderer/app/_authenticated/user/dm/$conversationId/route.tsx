@@ -199,6 +199,15 @@ function DMLayout() {
         // For 1:1 conversations, show single avatar
         if (otherParticipants.length === 1) {
           const participant = otherParticipants[0];
+          if (!participant) {
+            return (
+              <ProfileAvatar size="sm">
+                <ProfileAvatarImage
+                  fallbackIcon={<div className="text-xs font-bold">?</div>}
+                />
+              </ProfileAvatar>
+            );
+          }
           return (
             <ProfileAvatar size="sm">
               <ProfileAvatarImage
@@ -213,6 +222,16 @@ function DMLayout() {
         // For group conversations, show main avatar + counter
         const firstParticipant = otherParticipants[0];
         const remainingCount = otherParticipants.length - 1;
+
+        if (!firstParticipant) {
+          return (
+            <ProfileAvatar size="sm">
+              <ProfileAvatarImage
+                fallbackIcon={<div className="text-xs font-bold">?</div>}
+              />
+            </ProfileAvatar>
+          );
+        }
 
         return (
           <ProfileAvatar size="sm">

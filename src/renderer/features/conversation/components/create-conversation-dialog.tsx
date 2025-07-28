@@ -1,4 +1,4 @@
-import { Search, Check, User, Bot } from "lucide-react";
+import { Search, Check } from "lucide-react";
 import { useState } from "react";
 
 import type { UserSummary } from "@/main/features/user/user.service";

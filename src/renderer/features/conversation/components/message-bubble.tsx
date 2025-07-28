@@ -9,7 +9,7 @@ import type {
   SelectMessage,
   AuthenticatedUser,
 } from "@/renderer/features/conversation/types";
-import { cn, isValidAvatarUrl, getTimeAgo } from "@/renderer/lib/utils";
+import { cn } from "@/renderer/lib/utils";
 
 interface MessageBubbleProps {
   message: SelectMessage;
@@ -57,7 +57,6 @@ export function MessageBubble(props: MessageBubbleProps) {
           isInactive: true,
         };
 
-  const timeAgo = getTimeAgo(message.createdAt);
   const authorInitials = authorInfo.name.charAt(0).toUpperCase();
 
   // Status indicator logic inline - simplified from 45+ lines to 10 lines

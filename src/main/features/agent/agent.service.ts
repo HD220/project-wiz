@@ -1,4 +1,4 @@
-import { eq, and, desc, ilike, or } from "drizzle-orm";
+import { eq, and, desc, like, or } from "drizzle-orm";
 
 import { getDatabase } from "@/main/database/connection";
 import { agentsTable } from "@/main/features/agent/agent.model";
@@ -131,8 +131,8 @@ export class AgentService {
     if (filters?.search) {
       const searchTerm = `%${filters.search}%`;
       const searchCondition = or(
-        ilike(agentsTable.name, searchTerm),
-        ilike(agentsTable.role, searchTerm),
+        like(agentsTable.name, searchTerm),
+        like(agentsTable.role, searchTerm),
       );
       if (searchCondition) {
         conditions.push(searchCondition);

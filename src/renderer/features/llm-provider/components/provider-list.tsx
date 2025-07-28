@@ -1,19 +1,15 @@
+import {
+  validateSearchInput,
+  validateProviderTypeFilter,
+} from "@/renderer/lib/search-validation";
 import { Link, useNavigate, useSearch } from "@tanstack/react-router";
-import { Plus, Server, Search, Eye, EyeOff, AlertCircle } from "lucide-react";
+import { Plus, Server, Search, AlertCircle } from "lucide-react";
 
 import type { LlmProvider } from "@/main/features/agent/llm-provider/llm-provider.types";
 
 import { Button } from "@/renderer/components/ui/button";
-import { Input } from "@/renderer/components/ui/input";
 import { ScrollArea } from "@/renderer/components/ui/scroll-area";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/renderer/components/ui/select";
-import { Switch } from "@/renderer/components/ui/switch";
+import { SearchFilterBar } from "@/renderer/components/ui/search-filter-bar";
 import { EmptyState } from "@/renderer/features/llm-provider/components/empty-state";
 import { ProviderCard } from "@/renderer/features/llm-provider/components/provider-card";
 
@@ -31,26 +27,24 @@ export function ProviderList(props: ProviderListProps) {
   });
   const navigate = useNavigate();
 
-  // Inline action handlers following INLINE-FIRST principles
+  // IMPROVED: Type-safe provider type filter with validation
   function handleTypeFilter(value: string) {
     navigate({
       to: "/user/settings/llm-providers",
       search: {
         ...search,
-        type: value === "all" ? undefined : (value as any),
+        type: validateProviderTypeFilter(value),
       },
     });
   }
 
+  // IMPROVED: Centralized search validation - no more duplication
   function handleSearchChange(value: string) {
-    // Basic validation: limit search term length
-    if (value.length > 100) return;
-
     navigate({
       to: "/user/settings/llm-providers",
       search: {
         ...search,
-        search: value.trim() || undefined,
+        search: validateSearchInput(value),
       },
     });
   }
@@ -123,71 +117,28 @@ export function ProviderList(props: ProviderListProps) {
       </div>
 
       {/* Professional Filters */}
-      <div className="flex items-center gap-[var(--spacing-component-md)] px-[var(--spacing-component-lg)] py-[var(--spacing-component-sm)] border-b border-border/30 bg-background/50 shrink-0">
-        {/* Search Input */}
-        <div className="relative flex-1 max-w-sm">
-          <Search className="absolute left-3 top-1/2 w-4 h-4 -translate-y-1/2 text-muted-foreground" />
-          <Input
-            placeholder="Search providers..."
-            value={search.search || ""}
-            onChange={(event) => handleSearchChange(event.target.value)}
-            className="pl-10 h-9 border-border/60 bg-background/50 focus:bg-background"
-            maxLength={100}
-          />
-        </div>
-
-        {/* Type Filter */}
-        <Select value={search.type || "all"} onValueChange={handleTypeFilter}>
-          <SelectTrigger className="w-36 h-9 border-border/60 bg-background/50">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Types</SelectItem>
-            <SelectItem value="openai">OpenAI</SelectItem>
-            <SelectItem value="anthropic">Anthropic</SelectItem>
-            <SelectItem value="google">Google</SelectItem>
-            <SelectItem value="deepseek">DeepSeek</SelectItem>
-            <SelectItem value="custom">Custom</SelectItem>
-          </SelectContent>
-        </Select>
-
-        {/* Show Inactive Toggle */}
-        <div className="flex items-center gap-[var(--spacing-component-sm)] px-[var(--spacing-component-sm)] py-[var(--spacing-component-sm)] rounded-md border border-border/60 bg-background/50">
-          <Switch
-            id="show-inactive-providers"
-            checked={!!search.showInactive}
-            onCheckedChange={handleToggleInactive}
-          />
-          <label
-            htmlFor="show-inactive-providers"
-            className="text-sm text-muted-foreground cursor-pointer flex items-center gap-1"
-          >
-            {search.showInactive ? (
-              <>
-                <Eye className="w-4 h-4" />
-                Show Inactive
-              </>
-            ) : (
-              <>
-                <EyeOff className="w-4 h-4" />
-                Hide Inactive
-              </>
-            )}
-          </label>
-        </div>
-
-        {/* Clear Filters */}
-        {hasFilters && (
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={clearFilters}
-            className="h-9 px-3"
-          >
-            Clear Filters
-          </Button>
-        )}
-      </div>
+      <SearchFilterBar
+        searchValue={search.search || ""}
+        onSearchChange={handleSearchChange}
+        searchPlaceholder="Search providers..."
+        filterValue={search.type || "all"}
+        onFilterChange={handleTypeFilter}
+        filterOptions={[
+          { value: "all", label: "All Types" },
+          { value: "openai", label: "OpenAI" },
+          { value: "anthropic", label: "Anthropic" },
+          { value: "google", label: "Google" },
+          { value: "deepseek", label: "DeepSeek" },
+          { value: "custom", label: "Custom" },
+        ]}
+        filterPlaceholder="Type"
+        toggleValue={!!search.showInactive}
+        onToggleChange={handleToggleInactive}
+        toggleLabel="Show Inactive"
+        toggleId="show-inactive-providers"
+        hasFilters={hasFilters}
+        onClearFilters={clearFilters}
+      />
 
       {/* Empty Filter Results */}
       {filteredProviders.length === 0 && hasFilters && (
