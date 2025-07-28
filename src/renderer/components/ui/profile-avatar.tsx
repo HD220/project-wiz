@@ -170,7 +170,7 @@ function ProfileAvatarCounter({
         "absolute z-20 rounded-full border-2 border-background shadow-md",
         "bg-gradient-to-br from-primary/80 to-primary/70 text-primary-foreground",
         "flex items-center justify-center font-bold",
-        "bottom-1 right-1",
+        "bottom-0 right-0 transform translate-x-1 translate-y-1",
         profileAvatarVariants.counterSize[size],
         className,
       )}

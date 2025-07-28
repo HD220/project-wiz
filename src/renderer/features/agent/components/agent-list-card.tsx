@@ -10,13 +10,13 @@ import {
   Circle,
 } from "lucide-react";
 
-import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
-} from "@/renderer/components/ui/avatar";
 import { Badge } from "@/renderer/components/ui/badge";
 import { Button } from "@/renderer/components/ui/button";
+import {
+  ProfileAvatar,
+  ProfileAvatarImage,
+  ProfileAvatarStatus,
+} from "@/renderer/components/ui/profile-avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -86,17 +86,13 @@ export function AgentListCard(props: AgentListCardProps) {
     >
       {/* Avatar with status indicator */}
       <div className="relative shrink-0">
-        <Avatar className="w-8 h-8">
-          <AvatarImage src={undefined} alt={agent.name} />
-          <AvatarFallback className="text-xs bg-primary/10 text-primary">
-            <User className="w-4 h-4" />
-          </AvatarFallback>
-        </Avatar>
-
-        {/* Status dot - Discord style */}
-        <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-background border-2 border-background flex items-center justify-center">
-          <Circle className={cn("w-2 h-2 fill-current", getStatusColor())} />
-        </div>
+        <ProfileAvatar size="sm">
+          <ProfileAvatarImage name={agent.name} className="w-8 h-8" />
+          <ProfileAvatarStatus
+            status={agent.status === "active" ? "online" : "offline"}
+            size="sm"
+          />
+        </ProfileAvatar>
       </div>
 
       {/* Agent info - compact layout */}

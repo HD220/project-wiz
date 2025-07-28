@@ -1,17 +1,18 @@
-import { Users, User } from "lucide-react";
+import { Users, User, Hash } from "lucide-react";
 
-import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
-} from "@/renderer/components/ui/avatar";
 import { Badge } from "@/renderer/components/ui/badge";
+import {
+  ProfileAvatar,
+  ProfileAvatarImage,
+  ProfileAvatarStatus,
+  ProfileAvatarCounter,
+} from "@/renderer/components/ui/profile-avatar";
 import type {
   ConversationWithParticipants,
   AuthenticatedUser,
 } from "@/renderer/features/conversation/types";
 import type { SelectMessage } from "@/renderer/features/conversation/types";
-import { isValidAvatarUrl, cn, getTimeAgo } from "@/renderer/lib/utils";
+import { cn, getTimeAgo } from "@/renderer/lib/utils";
 
 interface ConversationItemProps {
   conversation: ConversationWithParticipants;
@@ -44,15 +45,9 @@ export function ConversationItem(props: ConversationItemProps) {
   // Use existing getTimeAgo utility
   const timeAgo = lastMessage ? getTimeAgo(lastMessage.createdAt) : "";
 
-  // Avatar logic inline
+  // Avatar logic inline - simplified for ProfileAvatar
   const isGroup = otherParticipants.length > 1;
   const participant = otherParticipants[0];
-  const avatarImage = isGroup
-    ? null
-    : isValidAvatarUrl(participant?.avatar) || null;
-  const avatarFallback = isGroup
-    ? otherParticipants.length.toString()
-    : participant?.name?.charAt(0).toUpperCase() || "?";
 
   // Message preview inline
   const messagePreview = lastMessage
@@ -83,14 +78,48 @@ export function ConversationItem(props: ConversationItemProps) {
       }}
     >
       <div className="flex items-start gap-3">
-        {/* Avatar inline - simplified to 5 lines */}
+        {/* Avatar - using ProfileAvatar system */}
         <div className="relative flex-shrink-0">
-          <Avatar className="size-9">
-            <AvatarImage src={avatarImage || undefined} />
-            <AvatarFallback className="text-xs">
-              {isGroup ? <Users className="h-3 w-3" /> : avatarFallback}
-            </AvatarFallback>
-          </Avatar>
+          {(() => {
+            // If no participants, show fallback
+            if (otherParticipants.length === 0) {
+              return (
+                <ProfileAvatar size="sm">
+                  <ProfileAvatarImage
+                    fallbackIcon={<Hash className="w-1/2 h-1/2" />}
+                  />
+                </ProfileAvatar>
+              );
+            }
+
+            // For 1:1 conversations, show single avatar
+            if (otherParticipants.length === 1) {
+              return (
+                <ProfileAvatar size="sm">
+                  <ProfileAvatarImage
+                    src={participant.avatar}
+                    name={participant.name}
+                  />
+                  <ProfileAvatarStatus id={participant.id} size="sm" />
+                </ProfileAvatar>
+              );
+            }
+
+            // For group conversations, show main avatar + counter
+            const remainingCount = otherParticipants.length - 1;
+            return (
+              <ProfileAvatar size="sm">
+                <ProfileAvatarImage
+                  src={participant.avatar}
+                  name={participant.name}
+                />
+                <ProfileAvatarStatus id={participant.id} size="sm" />
+                {remainingCount > 0 && (
+                  <ProfileAvatarCounter count={remainingCount} size="sm" />
+                )}
+              </ProfileAvatar>
+            );
+          })()}
         </div>
 
         <div className="flex-1 min-w-0">

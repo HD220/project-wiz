@@ -44,17 +44,6 @@ const getProviderLabel = (type: string): string => {
   return labels[type] || "Unknown";
 };
 
-const getProviderIcon = (type: string): string => {
-  const icons: Record<string, string> = {
-    openai: "AI",
-    deepseek: "DS",
-    anthropic: "AN",
-    google: "GO",
-    custom: "CU",
-  };
-  return icons[type] || "AI";
-};
-
 interface ProviderCardProps {
   provider: LlmProvider;
 }
@@ -107,33 +96,6 @@ export function ProviderCard(props: ProviderCardProps) {
           isLoading && "opacity-50 pointer-events-none",
         )}
       >
-        {/* Provider Icon */}
-        <div className="relative shrink-0">
-          <div
-            className={cn(
-              "flex items-center justify-center size-10 rounded-full text-xs font-bold",
-              provider.isDefault
-                ? "bg-primary/20 text-primary"
-                : "bg-muted text-muted-foreground",
-            )}
-          >
-            {getProviderIcon(provider.type)}
-          </div>
-          {/* Status dot */}
-          <div
-            className={cn(
-              "absolute -bottom-0.5 -right-0.5 size-3 rounded-full border-2 border-card",
-              provider.isActive ? "bg-green-500" : "bg-gray-400",
-            )}
-          />
-          {/* Default indicator */}
-          {provider.isDefault && (
-            <div className="absolute -top-0.5 -left-0.5 size-3 bg-primary rounded-full flex items-center justify-center">
-              <Star className="size-1.5 text-primary-foreground fill-current" />
-            </div>
-          )}
-        </div>
-
         {/* Provider Info */}
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-1">
