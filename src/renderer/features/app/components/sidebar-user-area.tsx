@@ -8,7 +8,6 @@ import {
   ProfileAvatarImage,
   ProfileAvatarStatus,
 } from "@/renderer/components/ui/profile-avatar";
-import { UserStatus } from "@/renderer/features/user/components/user-status";
 
 export function SidebarUserArea() {
   const router = useRouter();
@@ -30,31 +29,11 @@ export function SidebarUserArea() {
           {user && (
             <ProfileAvatar size="md">
               <ProfileAvatarImage
-                user={{
-                  id: user.id,
-                  name: user.name,
-                  username: user.username,
-                  email: user.email,
-                  avatar: user.avatar,
-                  theme: user.theme,
-                  createdAt: user.createdAt,
-                  updatedAt: user.updatedAt,
-                }}
+                src={user.avatar}
+                name={user.name}
                 size="md"
               />
-              <ProfileAvatarStatus
-                user={{
-                  id: user.id,
-                  name: user.name,
-                  username: user.username,
-                  email: user.email,
-                  avatar: user.avatar,
-                  theme: user.theme,
-                  createdAt: user.createdAt,
-                  updatedAt: user.updatedAt,
-                }}
-                size="md"
-              />
+              <ProfileAvatarStatus id={user.id} size="sm" />
             </ProfileAvatar>
           )}
         </div>
@@ -63,7 +42,10 @@ export function SidebarUserArea() {
           <p className="truncate transition-colors duration-200 font-semibold text-sm text-sidebar-foreground">
             {user?.name || "User"}
           </p>
-          <UserStatus status="online" size="sm" showLabel={true} />
+          <div className="flex items-center gap-2 text-xs text-sidebar-foreground/80">
+            <div className="w-2 h-2 bg-emerald-500 rounded-full shadow-sm"></div>
+            <span>Online</span>
+          </div>
         </div>
 
         <Button

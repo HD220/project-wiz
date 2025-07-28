@@ -1,9 +1,12 @@
 import * as React from "react";
-import { MessageSquare } from "lucide-react";
+import { Bot } from "lucide-react";
 
-import type { UserSummary } from "@/main/features/user/user.service";
-import { OptimizedAvatar } from "@/renderer/components/ui/optimized-avatar";
-import { cn } from "@/renderer/lib/utils";
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from "@/renderer/components/ui/avatar";
+import { cn, isValidAvatarUrl } from "@/renderer/lib/utils";
 
 type UserStatus = "online" | "away" | "busy" | "offline";
 
@@ -21,10 +24,8 @@ const getStatusColor = (status: UserStatus): string => {
   }
 };
 
-const getUserStatus = (user: UserSummary): UserStatus => {
-  // TODO: Implement actual user status logic based on real data
-  // For demo purposes, randomly assign status based on user ID
-  const hash = user.id.split("").reduce((a, b) => {
+const getStatusFromId = (id: string): UserStatus => {
+  const hash = id.split("").reduce((a, b) => {
     a = (a << 5) - a + b.charCodeAt(0);
     return a & a;
   }, 0);
@@ -42,8 +43,8 @@ const profileAvatarVariants = {
   },
   statusSize: {
     sm: "h-2 w-2",
-    md: "h-3 w-3",
-    lg: "h-3.5 w-3.5",
+    md: "h-2.5 w-2.5",
+    lg: "h-3 w-3",
   },
   ring: {
     sm: "ring-1",
@@ -57,41 +58,48 @@ const profileAvatarVariants = {
   },
 };
 
-// Root ProfileAvatar component
-interface ProfileAvatarProps {
+// Container principal
+function ProfileAvatar({
+  size = "md",
+  className,
+  children,
+  ...props
+}: {
   size?: keyof typeof profileAvatarVariants.size;
   className?: string;
   children: React.ReactNode;
+} & React.ComponentProps<"div">) {
+  return (
+    <div
+      data-slot="profile-avatar"
+      className={cn("relative", className)}
+      {...props}
+    >
+      {children}
+    </div>
+  );
 }
 
-const ProfileAvatar = React.forwardRef<HTMLDivElement, ProfileAvatarProps>(
-  ({ size = "md", className, children, ...props }, ref) => {
-    return (
-      <div ref={ref} className={cn("relative", className)} {...props}>
-        {children}
-      </div>
-    );
-  },
-);
-ProfileAvatar.displayName = "ProfileAvatar";
-
-// Image sub-component
-interface ProfileAvatarImageProps {
-  user: UserSummary;
+// ÚNICO avatar - serve para TUDO (usuário, agente, conversa)
+function ProfileAvatarImage({
+  src,
+  name,
+  size = "md",
+  className,
+  fallbackIcon,
+  ...props
+}: {
+  src?: string | null;
+  name?: string;
   size?: keyof typeof profileAvatarVariants.size;
   className?: string;
-}
+  fallbackIcon?: React.ReactNode;
+} & React.ComponentProps<"div">) {
+  const validSrc = isValidAvatarUrl(src);
 
-const ProfileAvatarImage = React.forwardRef<
-  HTMLDivElement,
-  ProfileAvatarImageProps
->(({ user, size = "md", className, ...props }, ref) => {
   return (
-    <OptimizedAvatar
-      ref={ref}
-      src={user.avatar}
-      size={size}
-      fallbackContent={user.name.charAt(0).toUpperCase()}
+    <Avatar
+      data-slot="profile-avatar-image"
       className={cn(
         profileAvatarVariants.size[size],
         profileAvatarVariants.ring[size],
@@ -99,87 +107,70 @@ const ProfileAvatarImage = React.forwardRef<
         className,
       )}
       {...props}
-    />
+    >
+      {validSrc && <AvatarImage src={validSrc} className="object-cover" />}
+      <AvatarFallback
+        className={cn(
+          "font-semibold flex items-center justify-center",
+          name
+            ? "bg-gradient-to-br from-primary/90 to-primary text-primary-foreground ring-2 ring-primary/20"
+            : "bg-gradient-to-br from-primary/10 to-primary/5 text-primary border border-primary/20",
+        )}
+      >
+        {name ? name.charAt(0).toUpperCase() : fallbackIcon}
+      </AvatarFallback>
+    </Avatar>
   );
-});
-ProfileAvatarImage.displayName = "ProfileAvatarImage";
-
-// Fallback sub-component
-interface ProfileAvatarFallbackProps {
-  size?: keyof typeof profileAvatarVariants.size;
-  className?: string;
-  children?: React.ReactNode;
 }
 
-const ProfileAvatarFallback = React.forwardRef<
-  HTMLDivElement,
-  ProfileAvatarFallbackProps
->(({ size = "md", className, children, ...props }, ref) => {
-  return (
-    <OptimizedAvatar
-      ref={ref}
-      size={size}
-      fallbackContent={children || <MessageSquare className="w-1/2 h-1/2" />}
-      className={cn(
-        profileAvatarVariants.size[size],
-        profileAvatarVariants.ring[size],
-        "ring-background shadow-md transition-all duration-200",
-        className,
-      )}
-      fallbackClassName="bg-gradient-to-br from-muted to-muted-foreground/20 text-muted-foreground border border-border/50"
-      {...props}
-    />
-  );
-});
-ProfileAvatarFallback.displayName = "ProfileAvatarFallback";
-
-// Status sub-component
-interface ProfileAvatarStatusProps {
-  user: UserSummary;
+// Badge de status
+function ProfileAvatarStatus({
+  id,
+  status,
+  size = "md",
+  className,
+  ...props
+}: {
+  id?: string;
+  status?: UserStatus;
   size?: keyof typeof profileAvatarVariants.size;
   className?: string;
-}
-
-const ProfileAvatarStatus = React.forwardRef<
-  HTMLDivElement,
-  ProfileAvatarStatusProps
->(({ user, size = "md", className, ...props }, ref) => {
-  const status = getUserStatus(user);
+} & React.ComponentProps<"div">) {
+  const finalStatus = status || (id ? getStatusFromId(id) : "offline");
 
   return (
     <div
-      ref={ref}
+      data-slot="profile-avatar-status"
       className={cn(
         "absolute -bottom-0.5 -right-0.5 rounded-full border-2 border-background shadow-sm status-pulse z-30",
         profileAvatarVariants.statusSize[size],
-        getStatusColor(status),
+        getStatusColor(finalStatus),
         className,
       )}
       {...props}
     />
   );
-});
-ProfileAvatarStatus.displayName = "ProfileAvatarStatus";
+}
 
-// Counter sub-component for group avatars
-interface ProfileAvatarCounterProps {
+// Contador para grupos
+function ProfileAvatarCounter({
+  count,
+  size = "md",
+  className,
+  ...props
+}: {
   count: number;
   size?: keyof typeof profileAvatarVariants.size;
   className?: string;
-}
-
-const ProfileAvatarCounter = React.forwardRef<
-  HTMLDivElement,
-  ProfileAvatarCounterProps
->(({ count, size = "md", className, ...props }, ref) => {
+} & React.ComponentProps<"div">) {
   return (
     <div
-      ref={ref}
+      data-slot="profile-avatar-counter"
       className={cn(
         "absolute z-20 rounded-full border-2 border-background shadow-md",
         "bg-gradient-to-br from-primary/80 to-primary/70 text-primary-foreground",
         "flex items-center justify-center font-bold",
-        "bottom-0 right-0 transform translate-x-1/12 translate-y-1/6",
+        "bottom-1 right-1",
         profileAvatarVariants.counterSize[size],
         className,
       )}
@@ -188,99 +179,11 @@ const ProfileAvatarCounter = React.forwardRef<
       +{count}
     </div>
   );
-});
-ProfileAvatarCounter.displayName = "ProfileAvatarCounter";
-
-// Group sub-component
-interface ProfileAvatarGroupProps {
-  participants: Array<{
-    id: string;
-    conversationId: string;
-    participantId: string;
-    isActive: boolean;
-    deactivatedAt: Date | null;
-    deactivatedBy: string | null;
-    createdAt: Date;
-    updatedAt: Date;
-  }>;
-  availableUsers: UserSummary[];
-  currentUserId?: string;
-  size?: keyof typeof profileAvatarVariants.size;
-  showStatus?: boolean;
-  className?: string;
 }
-
-const ProfileAvatarGroup = React.forwardRef<
-  HTMLDivElement,
-  ProfileAvatarGroupProps
->(
-  (
-    {
-      participants,
-      availableUsers,
-      currentUserId,
-      size = "md",
-      showStatus = false,
-      className,
-      ...props
-    },
-    ref,
-  ) => {
-    // Get other participants (exclude current user)
-    const otherParticipants = participants
-      .filter((participant) => participant.participantId !== currentUserId)
-      .map((participant) =>
-        availableUsers.find((user) => user.id === participant.participantId),
-      )
-      .filter(Boolean) as UserSummary[];
-
-    // If no other participants, show fallback
-    if (otherParticipants.length === 0) {
-      return (
-        <ProfileAvatarFallback
-          ref={ref}
-          size={size}
-          className={className}
-          {...props}
-        />
-      );
-    }
-
-    // For 1:1 conversations, show single avatar
-    if (otherParticipants.length === 1) {
-      const participant = otherParticipants[0];
-      return (
-        <ProfileAvatar ref={ref} size={size} className={className} {...props}>
-          <ProfileAvatarImage user={participant} size={size} />
-          {showStatus && <ProfileAvatarStatus user={participant} size={size} />}
-        </ProfileAvatar>
-      );
-    }
-
-    // For group conversations, show main avatar + counter
-    const firstParticipant = otherParticipants[0];
-    const remainingCount = otherParticipants.length - 1;
-
-    return (
-      <ProfileAvatar ref={ref} size={size} className={className} {...props}>
-        <ProfileAvatarImage user={firstParticipant} size={size} />
-        {showStatus && (
-          <ProfileAvatarStatus user={firstParticipant} size={size} />
-        )}
-        {remainingCount > 0 && (
-          <ProfileAvatarCounter count={remainingCount} size={size} />
-        )}
-      </ProfileAvatar>
-    );
-  },
-);
-ProfileAvatarGroup.displayName = "ProfileAvatarGroup";
 
 export {
   ProfileAvatar,
   ProfileAvatarImage,
-  ProfileAvatarFallback,
   ProfileAvatarStatus,
   ProfileAvatarCounter,
-  ProfileAvatarGroup,
 };

@@ -3,9 +3,12 @@ import { MoreHorizontal, Pencil, Power, Trash2, User, Bot } from "lucide-react";
 
 import { AgentStatus } from "@/renderer/components/agent-status/agent-status";
 import { Badge } from "@/renderer/components/ui/badge";
-import { ProfileAvatarFallback } from "@/renderer/components/ui/profile-avatar";
+import {
+  ProfileAvatar,
+  ProfileAvatarImage,
+  ProfileAvatarStatus,
+} from "@/renderer/components/ui/profile-avatar";
 import { Button } from "@/renderer/components/ui/button";
-import { StatusIndicator } from "@/renderer/components/ui/status-indicator";
 import {
   Card,
   CardContent,
@@ -80,19 +83,16 @@ export function AgentCard({
         <div className="flex items-start gap-[var(--spacing-component-md)]">
           {/* Avatar with status indicator */}
           <div className="relative">
-            <ProfileAvatarFallback
-              size="lg"
-              className="shrink-0 ring-2 ring-primary/10 transition-all duration-200 group-hover:ring-primary/20"
-            >
-              <Bot className="size-5" />
-            </ProfileAvatarFallback>
-            {/* Status indicator */}
-            <StatusIndicator
-              status={agent.status}
-              size="lg"
-              variant="dot"
-              className="absolute -bottom-1 -right-1 border-2 border-card"
-            />
+            <ProfileAvatar size="lg">
+              <ProfileAvatarImage
+                name={agent.name}
+                className="shrink-0 ring-2 ring-primary/10 transition-all duration-200 group-hover:ring-primary/20"
+              />
+              <ProfileAvatarStatus
+                status={agent.status === "active" ? "online" : "offline"}
+                size="sm"
+              />
+            </ProfileAvatar>
           </div>
 
           <div className="flex-1 min-w-0 space-y-[var(--spacing-component-xs)]">
@@ -175,7 +175,7 @@ export function AgentCard({
           {/* Model information with error handling */}
           {agent.modelConfig && (
             <div className="flex items-center gap-[var(--spacing-component-sm)] text-xs text-muted-foreground">
-              <StatusIndicator status="active" size="sm" variant="dot" />
+              <div className="w-2 h-2 bg-emerald-500 rounded-full"></div>
               <span className="font-medium">{getModelName()}</span>
             </div>
           )}
@@ -243,19 +243,16 @@ export function AgentListItem({
     >
       {/* Agent Avatar */}
       <div className="relative shrink-0">
-        <ProfileAvatarFallback
-          size="md"
-          className="ring-2 ring-primary/10 transition-all duration-200 group-hover:ring-primary/20"
-        >
-          <Bot className="size-4" />
-        </ProfileAvatarFallback>
-        {/* Status dot */}
-        <StatusIndicator
-          status={agent.status}
-          size="sm"
-          variant="dot"
-          className="absolute -bottom-0.5 -right-0.5 border-2 border-card"
-        />
+        <ProfileAvatar size="md">
+          <ProfileAvatarImage
+            name={agent.name}
+            className="ring-2 ring-primary/10 transition-all duration-200 group-hover:ring-primary/20"
+          />
+          <ProfileAvatarStatus
+            status={agent.status === "active" ? "online" : "offline"}
+            size="sm"
+          />
+        </ProfileAvatar>
       </div>
 
       {/* Agent Info */}

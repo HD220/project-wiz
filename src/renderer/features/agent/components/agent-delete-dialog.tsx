@@ -8,7 +8,6 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/renderer/components/ui/alert-dialog";
-import { StatusIndicator } from "@/renderer/components/ui/status-indicator";
 import type { SelectAgent } from "@/renderer/features/agent/agent.types";
 import { cn } from "@/renderer/lib/utils";
 
@@ -60,30 +59,15 @@ export function AgentDeleteDialog(props: AgentDeleteDialogProps) {
               </p>
               <ul className="text-xs text-muted-foreground space-y-[var(--spacing-component-xs)] ml-4">
                 <li className="flex items-center gap-[var(--spacing-component-sm)]">
-                  <StatusIndicator
-                    status="error"
-                    size="sm"
-                    variant="dot"
-                    className="w-1 h-1"
-                  />
+                  <div className="w-1 h-1 bg-destructive rounded-full"></div>
                   Agent configuration and settings
                 </li>
                 <li className="flex items-center gap-[var(--spacing-component-sm)]">
-                  <StatusIndicator
-                    status="error"
-                    size="sm"
-                    variant="dot"
-                    className="w-1 h-1"
-                  />
+                  <div className="w-1 h-1 bg-destructive rounded-full"></div>
                   All conversations and chat history
                 </li>
                 <li className="flex items-center gap-[var(--spacing-component-sm)]">
-                  <StatusIndicator
-                    status="error"
-                    size="sm"
-                    variant="dot"
-                    className="w-1 h-1"
-                  />
+                  <div className="w-1 h-1 bg-destructive rounded-full"></div>
                   Stored memories and context
                 </li>
               </ul>

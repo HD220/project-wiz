@@ -6,9 +6,8 @@ import { Separator } from "@/renderer/components/ui/separator";
 import {
   ProfileAvatar,
   ProfileAvatarImage,
-  ProfileAvatarFallback,
+  ProfileAvatarStatus,
 } from "@/renderer/components/ui/profile-avatar";
-import { UserStatus } from "@/renderer/features/user/components/user-status";
 import type { UserStatusType } from "@/renderer/features/user/components/user-status";
 import { cn } from "@/renderer/lib/utils";
 
@@ -63,34 +62,15 @@ export function MemberSidebar(props: MemberSidebarProps) {
     >
       <div className="flex items-center w-full gap-3">
         <div className="relative flex-shrink-0">
-          {member.type === "agent" ? (
-            <ProfileAvatarFallback
+          <ProfileAvatar size="sm">
+            <ProfileAvatarImage
+              src={member.avatarUrl}
+              name={member.name}
               size="sm"
-              className="ring-1 shadow-sm ring-primary/20"
-            >
-              <Bot className="w-4 h-4" />
-            </ProfileAvatarFallback>
-          ) : (
-            <ProfileAvatar size="sm">
-              <ProfileAvatarImage
-                user={{
-                  id: member.id,
-                  name: member.name,
-                  username: member.username || member.name,
-                  email: "",
-                  avatar: member.avatarUrl,
-                  theme: "system",
-                  createdAt: new Date(),
-                  updatedAt: new Date(),
-                }}
-                size="sm"
-                className="ring-1 shadow-sm ring-border/50"
-              />
-            </ProfileAvatar>
-          )}
-          <div className="absolute -bottom-0.5 -right-0.5">
-            <UserStatus status={member.status} size="sm" showLabel={false} />
-          </div>
+              className="ring-1 shadow-sm ring-border/50"
+            />
+            <ProfileAvatarStatus id={member.id} size="sm" />
+          </ProfileAvatar>
         </div>
         <div className="flex-1 min-w-0 space-y-0.5">
           <div className="flex items-center gap-2">

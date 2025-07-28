@@ -7,6 +7,7 @@ import { Button } from "@/renderer/components/ui/button";
 import {
   ProfileAvatar,
   ProfileAvatarImage,
+  ProfileAvatarStatus,
 } from "@/renderer/components/ui/profile-avatar";
 import {
   Dialog,
@@ -139,29 +140,13 @@ export function CreateConversationDialog(props: CreateConversationDialogProps) {
                       <div className="relative">
                         <ProfileAvatar size="sm">
                           <ProfileAvatarImage
-                            user={{
-                              id: user.id,
-                              name: user.name,
-                              username: user.username || user.name,
-                              email: user.email || "",
-                              avatar: user.avatar,
-                              theme: user.theme || "system",
-                              createdAt: user.createdAt,
-                              updatedAt: user.updatedAt,
-                            }}
+                            src={user.avatar}
+                            name={user.name}
                             size="sm"
                             className="ring-1 ring-border/50 transition-all duration-200 hover:ring-primary/30 hover:scale-[1.02]"
                           />
+                          <ProfileAvatarStatus id={user.id} size="sm" />
                         </ProfileAvatar>
-
-                        {/* Type indicator */}
-                        <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 bg-background rounded-full flex items-center justify-center border border-border/50 shadow-sm">
-                          {user.type === "agent" ? (
-                            <Bot className="h-2 w-2 text-primary" />
-                          ) : (
-                            <User className="h-2 w-2 text-green-500" />
-                          )}
-                        </div>
                       </div>
 
                       {/* User info */}

@@ -26,7 +26,12 @@ import { useApiMutation } from "@/renderer/hooks/use-api-mutation.hook";
 import { cn } from "@/renderer/lib/utils";
 
 import { ArchiveConversationDialog } from "./archive-conversation-dialog";
-import { ProfileAvatarGroup } from "@/renderer/components/ui/profile-avatar";
+import {
+  ProfileAvatar,
+  ProfileAvatarImage,
+  ProfileAvatarStatus,
+  ProfileAvatarCounter,
+} from "@/renderer/components/ui/profile-avatar";
 import { CreateConversationDialog } from "./create-conversation-dialog";
 
 import type { ConversationWithLastMessage } from "../types";
@@ -320,13 +325,57 @@ function ConversationListItem(props: ConversationListItemProps) {
       >
         {/* Avatar - smaller Discord style with space for overlapped groups */}
         <div className="relative flex-shrink-0">
-          <ProfileAvatarGroup
-            participants={conversation.participants}
-            availableUsers={availableUsers}
-            currentUserId={user?.id}
-            size="sm"
-            showStatus={true}
-          />
+          {(() => {
+            // Get other participants (exclude current user)
+            const otherParticipants = conversation.participants
+              .filter((participant) => participant.participantId !== user?.id)
+              .map((participant) =>
+                availableUsers.find((u) => u.id === participant.participantId),
+              )
+              .filter(Boolean) as UserSummary[];
+
+            // If no other participants, show fallback
+            if (otherParticipants.length === 0) {
+              return (
+                <ProfileAvatar size="sm">
+                  <ProfileAvatarImage
+                    fallbackIcon={<Hash className="w-1/2 h-1/2" />}
+                  />
+                </ProfileAvatar>
+              );
+            }
+
+            // For 1:1 conversations, show single avatar
+            if (otherParticipants.length === 1) {
+              const participant = otherParticipants[0];
+              return (
+                <ProfileAvatar size="sm">
+                  <ProfileAvatarImage
+                    src={participant.avatar}
+                    name={participant.name}
+                  />
+                  <ProfileAvatarStatus id={participant.id} size="sm" />
+                </ProfileAvatar>
+              );
+            }
+
+            // For group conversations, show main avatar + counter
+            const firstParticipant = otherParticipants[0];
+            const remainingCount = otherParticipants.length - 1;
+
+            return (
+              <ProfileAvatar size="sm">
+                <ProfileAvatarImage
+                  src={firstParticipant.avatar}
+                  name={firstParticipant.name}
+                />
+                <ProfileAvatarStatus id={firstParticipant.id} size="sm" />
+                {remainingCount > 0 && (
+                  <ProfileAvatarCounter count={remainingCount} size="sm" />
+                )}
+              </ProfileAvatar>
+            );
+          })()}
         </div>
 
         {/* Content - more compact */}
