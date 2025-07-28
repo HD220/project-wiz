@@ -79,11 +79,8 @@ export function WelcomeView() {
 
           {/* Quick Actions Grid */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-            <Card
-              className="group hover:bg-accent/50 transition-colors cursor-pointer"
-              asChild
-            >
-              <Link to="/user/agents">
+            <Link to="/user/agents">
+              <Card className="group hover:bg-accent/50 transition-colors cursor-pointer">
                 <CardContent className="p-3">
                   <div className="flex items-center gap-2">
                     <div className="p-1.5 rounded-md bg-primary/10">
@@ -99,8 +96,8 @@ export function WelcomeView() {
                     </div>
                   </div>
                 </CardContent>
-              </Link>
-            </Card>
+              </Card>
+            </Link>
 
             <div className="group hover:bg-accent/50 transition-colors cursor-pointer">
               <Card>
@@ -140,11 +137,8 @@ export function WelcomeView() {
               </Card>
             </div>
 
-            <Card
-              className="group hover:bg-accent/50 transition-colors cursor-pointer"
-              asChild
-            >
-              <Link to="/user/settings">
+            <Link to="/user/settings">
+              <Card className="group hover:bg-accent/50 transition-colors cursor-pointer">
                 <CardContent className="p-3">
                   <div className="flex items-center gap-2">
                     <div className="p-1.5 rounded-md bg-orange-500/10">
@@ -158,8 +152,8 @@ export function WelcomeView() {
                     </div>
                   </div>
                 </CardContent>
-              </Link>
-            </Card>
+              </Card>
+            </Link>
           </div>
 
           {/* Main Content Grid */}
