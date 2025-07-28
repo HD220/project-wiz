@@ -49,7 +49,7 @@ export function ProjectSidebar(props: ProjectSidebarProps) {
       aria-label={`${project.name} navigation`}
     >
       {/* Project Header */}
-      <header className="h-12 bg-card/80 border-b border-border/50 flex items-center justify-between px-4 backdrop-blur-sm">
+      <header className="h-12 bg-card/80 border-b border-border/50 flex items-center justify-between px-[var(--spacing-component-md)] backdrop-blur-sm">
         <h1 className="text-foreground font-semibold text-base truncate">
           {project.name}
         </h1>
@@ -65,7 +65,7 @@ export function ProjectSidebar(props: ProjectSidebarProps) {
 
       <ScrollArea className="flex-1">
         <nav
-          className="p-3 space-y-1"
+          className="p-[var(--spacing-component-md)] space-y-[var(--spacing-component-xs)]"
           role="navigation"
           aria-label="Project sections"
         >
@@ -81,7 +81,7 @@ export function ProjectSidebar(props: ProjectSidebarProps) {
               <Button
                 variant="ghost"
                 className={cn(
-                  "w-full justify-start px-3 h-9 text-sm font-normal transition-all duration-200 rounded-lg",
+                  "w-full justify-start px-[var(--spacing-component-md)] h-9 text-sm font-normal transition-all duration-200 rounded-lg",
                   "text-muted-foreground hover:text-foreground hover:bg-accent/60",
                   isActive && "bg-accent text-foreground font-medium shadow-sm",
                 )}
@@ -105,14 +105,14 @@ export function ProjectSidebar(props: ProjectSidebarProps) {
             <CollapsibleTrigger asChild>
               <Button
                 variant="ghost"
-                className="w-full justify-start px-3 h-8 text-xs font-semibold text-muted-foreground hover:text-foreground uppercase tracking-wider transition-colors focus-visible:ring-2 focus-visible:ring-ring"
+                className="w-full justify-start px-[var(--spacing-component-md)] h-8 text-xs font-semibold text-muted-foreground hover:text-foreground uppercase tracking-wider transition-colors focus-visible:ring-2 focus-visible:ring-ring"
                 aria-expanded="true"
               >
                 <ChevronDown className="w-3 h-3 mr-2 transition-transform duration-200" />
                 <span>Canais de Texto</span>
               </Button>
             </CollapsibleTrigger>
-            <CollapsibleContent className="space-y-1 mt-1">
+            <CollapsibleContent className="space-y-[var(--spacing-component-xs)] mt-1">
               {channels.length > 0 ? (
                 <div role="list" aria-label="Text channels">
                   {channels.map((channel) => (
@@ -128,7 +128,7 @@ export function ProjectSidebar(props: ProjectSidebarProps) {
                         <Button
                           variant="ghost"
                           className={cn(
-                            "w-full justify-start px-3 h-8 text-sm font-normal transition-all duration-200 rounded-lg group",
+                            "w-full justify-start px-[var(--spacing-component-md)] h-8 text-sm font-normal transition-all duration-200 rounded-lg group",
                             "text-muted-foreground hover:text-foreground hover:bg-accent/60",
                             isActive &&
                               "bg-accent text-foreground font-medium shadow-sm",
@@ -159,7 +159,7 @@ export function ProjectSidebar(props: ProjectSidebarProps) {
                   ))}
                 </div>
               ) : (
-                <div className="px-3 py-2 text-xs text-muted-foreground text-center">
+                <div className="px-[var(--spacing-component-md)] py-[var(--spacing-component-sm)] text-xs text-muted-foreground text-center">
                   Nenhuma conversa ainda
                 </div>
               )}

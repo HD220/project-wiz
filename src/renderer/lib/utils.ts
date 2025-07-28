@@ -28,3 +28,28 @@ export function isValidAvatarUrl(
     return null;
   }
 }
+
+/**
+ * Formats a timestamp to display relative time or time of day
+ * Returns "HH:MM" for today, "X dias" for older messages
+ */
+export function getTimeAgo(createdAt: Date | string): string {
+  try {
+    const messageDate = new Date(createdAt);
+    const now = new Date();
+    const diffInHours =
+      (now.getTime() - messageDate.getTime()) / (1000 * 60 * 60);
+
+    if (diffInHours < 24) {
+      return new Intl.DateTimeFormat(undefined, {
+        hour: "2-digit",
+        minute: "2-digit",
+      }).format(messageDate);
+    }
+
+    const days = Math.floor(diffInHours / 24);
+    return `${days} dias`;
+  } catch {
+    return "agora";
+  }
+}

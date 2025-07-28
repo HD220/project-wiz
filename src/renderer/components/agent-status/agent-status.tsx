@@ -1,6 +1,6 @@
 import { Badge } from "@/renderer/components/ui/badge";
-import { cn } from "@/renderer/lib/utils";
 import type { AgentStatus } from "@/renderer/features/agent/agent.types";
+import { cn } from "@/renderer/lib/utils";
 
 interface AgentStatusProps {
   status: AgentStatus;

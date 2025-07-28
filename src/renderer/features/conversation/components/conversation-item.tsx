@@ -11,7 +11,7 @@ import type {
   AuthenticatedUser,
 } from "@/renderer/features/conversation/types";
 import type { SelectMessage } from "@/renderer/features/conversation/types";
-import { isValidAvatarUrl, cn } from "@/renderer/lib/utils";
+import { isValidAvatarUrl, cn, getTimeAgo } from "@/renderer/lib/utils";
 
 interface ConversationItemProps {
   conversation: ConversationWithParticipants;
@@ -20,121 +20,6 @@ interface ConversationItemProps {
   isSelected?: boolean;
   onClick: () => void;
   className?: string;
-}
-
-// Avatar composition for better reusability
-interface ConversationAvatarProps {
-  otherParticipants: AuthenticatedUser[];
-  className?: string;
-}
-
-export function ConversationAvatar({
-  otherParticipants,
-  className,
-}: ConversationAvatarProps) {
-  const isGroup = otherParticipants.length > 1;
-  const participant = otherParticipants[0];
-
-  const avatarImage = isGroup
-    ? null
-    : isValidAvatarUrl(participant?.avatar) || null;
-  const avatarFallback = isGroup
-    ? otherParticipants.length.toString()
-    : participant?.name?.charAt(0).toUpperCase() || "?";
-
-  return (
-    <div className={cn("relative flex-shrink-0", className)}>
-      <Avatar className="w-10 h-10">
-        <AvatarImage src={avatarImage || undefined} />
-        <AvatarFallback className="text-sm font-medium">
-          {isGroup ? <Users className="h-4 w-4" /> : avatarFallback}
-        </AvatarFallback>
-      </Avatar>
-
-      {isGroup && (
-        <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 bg-primary rounded-full flex items-center justify-center">
-          <Users className="h-2.5 w-2.5 text-primary-foreground" />
-        </div>
-      )}
-    </div>
-  );
-}
-
-// Header composition for name and metadata
-interface ConversationHeaderProps {
-  displayName: string;
-  otherParticipants: AuthenticatedUser[];
-}
-
-export function ConversationHeader({
-  displayName,
-  otherParticipants,
-}: ConversationHeaderProps) {
-  const isGroup = otherParticipants.length > 1;
-
-  return (
-    <div className="flex items-center justify-between gap-2 mb-1">
-      <h3 className="font-medium text-sm truncate">{displayName}</h3>
-
-      {isGroup && (
-        <Badge variant="secondary" className="text-xs px-2 py-0.5 shrink-0">
-          {otherParticipants.length + 1}
-        </Badge>
-      )}
-    </div>
-  );
-}
-
-// Message preview composition
-interface MessagePreviewProps {
-  lastMessage?: SelectMessage | null;
-  timeAgo: string;
-}
-
-export function MessagePreview({ lastMessage, timeAgo }: MessagePreviewProps) {
-  const messagePreview = lastMessage
-    ? lastMessage.content.length > 60
-      ? `${lastMessage.content.substring(0, 60)}...`
-      : lastMessage.content
-    : "No messages yet";
-
-  return (
-    <div className="flex items-center justify-between gap-2">
-      <p className="text-sm text-muted-foreground truncate flex-1">
-        {messagePreview}
-      </p>
-
-      {timeAgo && (
-        <span className="text-xs text-muted-foreground shrink-0">
-          {timeAgo}
-        </span>
-      )}
-    </div>
-  );
-}
-
-// Group participants display
-interface GroupParticipantsProps {
-  otherParticipants: AuthenticatedUser[];
-}
-
-export function GroupParticipants({
-  otherParticipants,
-}: GroupParticipantsProps) {
-  if (otherParticipants.length <= 1) return null;
-
-  return (
-    <div className="flex items-center gap-1 mt-1">
-      <User className="h-3 w-3 text-muted-foreground" />
-      <span className="text-xs text-muted-foreground truncate">
-        {otherParticipants
-          .slice(0, 2)
-          .map((participant) => participant.name)
-          .join(", ")}
-        {otherParticipants.length > 2 && ` +${otherParticipants.length - 2}`}
-      </span>
-    </div>
-  );
 }
 
 export function ConversationItem(props: ConversationItemProps) {
@@ -147,7 +32,7 @@ export function ConversationItem(props: ConversationItemProps) {
     className,
   } = props;
 
-  // Get display name for conversation - inline logic kept simple
+  // Display name inline logic
   const displayName =
     conversation.name ||
     (otherParticipants.length === 1
@@ -156,38 +41,37 @@ export function ConversationItem(props: ConversationItemProps) {
         ? `Grupo ${otherParticipants.length + 1}`
         : "New Conversation");
 
-  // Format timestamp - simplified without debug logs
-  const timeAgo = lastMessage
-    ? (() => {
-        try {
-          const messageDate = new Date(lastMessage.createdAt);
-          const now = new Date();
-          const diffInHours =
-            (now.getTime() - messageDate.getTime()) / (1000 * 60 * 60);
+  // Use existing getTimeAgo utility
+  const timeAgo = lastMessage ? getTimeAgo(lastMessage.createdAt) : "";
 
-          if (diffInHours < 24) {
-            return new Intl.DateTimeFormat("pt-BR", {
-              hour: "2-digit",
-              minute: "2-digit",
-            }).format(messageDate);
-          }
+  // Avatar logic inline
+  const isGroup = otherParticipants.length > 1;
+  const participant = otherParticipants[0];
+  const avatarImage = isGroup
+    ? null
+    : isValidAvatarUrl(participant?.avatar) || null;
+  const avatarFallback = isGroup
+    ? otherParticipants.length.toString()
+    : participant?.name?.charAt(0).toUpperCase() || "?";
 
-          const days = Math.floor(diffInHours / 24);
-          return `${days}d`;
-        } catch {
-          return "";
-        }
-      })()
-    : "";
+  // Message preview inline
+  const messagePreview = lastMessage
+    ? lastMessage.content.length > 65
+      ? `${lastMessage.content.substring(0, 65)}...`
+      : lastMessage.content
+    : "No messages yet";
 
   return (
     <div
       role="button"
       tabIndex={0}
       className={cn(
-        "w-full p-3 rounded-lg border border-border/50 hover:border-border hover:bg-muted/50",
-        "transition-all duration-150 cursor-pointer",
-        isSelected ? "bg-muted border-border shadow-sm" : "bg-card",
+        "group w-full p-2 rounded-lg border transition-all duration-200 cursor-pointer",
+        "hover:shadow-sm hover:border-border/80 hover:bg-card/80",
+        "focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-1",
+        isSelected
+          ? "bg-accent/40 border-primary/30 shadow-sm ring-1 ring-primary/20"
+          : "bg-card border-border/40",
         className,
       )}
       onClick={onClick}
@@ -199,18 +83,66 @@ export function ConversationItem(props: ConversationItemProps) {
       }}
     >
       <div className="flex items-start gap-3">
-        <ConversationAvatar otherParticipants={otherParticipants} />
+        {/* Avatar inline - simplified to 5 lines */}
+        <div className="relative flex-shrink-0">
+          <Avatar className="size-9">
+            <AvatarImage src={avatarImage || undefined} />
+            <AvatarFallback className="text-xs">
+              {isGroup ? <Users className="h-3 w-3" /> : avatarFallback}
+            </AvatarFallback>
+          </Avatar>
+        </div>
 
         <div className="flex-1 min-w-0">
-          <ConversationHeader
-            displayName={displayName}
-            otherParticipants={otherParticipants}
-          />
+          {/* Header inline */}
+          <div className="flex items-center justify-between gap-2 mb-1">
+            <h3 className="font-medium text-sm truncate text-foreground">
+              {displayName}
+            </h3>
 
-          <MessagePreview lastMessage={lastMessage} timeAgo={timeAgo} />
+            {isGroup && (
+              <Badge
+                variant="secondary"
+                className="text-xs px-1.5 py-0.5 shrink-0"
+              >
+                {otherParticipants.length + 1}
+              </Badge>
+            )}
+          </div>
 
-          <GroupParticipants otherParticipants={otherParticipants} />
+          {/* Message preview inline */}
+          <div className="flex items-center justify-between gap-2">
+            <p className="text-xs text-muted-foreground truncate flex-1">
+              {messagePreview}
+            </p>
+
+            {timeAgo && (
+              <span className="text-xs text-muted-foreground font-medium shrink-0">
+                {timeAgo}
+              </span>
+            )}
+          </div>
+
+          {/* Group participants inline */}
+          {isGroup && otherParticipants.length > 1 && (
+            <div className="flex items-center gap-1 mt-1">
+              <User className="h-3 w-3 text-muted-foreground/70" />
+              <span className="text-xs text-muted-foreground/90 truncate">
+                {otherParticipants
+                  .slice(0, 2)
+                  .map((p) => p.name)
+                  .join(", ")}
+                {otherParticipants.length > 2 &&
+                  ` +${otherParticipants.length - 2}`}
+              </span>
+            </div>
+          )}
         </div>
+
+        {/* Selection indicator */}
+        {isSelected && (
+          <div className="flex-shrink-0 w-0.5 h-6 bg-primary rounded-full self-center" />
+        )}
       </div>
     </div>
   );

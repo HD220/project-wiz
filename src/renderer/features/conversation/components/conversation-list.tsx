@@ -1,7 +1,7 @@
+import { useQueryClient } from "@tanstack/react-query";
 import { useNavigate, useLocation, Link } from "@tanstack/react-router";
 import { MessageCircle, Archive, Plus, MoreHorizontal } from "lucide-react";
 import { useState, useMemo } from "react";
-import { useQueryClient } from "@tanstack/react-query";
 
 import type { UserSummary } from "@/main/features/user/user.service";
 
@@ -20,9 +20,9 @@ import {
   DropdownMenuTrigger,
 } from "@/renderer/components/ui/dropdown-menu";
 import { Switch } from "@/renderer/components/ui/switch";
-import { cn } from "@/renderer/lib/utils";
 import { useAuth } from "@/renderer/contexts/auth.context";
 import { useApiMutation } from "@/renderer/hooks/use-api-mutation.hook";
+import { cn } from "@/renderer/lib/utils";
 
 import { ArchiveConversationDialog } from "./archive-conversation-dialog";
 import { ConversationAvatar } from "./conversation-avatar";

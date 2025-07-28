@@ -1,9 +1,15 @@
+import { Send, Paperclip, Smile } from "lucide-react";
 import { useState, useRef, KeyboardEvent, useEffect } from "react";
-import { Send } from "lucide-react";
 
 import { Button } from "@/renderer/components/ui/button";
 import { ScrollArea } from "@/renderer/components/ui/scroll-area";
 import { Textarea } from "@/renderer/components/ui/textarea";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/renderer/components/ui/tooltip";
 import { cn } from "@/renderer/lib/utils";
 
 interface MessageInputProps {
@@ -14,39 +20,101 @@ interface MessageInputProps {
   className?: string;
 }
 
-// Send button composition for better accessibility
-interface SendButtonProps {
+// Action buttons composition for enhanced UX
+interface ActionButtonsProps {
   onSend: () => void;
   disabled: boolean;
   isSending: boolean;
   hasContent: boolean;
+  onAttachment?: () => void;
+  onEmoji?: () => void;
 }
 
-export function SendButton({
+export function ActionButtons({
   onSend,
   disabled,
   isSending,
   hasContent,
-}: SendButtonProps) {
+  onAttachment,
+  onEmoji,
+}: ActionButtonsProps) {
   return (
-    <div className="absolute bottom-2 right-2">
-      <Button
-        type="button"
-        size="sm"
-        variant="ghost"
-        onClick={onSend}
-        disabled={disabled || isSending || !hasContent}
-        className={cn(
-          "h-8 w-8 p-0 transition-all duration-200",
-          hasContent && !disabled && !isSending
-            ? "bg-primary text-primary-foreground hover:bg-primary/90"
-            : "text-muted-foreground hover:text-foreground hover:bg-muted/50",
+    <TooltipProvider>
+      <div className="absolute bottom-2 right-2 flex items-center gap-[var(--spacing-component-xs)]">
+        {/* Secondary action buttons - only show when no content */}
+        {!hasContent && (
+          <div className="flex items-center gap-[var(--spacing-component-xs)] mr-1">
+            {onAttachment && (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="ghost"
+                    onClick={onAttachment}
+                    disabled={disabled || isSending}
+                    className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all duration-200"
+                    aria-label="Attach file"
+                  >
+                    <Paperclip className="h-4 w-4" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Anexar arquivo</p>
+                </TooltipContent>
+              </Tooltip>
+            )}
+
+            {onEmoji && (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="ghost"
+                    onClick={onEmoji}
+                    disabled={disabled || isSending}
+                    className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all duration-200"
+                    aria-label="Add emoji"
+                  >
+                    <Smile className="h-4 w-4" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Adicionar emoji</p>
+                </TooltipContent>
+              </Tooltip>
+            )}
+          </div>
         )}
-        aria-label="Send message"
-      >
-        <Send className="h-4 w-4" />
-      </Button>
-    </div>
+
+        {/* Send button */}
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              type="button"
+              size="sm"
+              variant="ghost"
+              onClick={onSend}
+              disabled={disabled || isSending || !hasContent}
+              className={cn(
+                "h-8 w-8 p-0 transition-all duration-200 shadow-sm",
+                hasContent && !disabled && !isSending
+                  ? "bg-gradient-to-r from-primary to-primary/90 text-primary-foreground hover:from-primary/90 hover:to-primary/80 hover:scale-[1.01] hover:shadow-md border border-primary/20"
+                  : "text-muted-foreground hover:text-foreground hover:bg-muted/50 border border-transparent",
+                isSending && "animate-pulse",
+              )}
+              aria-label="Send message"
+            >
+              <Send className="h-4 w-4" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>{hasContent ? "Enviar mensagem" : "Digite uma mensagem"}</p>
+          </TooltipContent>
+        </Tooltip>
+      </div>
+    </TooltipProvider>
   );
 }
 
@@ -61,6 +129,7 @@ export function MessageInput(props: MessageInputProps) {
 
   const [message, setMessage] = useState("");
   const [previousIsSending, setPreviousIsSending] = useState(false);
+  const [isFocused, setIsFocused] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   // Auto-resize textarea and restore focus when message sending completes
@@ -82,10 +151,10 @@ export function MessageInput(props: MessageInputProps) {
     setPreviousIsSending(isSending);
   }, [message, isSending, previousIsSending]);
 
-  // Send message handler with validation
+  // Send message handler with enhanced validation
   async function handleSend() {
     const trimmedMessage = message.trim();
-    if (!trimmedMessage || isSending || disabled) return;
+    if (!trimmedMessage || isSending || disabled || isOverLimit) return;
 
     try {
       setMessage("");
@@ -117,11 +186,40 @@ export function MessageInput(props: MessageInputProps) {
   }
 
   const hasContent = message.trim().length > 0;
+  const characterCount = message.length;
+  const maxCharacters = 2000; // Standard message limit
+  const isNearLimit = characterCount > maxCharacters * 0.8;
+  const isOverLimit = characterCount > maxCharacters;
+
+  // Focus handlers for enhanced visual feedback
+  function handleFocus() {
+    setIsFocused(true);
+  }
+
+  function handleBlur() {
+    setIsFocused(false);
+  }
+
+  // Placeholder action handlers (for future implementation)
+  function handleAttachment() {
+    // Future: file attachment functionality
+    console.log("Attachment clicked");
+  }
+
+  function handleEmoji() {
+    // Future: emoji picker functionality
+    console.log("Emoji clicked");
+  }
 
   return (
-    <div className={cn("border-t bg-background", className)}>
-      <div className="px-4 pb-6 pt-4">
-        {/* Form-like input container with proper accessibility */}
+    <div
+      className={cn(
+        "border-t bg-gradient-to-r from-background to-background/95 backdrop-blur-sm",
+        className,
+      )}
+    >
+      <div className="px-[var(--spacing-component-md)] pb-[var(--spacing-component-md)] pt-[var(--spacing-component-md)]">
+        {/* Form-like input container with enhanced design */}
         <form
           onSubmit={(e) => {
             e.preventDefault();
@@ -129,21 +227,35 @@ export function MessageInput(props: MessageInputProps) {
           }}
           className="relative"
         >
-          <div className="bg-muted/50 rounded-lg border border-border/50 focus-within:border-border transition-colors relative">
-            <ScrollArea className="flex flex-col flex-1 max-h-[120px] transition-all duration-150">
+          <div
+            className={cn(
+              "bg-gradient-to-r from-muted/40 to-muted/30 rounded-xl border transition-all duration-300 relative shadow-sm",
+              isFocused
+                ? "border-primary/40 shadow-md ring-2 ring-primary/10"
+                : "border-border/60 hover:border-border/80",
+              disabled && "opacity-60 cursor-not-allowed",
+              isOverLimit && "border-destructive/50 ring-2 ring-destructive/10",
+            )}
+          >
+            <ScrollArea className="flex flex-col flex-1 max-h-[160px] transition-all duration-300">
               <Textarea
                 ref={textareaRef}
                 value={message}
                 onChange={handleTextareaChange}
                 onKeyDown={handleKeyDown}
+                onFocus={handleFocus}
+                onBlur={handleBlur}
                 placeholder={placeholder}
                 disabled={disabled || isSending}
+                maxLength={maxCharacters}
                 className={cn(
-                  "resize-none bg-transparent border-0 min-h-[44px]",
+                  "resize-none bg-transparent border-0 min-h-[52px]",
                   "focus-visible:ring-0 focus-visible:ring-offset-0",
-                  "px-4 py-3 pr-12 leading-5 text-sm w-full",
-                  "placeholder:text-muted-foreground/70",
+                  "px-5 py-[var(--spacing-component-md)] pr-20 leading-relaxed text-sm w-full font-medium",
+                  "placeholder:text-muted-foreground/60 placeholder:font-normal",
+                  "transition-all duration-200",
                   disabled && "cursor-not-allowed opacity-50",
+                  isOverLimit && "text-destructive",
                 )}
                 rows={1}
                 aria-label="Type a message"
@@ -155,13 +267,40 @@ export function MessageInput(props: MessageInputProps) {
               />
             </ScrollArea>
 
-            <SendButton
+            <ActionButtons
               onSend={handleSend}
-              disabled={disabled}
+              disabled={disabled || isOverLimit}
               isSending={isSending}
               hasContent={hasContent}
+              onAttachment={handleAttachment}
+              onEmoji={handleEmoji}
             />
           </div>
+
+          {/* Character count indicator */}
+          {(hasContent || isFocused) && (
+            <div className="flex justify-between items-center mt-2 px-[var(--spacing-component-sm)]">
+              <div className="text-xs text-muted-foreground/70 font-medium">
+                <span>Press Enter to send, Shift+Enter for new line</span>
+                {hasContent && <span> • Escape to clear</span>}
+              </div>
+
+              {characterCount > 0 && (
+                <div
+                  className={cn(
+                    "text-xs font-medium transition-colors duration-200",
+                    isOverLimit
+                      ? "text-destructive"
+                      : isNearLimit
+                        ? "text-chart-4"
+                        : "text-muted-foreground/60",
+                  )}
+                >
+                  {characterCount}/{maxCharacters}
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Hidden submit button for form submission */}
           <button
@@ -181,12 +320,6 @@ export function MessageInput(props: MessageInputProps) {
             </div>
           )}
         </form>
-
-        {/* Keyboard shortcuts help */}
-        <div className="text-xs text-muted-foreground/60 mt-1 px-1">
-          <span>Press Enter to send, Shift+Enter for new line</span>
-          {hasContent && <span> • Escape to clear</span>}
-        </div>
       </div>
     </div>
   );

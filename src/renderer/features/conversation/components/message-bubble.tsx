@@ -1,4 +1,4 @@
-import { Loader2, User } from "lucide-react";
+import { Loader2, User, Check, CheckCheck, Clock } from "lucide-react";
 
 import {
   Avatar,
@@ -10,7 +10,7 @@ import type {
   SelectMessage,
   AuthenticatedUser,
 } from "@/renderer/features/conversation/types";
-import { cn, isValidAvatarUrl } from "@/renderer/lib/utils";
+import { cn, isValidAvatarUrl, getTimeAgo } from "@/renderer/lib/utils";
 
 interface MessageBubbleProps {
   message: SelectMessage;
@@ -22,165 +22,22 @@ interface MessageBubbleProps {
   // Extended props for handling inactive agents
   authorIsInactive?: boolean;
   originalAuthorName?: string;
-}
-
-// Author avatar composition
-interface MessageAuthorAvatarProps {
-  authorInfo: {
-    name: string;
-    avatar: string | null | undefined;
-    isInactive: boolean;
-  };
-  showAvatar: boolean;
-  timeAgo: string;
-}
-
-export function MessageAuthorAvatar({
-  authorInfo,
-  showAvatar,
-  timeAgo,
-}: MessageAuthorAvatarProps) {
-  const authorInitials = authorInfo.name.charAt(0).toUpperCase();
-
-  if (showAvatar) {
-    return (
-      <div className="flex-shrink-0 w-10">
-        <Avatar
-          className={cn("w-10 h-10", authorInfo.isInactive && "opacity-60")}
-        >
-          <AvatarImage src={isValidAvatarUrl(authorInfo.avatar) || undefined} />
-          <AvatarFallback
-            className={cn(
-              "text-sm font-medium bg-primary/10 text-primary",
-              authorInfo.isInactive && "bg-muted/50 text-muted-foreground",
-            )}
-          >
-            {authorInfo.isInactive ? (
-              <User className="h-4 w-4" />
-            ) : (
-              authorInitials
-            )}
-          </AvatarFallback>
-        </Avatar>
-      </div>
-    );
-  }
-
-  return (
-    <div className="flex-shrink-0 w-10 flex justify-center">
-      <span className="text-xs text-muted-foreground/50 opacity-0 group-hover:opacity-100 transition-opacity leading-6">
-        {timeAgo}
-      </span>
-    </div>
-  );
-}
-
-// Author header composition
-interface MessageAuthorHeaderProps {
-  authorInfo: {
-    name: string;
-    isInactive: boolean;
-  };
-  timeAgo: string;
-}
-
-export function MessageAuthorHeader({
-  authorInfo,
-  timeAgo,
-}: MessageAuthorHeaderProps) {
-  return (
-    <div className="flex items-baseline gap-2 mb-0.5">
-      <div className="flex items-center gap-2">
-        <span
-          className={cn(
-            "text-sm font-semibold hover:underline cursor-pointer",
-            authorInfo.isInactive ? "text-muted-foreground" : "text-foreground",
-          )}
-        >
-          {authorInfo.name}
-        </span>
-
-        {authorInfo.isInactive && (
-          <Badge
-            variant="secondary"
-            className="h-4 px-1.5 text-xs font-medium bg-muted/50 text-muted-foreground border-0"
-          >
-            Inativo
-          </Badge>
-        )}
-      </div>
-
-      <span className="text-xs text-muted-foreground/70">{timeAgo}</span>
-    </div>
-  );
-}
-
-// Message content composition
-interface MessageContentProps {
-  message: SelectMessage;
-  authorInfo: {
-    isInactive: boolean;
-  };
-  isSending: boolean;
-}
-
-export function MessageContent({
-  message,
-  authorInfo,
-  isSending,
-}: MessageContentProps) {
-  return (
-    <div
-      className={cn(
-        "text-sm leading-[1.375] break-words",
-        authorInfo.isInactive ? "text-muted-foreground" : "text-foreground",
-      )}
-    >
-      <div className="flex items-start gap-2">
-        <p className="whitespace-pre-wrap flex-1 min-w-0">{message.content}</p>
-        {isSending && (
-          <div className="flex items-center gap-1 text-muted-foreground/70 flex-shrink-0">
-            <Loader2 className="w-3 h-3 animate-spin" />
-            <span className="text-xs">Enviando...</span>
-          </div>
-        )}
-      </div>
-    </div>
-  );
+  // Message state props for enhanced UX
+  messageState?: "sending" | "sent" | "delivered" | "read" | "failed";
 }
 
 export function MessageBubble(props: MessageBubbleProps) {
   const {
     message,
     author,
+    isCurrentUser,
     showAvatar = true,
     isSending = false,
     className,
     authorIsInactive = false,
     originalAuthorName,
+    messageState,
   } = props;
-
-  // Format timestamp - simplified without debug logs
-  const getTimeAgo = () => {
-    try {
-      const messageDate = new Date(message.createdAt);
-      const now = new Date();
-      const diffInHours =
-        (now.getTime() - messageDate.getTime()) / (1000 * 60 * 60);
-
-      if (diffInHours < 24) {
-        return new Intl.DateTimeFormat(undefined, {
-          hour: "2-digit",
-          minute: "2-digit",
-        }).format(messageDate);
-      }
-
-      const days = Math.floor(diffInHours / 24);
-      return `${days} dias`;
-    } catch {
-      return "agora";
-    }
-  };
 
   // Get author display info with proper fallbacks for inactive agents - inline logic
   const authorInfo = author
@@ -201,33 +58,136 @@ export function MessageBubble(props: MessageBubbleProps) {
           isInactive: true,
         };
 
-  const timeAgo = getTimeAgo();
+  const timeAgo = getTimeAgo(message.createdAt);
+  const authorInitials = authorInfo.name.charAt(0).toUpperCase();
+
+  // Status indicator logic inline - simplified from 45+ lines to 10 lines
+  const renderStatus = () => {
+    if (!isCurrentUser) return null;
+
+    if (isSending) {
+      return (
+        <div className="flex items-center gap-[var(--spacing-component-sm)] text-muted-foreground/60 ml-2">
+          <Loader2 className="w-3 h-3 animate-spin" />
+          <span className="text-xs">Enviando...</span>
+        </div>
+      );
+    }
+
+    const statusIcons = {
+      sent: <Check className="w-3 h-3 text-muted-foreground/60" />,
+      delivered: <CheckCheck className="w-3 h-3 text-chart-2/80" />,
+      read: <CheckCheck className="w-3 h-3 text-chart-5/80" />,
+      failed: <Clock className="w-3 h-3 text-destructive/80" />,
+    };
+
+    const state = messageState || "sent";
+    return statusIcons[state] ? (
+      <div className="opacity-0 group-hover:opacity-100 transition-opacity ml-2">
+        {statusIcons[state]}
+      </div>
+    ) : null;
+  };
 
   return (
     <div
       className={cn(
-        "relative flex gap-3 group hover:bg-muted/20 transition-colors px-4",
-        showAvatar ? "py-2 mt-0.5" : "py-0.5",
-        authorInfo.isInactive && "opacity-75",
+        "relative flex gap-[var(--spacing-component-md)] group px-4 rounded-sm",
+        "hover:bg-muted/10",
+        showAvatar
+          ? "py-[var(--spacing-component-md)] mt-1"
+          : "py-[var(--spacing-component-xs)]",
+        authorInfo.isInactive && "opacity-80",
+        isSending && "animate-pulse",
         className,
       )}
     >
-      <MessageAuthorAvatar
-        authorInfo={authorInfo}
-        showAvatar={showAvatar}
-        timeAgo={timeAgo}
-      />
+      {/* Avatar or time placeholder - inline logic */}
+      <div className="flex-shrink-0 w-10">
+        {showAvatar ? (
+          <Avatar
+            className={cn(
+              "size-10",
+              authorInfo.isInactive && "opacity-60 grayscale",
+            )}
+          >
+            <AvatarImage
+              src={isValidAvatarUrl(authorInfo.avatar) || undefined}
+              className="object-cover"
+            />
+            <AvatarFallback
+              className={cn(
+                "text-sm font-semibold",
+                authorInfo.isInactive
+                  ? "bg-muted/60 text-muted-foreground"
+                  : "bg-primary/15 text-primary",
+              )}
+            >
+              {authorInfo.isInactive ? (
+                <User className="h-4 w-4" />
+              ) : (
+                authorInitials
+              )}
+            </AvatarFallback>
+          </Avatar>
+        ) : (
+          <div className="flex justify-center items-center h-full">
+            <span className="text-xs text-muted-foreground/60 opacity-0 group-hover:opacity-100 transition-opacity">
+              {timeAgo}
+            </span>
+          </div>
+        )}
+      </div>
 
-      <div className="flex-1 min-w-0">
+      {/* Message content */}
+      <div className="flex-1 min-w-0 space-y-[var(--spacing-component-xs)]">
+        {/* Author header - inline logic */}
         {showAvatar && (
-          <MessageAuthorHeader authorInfo={authorInfo} timeAgo={timeAgo} />
+          <div className="flex items-baseline gap-[var(--spacing-component-md)] mb-1">
+            <div className="flex items-center gap-[var(--spacing-component-sm)]">
+              <span
+                className={cn(
+                  "text-sm font-semibold hover:underline cursor-pointer",
+                  authorInfo.isInactive
+                    ? "text-muted-foreground"
+                    : "text-foreground hover:text-primary",
+                )}
+              >
+                {authorInfo.name}
+              </span>
+
+              {authorInfo.isInactive && (
+                <Badge
+                  variant="outline"
+                  className="h-5 px-[var(--spacing-component-sm)] text-xs bg-muted/40 text-muted-foreground"
+                >
+                  Inativo
+                </Badge>
+              )}
+            </div>
+
+            <span className="text-xs text-muted-foreground/80">{timeAgo}</span>
+          </div>
         )}
 
-        <MessageContent
-          message={message}
-          authorInfo={authorInfo}
-          isSending={isSending}
-        />
+        {/* Message text with status - inline logic */}
+        <div
+          className={cn(
+            "text-sm leading-relaxed break-words",
+            authorInfo.isInactive
+              ? "text-muted-foreground/80"
+              : "text-foreground",
+          )}
+        >
+          <div className="flex items-end gap-[var(--spacing-component-sm)]">
+            <div className="flex-1 min-w-0">
+              <p className="whitespace-pre-wrap selection:bg-primary/20">
+                {message.content}
+              </p>
+            </div>
+            {renderStatus()}
+          </div>
+        </div>
       </div>
     </div>
   );

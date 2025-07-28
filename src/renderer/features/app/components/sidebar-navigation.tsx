@@ -17,7 +17,7 @@ export function SidebarNavigation(props: SidebarNavigationProps) {
 
   return (
     <nav
-      className="flex-1 p-3 space-y-1"
+      className="flex-1 px-[var(--spacing-component-md)] py-[var(--spacing-component-lg)] space-y-[var(--spacing-component-xs)] overflow-y-auto scrollbar-thin scrollbar-thumb-sidebar-border/60 scrollbar-track-transparent"
       role="navigation"
       aria-label="User navigation"
     >
@@ -30,10 +30,14 @@ export function SidebarNavigation(props: SidebarNavigationProps) {
 
       <NavigationItem to="/user/agents" icon={Bot} label="Agents" />
 
-      <Separator className="my-3" />
+      <Separator className="my-[var(--spacing-component-lg)] bg-sidebar-border/40" />
 
-      {/* Conversations List */}
-      <div role="region" aria-label="Conversations">
+      {/* Conversations List with enhanced container */}
+      <div
+        role="region"
+        aria-label="Conversations"
+        className="space-y-[var(--spacing-component-xs)]"
+      >
         <ConversationList
           conversations={conversations}
           availableUsers={availableUsers}

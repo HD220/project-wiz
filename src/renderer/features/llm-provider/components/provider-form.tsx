@@ -1,11 +1,26 @@
 import { zodResolver } from "@hookform/resolvers/zod";
+import {
+  Loader2,
+  Settings,
+  Key,
+  Shield,
+  CheckCircle2,
+  AlertCircle,
+  Plus,
+} from "lucide-react";
 import { useForm } from "react-hook-form";
-import { Loader2 } from "lucide-react";
 
 import type { CreateProviderInput } from "@/main/features/agent/llm-provider/llm-provider.types";
 import type { LlmProvider } from "@/main/features/agent/llm-provider/llm-provider.types";
 
 import { Button } from "@/renderer/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/renderer/components/ui/card";
 import { Checkbox } from "@/renderer/components/ui/checkbox";
 import {
   Dialog,
@@ -16,6 +31,7 @@ import {
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -32,6 +48,7 @@ import {
 import { Separator } from "@/renderer/components/ui/separator";
 import { useAuth } from "@/renderer/contexts/auth.context";
 import { useApiMutation } from "@/renderer/hooks/use-api-mutation.hook";
+import { cn } from "@/renderer/lib/utils";
 
 import {
   PROVIDER_CONFIGS,
@@ -116,212 +133,318 @@ export function ProviderForm(props: ProviderFormProps) {
 
   return (
     <Dialog open onOpenChange={onClose}>
-      <DialogContent className="max-w-lg" showCloseButton={false}>
-        <DialogHeader>
-          <DialogTitle>
+      <DialogContent
+        className="max-w-2xl max-h-[90vh] overflow-y-auto bg-card/95 backdrop-blur-sm border border-border/60"
+        showCloseButton={false}
+      >
+        <DialogHeader className="space-y-[var(--spacing-component-sm)] pb-[var(--spacing-component-lg)] border-b border-border/40">
+          <DialogTitle className="text-2xl font-bold bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent">
             {isEditing ? "Edit Provider" : "Add New Provider"}
           </DialogTitle>
+          <p className="text-muted-foreground text-sm leading-relaxed">
+            {isEditing
+              ? "Update your AI provider configuration and settings"
+              : "Configure a new AI provider to enable agent interactions"}
+          </p>
         </DialogHeader>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          <form
+            onSubmit={form.handleSubmit(onSubmit)}
+            className="space-y-[var(--spacing-layout-md)]"
+          >
             {/* Provider Configuration Section */}
-            <div className="space-y-4">
-              <div className="space-y-1">
-                <h4 className="font-medium text-sm">Provider Configuration</h4>
-                <p className="text-muted-foreground text-xs">
-                  Choose your AI provider and give it a name
-                </p>
-              </div>
+            <Card className="bg-gradient-to-br from-primary/5 via-primary/3 to-primary/0 border border-border/60">
+              <CardHeader className="pb-[var(--spacing-component-md)]">
+                <div className="flex items-center gap-[var(--spacing-component-sm)]">
+                  <Settings className="size-5 text-primary" />
+                  <div>
+                    <CardTitle className="text-lg font-semibold">
+                      Provider Configuration
+                    </CardTitle>
+                    <CardDescription className="text-sm mt-1">
+                      Choose your AI provider and give it a name
+                    </CardDescription>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-[var(--spacing-component-lg)]">
+                <div className="grid grid-cols-2 gap-[var(--spacing-component-lg)]">
+                  <FormField
+                    control={form.control}
+                    name="type"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-sm font-semibold flex items-center gap-[var(--spacing-component-sm)]">
+                          Provider Type
+                          <span className="text-destructive">*</span>
+                        </FormLabel>
+                        <Select
+                          onValueChange={field.onChange}
+                          defaultValue={field.value}
+                          disabled={isEditing}
+                        >
+                          <FormControl>
+                            <SelectTrigger className="bg-background/50 border-border/60 focus:border-primary/50 transition-colors">
+                              <SelectValue placeholder="Select provider type" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent className="bg-card/95 backdrop-blur-sm border border-border/60">
+                            {Object.entries(PROVIDER_CONFIGS).map(
+                              ([key, config]) => (
+                                <SelectItem
+                                  key={key}
+                                  value={key}
+                                  className="focus:bg-accent/50"
+                                >
+                                  {config.label}
+                                </SelectItem>
+                              ),
+                            )}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-              <div className="grid grid-cols-2 gap-4">
-                <FormField
-                  control={form.control}
-                  name="type"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Provider Type *</FormLabel>
-                      <Select
-                        onValueChange={field.onChange}
-                        defaultValue={field.value}
-                        disabled={isEditing}
-                      >
+                  <FormField
+                    control={form.control}
+                    name="name"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-sm font-semibold flex items-center gap-[var(--spacing-component-sm)]">
+                          Display Name
+                          <span className="text-destructive">*</span>
+                        </FormLabel>
                         <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select type" />
-                          </SelectTrigger>
+                          <Input
+                            placeholder="My AI Provider"
+                            className="bg-background/50 border-border/60 focus:border-primary/50 transition-colors"
+                            {...field}
+                          />
                         </FormControl>
-                        <SelectContent>
-                          {Object.entries(PROVIDER_CONFIGS).map(
-                            ([key, config]) => (
-                              <SelectItem key={key} value={key}>
-                                {config.label}
-                              </SelectItem>
-                            ),
-                          )}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="name"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Display Name *</FormLabel>
-                      <FormControl>
-                        <Input placeholder="My AI Provider" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-            </div>
-
-            <Separator />
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </CardContent>
+            </Card>
 
             {/* API Configuration Section */}
-            <div className="space-y-4">
-              <div className="space-y-1">
-                <h4 className="font-medium text-sm">API Configuration</h4>
-                <p className="text-muted-foreground text-xs">
-                  Configure your API credentials and settings
-                </p>
-              </div>
-
-              <FormField
-                control={form.control}
-                name="apiKey"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>API Key *</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="password"
-                        placeholder="sk-proj-..."
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              {PROVIDER_CONFIGS[watchedType as keyof typeof PROVIDER_CONFIGS]
-                ?.requiresBaseUrl && (
+            <Card className="bg-gradient-to-br from-chart-3/5 via-chart-3/3 to-chart-3/0 border border-border/60">
+              <CardHeader className="pb-[var(--spacing-component-md)]">
+                <div className="flex items-center gap-[var(--spacing-component-sm)]">
+                  <Key className="size-5 text-chart-3" />
+                  <div>
+                    <CardTitle className="text-lg font-semibold">
+                      API Configuration
+                    </CardTitle>
+                    <CardDescription className="text-sm mt-1">
+                      Configure your API credentials and endpoint settings
+                    </CardDescription>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-[var(--spacing-component-lg)]">
                 <FormField
                   control={form.control}
-                  name="baseUrl"
+                  name="apiKey"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Base URL *</FormLabel>
+                      <FormLabel className="text-sm font-semibold flex items-center gap-[var(--spacing-component-sm)]">
+                        API Key
+                        <span className="text-destructive">*</span>
+                      </FormLabel>
                       <FormControl>
                         <Input
-                          placeholder="https://api.example.com/v1"
+                          type="password"
+                          placeholder="sk-proj-..."
+                          className="bg-background/50 border-border/60 focus:border-primary/50 transition-colors font-mono"
                           {...field}
                         />
                       </FormControl>
+                      <FormDescription className="text-xs text-muted-foreground">
+                        Your API key will be stored securely and used for
+                        authentication
+                      </FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
-              )}
 
-              <FormField
-                control={form.control}
-                name="defaultModel"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Default Model</FormLabel>
-                    <FormControl>
-                      <Input placeholder="gpt-4o" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
+                {PROVIDER_CONFIGS[watchedType as keyof typeof PROVIDER_CONFIGS]
+                  ?.requiresBaseUrl && (
+                  <FormField
+                    control={form.control}
+                    name="baseUrl"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-sm font-semibold flex items-center gap-[var(--spacing-component-sm)]">
+                          Base URL
+                          <span className="text-destructive">*</span>
+                        </FormLabel>
+                        <FormControl>
+                          <Input
+                            placeholder="https://api.example.com/v1"
+                            className="bg-background/50 border-border/60 focus:border-primary/50 transition-colors font-mono"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormDescription className="text-xs text-muted-foreground">
+                          Custom API endpoint for your provider
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
                 )}
-              />
-            </div>
 
-            <Separator />
+                <FormField
+                  control={form.control}
+                  name="defaultModel"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-sm font-semibold">
+                        Default Model
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="gpt-4o"
+                          className="bg-background/50 border-border/60 focus:border-primary/50 transition-colors"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormDescription className="text-xs text-muted-foreground">
+                        The default model to use for new agents with this
+                        provider
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </CardContent>
+            </Card>
 
             {/* Provider Settings Section */}
-            <div className="space-y-4">
-              <div className="space-y-1">
-                <h4 className="font-medium text-sm">Provider Settings</h4>
-                <p className="text-muted-foreground text-xs">
-                  Configure provider behavior and status
-                </p>
-              </div>
+            <Card className="bg-gradient-to-br from-chart-4/5 via-chart-4/3 to-chart-4/0 border border-border/60">
+              <CardHeader className="pb-[var(--spacing-component-md)]">
+                <div className="flex items-center gap-[var(--spacing-component-sm)]">
+                  <Shield className="size-5 text-chart-4" />
+                  <div>
+                    <CardTitle className="text-lg font-semibold">
+                      Provider Settings
+                    </CardTitle>
+                    <CardDescription className="text-sm mt-1">
+                      Configure provider behavior and default status
+                    </CardDescription>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-[var(--spacing-component-lg)]">
+                <div className="grid gap-[var(--spacing-component-lg)]">
+                  <FormField
+                    control={form.control}
+                    name="isDefault"
+                    render={({ field }) => (
+                      <FormItem
+                        className={cn(
+                          "flex flex-row items-center justify-between rounded-lg border p-[var(--spacing-component-md)] transition-colors",
+                          "bg-background/30 border-border/60 hover:bg-background/50",
+                          field.value && "bg-primary/5 border-primary/20",
+                        )}
+                      >
+                        <div className="space-y-[var(--spacing-component-xs)]">
+                          <FormLabel className="text-sm font-semibold flex items-center gap-[var(--spacing-component-sm)]">
+                            <CheckCircle2 className="size-4 text-chart-4" />
+                            Default Provider
+                          </FormLabel>
+                          <FormDescription className="text-xs text-muted-foreground">
+                            Use this provider by default for new agents
+                          </FormDescription>
+                        </div>
+                        <FormControl>
+                          <Checkbox
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                            className="data-[state=checked]:bg-primary data-[state=checked]:border-primary"
+                          />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
 
-              <div className="space-y-4">
-                <FormField
-                  control={form.control}
-                  name="isDefault"
-                  render={({ field }) => (
-                    <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
-                      <div className="space-y-0.5">
-                        <FormLabel className="text-sm font-medium">
-                          Default Provider
-                        </FormLabel>
-                        <p className="text-xs text-muted-foreground">
-                          Use this provider by default for new agents
-                        </p>
-                      </div>
-                      <FormControl>
-                        <Checkbox
-                          checked={field.value}
-                          onCheckedChange={field.onChange}
-                        />
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
+                  <FormField
+                    control={form.control}
+                    name="isActive"
+                    render={({ field }) => (
+                      <FormItem
+                        className={cn(
+                          "flex flex-row items-center justify-between rounded-lg border p-[var(--spacing-component-md)] transition-colors",
+                          "bg-background/30 border-border/60 hover:bg-background/50",
+                          field.value && "bg-chart-2/5 border-chart-2/20",
+                        )}
+                      >
+                        <div className="space-y-[var(--spacing-component-xs)]">
+                          <FormLabel className="text-sm font-semibold flex items-center gap-[var(--spacing-component-sm)]">
+                            <AlertCircle className="size-4 text-chart-2" />
+                            Active Provider
+                          </FormLabel>
+                          <FormDescription className="text-xs text-muted-foreground">
+                            Enable this provider for use in agents
+                          </FormDescription>
+                        </div>
+                        <FormControl>
+                          <Checkbox
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                            className="data-[state=checked]:bg-chart-2 data-[state=checked]:border-chart-2"
+                          />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </CardContent>
+            </Card>
 
-                <FormField
-                  control={form.control}
-                  name="isActive"
-                  render={({ field }) => (
-                    <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
-                      <div className="space-y-0.5">
-                        <FormLabel className="text-sm font-medium">
-                          Active Provider
-                        </FormLabel>
-                        <p className="text-xs text-muted-foreground">
-                          Enable this provider for use in agents
-                        </p>
-                      </div>
-                      <FormControl>
-                        <Checkbox
-                          checked={field.value}
-                          onCheckedChange={field.onChange}
-                        />
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
-              </div>
-            </div>
-
-            {/* Form Actions */}
-            <div className="flex items-center gap-3 pt-2">
+            {/* Enhanced Form Actions */}
+            <div className="flex items-center gap-[var(--spacing-component-md)] pt-[var(--spacing-component-lg)] border-t border-border/40">
               <div className="flex-1" />
-              <Button variant="outline" onClick={onClose} disabled={isLoading}>
+              <Button
+                variant="outline"
+                onClick={onClose}
+                disabled={isLoading}
+                className="hover:bg-accent/50 transition-colors"
+              >
                 Cancel
               </Button>
-              <Button type="submit" disabled={isLoading}>
+              <Button
+                type="submit"
+                disabled={isLoading}
+                className={cn(
+                  "gap-[var(--spacing-component-sm)] shadow-sm",
+                  "bg-gradient-to-r from-primary to-primary/90",
+                  "hover:from-primary/90 hover:to-primary/80",
+                  "transition-all duration-200 hover:shadow-md hover:scale-[1.01]",
+                )}
+              >
                 {isLoading ? (
                   <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    <Loader2 className="size-4 animate-spin" />
                     Saving...
                   </>
                 ) : isEditing ? (
-                  "Update"
+                  <>
+                    <CheckCircle2 className="size-4" />
+                    Update Provider
+                  </>
                 ) : (
-                  "Create"
+                  <>
+                    <Plus className="size-4" />
+                    Create Provider
+                  </>
                 )}
               </Button>
             </div>

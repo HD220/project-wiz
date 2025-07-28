@@ -9,6 +9,7 @@ import {
   RotateCcw,
 } from "lucide-react";
 
+import { AgentStatus } from "@/renderer/components/agent-status";
 import {
   Avatar,
   AvatarFallback,
@@ -16,6 +17,7 @@ import {
 } from "@/renderer/components/ui/avatar";
 import { Badge } from "@/renderer/components/ui/badge";
 import { Button } from "@/renderer/components/ui/button";
+import { StatusIndicator } from "@/renderer/components/ui/status-indicator";
 import { Card } from "@/renderer/components/ui/card";
 import {
   DropdownMenu,
@@ -31,7 +33,6 @@ import {
   TooltipTrigger,
 } from "@/renderer/components/ui/tooltip";
 import type { SelectAgent } from "@/renderer/features/agent/agent.types";
-import { AgentStatus } from "@/renderer/components/agent-status";
 import { cn } from "@/renderer/lib/utils";
 
 interface AgentListCardProps {
@@ -115,14 +116,11 @@ export function AgentListCard(props: AgentListCardProps) {
 
             {/* Status indicator overlay on avatar */}
             {agent.isActive && (
-              <div
-                className={cn(
-                  "absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full border-2 border-card",
-                  "transition-colors duration-200",
-                  agent.status === "active" && "bg-chart-5",
-                  agent.status === "busy" && "bg-chart-4 animate-pulse",
-                  agent.status === "inactive" && "bg-muted-foreground",
-                )}
+              <StatusIndicator
+                status={agent.status}
+                size="lg"
+                variant="dot"
+                className="absolute -bottom-0.5 -right-0.5 border-2 border-card transition-colors duration-200"
               />
             )}
           </div>
@@ -237,7 +235,7 @@ export function AgentListCard(props: AgentListCardProps) {
                   "h-8 w-8 p-0",
                   "transition-all duration-200",
                   "hover:bg-accent/60",
-                  "hover:scale-105",
+                  "hover:scale-[1.01]",
                   "focus:bg-accent/60",
                   "active:scale-95",
                 )}

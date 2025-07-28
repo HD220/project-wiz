@@ -35,15 +35,30 @@ export function NavigationItem(props: NavigationItemProps) {
       variant={variant}
       size={size}
       className={cn(
-        "w-full justify-start h-10 px-4 text-sm font-normal transition-all duration-200 rounded-lg",
-        "text-muted-foreground hover:text-foreground hover:bg-accent/60 focus-visible:ring-2 focus-visible:ring-ring",
+        "w-full justify-start px-[var(--spacing-component-md)] transition-all duration-200 ease-in-out rounded-lg border border-transparent group",
+        "hover:bg-sidebar-accent/60 hover:border-sidebar-border/30 hover:text-sidebar-accent-foreground hover:scale-[1.01] hover:shadow-sm",
+        "focus-visible:ring-2 focus-visible:ring-sidebar-ring focus-visible:ring-offset-2 focus-visible:ring-offset-sidebar",
+        "active:scale-[0.98] active:bg-sidebar-accent/80",
         className,
       )}
+      style={{
+        height:
+          "calc(var(--spacing-component-xl) + var(--spacing-component-sm))",
+        fontSize: "var(--font-size-sm)",
+        fontWeight: "var(--font-weight-medium)",
+        color: "hsl(var(--sidebar-foreground) / 0.8)",
+      }}
       activeProps={{
         className: cn(
-          "bg-accent text-foreground font-medium shadow-sm",
+          "bg-sidebar-accent/90 text-sidebar-accent-foreground border-sidebar-border/50 shadow-md scale-[1.02]",
+          "font-semibold",
           className,
         ),
+        style: {
+          fontWeight: "var(--font-weight-semibold)",
+          backgroundColor: "hsl(var(--sidebar-accent) / 0.9)",
+          color: "hsl(var(--sidebar-accent-foreground))",
+        },
       }}
       activeOptions={activeOptions}
       {...restLinkProps}
@@ -51,9 +66,26 @@ export function NavigationItem(props: NavigationItemProps) {
       {children || (
         <>
           {IconComponent && (
-            <IconComponent className="w-4 h-4 mr-4 flex-shrink-0" />
+            <IconComponent
+              className="flex-shrink-0 transition-transform duration-200 group-hover:scale-[1.01]"
+              style={{
+                width: "var(--spacing-component-lg)",
+                height: "var(--spacing-component-lg)",
+                marginRight: "var(--spacing-component-md)",
+              }}
+            />
           )}
-          {label && <span className="truncate">{label}</span>}
+          {label && (
+            <span
+              className="truncate transition-colors duration-200"
+              style={{
+                fontSize: "var(--font-size-sm)",
+                lineHeight: "var(--line-height-normal)",
+              }}
+            >
+              {label}
+            </span>
+          )}
         </>
       )}
     </CustomLink>

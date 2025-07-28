@@ -1,16 +1,18 @@
 import { Crown, Users } from "lucide-react";
 
-import { Avatar, AvatarFallback } from "@/renderer/components/ui/avatar";
 import { Button } from "@/renderer/components/ui/button";
 import { ScrollArea } from "@/renderer/components/ui/scroll-area";
 import { Separator } from "@/renderer/components/ui/separator";
+import { UserAvatar } from "@/renderer/features/user/components/user-avatar";
+import { UserStatus } from "@/renderer/features/user/components/user-status";
+import type { UserStatusType } from "@/renderer/features/user/components/user-status";
 import { cn } from "@/renderer/lib/utils";
 
 interface Member {
   id: string;
   name: string;
   username?: string;
-  status: "online" | "away" | "busy" | "offline";
+  status: UserStatusType;
   role?: "owner" | "admin" | "member";
   avatarUrl?: string;
 }
@@ -34,20 +36,6 @@ export function MemberSidebar(props: MemberSidebarProps) {
     offline: members.filter((m) => m.status === "offline"),
   } as const;
 
-  const getStatusColor = (status: Member["status"]) => {
-    switch (status) {
-      case "online":
-        return "bg-green-500";
-      case "away":
-        return "bg-yellow-500";
-      case "busy":
-        return "bg-red-500";
-      case "offline":
-      default:
-        return "bg-muted-foreground";
-    }
-  };
-
   const getStatusLabel = (status: Member["status"]) => {
     switch (status) {
       case "online":
@@ -65,26 +53,17 @@ export function MemberSidebar(props: MemberSidebarProps) {
   const MemberItem = ({ member }: { member: Member }) => (
     <Button
       variant="ghost"
-      className="w-full justify-start px-4 h-10 text-sm font-normal hover:bg-accent/60 transition-all duration-200 group rounded-lg focus-visible:ring-2 focus-visible:ring-ring"
+      className="w-full justify-start h-auto p-3 text-sm font-normal hover:bg-accent/60 transition-all duration-200 group rounded-lg focus-visible:ring-2 focus-visible:ring-ring"
       aria-label={`${member.name} - ${getStatusLabel(member.status)}${member.role === "owner" ? " (Owner)" : ""}`}
     >
-      <div className="flex items-center w-full gap-4">
+      <div className="flex items-center w-full gap-3">
         <div className="relative flex-shrink-0">
-          <Avatar className="w-8 h-8">
-            <AvatarFallback className="text-xs bg-primary/10 text-primary font-medium">
-              {member.name.charAt(0).toUpperCase()}
-            </AvatarFallback>
-          </Avatar>
-          {/* Status indicator */}
-          <div
-            className={cn(
-              "absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-background",
-              getStatusColor(member.status),
-            )}
-            aria-hidden="true"
-          />
+          <UserAvatar name={member.name} size="md" showHover={false} />
+          <div className="absolute -bottom-0.5 -right-0.5">
+            <UserStatus status={member.status} size="sm" showLabel={false} />
+          </div>
         </div>
-        <div className="flex-1 min-w-0">
+        <div className="flex-1 min-w-0 space-y-0.5">
           <div className="flex items-center gap-2">
             {member.role === "owner" && (
               <Crown

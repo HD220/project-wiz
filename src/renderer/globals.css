@@ -59,10 +59,10 @@
   /* Semantic spacing tokens */
   --spacing-component-xs: 0.25rem;
   --spacing-component-sm: 0.5rem;
-  --spacing-component-md: 0.75rem;
-  --spacing-component-lg: 1rem;
-  --spacing-component-xl: 1.5rem;
-  --spacing-component-2xl: 2rem;
+  --spacing-component-md: 1rem;
+  --spacing-component-lg: 1.5rem;
+  --spacing-component-xl: 2rem;
+  --spacing-component-2xl: 2.5rem;
 
   --spacing-layout-xs: 0.5rem;
   --spacing-layout-sm: 1rem;
@@ -138,10 +138,10 @@
   /* Dark mode spacing tokens inherit the same values */
   --spacing-component-xs: 0.25rem;
   --spacing-component-sm: 0.5rem;
-  --spacing-component-md: 0.75rem;
-  --spacing-component-lg: 1rem;
-  --spacing-component-xl: 1.5rem;
-  --spacing-component-2xl: 2rem;
+  --spacing-component-md: 1rem;
+  --spacing-component-lg: 1.5rem;
+  --spacing-component-xl: 2rem;
+  --spacing-component-2xl: 2.5rem;
 
   --spacing-layout-xs: 0.5rem;
   --spacing-layout-sm: 1rem;

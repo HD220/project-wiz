@@ -2,6 +2,7 @@ import { createFileRoute, Outlet } from "@tanstack/react-router";
 
 import type { SelectConversationParticipant } from "@/main/features/conversation/conversation.model";
 import type { SelectMessage } from "@/main/features/conversation/message.model";
+
 import { ContentHeader } from "@/renderer/features/app/components/content-header";
 import { ConversationAvatar } from "@/renderer/features/conversation/components/conversation-avatar";
 import { ConversationChat } from "@/renderer/features/conversation/components/conversation-chat";

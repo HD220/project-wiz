@@ -1,5 +1,7 @@
 import { useEffect, useRef, useMemo } from "react";
 
+import type { AuthenticatedUser } from "@/main/features/user/user.types";
+
 import { ScrollArea } from "@/renderer/components/ui/scroll-area";
 import { Separator } from "@/renderer/components/ui/separator";
 import { ArchivedConversationBanner } from "@/renderer/features/conversation/components/archived-conversation-banner";
@@ -10,7 +12,6 @@ import type {
   SendMessageInput,
   SelectMessage,
 } from "@/renderer/features/conversation/types";
-import type { AuthenticatedUser } from "@/main/features/user/user.types";
 import { useApiMutation } from "@/renderer/hooks/use-api-mutation.hook";
 import { cn } from "@/renderer/lib/utils";
 
@@ -48,23 +49,73 @@ export function WelcomeMessage({
   isArchived,
 }: WelcomeMessageProps) {
   return (
-    <div className="px-6 py-8">
-      <div className="text-center">
-        <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
-          <span className="text-2xl font-bold text-primary">
-            {conversation.name?.charAt(0).toUpperCase() || "#"}
-          </span>
+    <div className="px-6 py-12 mx-auto max-w-2xl">
+      <div className="text-center space-y-6">
+        {/* Hero Icon */}
+        <div className="relative">
+          <div className="w-20 h-20 rounded-full bg-gradient-to-br from-primary/20 via-primary/10 to-primary/5 flex items-center justify-center mx-auto border border-primary/20 shadow-lg shadow-primary/10">
+            <span className="text-3xl font-bold text-primary">
+              {conversation.name?.charAt(0).toUpperCase() || "#"}
+            </span>
+          </div>
+          <div className="absolute -inset-1 rounded-full bg-gradient-to-r from-primary/20 to-primary/10 blur opacity-30 animate-pulse"></div>
         </div>
-        <div className="text-2xl font-semibold tracking-tight mb-4">
-          Bem-vindo a {conversation.name || "esta conversa"}!
-        </div>
-        <div className="text-base text-muted-foreground">
-          {isArchived
-            ? "Esta conversa foi arquivada."
-            : "Este é o início da sua conversa direta."}
+
+        {/* Welcome Content */}
+        <div className="space-y-[var(--spacing-component-md)]">
+          <div className="space-y-[var(--spacing-component-sm)]">
+            <h1 className="text-2xl font-bold tracking-tight text-foreground">
+              Bem-vindo a {conversation.name || "esta conversa"}!
+            </h1>
+            <p className="text-lg text-muted-foreground leading-relaxed">
+              {isArchived
+                ? "Esta conversa foi arquivada e não pode receber novas mensagens."
+                : "Este é o início da sua conversa. Comece a interagir com o agente de IA para obter assistência com seus projetos."}
+            </p>
+          </div>
+
+          {/* Feature Highlights */}
+          {!isArchived && (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-[var(--spacing-component-md)] mt-8">
+              <div className="p-[var(--spacing-component-md)] rounded-lg bg-card border border-border/50 hover:border-border transition-colors">
+                <div className="w-8 h-8 rounded-md bg-chart-2/10 flex items-center justify-center mb-3">
+                  <span className="text-chart-2 text-sm">💬</span>
+                </div>
+                <h3 className="font-medium text-sm text-foreground mb-1">
+                  Conversação Natural
+                </h3>
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  Converse naturalmente com o agente de IA
+                </p>
+              </div>
+              <div className="p-[var(--spacing-component-md)] rounded-lg bg-card border border-border/50 hover:border-border transition-colors">
+                <div className="w-8 h-8 rounded-md bg-chart-5/10 flex items-center justify-center mb-3">
+                  <span className="text-chart-5 text-sm">🎯</span>
+                </div>
+                <h3 className="font-medium text-sm text-foreground mb-1">
+                  Assistência Especializada
+                </h3>
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  Obtenha ajuda específica para desenvolvimento
+                </p>
+              </div>
+              <div className="p-[var(--spacing-component-md)] rounded-lg bg-card border border-border/50 hover:border-border transition-colors">
+                <div className="w-8 h-8 rounded-md bg-chart-4/10 flex items-center justify-center mb-3">
+                  <span className="text-chart-4 text-sm">⚡</span>
+                </div>
+                <h3 className="font-medium text-sm text-foreground mb-1">
+                  Respostas Rápidas
+                </h3>
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  Receba assistência instantânea e precisa
+                </p>
+              </div>
+            </div>
+          )}
         </div>
       </div>
-      <Separator className="mt-8" />
+
+      <Separator className="mt-12 opacity-30" />
     </div>
   );
 }
@@ -76,13 +127,35 @@ interface EmptyStateProps {
 
 export function EmptyState({ isArchived }: EmptyStateProps) {
   return (
-    <div className="px-6 py-8 text-center text-muted-foreground">
-      <div className="text-4xl mb-6">💬</div>
-      <div className="text-base">
-        {isArchived
-          ? "Esta conversa foi arquivada."
-          : "Nenhuma mensagem ainda. Comece a conversa!"}
+    <div className="flex flex-col items-center justify-center py-16 px-6 text-center">
+      <div className="relative mb-8">
+        <div className="w-16 h-16 rounded-full bg-muted/20 flex items-center justify-center">
+          <span className="text-3xl opacity-50">
+            {isArchived ? "📁" : "💬"}
+          </span>
+        </div>
+        <div className="absolute -inset-2 rounded-full bg-gradient-to-r from-muted/10 to-muted/5 blur opacity-20"></div>
       </div>
+
+      <div className="space-y-[var(--spacing-component-sm)] max-w-md">
+        <h3 className="text-lg font-medium text-foreground">
+          {isArchived ? "Conversa Arquivada" : "Pronto para Conversar"}
+        </h3>
+        <p className="text-muted-foreground leading-relaxed">
+          {isArchived
+            ? "Esta conversa foi arquivada e não está mais ativa. Para reativar, use a opção desarquivar."
+            : "Inicie uma conversa enviando uma mensagem. O agente está pronto para ajudar com seus projetos e dúvidas."}
+        </p>
+      </div>
+
+      {!isArchived && (
+        <div className="mt-8 p-[var(--spacing-component-md)] rounded-lg bg-muted/10 border border-border/50 max-w-sm">
+          <p className="text-sm text-muted-foreground">
+            💡 <strong>Dica:</strong> Seja específico em suas perguntas para
+            obter respostas mais precisas.
+          </p>
+        </div>
+      )}
     </div>
   );
 }
@@ -144,7 +217,12 @@ export function MessageGroup({
     groupIndex === messageGroups.length - 1;
 
   return (
-    <div>
+    <div
+      className={cn(
+        "animate-in fade-in duration-200",
+        showAvatar && "mt-4 first:mt-0",
+      )}
+    >
       {/* First message in group - shows avatar and name */}
       {group.messages[0] && (
         <MessageBubble
@@ -189,10 +267,18 @@ export function ArchivedInputPlaceholder({
   className,
 }: ArchivedInputPlaceholderProps) {
   return (
-    <div className={cn("border-t bg-muted/30 px-6 py-4", className)}>
-      <div className="text-center text-base text-muted-foreground">
-        Esta conversa foi arquivada. Para enviar mensagens, desarquive a
-        conversa primeiro.
+    <div className={cn("bg-muted/20 px-6 py-6", className)}>
+      <div className="flex items-center justify-center gap-[var(--spacing-component-md)] text-muted-foreground max-w-md mx-auto">
+        <div className="w-8 h-8 rounded-full bg-muted/30 flex items-center justify-center flex-shrink-0">
+          <span className="text-sm">📁</span>
+        </div>
+        <div className="text-center">
+          <p className="text-sm font-medium mb-1">Conversa Arquivada</p>
+          <p className="text-xs text-muted-foreground/80 leading-relaxed">
+            Esta conversa foi arquivada. Para enviar mensagens, desarquive a
+            conversa primeiro.
+          </p>
+        </div>
       </div>
     </div>
   );
@@ -290,7 +376,7 @@ export function ConversationChat(props: ConversationChatProps) {
   }
 
   return (
-    <div className={cn("flex flex-col h-full bg-background", className)}>
+    <div className={cn("flex flex-col h-full", className)}>
       {/* Archived conversation banner */}
       {isArchived && conversation.archivedAt && (
         <ArchivedConversationBanner
@@ -300,54 +386,77 @@ export function ConversationChat(props: ConversationChatProps) {
         />
       )}
 
-      {/* Messages Area */}
-      <div className="flex-1 overflow-hidden">
-        <ScrollArea ref={scrollAreaRef} className="h-full w-full">
-          <div className="pb-4">
+      {/* Enhanced Messages Area */}
+      <div className="flex-1 overflow-hidden relative">
+        {/* Chat Background */}
+        <div className="absolute inset-0 bg-gradient-to-b from-background via-background to-background/95"></div>
+
+        <ScrollArea ref={scrollAreaRef} className="h-full w-full relative z-10">
+          <div className="min-h-full flex flex-col">
             {/* Welcome Message - only show when no messages */}
             {messageGroups.length === 0 && (
-              <WelcomeMessage
-                conversation={conversation}
-                isArchived={isArchived}
-              />
+              <div className="flex-1 flex items-center justify-center">
+                <WelcomeMessage
+                  conversation={conversation}
+                  isArchived={isArchived}
+                />
+              </div>
             )}
 
-            {/* Message Groups - Discord style */}
-            {messageGroups.map((group, groupIndex) => (
-              <MessageGroup
-                key={groupIndex}
-                group={group}
-                groupIndex={groupIndex}
-                messageGroups={messageGroups}
-                currentUser={currentUser}
-                getUserById={getUserById}
-                isSendingMessage={sendMessageMutation.isPending}
-              />
-            ))}
+            {/* Messages Container */}
+            {messageGroups.length > 0 && (
+              <div className="flex-1">
+                {/* Message Groups - Discord style */}
+                <div className="space-y-1">
+                  {messageGroups.map((group, groupIndex) => (
+                    <MessageGroup
+                      key={groupIndex}
+                      group={group}
+                      groupIndex={groupIndex}
+                      messageGroups={messageGroups}
+                      currentUser={currentUser}
+                      getUserById={getUserById}
+                      isSendingMessage={sendMessageMutation.isPending}
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* Empty state - fallback for unusual scenarios */}
             {messageGroups.length === 0 && (
-              <EmptyState isArchived={isArchived} />
+              <div className="flex-1 flex items-center justify-center">
+                <EmptyState isArchived={isArchived} />
+              </div>
             )}
 
             {/* Scroll padding */}
-            <div className="h-4" />
+            <div className="h-6" />
           </div>
         </ScrollArea>
+
+        {/* Subtle gradient overlay at bottom */}
+        <div className="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-background/80 to-transparent pointer-events-none z-20"></div>
       </div>
 
-      {/* Message Input - hide if conversation is archived */}
+      {/* Enhanced Message Input */}
       {!isArchived && (
-        <MessageInput
-          onSendMessage={handleSendMessage}
-          disabled={sendMessageMutation.isPending}
-          isSending={sendMessageMutation.isPending}
-          placeholder={`Conversar em ${conversation.name || "conversa"}...`}
-        />
+        <div className="border-t border-border/50 bg-background/95 backdrop-blur-sm">
+          <MessageInput
+            onSendMessage={handleSendMessage}
+            disabled={sendMessageMutation.isPending}
+            isSending={sendMessageMutation.isPending}
+            placeholder={`Conversar em ${conversation.name || "conversa"}...`}
+          />
+        </div>
       )}
 
-      {/* Archived conversation message input replacement */}
-      {isArchived && <ArchivedInputPlaceholder />}
+      {/* Enhanced Archived conversation message input replacement */}
+      {isArchived && (
+        <div className="border-t border-border/50">
+          <ArchivedInputPlaceholder />
+        </div>
+      )}
     </div>
   );
 }

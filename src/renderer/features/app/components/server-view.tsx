@@ -27,7 +27,7 @@ export function ProjectView(props: ProjectViewProps) {
         <Card>
           <CardHeader>
             <div className="flex items-start justify-between">
-              <div className="space-y-2">
+              <div className="space-y-[var(--spacing-component-sm)]">
                 <CardTitle className="text-2xl">{project.name}</CardTitle>
                 {project.description && (
                   <CardDescription className="text-base">
@@ -35,7 +35,7 @@ export function ProjectView(props: ProjectViewProps) {
                   </CardDescription>
                 )}
               </div>
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center space-x-[var(--spacing-component-sm)]">
                 <Badge
                   variant={
                     project.status === "active" ? "default" : "secondary"
@@ -57,9 +57,9 @@ export function ProjectView(props: ProjectViewProps) {
           <CardHeader>
             <CardTitle>Detalhes do Projeto</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-[var(--spacing-component-md)]">
             {project.localPath && (
-              <div className="flex items-center space-x-3">
+              <div className="flex items-center space-x-[var(--spacing-component-md)]">
                 <Folder className="h-5 w-5 text-muted-foreground" />
                 <div>
                   <p className="font-medium">Caminho Local</p>
@@ -71,7 +71,7 @@ export function ProjectView(props: ProjectViewProps) {
             )}
 
             {project.gitUrl && (
-              <div className="flex items-center space-x-3">
+              <div className="flex items-center space-x-[var(--spacing-component-md)]">
                 <GitBranch className="h-5 w-5 text-muted-foreground" />
                 <div>
                   <p className="font-medium">Repositório Git</p>
@@ -89,7 +89,7 @@ export function ProjectView(props: ProjectViewProps) {
 
             <Separator />
 
-            <div className="flex items-center space-x-3">
+            <div className="flex items-center space-x-[var(--spacing-component-md)]">
               <Calendar className="h-5 w-5 text-muted-foreground" />
               <div>
                 <p className="font-medium">Criado em</p>
@@ -116,7 +116,7 @@ export function ProjectView(props: ProjectViewProps) {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-[var(--spacing-component-md)]">
               <Button variant="outline" className="justify-start">
                 <Folder className="h-4 w-4 mr-2" />
                 Abrir no Explorer

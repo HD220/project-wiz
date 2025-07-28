@@ -1,4 +1,4 @@
-import { MessageSquare } from "lucide-react";
+import { MessageSquare, Crown, Zap } from "lucide-react";
 
 import type { UserSummary } from "@/main/features/user/user.service";
 
@@ -14,14 +14,14 @@ type UserStatus = "online" | "away" | "busy" | "offline";
 const getStatusColor = (status: UserStatus): string => {
   switch (status) {
     case "online":
-      return "bg-green-500";
+      return "bg-emerald-500 shadow-emerald-500/30";
     case "away":
-      return "bg-yellow-500";
+      return "bg-amber-500 shadow-amber-500/30";
     case "busy":
-      return "bg-red-500";
+      return "bg-red-500 shadow-red-500/30";
     case "offline":
     default:
-      return "bg-gray-400";
+      return "bg-gray-400 shadow-gray-400/20";
   }
 };
 
@@ -67,15 +67,21 @@ export function ConversationAvatar(props: ConversationAvatarProps) {
   } = props;
 
   const sizeClasses = {
-    sm: "w-7 h-7 text-xs",
-    md: "w-9 h-9 text-sm",
-    lg: "w-11 h-11 text-base",
+    sm: "size-7 text-xs",
+    md: "size-9 text-sm",
+    lg: "size-11 text-base",
   };
 
   const statusSizeClasses = {
-    sm: "w-2 h-2",
-    md: "w-2.5 h-2.5",
-    lg: "w-3 h-3",
+    sm: "size-2.5",
+    md: "size-3",
+    lg: "size-3.5",
+  };
+
+  const ringClasses = {
+    sm: "ring-1",
+    md: "ring-2",
+    lg: "ring-2",
   };
 
   // Get other participants (exclude current user)
@@ -90,15 +96,23 @@ export function ConversationAvatar(props: ConversationAvatarProps) {
   if (!participants.length || otherParticipants.length === 0) {
     return (
       <div className="relative">
-        <Avatar className={cn(sizeClasses[size], className)}>
-          <AvatarFallback className="bg-gradient-to-br from-gray-400 to-gray-600 text-white">
+        <Avatar
+          className={cn(
+            sizeClasses[size],
+            ringClasses[size],
+            "ring-background shadow-md transition-all duration-200",
+            className,
+          )}
+        >
+          <AvatarFallback className="bg-gradient-to-br from-muted to-muted-foreground/20 text-muted-foreground border border-border/50">
             <MessageSquare className="w-1/2 h-1/2" />
           </AvatarFallback>
         </Avatar>
         {showStatus && (
           <div
             className={cn(
-              "absolute -bottom-0.5 -right-0.5 bg-gray-400 rounded-full border-2 border-background",
+              "absolute -bottom-0.5 -right-0.5 rounded-full border-2 border-background shadow-sm",
+              "bg-gray-400 shadow-gray-400/20",
               statusSizeClasses[size],
             )}
           />
@@ -132,18 +146,25 @@ export function ConversationAvatar(props: ConversationAvatarProps) {
 
     return (
       <div className="relative">
-        <Avatar className={cn(sizeClasses[size], className)}>
+        <Avatar
+          className={cn(
+            sizeClasses[size],
+            ringClasses[size],
+            "ring-background shadow-md transition-all duration-200 hover:shadow-lg hover:scale-[1.01]",
+            className,
+          )}
+        >
           <AvatarImage
             src={isValidAvatarUrl(participant.avatar) || undefined}
           />
-          <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-white font-semibold">
+          <AvatarFallback className="bg-gradient-to-br from-blue-500/10 to-purple-600/10 text-foreground font-semibold border border-border/50">
             {participant.name.charAt(0).toUpperCase()}
           </AvatarFallback>
         </Avatar>
         {showStatus && participant && (
           <div
             className={cn(
-              "absolute -bottom-0.5 -right-0.5 rounded-full border-2 border-background",
+              "absolute -bottom-0.5 -right-0.5 rounded-full border-2 border-background shadow-sm status-pulse",
               getStatusColor(getUserStatus(participant)),
               statusSizeClasses[size],
             )}
@@ -184,13 +205,14 @@ export function ConversationAvatar(props: ConversationAvatarProps) {
       <Avatar
         className={cn(
           sizeClasses[size],
-          "relative z-20 ring-2 ring-background",
+          ringClasses[size],
+          "relative z-20 ring-background shadow-md transition-all duration-200 hover:shadow-lg",
         )}
       >
         <AvatarImage
           src={isValidAvatarUrl(firstParticipant.avatar) || undefined}
         />
-        <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-white font-semibold">
+        <AvatarFallback className="bg-gradient-to-br from-blue-500/10 to-purple-600/10 text-foreground font-semibold border border-border/50">
           {firstParticipant.name.charAt(0).toUpperCase()}
         </AvatarFallback>
       </Avatar>
@@ -199,7 +221,8 @@ export function ConversationAvatar(props: ConversationAvatarProps) {
       <Avatar
         className={cn(
           sizeClasses[size],
-          "relative z-10 -ml-3 ring-2 ring-background",
+          ringClasses[size],
+          "relative z-10 -ml-3 ring-background shadow-md transition-all duration-200 hover:shadow-lg",
         )}
       >
         {secondParticipant ? (
@@ -207,12 +230,12 @@ export function ConversationAvatar(props: ConversationAvatarProps) {
             <AvatarImage
               src={isValidAvatarUrl(secondParticipant.avatar) || undefined}
             />
-            <AvatarFallback className="bg-gradient-to-br from-green-500 to-teal-600 text-white font-semibold">
+            <AvatarFallback className="bg-gradient-to-br from-emerald-500/10 to-teal-600/10 text-foreground font-semibold border border-border/50">
               {secondParticipant.name.charAt(0).toUpperCase()}
             </AvatarFallback>
           </>
         ) : (
-          <AvatarFallback className="bg-muted text-muted-foreground font-semibold">
+          <AvatarFallback className="bg-gradient-to-br from-muted to-muted-foreground/20 text-muted-foreground font-semibold border border-border/50">
             +{remainingCount}
           </AvatarFallback>
         )}
@@ -222,11 +245,13 @@ export function ConversationAvatar(props: ConversationAvatarProps) {
       {remainingCount > 0 && secondParticipant && (
         <div
           className={cn(
-            "absolute -bottom-1 -right-1 bg-primary text-primary-foreground rounded-full text-xs font-bold",
-            "flex items-center justify-center min-w-[1.25rem] h-5 px-1 z-30 ring-2 ring-background",
+            "absolute -bottom-1 -right-1 bg-gradient-to-br from-primary to-primary/80 text-primary-foreground rounded-full text-xs font-bold shadow-md",
+            "flex items-center justify-center min-w-[1.25rem] h-5 px-1 z-30 ring-2 ring-background border border-primary/20",
+            "transition-all duration-200 hover:scale-[1.01]",
           )}
         >
-          +{remainingCount}
+          <Crown className="h-2.5 w-2.5 mr-0.5" />
+          {remainingCount}
         </div>
       )}
 
@@ -234,14 +259,18 @@ export function ConversationAvatar(props: ConversationAvatarProps) {
       {showStatus && (
         <div
           className={cn(
-            "absolute -bottom-0.5 -right-0.5 rounded-full border-2 border-background z-30",
-            // For group conversations, show green if any participant is online
+            "absolute -bottom-0.5 -right-0.5 rounded-full border-2 border-background z-30 shadow-sm status-pulse",
+            // For group conversations, show emerald if any participant is online
             otherParticipants.some((p) => getUserStatus(p) === "online")
-              ? "bg-green-500"
-              : "bg-gray-400",
+              ? "bg-emerald-500 shadow-emerald-500/30"
+              : "bg-gray-400 shadow-gray-400/20",
             statusSizeClasses[size],
           )}
-        />
+        >
+          {otherParticipants.some((p) => getUserStatus(p) === "online") && (
+            <Zap className="h-1.5 w-1.5 text-white absolute inset-0.5" />
+          )}
+        </div>
       )}
     </div>
   );

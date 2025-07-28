@@ -1,6 +1,7 @@
 import type { ConversationWithLastMessage } from "@/main/features/conversation/conversation.types";
 import type { UserSummary } from "@/main/features/user/user.service";
 
+import { ScrollArea } from "@/renderer/components/ui/scroll-area";
 import { SidebarHeader } from "@/renderer/features/app/components/sidebar-header";
 import { SidebarNavigation } from "@/renderer/features/app/components/sidebar-navigation";
 import { SidebarUserArea } from "@/renderer/features/app/components/sidebar-user-area";
@@ -18,18 +19,44 @@ export function UserSidebar(props: UserSidebarProps) {
   return (
     <aside
       className={cn(
-        "h-full flex flex-col bg-card/50 backdrop-blur-sm",
+        "h-full flex flex-col",
+        "bg-sidebar/95 backdrop-blur-md",
+        "border-r border-sidebar-border/60",
+        "shadow-lg/20",
+        "transition-all duration-300 ease-in-out",
         className,
       )}
       role="complementary"
       aria-label="User area navigation"
     >
-      <SidebarHeader />
-      <SidebarNavigation
-        conversations={conversations}
-        availableUsers={availableUsers}
-      />
-      <SidebarUserArea />
+      <div className="flex-shrink-0">
+        <SidebarHeader />
+      </div>
+
+      <ScrollArea className="flex-1 overflow-hidden" type="auto">
+        <div
+          className={cn(
+            "px-[var(--spacing-component-sm)]",
+            "py-[var(--spacing-component-sm)]",
+            "space-y-[var(--spacing-component-xs)]",
+          )}
+        >
+          <SidebarNavigation
+            conversations={conversations}
+            availableUsers={availableUsers}
+          />
+        </div>
+      </ScrollArea>
+
+      <div
+        className={cn(
+          "flex-shrink-0",
+          "border-t border-sidebar-border/40",
+          "bg-sidebar-accent/20",
+        )}
+      >
+        <SidebarUserArea />
+      </div>
     </aside>
   );
 }

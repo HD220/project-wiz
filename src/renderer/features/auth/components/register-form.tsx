@@ -1,8 +1,8 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "@tanstack/react-router";
 import { UserPlus, User, Lock, Eye, EyeOff, Loader2 } from "lucide-react";
-import { useForm } from "react-hook-form";
 import { useState } from "react";
+import { useForm } from "react-hook-form";
 import { z } from "zod";
 
 import { Alert, AlertDescription } from "@/renderer/components/ui/alert";
