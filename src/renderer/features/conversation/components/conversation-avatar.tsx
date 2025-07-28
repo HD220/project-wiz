@@ -67,20 +67,27 @@ export function ConversationAvatar(props: ConversationAvatarProps) {
   } = props;
 
   const sizeClasses = {
-    sm: "size-7 text-xs",
+    sm: "size-8 text-xs",
     md: "size-9 text-sm",
     lg: "size-11 text-base",
   };
 
+  // Group avatar sizes - smaller for overlapped display
+  const groupSizeClasses = {
+    sm: "size-6 text-xs",
+    md: "size-7 text-xs",
+    lg: "size-8 text-sm",
+  };
+
   const statusSizeClasses = {
-    sm: "size-2.5",
+    sm: "size-2",
     md: "size-3",
     lg: "size-3.5",
   };
 
   const ringClasses = {
     sm: "ring-1",
-    md: "ring-2",
+    md: "ring-1",
     lg: "ring-2",
   };
 
@@ -201,10 +208,10 @@ export function ConversationAvatar(props: ConversationAvatarProps) {
 
   return (
     <div className={cn("relative flex", className)}>
-      {/* First participant avatar */}
+      {/* First participant avatar - smaller for group */}
       <Avatar
         className={cn(
-          sizeClasses[size],
+          groupSizeClasses[size],
           ringClasses[size],
           "relative z-20 ring-background shadow-md transition-all duration-200 hover:shadow-lg",
         )}
@@ -217,12 +224,14 @@ export function ConversationAvatar(props: ConversationAvatarProps) {
         </AvatarFallback>
       </Avatar>
 
-      {/* Second participant or counter */}
+      {/* Second participant or counter - more overlap */}
       <Avatar
         className={cn(
-          sizeClasses[size],
+          groupSizeClasses[size],
           ringClasses[size],
-          "relative z-10 -ml-3 ring-background shadow-md transition-all duration-200 hover:shadow-lg",
+          "relative z-10 ring-background shadow-md transition-all duration-200 hover:shadow-lg",
+          // Increased overlap based on size
+          size === "sm" ? "-ml-4" : size === "md" ? "-ml-5" : "-ml-6",
         )}
       >
         {secondParticipant ? (
@@ -245,12 +254,12 @@ export function ConversationAvatar(props: ConversationAvatarProps) {
       {remainingCount > 0 && secondParticipant && (
         <div
           className={cn(
-            "absolute -bottom-1 -right-1 bg-gradient-to-br from-primary to-primary/80 text-primary-foreground rounded-full text-xs font-bold shadow-md",
-            "flex items-center justify-center min-w-[1.25rem] h-5 px-1 z-30 ring-2 ring-background border border-primary/20",
+            "absolute -bottom-0.5 -right-0.5 bg-gradient-to-br from-primary to-primary/80 text-primary-foreground rounded-full text-xs font-bold shadow-md",
+            "flex items-center justify-center min-w-[1rem] h-4 px-1 z-30 ring-1 ring-background border border-primary/20",
             "transition-all duration-200 hover:scale-[1.01]",
           )}
         >
-          <Crown className="h-2.5 w-2.5 mr-0.5" />
+          <Crown className="h-2 w-2 mr-0.5" />
           {remainingCount}
         </div>
       )}

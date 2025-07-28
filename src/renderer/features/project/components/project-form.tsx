@@ -1,12 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  FolderIcon,
-  GitBranch,
-  FileText,
-  Github,
-  Loader2,
-  Info,
-} from "lucide-react";
+import { FolderIcon, Github, Loader2 } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
@@ -16,7 +9,6 @@ import { Button } from "@/renderer/components/ui/button";
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -37,34 +29,34 @@ const ProjectFormSchema = z
   .object({
     name: z
       .string()
-      .min(1, "Nome é obrigatório")
-      .max(100, "Nome deve ter no máximo 100 caracteres")
+      .min(1, "Project name is required")
+      .max(100, "Project name must be 100 characters or less")
       .refine(
         (name) => /^[a-zA-Z0-9\s\-_]+$/.test(name),
-        "Nome deve conter apenas letras, números, espaços, hífens e underscores",
+        "Project name can only contain letters, numbers, spaces, hyphens and underscores",
       ),
     description: z
       .string()
-      .max(500, "Descrição deve ter no máximo 500 caracteres")
+      .max(500, "Description must be 500 characters or less")
       .optional(),
     type: z.enum(["blank", "github"], {
-      required_error: "Tipo de projeto é obrigatório",
+      required_error: "Project type is required",
     }),
     gitUrl: z
       .string()
-      .url("URL deve ser válida")
+      .url("URL must be valid")
       .refine(
         (url) =>
           url.includes("github.com") ||
           url.includes("gitlab.com") ||
           url.includes(".git"),
-        "URL deve ser de um repositório Git válido",
+        "URL must be a valid Git repository",
       )
       .optional()
       .or(z.literal("")),
     branch: z
       .string()
-      .min(1, "Branch é obrigatória quando usando Git")
+      .min(1, "Branch is required when using Git")
       .optional()
       .or(z.literal("")),
   })
@@ -76,7 +68,7 @@ const ProjectFormSchema = z
       return true;
     },
     {
-      message: "URL do repositório é obrigatória para projetos do GitHub",
+      message: "Repository URL is required for GitHub projects",
       path: ["gitUrl"],
     },
   );
@@ -96,7 +88,7 @@ export function ProjectForm(props: ProjectFormProps) {
     onSuccess,
     onCancel,
     initialData,
-    submitLabel = "Criar Projeto",
+    submitLabel = "Create Project",
     disabled = false,
   } = props;
   const { user } = useAuth();
@@ -129,7 +121,7 @@ export function ProjectForm(props: ProjectFormProps) {
   const isLoading = createProjectMutation.isPending;
   const isFormDisabled = disabled || isLoading;
 
-  // Enhanced form field helper component with modern design
+  // Compact Discord-style option component
   function ProjectTypeOption({
     value,
     icon: Icon,
@@ -146,36 +138,19 @@ export function ProjectForm(props: ProjectFormProps) {
     return (
       <div
         className={cn(
-          "flex items-start space-x-3 p-4 rounded-xl border-2 transition-all duration-200 cursor-pointer group",
-          "hover:shadow-md hover:scale-[1.01]",
+          "flex items-center space-x-3 p-3 rounded-md border cursor-pointer transition-colors",
           isSelected
-            ? "border-primary bg-primary/5 shadow-md ring-2 ring-primary/20"
-            : "border-border hover:border-border/80 hover:bg-muted/30",
+            ? "border-primary bg-primary/10"
+            : "border-input hover:bg-accent",
         )}
       >
-        <RadioGroupItem value={value} id={value} className="mt-1" />
+        <RadioGroupItem value={value} id={value} />
+        <Icon className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
         <div className="flex-1">
-          <div className="flex items-center gap-3 mb-2">
-            <div
-              className={cn(
-                "p-2 rounded-lg transition-colors",
-                isSelected
-                  ? "bg-primary/10 text-primary"
-                  : "bg-muted text-muted-foreground group-hover:bg-muted/80",
-              )}
-            >
-              <Icon className="h-4 w-4" aria-hidden="true" />
-            </div>
-            <Label
-              htmlFor={value}
-              className="font-semibold cursor-pointer text-base"
-            >
-              {title}
-            </Label>
-          </div>
-          <p className="text-sm text-muted-foreground leading-relaxed">
-            {description}
-          </p>
+          <Label htmlFor={value} className="font-medium cursor-pointer text-sm">
+            {title}
+          </Label>
+          <p className="text-xs text-muted-foreground">{description}</p>
         </div>
       </div>
     );
@@ -216,39 +191,26 @@ export function ProjectForm(props: ProjectFormProps) {
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(onSubmit)}
-        className="space-y-6"
+        className="space-y-4"
         noValidate
-        aria-label="Formulário de criação de projeto"
+        aria-label="Create project form"
       >
-        <div className="space-y-6">
+        <div className="space-y-4">
           <FormField
             control={form.control}
             name="name"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="flex items-center gap-2 text-base font-semibold">
-                  <FileText className="h-4 w-4" aria-hidden="true" />
+                <FormLabel className="text-sm font-medium">
                   Project Name
                 </FormLabel>
                 <FormControl>
                   <Input
-                    placeholder="e.g., My Awesome Project"
+                    placeholder="My Awesome Project"
                     disabled={isFormDisabled}
-                    aria-describedby="name-description"
-                    className="h-11 text-base bg-background/50 border-border/80 focus:bg-background"
                     {...field}
                   />
                 </FormControl>
-                <FormDescription
-                  id="name-description"
-                  className="flex items-start gap-2"
-                >
-                  <Info className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
-                  <span>
-                    Choose a descriptive name for your project (maximum 100
-                    characters)
-                  </span>
-                </FormDescription>
                 <FormMessage />
               </FormItem>
             )}
@@ -259,29 +221,19 @@ export function ProjectForm(props: ProjectFormProps) {
             name="description"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-base font-semibold">
-                  Description (optional)
+                <FormLabel className="text-sm font-medium">
+                  Description{" "}
+                  <span className="text-muted-foreground">(optional)</span>
                 </FormLabel>
                 <FormControl>
                   <Textarea
-                    placeholder="Describe the purpose and scope of your project..."
+                    placeholder="What's this project about?"
                     disabled={isFormDisabled}
-                    rows={4}
-                    className="resize-none text-base bg-background/50 border-border/80 focus:bg-background"
-                    aria-describedby="description-hint"
+                    rows={3}
+                    className="resize-none"
                     {...field}
                   />
                 </FormControl>
-                <FormDescription
-                  id="description-hint"
-                  className="flex items-start gap-2"
-                >
-                  <Info className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
-                  <span>
-                    A brief description helps identify the project (maximum 500
-                    characters)
-                  </span>
-                </FormDescription>
                 <FormMessage />
               </FormItem>
             )}
@@ -292,7 +244,7 @@ export function ProjectForm(props: ProjectFormProps) {
             name="type"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-base font-semibold">
+                <FormLabel className="text-sm font-medium">
                   Project Type
                 </FormLabel>
                 <FormControl>
@@ -300,49 +252,32 @@ export function ProjectForm(props: ProjectFormProps) {
                     onValueChange={field.onChange}
                     value={field.value}
                     disabled={isFormDisabled}
-                    className="space-y-4"
-                    aria-describedby="type-description"
+                    className="space-y-2"
                   >
                     <ProjectTypeOption
                       value="blank"
                       icon={FolderIcon}
-                      title="Blank Project"
-                      description="Start from scratch with a basic structure"
+                      title="Start fresh"
+                      description="Create a new empty project"
                     />
                     <ProjectTypeOption
                       value="github"
                       icon={Github}
-                      title="GitHub Project"
-                      description="Clone an existing repository from GitHub"
+                      title="Import from GitHub"
+                      description="Clone an existing repository"
                     />
                   </RadioGroup>
                 </FormControl>
-                <FormDescription
-                  id="type-description"
-                  className="flex items-start gap-2"
-                >
-                  <Info className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
-                  <span>Choose how you want to start your project</span>
-                </FormDescription>
                 <FormMessage />
               </FormItem>
             )}
           />
 
           {projectType === "github" && (
-            <div className="space-y-6 p-6 border-2 border-primary/20 bg-gradient-to-br from-primary/5 to-primary/10 rounded-xl">
-              <div className="flex items-center gap-3 pb-2 border-b border-primary/20">
-                <div className="p-2 bg-primary/10 rounded-lg">
-                  <Github className="h-5 w-5 text-primary" aria-hidden="true" />
-                </div>
-                <div>
-                  <h4 className="font-semibold text-base text-foreground">
-                    Repository Configuration
-                  </h4>
-                  <p className="text-sm text-muted-foreground">
-                    Connect your project to a Git repository
-                  </p>
-                </div>
+            <div className="space-y-4 p-4 bg-muted/30 rounded-lg border">
+              <div className="flex items-center gap-2">
+                <Github className="h-4 w-4 text-muted-foreground" />
+                <span className="text-sm font-medium">Repository Details</span>
               </div>
 
               <FormField
@@ -350,33 +285,17 @@ export function ProjectForm(props: ProjectFormProps) {
                 name="gitUrl"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-sm font-medium flex items-center gap-2">
-                      <GitBranch className="h-4 w-4" />
+                    <FormLabel className="text-sm font-medium">
                       Repository URL
                     </FormLabel>
                     <FormControl>
-                      <div className="relative">
-                        <Input
-                          type="url"
-                          placeholder="https://github.com/username/repository.git"
-                          disabled={isFormDisabled}
-                          aria-describedby="git-url-hint"
-                          className="pl-10 bg-background/50 border-border/80 focus:bg-background"
-                          {...field}
-                        />
-                        <Github className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                      </div>
+                      <Input
+                        type="url"
+                        placeholder="https://github.com/username/repository.git"
+                        disabled={isFormDisabled}
+                        {...field}
+                      />
                     </FormControl>
-                    <FormDescription
-                      id="git-url-hint"
-                      className="flex items-start gap-2"
-                    >
-                      <Info className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
-                      <span>
-                        Complete URL of the Git repository (GitHub, GitLab,
-                        etc.)
-                      </span>
-                    </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -387,22 +306,16 @@ export function ProjectForm(props: ProjectFormProps) {
                 name="branch"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="flex items-center gap-2 text-sm font-medium">
-                      <GitBranch className="h-4 w-4" aria-hidden="true" />
+                    <FormLabel className="text-sm font-medium">
                       Branch
                     </FormLabel>
                     <FormControl>
-                      <div className="relative">
-                        <Input
-                          placeholder="main"
-                          disabled={isFormDisabled}
-                          list="common-branches"
-                          aria-describedby="branch-hint"
-                          className="pl-10 bg-background/50 border-border/80 focus:bg-background"
-                          {...field}
-                        />
-                        <GitBranch className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                      </div>
+                      <Input
+                        placeholder="main"
+                        disabled={isFormDisabled}
+                        list="common-branches"
+                        {...field}
+                      />
                     </FormControl>
                     <datalist id="common-branches">
                       <option value="main" />
@@ -410,13 +323,6 @@ export function ProjectForm(props: ProjectFormProps) {
                       <option value="develop" />
                       <option value="dev" />
                     </datalist>
-                    <FormDescription
-                      id="branch-hint"
-                      className="flex items-start gap-2"
-                    >
-                      <Info className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
-                      <span>Branch to be cloned (default: main)</span>
-                    </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -425,34 +331,26 @@ export function ProjectForm(props: ProjectFormProps) {
           )}
         </div>
 
-        <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-3 pt-6 border-t border-border/50">
+        <div className="flex gap-3 pt-4">
           {onCancel && (
             <Button
               type="button"
               variant="outline"
               onClick={onCancel}
               disabled={isFormDisabled}
-              className="sm:w-auto w-full h-11 font-medium"
+              className="flex-1"
             >
               Cancel
             </Button>
           )}
-          <Button
-            type="submit"
-            disabled={isFormDisabled}
-            className="sm:w-auto w-full h-11 font-medium shadow-md hover:shadow-lg transition-shadow"
-            aria-describedby={isLoading ? "loading-status" : undefined}
-          >
+          <Button type="submit" disabled={isFormDisabled} className="flex-1">
             {isLoading ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 Creating...
               </>
             ) : (
-              <>
-                <FolderIcon className="mr-2 h-4 w-4" />
-                {submitLabel}
-              </>
+              submitLabel
             )}
           </Button>
         </div>

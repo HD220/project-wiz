@@ -2,7 +2,7 @@ import { Link } from "@tanstack/react-router";
 import {
   ArrowRight,
   Bot,
-  FolderOpen,
+  Folder,
   Plus,
   Sparkles,
   Users,
@@ -10,6 +10,12 @@ import {
   Clock,
   Shield,
   Target,
+  Home,
+  Activity,
+  TrendingUp,
+  Settings,
+  BookOpen,
+  MessageSquare,
 } from "lucide-react";
 
 import { Badge } from "@/renderer/components/ui/badge";
@@ -21,6 +27,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/renderer/components/ui/card";
+import { ScrollArea } from "@/renderer/components/ui/scroll-area";
+import { Separator } from "@/renderer/components/ui/separator";
 import { useAuth } from "@/renderer/contexts/auth.context";
 import { ActivityItem } from "@/renderer/features/app/components/activity-item";
 
@@ -37,285 +45,370 @@ export function WelcomeView() {
         : "Good evening";
 
   return (
-    <div className="min-h-full bg-background">
-      {/* Hero Section */}
-      <div className="relative">
-        <div className="px-6 pt-6 pb-8">
-          <div className="max-w-5xl mx-auto">
-            {/* Welcome Header */}
-            <div className="text-center space-y-[var(--spacing-component-md)] mb-8">
-              <div className="inline-flex items-center gap-[var(--spacing-component-sm)] px-[var(--spacing-component-md)] py-[var(--spacing-component-xs)] rounded-full bg-primary/10 text-primary text-sm font-medium border border-primary/20">
-                <Sparkles className="size-4" />
-                Welcome to Project Wiz
+    <div className="h-full flex flex-col">
+      <ScrollArea className="flex-1">
+        <div className="p-4 space-y-4">
+          {/* Compact Welcome Header */}
+          <div className="flex items-center justify-between">
+            <div>
+              <div className="flex items-center gap-2 mb-1">
+                <Home className="size-4 text-primary" />
+                <h1 className="text-lg font-semibold text-foreground">
+                  {greeting}, {user?.username || "Developer"}!
+                </h1>
               </div>
-              <h1 className="text-3xl font-bold text-foreground tracking-tight lg:text-4xl">
-                {greeting}, {user?.username || "Desenvolvedor"}!
-              </h1>
-              <p className="text-lg text-muted-foreground max-w-prose mx-auto">
-                Ready to revolutionize your development workflow with AI-based
-                automation and intelligent project management?
+              <p className="text-sm text-muted-foreground">
+                Welcome to your AI development workspace
               </p>
             </div>
-
-            {/* Quick Actions */}
-            <div className="flex flex-wrap items-center justify-center gap-[var(--spacing-component-md)] mb-10">
-              <Button
-                asChild
-                size="lg"
-                className="gap-[var(--spacing-component-sm)]"
-              >
+            <div className="flex items-center gap-2">
+              <Button size="sm" asChild>
                 <Link to="/user/agents/new">
-                  <Plus className="size-4" />
-                  Criar Seu Primeiro Agente
+                  <Plus className="size-3 mr-1.5" />
+                  Create Agent
                 </Link>
               </Button>
-              <Button
-                asChild
-                variant="outline"
-                size="lg"
-                className="gap-[var(--spacing-component-sm)]"
-              >
+              <Button size="sm" variant="outline" asChild>
                 <Link to="/project/new">
-                  <FolderOpen className="size-4" />
-                  Iniciar um Projeto
+                  <Folder className="size-3 mr-1.5" />
+                  New Project
                 </Link>
               </Button>
             </div>
           </div>
-        </div>
-      </div>
 
-      {/* Main Content */}
-      <div className="px-6 pb-8">
-        <div className="max-w-screen-xl mx-auto space-y-8">
-          {/* Feature Cards */}
-          <section>
-            <div className="text-center mb-6">
-              <h2 className="text-xl font-semibold text-foreground mb-1">
-                Comece em Minutos
-              </h2>
-              <p className="text-muted-foreground text-sm">
-                Escolha seu caminho para desenvolvimento com IA
-              </p>
-            </div>
+          <Separator />
 
-            <div className="grid gap-[var(--spacing-component-md)] md:grid-cols-2 lg:grid-cols-3">
-              {/* Quick Start Card */}
-              <Card className="group border-primary/20 hover:border-primary/40 transition-colors">
-                <CardHeader className="pb-3">
-                  <div className="flex items-center gap-[var(--spacing-component-md)]">
-                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 border border-primary/20">
-                      <Zap className="h-4 w-4 text-primary" />
+          {/* Quick Actions Grid */}
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+            <Card
+              className="group hover:bg-accent/50 transition-colors cursor-pointer"
+              asChild
+            >
+              <Link to="/user/agents/new">
+                <CardContent className="p-3">
+                  <div className="flex items-center gap-2">
+                    <div className="p-1.5 rounded-md bg-primary/10">
+                      <Zap className="size-3 text-primary" />
                     </div>
-                    <div className="flex-1">
-                      <div className="flex items-center gap-[var(--spacing-component-sm)]">
-                        <CardTitle className="text-base">
-                          Início Rápido
-                        </CardTitle>
-                        <Badge variant="secondary" className="text-xs">
-                          Recomendado
-                        </Badge>
+                    <div className="min-w-0">
+                      <p className="text-sm font-medium truncate">
+                        Quick Start
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        Create your first agent
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Link>
+            </Card>
+
+            <Card
+              className="group hover:bg-accent/50 transition-colors cursor-pointer"
+              asChild
+            >
+              <Link to="/projects">
+                <CardContent className="p-3">
+                  <div className="flex items-center gap-2">
+                    <div className="p-1.5 rounded-md bg-blue-500/10">
+                      <Folder className="size-3 text-blue-600" />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-sm font-medium truncate">Projects</p>
+                      <p className="text-xs text-muted-foreground">
+                        Manage workspaces
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Link>
+            </Card>
+
+            <Card
+              className="group hover:bg-accent/50 transition-colors cursor-pointer"
+              asChild
+            >
+              <Link to="/user/dm">
+                <CardContent className="p-3">
+                  <div className="flex items-center gap-2">
+                    <div className="p-1.5 rounded-md bg-green-500/10">
+                      <MessageSquare className="size-3 text-green-600" />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-sm font-medium truncate">
+                        Conversations
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        Chat with AI
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Link>
+            </Card>
+
+            <Card
+              className="group hover:bg-accent/50 transition-colors cursor-pointer"
+              asChild
+            >
+              <Link to="/user/settings">
+                <CardContent className="p-3">
+                  <div className="flex items-center gap-2">
+                    <div className="p-1.5 rounded-md bg-orange-500/10">
+                      <Settings className="size-3 text-orange-600" />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-sm font-medium truncate">Settings</p>
+                      <p className="text-xs text-muted-foreground">
+                        Configure workspace
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Link>
+            </Card>
+          </div>
+
+          {/* Main Content Grid */}
+          <div className="grid lg:grid-cols-3 gap-4">
+            {/* Left Column - Feature Cards */}
+            <div className="lg:col-span-2 space-y-4">
+              {/* Getting Started Section */}
+              <Card>
+                <CardHeader className="pb-3">
+                  <div className="flex items-center gap-2">
+                    <Sparkles className="size-4 text-primary" />
+                    <CardTitle className="text-base">Getting Started</CardTitle>
+                    <Badge variant="outline" className="text-xs">
+                      New
+                    </Badge>
+                  </div>
+                  <CardDescription className="text-sm">
+                    Set up your AI development environment in minutes
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div className="p-3 rounded-lg border bg-card hover:bg-accent/50 transition-colors">
+                      <div className="flex items-start gap-3">
+                        <div className="p-1.5 rounded-md bg-primary/10 mt-0.5">
+                          <Bot className="size-3 text-primary" />
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <h4 className="text-sm font-medium mb-1">
+                            AI Agents
+                          </h4>
+                          <p className="text-xs text-muted-foreground mb-2">
+                            Create intelligent assistants for development tasks
+                          </p>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            className="h-6 text-xs"
+                            asChild
+                          >
+                            <Link to="/user/agents/new">
+                              Get Started
+                              <ArrowRight className="size-2.5 ml-1" />
+                            </Link>
+                          </Button>
+                        </div>
                       </div>
-                      <CardDescription className="text-xs">
-                        Launch your first AI agent in 60 seconds
-                      </CardDescription>
+                    </div>
+
+                    <div className="p-3 rounded-lg border bg-card hover:bg-accent/50 transition-colors">
+                      <div className="flex items-start gap-3">
+                        <div className="p-1.5 rounded-md bg-blue-500/10 mt-0.5">
+                          <Folder className="size-3 text-blue-600" />
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <h4 className="text-sm font-medium mb-1">
+                            Project Hub
+                          </h4>
+                          <p className="text-xs text-muted-foreground mb-2">
+                            Organize and manage development projects
+                          </p>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            className="h-6 text-xs"
+                            asChild
+                          >
+                            <Link to="/projects">
+                              Explore
+                              <ArrowRight className="size-2.5 ml-1" />
+                            </Link>
+                          </Button>
+                        </div>
+                      </div>
                     </div>
                   </div>
-                </CardHeader>
-                <CardContent className="pt-0 space-y-[var(--spacing-component-md)]">
-                  <p className="text-sm text-muted-foreground">
-                    Accelerate your automation journey with our guided setup.
-                    Create your first AI agent and experience intelligent
-                    workflows.
-                  </p>
-                  <Button
-                    asChild
-                    variant="ghost"
-                    className="w-full gap-[var(--spacing-component-sm)] h-8"
-                  >
-                    <Link to="/user/agents/new">
-                      Começar
-                      <ArrowRight className="size-3" />
-                    </Link>
-                  </Button>
                 </CardContent>
               </Card>
 
-              {/* Projects Card */}
-              <Card className="group hover:border-blue-500/40 transition-colors">
+              {/* Features Overview */}
+              <Card>
                 <CardHeader className="pb-3">
-                  <div className="flex items-center gap-[var(--spacing-component-md)]">
-                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-500/10 border border-blue-500/20">
-                      <FolderOpen className="h-4 w-4 text-blue-600" />
+                  <CardTitle className="text-base">Key Features</CardTitle>
+                  <CardDescription className="text-sm">
+                    Built for developers, by developers
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                    <div className="flex items-start gap-2 p-2 rounded-md hover:bg-accent/50 transition-colors">
+                      <div className="p-1 rounded-sm bg-primary/10 mt-0.5">
+                        <Clock className="size-3 text-primary" />
+                      </div>
+                      <div>
+                        <h4 className="text-sm font-medium">Save Time</h4>
+                        <p className="text-xs text-muted-foreground">
+                          Automate repetitive tasks
+                        </p>
+                      </div>
                     </div>
-                    <div className="flex-1">
-                      <CardTitle className="text-base">Project Hub</CardTitle>
-                      <CardDescription className="text-xs">
-                        Organize and manage your development projects
-                      </CardDescription>
+
+                    <div className="flex items-start gap-2 p-2 rounded-md hover:bg-accent/50 transition-colors">
+                      <div className="p-1 rounded-sm bg-blue-500/10 mt-0.5">
+                        <Shield className="size-3 text-blue-600" />
+                      </div>
+                      <div>
+                        <h4 className="text-sm font-medium">Secure</h4>
+                        <p className="text-xs text-muted-foreground">
+                          Enterprise-grade security
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-start gap-2 p-2 rounded-md hover:bg-accent/50 transition-colors">
+                      <div className="p-1 rounded-sm bg-green-500/10 mt-0.5">
+                        <Target className="size-3 text-green-600" />
+                      </div>
+                      <div>
+                        <h4 className="text-sm font-medium">Precise</h4>
+                        <p className="text-xs text-muted-foreground">
+                          AI trained for development
+                        </p>
+                      </div>
                     </div>
                   </div>
-                </CardHeader>
-                <CardContent className="pt-0 space-y-[var(--spacing-component-md)]">
-                  <p className="text-sm text-muted-foreground">
-                    Centralize your repositories, track progress and collaborate
-                    seamlessly with your team using project management tools.
-                  </p>
-                  <Button
-                    asChild
-                    variant="ghost"
-                    className="w-full gap-[var(--spacing-component-sm)] h-8"
-                  >
-                    <Link to="/projects">
-                      Explorar Projetos
-                      <ArrowRight className="size-3" />
-                    </Link>
-                  </Button>
                 </CardContent>
               </Card>
+            </div>
 
-              {/* Community Card */}
-              <Card className="group hover:border-green-500/40 transition-colors">
+            {/* Right Column - Activity & Stats */}
+            <div className="space-y-4">
+              {/* Recent Activity */}
+              <Card>
                 <CardHeader className="pb-3">
-                  <div className="flex items-center gap-[var(--spacing-component-md)]">
-                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-green-500/10 border border-green-500/20">
-                      <Users className="h-4 w-4 text-green-600" />
-                    </div>
-                    <div className="flex-1">
-                      <CardTitle className="text-base">AI Community</CardTitle>
-                      <CardDescription className="text-xs">
-                        Connect with fellow AI developers
-                      </CardDescription>
-                    </div>
+                  <div className="flex items-center gap-2">
+                    <Activity className="size-4 text-primary" />
+                    <CardTitle className="text-base">Recent Activity</CardTitle>
                   </div>
+                  <CardDescription className="text-sm">
+                    Your latest interactions
+                  </CardDescription>
                 </CardHeader>
-                <CardContent className="pt-0 space-y-[var(--spacing-component-md)]">
-                  <p className="text-sm text-muted-foreground">
-                    Join our vibrant community of developers. Share knowledge,
-                    discover best practices, and get help from AI experts.
-                  </p>
-                  <Button
-                    asChild
-                    variant="ghost"
-                    className="w-full gap-[var(--spacing-component-sm)] h-8"
-                  >
-                    <Link to="/community">
-                      Join Community
-                      <ArrowRight className="size-3" />
-                    </Link>
-                  </Button>
-                </CardContent>
-              </Card>
-            </div>
-          </section>
-
-          {/* Benefits Section */}
-          <section>
-            <div className="text-center mb-6">
-              <h2 className="text-xl font-semibold text-foreground mb-1">
-                Por que Escolher o Project Wiz?
-              </h2>
-              <p className="text-muted-foreground text-sm">
-                Construído para desenvolvedores, por desenvolvedores
-              </p>
-            </div>
-
-            <div className="grid gap-[var(--spacing-component-md)] md:grid-cols-3">
-              <div className="flex items-start gap-[var(--spacing-component-md)] p-[var(--spacing-component-md)] rounded-lg bg-card border">
-                <div className="flex h-6 w-6 items-center justify-center rounded-lg bg-primary/10">
-                  <Clock className="h-3 w-3 text-primary" />
-                </div>
-                <div>
-                  <h3 className="font-medium text-foreground text-sm mb-1">
-                    Economize Tempo
-                  </h3>
-                  <p className="text-xs text-muted-foreground">
-                    Automatize tarefas repetitivas e foque no que mais importa
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex items-start gap-[var(--spacing-component-md)] p-[var(--spacing-component-md)] rounded-lg bg-card border">
-                <div className="flex h-6 w-6 items-center justify-center rounded-lg bg-blue-500/10">
-                  <Shield className="h-3 w-3 text-blue-600" />
-                </div>
-                <div>
-                  <h3 className="font-medium text-foreground text-sm mb-1">
-                    Seguro
-                  </h3>
-                  <p className="text-xs text-muted-foreground">
-                    Segurança empresarial com processamento local de dados
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex items-start gap-[var(--spacing-component-md)] p-[var(--spacing-component-md)] rounded-lg bg-card border">
-                <div className="flex h-6 w-6 items-center justify-center rounded-lg bg-green-500/10">
-                  <Target className="h-3 w-3 text-green-600" />
-                </div>
-                <div>
-                  <h3 className="font-medium text-foreground text-sm mb-1">
-                    Preciso
-                  </h3>
-                  <p className="text-xs text-muted-foreground">
-                    Agentes de IA treinados para fluxos de desenvolvimento
-                  </p>
-                </div>
-              </div>
-            </div>
-          </section>
-
-          {/* Recent Activity */}
-          <section>
-            <Card>
-              <CardHeader className="border-b border-border/50 pb-3">
-                <div className="flex items-center gap-[var(--spacing-component-md)]">
-                  <div className="flex h-6 w-6 items-center justify-center rounded-lg bg-primary/10">
-                    <Bot className="h-3 w-3 text-primary" />
-                  </div>
-                  <div>
-                    <CardTitle className="text-base">
-                      Atividade Recente
-                    </CardTitle>
-                    <CardDescription className="text-xs">
-                      Suas últimas interações e atualizações do sistema
-                    </CardDescription>
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent className="pt-4">
-                <div className="space-y-[var(--spacing-component-md)]">
+                <CardContent className="space-y-2">
                   <ActivityItem
                     icon={<div className="w-2 h-2 bg-green-500 rounded-full" />}
-                    title="Login realizado com sucesso no Project Wiz"
-                    timestamp="Agora mesmo"
+                    title="Successfully logged into Project Wiz"
+                    timestamp="Just now"
                     variant="success"
                   />
                   <ActivityItem
                     icon={<div className="w-2 h-2 bg-primary rounded-full" />}
-                    title="Bem-vindo! Seu espaço de trabalho está pronto para usar"
-                    timestamp="Hoje"
+                    title="Welcome! Your workspace is ready"
+                    timestamp="Today"
                     variant="info"
                   />
                   <ActivityItem
                     icon={<div className="w-2 h-2 bg-blue-500 rounded-full" />}
-                    title="Sistema atualizado com os últimos modelos de IA"
-                    timestamp="Ontem"
+                    title="System updated with latest AI models"
+                    timestamp="Yesterday"
                     variant="info"
                   />
-                </div>
+                  <div className="pt-2 border-t border-border/50">
+                    <p className="text-xs text-muted-foreground text-center">
+                      Create agents and projects to see more activity
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
 
-                <div className="mt-4 pt-3 border-t border-border/50">
-                  <p className="text-xs text-muted-foreground text-center">
-                    Start by creating agents and projects to see more activity
-                    here
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-          </section>
+              {/* Quick Stats */}
+              <Card>
+                <CardHeader className="pb-3">
+                  <div className="flex items-center gap-2">
+                    <TrendingUp className="size-4 text-primary" />
+                    <CardTitle className="text-base">Workspace Stats</CardTitle>
+                  </div>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <div className="flex items-center justify-between p-2 rounded-md bg-muted/50">
+                    <div className="flex items-center gap-2">
+                      <Bot className="size-3 text-primary" />
+                      <span className="text-sm">AI Agents</span>
+                    </div>
+                    <span className="text-sm font-medium">0</span>
+                  </div>
+                  <div className="flex items-center justify-between p-2 rounded-md bg-muted/50">
+                    <div className="flex items-center gap-2">
+                      <Folder className="size-3 text-blue-600" />
+                      <span className="text-sm">Projects</span>
+                    </div>
+                    <span className="text-sm font-medium">0</span>
+                  </div>
+                  <div className="flex items-center justify-between p-2 rounded-md bg-muted/50">
+                    <div className="flex items-center gap-2">
+                      <MessageSquare className="size-3 text-green-600" />
+                      <span className="text-sm">Conversations</span>
+                    </div>
+                    <span className="text-sm font-medium">0</span>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Resources */}
+              <Card>
+                <CardHeader className="pb-3">
+                  <div className="flex items-center gap-2">
+                    <BookOpen className="size-4 text-primary" />
+                    <CardTitle className="text-base">Resources</CardTitle>
+                  </div>
+                </CardHeader>
+                <CardContent className="space-y-2">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="w-full justify-start h-8"
+                  >
+                    <BookOpen className="size-3 mr-2" />
+                    Documentation
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="w-full justify-start h-8"
+                  >
+                    <Users className="size-3 mr-2" />
+                    Community
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="w-full justify-start h-8"
+                  >
+                    <MessageSquare className="size-3 mr-2" />
+                    Support
+                  </Button>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
         </div>
-      </div>
+      </ScrollArea>
     </div>
   );
 }

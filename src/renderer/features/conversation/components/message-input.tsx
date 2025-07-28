@@ -40,53 +40,51 @@ export function ActionButtons({
 }: ActionButtonsProps) {
   return (
     <TooltipProvider>
-      <div className="absolute bottom-2 right-2 flex items-center gap-[var(--spacing-component-xs)]">
-        {/* Secondary action buttons - only show when no content */}
-        {!hasContent && (
-          <div className="flex items-center gap-[var(--spacing-component-xs)] mr-1">
-            {onAttachment && (
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    type="button"
-                    size="sm"
-                    variant="ghost"
-                    onClick={onAttachment}
-                    disabled={disabled || isSending}
-                    className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all duration-200"
-                    aria-label="Attach file"
-                  >
-                    <Paperclip className="h-4 w-4" />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Anexar arquivo</p>
-                </TooltipContent>
-              </Tooltip>
-            )}
+      <div className="absolute bottom-1.5 right-1.5 flex items-center gap-1">
+        {/* Secondary action buttons - always show */}
+        <div className="flex items-center gap-1 mr-1">
+          {onAttachment && (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="ghost"
+                  onClick={onAttachment}
+                  disabled={disabled || isSending}
+                  className="h-7 w-7 p-0 text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all duration-150"
+                  aria-label="Attach file"
+                >
+                  <Paperclip className="h-4 w-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Attach file</p>
+              </TooltipContent>
+            </Tooltip>
+          )}
 
-            {onEmoji && (
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    type="button"
-                    size="sm"
-                    variant="ghost"
-                    onClick={onEmoji}
-                    disabled={disabled || isSending}
-                    className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all duration-200"
-                    aria-label="Add emoji"
-                  >
-                    <Smile className="h-4 w-4" />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Adicionar emoji</p>
-                </TooltipContent>
-              </Tooltip>
-            )}
-          </div>
-        )}
+          {onEmoji && (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="ghost"
+                  onClick={onEmoji}
+                  disabled={disabled || isSending}
+                  className="h-7 w-7 p-0 text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all duration-150"
+                  aria-label="Add emoji"
+                >
+                  <Smile className="h-4 w-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Add emoji</p>
+              </TooltipContent>
+            </Tooltip>
+          )}
+        </div>
 
         {/* Send button */}
         <Tooltip>
@@ -98,10 +96,10 @@ export function ActionButtons({
               onClick={onSend}
               disabled={disabled || isSending || !hasContent}
               className={cn(
-                "h-8 w-8 p-0 transition-all duration-200 shadow-sm",
+                "h-7 w-7 p-0 transition-all duration-150",
                 hasContent && !disabled && !isSending
-                  ? "bg-gradient-to-r from-primary to-primary/90 text-primary-foreground hover:from-primary/90 hover:to-primary/80 hover:scale-[1.01] hover:shadow-md border border-primary/20"
-                  : "text-muted-foreground hover:text-foreground hover:bg-muted/50 border border-transparent",
+                  ? "bg-primary text-primary-foreground hover:bg-primary/90"
+                  : "text-muted-foreground hover:text-foreground hover:bg-muted/50",
                 isSending && "animate-pulse",
               )}
               aria-label="Send message"
@@ -110,7 +108,7 @@ export function ActionButtons({
             </Button>
           </TooltipTrigger>
           <TooltipContent>
-            <p>{hasContent ? "Enviar mensagem" : "Digite uma mensagem"}</p>
+            <p>{hasContent ? "Send message" : "Type a message"}</p>
           </TooltipContent>
         </Tooltip>
       </div>
@@ -212,13 +210,8 @@ export function MessageInput(props: MessageInputProps) {
   }
 
   return (
-    <div
-      className={cn(
-        "border-t bg-gradient-to-r from-background to-background/95 backdrop-blur-sm",
-        className,
-      )}
-    >
-      <div className="px-[var(--spacing-component-md)] pb-[var(--spacing-component-md)] pt-[var(--spacing-component-md)]">
+    <div className={cn("bg-background border-t border-border/60", className)}>
+      <div className="px-4 py-3">
         {/* Form-like input container with enhanced design */}
         <form
           onSubmit={(e) => {
@@ -229,15 +222,15 @@ export function MessageInput(props: MessageInputProps) {
         >
           <div
             className={cn(
-              "bg-gradient-to-r from-muted/40 to-muted/30 rounded-xl border transition-all duration-300 relative shadow-sm",
+              "bg-muted/40 rounded-lg border transition-all duration-200 relative",
               isFocused
-                ? "border-primary/40 shadow-md ring-2 ring-primary/10"
-                : "border-border/60 hover:border-border/80",
+                ? "border-primary/50 ring-1 ring-primary/20"
+                : "border-border/50 hover:border-border/70",
               disabled && "opacity-60 cursor-not-allowed",
-              isOverLimit && "border-destructive/50 ring-2 ring-destructive/10",
+              isOverLimit && "border-destructive/50 ring-1 ring-destructive/20",
             )}
           >
-            <ScrollArea className="flex flex-col flex-1 max-h-[160px] transition-all duration-300">
+            <ScrollArea className="max-h-[120px]">
               <Textarea
                 ref={textareaRef}
                 value={message}
@@ -249,11 +242,11 @@ export function MessageInput(props: MessageInputProps) {
                 disabled={disabled || isSending}
                 maxLength={maxCharacters}
                 className={cn(
-                  "resize-none bg-transparent border-0 min-h-[52px]",
+                  "resize-none bg-transparent border-0 min-h-[44px]",
                   "focus-visible:ring-0 focus-visible:ring-offset-0",
-                  "px-5 py-[var(--spacing-component-md)] pr-20 leading-relaxed text-sm w-full font-medium",
-                  "placeholder:text-muted-foreground/60 placeholder:font-normal",
-                  "transition-all duration-200",
+                  "px-3 py-2.5 pr-16 leading-[1.375] text-sm w-full",
+                  "placeholder:text-muted-foreground/60",
+                  "transition-all duration-150",
                   disabled && "cursor-not-allowed opacity-50",
                   isOverLimit && "text-destructive",
                 )}
@@ -277,28 +270,17 @@ export function MessageInput(props: MessageInputProps) {
             />
           </div>
 
-          {/* Character count indicator */}
-          {(hasContent || isFocused) && (
-            <div className="flex justify-between items-center mt-2 px-[var(--spacing-component-sm)]">
-              <div className="text-xs text-muted-foreground/70 font-medium">
-                <span>Press Enter to send, Shift+Enter for new line</span>
-                {hasContent && <span> • Escape to clear</span>}
+          {/* Character count indicator - more compact */}
+          {(isNearLimit || isOverLimit) && (
+            <div className="flex justify-end items-center mt-1 px-1">
+              <div
+                className={cn(
+                  "text-xs transition-colors duration-200",
+                  isOverLimit ? "text-destructive" : "text-muted-foreground/80",
+                )}
+              >
+                {characterCount}/{maxCharacters}
               </div>
-
-              {characterCount > 0 && (
-                <div
-                  className={cn(
-                    "text-xs font-medium transition-colors duration-200",
-                    isOverLimit
-                      ? "text-destructive"
-                      : isNearLimit
-                        ? "text-chart-4"
-                        : "text-muted-foreground/60",
-                  )}
-                >
-                  {characterCount}/{maxCharacters}
-                </div>
-              )}
             </div>
           )}
 

@@ -77,7 +77,7 @@ export function RegisterForm(props: RegisterFormProps) {
       });
 
       if (!response.success) {
-        throw new Error(response.error || "Falha no cadastro");
+        throw new Error(response.error || "Registration failed");
       }
 
       // Automatically log in after registration
@@ -89,7 +89,7 @@ export function RegisterForm(props: RegisterFormProps) {
       router.navigate({ to: "/user" });
     } catch (error) {
       form.setError("root", {
-        message: error instanceof Error ? error.message : "Falha no cadastro",
+        message: error instanceof Error ? error.message : "Registration failed",
       });
     }
   };
@@ -162,7 +162,7 @@ export function RegisterForm(props: RegisterFormProps) {
             name="password"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-sm font-medium">Senha</FormLabel>
+                <FormLabel className="text-sm font-medium">Password</FormLabel>
                 <FormControl>
                   <div className="relative">
                     <Lock
@@ -172,7 +172,7 @@ export function RegisterForm(props: RegisterFormProps) {
                     <Input
                       {...field}
                       type={showPassword ? "text" : "password"}
-                      placeholder="Crie uma senha segura"
+                      placeholder="Create a secure password"
                       disabled={form.formState.isSubmitting}
                       className="pl-10 pr-10 h-11"
                       aria-describedby={field.name + "-error"}
@@ -186,7 +186,7 @@ export function RegisterForm(props: RegisterFormProps) {
                       onClick={() => setShowPassword(!showPassword)}
                       tabIndex={-1}
                       aria-label={
-                        showPassword ? "Ocultar senha" : "Mostrar senha"
+                        showPassword ? "Hide password" : "Show password"
                       }
                     >
                       {showPassword ? (
@@ -208,7 +208,7 @@ export function RegisterForm(props: RegisterFormProps) {
             render={({ field }) => (
               <FormItem>
                 <FormLabel className="text-sm font-medium">
-                  Confirmar senha
+                  Confirm password
                 </FormLabel>
                 <FormControl>
                   <div className="relative">
@@ -219,7 +219,7 @@ export function RegisterForm(props: RegisterFormProps) {
                     <Input
                       {...field}
                       type={showConfirmPassword ? "text" : "password"}
-                      placeholder="Confirme sua senha"
+                      placeholder="Confirm your password"
                       disabled={form.formState.isSubmitting}
                       className="pl-10 pr-10 h-11"
                       aria-describedby={field.name + "-error"}
@@ -235,7 +235,7 @@ export function RegisterForm(props: RegisterFormProps) {
                       }
                       tabIndex={-1}
                       aria-label={
-                        showConfirmPassword ? "Ocultar senha" : "Mostrar senha"
+                        showConfirmPassword ? "Hide password" : "Show password"
                       }
                     >
                       {showConfirmPassword ? (
@@ -261,12 +261,12 @@ export function RegisterForm(props: RegisterFormProps) {
               {form.formState.isSubmitting ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Criando conta...
+                  Creating account...
                 </>
               ) : (
                 <>
                   <UserPlus className="mr-2 h-4 w-4" aria-hidden="true" />
-                  Criar conta
+                  Create account
                 </>
               )}
             </Button>
@@ -288,7 +288,7 @@ export function RegisterForm(props: RegisterFormProps) {
                   onClick={() => router.navigate({ to: "/auth/login" })}
                   type="button"
                 >
-                  Entrar
+                  Sign in
                 </Button>
               </p>
             </div>

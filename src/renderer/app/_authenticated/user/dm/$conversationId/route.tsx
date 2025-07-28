@@ -163,10 +163,10 @@ function DMLayout() {
   // Create description based on participants, not duplicating the title
   const description =
     otherParticipants.length === 1
-      ? "Conversa direta"
+      ? "Direct conversation"
       : otherParticipants.length > 1
-        ? `${otherParticipants.length + 1} participantes`
-        : "Conversa";
+        ? `${otherParticipants.length + 1} participants`
+        : "Conversation";
 
   // Create conversation avatar - use small size for header
   const conversationAvatar = (

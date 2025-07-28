@@ -53,7 +53,7 @@ export function MessageBubble(props: MessageBubbleProps) {
           isInactive: true,
         }
       : {
-          name: "Agente Removido",
+          name: "Removed Agent",
           avatar: null,
           isInactive: true,
         };
@@ -69,7 +69,7 @@ export function MessageBubble(props: MessageBubbleProps) {
       return (
         <div className="flex items-center gap-[var(--spacing-component-sm)] text-muted-foreground/60 ml-2">
           <Loader2 className="w-3 h-3 animate-spin" />
-          <span className="text-xs">Enviando...</span>
+          <span className="text-xs">Sending...</span>
         </div>
       );
     }
@@ -92,22 +92,19 @@ export function MessageBubble(props: MessageBubbleProps) {
   return (
     <div
       className={cn(
-        "relative flex gap-[var(--spacing-component-md)] group px-4 rounded-sm",
-        "hover:bg-muted/10",
-        showAvatar
-          ? "py-[var(--spacing-component-md)] mt-1"
-          : "py-[var(--spacing-component-xs)]",
+        "relative flex gap-3 group px-4 py-0.5 hover:bg-muted/30 transition-colors",
+        showAvatar ? "mt-3 pb-0.5" : "mt-0 pb-0",
         authorInfo.isInactive && "opacity-80",
         isSending && "animate-pulse",
         className,
       )}
     >
-      {/* Avatar or time placeholder - inline logic */}
+      {/* Avatar or time placeholder - Discord style */}
       <div className="flex-shrink-0 w-10">
         {showAvatar ? (
           <Avatar
             className={cn(
-              "size-10",
+              "w-10 h-10",
               authorInfo.isInactive && "opacity-60 grayscale",
             )}
           >
@@ -131,57 +128,66 @@ export function MessageBubble(props: MessageBubbleProps) {
             </AvatarFallback>
           </Avatar>
         ) : (
-          <div className="flex justify-center items-center h-full">
-            <span className="text-xs text-muted-foreground/60 opacity-0 group-hover:opacity-100 transition-opacity">
-              {timeAgo}
+          <div className="flex justify-end items-start h-5 pt-0.5">
+            <span className="text-xs text-muted-foreground/40 opacity-0 group-hover:opacity-100 transition-opacity font-mono">
+              {new Date(message.createdAt).toLocaleTimeString([], {
+                hour: "2-digit",
+                minute: "2-digit",
+              })}
             </span>
           </div>
         )}
       </div>
 
-      {/* Message content */}
-      <div className="flex-1 min-w-0 space-y-[var(--spacing-component-xs)]">
-        {/* Author header - inline logic */}
+      {/* Message content - Discord style */}
+      <div className="flex-1 min-w-0">
+        {/* Author header - compact Discord style */}
         {showAvatar && (
-          <div className="flex items-baseline gap-[var(--spacing-component-md)] mb-1">
-            <div className="flex items-center gap-[var(--spacing-component-sm)]">
-              <span
-                className={cn(
-                  "text-sm font-semibold hover:underline cursor-pointer",
-                  authorInfo.isInactive
-                    ? "text-muted-foreground"
-                    : "text-foreground hover:text-primary",
-                )}
-              >
-                {authorInfo.name}
-              </span>
-
-              {authorInfo.isInactive && (
-                <Badge
-                  variant="outline"
-                  className="h-5 px-[var(--spacing-component-sm)] text-xs bg-muted/40 text-muted-foreground"
-                >
-                  Inativo
-                </Badge>
+          <div className="flex items-baseline gap-2 mb-1">
+            <span
+              className={cn(
+                "text-sm font-medium hover:underline cursor-pointer",
+                authorInfo.isInactive
+                  ? "text-muted-foreground"
+                  : "text-foreground hover:text-primary",
               )}
-            </div>
+            >
+              {authorInfo.name}
+            </span>
 
-            <span className="text-xs text-muted-foreground/80">{timeAgo}</span>
+            {authorInfo.isInactive && (
+              <Badge
+                variant="outline"
+                className="h-4 px-1.5 text-xs bg-muted/40 text-muted-foreground border-muted-foreground/20"
+              >
+                Inactive
+              </Badge>
+            )}
+
+            <span className="text-xs text-muted-foreground/60 font-mono">
+              {new Date(message.createdAt).toLocaleString([], {
+                month: "short",
+                day: "numeric",
+                hour: "2-digit",
+                minute: "2-digit",
+              })}
+            </span>
           </div>
         )}
 
-        {/* Message text with status - inline logic */}
+        {/* Message text with status - Discord style */}
         <div
           className={cn(
-            "text-sm leading-relaxed break-words",
+            "text-sm leading-[1.375] break-words",
+            showAvatar ? "" : "mt-0",
             authorInfo.isInactive
               ? "text-muted-foreground/80"
               : "text-foreground",
           )}
         >
-          <div className="flex items-end gap-[var(--spacing-component-sm)]">
+          <div className="flex items-end gap-2">
             <div className="flex-1 min-w-0">
-              <p className="whitespace-pre-wrap selection:bg-primary/20">
+              <p className="whitespace-pre-wrap selection:bg-primary/20 m-0">
                 {message.content}
               </p>
             </div>

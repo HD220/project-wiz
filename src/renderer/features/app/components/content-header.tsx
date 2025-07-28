@@ -67,9 +67,7 @@ export function ContentHeader(props: ContentHeaderProps) {
                 !isMemberSidebarCollapsed && "bg-accent text-accent-foreground",
               )}
               onClick={onToggleMemberSidebar}
-              title={
-                isMemberSidebarCollapsed ? "Mostrar membros" : "Ocultar membros"
-              }
+              title={isMemberSidebarCollapsed ? "Show members" : "Hide members"}
             >
               <Users className="w-[var(--spacing-component-lg)] h-[var(--spacing-component-lg)]" />
             </Button>

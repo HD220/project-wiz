@@ -1,18 +1,17 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { useNavigate, useLocation, Link } from "@tanstack/react-router";
-import { MessageCircle, Archive, Plus, MoreHorizontal } from "lucide-react";
+import {
+  MessageCircle,
+  Archive,
+  Plus,
+  MoreHorizontal,
+  Hash,
+} from "lucide-react";
 import { useState, useMemo } from "react";
 
 import type { UserSummary } from "@/main/features/user/user.service";
 
 import { Button } from "@/renderer/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/renderer/components/ui/card";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -21,6 +20,7 @@ import {
 } from "@/renderer/components/ui/dropdown-menu";
 import { ScrollArea } from "@/renderer/components/ui/scroll-area";
 import { Switch } from "@/renderer/components/ui/switch";
+import { Separator } from "@/renderer/components/ui/separator";
 import { useAuth } from "@/renderer/contexts/auth.context";
 import { useApiMutation } from "@/renderer/hooks/use-api-mutation.hook";
 import { cn } from "@/renderer/lib/utils";
@@ -111,8 +111,8 @@ export function ConversationList(props: ConversationListProps) {
           onCreateConversation={() => setShowCreateDialog(true)}
         />
       ) : (
-        <ScrollArea className="flex-1">
-          <div className="py-2 space-y-1">
+        <ScrollArea className="flex-1 px-2">
+          <div className="py-1 space-y-0.5">
             {displayConversations.map((conversation) => (
               <ConversationListItem
                 key={conversation.id}
@@ -157,17 +157,17 @@ function ConversationListHeader(props: ConversationListHeaderProps) {
   const { onCreateConversation, showArchived, onToggleShowArchived } = props;
 
   return (
-    <div className="p-4 border-b border-border/50 bg-background/95 backdrop-blur-sm">
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="font-semibold text-foreground text-base tracking-tight">
+    <div className="px-2 py-3 border-b border-border/50">
+      <div className="flex items-center justify-between mb-3">
+        <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
           Direct Messages
         </h2>
         <Button
           variant="ghost"
           size="icon"
           className={cn(
-            "w-8 h-8 hover:bg-accent/80 transition-colors rounded-md",
-            "focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1",
+            "w-6 h-6 hover:bg-accent transition-colors rounded-sm",
+            "focus-visible:ring-1 focus-visible:ring-ring",
           )}
           onClick={onCreateConversation}
         >
@@ -176,10 +176,10 @@ function ConversationListHeader(props: ConversationListHeaderProps) {
         </Button>
       </div>
 
-      {/* Archive Toggle */}
-      <div className="flex items-center justify-between text-sm bg-muted/30 rounded-lg p-2.5 hover:bg-muted/40 transition-colors">
-        <div className="flex items-center gap-2.5">
-          <Archive className="w-4 h-4 text-muted-foreground" />
+      {/* Archive Toggle - More compact */}
+      <div className="flex items-center justify-between text-xs bg-muted/20 rounded-md p-2 hover:bg-muted/30 transition-colors">
+        <div className="flex items-center gap-2">
+          <Archive className="w-3.5 h-3.5 text-muted-foreground" />
           <span className="text-muted-foreground font-medium">
             Show Archived
           </span>
@@ -187,7 +187,7 @@ function ConversationListHeader(props: ConversationListHeaderProps) {
         <Switch
           checked={showArchived}
           onCheckedChange={onToggleShowArchived}
-          className="data-[state=checked]:bg-primary"
+          className="data-[state=checked]:bg-primary scale-75"
           aria-label="Toggle archived conversations visibility"
         />
       </div>
@@ -204,15 +204,15 @@ function ConversationListEmpty(props: ConversationListEmptyProps) {
   const { showArchived, onCreateConversation } = props;
 
   return (
-    <div className="flex flex-col items-center justify-center h-full text-center px-4 py-8">
-      <div className="w-16 h-16 rounded-full bg-muted/50 flex items-center justify-center mb-6">
-        <MessageCircle className="w-8 h-8 text-muted-foreground/60" />
+    <div className="flex flex-col items-center justify-center h-full text-center px-3 py-6">
+      <div className="w-12 h-12 rounded-full bg-muted/40 flex items-center justify-center mb-4">
+        <MessageCircle className="w-6 h-6 text-muted-foreground/60" />
       </div>
-      <div className="space-y-4 max-w-xs">
-        <h3 className="font-semibold text-foreground text-base">
+      <div className="space-y-2 max-w-xs">
+        <h3 className="font-medium text-foreground text-sm">
           {showArchived ? "No Archived Conversations" : "No Direct Messages"}
         </h3>
-        <p className="text-sm text-muted-foreground leading-relaxed">
+        <p className="text-xs text-muted-foreground leading-relaxed">
           {showArchived
             ? "You haven't archived any conversations yet."
             : "Start a conversation with someone to begin chatting."}
@@ -222,12 +222,9 @@ function ConversationListEmpty(props: ConversationListEmptyProps) {
             variant="outline"
             size="sm"
             onClick={onCreateConversation}
-            className={cn(
-              "mt-2 shadow-sm hover:shadow-md transition-all duration-200",
-              "focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
-            )}
+            className="mt-3 h-7 text-xs"
           >
-            <Plus className="w-4 h-4 mr-2" />
+            <Plus className="w-3 h-3 mr-1.5" />
             New Message
           </Button>
         )}
@@ -264,12 +261,12 @@ function ConversationListItem(props: ConversationListItemProps) {
 
   // Inline logic for message preview with proper truncation
   const messagePreview = conversation.lastMessage
-    ? conversation.lastMessage.content.length > 30
-      ? `${conversation.lastMessage.content.substring(0, 30)}...`
+    ? conversation.lastMessage.content.length > 35
+      ? `${conversation.lastMessage.content.substring(0, 35)}...`
       : conversation.lastMessage.content
     : "No messages yet";
 
-  // Inline logic for time formatting - consistent with other components
+  // Inline logic for time formatting - Discord style
   const formattedTime = conversation.lastMessage
     ? (() => {
         try {
@@ -306,59 +303,57 @@ function ConversationListItem(props: ConversationListItemProps) {
   const hasUnreadMessages = conversation.lastMessage && false; // TODO: Implement proper unread logic
 
   return (
-    <div className="group relative conversation-item-enter px-2">
+    <div className="group relative">
       <Link
         to="/user/dm/$conversationId"
         params={{ conversationId: conversation.id }}
         className={cn(
-          "flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200",
-          "hover:bg-accent/70 hover:shadow-sm",
-          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+          "flex items-center gap-2 px-2 py-1.5 mx-1 rounded transition-all duration-150",
+          "hover:bg-accent/60",
+          "focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
           conversation.archivedAt && "opacity-60",
           hasUnreadMessages && "bg-accent/30",
         )}
         activeProps={{
-          className: "bg-accent text-accent-foreground shadow-sm",
+          className: "bg-accent/70 text-accent-foreground",
         }}
       >
-        {/* Avatar with status indicator */}
+        {/* Avatar - smaller Discord style with space for overlapped groups */}
         <div className="relative flex-shrink-0">
           <ConversationAvatar
             participants={conversation.participants}
             availableUsers={availableUsers}
             currentUserId={user?.id}
-            size="md"
-            className="ring-1 ring-border/20 shadow-sm"
+            size="sm"
+            className={cn(
+              // Adjust width based on participant count for overlapped group avatars
+              conversation.participants.length > 2 ? "w-10" : "w-8",
+              "h-8",
+            )}
             showStatus={true}
           />
         </div>
 
-        {/* Content */}
-        <div className="flex-1 min-w-0 space-y-1">
-          {/* Top row: Name and time */}
-          <div className="flex items-center justify-between gap-2">
-            <div className="flex items-center gap-2 min-w-0">
-              <span
-                className={cn(
-                  "text-sm font-semibold truncate transition-colors",
-                  conversation.archivedAt &&
-                    "line-through text-muted-foreground",
-                  hasUnreadMessages ? "text-foreground" : "text-foreground/90",
-                )}
-              >
-                {conversationName}
-              </span>
-              {hasUnreadMessages && (
-                <div className="w-2 h-2 bg-primary rounded-full flex-shrink-0 animate-pulse" />
+        {/* Content - more compact */}
+        <div className="flex-1 min-w-0">
+          {/* Name and time in same line */}
+          <div className="flex items-center justify-between gap-1">
+            <span
+              className={cn(
+                "text-sm font-medium truncate",
+                conversation.archivedAt && "line-through text-muted-foreground",
+                hasUnreadMessages ? "text-foreground" : "text-foreground/90",
               )}
-            </div>
+            >
+              {conversationName}
+            </span>
             {formattedTime && (
               <span
                 className={cn(
-                  "text-xs whitespace-nowrap transition-colors",
+                  "text-xs whitespace-nowrap",
                   hasUnreadMessages
                     ? "text-primary font-medium"
-                    : "text-muted-foreground",
+                    : "text-muted-foreground/80",
                 )}
               >
                 {formattedTime}
@@ -366,63 +361,62 @@ function ConversationListItem(props: ConversationListItemProps) {
             )}
           </div>
 
-          {/* Bottom row: Last message preview */}
+          {/* Message preview - more compact */}
           <div
             className={cn(
-              "text-xs truncate leading-tight transition-colors",
-              hasUnreadMessages
-                ? "text-muted-foreground font-medium"
-                : "text-muted-foreground/80",
+              "text-xs truncate text-muted-foreground/70 leading-tight",
+              hasUnreadMessages && "text-muted-foreground font-medium",
             )}
           >
             {messagePreview}
           </div>
         </div>
 
-        {/* Actions menu */}
-        <div
-          className={cn(
-            "opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex-shrink-0",
+        {/* Unread indicator and actions */}
+        <div className="flex items-center gap-1 flex-shrink-0">
+          {hasUnreadMessages && (
+            <div className="w-1.5 h-1.5 bg-primary rounded-full" />
           )}
-          onClick={(e) => e.preventDefault()}
-        >
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="ghost"
-                size="sm"
-                className={cn(
-                  "h-6 w-6 p-0 rounded-md transition-colors",
-                  "hover:bg-accent/50 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1",
+
+          {/* Actions menu - smaller */}
+          <div
+            className={cn(
+              "opacity-0 group-hover:opacity-100 transition-opacity",
+            )}
+            onClick={(e) => e.preventDefault()}
+          >
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-5 w-5 p-0 hover:bg-accent/60"
+                >
+                  <MoreHorizontal className="h-3 w-3" />
+                  <span className="sr-only">Conversation options</span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-44">
+                {!conversation.archivedAt ? (
+                  <DropdownMenuItem
+                    onClick={handleArchive}
+                    className="text-xs py-2 px-2.5 cursor-pointer"
+                  >
+                    <Archive className="h-3.5 w-3.5 mr-2 text-muted-foreground" />
+                    Archive Conversation
+                  </DropdownMenuItem>
+                ) : (
+                  <DropdownMenuItem
+                    onClick={handleUnarchive}
+                    className="text-xs py-2 px-2.5 cursor-pointer"
+                  >
+                    <Archive className="h-3.5 w-3.5 mr-2 text-muted-foreground" />
+                    Unarchive Conversation
+                  </DropdownMenuItem>
                 )}
-              >
-                <MoreHorizontal className="h-3.5 w-3.5" />
-                <span className="sr-only">Conversation options</span>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent
-              align="end"
-              className="w-48 shadow-lg border-border/50"
-            >
-              {!conversation.archivedAt ? (
-                <DropdownMenuItem
-                  onClick={handleArchive}
-                  className="text-sm py-2.5 px-3 focus:bg-accent/80 cursor-pointer"
-                >
-                  <Archive className="h-4 w-4 mr-3 text-muted-foreground" />
-                  Archive Conversation
-                </DropdownMenuItem>
-              ) : (
-                <DropdownMenuItem
-                  onClick={handleUnarchive}
-                  className="text-sm py-2.5 px-3 focus:bg-accent/80 cursor-pointer"
-                >
-                  <Archive className="h-4 w-4 mr-3 text-muted-foreground" />
-                  Unarchive Conversation
-                </DropdownMenuItem>
-              )}
-            </DropdownMenuContent>
-          </DropdownMenu>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         </div>
       </Link>
 
@@ -448,28 +442,26 @@ export function EmptyConversations(props: EmptyConversationsProps) {
   const { onCreateConversation, className } = props;
 
   return (
-    <Card
-      className={`border-dashed border-2 border-muted-foreground/25 ${className || ""}`}
+    <div
+      className={cn(
+        "flex flex-col items-center justify-center h-full text-center p-6",
+        className,
+      )}
     >
-      <CardHeader className="text-center pb-4">
-        <div className="mx-auto mb-4 w-12 h-12 rounded-full bg-muted flex items-center justify-center">
-          <MessageCircle className="h-6 w-6 text-muted-foreground" />
-        </div>
-        <CardTitle className="text-xl">No Conversations Yet</CardTitle>
-        <CardDescription className="text-base">
-          Start your first direct message conversation
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="text-center pt-0">
-        <p className="text-sm text-muted-foreground mb-6">
-          Connect with other users or AI agents in private conversations. Select
-          participants to begin chatting.
-        </p>
-        <Button onClick={onCreateConversation} className="gap-2">
-          <MessageCircle className="h-4 w-4" />
-          Start Conversation
-        </Button>
-      </CardContent>
-    </Card>
+      <div className="w-12 h-12 rounded-full bg-muted/40 flex items-center justify-center mb-4">
+        <MessageCircle className="h-6 w-6 text-muted-foreground/60" />
+      </div>
+      <h3 className="font-medium text-foreground text-sm mb-2">
+        No Conversations Yet
+      </h3>
+      <p className="text-xs text-muted-foreground mb-4 max-w-xs">
+        Connect with other users or AI agents in private conversations. Select
+        participants to begin chatting.
+      </p>
+      <Button onClick={onCreateConversation} size="sm" className="h-7 text-xs">
+        <MessageCircle className="h-3 w-3 mr-1.5" />
+        Start Conversation
+      </Button>
+    </div>
   );
 }

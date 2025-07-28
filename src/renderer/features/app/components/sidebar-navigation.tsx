@@ -17,27 +17,23 @@ export function SidebarNavigation(props: SidebarNavigationProps) {
 
   return (
     <nav
-      className="flex-1 px-[var(--spacing-component-md)] py-[var(--spacing-component-lg)] space-y-[var(--spacing-component-xs)] overflow-y-auto scrollbar-thin scrollbar-thumb-sidebar-border/60 scrollbar-track-transparent"
+      className="flex-1 px-2 py-3 space-y-1 overflow-y-auto"
       role="navigation"
       aria-label="User navigation"
     >
       <NavigationItem
         to="/user"
         icon={Hash}
-        label="Painel"
+        label="Dashboard"
         activeOptions={{ exact: true }}
       />
 
-      <NavigationItem to="/user/agents" icon={Bot} label="Agentes" />
+      <NavigationItem to="/user/agents" icon={Bot} label="Agents" />
 
-      <Separator className="my-[var(--spacing-component-lg)] bg-sidebar-border/40" />
+      <Separator className="my-3 bg-sidebar-border/40" />
 
       {/* Conversations List with enhanced container */}
-      <div
-        role="region"
-        aria-label="Conversations"
-        className="space-y-[var(--spacing-component-xs)]"
-      >
+      <div role="region" aria-label="Conversations" className="space-y-0">
         <ConversationList
           conversations={conversations}
           availableUsers={availableUsers}

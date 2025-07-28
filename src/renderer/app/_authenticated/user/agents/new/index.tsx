@@ -3,15 +3,11 @@ import {
   useNavigate,
   useSearch,
 } from "@tanstack/react-router";
+import { ArrowLeft, Bot } from "lucide-react";
 
 import type { LlmProvider } from "@/main/features/agent/llm-provider/llm-provider.types";
 
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/renderer/components/ui/dialog";
+import { Button } from "@/renderer/components/ui/button";
 import type { CreateAgentInput } from "@/renderer/features/agent/agent.types";
 import { AgentForm } from "@/renderer/features/agent/components/agent-form";
 import { useApiMutation } from "@/renderer/hooks/use-api-mutation.hook";
@@ -29,12 +25,12 @@ function NewAgentPage() {
     {
       successMessage: "Agent created successfully",
       errorMessage: "Failed to create agent",
-      onSuccess: () => handleClose(),
+      onSuccess: () => handleBack(),
     },
   );
 
-  function handleClose() {
-    // Preserve user's current filter state when closing
+  function handleBack() {
+    // Preserve user's current filter state when going back
     navigate({ to: "/user/agents", search: parentSearch });
   }
 
@@ -49,22 +45,35 @@ function NewAgentPage() {
   }
 
   return (
-    <Dialog open onOpenChange={handleClose}>
-      <DialogContent className="max-w-2xl lg:max-w-4xl xl:max-w-5xl max-h-[90vh] overflow-hidden">
-        <DialogHeader>
-          <DialogTitle>Create New Agent</DialogTitle>
-        </DialogHeader>
+    <div className="flex flex-col h-full">
+      {/* Header with back button - Discord style */}
+      <div className="flex items-center gap-4 p-4 border-b">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={handleBack}
+          className="h-8 w-8 p-0"
+        >
+          <ArrowLeft className="size-4" />
+        </Button>
+        <div className="flex items-center gap-2">
+          <Bot className="size-5 text-muted-foreground" />
+          <h1 className="text-lg font-semibold">Create New Agent</h1>
+        </div>
+      </div>
 
-        <div className="overflow-hidden flex-1">
+      {/* Form Content */}
+      <div className="flex-1 flex justify-center overflow-hidden">
+        <div className="w-full max-w-2xl">
           <AgentForm
             providers={providers}
             onSubmit={handleSubmit}
-            onCancel={handleClose}
+            onCancel={handleBack}
             isLoading={createAgentMutation.isPending}
           />
         </div>
-      </DialogContent>
-    </Dialog>
+      </div>
+    </div>
   );
 }
 

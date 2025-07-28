@@ -1,15 +1,15 @@
 import { useNavigate } from "@tanstack/react-router";
-import { Folder, Plus, Sparkles } from "lucide-react";
+import { X } from "lucide-react";
 import { useState } from "react";
 
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
 } from "@/renderer/components/ui/dialog";
+import { Button } from "@/renderer/components/ui/button";
 import { cn } from "@/renderer/lib/utils";
 
 import { ProjectForm } from "./project-form";
@@ -17,19 +17,18 @@ import { ProjectForm } from "./project-form";
 interface CreateProjectDialogProps {
   children: React.ReactNode;
   onSuccess?: () => void;
-  variant?: "default" | "compact";
   className?: string;
 }
 
 export function CreateProjectDialog(props: CreateProjectDialogProps) {
-  const { children, onSuccess, variant = "default", className } = props;
+  const { children, onSuccess, className } = props;
   const [open, setOpen] = useState(false);
   const navigate = useNavigate();
 
   function handleSuccess(projectId: string) {
     setOpen(false);
 
-    // Navigate to the new project with loading state
+    // Navigate to the new project
     navigate({
       to: "/project/$projectId",
       params: { projectId },
@@ -41,66 +40,37 @@ export function CreateProjectDialog(props: CreateProjectDialogProps) {
 
   function handleOpenChange(newOpen: boolean) {
     setOpen(newOpen);
-    // Reset form state when dialog closes
-    if (!newOpen) {
-      // Form will reset automatically on unmount
-    }
   }
-
-  const isCompact = variant === "compact";
-  const dialogWidth = isCompact ? "sm:max-w-[400px]" : "sm:max-w-[600px]";
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild className={className}>
         {children}
       </DialogTrigger>
-      <DialogContent
-        className={cn(
-          "gap-0 p-0 border-2 shadow-2xl",
-          dialogWidth,
-          "max-h-[90vh] overflow-hidden",
-        )}
-        aria-describedby="create-project-description"
-      >
-        {/* Enhanced Header with gradient background */}
-        <DialogHeader className="relative p-6 pb-4 bg-gradient-to-br from-primary/5 via-primary/10 to-background border-b border-border/50">
-          <div className="flex items-start gap-4">
-            <div className="relative">
-              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 border-2 border-primary/20 shadow-sm">
-                <Folder className="h-6 w-6 text-primary" aria-hidden="true" />
-              </div>
-              <div className="absolute -top-1 -right-1 h-5 w-5 bg-primary rounded-full flex items-center justify-center shadow-md">
-                <Plus className="h-3 w-3 text-primary-foreground" />
-              </div>
-            </div>
-            <div className="flex-1 space-y-2">
-              <DialogTitle className="text-2xl font-bold bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text">
-                Create New Project
-              </DialogTitle>
-              <DialogDescription
-                id="create-project-description"
-                className="text-base text-muted-foreground leading-relaxed"
-              >
-                {isCompact
-                  ? "Set up your new project"
-                  : "Create a new project to organize your work and collaborate with your team. Choose between starting from scratch or cloning an existing repository."}
-              </DialogDescription>
-            </div>
-            {!isCompact && (
-              <div className="hidden sm:flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-primary/20 to-primary/30 border border-primary/30">
-                <Sparkles className="h-8 w-8 text-primary" />
-              </div>
-            )}
+      <DialogContent className={cn("sm:max-w-md p-0 gap-0")}>
+        {/* Discord-style header */}
+        <DialogHeader className="px-6 py-4 border-b">
+          <div className="flex items-center justify-between">
+            <DialogTitle className="text-lg font-semibold">
+              Create Project
+            </DialogTitle>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-6 w-6 p-0"
+              onClick={() => setOpen(false)}
+            >
+              <X className="h-4 w-4" />
+            </Button>
           </div>
         </DialogHeader>
 
-        {/* Enhanced Content Area */}
-        <div className="p-6 pt-6 overflow-y-auto max-h-[calc(90vh-140px)]">
+        {/* Compact content area */}
+        <div className="px-6 py-4">
           <ProjectForm
             onSuccess={handleSuccess}
             onCancel={() => setOpen(false)}
-            submitLabel={isCompact ? "Create" : "Create Project"}
+            submitLabel="Create"
           />
         </div>
       </DialogContent>
@@ -108,9 +78,5 @@ export function CreateProjectDialog(props: CreateProjectDialogProps) {
   );
 }
 
-// Compound component pattern for better composition
+// Compound component exports
 export const CreateProjectDialogTrigger = DialogTrigger;
-export const CreateProjectDialogContent = DialogContent;
-export const CreateProjectDialogHeader = DialogHeader;
-export const CreateProjectDialogTitle = DialogTitle;
-export const CreateProjectDialogDescription = DialogDescription;

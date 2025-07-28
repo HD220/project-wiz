@@ -38,7 +38,7 @@ export function ConversationItem(props: ConversationItemProps) {
     (otherParticipants.length === 1
       ? otherParticipants[0]?.name || "Unknown"
       : otherParticipants.length > 1
-        ? `Grupo ${otherParticipants.length + 1}`
+        ? `Group ${otherParticipants.length + 1}`
         : "New Conversation");
 
   // Use existing getTimeAgo utility

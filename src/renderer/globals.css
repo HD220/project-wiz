@@ -256,7 +256,7 @@
 }
 
 @layer utilities {
-  /* Oculta a barra de rolagem do ScrollArea do shadcn */
+  /* Hide the scrollbar from shadcn ScrollArea */
   .scrollbar-hide [data-slot="scroll-area-scrollbar"] {
     display: none !important;
   }

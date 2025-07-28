@@ -70,7 +70,7 @@ export function WelcomeMessage({
             <p className="text-lg text-muted-foreground leading-relaxed">
               {isArchived
                 ? "This conversation has been archived and cannot receive new messages."
-                : "This is the beginning of your conversation. Start interacting with the AI agent to get assistance with your projects."}
+                : "This is the beginning of your conversation. Start chatting with the AI agent to get assistance with your projects."}
             </p>
           </div>
 
@@ -220,7 +220,7 @@ export function MessageGroup({
     <div
       className={cn(
         "animate-in fade-in duration-200",
-        showAvatar && "mt-4 first:mt-0",
+        showAvatar && "mt-[17px] first:mt-0",
       )}
     >
       {/* First message in group - shows avatar and name */}
@@ -267,16 +267,20 @@ export function ArchivedInputPlaceholder({
   className,
 }: ArchivedInputPlaceholderProps) {
   return (
-    <div className={cn("bg-muted/20 px-6 py-6", className)}>
-      <div className="flex items-center justify-center gap-[var(--spacing-component-md)] text-muted-foreground max-w-md lg:max-w-lg mx-auto">
-        <div className="w-8 h-8 rounded-full bg-muted/30 flex items-center justify-center flex-shrink-0">
+    <div
+      className={cn(
+        "bg-muted/20 px-4 py-3 border-t border-border/50",
+        className,
+      )}
+    >
+      <div className="flex items-center justify-center gap-3 text-muted-foreground max-w-md mx-auto">
+        <div className="w-6 h-6 rounded-full bg-muted/30 flex items-center justify-center flex-shrink-0">
           <span className="text-sm">📁</span>
         </div>
         <div className="text-center">
-          <p className="text-sm font-medium mb-1">Archived Conversation</p>
-          <p className="text-xs text-muted-foreground/80 leading-relaxed">
-            This conversation has been archived. To send messages, unarchive the
-            conversation first.
+          <p className="text-sm font-medium mb-0.5">Archived Conversation</p>
+          <p className="text-xs text-muted-foreground/80">
+            This conversation has been archived. Unarchive to send messages.
           </p>
         </div>
       </div>
@@ -300,20 +304,32 @@ export function ConversationChat(props: ConversationChatProps) {
     },
   );
 
-  // Auto-scroll to bottom when new messages arrive
+  // Auto-scroll to bottom when new messages arrive - Discord-like behavior
   useEffect(() => {
-    const scrollToBottom = () => {
+    const scrollToBottom = (smooth = true) => {
       if (scrollAreaRef.current) {
         const viewport = scrollAreaRef.current.querySelector(
           "[data-radix-scroll-area-viewport]",
         );
         if (viewport) {
-          viewport.scrollTop = viewport.scrollHeight;
+          if (smooth) {
+            viewport.scrollTo({
+              top: viewport.scrollHeight,
+              behavior: "smooth",
+            });
+          } else {
+            viewport.scrollTop = viewport.scrollHeight;
+          }
         }
       }
     };
 
-    const timeoutId = setTimeout(scrollToBottom, 50);
+    // Immediate scroll for initial load, smooth scroll for new messages
+    const isInitialLoad = !conversation.messages?.length;
+    const timeoutId = setTimeout(
+      () => scrollToBottom(!isInitialLoad),
+      isInitialLoad ? 0 : 100,
+    );
     return () => clearTimeout(timeoutId);
   }, [conversation.messages?.length]);
 
@@ -386,12 +402,9 @@ export function ConversationChat(props: ConversationChatProps) {
         />
       )}
 
-      {/* Enhanced Messages Area */}
+      {/* Messages Area - Discord style */}
       <div className="flex-1 overflow-hidden relative">
-        {/* Chat Background */}
-        <div className="absolute inset-0 bg-gradient-to-b from-background via-background to-background/95"></div>
-
-        <ScrollArea ref={scrollAreaRef} className="h-full w-full relative z-10">
+        <ScrollArea ref={scrollAreaRef} className="h-full w-full">
           <div className="min-h-full flex flex-col">
             {/* Welcome Message - only show when no messages */}
             {messageGroups.length === 0 && (
@@ -403,11 +416,10 @@ export function ConversationChat(props: ConversationChatProps) {
               </div>
             )}
 
-            {/* Messages Container */}
+            {/* Messages Container - Discord style */}
             {messageGroups.length > 0 && (
               <div className="flex-1">
-                {/* Message Groups - Discord style */}
-                <div className="space-y-1">
+                <div className="px-4 py-4">
                   {messageGroups.map((group, groupIndex) => (
                     <MessageGroup
                       key={groupIndex}
@@ -431,32 +443,23 @@ export function ConversationChat(props: ConversationChatProps) {
             )}
 
             {/* Scroll padding */}
-            <div className="h-6" />
+            <div className="h-4" />
           </div>
         </ScrollArea>
-
-        {/* Subtle gradient overlay at bottom */}
-        <div className="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-background/80 to-transparent pointer-events-none z-20"></div>
       </div>
 
-      {/* Enhanced Message Input */}
+      {/* Message Input */}
       {!isArchived && (
-        <div className="border-t border-border/50 bg-background/95 backdrop-blur-sm">
-          <MessageInput
-            onSendMessage={handleSendMessage}
-            disabled={sendMessageMutation.isPending}
-            isSending={sendMessageMutation.isPending}
-            placeholder={`Chat in ${conversation.name || "conversation"}...`}
-          />
-        </div>
+        <MessageInput
+          onSendMessage={handleSendMessage}
+          disabled={sendMessageMutation.isPending}
+          isSending={sendMessageMutation.isPending}
+          placeholder={`Message ${conversation.name || "conversation"}...`}
+        />
       )}
 
-      {/* Enhanced Archived conversation message input replacement */}
-      {isArchived && (
-        <div className="border-t border-border/50">
-          <ArchivedInputPlaceholder />
-        </div>
-      )}
+      {/* Archived conversation input replacement */}
+      {isArchived && <ArchivedInputPlaceholder />}
     </div>
   );
 }

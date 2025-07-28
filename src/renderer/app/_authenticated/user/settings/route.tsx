@@ -86,7 +86,7 @@ function SettingsLayout() {
       {/* Content */}
       <div className="flex-1 overflow-auto">
         {/* Header */}
-        <div className="bg-background border-b px-6 py-4 flex items-center justify-between">
+        <div className="bg-background border-b px-6 py-3 flex items-center justify-between">
           <div className="text-sm text-muted-foreground">
             Press{" "}
             <span className="text-xs text-muted-foreground font-mono">ESC</span>{" "}
@@ -99,15 +99,15 @@ function SettingsLayout() {
               size="icon"
               className="w-8 h-8 rounded-full hover:bg-accent/80"
               onClick={() => navigate({ to: "/user" })}
-              title="Fechar configurações"
+              title="Close settings"
             >
               <X className="w-4 h-4" />
             </Button>
           </div>
         </div>
 
-        {/* Page Content */}
-        <div className="p-6">
+        {/* Page Content - Discord style compact padding */}
+        <div className="p-4">
           <Outlet />
         </div>
       </div>

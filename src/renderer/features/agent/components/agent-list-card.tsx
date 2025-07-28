@@ -7,9 +7,9 @@ import {
   PowerOff,
   User,
   RotateCcw,
+  Circle,
 } from "lucide-react";
 
-import { AgentStatus } from "@/renderer/components/agent-status";
 import {
   Avatar,
   AvatarFallback,
@@ -17,8 +17,6 @@ import {
 } from "@/renderer/components/ui/avatar";
 import { Badge } from "@/renderer/components/ui/badge";
 import { Button } from "@/renderer/components/ui/button";
-import { StatusIndicator } from "@/renderer/components/ui/status-indicator";
-import { Card } from "@/renderer/components/ui/card";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -26,12 +24,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/renderer/components/ui/dropdown-menu";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/renderer/components/ui/tooltip";
 import type { SelectAgent } from "@/renderer/features/agent/agent.types";
 import { cn } from "@/renderer/lib/utils";
 
@@ -57,269 +49,183 @@ export function AgentListCard(props: AgentListCardProps) {
     onToggleStatus?.(agent);
   }
 
-  // Format deactivation date
-  const formatDeactivationDate = (date: Date | null) => {
-    if (!date) return "";
-    return new Date(date).toLocaleDateString();
+  // Parse model from modelConfig JSON string
+  const getModelName = () => {
+    try {
+      const config = JSON.parse(agent.modelConfig);
+      return config.model || "Unknown";
+    } catch {
+      return "Unknown";
+    }
+  };
+
+  // Status indicator color based on agent status
+  const getStatusColor = () => {
+    if (!agent.isActive) return "text-muted-foreground";
+    switch (agent.status) {
+      case "active":
+        return "text-green-500";
+      case "busy":
+        return "text-orange-500";
+      case "inactive":
+        return "text-red-500";
+      default:
+        return "text-muted-foreground";
+    }
   };
 
   return (
-    <Card
+    <div
       className={cn(
-        // Enhanced card styling using design tokens
-        "relative group",
-        "p-[var(--spacing-component-lg)]",
-        "border border-border",
-        "bg-card",
-        "rounded-[var(--radius)]",
-        "transition-all duration-200 ease-out",
-        "hover:border-ring/30",
-        "hover:shadow-lg",
-        "hover:shadow-foreground/5",
-        "hover:-translate-y-0.5",
-        // Active state visual distinction
-        agent.isActive
-          ? ["opacity-100", "border-solid"]
-          : ["opacity-75", "border-dashed border-border/50", "bg-card/60"],
+        // Discord-style compact row layout
+        "group flex items-center gap-3 px-3 py-2 rounded-md transition-all duration-150",
+        "hover:bg-accent/50 cursor-pointer",
+        // Inactive state styling
+        !agent.isActive && "opacity-60",
       )}
     >
-      {/* Active indicator line */}
-      {agent.isActive && agent.status === "active" && (
-        <div className="absolute top-0 left-0 w-1 h-full bg-chart-5 rounded-l-[var(--radius)]" />
-      )}
+      {/* Avatar with status indicator */}
+      <div className="relative shrink-0">
+        <Avatar className="w-8 h-8">
+          <AvatarImage src={undefined} alt={agent.name} />
+          <AvatarFallback className="text-xs bg-primary/10 text-primary">
+            <User className="w-4 h-4" />
+          </AvatarFallback>
+        </Avatar>
 
-      <div className="flex items-center gap-[var(--spacing-component-lg)]">
-        {/* Avatar and Info */}
-        <div className="flex items-center gap-[var(--spacing-component-md)] flex-1 min-w-0">
-          <div className="relative">
-            <Avatar
+        {/* Status dot - Discord style */}
+        <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-background border-2 border-background flex items-center justify-center">
+          <Circle className={cn("w-2 h-2 fill-current", getStatusColor())} />
+        </div>
+      </div>
+
+      {/* Agent info - compact layout */}
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center gap-2">
+          <span
+            className={cn(
+              "text-sm font-medium truncate",
+              agent.isActive ? "text-foreground" : "text-muted-foreground",
+            )}
+          >
+            {agent.name}
+          </span>
+
+          {/* Compact status badge */}
+          {agent.isActive && (
+            <Badge
+              variant="secondary"
               className={cn(
-                "h-12 w-12 shrink-0 ring-2 ring-transparent transition-all duration-200",
-                agent.isActive
-                  ? "ring-border/20 group-hover:ring-ring/20"
-                  : "opacity-70",
+                "h-4 px-1.5 text-xs font-normal",
+                agent.status === "active" &&
+                  "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400",
+                agent.status === "busy" &&
+                  "bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400",
+                agent.status === "inactive" &&
+                  "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400",
               )}
             >
-              <AvatarImage src={undefined} alt={agent.name} />
-              <AvatarFallback
-                className={cn(
-                  "text-[var(--font-size-sm)] font-[var(--font-weight-medium)]",
-                  "transition-colors duration-200",
-                  agent.isActive
-                    ? "bg-primary/10 text-primary group-hover:bg-primary/15"
-                    : "bg-muted/30 text-muted-foreground",
-                )}
-              >
-                <User className="h-5 w-5" />
-              </AvatarFallback>
-            </Avatar>
+              {agent.status}
+            </Badge>
+          )}
 
-            {/* Status indicator overlay on avatar */}
-            {agent.isActive && (
-              <StatusIndicator
-                status={agent.status}
-                size="lg"
-                variant="dot"
-                className="absolute -bottom-0.5 -right-0.5 border-2 border-card transition-colors duration-200"
-              />
-            )}
-          </div>
+          {/* Inactive indicator */}
+          {!agent.isActive && (
+            <Badge variant="outline" className="h-4 px-1.5 text-xs">
+              Inactive
+            </Badge>
+          )}
+        </div>
 
-          <div className="min-w-0 flex-1 space-y-[var(--spacing-component-xs)]">
-            <div className="flex items-center gap-[var(--spacing-component-sm)]">
-              <h3
-                className={cn(
-                  "text-[var(--font-size-base)] font-[var(--font-weight-semibold)]",
-                  "truncate transition-colors duration-200",
-                  agent.isActive
-                    ? "text-card-foreground group-hover:text-foreground"
-                    : "text-muted-foreground",
-                )}
-              >
-                {agent.name}
-              </h3>
+        {/* Secondary info line */}
+        <div className="flex items-center gap-2 mt-0.5">
+          <span className="text-xs text-muted-foreground truncate">
+            {agent.role}
+          </span>
 
-              {/* Enhanced inactive badge */}
-              {!agent.isActive && (
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger>
-                      <Badge
-                        variant="secondary"
-                        className={cn(
-                          "h-5 px-[var(--spacing-component-sm)]",
-                          "text-[var(--font-size-xs)] font-[var(--font-weight-medium)]",
-                          "bg-muted/60 text-muted-foreground border-0",
-                          "rounded-[calc(var(--radius)-1px)]",
-                        )}
-                      >
-                        Inativo
-                      </Badge>
-                    </TooltipTrigger>
-                    <TooltipContent className="text-[var(--font-size-xs)]">
-                      <p>
-                        Desativado em{" "}
-                        {formatDeactivationDate(agent.deactivatedAt)}
-                      </p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-              )}
-            </div>
+          <span className="text-xs text-muted-foreground">•</span>
+          <span className="text-xs text-muted-foreground/80 truncate">
+            {getModelName()}
+          </span>
+        </div>
+      </div>
 
-            <div className="flex items-center gap-[var(--spacing-component-xs)]">
-              <p className="text-[var(--font-size-sm)] text-muted-foreground truncate">
-                <span className="font-[var(--font-weight-medium)]">
-                  {agent.role}
-                </span>
-                <span className="mx-[var(--spacing-component-xs)] opacity-60">
-                  •
-                </span>
-                <span>
-                  {!agent.isActive ? (
+      {/* Compact actions - only visible on hover */}
+      <div className="shrink-0 opacity-0 group-hover:opacity-100 transition-opacity duration-150">
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-6 w-6 p-0 hover:bg-accent/80"
+            >
+              <MoreHorizontal className="w-3.5 h-3.5" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-40">
+            {agent.isActive ? (
+              // Actions for active agents
+              <>
+                <DropdownMenuItem asChild>
+                  <Link
+                    to="/user/agents/edit/$agentId"
+                    params={{ agentId: agent.id }}
+                    className="cursor-pointer"
+                  >
+                    <Edit2 className="mr-2 w-3.5 h-3.5" />
+                    <span className="text-xs">Edit</span>
+                  </Link>
+                </DropdownMenuItem>
+
+                <DropdownMenuItem
+                  onClick={handleToggleStatus}
+                  className="cursor-pointer"
+                >
+                  {agent.status === "active" ? (
                     <>
-                      Desativado em{" "}
-                      {formatDeactivationDate(agent.deactivatedAt)}
+                      <PowerOff className="mr-2 w-3.5 h-3.5" />
+                      <span className="text-xs">Deactivate</span>
                     </>
                   ) : (
                     <>
-                      Created on{" "}
-                      {new Date(agent.createdAt).toLocaleDateString()}
+                      <Power className="mr-2 w-3.5 h-3.5" />
+                      <span className="text-xs">Activate</span>
                     </>
                   )}
-                </span>
-              </p>
-            </div>
+                </DropdownMenuItem>
 
-            {/* Model information */}
-            {agent.model && (
-              <div className="flex items-center gap-[var(--spacing-component-xs)]">
-                <Badge
-                  variant="outline"
-                  className={cn(
-                    "h-4 px-[var(--spacing-component-xs)]",
-                    "text-[10px] font-[var(--font-weight-medium)]",
-                    "border-border/40 text-muted-foreground",
-                    "bg-transparent",
-                  )}
+                <DropdownMenuSeparator />
+
+                <DropdownMenuItem
+                  onClick={handleDelete}
+                  className="text-destructive cursor-pointer focus:text-destructive"
                 >
-                  {agent.model}
-                </Badge>
-              </div>
+                  <Trash2 className="mr-2 w-3.5 h-3.5" />
+                  <span className="text-xs">Delete</span>
+                </DropdownMenuItem>
+              </>
+            ) : (
+              // Actions for inactive agents
+              <>
+                <DropdownMenuItem
+                  onClick={handleRestore}
+                  className="text-green-600 cursor-pointer focus:text-green-600"
+                >
+                  <RotateCcw className="mr-2 w-3.5 h-3.5" />
+                  <span className="text-xs">Restore</span>
+                </DropdownMenuItem>
+
+                <DropdownMenuSeparator />
+
+                <DropdownMenuItem disabled className="text-muted-foreground">
+                  <Edit2 className="mr-2 w-3.5 h-3.5" />
+                  <span className="text-xs">Edit (Unavailable)</span>
+                </DropdownMenuItem>
+              </>
             )}
-          </div>
-        </div>
-
-        {/* Status and Actions */}
-        <div className="flex items-center gap-[var(--spacing-component-md)] shrink-0">
-          {/* Enhanced status indicator for active agents */}
-          {agent.isActive && (
-            <div className="flex items-center gap-[var(--spacing-component-xs)]">
-              <AgentStatus
-                status={agent.status}
-                size="sm"
-                className="ring-1 ring-border/20"
-              />
-              <span className="text-[var(--font-size-xs)] text-muted-foreground capitalize hidden sm:inline">
-                {agent.status}
-              </span>
-            </div>
-          )}
-
-          {/* Enhanced Actions Menu */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="ghost"
-                size="sm"
-                className={cn(
-                  "h-8 w-8 p-0",
-                  "transition-all duration-200",
-                  "hover:bg-accent/60",
-                  "hover:scale-[1.01]",
-                  "focus:bg-accent/60",
-                  "active:scale-95",
-                )}
-              >
-                <MoreHorizontal className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent
-              align="end"
-              className="w-48 border-border/50 bg-popover/95 backdrop-blur-sm"
-            >
-              {agent.isActive ? (
-                // Enhanced actions for active agents
-                <>
-                  <DropdownMenuItem asChild>
-                    <Link
-                      to="/user/agents/edit/$agentId"
-                      params={{ agentId: agent.id }}
-                      className="cursor-pointer"
-                    >
-                      <Edit2 className="mr-[var(--spacing-component-sm)] h-4 w-4" />
-                      <span className="text-[var(--font-size-sm)]">Edit</span>
-                    </Link>
-                  </DropdownMenuItem>
-
-                  <DropdownMenuItem
-                    onClick={handleToggleStatus}
-                    className="cursor-pointer"
-                  >
-                    {agent.status === "active" ? (
-                      <>
-                        <PowerOff className="mr-[var(--spacing-component-sm)] h-4 w-4" />
-                        <span className="text-[var(--font-size-sm)]">
-                          Deactivate
-                        </span>
-                      </>
-                    ) : (
-                      <>
-                        <Power className="mr-[var(--spacing-component-sm)] h-4 w-4" />
-                        <span className="text-[var(--font-size-sm)]">
-                          Activate
-                        </span>
-                      </>
-                    )}
-                  </DropdownMenuItem>
-
-                  <DropdownMenuSeparator />
-
-                  <DropdownMenuItem
-                    onClick={handleDelete}
-                    className="text-destructive cursor-pointer focus:text-destructive"
-                  >
-                    <Trash2 className="mr-[var(--spacing-component-sm)] h-4 w-4" />
-                    <span className="text-[var(--font-size-sm)]">Delete</span>
-                  </DropdownMenuItem>
-                </>
-              ) : (
-                // Enhanced actions for inactive agents
-                <>
-                  <DropdownMenuItem
-                    onClick={handleRestore}
-                    className="text-chart-5 cursor-pointer focus:text-chart-5"
-                  >
-                    <RotateCcw className="mr-[var(--spacing-component-sm)] h-4 w-4" />
-                    <span className="text-[var(--font-size-sm)]">
-                      Restore Agent
-                    </span>
-                  </DropdownMenuItem>
-
-                  <DropdownMenuSeparator />
-
-                  <DropdownMenuItem disabled className="text-muted-foreground">
-                    <Edit2 className="mr-[var(--spacing-component-sm)] h-4 w-4" />
-                    <span className="text-[var(--font-size-sm)]">
-                      Edit (Unavailable)
-                    </span>
-                  </DropdownMenuItem>
-                </>
-              )}
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
-    </Card>
+    </div>
   );
 }

@@ -2,7 +2,6 @@ import { createFileRoute, Outlet } from "@tanstack/react-router";
 
 import { AgentFiltersSchema } from "@/renderer/features/agent/agent.schema";
 import { AgentList } from "@/renderer/features/agent/components/agent-list";
-import { ContentHeader } from "@/renderer/features/app/components/content-header";
 import { loadApiData } from "@/renderer/lib/route-loader";
 
 function AgentsLayout() {
@@ -10,16 +9,8 @@ function AgentsLayout() {
   const search = Route.useSearch();
 
   return (
-    <div className="flex-1 flex flex-col">
-      <ContentHeader
-        title="AI Agents"
-        description="Create and manage your AI agents for automated tasks and conversations"
-      />
-      <main className="flex-1 overflow-auto">
-        <div className="p-6">
-          <AgentList agents={agents} showInactive={search.showInactive} />
-        </div>
-      </main>
+    <div className="flex-1 flex flex-col overflow-hidden">
+      <AgentList agents={agents} showInactive={search.showInactive} />
 
       {/* Modals/Child Routes */}
       <Outlet />

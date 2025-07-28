@@ -21,13 +21,13 @@ import { AuthCard } from "@/renderer/features/auth/components/auth-layout";
 const loginSchema = z.object({
   username: z
     .string()
-    .min(1, "Nome de usuário é obrigatório")
-    .max(50, "Nome de usuário muito longo")
+    .min(1, "Username is required")
+    .max(50, "Username is too long")
     .trim(),
   password: z
     .string()
-    .min(1, "Senha é obrigatória")
-    .max(100, "Senha muito longa"),
+    .min(1, "Password is required")
+    .max(100, "Password is too long"),
 });
 
 type LoginFormData = z.infer<typeof loginSchema>;
@@ -53,22 +53,22 @@ export function LoginForm(props: LoginFormProps) {
   const handleSubmit = async (data: LoginFormData) => {
     try {
       await login(data);
-      // Aguardar context update antes de navegar
+      // Wait for context update before navigating
       await new Promise((resolve) => setTimeout(resolve, 0));
-      // Usar redirect param se disponível, senão ir para /user
+      // Use redirect param if available, otherwise go to /user
       const redirectTo = search.redirect || "/user";
       router.navigate({ to: redirectTo });
     } catch (error) {
       form.setError("root", {
-        message: error instanceof Error ? error.message : "Falha no login",
+        message: error instanceof Error ? error.message : "Login failed",
       });
     }
   };
 
   return (
     <AuthCard
-      title="Bem-vindo de volta!"
-      description="Faça login para continuar ao seu espaço de trabalho"
+      title="Welcome back!"
+      description="Sign in to continue to your workspace"
       className={className}
     >
       <Form {...form}>
@@ -85,7 +85,7 @@ export function LoginForm(props: LoginFormProps) {
               render={({ field }) => (
                 <FormItem className="space-y-[var(--spacing-component-sm)]">
                   <FormLabel className="text-[var(--font-size-sm)] font-[var(--font-weight-medium)] text-foreground">
-                    Nome de usuário
+                    Username
                   </FormLabel>
                   <FormControl>
                     <div className="relative group">
@@ -96,7 +96,7 @@ export function LoginForm(props: LoginFormProps) {
                       <Input
                         {...field}
                         type="text"
-                        placeholder="Digite seu nome de usuário"
+                        placeholder="Enter your username"
                         disabled={form.formState.isSubmitting}
                         className="
                           pl-10 
@@ -132,13 +132,13 @@ export function LoginForm(props: LoginFormProps) {
               render={({ field }) => (
                 <FormItem className="space-y-[var(--spacing-component-sm)]">
                   <FormLabel className="text-[var(--font-size-sm)] font-[var(--font-weight-medium)] text-foreground">
-                    Senha
+                    Password
                   </FormLabel>
                   <FormControl>
                     <Input
                       {...field}
                       type="password"
-                      placeholder="Digite sua senha"
+                      placeholder="Enter your password"
                       disabled={form.formState.isSubmitting}
                       className="
                         h-12
@@ -196,7 +196,7 @@ export function LoginForm(props: LoginFormProps) {
               {form.formState.isSubmitting ? (
                 <>
                   <Loader2 className="mr-[var(--spacing-component-sm)] h-4 w-4 animate-spin" />
-                  <span>Entrando...</span>
+                  <span>Signing in...</span>
                 </>
               ) : (
                 <>
@@ -204,7 +204,7 @@ export function LoginForm(props: LoginFormProps) {
                     className="mr-[var(--spacing-component-sm)] h-4 w-4"
                     aria-hidden="true"
                   />
-                  <span>Entrar</span>
+                  <span>Sign in</span>
                 </>
               )}
             </Button>
@@ -234,7 +234,7 @@ export function LoginForm(props: LoginFormProps) {
 
             <div className="text-center pt-[var(--spacing-component-sm)]">
               <p className="text-[var(--font-size-sm)] text-muted-foreground">
-                Precisa de uma conta?{" "}
+                Need an account?{" "}
                 <Button
                   variant="link"
                   className="
@@ -249,7 +249,7 @@ export function LoginForm(props: LoginFormProps) {
                   onClick={() => router.navigate({ to: "/auth/register" })}
                   type="button"
                 >
-                  Criar conta
+                  Create account
                 </Button>
               </p>
             </div>

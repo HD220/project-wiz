@@ -1,12 +1,11 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Loader2 } from "lucide-react";
+import { Bot, Settings, User, Loader2 } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { UseFormReturn } from "react-hook-form";
 import { z } from "zod";
 
 import { Button } from "@/renderer/components/ui/button";
 import { ScrollArea } from "@/renderer/components/ui/scroll-area";
-import { StatusIndicator } from "@/renderer/components/ui/status-indicator";
 import {
   Form,
   FormControl,
@@ -100,145 +99,64 @@ export function AgentForm(props: AgentFormProps) {
   // Inline validation state checks
   const hasErrors = Object.keys(form.formState.errors).length > 0;
   const isFormValid = form.formState.isValid;
-  const isDirty = form.formState.isDirty;
 
   return (
-    <ScrollArea className="h-full w-full">
-      <div className="max-w-2xl lg:max-w-4xl xl:max-w-5xl mx-auto space-y-[var(--spacing-layout-lg)] p-6">
-        {/* Enhanced Form Header */}
-        <div className="space-y-[var(--spacing-component-md)]">
-          {/* Hero Section */}
-          <div className="relative">
-            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary/20 via-primary/10 to-primary/5 flex items-center justify-center mx-auto border border-primary/20 shadow-lg shadow-primary/10">
-              <span className="text-2xl font-bold text-primary">
-                {isEditing ? "✏️" : "🤖"}
-              </span>
-            </div>
-            <div className="absolute -inset-1 rounded-2xl bg-gradient-to-r from-primary/20 to-primary/10 blur opacity-30 animate-pulse"></div>
-          </div>
-
-          {/* Title and Description */}
-          <div className="text-center space-y-3">
-            <h1 className="text-3xl font-bold tracking-tight text-foreground">
-              {isEditing ? "Edit Agent" : "Create New Agent"}
-            </h1>
-            <p className="text-lg text-muted-foreground leading-relaxed max-w-2xl lg:max-w-3xl xl:max-w-4xl mx-auto">
-              {isEditing
-                ? "Update your agent's configuration and settings to optimize its performance and behavior."
-                : "Configure your new AI agent with identity, behavior, and provider settings to start automating your workflows."}
-            </p>
-          </div>
-        </div>
-
-        <Separator className="bg-border/50" />
-
-        {/* Enhanced Form Container */}
-        <div className="bg-card/50 backdrop-blur-sm border border-border/60 rounded-xl shadow-lg shadow-primary/5">
+    <div className="flex-1 flex flex-col overflow-hidden">
+      <ScrollArea className="flex-1">
+        <div className="max-w-4xl mx-auto p-8 space-y-8">
           <Form {...form}>
             <form
               onSubmit={form.handleSubmit(handleSubmit)}
-              className="p-[var(--spacing-layout-lg)] space-y-[var(--spacing-layout-lg)]"
+              className="space-y-8"
               role="form"
               aria-label={isEditing ? "Edit agent form" : "Create agent form"}
             >
               {/* Agent Identity Section */}
-              <section
-                aria-labelledby="identity-section"
-                className="space-y-[var(--spacing-component-lg)]"
-              >
-                <AgentFormIdentity form={form} />
-              </section>
+              <AgentFormIdentity form={form} />
 
-              {/* Agent Provider Section */}
-              <section
-                aria-labelledby="provider-section"
-                className="space-y-[var(--spacing-component-lg)]"
-              >
-                <AgentFormProvider form={form} providers={providers} />
-              </section>
-
-              {/* Enhanced Form Actions */}
-              <div className="pt-[var(--spacing-component-lg)] border-t border-border/40">
-                <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-[var(--spacing-component-md)]">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={handleCancel}
-                    disabled={isLoading}
-                    className="sm:w-auto w-full h-11 px-6 border-border/60 hover:bg-accent/50 transition-all duration-200"
-                  >
-                    Cancel
-                  </Button>
-
-                  <Button
-                    type="submit"
-                    disabled={isLoading || (!isFormValid && hasErrors)}
-                    className="sm:w-auto w-full min-w-[160px] h-11 px-6 bg-primary hover:bg-primary/90 shadow-lg shadow-primary/20 transition-all duration-200"
-                  >
-                    {isLoading ? (
-                      <>
-                        <Loader2 className="mr-2 size-4 animate-spin" />
-                        {isEditing ? "Updating..." : "Creating..."}
-                      </>
-                    ) : isEditing ? (
-                      "Update Agent"
-                    ) : (
-                      "Create Agent"
-                    )}
-                  </Button>
-                </div>
+              {/* Separator */}
+              <div className="py-2">
+                <Separator />
               </div>
 
-              {/* Enhanced Form Status Indicator */}
-              {isDirty && (
-                <div className="text-center">
-                  <div className="inline-flex items-center gap-[var(--spacing-component-sm)] px-4 py-2 rounded-lg border border-border/40 bg-card/50">
-                    {hasErrors ? (
-                      <>
-                        <StatusIndicator
-                          status="error"
-                          size="md"
-                          variant="dot"
-                        />
-                        <span className="text-sm text-destructive font-medium">
-                          Please fix the errors above before submitting.
-                        </span>
-                      </>
-                    ) : isFormValid ? (
-                      <>
-                        <StatusIndicator
-                          status="active"
-                          size="md"
-                          variant="dot"
-                          className="animate-pulse"
-                        />
-                        <span className="text-sm text-chart-2 font-medium">
-                          Form is ready to submit.
-                        </span>
-                      </>
-                    ) : (
-                      <>
-                        <StatusIndicator
-                          status="inactive"
-                          size="md"
-                          variant="dot"
-                        />
-                        <span className="text-sm text-muted-foreground font-medium">
-                          Fill in all required fields to continue.
-                        </span>
-                      </>
-                    )}
-                  </div>
-                </div>
-              )}
+              {/* Agent Provider Section */}
+              <AgentFormProvider form={form} providers={providers} />
+
+              {/* Form Actions */}
+              <div className="flex justify-end gap-4 pt-6 border-t bg-background/50 p-6 -mx-6 mt-8">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={handleCancel}
+                  disabled={isLoading}
+                  size="lg"
+                  className="px-6"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  disabled={isLoading || (!isFormValid && hasErrors)}
+                  size="lg"
+                  className="px-6 min-w-[120px]"
+                >
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="mr-2 size-4 animate-spin" />
+                      {isEditing ? "Updating..." : "Creating..."}
+                    </>
+                  ) : isEditing ? (
+                    "Update Agent"
+                  ) : (
+                    "Create Agent"
+                  )}
+                </Button>
+              </div>
             </form>
           </Form>
         </div>
-
-        {/* Scroll padding to prevent content cut-off */}
-        <div className="h-6" />
-      </div>
-    </ScrollArea>
+      </ScrollArea>
+    </div>
   );
 }
 
@@ -252,131 +170,106 @@ function AgentFormIdentity(props: AgentFormIdentityProps) {
   const { form } = props;
 
   return (
-    <>
-      {/* Enhanced Identity Section */}
-      <div className="space-y-[var(--spacing-component-lg)]">
-        <div className="space-y-[var(--spacing-component-sm)]">
-          <div className="flex items-center gap-[var(--spacing-component-md)]">
-            <div className="w-8 h-8 rounded-lg bg-chart-1/10 flex items-center justify-center">
-              <span className="text-chart-1 text-sm">👤</span>
-            </div>
-            <div>
-              <h4 className="text-xl font-semibold text-foreground">
-                Agent Identity
-              </h4>
-              <p className="text-sm text-muted-foreground">
-                Define your agent's name, role, and purpose
-              </p>
-            </div>
-          </div>
+    <div className="space-y-6">
+      {/* Section Header - Professional style */}
+      <div className="flex items-center gap-3 pb-2">
+        <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-primary/10">
+          <User className="size-4 text-primary" />
         </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-[var(--spacing-component-lg)]">
-          <FormField
-            control={form.control}
-            name="name"
-            render={({ field }) => (
-              <FormItem className="space-y-[var(--spacing-component-sm)]">
-                <FormLabel className="text-sm font-medium text-foreground">
-                  Agent Name *
-                </FormLabel>
-                <FormControl>
-                  <Input
-                    placeholder="My Assistant"
-                    className="h-11 border-border/60 focus:border-primary/60 focus:ring-primary/20 transition-all duration-200"
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage className="text-xs" />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="role"
-            render={({ field }) => (
-              <FormItem className="space-y-[var(--spacing-component-sm)]">
-                <FormLabel className="text-sm font-medium text-foreground">
-                  Role *
-                </FormLabel>
-                <FormControl>
-                  <Input
-                    placeholder="Senior Developer"
-                    className="h-11 border-border/60 focus:border-primary/60 focus:ring-primary/20 transition-all duration-200"
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage className="text-xs" />
-              </FormItem>
-            )}
-          />
+        <div>
+          <h3 className="text-xl font-semibold text-foreground">
+            Agent Identity
+          </h3>
+          <p className="text-sm text-muted-foreground">
+            Define your agent's basic information and personality
+          </p>
         </div>
+      </div>
 
+      {/* Basic Info Fields - Spacious Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <FormField
           control={form.control}
-          name="avatar"
+          name="name"
           render={({ field }) => (
-            <FormItem className="space-y-[var(--spacing-component-sm)]">
-              <FormLabel className="text-sm font-medium text-foreground">
-                Avatar URL
+            <FormItem className="space-y-3">
+              <FormLabel className="text-base font-medium">
+                Agent Name
               </FormLabel>
               <FormControl>
                 <Input
-                  placeholder="https://example.com/avatar.jpg"
-                  className="h-11 border-border/60 focus:border-primary/60 focus:ring-primary/20 transition-all duration-200"
+                  placeholder="My AI Assistant"
+                  className="h-10"
                   {...field}
                 />
               </FormControl>
-              <FormDescription className="text-xs text-muted-foreground">
-                Optional avatar image URL for your agent
-              </FormDescription>
-              <FormMessage className="text-xs" />
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="role"
+          render={({ field }) => (
+            <FormItem className="space-y-3">
+              <FormLabel className="text-base font-medium">Role</FormLabel>
+              <FormControl>
+                <Input
+                  placeholder="Senior Developer"
+                  className="h-10"
+                  {...field}
+                />
+              </FormControl>
+              <FormMessage />
             </FormItem>
           )}
         />
       </div>
 
-      <Separator className="bg-border/40" />
+      {/* Avatar URL - Full Width */}
+      <FormField
+        control={form.control}
+        name="avatar"
+        render={({ field }) => (
+          <FormItem className="space-y-3">
+            <FormLabel className="text-base font-medium">Avatar URL</FormLabel>
+            <FormControl>
+              <Input
+                placeholder="https://example.com/avatar.jpg"
+                className="h-10"
+                {...field}
+              />
+            </FormControl>
+            <FormDescription className="text-sm text-muted-foreground">
+              Optional image URL for your agent's profile picture
+            </FormDescription>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
 
-      {/* Enhanced Configuration Section */}
-      <div className="space-y-[var(--spacing-component-lg)]">
-        <div className="space-y-[var(--spacing-component-sm)]">
-          <div className="flex items-center gap-[var(--spacing-component-md)]">
-            <div className="w-8 h-8 rounded-lg bg-chart-3/10 flex items-center justify-center">
-              <span className="text-chart-3 text-sm">⚙️</span>
-            </div>
-            <div>
-              <h4 className="text-xl font-semibold text-foreground">
-                Agent Configuration
-              </h4>
-              <p className="text-sm text-muted-foreground">
-                Configure your agent's personality and behavior
-              </p>
-            </div>
-          </div>
-        </div>
-
+      {/* Personality Fields */}
+      <div className="space-y-6 pt-4">
         <FormField
           control={form.control}
           name="backstory"
           render={({ field }) => (
-            <FormItem className="space-y-[var(--spacing-component-sm)]">
-              <FormLabel className="text-sm font-medium text-foreground">
-                Backstory *
-              </FormLabel>
+            <FormItem className="space-y-3">
+              <FormLabel className="text-base font-medium">Backstory</FormLabel>
               <FormControl>
                 <Textarea
-                  placeholder="You are an experienced software developer with expertise in modern web technologies..."
-                  className="min-h-[120px] border-border/60 focus:border-primary/60 focus:ring-primary/20 transition-all duration-200 resize-none"
+                  placeholder="You are an experienced software developer with expertise in modern web technologies, specializing in React, TypeScript, and backend systems. You have years of experience building scalable applications and helping teams write clean, maintainable code."
+                  className="min-h-[100px] resize-none leading-relaxed"
                   {...field}
                 />
               </FormControl>
-              <FormDescription className="text-xs text-muted-foreground">
-                Describe your agent's background and expertise (10-1000
-                characters)
+              <FormDescription className="text-sm text-muted-foreground">
+                Describe your agent's background, expertise, and personality.
+                This helps define how the agent will behave and respond.
+                (10-1000 characters)
               </FormDescription>
-              <FormMessage className="text-xs" />
+              <FormMessage />
             </FormItem>
           )}
         />
@@ -385,27 +278,27 @@ function AgentFormIdentity(props: AgentFormIdentityProps) {
           control={form.control}
           name="goal"
           render={({ field }) => (
-            <FormItem className="space-y-[var(--spacing-component-sm)]">
-              <FormLabel className="text-sm font-medium text-foreground">
-                Goal *
+            <FormItem className="space-y-3">
+              <FormLabel className="text-base font-medium">
+                Primary Goal
               </FormLabel>
               <FormControl>
                 <Textarea
-                  placeholder="Help users write clean, maintainable code and solve complex technical problems..."
-                  className="min-h-[100px] border-border/60 focus:border-primary/60 focus:ring-primary/20 transition-all duration-200 resize-none"
+                  placeholder="Help users write clean, maintainable code and solve complex technical problems. Provide clear explanations, suggest best practices, and guide users through implementation challenges with patience and expertise."
+                  className="min-h-[80px] resize-none leading-relaxed"
                   {...field}
                 />
               </FormControl>
-              <FormDescription className="text-xs text-muted-foreground">
-                Define your agent's primary goal and objectives (10-500
-                characters)
+              <FormDescription className="text-sm text-muted-foreground">
+                Define your agent's primary goal and objectives. What should
+                this agent focus on accomplishing? (10-500 characters)
               </FormDescription>
-              <FormMessage className="text-xs" />
+              <FormMessage />
             </FormItem>
           )}
         />
       </div>
-    </>
+    </div>
   );
 }
 
@@ -427,217 +320,218 @@ function AgentFormProvider(props: AgentFormProviderProps) {
   };
 
   return (
-    <>
-      <Separator className="bg-border/40" />
-
-      {/* Enhanced Provider Section */}
-      <div className="space-y-[var(--spacing-component-lg)]">
-        <div className="space-y-[var(--spacing-component-sm)]">
-          <div className="flex items-center gap-[var(--spacing-component-md)]">
-            <div className="w-8 h-8 rounded-lg bg-chart-4/10 flex items-center justify-center">
-              <span className="text-chart-4 text-sm">🤖</span>
-            </div>
-            <div>
-              <h4 className="text-xl font-semibold text-foreground">
-                AI Provider Configuration
-              </h4>
-              <p className="text-sm text-muted-foreground">
-                Choose the AI provider and configure model settings
-              </p>
-            </div>
-          </div>
+    <div className="space-y-6">
+      {/* Section Header - Professional style */}
+      <div className="flex items-center gap-3 pb-2">
+        <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-primary/10">
+          <Bot className="size-4 text-primary" />
         </div>
-
-        <FormField
-          control={form.control}
-          name="providerId"
-          render={({ field }) => (
-            <FormItem className="space-y-[var(--spacing-component-sm)]">
-              <FormLabel className="text-sm font-medium text-foreground">
-                AI Provider *
-              </FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                <FormControl>
-                  <SelectTrigger className="h-11 border-border/60 focus:border-primary/60 focus:ring-primary/20 transition-all duration-200">
-                    <SelectValue placeholder="Select provider" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  {activeProviders.map((provider) => (
-                    <SelectItem key={provider.id} value={provider.id}>
-                      {provider.name}
-                      {provider.isDefault && " (Default)"}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <FormMessage className="text-xs" />
-            </FormItem>
-          )}
-        />
-
-        <div className="space-y-[var(--spacing-component-lg)]">
-          <div className="space-y-[var(--spacing-component-sm)]">
-            <div className="flex items-center gap-[var(--spacing-component-md)]">
-              <div className="w-6 h-6 rounded-md bg-chart-5/10 flex items-center justify-center">
-                <span className="text-chart-5 text-xs">⚙️</span>
-              </div>
-              <div>
-                <h5 className="text-lg font-medium text-foreground">
-                  Model Settings
-                </h5>
-                <p className="text-xs text-muted-foreground">
-                  Configure the AI model parameters
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-[var(--spacing-component-lg)]">
-            <FormField
-              control={form.control}
-              name="modelConfig"
-              render={({ field }) => {
-                const config = field.value
-                  ? JSON.parse(field.value)
-                  : defaultModelConfig;
-                return (
-                  <FormItem className="space-y-[var(--spacing-component-sm)]">
-                    <FormLabel className="text-sm font-medium text-foreground">
-                      Model
-                    </FormLabel>
-                    <FormControl>
-                      <Input
-                        value={config.model}
-                        onChange={(event) => {
-                          const newConfig = {
-                            ...config,
-                            model: event.target.value,
-                          };
-                          field.onChange(JSON.stringify(newConfig));
-                        }}
-                        placeholder="gpt-4o"
-                        className="h-11 border-border/60 focus:border-primary/60 focus:ring-primary/20 transition-all duration-200"
-                      />
-                    </FormControl>
-                    <FormMessage className="text-xs" />
-                  </FormItem>
-                );
-              }}
-            />
-
-            <FormField
-              control={form.control}
-              name="modelConfig"
-              render={({ field }) => {
-                const config = field.value
-                  ? JSON.parse(field.value)
-                  : defaultModelConfig;
-                return (
-                  <FormItem className="space-y-[var(--spacing-component-sm)]">
-                    <FormLabel className="text-sm font-medium text-foreground">
-                      Temperature
-                    </FormLabel>
-                    <FormControl>
-                      <Input
-                        type="number"
-                        min="0"
-                        max="2"
-                        step="0.1"
-                        value={config.temperature}
-                        onChange={(event) => {
-                          const newConfig = {
-                            ...config,
-                            temperature: parseFloat(event.target.value),
-                          };
-                          field.onChange(JSON.stringify(newConfig));
-                        }}
-                        placeholder="0.7"
-                        className="h-11 border-border/60 focus:border-primary/60 focus:ring-primary/20 transition-all duration-200"
-                      />
-                    </FormControl>
-                    <FormMessage className="text-xs" />
-                  </FormItem>
-                );
-              }}
-            />
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-[var(--spacing-component-lg)]">
-            <FormField
-              control={form.control}
-              name="modelConfig"
-              render={({ field }) => {
-                const config = field.value
-                  ? JSON.parse(field.value)
-                  : defaultModelConfig;
-                return (
-                  <FormItem className="space-y-[var(--spacing-component-sm)]">
-                    <FormLabel className="text-sm font-medium text-foreground">
-                      Max Tokens
-                    </FormLabel>
-                    <FormControl>
-                      <Input
-                        type="number"
-                        min="1"
-                        value={config.maxTokens}
-                        onChange={(event) => {
-                          const newConfig = {
-                            ...config,
-                            maxTokens: parseInt(event.target.value),
-                          };
-                          field.onChange(JSON.stringify(newConfig));
-                        }}
-                        placeholder="4000"
-                        className="h-11 border-border/60 focus:border-primary/60 focus:ring-primary/20 transition-all duration-200"
-                      />
-                    </FormControl>
-                    <FormMessage className="text-xs" />
-                  </FormItem>
-                );
-              }}
-            />
-
-            <FormField
-              control={form.control}
-              name="modelConfig"
-              render={({ field }) => {
-                const config = field.value
-                  ? JSON.parse(field.value)
-                  : defaultModelConfig;
-                return (
-                  <FormItem className="space-y-[var(--spacing-component-sm)]">
-                    <FormLabel className="text-sm font-medium text-foreground">
-                      Top P (Optional)
-                    </FormLabel>
-                    <FormControl>
-                      <Input
-                        type="number"
-                        min="0"
-                        max="1"
-                        step="0.1"
-                        value={config.topP || ""}
-                        onChange={(event) => {
-                          const newConfig = {
-                            ...config,
-                            topP: event.target.value
-                              ? parseFloat(event.target.value)
-                              : undefined,
-                          };
-                          field.onChange(JSON.stringify(newConfig));
-                        }}
-                        placeholder="0.9"
-                        className="h-11 border-border/60 focus:border-primary/60 focus:ring-primary/20 transition-all duration-200"
-                      />
-                    </FormControl>
-                    <FormMessage className="text-xs" />
-                  </FormItem>
-                );
-              }}
-            />
-          </div>
+        <div>
+          <h3 className="text-xl font-semibold text-foreground">
+            AI Provider Configuration
+          </h3>
+          <p className="text-sm text-muted-foreground">
+            Configure the AI model and provider settings for your agent
+          </p>
         </div>
       </div>
-    </>
+
+      {/* Provider Selection */}
+      <FormField
+        control={form.control}
+        name="providerId"
+        render={({ field }) => (
+          <FormItem className="space-y-3">
+            <FormLabel className="text-base font-medium">AI Provider</FormLabel>
+            <Select onValueChange={field.onChange} defaultValue={field.value}>
+              <FormControl>
+                <SelectTrigger className="h-10">
+                  <SelectValue placeholder="Select an AI provider" />
+                </SelectTrigger>
+              </FormControl>
+              <SelectContent>
+                {activeProviders.map((provider) => (
+                  <SelectItem key={provider.id} value={provider.id}>
+                    {provider.name}
+                    {provider.isDefault && " (Default)"}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <FormDescription className="text-sm text-muted-foreground">
+              Choose the AI provider that will power this agent
+            </FormDescription>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+
+      {/* Model Settings Subsection */}
+      <div className="space-y-6 pt-4">
+        <div className="flex items-center gap-3">
+          <div className="flex items-center justify-center w-6 h-6 rounded bg-muted/20">
+            <Settings className="size-3 text-muted-foreground" />
+          </div>
+          <h4 className="text-lg font-medium text-foreground">
+            Model Settings
+          </h4>
+        </div>
+
+        {/* Model Configuration Fields - Spacious Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <FormField
+            control={form.control}
+            name="modelConfig"
+            render={({ field }) => {
+              const config = field.value
+                ? JSON.parse(field.value)
+                : defaultModelConfig;
+              return (
+                <FormItem className="space-y-3">
+                  <FormLabel className="text-base font-medium">Model</FormLabel>
+                  <FormControl>
+                    <Input
+                      value={config.model}
+                      onChange={(event) => {
+                        const newConfig = {
+                          ...config,
+                          model: event.target.value,
+                        };
+                        field.onChange(JSON.stringify(newConfig));
+                      }}
+                      placeholder="gpt-4o"
+                      className="h-10"
+                    />
+                  </FormControl>
+                  <FormDescription className="text-sm text-muted-foreground">
+                    The specific AI model to use (e.g., gpt-4o,
+                    claude-3-5-sonnet)
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              );
+            }}
+          />
+
+          <FormField
+            control={form.control}
+            name="modelConfig"
+            render={({ field }) => {
+              const config = field.value
+                ? JSON.parse(field.value)
+                : defaultModelConfig;
+              return (
+                <FormItem className="space-y-3">
+                  <FormLabel className="text-base font-medium">
+                    Temperature
+                  </FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      min="0"
+                      max="2"
+                      step="0.1"
+                      value={config.temperature}
+                      onChange={(event) => {
+                        const newConfig = {
+                          ...config,
+                          temperature: parseFloat(event.target.value),
+                        };
+                        field.onChange(JSON.stringify(newConfig));
+                      }}
+                      placeholder="0.7"
+                      className="h-10"
+                    />
+                  </FormControl>
+                  <FormDescription className="text-sm text-muted-foreground">
+                    Controls randomness (0.0 = focused, 2.0 = creative)
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              );
+            }}
+          />
+
+          <FormField
+            control={form.control}
+            name="modelConfig"
+            render={({ field }) => {
+              const config = field.value
+                ? JSON.parse(field.value)
+                : defaultModelConfig;
+              return (
+                <FormItem className="space-y-3">
+                  <FormLabel className="text-base font-medium">
+                    Max Tokens
+                  </FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      min="1"
+                      value={config.maxTokens}
+                      onChange={(event) => {
+                        const newConfig = {
+                          ...config,
+                          maxTokens: parseInt(event.target.value),
+                        };
+                        field.onChange(JSON.stringify(newConfig));
+                      }}
+                      placeholder="4000"
+                      className="h-10"
+                    />
+                  </FormControl>
+                  <FormDescription className="text-sm text-muted-foreground">
+                    Maximum number of tokens in the response
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              );
+            }}
+          />
+
+          <FormField
+            control={form.control}
+            name="modelConfig"
+            render={({ field }) => {
+              const config = field.value
+                ? JSON.parse(field.value)
+                : defaultModelConfig;
+              return (
+                <FormItem className="space-y-3">
+                  <FormLabel className="text-base font-medium">
+                    Top P (Optional)
+                  </FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      min="0"
+                      max="1"
+                      step="0.1"
+                      value={config.topP || ""}
+                      onChange={(event) => {
+                        const newConfig = {
+                          ...config,
+                          topP: event.target.value
+                            ? parseFloat(event.target.value)
+                            : undefined,
+                        };
+                        field.onChange(JSON.stringify(newConfig));
+                      }}
+                      placeholder="0.9"
+                      className="h-10"
+                    />
+                  </FormControl>
+                  <FormDescription className="text-sm text-muted-foreground">
+                    Nucleus sampling parameter (0.0-1.0, leave empty for
+                    default)
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              );
+            }}
+          />
+        </div>
+      </div>
+    </div>
   );
 }

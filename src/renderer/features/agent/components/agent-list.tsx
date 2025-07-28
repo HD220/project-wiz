@@ -1,20 +1,19 @@
 import { Link, useNavigate, useSearch } from "@tanstack/react-router";
 import {
-  Filter,
   Plus,
   Search,
   Eye,
   EyeOff,
   Users,
   AlertCircle,
+  LayoutGrid,
 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
-import { Badge } from "@/renderer/components/ui/badge";
 import { Button } from "@/renderer/components/ui/button";
 import { Input } from "@/renderer/components/ui/input";
-import { StatusIndicator } from "@/renderer/components/ui/status-indicator";
+import { ScrollArea } from "@/renderer/components/ui/scroll-area";
 import {
   Select,
   SelectContent,
@@ -22,14 +21,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/renderer/components/ui/select";
-import { Separator } from "@/renderer/components/ui/separator";
 import { Switch } from "@/renderer/components/ui/switch";
 import type {
   SelectAgent,
   AgentStatus,
+  AgentWithAvatar,
 } from "@/renderer/features/agent/agent.types";
 import { AgentDeleteDialog } from "@/renderer/features/agent/components/agent-delete-dialog";
-import { AgentListCard } from "@/renderer/features/agent/components/agent-list-card";
+import { AgentCard } from "@/renderer/features/agent/components/agent-card";
 import { useApiMutation } from "@/renderer/hooks/use-api-mutation.hook";
 
 interface AgentListProps {
@@ -155,102 +154,48 @@ export function AgentList(props: AgentListProps) {
   // Render empty state when no agents exist and no filters are applied
   if (filteredAgents.length === 0 && !hasFilters) {
     return (
-      <div className="space-y-[var(--spacing-layout-lg)]">
-        {/* Enhanced Page Header */}
-        <div className="flex flex-col gap-[var(--spacing-component-lg)] lg:flex-row lg:items-center lg:justify-between">
-          <div className="space-y-[var(--spacing-component-sm)]">
-            <div className="flex items-center gap-[var(--spacing-component-md)]">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-chart-1/20 via-chart-1/10 to-chart-1/5 flex items-center justify-center border border-chart-1/20">
-                <Users className="size-5 text-chart-1" />
-              </div>
-              <div>
-                <h1 className="text-3xl font-bold tracking-tight text-foreground">
-                  AI Agents
-                </h1>
-                <p className="text-lg text-muted-foreground">
-                  Create and manage intelligent AI agents for your projects
-                </p>
-              </div>
+      <div className="flex flex-col h-full">
+        {/* Professional Header */}
+        <div className="flex items-center justify-between px-6 py-4 border-b border-border/50 bg-background/95 backdrop-blur-sm">
+          <div className="flex items-center gap-4">
+            <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-primary/10">
+              <LayoutGrid className="w-5 h-5 text-primary" />
+            </div>
+            <div>
+              <h1 className="text-xl font-semibold text-foreground">
+                AI Agents
+              </h1>
+              <p className="text-sm text-muted-foreground">
+                Manage your AI agents and configurations
+              </p>
             </div>
           </div>
           <Link to="/user/agents/new">
-            <Button className="gap-[var(--spacing-component-sm)] h-11 px-6 bg-primary hover:bg-primary/90 shadow-lg shadow-primary/20 transition-all duration-200">
-              <Plus className="size-4" />
-              Create Agent
+            <Button className="gap-2">
+              <Plus className="w-4 h-4" />
+              New Agent
             </Button>
           </Link>
         </div>
 
-        <Separator className="bg-border/50" />
-
-        {/* Enhanced Empty State */}
-        <div className="flex flex-col items-center justify-center py-20 text-center">
-          {/* Hero Icon */}
-          <div className="relative mb-8">
-            <div className="w-24 h-24 rounded-3xl bg-gradient-to-br from-chart-1/20 via-chart-1/10 to-chart-1/5 flex items-center justify-center border border-chart-1/20 shadow-lg shadow-chart-1/10">
-              <Users className="size-12 text-chart-1" />
-            </div>
-            <div className="absolute -inset-2 rounded-3xl bg-gradient-to-r from-chart-1/20 to-chart-1/10 blur opacity-30 animate-pulse"></div>
+        {/* Empty State */}
+        <div className="flex-1 flex flex-col items-center justify-center p-12 text-center">
+          <div className="w-20 h-20 rounded-2xl bg-muted/20 flex items-center justify-center mb-6">
+            <LayoutGrid className="w-10 h-10 text-muted-foreground" />
           </div>
-
-          <div className="space-y-4 max-w-md">
-            <h3 className="text-2xl font-bold text-foreground">
-              No agents created yet
-            </h3>
-            <p className="text-lg text-muted-foreground leading-relaxed">
-              Create your first AI agent to start automating tasks and improving
-              productivity
-            </p>
-          </div>
-
-          <div className="mt-8">
-            <Link to="/user/agents/new">
-              <Button
-                size="lg"
-                className="gap-[var(--spacing-component-md)] h-12 px-8 bg-primary hover:bg-primary/90 shadow-lg shadow-primary/20 transition-all duration-200"
-              >
-                <Plus className="size-5" />
-                Create Your First Agent
-              </Button>
-            </Link>
-          </div>
-
-          {/* Feature Highlights */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-[var(--spacing-component-md)] mt-12 max-w-3xl">
-            <div className="p-[var(--spacing-component-md)] rounded-lg bg-card border border-border/50 hover:border-border transition-colors">
-              <div className="w-8 h-8 rounded-md bg-chart-2/10 flex items-center justify-center mb-3">
-                <span className="text-chart-2 text-sm">🤖</span>
-              </div>
-              <h4 className="font-medium text-sm text-foreground mb-1">
-                Intelligent Automation
-              </h4>
-              <p className="text-xs text-muted-foreground leading-relaxed">
-                AI agents that understand context and execute complex tasks
-              </p>
-            </div>
-            <div className="p-[var(--spacing-component-md)] rounded-lg bg-card border border-border/50 hover:border-border transition-colors">
-              <div className="w-8 h-8 rounded-md bg-chart-3/10 flex items-center justify-center mb-3">
-                <span className="text-chart-3 text-sm">⚡</span>
-              </div>
-              <h4 className="font-medium text-sm text-foreground mb-1">
-                Fast Configuration
-              </h4>
-              <p className="text-xs text-muted-foreground leading-relaxed">
-                Quick setup with pre-configured templates and settings
-              </p>
-            </div>
-            <div className="p-[var(--spacing-component-md)] rounded-lg bg-card border border-border/50 hover:border-border transition-colors">
-              <div className="w-8 h-8 rounded-md bg-chart-4/10 flex items-center justify-center mb-3">
-                <span className="text-chart-4 text-sm">🎯</span>
-              </div>
-              <h4 className="font-medium text-sm text-foreground mb-1">
-                Goal-Oriented
-              </h4>
-              <p className="text-xs text-muted-foreground leading-relaxed">
-                Agents focused on achieving specific objectives and results
-              </p>
-            </div>
-          </div>
+          <h3 className="text-xl font-semibold text-foreground mb-3">
+            No agents created yet
+          </h3>
+          <p className="text-base text-muted-foreground mb-8 max-w-lg leading-relaxed">
+            Create your first AI agent to start automating tasks, managing
+            conversations, and building intelligent workflows for your projects.
+          </p>
+          <Link to="/user/agents/new">
+            <Button size="lg" className="gap-2">
+              <Plus className="w-5 h-5" />
+              Create Your First Agent
+            </Button>
+          </Link>
         </div>
       </div>
     );
@@ -258,221 +203,135 @@ export function AgentList(props: AgentListProps) {
 
   return (
     <>
-      <div className="space-y-[var(--spacing-layout-lg)]">
-        {/* Enhanced Page Header with Stats */}
-        <div className="flex flex-col gap-[var(--spacing-component-lg)] lg:flex-row lg:items-center lg:justify-between">
-          <div className="space-y-[var(--spacing-component-sm)]">
-            <div className="flex items-center gap-[var(--spacing-component-md)]">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-chart-1/20 via-chart-1/10 to-chart-1/5 flex items-center justify-center border border-chart-1/20">
-                <Users className="size-5 text-chart-1" />
-              </div>
-              <div className="flex items-center gap-[var(--spacing-component-md)]">
-                <div>
-                  <h1 className="text-3xl font-bold tracking-tight text-foreground">
-                    AI Agents
-                  </h1>
-                  <p className="text-lg text-muted-foreground">
-                    Manage your intelligent AI agents and their configurations
-                  </p>
-                </div>
-                {agentStats.total > 0 && (
-                  <Badge
-                    variant="secondary"
-                    className="text-sm px-3 py-1 bg-primary/10 text-primary border-primary/20"
-                  >
-                    {agentStats.total}
-                  </Badge>
-                )}
-              </div>
+      <div className="flex flex-col h-full">
+        {/* Professional Header */}
+        <div className="flex items-center justify-between px-6 py-4 border-b border-border/50 bg-background/95 backdrop-blur-sm shrink-0">
+          <div className="flex items-center gap-4">
+            <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-primary/10">
+              <LayoutGrid className="w-5 h-5 text-primary" />
+            </div>
+            <div>
+              <h1 className="text-xl font-semibold text-foreground">
+                AI Agents
+              </h1>
+              <p className="text-sm text-muted-foreground">
+                {agentStats.total} agents • {agentStats.active} active •{" "}
+                {agentStats.busy} busy
+              </p>
             </div>
           </div>
-
           <Link to="/user/agents/new">
-            <Button className="gap-[var(--spacing-component-sm)] lg:shrink-0 h-11 px-6 bg-primary hover:bg-primary/90 shadow-lg shadow-primary/20 transition-all duration-200">
-              <Plus className="size-4" />
-              Create Agent
+            <Button className="gap-2">
+              <Plus className="w-4 h-4" />
+              New Agent
             </Button>
           </Link>
         </div>
 
-        {/* Enhanced Filters and Search */}
-        <div className="flex flex-col gap-[var(--spacing-component-md)] sm:flex-row sm:items-center">
-          {/* Enhanced Search Input */}
-          <div className="relative flex-1 max-w-md">
-            <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+        {/* Professional Filters */}
+        <div className="flex items-center gap-4 px-6 py-3 border-b border-border/30 bg-background/50 shrink-0">
+          {/* Search Input */}
+          <div className="relative flex-1 max-w-sm">
+            <Search className="absolute left-3 top-1/2 w-4 h-4 -translate-y-1/2 text-muted-foreground" />
             <Input
-              placeholder="Search agents by name or role..."
+              placeholder="Search agents..."
               value={search.search || ""}
               onChange={(event) => handleSearchChange(event.target.value)}
-              className="pl-9 h-11 border-border/60 focus:border-primary/60 focus:ring-primary/20 transition-all duration-200"
+              className="pl-10 h-9 border-border/60 bg-background/50 focus:bg-background"
             />
           </div>
 
-          <div className="flex items-center gap-[var(--spacing-component-sm)]">
-            {/* Enhanced Status Filter */}
-            <Select
-              value={search.status || "all"}
-              onValueChange={handleStatusFilter}
+          {/* Status Filter */}
+          <Select
+            value={search.status || "all"}
+            onValueChange={handleStatusFilter}
+          >
+            <SelectTrigger className="w-32 h-9 border-border/60 bg-background/50">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Status</SelectItem>
+              <SelectItem value="active">Active</SelectItem>
+              <SelectItem value="inactive">Inactive</SelectItem>
+              <SelectItem value="busy">Busy</SelectItem>
+            </SelectContent>
+          </Select>
+
+          {/* Show Inactive Toggle */}
+          <div className="flex items-center gap-3 px-3 py-2 rounded-md border border-border/60 bg-background/50">
+            <Switch
+              id="show-inactive"
+              checked={!!search.showInactive}
+              onCheckedChange={handleToggleInactive}
+            />
+            <label
+              htmlFor="show-inactive"
+              className="text-sm text-muted-foreground cursor-pointer flex items-center gap-1"
             >
-              <SelectTrigger className="w-40 h-11 border-border/60 focus:border-primary/60 focus:ring-primary/20 transition-all duration-200">
-                <Filter className="mr-2 size-4" />
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Status</SelectItem>
-                <SelectItem value="active">Active</SelectItem>
-                <SelectItem value="inactive">Inactive</SelectItem>
-                <SelectItem value="busy">Busy</SelectItem>
-              </SelectContent>
-            </Select>
-
-            {/* Enhanced Show Inactive Toggle */}
-            <div className="flex items-center gap-[var(--spacing-component-sm)] px-3 py-2 rounded-lg border border-border/60 bg-card/50 hover:bg-card transition-colors">
-              <Switch
-                id="show-inactive"
-                checked={!!search.showInactive}
-                onCheckedChange={handleToggleInactive}
-              />
-              <label
-                htmlFor="show-inactive"
-                className="flex cursor-pointer items-center gap-[var(--spacing-component-sm)] text-sm font-medium"
-              >
-                {search.showInactive ? (
-                  <Eye className="size-4 text-chart-2" />
-                ) : (
-                  <EyeOff className="size-4 text-muted-foreground" />
-                )}
-                Show Inactive
-              </label>
-            </div>
-
-            {/* Enhanced Clear Filters */}
-            {hasFilters && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={clearFilters}
-                className="h-9 px-3 hover:bg-accent/50 transition-all duration-200"
-              >
-                Clear Filters
-              </Button>
-            )}
+              {search.showInactive ? (
+                <>
+                  <Eye className="w-4 h-4" />
+                  Show Inactive
+                </>
+              ) : (
+                <>
+                  <EyeOff className="w-4 h-4" />
+                  Hide Inactive
+                </>
+              )}
+            </label>
           </div>
+
+          {/* Clear Filters */}
+          {hasFilters && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={clearFilters}
+              className="h-9 px-3"
+            >
+              Clear Filters
+            </Button>
+          )}
         </div>
 
-        {/* Enhanced Agent Statistics */}
-        {agentStats.total > 0 && (
-          <div className="bg-card/50 backdrop-blur-sm border border-border/60 rounded-xl p-[var(--spacing-component-lg)] shadow-sm">
-            <h3 className="text-sm font-medium text-foreground mb-3">
-              Agent Overview
-            </h3>
-            <div className="flex flex-wrap items-center gap-[var(--spacing-component-lg)]">
-              <div className="flex items-center gap-[var(--spacing-component-sm)]">
-                <StatusIndicator
-                  status="active"
-                  size="md"
-                  variant="dot"
-                  className="bg-chart-1"
-                />
-                <span className="text-sm font-medium text-foreground">
-                  Total:
-                </span>
-                <Badge
-                  variant="outline"
-                  className="border-chart-1/30 text-chart-1 bg-chart-1/5"
-                >
-                  {agentStats.total}
-                </Badge>
-              </div>
-              <div className="flex items-center gap-[var(--spacing-component-sm)]">
-                <StatusIndicator status="active" size="md" variant="dot" />
-                <span className="text-sm font-medium text-foreground">
-                  Active:
-                </span>
-                <Badge className="bg-chart-2 hover:bg-chart-2/90 text-white border-chart-2">
-                  {agentStats.active}
-                </Badge>
-              </div>
-              {agentStats.inactive > 0 && (
-                <div className="flex items-center gap-[var(--spacing-component-sm)]">
-                  <StatusIndicator status="inactive" size="md" variant="dot" />
-                  <span className="text-sm font-medium text-foreground">
-                    Inactive:
-                  </span>
-                  <Badge
-                    variant="secondary"
-                    className="bg-muted/30 text-muted-foreground border-muted-foreground/20"
-                  >
-                    {agentStats.inactive}
-                  </Badge>
-                </div>
-              )}
-              {agentStats.busy > 0 && (
-                <div className="flex items-center gap-[var(--spacing-component-sm)]">
-                  <StatusIndicator status="busy" size="md" variant="dot" />
-                  <span className="text-sm font-medium text-foreground">
-                    Busy:
-                  </span>
-                  <Badge
-                    variant="outline"
-                    className="border-destructive/30 text-destructive bg-destructive/5"
-                  >
-                    {agentStats.busy}
-                  </Badge>
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-
-        {/* Enhanced Empty Filter Results */}
+        {/* Empty Filter Results */}
         {filteredAgents.length === 0 && hasFilters && (
-          <div className="flex flex-col items-center justify-center py-20 text-center">
-            <div className="relative mb-8">
-              <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-muted/50 to-muted/30 flex items-center justify-center border border-border/50">
-                <AlertCircle className="size-10 text-muted-foreground" />
-              </div>
-              <div className="absolute -inset-1 rounded-2xl bg-gradient-to-r from-muted/30 to-muted/20 blur opacity-50"></div>
+          <div className="flex-1 flex flex-col items-center justify-center p-12 text-center">
+            <div className="w-16 h-16 rounded-2xl bg-muted/20 flex items-center justify-center mb-6">
+              <AlertCircle className="w-8 h-8 text-muted-foreground" />
             </div>
-
-            <div className="space-y-4 max-w-md">
-              <h3 className="text-2xl font-bold text-foreground">
-                No agents match your filters
-              </h3>
-              <p className="text-lg text-muted-foreground leading-relaxed">
-                Try adjusting your search criteria or clear the filters to see
-                all agents
-              </p>
-            </div>
-
-            <div className="mt-8">
-              <Button
-                variant="outline"
-                onClick={clearFilters}
-                className="h-11 px-6 border-border/60 hover:bg-accent/50 transition-all duration-200"
-              >
-                Clear All Filters
-              </Button>
-            </div>
+            <h3 className="text-lg font-semibold text-foreground mb-2">
+              No agents match your filters
+            </h3>
+            <p className="text-base text-muted-foreground mb-6 max-w-md">
+              Try adjusting your search criteria or clearing the filters to see
+              all agents.
+            </p>
+            <Button variant="outline" onClick={clearFilters} className="gap-2">
+              <Search className="w-4 h-4" />
+              Clear Filters
+            </Button>
           </div>
         )}
 
-        {/* Enhanced Agents Grid/List */}
+        {/* Professional Card Grid */}
         {filteredAgents.length > 0 && (
-          <>
-            <Separator className="bg-border/50" />
-            <div className="grid gap-[var(--spacing-component-lg)] sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-              {filteredAgents.map((agent) => (
-                <AgentListCard
-                  key={agent.id}
-                  agent={agent}
-                  onDelete={() => handleDelete(agent)}
-                  onRestore={() => handleRestore(agent)}
-                  onToggleStatus={() => handleToggleStatus(agent)}
-                />
-              ))}
+          <ScrollArea className="flex-1">
+            <div className="p-6 pb-8">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                {filteredAgents.map((agent) => (
+                  <AgentCard
+                    key={agent.id}
+                    agent={agent as AgentWithAvatar}
+                    onDelete={() => handleDelete(agent)}
+                    onToggleStatus={() => handleToggleStatus(agent)}
+                    className="h-fit"
+                  />
+                ))}
+              </div>
             </div>
-          </>
+          </ScrollArea>
         )}
       </div>
 

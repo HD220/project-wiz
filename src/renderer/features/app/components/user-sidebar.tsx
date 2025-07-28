@@ -34,18 +34,10 @@ export function UserSidebar(props: UserSidebarProps) {
       </div>
 
       <ScrollArea className="flex-1 overflow-hidden" type="auto">
-        <div
-          className={cn(
-            "px-[var(--spacing-component-sm)]",
-            "py-[var(--spacing-component-sm)]",
-            "space-y-[var(--spacing-component-xs)]",
-          )}
-        >
-          <SidebarNavigation
-            conversations={conversations}
-            availableUsers={availableUsers}
-          />
-        </div>
+        <SidebarNavigation
+          conversations={conversations}
+          availableUsers={availableUsers}
+        />
       </ScrollArea>
 
       <div

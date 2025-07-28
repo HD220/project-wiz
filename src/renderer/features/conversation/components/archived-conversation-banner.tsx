@@ -23,7 +23,7 @@ export function ArchivedConversationBanner(
     (conversationId: string) =>
       window.api.conversations.unarchive(conversationId),
     {
-      successMessage: "Conversa desarquivada com sucesso",
+      successMessage: "Conversation unarchived successfully",
       onSuccess: () => {
         // Invalidate routes to refresh conversation lists
         router.invalidate();
@@ -35,7 +35,7 @@ export function ArchivedConversationBanner(
     unarchiveMutation.mutate(conversationId);
   }
 
-  // Format archived date - enhanced pt-BR format with relative time
+  // Format archived date - enhanced EN format with relative time
   const formatArchivedDate = () => {
     try {
       const archivedDate = new Date(archivedAt);
@@ -45,23 +45,23 @@ export function ArchivedConversationBanner(
       );
 
       if (diffInDays === 0) {
-        return `hoje às ${new Intl.DateTimeFormat("pt-BR", {
+        return `today at ${new Intl.DateTimeFormat("en-US", {
           hour: "2-digit",
           minute: "2-digit",
         }).format(archivedDate)}`;
       } else if (diffInDays === 1) {
-        return "ontem";
+        return "yesterday";
       } else if (diffInDays < 7) {
-        return `${diffInDays} dias atrás`;
+        return `${diffInDays} days ago`;
       } else {
-        return new Intl.DateTimeFormat("pt-BR", {
+        return new Intl.DateTimeFormat("en-US", {
           day: "2-digit",
           month: "2-digit",
           year: "numeric",
         }).format(archivedDate);
       }
     } catch (error) {
-      return "Data inválida";
+      return "Invalid date";
     }
   };
 
@@ -86,7 +86,7 @@ export function ArchivedConversationBanner(
           <div className="min-w-0 flex-1 space-y-2">
             <div className="flex items-center gap-2">
               <p className="text-base font-semibold text-amber-900 dark:text-amber-100">
-                Esta conversa foi arquivada
+                This conversation has been archived
               </p>
             </div>
 
@@ -98,7 +98,7 @@ export function ArchivedConversationBanner(
               <div className="w-1 h-1 bg-amber-500 rounded-full" />
               <div className="flex items-center gap-1.5">
                 <Clock className="h-3.5 w-3.5" />
-                <span>Sem notificações</span>
+                <span>No notifications</span>
               </div>
             </div>
           </div>
@@ -121,12 +121,12 @@ export function ArchivedConversationBanner(
             {unarchiveMutation.isPending ? (
               <>
                 <ArchiveRestore className="h-4 w-4 mr-2 animate-pulse" />
-                Desarquivando...
+                Unarchiving...
               </>
             ) : (
               <>
                 <ArchiveRestore className="h-4 w-4 mr-2" />
-                Desarquivar
+                Unarchive
               </>
             )}
           </Button>
