@@ -35,8 +35,8 @@ export function AuthLayout(props: AuthLayoutProps) {
           background: `
             repeating-linear-gradient(
               135deg,
-              rgba(255, 255, 255, 0.015) 0px,
-              rgba(255, 255, 255, 0.015) 3px,
+              rgba(255, 255, 255, 0.02) 0px,
+              rgba(255, 255, 255, 0.02) 3px,
               rgba(255, 255, 255, 0) 200px
             )
           `,
