@@ -14,7 +14,7 @@ export function AuthLayout(props: AuthLayoutProps) {
   return (
     <div
       className={cn(
-        "min-h-screen w-full bg-gradient-to-br from-background via-muted/30 to-muted/50",
+        "min-h-screen w-full",
         "flex items-center justify-center",
         "p-6",
         "relative overflow-hidden",
@@ -22,18 +22,24 @@ export function AuthLayout(props: AuthLayoutProps) {
       )}
       role="main"
       aria-label="Authentication page"
+      style={{
+        background: `linear-gradient(135deg, var(--background), rgba(128, 128, 128, 0.05))`,
+        backgroundSize: "100% 100%, 100% 100%",
+        backgroundRepeat: "repeat, no-repeat",
+      }}
     >
-      {/* Diagonal block pattern from bottom-right to top-left */}
+      {/* Overlay for stripe pattern */}
       <div
-        className="absolute inset-0 opacity-[0.15] pointer-events-none"
+        className="absolute inset-0 pointer-events-none"
         style={{
-          backgroundImage: `repeating-linear-gradient(
-            -45deg,
-            transparent,
-            transparent 40px,
-            var(--muted-foreground) 40px,
-            var(--muted-foreground) 190px
-          )`,
+          background: `
+            repeating-linear-gradient(
+              135deg,
+              rgba(255, 255, 255, 0.015) 0px,
+              rgba(255, 255, 255, 0.015) 3px,
+              rgba(255, 255, 255, 0) 200px
+            )
+          `,
         }}
         aria-hidden="true"
       />
