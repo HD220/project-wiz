@@ -184,11 +184,7 @@ export function MessageGroup({
   getUserById,
   isSendingMessage,
 }: MessageGroupProps) {
-  const author = getUserById(group.authorId);
-  if (!author) {
-    console.warn(`Author with ID ${group.authorId} not found`);
-    return null; // Skip rendering this message group if author not found
-  }
+  const author = getUserById(group.authorId) as AuthenticatedUser;
   const isCurrentUser = group.authorId === currentUser.id;
 
   // Calculate time difference for avatar display logic
@@ -348,24 +344,6 @@ export function ConversationChat(props: ConversationChatProps) {
     });
   }
 
-  // Safe type guard for user conversion - INLINE-FIRST (< 15 lines)
-  function convertToAuthenticatedUser(user: unknown): AuthenticatedUser {
-    if (!user || typeof user !== "object") {
-      throw new Error("Invalid user data: not an object");
-    }
-    const userData = user as Record<string, unknown>;
-
-    // Validate required fields
-    if (!userData["id"] || typeof userData["id"] !== "string") {
-      throw new Error("Invalid user data: missing id");
-    }
-    if (!userData["name"] || typeof userData["name"] !== "string") {
-      throw new Error("Invalid user data: missing name");
-    }
-
-    return userData as AuthenticatedUser;
-  }
-
   // Get user info by ID - inline logic with fallback handling
   function getUserById(userId: string): AuthenticatedUser | null {
     if (userId === currentUser?.id) return currentUser;
@@ -374,7 +352,7 @@ export function ConversationChat(props: ConversationChatProps) {
       (user) => user.id === userId,
     );
     // Cast to AuthenticatedUser for compatibility, knowing this might be incomplete
-    return foundUser ? convertToAuthenticatedUser(foundUser) : null;
+    return foundUser ? (foundUser as unknown as AuthenticatedUser) : null;
   }
 
   const messageGroups = useMemo(() => {

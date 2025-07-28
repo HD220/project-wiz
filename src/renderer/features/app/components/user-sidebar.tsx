@@ -2,8 +2,8 @@ import type { ConversationWithLastMessage } from "@/main/features/conversation/c
 import type { UserSummary } from "@/main/features/user/user.service";
 
 import { ScrollArea } from "@/renderer/components/ui/scroll-area";
-import { SidebarHeader } from "@/renderer/features/app/components/sidebar-header";
-import { SidebarNavigation } from "@/renderer/features/app/components/sidebar-navigation";
+import { SidebarHeader } from "@/renderer/features/layout/components/navigation/sidebar-header";
+import { SidebarNavigation } from "@/renderer/features/layout/components/navigation/sidebar-navigation";
 import { SidebarUserArea } from "@/renderer/features/app/components/sidebar-user-area";
 import { cn } from "@/renderer/lib/utils";
 

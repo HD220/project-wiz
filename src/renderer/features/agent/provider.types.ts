@@ -1,5 +1,6 @@
 /**
- * LLM Provider types for renderer process
+ * LLM Provider types for agent feature
+ * Unified from main process and renderer types
  */
 
 export type ProviderType =
@@ -28,3 +29,9 @@ export interface TestApiKeyResult {
   message: string;
   model?: string;
 }
+
+// Input type for creating a provider (without generated fields)
+export type CreateProviderInput = Omit<
+  LlmProvider,
+  "id" | "createdAt" | "updatedAt"
+>;

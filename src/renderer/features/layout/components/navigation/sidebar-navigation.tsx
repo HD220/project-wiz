@@ -5,7 +5,7 @@ import type { UserSummary } from "@/main/features/user/user.service";
 
 import { ScrollArea } from "@/renderer/components/ui/scroll-area";
 import { Separator } from "@/renderer/components/ui/separator";
-import { NavigationItem } from "@/renderer/features/app/components/navigation-item";
+import { NavigationItem } from "@/renderer/features/layout/components/navigation/navigation-item";
 import { ConversationList } from "@/renderer/features/conversation/components/conversation-list";
 
 interface SidebarNavigationProps {

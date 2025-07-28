@@ -10,8 +10,10 @@ import {
 } from "lucide-react";
 import { useForm } from "react-hook-form";
 
-import type { CreateProviderInput } from "@/main/features/agent/llm-provider/llm-provider.types";
-import type { LlmProvider } from "@/main/features/agent/llm-provider/llm-provider.types";
+import type {
+  CreateProviderInput,
+  LlmProvider,
+} from "@/renderer/features/agent/provider.types";
 
 import { Button } from "@/renderer/components/ui/button";
 import {
@@ -54,7 +56,7 @@ import {
   PROVIDER_CONFIGS,
   providerFormSchema,
   type ProviderFormData,
-} from "../constants";
+} from "@/renderer/features/agent/provider-constants";
 
 interface ProviderFormProps {
   provider?: LlmProvider | null;

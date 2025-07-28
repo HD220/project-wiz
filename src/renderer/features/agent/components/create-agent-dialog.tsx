@@ -1,7 +1,7 @@
 import { Bot, Loader2 } from "lucide-react";
 import { useState, useEffect } from "react";
 
-import type { LlmProvider } from "@/main/features/agent/llm-provider/llm-provider.types";
+import type { LlmProvider } from "@/renderer/features/agent/provider.types";
 
 import {
   Dialog,

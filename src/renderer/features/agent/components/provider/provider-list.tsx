@@ -5,13 +5,13 @@ import {
 import { Link, useNavigate, useSearch } from "@tanstack/react-router";
 import { Plus, Server, Search, AlertCircle } from "lucide-react";
 
-import type { LlmProvider } from "@/main/features/agent/llm-provider/llm-provider.types";
+import type { LlmProvider } from "@/renderer/features/agent/provider.types";
 
 import { Button } from "@/renderer/components/ui/button";
 import { ScrollArea } from "@/renderer/components/ui/scroll-area";
 import { SearchFilterBar } from "@/renderer/components/ui/search-filter-bar";
-import { EmptyState } from "@/renderer/features/llm-provider/components/empty-state";
-import { ProviderCard } from "@/renderer/features/llm-provider/components/provider-card";
+import { EmptyState } from "@/renderer/features/agent/components/provider/empty-state";
+import { ProviderCard } from "@/renderer/features/agent/components/provider/provider-card";
 
 interface ProviderListProps {
   providers: LlmProvider[];

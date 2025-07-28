@@ -18,7 +18,7 @@ import {
 } from "@/renderer/components/ui/form";
 import { cn } from "@/renderer/lib/utils";
 
-import { type ProviderFormData } from "../constants";
+import { type ProviderFormData } from "@/renderer/features/agent/provider-constants";
 
 interface EditProviderSettingsSectionProps {
   form: UseFormReturn<ProviderFormData>;

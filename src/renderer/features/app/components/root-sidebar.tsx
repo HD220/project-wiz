@@ -16,6 +16,7 @@ import {
 } from "@/renderer/components/ui/tooltip";
 import { useAuth } from "@/renderer/contexts/auth.context";
 import { CreateProjectDialog } from "@/renderer/features/project/components";
+import { useElectronViewport } from "@/renderer/hooks/use-mobile";
 import { cn } from "@/renderer/lib/utils";
 
 interface RootSidebarProps {

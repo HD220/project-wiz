@@ -6,7 +6,7 @@ import {
   type Member,
 } from "@/renderer/components/members/member-sidebar";
 import { ScrollArea } from "@/renderer/components/ui/scroll-area";
-import { ContentHeader } from "@/renderer/features/app/components/content-header";
+import { ContentHeader } from "@/renderer/features/layout/components/content-header";
 
 function ChannelLayout() {
   const { channelId } = Route.useParams();

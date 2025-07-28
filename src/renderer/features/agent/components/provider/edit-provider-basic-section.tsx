@@ -25,7 +25,10 @@ import {
   SelectValue,
 } from "@/renderer/components/ui/select";
 
-import { PROVIDER_CONFIGS, type ProviderFormData } from "../constants";
+import {
+  PROVIDER_CONFIGS,
+  type ProviderFormData,
+} from "@/renderer/features/agent/provider-constants";
 
 interface EditProviderBasicSectionProps {
   form: UseFormReturn<ProviderFormData>;

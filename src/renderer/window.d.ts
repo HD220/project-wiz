@@ -8,8 +8,8 @@ import type {
 import type {
   CreateProviderInput,
   LlmProvider,
-} from "@/main/features/agent/llm-provider/llm-provider.types";
-import type { ProviderFiltersInput } from "@/renderer/features/llm-provider/llm-provider.schema";
+} from "@/renderer/features/agent/provider.types";
+import type { ProviderFiltersInput } from "@/renderer/features/agent/provider.schema";
 import type {
   MemoryCreationInput,
   MemoryUpdateInput,

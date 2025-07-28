@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 
-import { ProviderForm } from "@/renderer/features/llm-provider/components/provider-form";
+import { ProviderForm } from "@/renderer/features/agent/components/provider/provider-form";
 
 function NewProviderDialog() {
   const navigate = useNavigate();

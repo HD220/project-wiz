@@ -2,7 +2,6 @@ import { createFileRoute, Outlet } from "@tanstack/react-router";
 
 import type { SelectConversationParticipant } from "@/main/features/conversation/conversation.model";
 import type { SelectMessage } from "@/main/features/conversation/message.model";
-import type { AuthenticatedUser } from "@/main/features/user/user.types";
 
 import { ContentHeader } from "@/renderer/features/layout/components/content-header";
 import {
@@ -48,24 +47,24 @@ function convertToRendererMessage(mainMessage: SelectMessage): Message {
   };
 }
 
-// Safe type guard for converting user data - INLINE-FIRST (< 15 lines)
-function convertToRendererUser(user: unknown): AuthenticatedUser {
-  if (!user || typeof user !== "object") {
-    throw new Error("Invalid user data: user is null or not an object");
-  }
-  const userData = user as Record<string, unknown>;
-
-  // Validate required fields exist
-  if (!userData["id"] || typeof userData["id"] !== "string") {
-    throw new Error("Invalid user data: missing or invalid id field");
-  }
-  if (!userData["name"] || typeof userData["name"] !== "string") {
-    throw new Error("Invalid user data: missing or invalid name field");
-  }
-
-  // Return validated user (fields match main process AuthenticatedUser)
-  return userData as AuthenticatedUser;
-}
+// Helper function to convert main AuthenticatedUser to renderer AuthenticatedUser (unused but kept for future use)
+// function convertToRendererUser(mainUser: MainAuthUser): AuthenticatedUser {
+//   return {
+//     id: mainUser.id,
+//     username: mainUser.name,
+//     email: "",
+//     displayName: mainUser.name,
+//     name: mainUser.name,
+//     avatar: mainUser.avatar,
+//     theme: "system",
+//     type: "user",
+//     isActive: true,
+//     deactivatedAt: null,
+//     deactivatedBy: null,
+//     createdAt: mainUser.createdAt,
+//     updatedAt: mainUser.updatedAt,
+//   };
+// }
 
 // Extended conversation type for rendering
 type RendererConversation = {
@@ -250,8 +249,6 @@ function DMLayout() {
     </div>
   );
 
-  // Safe user conversion - replace dangerous 'as any'
-  const safeCurrentUser = convertToRendererUser(user);
   return (
     <div className="h-full w-full flex flex-col">
       <ContentHeader
@@ -273,7 +270,7 @@ function DMLayout() {
             messages: conversation.messages.map(convertToRendererMessage),
           }}
           availableUsers={availableUsers}
-          currentUser={safeCurrentUser}
+          currentUser={user as any}
         />
       </main>
 

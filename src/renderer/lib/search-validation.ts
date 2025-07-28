@@ -1,5 +1,5 @@
 import type { AgentStatus } from "@/renderer/features/agent/agent.types";
-import type { ProviderType } from "@/main/features/agent/llm-provider/llm-provider.model";
+import type { ProviderType } from "@/renderer/features/agent/provider.types";
 
 /**
  * Search validation utilities following INLINE-FIRST principles

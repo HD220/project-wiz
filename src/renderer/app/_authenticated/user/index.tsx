@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 
-import { ContentHeader } from "@/renderer/features/app/components/content-header";
+import { ContentHeader } from "@/renderer/features/layout/components/content-header";
 import { WelcomeView } from "@/renderer/features/app/components/welcome-view";
 
 function UserPage() {

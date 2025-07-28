@@ -13,7 +13,6 @@ import { SearchFilterBar } from "@/renderer/components/ui/search-filter-bar";
 import type {
   SelectAgent,
   AgentStatus,
-  AgentWithAvatar,
 } from "@/renderer/features/agent/agent.types";
 import { AgentDeleteDialog } from "@/renderer/features/agent/components/agent-delete-dialog";
 import { AgentListItem } from "@/renderer/features/agent/components/agent-card";
@@ -262,7 +261,7 @@ export function AgentList(props: AgentListProps) {
                 {filteredAgents.map((agent) => (
                   <AgentListItem
                     key={agent.id}
-                    agent={agent as AgentWithAvatar}
+                    agent={{ ...agent, avatar: undefined }}
                     onDelete={() => handleDelete(agent)}
                     onToggleStatus={() => handleToggleStatus(agent)}
                     isLoading={

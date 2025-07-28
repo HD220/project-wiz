@@ -9,7 +9,7 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 
-import type { LlmProvider } from "@/main/features/agent/llm-provider/llm-provider.types";
+import type { LlmProvider } from "@/renderer/features/agent/provider.types";
 
 import {
   AlertDialog,

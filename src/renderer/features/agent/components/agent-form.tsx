@@ -32,7 +32,7 @@ import type {
   CreateAgentInput,
   ModelConfig,
 } from "@/renderer/features/agent/agent.types";
-import type { LlmProvider } from "@/renderer/features/agent/llm-provider.types";
+import type { LlmProvider } from "@/renderer/features/agent/provider.types";
 
 type FormData = z.infer<typeof CreateAgentSchema>;
 

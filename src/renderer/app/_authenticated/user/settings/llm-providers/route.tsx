@@ -1,7 +1,7 @@
 import { createFileRoute, Outlet } from "@tanstack/react-router";
 
-import { ProviderFiltersSchema } from "@/renderer/features/llm-provider/llm-provider.schema";
-import { ProviderList } from "@/renderer/features/llm-provider/components/provider-list";
+import { ProviderFiltersSchema } from "@/renderer/features/agent/provider.schema";
+import { ProviderList } from "@/renderer/features/agent/components/provider/provider-list";
 import { loadApiData } from "@/renderer/lib/route-loader";
 
 function LLMProvidersLayout() {
