@@ -209,7 +209,7 @@ export function RootSidebar(props: RootSidebarProps) {
               sideOffset={16}
               className="bg-sidebar-foreground text-sidebar text-sm font-medium shadow-lg border border-sidebar-border/50"
             >
-              <p>Configurações</p>
+              <p>Settings</p>
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>

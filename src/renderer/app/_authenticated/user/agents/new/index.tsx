@@ -50,17 +50,19 @@ function NewAgentPage() {
 
   return (
     <Dialog open onOpenChange={handleClose}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-2xl lg:max-w-4xl xl:max-w-5xl max-h-[90vh] overflow-hidden">
         <DialogHeader>
           <DialogTitle>Create New Agent</DialogTitle>
         </DialogHeader>
 
-        <AgentForm
-          providers={providers}
-          onSubmit={handleSubmit}
-          onCancel={handleClose}
-          isLoading={createAgentMutation.isPending}
-        />
+        <div className="overflow-hidden flex-1">
+          <AgentForm
+            providers={providers}
+            onSubmit={handleSubmit}
+            onCancel={handleClose}
+            isLoading={createAgentMutation.isPending}
+          />
+        </div>
       </DialogContent>
     </Dialog>
   );

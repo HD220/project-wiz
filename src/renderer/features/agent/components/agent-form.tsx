@@ -5,6 +5,7 @@ import { UseFormReturn } from "react-hook-form";
 import { z } from "zod";
 
 import { Button } from "@/renderer/components/ui/button";
+import { ScrollArea } from "@/renderer/components/ui/scroll-area";
 import { StatusIndicator } from "@/renderer/components/ui/status-indicator";
 import {
   Form,
@@ -102,133 +103,142 @@ export function AgentForm(props: AgentFormProps) {
   const isDirty = form.formState.isDirty;
 
   return (
-    <div className="max-w-4xl mx-auto space-y-[var(--spacing-layout-lg)]">
-      {/* Enhanced Form Header */}
-      <div className="space-y-[var(--spacing-component-md)]">
-        {/* Hero Section */}
-        <div className="relative">
-          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary/20 via-primary/10 to-primary/5 flex items-center justify-center mx-auto border border-primary/20 shadow-lg shadow-primary/10">
-            <span className="text-2xl font-bold text-primary">
-              {isEditing ? "✏️" : "🤖"}
-            </span>
-          </div>
-          <div className="absolute -inset-1 rounded-2xl bg-gradient-to-r from-primary/20 to-primary/10 blur opacity-30 animate-pulse"></div>
-        </div>
-
-        {/* Title and Description */}
-        <div className="text-center space-y-3">
-          <h1 className="text-3xl font-bold tracking-tight text-foreground">
-            {isEditing ? "Edit Agent" : "Create New Agent"}
-          </h1>
-          <p className="text-lg text-muted-foreground leading-relaxed max-w-2xl mx-auto">
-            {isEditing
-              ? "Update your agent's configuration and settings to optimize its performance and behavior."
-              : "Configure your new AI agent with identity, behavior, and provider settings to start automating your workflows."}
-          </p>
-        </div>
-      </div>
-
-      <Separator className="bg-border/50" />
-
-      {/* Enhanced Form Container */}
-      <div className="bg-card/50 backdrop-blur-sm border border-border/60 rounded-xl shadow-lg shadow-primary/5">
-        <Form {...form}>
-          <form
-            onSubmit={form.handleSubmit(handleSubmit)}
-            className="p-[var(--spacing-layout-lg)] space-y-[var(--spacing-layout-lg)]"
-            role="form"
-            aria-label={isEditing ? "Edit agent form" : "Create agent form"}
-          >
-            {/* Agent Identity Section */}
-            <section
-              aria-labelledby="identity-section"
-              className="space-y-[var(--spacing-component-lg)]"
-            >
-              <AgentFormIdentity form={form} />
-            </section>
-
-            {/* Agent Provider Section */}
-            <section
-              aria-labelledby="provider-section"
-              className="space-y-[var(--spacing-component-lg)]"
-            >
-              <AgentFormProvider form={form} providers={providers} />
-            </section>
-
-            {/* Enhanced Form Actions */}
-            <div className="pt-[var(--spacing-component-lg)] border-t border-border/40">
-              <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-[var(--spacing-component-md)]">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={handleCancel}
-                  disabled={isLoading}
-                  className="sm:w-auto w-full h-11 px-6 border-border/60 hover:bg-accent/50 transition-all duration-200"
-                >
-                  Cancel
-                </Button>
-
-                <Button
-                  type="submit"
-                  disabled={isLoading || (!isFormValid && hasErrors)}
-                  className="sm:w-auto w-full min-w-[160px] h-11 px-6 bg-primary hover:bg-primary/90 shadow-lg shadow-primary/20 transition-all duration-200"
-                >
-                  {isLoading ? (
-                    <>
-                      <Loader2 className="mr-2 size-4 animate-spin" />
-                      {isEditing ? "Updating..." : "Creating..."}
-                    </>
-                  ) : isEditing ? (
-                    "Update Agent"
-                  ) : (
-                    "Create Agent"
-                  )}
-                </Button>
-              </div>
+    <ScrollArea className="h-full w-full">
+      <div className="max-w-2xl lg:max-w-4xl xl:max-w-5xl mx-auto space-y-[var(--spacing-layout-lg)] p-6">
+        {/* Enhanced Form Header */}
+        <div className="space-y-[var(--spacing-component-md)]">
+          {/* Hero Section */}
+          <div className="relative">
+            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary/20 via-primary/10 to-primary/5 flex items-center justify-center mx-auto border border-primary/20 shadow-lg shadow-primary/10">
+              <span className="text-2xl font-bold text-primary">
+                {isEditing ? "✏️" : "🤖"}
+              </span>
             </div>
+            <div className="absolute -inset-1 rounded-2xl bg-gradient-to-r from-primary/20 to-primary/10 blur opacity-30 animate-pulse"></div>
+          </div>
 
-            {/* Enhanced Form Status Indicator */}
-            {isDirty && (
-              <div className="text-center">
-                <div className="inline-flex items-center gap-[var(--spacing-component-sm)] px-4 py-2 rounded-lg border border-border/40 bg-card/50">
-                  {hasErrors ? (
-                    <>
-                      <StatusIndicator status="error" size="md" variant="dot" />
-                      <span className="text-sm text-destructive font-medium">
-                        Please fix the errors above before submitting.
-                      </span>
-                    </>
-                  ) : isFormValid ? (
-                    <>
-                      <StatusIndicator
-                        status="active"
-                        size="md"
-                        variant="dot"
-                        className="animate-pulse"
-                      />
-                      <span className="text-sm text-chart-2 font-medium">
-                        Form is ready to submit.
-                      </span>
-                    </>
-                  ) : (
-                    <>
-                      <StatusIndicator
-                        status="inactive"
-                        size="md"
-                        variant="dot"
-                      />
-                      <span className="text-sm text-muted-foreground font-medium">
-                        Fill in all required fields to continue.
-                      </span>
-                    </>
-                  )}
+          {/* Title and Description */}
+          <div className="text-center space-y-3">
+            <h1 className="text-3xl font-bold tracking-tight text-foreground">
+              {isEditing ? "Edit Agent" : "Create New Agent"}
+            </h1>
+            <p className="text-lg text-muted-foreground leading-relaxed max-w-2xl lg:max-w-3xl xl:max-w-4xl mx-auto">
+              {isEditing
+                ? "Update your agent's configuration and settings to optimize its performance and behavior."
+                : "Configure your new AI agent with identity, behavior, and provider settings to start automating your workflows."}
+            </p>
+          </div>
+        </div>
+
+        <Separator className="bg-border/50" />
+
+        {/* Enhanced Form Container */}
+        <div className="bg-card/50 backdrop-blur-sm border border-border/60 rounded-xl shadow-lg shadow-primary/5">
+          <Form {...form}>
+            <form
+              onSubmit={form.handleSubmit(handleSubmit)}
+              className="p-[var(--spacing-layout-lg)] space-y-[var(--spacing-layout-lg)]"
+              role="form"
+              aria-label={isEditing ? "Edit agent form" : "Create agent form"}
+            >
+              {/* Agent Identity Section */}
+              <section
+                aria-labelledby="identity-section"
+                className="space-y-[var(--spacing-component-lg)]"
+              >
+                <AgentFormIdentity form={form} />
+              </section>
+
+              {/* Agent Provider Section */}
+              <section
+                aria-labelledby="provider-section"
+                className="space-y-[var(--spacing-component-lg)]"
+              >
+                <AgentFormProvider form={form} providers={providers} />
+              </section>
+
+              {/* Enhanced Form Actions */}
+              <div className="pt-[var(--spacing-component-lg)] border-t border-border/40">
+                <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-[var(--spacing-component-md)]">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={handleCancel}
+                    disabled={isLoading}
+                    className="sm:w-auto w-full h-11 px-6 border-border/60 hover:bg-accent/50 transition-all duration-200"
+                  >
+                    Cancel
+                  </Button>
+
+                  <Button
+                    type="submit"
+                    disabled={isLoading || (!isFormValid && hasErrors)}
+                    className="sm:w-auto w-full min-w-[160px] h-11 px-6 bg-primary hover:bg-primary/90 shadow-lg shadow-primary/20 transition-all duration-200"
+                  >
+                    {isLoading ? (
+                      <>
+                        <Loader2 className="mr-2 size-4 animate-spin" />
+                        {isEditing ? "Updating..." : "Creating..."}
+                      </>
+                    ) : isEditing ? (
+                      "Update Agent"
+                    ) : (
+                      "Create Agent"
+                    )}
+                  </Button>
                 </div>
               </div>
-            )}
-          </form>
-        </Form>
+
+              {/* Enhanced Form Status Indicator */}
+              {isDirty && (
+                <div className="text-center">
+                  <div className="inline-flex items-center gap-[var(--spacing-component-sm)] px-4 py-2 rounded-lg border border-border/40 bg-card/50">
+                    {hasErrors ? (
+                      <>
+                        <StatusIndicator
+                          status="error"
+                          size="md"
+                          variant="dot"
+                        />
+                        <span className="text-sm text-destructive font-medium">
+                          Please fix the errors above before submitting.
+                        </span>
+                      </>
+                    ) : isFormValid ? (
+                      <>
+                        <StatusIndicator
+                          status="active"
+                          size="md"
+                          variant="dot"
+                          className="animate-pulse"
+                        />
+                        <span className="text-sm text-chart-2 font-medium">
+                          Form is ready to submit.
+                        </span>
+                      </>
+                    ) : (
+                      <>
+                        <StatusIndicator
+                          status="inactive"
+                          size="md"
+                          variant="dot"
+                        />
+                        <span className="text-sm text-muted-foreground font-medium">
+                          Fill in all required fields to continue.
+                        </span>
+                      </>
+                    )}
+                  </div>
+                </div>
+              )}
+            </form>
+          </Form>
+        </div>
+
+        {/* Scroll padding to prevent content cut-off */}
+        <div className="h-6" />
       </div>
-    </div>
+    </ScrollArea>
   );
 }
 

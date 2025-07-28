@@ -105,8 +105,8 @@ export function ProjectForm(props: ProjectFormProps) {
   const createProjectMutation = useApiMutation(
     (data: InsertProject) => window.api.projects.create(data),
     {
-      successMessage: "Projeto criado com sucesso",
-      errorMessage: "Falha ao criar projeto",
+      successMessage: "Project created successfully",
+      errorMessage: "Failed to create project",
       invalidateRouter: false, // Disable automatic invalidation to prevent double invalidation
       onSuccess: (project) => {
         onSuccess?.(project.id);

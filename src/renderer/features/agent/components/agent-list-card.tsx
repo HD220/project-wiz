@@ -183,7 +183,8 @@ export function AgentListCard(props: AgentListCardProps) {
                     </>
                   ) : (
                     <>
-                      Criado em {new Date(agent.createdAt).toLocaleDateString()}
+                      Created on{" "}
+                      {new Date(agent.createdAt).toLocaleDateString()}
                     </>
                   )}
                 </span>

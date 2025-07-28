@@ -21,13 +21,13 @@ import { AuthCard } from "@/renderer/features/auth/components/auth-layout";
 const loginSchema = z.object({
   username: z
     .string()
-    .min(1, "Username is required")
-    .max(50, "Username too long")
+    .min(1, "Nome de usuário é obrigatório")
+    .max(50, "Nome de usuário muito longo")
     .trim(),
   password: z
     .string()
-    .min(1, "Password is required")
-    .max(100, "Password too long"),
+    .min(1, "Senha é obrigatória")
+    .max(100, "Senha muito longa"),
 });
 
 type LoginFormData = z.infer<typeof loginSchema>;
@@ -60,15 +60,15 @@ export function LoginForm(props: LoginFormProps) {
       router.navigate({ to: redirectTo });
     } catch (error) {
       form.setError("root", {
-        message: error instanceof Error ? error.message : "Login failed",
+        message: error instanceof Error ? error.message : "Falha no login",
       });
     }
   };
 
   return (
     <AuthCard
-      title="Welcome back!"
-      description="Sign in to continue to your workspace"
+      title="Bem-vindo de volta!"
+      description="Faça login para continuar ao seu espaço de trabalho"
       className={className}
     >
       <Form {...form}>
@@ -85,7 +85,7 @@ export function LoginForm(props: LoginFormProps) {
               render={({ field }) => (
                 <FormItem className="space-y-[var(--spacing-component-sm)]">
                   <FormLabel className="text-[var(--font-size-sm)] font-[var(--font-weight-medium)] text-foreground">
-                    Username
+                    Nome de usuário
                   </FormLabel>
                   <FormControl>
                     <div className="relative group">
@@ -96,7 +96,7 @@ export function LoginForm(props: LoginFormProps) {
                       <Input
                         {...field}
                         type="text"
-                        placeholder="Enter your username"
+                        placeholder="Digite seu nome de usuário"
                         disabled={form.formState.isSubmitting}
                         className="
                           pl-10 
@@ -132,13 +132,13 @@ export function LoginForm(props: LoginFormProps) {
               render={({ field }) => (
                 <FormItem className="space-y-[var(--spacing-component-sm)]">
                   <FormLabel className="text-[var(--font-size-sm)] font-[var(--font-weight-medium)] text-foreground">
-                    Password
+                    Senha
                   </FormLabel>
                   <FormControl>
                     <Input
                       {...field}
                       type="password"
-                      placeholder="Enter your password"
+                      placeholder="Digite sua senha"
                       disabled={form.formState.isSubmitting}
                       className="
                         h-12
@@ -196,7 +196,7 @@ export function LoginForm(props: LoginFormProps) {
               {form.formState.isSubmitting ? (
                 <>
                   <Loader2 className="mr-[var(--spacing-component-sm)] h-4 w-4 animate-spin" />
-                  <span>Signing in...</span>
+                  <span>Entrando...</span>
                 </>
               ) : (
                 <>
@@ -204,7 +204,7 @@ export function LoginForm(props: LoginFormProps) {
                     className="mr-[var(--spacing-component-sm)] h-4 w-4"
                     aria-hidden="true"
                   />
-                  <span>Sign In</span>
+                  <span>Entrar</span>
                 </>
               )}
             </Button>
@@ -234,7 +234,7 @@ export function LoginForm(props: LoginFormProps) {
 
             <div className="text-center pt-[var(--spacing-component-sm)]">
               <p className="text-[var(--font-size-sm)] text-muted-foreground">
-                Need an account?{" "}
+                Precisa de uma conta?{" "}
                 <Button
                   variant="link"
                   className="
@@ -249,7 +249,7 @@ export function LoginForm(props: LoginFormProps) {
                   onClick={() => router.navigate({ to: "/auth/register" })}
                   type="button"
                 >
-                  Create account
+                  Criar conta
                 </Button>
               </p>
             </div>

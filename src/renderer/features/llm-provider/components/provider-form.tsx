@@ -134,7 +134,7 @@ export function ProviderForm(props: ProviderFormProps) {
   return (
     <Dialog open onOpenChange={onClose}>
       <DialogContent
-        className="max-w-2xl max-h-[90vh] overflow-y-auto bg-card/95 backdrop-blur-sm border border-border/60"
+        className="max-w-2xl lg:max-w-4xl xl:max-w-5xl max-h-[90vh] overflow-y-auto bg-card/95 backdrop-blur-sm border border-border/60"
         showCloseButton={false}
       >
         <DialogHeader className="space-y-[var(--spacing-component-sm)] pb-[var(--spacing-component-lg)] border-b border-border/40">

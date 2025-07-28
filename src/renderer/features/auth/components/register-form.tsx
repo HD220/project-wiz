@@ -77,10 +77,10 @@ export function RegisterForm(props: RegisterFormProps) {
       });
 
       if (!response.success) {
-        throw new Error(response.error || "Registration failed");
+        throw new Error(response.error || "Falha no cadastro");
       }
 
-      // Logar automaticamente após registro
+      // Automatically log in after registration
       await login({
         username: data.username,
         password: data.password,
@@ -89,7 +89,7 @@ export function RegisterForm(props: RegisterFormProps) {
       router.navigate({ to: "/user" });
     } catch (error) {
       form.setError("root", {
-        message: error instanceof Error ? error.message : "Registration failed",
+        message: error instanceof Error ? error.message : "Falha no cadastro",
       });
     }
   };
@@ -97,7 +97,7 @@ export function RegisterForm(props: RegisterFormProps) {
   return (
     <AuthCard
       title="Create your account"
-      description="Join our platform and start building amazing projects"
+      description="Join our platform and start creating amazing projects"
       className={className}
     >
       <Form {...form}>
@@ -113,7 +113,7 @@ export function RegisterForm(props: RegisterFormProps) {
             render={({ field }) => (
               <FormItem>
                 <FormLabel className="text-sm font-medium">
-                  Display Name
+                  Display name
                 </FormLabel>
                 <FormControl>
                   <div className="relative">
@@ -162,7 +162,7 @@ export function RegisterForm(props: RegisterFormProps) {
             name="password"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-sm font-medium">Password</FormLabel>
+                <FormLabel className="text-sm font-medium">Senha</FormLabel>
                 <FormControl>
                   <div className="relative">
                     <Lock
@@ -172,7 +172,7 @@ export function RegisterForm(props: RegisterFormProps) {
                     <Input
                       {...field}
                       type={showPassword ? "text" : "password"}
-                      placeholder="Create a secure password"
+                      placeholder="Crie uma senha segura"
                       disabled={form.formState.isSubmitting}
                       className="pl-10 pr-10 h-11"
                       aria-describedby={field.name + "-error"}
@@ -186,7 +186,7 @@ export function RegisterForm(props: RegisterFormProps) {
                       onClick={() => setShowPassword(!showPassword)}
                       tabIndex={-1}
                       aria-label={
-                        showPassword ? "Hide password" : "Show password"
+                        showPassword ? "Ocultar senha" : "Mostrar senha"
                       }
                     >
                       {showPassword ? (
@@ -208,7 +208,7 @@ export function RegisterForm(props: RegisterFormProps) {
             render={({ field }) => (
               <FormItem>
                 <FormLabel className="text-sm font-medium">
-                  Confirm Password
+                  Confirmar senha
                 </FormLabel>
                 <FormControl>
                   <div className="relative">
@@ -219,7 +219,7 @@ export function RegisterForm(props: RegisterFormProps) {
                     <Input
                       {...field}
                       type={showConfirmPassword ? "text" : "password"}
-                      placeholder="Confirm your password"
+                      placeholder="Confirme sua senha"
                       disabled={form.formState.isSubmitting}
                       className="pl-10 pr-10 h-11"
                       aria-describedby={field.name + "-error"}
@@ -235,7 +235,7 @@ export function RegisterForm(props: RegisterFormProps) {
                       }
                       tabIndex={-1}
                       aria-label={
-                        showConfirmPassword ? "Hide password" : "Show password"
+                        showConfirmPassword ? "Ocultar senha" : "Mostrar senha"
                       }
                     >
                       {showConfirmPassword ? (
@@ -261,12 +261,12 @@ export function RegisterForm(props: RegisterFormProps) {
               {form.formState.isSubmitting ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Creating account...
+                  Criando conta...
                 </>
               ) : (
                 <>
                   <UserPlus className="mr-2 h-4 w-4" aria-hidden="true" />
-                  Create Account
+                  Criar conta
                 </>
               )}
             </Button>
@@ -288,7 +288,7 @@ export function RegisterForm(props: RegisterFormProps) {
                   onClick={() => router.navigate({ to: "/auth/login" })}
                   type="button"
                 >
-                  Sign in
+                  Entrar
                 </Button>
               </p>
             </div>

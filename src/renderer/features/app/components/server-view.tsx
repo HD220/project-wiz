@@ -41,11 +41,11 @@ export function ProjectView(props: ProjectViewProps) {
                     project.status === "active" ? "default" : "secondary"
                   }
                 >
-                  {project.status === "active" ? "Ativo" : "Arquivado"}
+                  {project.status === "active" ? "Active" : "Archived"}
                 </Badge>
                 <Button variant="outline" size="sm">
                   <Settings className="h-4 w-4 mr-2" />
-                  Configurações
+                  Settings
                 </Button>
               </div>
             </div>
@@ -55,14 +55,14 @@ export function ProjectView(props: ProjectViewProps) {
         {/* Project Details */}
         <Card>
           <CardHeader>
-            <CardTitle>Detalhes do Projeto</CardTitle>
+            <CardTitle>Project Details</CardTitle>
           </CardHeader>
           <CardContent className="space-y-[var(--spacing-component-md)]">
             {project.localPath && (
               <div className="flex items-center space-x-[var(--spacing-component-md)]">
                 <Folder className="h-5 w-5 text-muted-foreground" />
                 <div>
-                  <p className="font-medium">Caminho Local</p>
+                  <p className="font-medium">Local Path</p>
                   <p className="text-sm text-muted-foreground font-mono">
                     {project.localPath}
                   </p>
@@ -74,7 +74,7 @@ export function ProjectView(props: ProjectViewProps) {
               <div className="flex items-center space-x-[var(--spacing-component-md)]">
                 <GitBranch className="h-5 w-5 text-muted-foreground" />
                 <div>
-                  <p className="font-medium">Repositório Git</p>
+                  <p className="font-medium">Git Repository</p>
                   <p className="text-sm text-muted-foreground break-all">
                     {project.gitUrl}
                   </p>
@@ -92,7 +92,7 @@ export function ProjectView(props: ProjectViewProps) {
             <div className="flex items-center space-x-[var(--spacing-component-md)]">
               <Calendar className="h-5 w-5 text-muted-foreground" />
               <div>
-                <p className="font-medium">Criado em</p>
+                <p className="font-medium">Created on</p>
                 <p className="text-sm text-muted-foreground">
                   {new Date(project.createdAt).toLocaleDateString("pt-BR", {
                     year: "numeric",
@@ -110,20 +110,20 @@ export function ProjectView(props: ProjectViewProps) {
         {/* Quick Actions */}
         <Card>
           <CardHeader>
-            <CardTitle>Ações Rápidas</CardTitle>
+            <CardTitle>Quick Actions</CardTitle>
             <CardDescription>
-              Gerencie seu projeto e trabalhe com agentes.
+              Manage your project and work with agents.
             </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-[var(--spacing-component-md)]">
               <Button variant="outline" className="justify-start">
                 <Folder className="h-4 w-4 mr-2" />
-                Abrir no Explorer
+                Open in Explorer
               </Button>
               <Button variant="outline" className="justify-start">
                 <GitBranch className="h-4 w-4 mr-2" />
-                Sincronizar Git
+                Sync Repository
               </Button>
             </div>
           </CardContent>

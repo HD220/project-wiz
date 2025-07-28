@@ -49,7 +49,7 @@ export function WelcomeMessage({
   isArchived,
 }: WelcomeMessageProps) {
   return (
-    <div className="px-6 py-12 mx-auto max-w-2xl">
+    <div className="px-6 py-12 mx-auto max-w-2xl lg:max-w-4xl xl:max-w-5xl">
       <div className="text-center space-y-6">
         {/* Hero Icon */}
         <div className="relative">
@@ -65,12 +65,12 @@ export function WelcomeMessage({
         <div className="space-y-[var(--spacing-component-md)]">
           <div className="space-y-[var(--spacing-component-sm)]">
             <h1 className="text-2xl font-bold tracking-tight text-foreground">
-              Bem-vindo a {conversation.name || "esta conversa"}!
+              Welcome to {conversation.name || "this conversation"}!
             </h1>
             <p className="text-lg text-muted-foreground leading-relaxed">
               {isArchived
-                ? "Esta conversa foi arquivada e não pode receber novas mensagens."
-                : "Este é o início da sua conversa. Comece a interagir com o agente de IA para obter assistência com seus projetos."}
+                ? "This conversation has been archived and cannot receive new messages."
+                : "This is the beginning of your conversation. Start interacting with the AI agent to get assistance with your projects."}
             </p>
           </div>
 
@@ -82,10 +82,10 @@ export function WelcomeMessage({
                   <span className="text-chart-2 text-sm">💬</span>
                 </div>
                 <h3 className="font-medium text-sm text-foreground mb-1">
-                  Conversação Natural
+                  Natural Conversation
                 </h3>
                 <p className="text-xs text-muted-foreground leading-relaxed">
-                  Converse naturalmente com o agente de IA
+                  Chat naturally with the AI agent
                 </p>
               </div>
               <div className="p-[var(--spacing-component-md)] rounded-lg bg-card border border-border/50 hover:border-border transition-colors">
@@ -93,10 +93,10 @@ export function WelcomeMessage({
                   <span className="text-chart-5 text-sm">🎯</span>
                 </div>
                 <h3 className="font-medium text-sm text-foreground mb-1">
-                  Assistência Especializada
+                  Specialized Assistance
                 </h3>
                 <p className="text-xs text-muted-foreground leading-relaxed">
-                  Obtenha ajuda específica para desenvolvimento
+                  Get specific help for development
                 </p>
               </div>
               <div className="p-[var(--spacing-component-md)] rounded-lg bg-card border border-border/50 hover:border-border transition-colors">
@@ -104,10 +104,10 @@ export function WelcomeMessage({
                   <span className="text-chart-4 text-sm">⚡</span>
                 </div>
                 <h3 className="font-medium text-sm text-foreground mb-1">
-                  Respostas Rápidas
+                  Quick Responses
                 </h3>
                 <p className="text-xs text-muted-foreground leading-relaxed">
-                  Receba assistência instantânea e precisa
+                  Get instant and accurate assistance
                 </p>
               </div>
             </div>
@@ -137,22 +137,22 @@ export function EmptyState({ isArchived }: EmptyStateProps) {
         <div className="absolute -inset-2 rounded-full bg-gradient-to-r from-muted/10 to-muted/5 blur opacity-20"></div>
       </div>
 
-      <div className="space-y-[var(--spacing-component-sm)] max-w-md">
+      <div className="space-y-[var(--spacing-component-sm)] max-w-md lg:max-w-lg xl:max-w-xl">
         <h3 className="text-lg font-medium text-foreground">
-          {isArchived ? "Conversa Arquivada" : "Pronto para Conversar"}
+          {isArchived ? "Archived Conversation" : "Ready to Chat"}
         </h3>
         <p className="text-muted-foreground leading-relaxed">
           {isArchived
-            ? "Esta conversa foi arquivada e não está mais ativa. Para reativar, use a opção desarquivar."
-            : "Inicie uma conversa enviando uma mensagem. O agente está pronto para ajudar com seus projetos e dúvidas."}
+            ? "This conversation has been archived and is no longer active. To reactivate, use the unarchive option."
+            : "Start a conversation by sending a message. The agent is ready to help with your projects and questions."}
         </p>
       </div>
 
       {!isArchived && (
-        <div className="mt-8 p-[var(--spacing-component-md)] rounded-lg bg-muted/10 border border-border/50 max-w-sm">
+        <div className="mt-8 p-[var(--spacing-component-md)] rounded-lg bg-muted/10 border border-border/50 max-w-sm lg:max-w-md">
           <p className="text-sm text-muted-foreground">
-            💡 <strong>Dica:</strong> Seja específico em suas perguntas para
-            obter respostas mais precisas.
+            💡 <strong>Tip:</strong> Be specific in your questions to get more
+            accurate answers.
           </p>
         </div>
       )}
@@ -231,7 +231,7 @@ export function MessageGroup({
           isCurrentUser={isCurrentUser}
           showAvatar={showAvatar}
           authorIsInactive={authorIsInactive}
-          originalAuthorName={authorIsInactive ? "Agente" : undefined}
+          originalAuthorName={authorIsInactive ? "Agent" : undefined}
           isSending={isLastCurrentUserGroup && group.messages.length === 1}
         />
       )}
@@ -249,7 +249,7 @@ export function MessageGroup({
             isCurrentUser={isCurrentUser}
             showAvatar={false}
             authorIsInactive={authorIsInactive}
-            originalAuthorName={authorIsInactive ? "Agente" : undefined}
+            originalAuthorName={authorIsInactive ? "Agent" : undefined}
             isSending={isLastCurrentUserGroup && isLastMessageInGroup}
           />
         );
@@ -268,15 +268,15 @@ export function ArchivedInputPlaceholder({
 }: ArchivedInputPlaceholderProps) {
   return (
     <div className={cn("bg-muted/20 px-6 py-6", className)}>
-      <div className="flex items-center justify-center gap-[var(--spacing-component-md)] text-muted-foreground max-w-md mx-auto">
+      <div className="flex items-center justify-center gap-[var(--spacing-component-md)] text-muted-foreground max-w-md lg:max-w-lg mx-auto">
         <div className="w-8 h-8 rounded-full bg-muted/30 flex items-center justify-center flex-shrink-0">
           <span className="text-sm">📁</span>
         </div>
         <div className="text-center">
-          <p className="text-sm font-medium mb-1">Conversa Arquivada</p>
+          <p className="text-sm font-medium mb-1">Archived Conversation</p>
           <p className="text-xs text-muted-foreground/80 leading-relaxed">
-            Esta conversa foi arquivada. Para enviar mensagens, desarquive a
-            conversa primeiro.
+            This conversation has been archived. To send messages, unarchive the
+            conversation first.
           </p>
         </div>
       </div>
@@ -446,7 +446,7 @@ export function ConversationChat(props: ConversationChatProps) {
             onSendMessage={handleSendMessage}
             disabled={sendMessageMutation.isPending}
             isSending={sendMessageMutation.isPending}
-            placeholder={`Conversar em ${conversation.name || "conversa"}...`}
+            placeholder={`Chat in ${conversation.name || "conversation"}...`}
           />
         </div>
       )}

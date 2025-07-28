@@ -34,7 +34,7 @@ export function ProjectSidebar(props: ProjectSidebarProps) {
   // Transform conversations into channels format
   const channels: Channel[] = conversations.map((conversation) => ({
     id: conversation.id,
-    name: conversation.name || "Conversa sem nome",
+    name: conversation.name || "Unnamed conversation",
     type: "text" as const,
     hasNotification: false, // TODO: Add notification logic from conversation data
   }));
@@ -109,7 +109,7 @@ export function ProjectSidebar(props: ProjectSidebarProps) {
                 aria-expanded="true"
               >
                 <ChevronDown className="w-3 h-3 mr-2 transition-transform duration-200" />
-                <span>Canais de Texto</span>
+                <span>TEXT CHANNELS</span>
               </Button>
             </CollapsibleTrigger>
             <CollapsibleContent className="space-y-[var(--spacing-component-xs)] mt-1">
@@ -160,7 +160,7 @@ export function ProjectSidebar(props: ProjectSidebarProps) {
                 </div>
               ) : (
                 <div className="px-[var(--spacing-component-md)] py-[var(--spacing-component-sm)] text-xs text-muted-foreground text-center">
-                  Nenhuma conversa ainda
+                  No conversations yet
                 </div>
               )}
             </CollapsibleContent>

@@ -24,11 +24,11 @@ export function SidebarNavigation(props: SidebarNavigationProps) {
       <NavigationItem
         to="/user"
         icon={Hash}
-        label="Dashboard"
+        label="Painel"
         activeOptions={{ exact: true }}
       />
 
-      <NavigationItem to="/user/agents" icon={Bot} label="Agents" />
+      <NavigationItem to="/user/agents" icon={Bot} label="Agentes" />
 
       <Separator className="my-[var(--spacing-component-lg)] bg-sidebar-border/40" />
 

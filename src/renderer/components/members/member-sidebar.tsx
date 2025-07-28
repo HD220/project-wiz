@@ -39,14 +39,14 @@ export function MemberSidebar(props: MemberSidebarProps) {
   const getStatusLabel = (status: Member["status"]) => {
     switch (status) {
       case "online":
-        return "Online";
+        return "ONLINE";
       case "away":
-        return "Ausente";
+        return "AWAY";
       case "busy":
-        return "Ocupado";
+        return "BUSY";
       case "offline":
       default:
-        return "Offline";
+        return "OFFLINE";
     }
   };
 
@@ -144,7 +144,7 @@ export function MemberSidebar(props: MemberSidebarProps) {
         <div className="p-4 space-y-4">
           {/* Online Members */}
           <MemberSection
-            title="Online"
+            title="ONLINE"
             members={online}
             count={online.length}
             status="online"
@@ -152,7 +152,7 @@ export function MemberSidebar(props: MemberSidebarProps) {
 
           {/* Away Members */}
           <MemberSection
-            title="Ausente"
+            title="AWAY"
             members={away}
             count={away.length}
             status="away"
@@ -160,7 +160,7 @@ export function MemberSidebar(props: MemberSidebarProps) {
 
           {/* Busy Members */}
           <MemberSection
-            title="Ocupado"
+            title="BUSY"
             members={busy}
             count={busy.length}
             status="busy"
@@ -173,7 +173,7 @@ export function MemberSidebar(props: MemberSidebarProps) {
 
           {/* Offline Members */}
           <MemberSection
-            title="Offline"
+            title="OFFLINE"
             members={offline}
             count={offline.length}
             status="offline"
@@ -187,9 +187,7 @@ export function MemberSidebar(props: MemberSidebarProps) {
               aria-live="polite"
             >
               <Users className="w-8 h-8 mx-auto mb-3 text-muted-foreground/50" />
-              <p className="text-sm text-muted-foreground">
-                Nenhum membro encontrado
-              </p>
+              <p className="text-sm text-muted-foreground">No members found</p>
             </div>
           )}
         </div>

@@ -327,7 +327,7 @@ export function LegacyProjectCard(props: LegacyProjectCardProps) {
               variant={project.status === "active" ? "default" : "secondary"}
               className="shrink-0 text-xs"
             >
-              {project.status === "active" ? "Ativo" : "Arquivado"}
+              {project.status === "active" ? "Active" : "Archived"}
             </Badge>
           </div>
         </CardHeader>

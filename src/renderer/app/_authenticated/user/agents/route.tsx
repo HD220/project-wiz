@@ -16,7 +16,7 @@ function AgentsLayout() {
         description="Create and manage your AI agents for automated tasks and conversations"
       />
       <main className="flex-1 overflow-auto">
-        <div className="h-full p-6">
+        <div className="p-6">
           <AgentList agents={agents} showInactive={search.showInactive} />
         </div>
       </main>

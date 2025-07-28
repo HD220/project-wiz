@@ -24,25 +24,25 @@ export function UserStatus(props: UserStatusProps) {
       indicator: "bg-gradient-to-r from-emerald-400 to-emerald-500",
       ring: "ring-emerald-400/30",
       text: "text-emerald-600 dark:text-emerald-400",
-      label: "Online",
+      label: "Conectado",
     },
     away: {
       indicator: "bg-gradient-to-r from-amber-400 to-amber-500",
       ring: "ring-amber-400/30",
       text: "text-amber-600 dark:text-amber-400",
-      label: "Away",
+      label: "Ausente",
     },
     busy: {
       indicator: "bg-gradient-to-r from-red-400 to-red-500",
       ring: "ring-red-400/30",
       text: "text-red-600 dark:text-red-400",
-      label: "Busy",
+      label: "Ocupado",
     },
     offline: {
       indicator: "bg-gradient-to-r from-slate-400 to-slate-500",
       ring: "ring-slate-400/30",
       text: "text-muted-foreground",
-      label: "Offline",
+      label: "Desconectado",
     },
   };
 

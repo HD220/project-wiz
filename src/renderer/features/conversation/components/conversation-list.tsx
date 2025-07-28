@@ -19,6 +19,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/renderer/components/ui/dropdown-menu";
+import { ScrollArea } from "@/renderer/components/ui/scroll-area";
 import { Switch } from "@/renderer/components/ui/switch";
 import { useAuth } from "@/renderer/contexts/auth.context";
 import { useApiMutation } from "@/renderer/hooks/use-api-mutation.hook";
@@ -110,15 +111,17 @@ export function ConversationList(props: ConversationListProps) {
           onCreateConversation={() => setShowCreateDialog(true)}
         />
       ) : (
-        <div className="flex-1 overflow-y-auto scrollbar-thin py-2 space-y-1">
-          {displayConversations.map((conversation) => (
-            <ConversationListItem
-              key={conversation.id}
-              conversation={conversation}
-              availableUsers={availableUsers}
-            />
-          ))}
-        </div>
+        <ScrollArea className="flex-1">
+          <div className="py-2 space-y-1">
+            {displayConversations.map((conversation) => (
+              <ConversationListItem
+                key={conversation.id}
+                conversation={conversation}
+                availableUsers={availableUsers}
+              />
+            ))}
+          </div>
+        </ScrollArea>
       )}
 
       {/* Create Dialog */}

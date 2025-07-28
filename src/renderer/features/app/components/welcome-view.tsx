@@ -49,10 +49,10 @@ export function WelcomeView() {
                 Welcome to Project Wiz
               </div>
               <h1 className="text-3xl font-bold text-foreground tracking-tight lg:text-4xl">
-                {greeting}, {user?.username || "Developer"}!
+                {greeting}, {user?.username || "Desenvolvedor"}!
               </h1>
               <p className="text-lg text-muted-foreground max-w-prose mx-auto">
-                Ready to revolutionize your development workflow with AI-powered
+                Ready to revolutionize your development workflow with AI-based
                 automation and intelligent project management?
               </p>
             </div>
@@ -66,7 +66,7 @@ export function WelcomeView() {
               >
                 <Link to="/user/agents/new">
                   <Plus className="size-4" />
-                  Create Your First Agent
+                  Criar Seu Primeiro Agente
                 </Link>
               </Button>
               <Button
@@ -77,7 +77,7 @@ export function WelcomeView() {
               >
                 <Link to="/project/new">
                   <FolderOpen className="size-4" />
-                  Start a Project
+                  Iniciar um Projeto
                 </Link>
               </Button>
             </div>
@@ -92,10 +92,10 @@ export function WelcomeView() {
           <section>
             <div className="text-center mb-6">
               <h2 className="text-xl font-semibold text-foreground mb-1">
-                Get Started in Minutes
+                Comece em Minutos
               </h2>
               <p className="text-muted-foreground text-sm">
-                Choose your path to AI-powered development
+                Escolha seu caminho para desenvolvimento com IA
               </p>
             </div>
 
@@ -109,9 +109,11 @@ export function WelcomeView() {
                     </div>
                     <div className="flex-1">
                       <div className="flex items-center gap-[var(--spacing-component-sm)]">
-                        <CardTitle className="text-base">Quick Start</CardTitle>
+                        <CardTitle className="text-base">
+                          Início Rápido
+                        </CardTitle>
                         <Badge variant="secondary" className="text-xs">
-                          Recommended
+                          Recomendado
                         </Badge>
                       </div>
                       <CardDescription className="text-xs">
@@ -122,7 +124,7 @@ export function WelcomeView() {
                 </CardHeader>
                 <CardContent className="pt-0 space-y-[var(--spacing-component-md)]">
                   <p className="text-sm text-muted-foreground">
-                    Jump-start your automation journey with our guided setup.
+                    Accelerate your automation journey with our guided setup.
                     Create your first AI agent and experience intelligent
                     workflows.
                   </p>
@@ -132,7 +134,7 @@ export function WelcomeView() {
                     className="w-full gap-[var(--spacing-component-sm)] h-8"
                   >
                     <Link to="/user/agents/new">
-                      Get Started
+                      Começar
                       <ArrowRight className="size-3" />
                     </Link>
                   </Button>
@@ -156,9 +158,8 @@ export function WelcomeView() {
                 </CardHeader>
                 <CardContent className="pt-0 space-y-[var(--spacing-component-md)]">
                   <p className="text-sm text-muted-foreground">
-                    Centralize your repositories, track progress, and
-                    collaborate seamlessly with your team using project
-                    management tools.
+                    Centralize your repositories, track progress and collaborate
+                    seamlessly with your team using project management tools.
                   </p>
                   <Button
                     asChild
@@ -166,7 +167,7 @@ export function WelcomeView() {
                     className="w-full gap-[var(--spacing-component-sm)] h-8"
                   >
                     <Link to="/projects">
-                      Explore Projects
+                      Explorar Projetos
                       <ArrowRight className="size-3" />
                     </Link>
                   </Button>
@@ -212,10 +213,10 @@ export function WelcomeView() {
           <section>
             <div className="text-center mb-6">
               <h2 className="text-xl font-semibold text-foreground mb-1">
-                Why Choose Project Wiz?
+                Por que Escolher o Project Wiz?
               </h2>
               <p className="text-muted-foreground text-sm">
-                Built for developers, by developers
+                Construído para desenvolvedores, por desenvolvedores
               </p>
             </div>
 
@@ -226,10 +227,10 @@ export function WelcomeView() {
                 </div>
                 <div>
                   <h3 className="font-medium text-foreground text-sm mb-1">
-                    Save Time
+                    Economize Tempo
                   </h3>
                   <p className="text-xs text-muted-foreground">
-                    Automate repetitive tasks and focus on what matters most
+                    Automatize tarefas repetitivas e foque no que mais importa
                   </p>
                 </div>
               </div>
@@ -240,10 +241,10 @@ export function WelcomeView() {
                 </div>
                 <div>
                   <h3 className="font-medium text-foreground text-sm mb-1">
-                    Secure
+                    Seguro
                   </h3>
                   <p className="text-xs text-muted-foreground">
-                    Enterprise-grade security with local data processing
+                    Segurança empresarial com processamento local de dados
                   </p>
                 </div>
               </div>
@@ -254,10 +255,10 @@ export function WelcomeView() {
                 </div>
                 <div>
                   <h3 className="font-medium text-foreground text-sm mb-1">
-                    Precise
+                    Preciso
                   </h3>
                   <p className="text-xs text-muted-foreground">
-                    AI agents trained for development workflows
+                    Agentes de IA treinados para fluxos de desenvolvimento
                   </p>
                 </div>
               </div>
@@ -273,9 +274,11 @@ export function WelcomeView() {
                     <Bot className="h-3 w-3 text-primary" />
                   </div>
                   <div>
-                    <CardTitle className="text-base">Recent Activity</CardTitle>
+                    <CardTitle className="text-base">
+                      Atividade Recente
+                    </CardTitle>
                     <CardDescription className="text-xs">
-                      Your latest interactions and system updates
+                      Suas últimas interações e atualizações do sistema
                     </CardDescription>
                   </div>
                 </div>
@@ -284,27 +287,28 @@ export function WelcomeView() {
                 <div className="space-y-[var(--spacing-component-md)]">
                   <ActivityItem
                     icon={<div className="w-2 h-2 bg-green-500 rounded-full" />}
-                    title="Successfully logged in to Project Wiz"
-                    timestamp="Just now"
+                    title="Login realizado com sucesso no Project Wiz"
+                    timestamp="Agora mesmo"
                     variant="success"
                   />
                   <ActivityItem
                     icon={<div className="w-2 h-2 bg-primary rounded-full" />}
-                    title="Welcome! Your workspace is ready to use"
-                    timestamp="Today"
+                    title="Bem-vindo! Seu espaço de trabalho está pronto para usar"
+                    timestamp="Hoje"
                     variant="info"
                   />
                   <ActivityItem
                     icon={<div className="w-2 h-2 bg-blue-500 rounded-full" />}
-                    title="System updated with latest AI models"
-                    timestamp="Yesterday"
+                    title="Sistema atualizado com os últimos modelos de IA"
+                    timestamp="Ontem"
                     variant="info"
                   />
                 </div>
 
                 <div className="mt-4 pt-3 border-t border-border/50">
                   <p className="text-xs text-muted-foreground text-center">
-                    Start creating agents and projects to see more activity here
+                    Start by creating agents and projects to see more activity
+                    here
                   </p>
                 </div>
               </CardContent>
