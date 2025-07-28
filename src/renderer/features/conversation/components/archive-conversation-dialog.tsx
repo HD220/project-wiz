@@ -38,8 +38,8 @@ export function ArchiveConversationDialog(
   return (
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-lg border-border/50 shadow-2xl">
-        <DialogHeader className="space-y-4">
-          <div className="flex items-center gap-3">
+        <DialogHeader className="space-y-[var(--spacing-component-md)]">
+          <div className="flex items-center gap-[var(--spacing-component-sm)]">
             <div className="w-12 h-12 rounded-full bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center ring-2 ring-amber-200 dark:ring-amber-800/50">
               <Archive className="h-6 w-6 text-amber-600 dark:text-amber-400" />
             </div>
@@ -50,7 +50,7 @@ export function ArchiveConversationDialog(
             </div>
           </div>
 
-          <DialogDescription className="text-left space-y-3">
+          <DialogDescription className="text-left space-y-[var(--spacing-component-sm)]">
             <p className="text-base leading-relaxed">
               Are you sure you want to archive{" "}
               {conversationName ? (
@@ -64,11 +64,11 @@ export function ArchiveConversationDialog(
             </p>
 
             <div className="bg-muted/50 p-4 rounded-lg border border-border/50">
-              <div className="flex items-start gap-3">
+              <div className="flex items-start gap-[var(--spacing-component-sm)]">
                 <AlertTriangle className="h-4 w-4 text-amber-500 mt-0.5 flex-shrink-0" />
-                <div className="text-sm text-muted-foreground space-y-1">
+                <div className="text-sm text-muted-foreground space-y-[var(--spacing-component-xs)]">
                   <p>This conversation will be:</p>
-                  <ul className="list-disc list-inside space-y-0.5 ml-2">
+                  <ul className="list-disc list-inside space-y-[var(--spacing-component-xs)] ml-2">
                     <li>Moved to your archived conversations</li>
                     <li>Hidden from your main conversation list</li>
                     <li>Notifications will be disabled</li>
@@ -79,7 +79,7 @@ export function ArchiveConversationDialog(
           </DialogDescription>
         </DialogHeader>
 
-        <DialogFooter className="gap-3 pt-2">
+        <DialogFooter className="gap-[var(--spacing-component-sm)] pt-[var(--spacing-component-sm)]">
           <Button
             variant="outline"
             onClick={onClose}

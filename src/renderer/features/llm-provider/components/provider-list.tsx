@@ -43,6 +43,9 @@ export function ProviderList(props: ProviderListProps) {
   }
 
   function handleSearchChange(value: string) {
+    // Basic validation: limit search term length
+    if (value.length > 100) return;
+
     navigate({
       to: "/user/settings/llm-providers",
       search: {
@@ -93,8 +96,8 @@ export function ProviderList(props: ProviderListProps) {
   return (
     <div className="flex flex-col h-full">
       {/* Professional Agent-style Header */}
-      <div className="flex items-center justify-between px-6 py-4 border-b border-border/50 bg-background/95 backdrop-blur-sm shrink-0">
-        <div className="flex items-center gap-4">
+      <div className="flex items-center justify-between px-[var(--spacing-component-lg)] py-[var(--spacing-component-md)] border-b border-border/50 bg-background/95 backdrop-blur-sm shrink-0">
+        <div className="flex items-center gap-[var(--spacing-component-md)]">
           <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-primary/10">
             <Server className="w-5 h-5 text-primary" />
           </div>
@@ -120,7 +123,7 @@ export function ProviderList(props: ProviderListProps) {
       </div>
 
       {/* Professional Filters */}
-      <div className="flex items-center gap-4 px-6 py-3 border-b border-border/30 bg-background/50 shrink-0">
+      <div className="flex items-center gap-[var(--spacing-component-md)] px-[var(--spacing-component-lg)] py-[var(--spacing-component-sm)] border-b border-border/30 bg-background/50 shrink-0">
         {/* Search Input */}
         <div className="relative flex-1 max-w-sm">
           <Search className="absolute left-3 top-1/2 w-4 h-4 -translate-y-1/2 text-muted-foreground" />
@@ -129,6 +132,7 @@ export function ProviderList(props: ProviderListProps) {
             value={search.search || ""}
             onChange={(event) => handleSearchChange(event.target.value)}
             className="pl-10 h-9 border-border/60 bg-background/50 focus:bg-background"
+            maxLength={100}
           />
         </div>
 
@@ -148,7 +152,7 @@ export function ProviderList(props: ProviderListProps) {
         </Select>
 
         {/* Show Inactive Toggle */}
-        <div className="flex items-center gap-3 px-3 py-2 rounded-md border border-border/60 bg-background/50">
+        <div className="flex items-center gap-[var(--spacing-component-sm)] px-[var(--spacing-component-sm)] py-[var(--spacing-component-sm)] rounded-md border border-border/60 bg-background/50">
           <Switch
             id="show-inactive-providers"
             checked={!!search.showInactive}
@@ -208,8 +212,8 @@ export function ProviderList(props: ProviderListProps) {
       {/* Scrollable Provider List with responsive 2-column layout */}
       {filteredProviders.length > 0 && (
         <ScrollArea className="flex-1">
-          <div className="p-3 space-y-1">
-            <div className="grid grid-cols-1 xl:grid-cols-2 gap-1">
+          <div className="p-[var(--spacing-component-sm)] space-y-[var(--spacing-component-xs)]">
+            <div className="grid grid-cols-1 xl:grid-cols-2 gap-[var(--spacing-component-xs)]">
               {filteredProviders.map((provider: LlmProvider) => (
                 <ProviderCard key={provider.id} provider={provider} />
               ))}

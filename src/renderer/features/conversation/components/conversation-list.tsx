@@ -117,7 +117,7 @@ export function ConversationList(props: ConversationListProps) {
         />
       ) : (
         <ScrollArea className="flex-1">
-          <div className="space-y-1 pt-1">
+          <div className="space-y-[var(--spacing-component-xs)] pt-[var(--spacing-component-xs)]">
             {displayConversations.map((conversation) => (
               <ConversationListItem
                 key={conversation.id}
@@ -162,8 +162,8 @@ function ConversationListHeader(props: ConversationListHeaderProps) {
   const { onCreateConversation, showArchived, onToggleShowArchived } = props;
 
   return (
-    <div className="pb-2 border-b border-sidebar-border/40">
-      <div className="flex items-center justify-between mb-3">
+    <div className="pb-[var(--spacing-component-sm)] border-b border-sidebar-border/40">
+      <div className="flex items-center justify-between mb-[var(--spacing-component-sm)]">
         <h2 className="text-xs font-semibold text-sidebar-foreground/60 uppercase tracking-wide">
           Direct Messages
         </h2>
@@ -182,8 +182,8 @@ function ConversationListHeader(props: ConversationListHeaderProps) {
       </div>
 
       {/* Archive Toggle - More compact */}
-      <div className="flex items-center justify-between text-xs bg-sidebar-accent/20 rounded-md p-2 hover:bg-sidebar-accent/30 transition-colors">
-        <div className="flex items-center gap-2">
+      <div className="flex items-center justify-between text-xs bg-sidebar-accent/20 rounded-md p-[var(--spacing-component-sm)] hover:bg-sidebar-accent/30 transition-colors">
+        <div className="flex items-center gap-[var(--spacing-component-sm)]">
           <Archive className="w-3.5 h-3.5 text-sidebar-foreground/60" />
           <span className="text-sidebar-foreground/80 font-medium">
             Show Archived
@@ -209,11 +209,11 @@ function ConversationListEmpty(props: ConversationListEmptyProps) {
   const { showArchived, onCreateConversation } = props;
 
   return (
-    <div className="flex flex-col items-center justify-center h-full text-center px-3 py-6">
+    <div className="flex flex-col items-center justify-center h-full text-center px-[var(--spacing-component-sm)] py-[var(--spacing-component-lg)]">
       <div className="w-12 h-12 rounded-full bg-muted/40 flex items-center justify-center mb-4">
         <MessageCircle className="w-6 h-6 text-muted-foreground/60" />
       </div>
-      <div className="space-y-2 max-w-xs">
+      <div className="space-y-[var(--spacing-component-sm)] max-w-xs">
         <h3 className="font-medium text-foreground text-sm">
           {showArchived ? "No Archived Conversations" : "No Direct Messages"}
         </h3>
@@ -313,7 +313,7 @@ function ConversationListItem(props: ConversationListItemProps) {
         to="/user/dm/$conversationId"
         params={{ conversationId: conversation.id }}
         className={cn(
-          "flex items-center gap-2 px-2 py-1.5 rounded transition-all duration-150",
+          "flex items-center gap-[var(--spacing-component-sm)] px-[var(--spacing-component-sm)] py-[var(--spacing-component-xs)] rounded transition-all duration-150",
           "hover:bg-sidebar-accent/60 hover:text-sidebar-accent-foreground",
           "focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-sidebar-ring",
           conversation.archivedAt && "opacity-60",
@@ -348,6 +348,15 @@ function ConversationListItem(props: ConversationListItemProps) {
             // For 1:1 conversations, show single avatar
             if (otherParticipants.length === 1) {
               const participant = otherParticipants[0];
+              if (!participant) {
+                return (
+                  <ProfileAvatar size="sm">
+                    <ProfileAvatarImage
+                      fallbackIcon={<Hash className="w-1/2 h-1/2" />}
+                    />
+                  </ProfileAvatar>
+                );
+              }
               return (
                 <ProfileAvatar size="sm">
                   <ProfileAvatarImage
@@ -362,6 +371,16 @@ function ConversationListItem(props: ConversationListItemProps) {
             // For group conversations, show main avatar + counter
             const firstParticipant = otherParticipants[0];
             const remainingCount = otherParticipants.length - 1;
+
+            if (!firstParticipant) {
+              return (
+                <ProfileAvatar size="sm">
+                  <ProfileAvatarImage
+                    fallbackIcon={<Hash className="w-1/2 h-1/2" />}
+                  />
+                </ProfileAvatar>
+              );
+            }
 
             return (
               <ProfileAvatar size="sm">
@@ -381,7 +400,7 @@ function ConversationListItem(props: ConversationListItemProps) {
         {/* Content - more compact */}
         <div className="flex-1 min-w-0">
           {/* Name and time in same line */}
-          <div className="flex items-center justify-between gap-1">
+          <div className="flex items-center justify-between gap-[var(--spacing-component-xs)]">
             <span
               className={cn(
                 "text-sm font-medium truncate",
@@ -419,7 +438,7 @@ function ConversationListItem(props: ConversationListItemProps) {
         </div>
 
         {/* Unread indicator and actions */}
-        <div className="flex items-center gap-1 flex-shrink-0">
+        <div className="flex items-center gap-[var(--spacing-component-xs)] flex-shrink-0">
           {hasUnreadMessages && (
             <div className="w-1.5 h-1.5 bg-primary rounded-full" />
           )}
@@ -446,7 +465,7 @@ function ConversationListItem(props: ConversationListItemProps) {
                 {!conversation.archivedAt ? (
                   <DropdownMenuItem
                     onClick={handleArchive}
-                    className="text-xs py-2 px-2.5 cursor-pointer"
+                    className="text-xs py-[var(--spacing-component-sm)] px-[var(--spacing-component-sm)] cursor-pointer"
                   >
                     <Archive className="h-3.5 w-3.5 mr-2 text-muted-foreground" />
                     Archive Conversation
@@ -454,7 +473,7 @@ function ConversationListItem(props: ConversationListItemProps) {
                 ) : (
                   <DropdownMenuItem
                     onClick={handleUnarchive}
-                    className="text-xs py-2 px-2.5 cursor-pointer"
+                    className="text-xs py-[var(--spacing-component-sm)] px-[var(--spacing-component-sm)] cursor-pointer"
                   >
                     <Archive className="h-3.5 w-3.5 mr-2 text-muted-foreground" />
                     Unarchive Conversation

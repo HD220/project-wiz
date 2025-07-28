@@ -150,7 +150,10 @@ export function ProviderForm(props: ProviderFormProps) {
         </DialogHeader>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <form
+            onSubmit={form.handleSubmit(onSubmit)}
+            className="space-y-[var(--spacing-component-md)]"
+          >
             <ScrollArea className="max-h-[60vh]">
               <div className="space-y-[var(--spacing-layout-md)] pr-4">
                 {/* Provider Configuration Section */}

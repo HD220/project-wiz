@@ -138,7 +138,7 @@ export function ProjectForm(props: ProjectFormProps) {
     return (
       <div
         className={cn(
-          "flex items-center space-x-3 p-3 rounded-md border cursor-pointer transition-colors",
+          "flex items-center space-x-[var(--spacing-component-sm)] p-[var(--spacing-component-sm)] rounded-md border cursor-pointer transition-colors",
           isSelected
             ? "border-primary bg-primary/10"
             : "border-input hover:bg-accent",
@@ -191,11 +191,11 @@ export function ProjectForm(props: ProjectFormProps) {
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(onSubmit)}
-        className="space-y-4"
+        className="space-y-[var(--spacing-component-md)]"
         noValidate
         aria-label="Create project form"
       >
-        <div className="space-y-4">
+        <div className="space-y-[var(--spacing-component-md)]">
           <FormField
             control={form.control}
             name="name"
@@ -252,7 +252,7 @@ export function ProjectForm(props: ProjectFormProps) {
                     onValueChange={field.onChange}
                     value={field.value}
                     disabled={isFormDisabled}
-                    className="space-y-2"
+                    className="space-y-[var(--spacing-component-sm)]"
                   >
                     <ProjectTypeOption
                       value="blank"
@@ -274,8 +274,8 @@ export function ProjectForm(props: ProjectFormProps) {
           />
 
           {projectType === "github" && (
-            <div className="space-y-4 p-4 bg-muted/30 rounded-lg border">
-              <div className="flex items-center gap-2">
+            <div className="space-y-[var(--spacing-component-md)] p-[var(--spacing-component-md)] bg-muted/30 rounded-lg border">
+              <div className="flex items-center gap-[var(--spacing-component-sm)]">
                 <Github className="h-4 w-4 text-muted-foreground" />
                 <span className="text-sm font-medium">Repository Details</span>
               </div>
@@ -331,7 +331,7 @@ export function ProjectForm(props: ProjectFormProps) {
           )}
         </div>
 
-        <div className="flex gap-3 pt-4">
+        <div className="flex gap-[var(--spacing-component-sm)] pt-[var(--spacing-component-md)]">
           {onCancel && (
             <Button
               type="button"

@@ -74,6 +74,7 @@ export function MessageBubble(props: MessageBubbleProps) {
     }
 
     const statusIcons = {
+      sending: <Clock className="w-3 h-3 text-muted-foreground/60" />,
       sent: <Check className="w-3 h-3 text-muted-foreground/60" />,
       delivered: <CheckCheck className="w-3 h-3 text-chart-2/80" />,
       read: <CheckCheck className="w-3 h-3 text-chart-5/80" />,

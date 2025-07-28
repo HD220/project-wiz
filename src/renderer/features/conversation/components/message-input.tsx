@@ -40,9 +40,9 @@ export function ActionButtons({
 }: ActionButtonsProps) {
   return (
     <TooltipProvider>
-      <div className="absolute bottom-1.5 right-1.5 flex items-center gap-1">
+      <div className="absolute bottom-[var(--spacing-component-xs)] right-[var(--spacing-component-xs)] flex items-center gap-[var(--spacing-component-xs)]">
         {/* Secondary action buttons - always show */}
-        <div className="flex items-center gap-1 mr-1">
+        <div className="flex items-center gap-[var(--spacing-component-xs)] mr-[var(--spacing-component-xs)]">
           {onAttachment && (
             <Tooltip>
               <TooltipTrigger asChild>
@@ -211,7 +211,7 @@ export function MessageInput(props: MessageInputProps) {
 
   return (
     <div className={cn("bg-background border-t border-border/60", className)}>
-      <div className="px-4 py-2">
+      <div className="px-[var(--spacing-component-md)] py-[var(--spacing-component-sm)]">
         {/* Form-like input container with enhanced design */}
         <form
           onSubmit={(e) => {
@@ -244,7 +244,7 @@ export function MessageInput(props: MessageInputProps) {
                 className={cn(
                   "resize-none bg-transparent border-0 min-h-[44px]",
                   "focus-visible:ring-0 focus-visible:ring-offset-0",
-                  "px-3 py-2.5 pr-16 leading-[1.375] text-sm w-full",
+                  "px-[var(--spacing-component-sm)] py-[var(--spacing-component-sm)] pr-16 leading-[1.375] text-sm w-full",
                   "placeholder:text-muted-foreground/60",
                   "transition-all duration-150",
                   disabled && "cursor-not-allowed opacity-50",
@@ -272,7 +272,7 @@ export function MessageInput(props: MessageInputProps) {
 
           {/* Character count indicator - more compact */}
           {(isNearLimit || isOverLimit) && (
-            <div className="flex justify-end items-center mt-1 px-1">
+            <div className="flex justify-end items-center mt-[var(--spacing-component-xs)] px-[var(--spacing-component-xs)]">
               <div
                 className={cn(
                   "text-xs transition-colors duration-200",

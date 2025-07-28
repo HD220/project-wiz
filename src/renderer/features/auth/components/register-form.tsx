@@ -111,7 +111,7 @@ export function RegisterForm(props: RegisterFormProps) {
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(handleSubmit)}
-          className="space-y-2.5"
+          className="space-y-[var(--spacing-component-sm)]"
           noValidate
           aria-label="Create account form"
         >
@@ -119,7 +119,7 @@ export function RegisterForm(props: RegisterFormProps) {
             control={form.control}
             name="name"
             render={({ field }) => (
-              <FormItem className="space-y-1">
+              <FormItem className="space-y-[var(--spacing-component-xs)]">
                 <FormLabel className="text-sm font-medium">
                   Display name
                 </FormLabel>
@@ -148,7 +148,7 @@ export function RegisterForm(props: RegisterFormProps) {
             control={form.control}
             name="username"
             render={({ field }) => (
-              <FormItem className="space-y-1">
+              <FormItem className="space-y-[var(--spacing-component-xs)]">
                 <FormLabel className="text-sm font-medium">Username</FormLabel>
                 <FormControl>
                   <div className="relative group">
@@ -175,7 +175,7 @@ export function RegisterForm(props: RegisterFormProps) {
             control={form.control}
             name="password"
             render={({ field }) => (
-              <FormItem className="space-y-1">
+              <FormItem className="space-y-[var(--spacing-component-xs)]">
                 <FormLabel className="text-sm font-medium">Password</FormLabel>
                 <FormControl>
                   <div className="relative">
@@ -196,7 +196,7 @@ export function RegisterForm(props: RegisterFormProps) {
                       type="button"
                       variant="ghost"
                       size="sm"
-                      className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                      className="absolute right-0 top-0 h-full px-[var(--spacing-component-sm)] py-[var(--spacing-component-sm)] hover:bg-transparent"
                       onClick={() => setShowPassword(!showPassword)}
                       tabIndex={-1}
                       aria-label={
@@ -220,7 +220,7 @@ export function RegisterForm(props: RegisterFormProps) {
             control={form.control}
             name="confirmPassword"
             render={({ field }) => (
-              <FormItem className="space-y-1">
+              <FormItem className="space-y-[var(--spacing-component-xs)]">
                 <FormLabel className="text-sm font-medium">
                   Confirm password
                 </FormLabel>
@@ -243,7 +243,7 @@ export function RegisterForm(props: RegisterFormProps) {
                       type="button"
                       variant="ghost"
                       size="sm"
-                      className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                      className="absolute right-0 top-0 h-full px-[var(--spacing-component-sm)] py-[var(--spacing-component-sm)] hover:bg-transparent"
                       onClick={() =>
                         setShowConfirmPassword(!showConfirmPassword)
                       }
@@ -265,7 +265,7 @@ export function RegisterForm(props: RegisterFormProps) {
             )}
           />
 
-          <div className="flex flex-col space-y-2.5 pt-1.5">
+          <div className="flex flex-col space-y-[var(--spacing-component-sm)] pt-[var(--spacing-component-xs)]">
             <Button
               type="submit"
               disabled={form.formState.isSubmitting}
@@ -293,7 +293,7 @@ export function RegisterForm(props: RegisterFormProps) {
               </Alert>
             )}
 
-            <div className="text-center pt-0.5">
+            <div className="text-center pt-[var(--spacing-component-xs)]">
               <p className="text-sm text-muted-foreground">
                 Already have an account?{" "}
                 <Button

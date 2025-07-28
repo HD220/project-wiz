@@ -103,11 +103,11 @@ export function AgentForm(props: AgentFormProps) {
   return (
     <div className="flex-1 flex flex-col overflow-hidden">
       <ScrollArea className="flex-1">
-        <div className="max-w-4xl mx-auto p-8 space-y-8">
+        <div className="max-w-4xl mx-auto p-8 space-y-[var(--spacing-layout-lg)]">
           <Form {...form}>
             <form
               onSubmit={form.handleSubmit(handleSubmit)}
-              className="space-y-8"
+              className="space-y-[var(--spacing-layout-lg)]"
               role="form"
               aria-label={isEditing ? "Edit agent form" : "Create agent form"}
             >
@@ -115,7 +115,7 @@ export function AgentForm(props: AgentFormProps) {
               <AgentFormIdentity form={form} />
 
               {/* Separator */}
-              <div className="py-2">
+              <div className="py-[var(--spacing-component-sm)]">
                 <Separator />
               </div>
 
@@ -123,14 +123,14 @@ export function AgentForm(props: AgentFormProps) {
               <AgentFormProvider form={form} providers={providers} />
 
               {/* Form Actions */}
-              <div className="flex justify-end gap-4 pt-6 border-t bg-background/50 p-6 -mx-6 mt-8">
+              <div className="flex justify-end gap-[var(--spacing-component-md)] pt-[var(--spacing-component-lg)] border-t bg-background/50 p-[var(--spacing-component-lg)] -mx-6 mt-[var(--spacing-layout-lg)]">
                 <Button
                   type="button"
                   variant="outline"
                   onClick={handleCancel}
                   disabled={isLoading}
                   size="lg"
-                  className="px-6"
+                  className="px-[var(--spacing-component-lg)]"
                 >
                   Cancel
                 </Button>
@@ -170,9 +170,9 @@ function AgentFormIdentity(props: AgentFormIdentityProps) {
   const { form } = props;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-[var(--spacing-layout-md)]">
       {/* Section Header - Professional style */}
-      <div className="flex items-center gap-3 pb-2">
+      <div className="flex items-center gap-[var(--spacing-component-sm)] pb-[var(--spacing-component-sm)]">
         <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-primary/10">
           <User className="size-4 text-primary" />
         </div>
@@ -187,12 +187,12 @@ function AgentFormIdentity(props: AgentFormIdentityProps) {
       </div>
 
       {/* Basic Info Fields - Spacious Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-[var(--spacing-component-lg)]">
         <FormField
           control={form.control}
           name="name"
           render={({ field }) => (
-            <FormItem className="space-y-3">
+            <FormItem className="space-y-[var(--spacing-component-lg)]">
               <FormLabel className="text-base font-medium">
                 Agent Name
               </FormLabel>
@@ -212,7 +212,7 @@ function AgentFormIdentity(props: AgentFormIdentityProps) {
           control={form.control}
           name="role"
           render={({ field }) => (
-            <FormItem className="space-y-3">
+            <FormItem className="space-y-[var(--spacing-component-lg)]">
               <FormLabel className="text-base font-medium">Role</FormLabel>
               <FormControl>
                 <Input
@@ -232,7 +232,7 @@ function AgentFormIdentity(props: AgentFormIdentityProps) {
         control={form.control}
         name="avatar"
         render={({ field }) => (
-          <FormItem className="space-y-3">
+          <FormItem className="space-y-[var(--spacing-component-lg)]">
             <FormLabel className="text-base font-medium">Avatar URL</FormLabel>
             <FormControl>
               <Input
@@ -250,12 +250,12 @@ function AgentFormIdentity(props: AgentFormIdentityProps) {
       />
 
       {/* Personality Fields */}
-      <div className="space-y-6 pt-4">
+      <div className="space-y-[var(--spacing-layout-md)] pt-4">
         <FormField
           control={form.control}
           name="backstory"
           render={({ field }) => (
-            <FormItem className="space-y-3">
+            <FormItem className="space-y-[var(--spacing-component-lg)]">
               <FormLabel className="text-base font-medium">Backstory</FormLabel>
               <FormControl>
                 <Textarea
@@ -278,7 +278,7 @@ function AgentFormIdentity(props: AgentFormIdentityProps) {
           control={form.control}
           name="goal"
           render={({ field }) => (
-            <FormItem className="space-y-3">
+            <FormItem className="space-y-[var(--spacing-component-lg)]">
               <FormLabel className="text-base font-medium">
                 Primary Goal
               </FormLabel>
@@ -320,9 +320,9 @@ function AgentFormProvider(props: AgentFormProviderProps) {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-[var(--spacing-layout-md)]">
       {/* Section Header - Professional style */}
-      <div className="flex items-center gap-3 pb-2">
+      <div className="flex items-center gap-[var(--spacing-component-sm)] pb-[var(--spacing-component-sm)]">
         <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-primary/10">
           <Bot className="size-4 text-primary" />
         </div>
@@ -341,7 +341,7 @@ function AgentFormProvider(props: AgentFormProviderProps) {
         control={form.control}
         name="providerId"
         render={({ field }) => (
-          <FormItem className="space-y-3">
+          <FormItem className="space-y-[var(--spacing-component-lg)]">
             <FormLabel className="text-base font-medium">AI Provider</FormLabel>
             <Select onValueChange={field.onChange} defaultValue={field.value}>
               <FormControl>
@@ -367,8 +367,8 @@ function AgentFormProvider(props: AgentFormProviderProps) {
       />
 
       {/* Model Settings Subsection */}
-      <div className="space-y-6 pt-4">
-        <div className="flex items-center gap-3">
+      <div className="space-y-[var(--spacing-layout-md)] pt-4">
+        <div className="flex items-center gap-[var(--spacing-component-sm)]">
           <div className="flex items-center justify-center w-6 h-6 rounded bg-muted/20">
             <Settings className="size-3 text-muted-foreground" />
           </div>
@@ -378,7 +378,7 @@ function AgentFormProvider(props: AgentFormProviderProps) {
         </div>
 
         {/* Model Configuration Fields - Spacious Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-[var(--spacing-component-lg)]">
           <FormField
             control={form.control}
             name="modelConfig"
@@ -387,7 +387,7 @@ function AgentFormProvider(props: AgentFormProviderProps) {
                 ? JSON.parse(field.value)
                 : defaultModelConfig;
               return (
-                <FormItem className="space-y-3">
+                <FormItem className="space-y-[var(--spacing-component-lg)]">
                   <FormLabel className="text-base font-medium">Model</FormLabel>
                   <FormControl>
                     <Input
@@ -421,7 +421,7 @@ function AgentFormProvider(props: AgentFormProviderProps) {
                 ? JSON.parse(field.value)
                 : defaultModelConfig;
               return (
-                <FormItem className="space-y-3">
+                <FormItem className="space-y-[var(--spacing-component-lg)]">
                   <FormLabel className="text-base font-medium">
                     Temperature
                   </FormLabel>
@@ -460,7 +460,7 @@ function AgentFormProvider(props: AgentFormProviderProps) {
                 ? JSON.parse(field.value)
                 : defaultModelConfig;
               return (
-                <FormItem className="space-y-3">
+                <FormItem className="space-y-[var(--spacing-component-lg)]">
                   <FormLabel className="text-base font-medium">
                     Max Tokens
                   </FormLabel>
@@ -497,7 +497,7 @@ function AgentFormProvider(props: AgentFormProviderProps) {
                 ? JSON.parse(field.value)
                 : defaultModelConfig;
               return (
-                <FormItem className="space-y-3">
+                <FormItem className="space-y-[var(--spacing-component-lg)]">
                   <FormLabel className="text-base font-medium">
                     Top P (Optional)
                   </FormLabel>

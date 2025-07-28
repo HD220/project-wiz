@@ -17,29 +17,71 @@ function AppearancePage() {
   const [isHighContrast, setIsHighContrast] = useState(false);
   const [isReducedMotion, setIsReducedMotion] = useState(false);
   const [isCompactMode, setIsCompactMode] = useState(false);
+  const [zoomLevel, setZoomLevel] = useState("100");
+  const [hardwareAcceleration, setHardwareAcceleration] = useState(true);
+  const [smoothScrolling, setSmoothScrolling] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const handleThemeChange = (newTheme: "light" | "dark" | "system") => {
+    // Basic validation: ensure valid theme value
+    const validThemes = ["light", "dark", "system"];
+    if (!validThemes.includes(newTheme)) {
+      setError("Invalid theme selection");
+      return;
+    }
+    setError(null);
     setTheme(newTheme);
+  };
+
+  const handleZoomChange = (value: string) => {
+    // Basic validation: ensure valid zoom level
+    const validZooms = ["80", "90", "100", "110", "125", "150"];
+    if (!validZooms.includes(value)) {
+      setError("Invalid zoom level");
+      return;
+    }
+    setError(null);
+    setZoomLevel(value);
+  };
+
+  const handleSwitchChange = (
+    setter: (value: boolean) => void,
+    value: boolean,
+  ) => {
+    // Basic validation: ensure boolean value
+    if (typeof value !== "boolean") {
+      setError("Invalid setting value");
+      return;
+    }
+    setError(null);
+    setter(value);
   };
 
   return (
     <div className="h-full w-full">
       <ScrollArea className="h-full">
-        <div className="max-w-2xl space-y-6">
+        <div className="max-w-2xl space-y-[var(--spacing-layout-md)]">
           {/* Page Header - Discord Style */}
-          <div className="space-y-2">
+          <div className="space-y-[var(--spacing-component-sm)]">
             <h1 className="text-xl font-semibold text-foreground">
               Appearance
             </h1>
             <p className="text-sm text-muted-foreground">
               Customize how Project Wiz looks and feels on your device.
             </p>
+
+            {/* Error message */}
+            {error && (
+              <div className="text-xs text-destructive bg-destructive/10 px-3 py-2 rounded-md">
+                {error}
+              </div>
+            )}
           </div>
 
           {/* Theme Selection - Discord Style Compact */}
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <div className="flex items-center gap-2">
+          <div className="space-y-[var(--spacing-component-lg)]">
+            <div className="space-y-[var(--spacing-component-sm)]">
+              <div className="flex items-center gap-[var(--spacing-component-sm)]">
                 <Palette className="h-4 w-4 text-muted-foreground" />
                 <Label className="text-sm font-medium">Theme</Label>
               </div>
@@ -50,7 +92,7 @@ function AppearancePage() {
             </div>
 
             {/* Theme Preview Cards */}
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-3 gap-[var(--spacing-component-sm)]">
               {[
                 {
                   id: "light",
@@ -84,7 +126,7 @@ function AppearancePage() {
                 return (
                   <div
                     key={themeOption.id}
-                    className={`relative cursor-pointer rounded-lg border-2 p-3 transition-all ${
+                    className={`relative cursor-pointer rounded-lg border-2 p-[var(--spacing-component-sm)] transition-all ${
                       isSelected
                         ? "border-primary ring-2 ring-primary/20"
                         : "border-border hover:border-muted-foreground/50"
@@ -111,7 +153,7 @@ function AppearancePage() {
                     </div>
 
                     {/* Theme Info */}
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-[var(--spacing-component-sm)]">
                       <Icon className="h-4 w-4 text-muted-foreground" />
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium text-foreground truncate">
@@ -139,9 +181,9 @@ function AppearancePage() {
           <Separator />
 
           {/* Display Settings */}
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <div className="flex items-center gap-2">
+          <div className="space-y-[var(--spacing-component-lg)]">
+            <div className="space-y-[var(--spacing-component-sm)]">
+              <div className="flex items-center gap-[var(--spacing-component-sm)]">
                 <Eye className="h-4 w-4 text-muted-foreground" />
                 <Label className="text-sm font-medium">Display</Label>
               </div>
@@ -151,10 +193,10 @@ function AppearancePage() {
             </div>
 
             {/* Compact Settings List */}
-            <div className="space-y-3">
+            <div className="space-y-[var(--spacing-component-md)]">
               {/* High Contrast */}
-              <div className="flex items-center justify-between py-2">
-                <div className="space-y-0.5">
+              <div className="flex items-center justify-between py-[var(--spacing-component-sm)]">
+                <div className="space-y-[var(--spacing-component-xs)]">
                   <Label className="text-sm font-medium">High Contrast</Label>
                   <p className="text-xs text-muted-foreground">
                     Increase contrast for better visibility
@@ -162,13 +204,15 @@ function AppearancePage() {
                 </div>
                 <Switch
                   checked={isHighContrast}
-                  onCheckedChange={setIsHighContrast}
+                  onCheckedChange={(value) =>
+                    handleSwitchChange(setIsHighContrast, value)
+                  }
                 />
               </div>
 
               {/* Reduced Motion */}
-              <div className="flex items-center justify-between py-2">
-                <div className="space-y-0.5">
+              <div className="flex items-center justify-between py-[var(--spacing-component-sm)]">
+                <div className="space-y-[var(--spacing-component-xs)]">
                   <Label className="text-sm font-medium">Reduced Motion</Label>
                   <p className="text-xs text-muted-foreground">
                     Minimize animations and transitions
@@ -176,13 +220,15 @@ function AppearancePage() {
                 </div>
                 <Switch
                   checked={isReducedMotion}
-                  onCheckedChange={setIsReducedMotion}
+                  onCheckedChange={(value) =>
+                    handleSwitchChange(setIsReducedMotion, value)
+                  }
                 />
               </div>
 
               {/* Compact Mode */}
-              <div className="flex items-center justify-between py-2">
-                <div className="space-y-0.5">
+              <div className="flex items-center justify-between py-[var(--spacing-component-sm)]">
+                <div className="space-y-[var(--spacing-component-xs)]">
                   <Label className="text-sm font-medium">Compact Mode</Label>
                   <p className="text-xs text-muted-foreground">
                     Reduce spacing for more content on screen
@@ -190,7 +236,9 @@ function AppearancePage() {
                 </div>
                 <Switch
                   checked={isCompactMode}
-                  onCheckedChange={setIsCompactMode}
+                  onCheckedChange={(value) =>
+                    handleSwitchChange(setIsCompactMode, value)
+                  }
                 />
               </div>
             </div>
@@ -199,9 +247,9 @@ function AppearancePage() {
           <Separator />
 
           {/* Accessibility Settings */}
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <div className="flex items-center gap-2">
+          <div className="space-y-[var(--spacing-component-lg)]">
+            <div className="space-y-[var(--spacing-component-sm)]">
+              <div className="flex items-center gap-[var(--spacing-component-sm)]">
                 <Contrast className="h-4 w-4 text-muted-foreground" />
                 <Label className="text-sm font-medium">Accessibility</Label>
               </div>
@@ -211,11 +259,18 @@ function AppearancePage() {
             </div>
 
             {/* Zoom Level */}
-            <div className="space-y-2">
+            <div className="space-y-[var(--spacing-component-sm)]">
               <Label className="text-sm font-medium">Zoom Level</Label>
-              <RadioGroup defaultValue="100" className="flex gap-4">
+              <RadioGroup
+                value={zoomLevel}
+                onValueChange={handleZoomChange}
+                className="flex gap-[var(--spacing-component-md)]"
+              >
                 {["80", "90", "100", "110", "125", "150"].map((zoom) => (
-                  <div key={zoom} className="flex items-center space-x-2">
+                  <div
+                    key={zoom}
+                    className="flex items-center space-x-[var(--spacing-component-sm)]"
+                  >
                     <RadioGroupItem value={zoom} id={`zoom-${zoom}`} />
                     <Label
                       htmlFor={`zoom-${zoom}`}
@@ -235,9 +290,9 @@ function AppearancePage() {
           <Separator />
 
           {/* Advanced Settings */}
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <div className="flex items-center gap-2">
+          <div className="space-y-[var(--spacing-component-lg)]">
+            <div className="space-y-[var(--spacing-component-sm)]">
+              <div className="flex items-center gap-[var(--spacing-component-sm)]">
                 <Zap className="h-4 w-4 text-muted-foreground" />
                 <Label className="text-sm font-medium">Performance</Label>
               </div>
@@ -247,10 +302,10 @@ function AppearancePage() {
             </div>
 
             {/* Performance Options */}
-            <div className="space-y-3">
+            <div className="space-y-[var(--spacing-component-md)]">
               {/* Hardware Acceleration */}
-              <div className="flex items-center justify-between py-2">
-                <div className="space-y-0.5">
+              <div className="flex items-center justify-between py-[var(--spacing-component-sm)]">
+                <div className="space-y-[var(--spacing-component-xs)]">
                   <Label className="text-sm font-medium">
                     Hardware Acceleration
                   </Label>
@@ -258,12 +313,17 @@ function AppearancePage() {
                     Use GPU for better performance (requires restart)
                   </p>
                 </div>
-                <Switch defaultChecked />
+                <Switch
+                  checked={hardwareAcceleration}
+                  onCheckedChange={(value) =>
+                    handleSwitchChange(setHardwareAcceleration, value)
+                  }
+                />
               </div>
 
               {/* Smooth Scrolling */}
-              <div className="flex items-center justify-between py-2">
-                <div className="space-y-0.5">
+              <div className="flex items-center justify-between py-[var(--spacing-component-sm)]">
+                <div className="space-y-[var(--spacing-component-xs)]">
                   <Label className="text-sm font-medium">
                     Smooth Scrolling
                   </Label>
@@ -271,7 +331,12 @@ function AppearancePage() {
                     Enable smooth scrolling animations
                   </p>
                 </div>
-                <Switch defaultChecked />
+                <Switch
+                  checked={smoothScrolling}
+                  onCheckedChange={(value) =>
+                    handleSwitchChange(setSmoothScrolling, value)
+                  }
+                />
               </div>
             </div>
           </div>
