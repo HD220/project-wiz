@@ -1,11 +1,11 @@
 import { Loader2, User, Check, CheckCheck, Clock } from "lucide-react";
 
-import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
-} from "@/renderer/components/ui/avatar";
 import { Badge } from "@/renderer/components/ui/badge";
+import {
+  ProfileAvatar,
+  ProfileAvatarImage,
+  ProfileAvatarFallback,
+} from "@/renderer/components/ui/profile-avatar";
 import type {
   SelectMessage,
   AuthenticatedUser,
@@ -102,31 +102,31 @@ export function MessageBubble(props: MessageBubbleProps) {
       {/* Avatar or time placeholder - Discord style */}
       <div className="flex-shrink-0 w-10">
         {showAvatar ? (
-          <Avatar
-            className={cn(
-              "w-10 h-10",
-              authorInfo.isInactive && "opacity-60 grayscale",
-            )}
-          >
-            <AvatarImage
-              src={isValidAvatarUrl(authorInfo.avatar) || undefined}
-              className="object-cover"
-            />
-            <AvatarFallback
-              className={cn(
-                "text-sm font-semibold",
-                authorInfo.isInactive
-                  ? "bg-muted/60 text-muted-foreground"
-                  : "bg-primary/15 text-primary",
-              )}
-            >
-              {authorInfo.isInactive ? (
-                <User className="h-4 w-4" />
-              ) : (
-                authorInitials
-              )}
-            </AvatarFallback>
-          </Avatar>
+          authorInfo.isInactive ? (
+            <ProfileAvatarFallback size="md" className="opacity-60 grayscale">
+              <User className="h-4 w-4" />
+            </ProfileAvatarFallback>
+          ) : author ? (
+            <ProfileAvatar size="md">
+              <ProfileAvatarImage
+                user={{
+                  id: author.id,
+                  name: author.name,
+                  username: author.username || author.name,
+                  email: author.email || "",
+                  avatar: author.avatar,
+                  theme: author.theme || "system",
+                  createdAt: author.createdAt,
+                  updatedAt: author.updatedAt,
+                }}
+                size="md"
+              />
+            </ProfileAvatar>
+          ) : (
+            <ProfileAvatarFallback size="md">
+              {authorInitials}
+            </ProfileAvatarFallback>
+          )
         ) : (
           <div className="flex justify-end items-start h-5 pt-0.5">
             <span className="text-xs text-muted-foreground/40 opacity-0 group-hover:opacity-100 transition-opacity font-mono">

@@ -26,7 +26,7 @@ import { useApiMutation } from "@/renderer/hooks/use-api-mutation.hook";
 import { cn } from "@/renderer/lib/utils";
 
 import { ArchiveConversationDialog } from "./archive-conversation-dialog";
-import { ConversationAvatar } from "./conversation-avatar";
+import { ProfileAvatarGroup } from "@/renderer/components/ui/profile-avatar";
 import { CreateConversationDialog } from "./create-conversation-dialog";
 
 import type { ConversationWithLastMessage } from "../types";
@@ -320,16 +320,11 @@ function ConversationListItem(props: ConversationListItemProps) {
       >
         {/* Avatar - smaller Discord style with space for overlapped groups */}
         <div className="relative flex-shrink-0">
-          <ConversationAvatar
+          <ProfileAvatarGroup
             participants={conversation.participants}
             availableUsers={availableUsers}
             currentUserId={user?.id}
             size="sm"
-            className={cn(
-              // Adjust width based on participant count for overlapped group avatars
-              conversation.participants.length > 2 ? "w-10" : "w-8",
-              "h-8",
-            )}
             showStatus={true}
           />
         </div>

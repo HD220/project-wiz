@@ -4,7 +4,7 @@ import type { SelectConversationParticipant } from "@/main/features/conversation
 import type { SelectMessage } from "@/main/features/conversation/message.model";
 
 import { ContentHeader } from "@/renderer/features/app/components/content-header";
-import { ConversationAvatar } from "@/renderer/features/conversation/components/conversation-avatar";
+import { ProfileAvatarGroup } from "@/renderer/components/ui/profile-avatar";
 import { ConversationChat } from "@/renderer/features/conversation/components/conversation-chat";
 import { loadApiData } from "@/renderer/lib/route-loader";
 
@@ -171,7 +171,7 @@ function DMLayout() {
   // Create conversation avatar - use small size for header
   const conversationAvatar = (
     <div className="flex-shrink-0">
-      <ConversationAvatar
+      <ProfileAvatarGroup
         participants={conversation.participants}
         availableUsers={availableUsers}
         currentUserId={user?.id}

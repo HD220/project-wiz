@@ -2,12 +2,8 @@ import { Link } from "@tanstack/react-router";
 import { MoreHorizontal, Pencil, Power, Trash2, User, Bot } from "lucide-react";
 
 import { AgentStatus } from "@/renderer/components/agent-status/agent-status";
-import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
-} from "@/renderer/components/ui/avatar";
 import { Badge } from "@/renderer/components/ui/badge";
+import { ProfileAvatarFallback } from "@/renderer/components/ui/profile-avatar";
 import { Button } from "@/renderer/components/ui/button";
 import { StatusIndicator } from "@/renderer/components/ui/status-indicator";
 import {
@@ -84,15 +80,12 @@ export function AgentCard({
         <div className="flex items-start gap-[var(--spacing-component-md)]">
           {/* Avatar with status indicator */}
           <div className="relative">
-            <Avatar className="size-12 shrink-0 ring-2 ring-primary/10 transition-all duration-200 group-hover:ring-primary/20">
-              <AvatarImage
-                src={isValidAvatarUrl(agent.avatar) || undefined}
-                alt={`${agent.name} avatar`}
-              />
-              <AvatarFallback className="bg-gradient-to-br from-primary/10 to-primary/5 text-primary border border-primary/20">
-                <User className="size-5" />
-              </AvatarFallback>
-            </Avatar>
+            <ProfileAvatarFallback
+              size="lg"
+              className="shrink-0 ring-2 ring-primary/10 transition-all duration-200 group-hover:ring-primary/20"
+            >
+              <Bot className="size-5" />
+            </ProfileAvatarFallback>
             {/* Status indicator */}
             <StatusIndicator
               status={agent.status}
@@ -250,15 +243,12 @@ export function AgentListItem({
     >
       {/* Agent Avatar */}
       <div className="relative shrink-0">
-        <Avatar className="size-10 ring-2 ring-primary/10 transition-all duration-200 group-hover:ring-primary/20">
-          <AvatarImage
-            src={isValidAvatarUrl(agent.avatar) || undefined}
-            alt={`${agent.name} avatar`}
-          />
-          <AvatarFallback className="bg-gradient-to-br from-primary/10 to-primary/5 text-primary border border-primary/20">
-            <Bot className="size-4" />
-          </AvatarFallback>
-        </Avatar>
+        <ProfileAvatarFallback
+          size="md"
+          className="ring-2 ring-primary/10 transition-all duration-200 group-hover:ring-primary/20"
+        >
+          <Bot className="size-4" />
+        </ProfileAvatarFallback>
         {/* Status dot */}
         <StatusIndicator
           status={agent.status}

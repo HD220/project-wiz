@@ -4,9 +4,10 @@ import { Button } from "@/renderer/components/ui/button";
 import { ScrollArea } from "@/renderer/components/ui/scroll-area";
 import { Separator } from "@/renderer/components/ui/separator";
 import {
-  OptimizedAvatar,
-  getUserInitials,
-} from "@/renderer/components/ui/optimized-avatar";
+  ProfileAvatar,
+  ProfileAvatarImage,
+  ProfileAvatarFallback,
+} from "@/renderer/components/ui/profile-avatar";
 import { UserStatus } from "@/renderer/features/user/components/user-status";
 import type { UserStatusType } from "@/renderer/features/user/components/user-status";
 import { cn } from "@/renderer/lib/utils";
@@ -62,27 +63,31 @@ export function MemberSidebar(props: MemberSidebarProps) {
     >
       <div className="flex items-center w-full gap-3">
         <div className="relative flex-shrink-0">
-          <OptimizedAvatar
-            src={member.avatarUrl}
-            size="sm"
-            showHover={false}
-            fallbackContent={
-              member.type === "agent" ? (
-                <Bot className="w-4 h-4" />
-              ) : (
-                getUserInitials(member.name)
-              )
-            }
-            className={cn(
-              "ring-1 shadow-sm",
-              member.type === "agent" ? "ring-primary/20" : "ring-border/50",
-            )}
-            fallbackClassName={
-              member.type === "agent"
-                ? "bg-gradient-to-br from-primary/10 to-primary/5 text-primary border border-primary/20"
-                : undefined
-            }
-          />
+          {member.type === "agent" ? (
+            <ProfileAvatarFallback
+              size="sm"
+              className="ring-1 shadow-sm ring-primary/20"
+            >
+              <Bot className="w-4 h-4" />
+            </ProfileAvatarFallback>
+          ) : (
+            <ProfileAvatar size="sm">
+              <ProfileAvatarImage
+                user={{
+                  id: member.id,
+                  name: member.name,
+                  username: member.username || member.name,
+                  email: "",
+                  avatar: member.avatarUrl,
+                  theme: "system",
+                  createdAt: new Date(),
+                  updatedAt: new Date(),
+                }}
+                size="sm"
+                className="ring-1 shadow-sm ring-border/50"
+              />
+            </ProfileAvatar>
+          )}
           <div className="absolute -bottom-0.5 -right-0.5">
             <UserStatus status={member.status} size="sm" showLabel={false} />
           </div>

@@ -3,7 +3,11 @@ import { LogOut } from "lucide-react";
 
 import { Button } from "@/renderer/components/ui/button";
 import { useAuth } from "@/renderer/contexts/auth.context";
-import { UserAvatar } from "@/renderer/features/user/components/user-avatar";
+import {
+  ProfileAvatar,
+  ProfileAvatarImage,
+  ProfileAvatarStatus,
+} from "@/renderer/components/ui/profile-avatar";
 import { UserStatus } from "@/renderer/features/user/components/user-status";
 
 export function SidebarUserArea() {
@@ -23,7 +27,36 @@ export function SidebarUserArea() {
       {/* User area content with enhanced styling */}
       <div className="relative z-10 flex items-center gap-[var(--spacing-component-md)] group transition-all duration-200 ease-in-out hover:bg-sidebar-accent/20 rounded-lg p-[var(--spacing-component-sm)] -m-[var(--spacing-component-sm)]">
         <div className="flex-shrink-0">
-          <UserAvatar name={user?.name} size="md" showHover={false} />
+          {user && (
+            <ProfileAvatar size="md">
+              <ProfileAvatarImage
+                user={{
+                  id: user.id,
+                  name: user.name,
+                  username: user.username,
+                  email: user.email,
+                  avatar: user.avatar,
+                  theme: user.theme,
+                  createdAt: user.createdAt,
+                  updatedAt: user.updatedAt,
+                }}
+                size="md"
+              />
+              <ProfileAvatarStatus
+                user={{
+                  id: user.id,
+                  name: user.name,
+                  username: user.username,
+                  email: user.email,
+                  avatar: user.avatar,
+                  theme: user.theme,
+                  createdAt: user.createdAt,
+                  updatedAt: user.updatedAt,
+                }}
+                size="md"
+              />
+            </ProfileAvatar>
+          )}
         </div>
 
         <div className="flex-1 min-w-0 space-y-[var(--spacing-component-xs)]">
