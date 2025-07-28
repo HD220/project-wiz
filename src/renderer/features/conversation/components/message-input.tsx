@@ -211,7 +211,7 @@ export function MessageInput(props: MessageInputProps) {
 
   return (
     <div className={cn("bg-background border-t border-border/60", className)}>
-      <div className="px-4 py-3">
+      <div className="px-4 py-2">
         {/* Form-like input container with enhanced design */}
         <form
           onSubmit={(e) => {

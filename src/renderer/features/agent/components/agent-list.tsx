@@ -28,7 +28,7 @@ import type {
   AgentWithAvatar,
 } from "@/renderer/features/agent/agent.types";
 import { AgentDeleteDialog } from "@/renderer/features/agent/components/agent-delete-dialog";
-import { AgentCard } from "@/renderer/features/agent/components/agent-card";
+import { AgentListItem } from "@/renderer/features/agent/components/agent-card";
 import { useApiMutation } from "@/renderer/hooks/use-api-mutation.hook";
 
 interface AgentListProps {
@@ -315,18 +315,22 @@ export function AgentList(props: AgentListProps) {
           </div>
         )}
 
-        {/* Professional Card Grid */}
+        {/* Professional Agent List with 2-column layout */}
         {filteredAgents.length > 0 && (
           <ScrollArea className="flex-1">
-            <div className="p-6 pb-8">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <div className="p-3 space-y-1">
+              <div className="grid grid-cols-1 xl:grid-cols-2 gap-1">
                 {filteredAgents.map((agent) => (
-                  <AgentCard
+                  <AgentListItem
                     key={agent.id}
                     agent={agent as AgentWithAvatar}
                     onDelete={() => handleDelete(agent)}
                     onToggleStatus={() => handleToggleStatus(agent)}
-                    className="h-fit"
+                    isLoading={
+                      deleteAgentMutation.isPending ||
+                      restoreAgentMutation.isPending ||
+                      toggleStatusMutation.isPending
+                    }
                   />
                 ))}
               </div>

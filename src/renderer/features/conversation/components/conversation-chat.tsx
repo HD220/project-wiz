@@ -49,12 +49,12 @@ export function WelcomeMessage({
   isArchived,
 }: WelcomeMessageProps) {
   return (
-    <div className="px-6 py-12 mx-auto max-w-2xl lg:max-w-4xl xl:max-w-5xl">
-      <div className="text-center space-y-6">
+    <div className="px-6 py-4 mx-auto max-w-2xl lg:max-w-4xl xl:max-w-5xl">
+      <div className="text-center space-y-3">
         {/* Hero Icon */}
         <div className="relative">
-          <div className="w-20 h-20 rounded-full bg-gradient-to-br from-primary/20 via-primary/10 to-primary/5 flex items-center justify-center mx-auto border border-primary/20 shadow-lg shadow-primary/10">
-            <span className="text-3xl font-bold text-primary">
+          <div className="w-16 h-16 rounded-full bg-gradient-to-br from-primary/20 via-primary/10 to-primary/5 flex items-center justify-center mx-auto border border-primary/20 shadow-lg shadow-primary/10">
+            <span className="text-2xl font-bold text-primary">
               {conversation.name?.charAt(0).toUpperCase() || "#"}
             </span>
           </div>
@@ -62,12 +62,12 @@ export function WelcomeMessage({
         </div>
 
         {/* Welcome Content */}
-        <div className="space-y-[var(--spacing-component-md)]">
-          <div className="space-y-[var(--spacing-component-sm)]">
-            <h1 className="text-2xl font-bold tracking-tight text-foreground">
+        <div className="space-y-3">
+          <div className="space-y-1">
+            <h1 className="text-xl font-bold tracking-tight text-foreground">
               Welcome to {conversation.name || "this conversation"}!
             </h1>
-            <p className="text-lg text-muted-foreground leading-relaxed">
+            <p className="text-base text-muted-foreground leading-relaxed">
               {isArchived
                 ? "This conversation has been archived and cannot receive new messages."
                 : "This is the beginning of your conversation. Start chatting with the AI agent to get assistance with your projects."}
@@ -76,9 +76,9 @@ export function WelcomeMessage({
 
           {/* Feature Highlights */}
           {!isArchived && (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-[var(--spacing-component-md)] mt-8">
-              <div className="p-[var(--spacing-component-md)] rounded-lg bg-card border border-border/50 hover:border-border transition-colors">
-                <div className="w-8 h-8 rounded-md bg-chart-2/10 flex items-center justify-center mb-3">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mt-4">
+              <div className="p-3 rounded-lg bg-card border border-border/50 hover:border-border transition-colors">
+                <div className="w-7 h-7 rounded-md bg-chart-2/10 flex items-center justify-center mb-2">
                   <span className="text-chart-2 text-sm">💬</span>
                 </div>
                 <h3 className="font-medium text-sm text-foreground mb-1">
@@ -88,8 +88,8 @@ export function WelcomeMessage({
                   Chat naturally with the AI agent
                 </p>
               </div>
-              <div className="p-[var(--spacing-component-md)] rounded-lg bg-card border border-border/50 hover:border-border transition-colors">
-                <div className="w-8 h-8 rounded-md bg-chart-5/10 flex items-center justify-center mb-3">
+              <div className="p-3 rounded-lg bg-card border border-border/50 hover:border-border transition-colors">
+                <div className="w-7 h-7 rounded-md bg-chart-5/10 flex items-center justify-center mb-2">
                   <span className="text-chart-5 text-sm">🎯</span>
                 </div>
                 <h3 className="font-medium text-sm text-foreground mb-1">
@@ -99,8 +99,8 @@ export function WelcomeMessage({
                   Get specific help for development
                 </p>
               </div>
-              <div className="p-[var(--spacing-component-md)] rounded-lg bg-card border border-border/50 hover:border-border transition-colors">
-                <div className="w-8 h-8 rounded-md bg-chart-4/10 flex items-center justify-center mb-3">
+              <div className="p-3 rounded-lg bg-card border border-border/50 hover:border-border transition-colors">
+                <div className="w-7 h-7 rounded-md bg-chart-4/10 flex items-center justify-center mb-2">
                   <span className="text-chart-4 text-sm">⚡</span>
                 </div>
                 <h3 className="font-medium text-sm text-foreground mb-1">
@@ -115,7 +115,7 @@ export function WelcomeMessage({
         </div>
       </div>
 
-      <Separator className="mt-12 opacity-30" />
+      <Separator className="mt-6 opacity-30" />
     </div>
   );
 }
@@ -127,21 +127,21 @@ interface EmptyStateProps {
 
 export function EmptyState({ isArchived }: EmptyStateProps) {
   return (
-    <div className="flex flex-col items-center justify-center py-16 px-6 text-center">
-      <div className="relative mb-8">
-        <div className="w-16 h-16 rounded-full bg-muted/20 flex items-center justify-center">
-          <span className="text-3xl opacity-50">
+    <div className="flex flex-col items-center justify-center py-6 px-6 text-center">
+      <div className="relative mb-4">
+        <div className="w-12 h-12 rounded-full bg-muted/20 flex items-center justify-center">
+          <span className="text-2xl opacity-50">
             {isArchived ? "📁" : "💬"}
           </span>
         </div>
         <div className="absolute -inset-2 rounded-full bg-gradient-to-r from-muted/10 to-muted/5 blur opacity-20"></div>
       </div>
 
-      <div className="space-y-[var(--spacing-component-sm)] max-w-md lg:max-w-lg xl:max-w-xl">
-        <h3 className="text-lg font-medium text-foreground">
+      <div className="space-y-2 max-w-md lg:max-w-lg xl:max-w-xl">
+        <h3 className="text-base font-medium text-foreground">
           {isArchived ? "Archived Conversation" : "Ready to Chat"}
         </h3>
-        <p className="text-muted-foreground leading-relaxed">
+        <p className="text-sm text-muted-foreground leading-relaxed">
           {isArchived
             ? "This conversation has been archived and is no longer active. To reactivate, use the unarchive option."
             : "Start a conversation by sending a message. The agent is ready to help with your projects and questions."}
@@ -149,7 +149,7 @@ export function EmptyState({ isArchived }: EmptyStateProps) {
       </div>
 
       {!isArchived && (
-        <div className="mt-8 p-[var(--spacing-component-md)] rounded-lg bg-muted/10 border border-border/50 max-w-sm lg:max-w-md">
+        <div className="mt-4 p-3 rounded-lg bg-muted/10 border border-border/50 max-w-sm lg:max-w-md">
           <p className="text-sm text-muted-foreground">
             💡 <strong>Tip:</strong> Be specific in your questions to get more
             accurate answers.
@@ -419,7 +419,7 @@ export function ConversationChat(props: ConversationChatProps) {
             {/* Messages Container - Discord style */}
             {messageGroups.length > 0 && (
               <div className="flex-1">
-                <div className="px-4 py-4">
+                <div className="px-4 py-2">
                   {messageGroups.map((group, groupIndex) => (
                     <MessageGroup
                       key={groupIndex}
@@ -443,7 +443,7 @@ export function ConversationChat(props: ConversationChatProps) {
             )}
 
             {/* Scroll padding */}
-            <div className="h-4" />
+            <div className="h-2" />
           </div>
         </ScrollArea>
       </div>

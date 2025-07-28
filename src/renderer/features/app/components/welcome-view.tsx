@@ -46,7 +46,7 @@ export function WelcomeView() {
 
   return (
     <div className="h-full flex flex-col">
-      <ScrollArea className="flex-1">
+      <ScrollArea className="flex-1 h-0">
         <div className="p-4 space-y-4">
           {/* Compact Welcome Header */}
           <div className="flex items-center justify-between">
@@ -54,7 +54,7 @@ export function WelcomeView() {
               <div className="flex items-center gap-2 mb-1">
                 <Home className="size-4 text-primary" />
                 <h1 className="text-lg font-semibold text-foreground">
-                  {greeting}, {user?.username || "Developer"}!
+                  {greeting}, {user?.name || "Developer"}!
                 </h1>
               </div>
               <p className="text-sm text-muted-foreground">
@@ -68,11 +68,9 @@ export function WelcomeView() {
                   Create Agent
                 </Link>
               </Button>
-              <Button size="sm" variant="outline" asChild>
-                <Link to="/project/new">
-                  <Folder className="size-3 mr-1.5" />
-                  New Project
-                </Link>
+              <Button size="sm" variant="outline">
+                <Folder className="size-3 mr-1.5" />
+                New Project
               </Button>
             </div>
           </div>
@@ -104,11 +102,8 @@ export function WelcomeView() {
               </Link>
             </Card>
 
-            <Card
-              className="group hover:bg-accent/50 transition-colors cursor-pointer"
-              asChild
-            >
-              <Link to="/projects">
+            <div className="group hover:bg-accent/50 transition-colors cursor-pointer">
+              <Card>
                 <CardContent className="p-3">
                   <div className="flex items-center gap-2">
                     <div className="p-1.5 rounded-md bg-blue-500/10">
@@ -122,14 +117,11 @@ export function WelcomeView() {
                     </div>
                   </div>
                 </CardContent>
-              </Link>
-            </Card>
+              </Card>
+            </div>
 
-            <Card
-              className="group hover:bg-accent/50 transition-colors cursor-pointer"
-              asChild
-            >
-              <Link to="/user/dm">
+            <div className="group hover:bg-accent/50 transition-colors cursor-pointer">
+              <Card>
                 <CardContent className="p-3">
                   <div className="flex items-center gap-2">
                     <div className="p-1.5 rounded-md bg-green-500/10">
@@ -145,8 +137,8 @@ export function WelcomeView() {
                     </div>
                   </div>
                 </CardContent>
-              </Link>
-            </Card>
+              </Card>
+            </div>
 
             <Card
               className="group hover:bg-accent/50 transition-colors cursor-pointer"
@@ -235,8 +227,8 @@ export function WelcomeView() {
                             className="h-6 text-xs"
                             asChild
                           >
-                            <Link to="/projects">
-                              Explore
+                            <Link to="/user">
+                              View Dashboard
                               <ArrowRight className="size-2.5 ml-1" />
                             </Link>
                           </Button>
@@ -403,6 +395,73 @@ export function WelcomeView() {
                     <MessageSquare className="size-3 mr-2" />
                     Support
                   </Button>
+                </CardContent>
+              </Card>
+
+              {/* Additional Content for Testing Scroll */}
+              <Card>
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-base">Development Tips</CardTitle>
+                  <CardDescription className="text-sm">
+                    Best practices for AI-powered development
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <div className="p-3 rounded-lg border bg-card">
+                    <h4 className="text-sm font-medium mb-2">Start Small</h4>
+                    <p className="text-xs text-muted-foreground">
+                      Begin with simple agents and gradually increase complexity
+                      as you learn the platform.
+                    </p>
+                  </div>
+                  <div className="p-3 rounded-lg border bg-card">
+                    <h4 className="text-sm font-medium mb-2">Iterate Often</h4>
+                    <p className="text-xs text-muted-foreground">
+                      Test your agents frequently and refine their prompts based
+                      on real-world usage.
+                    </p>
+                  </div>
+                  <div className="p-3 rounded-lg border bg-card">
+                    <h4 className="text-sm font-medium mb-2">Stay Organized</h4>
+                    <p className="text-xs text-muted-foreground">
+                      Use projects to group related work and keep your workspace
+                      clean.
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Performance Metrics */}
+              <Card>
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-base">System Status</CardTitle>
+                  <CardDescription className="text-sm">
+                    Platform health and performance metrics
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <div className="flex items-center justify-between p-2 rounded-md bg-green-500/10">
+                    <span className="text-sm">API Status</span>
+                    <Badge
+                      variant="outline"
+                      className="bg-green-500/20 text-green-700"
+                    >
+                      Online
+                    </Badge>
+                  </div>
+                  <div className="flex items-center justify-between p-2 rounded-md bg-blue-500/10">
+                    <span className="text-sm">AI Models</span>
+                    <Badge
+                      variant="outline"
+                      className="bg-blue-500/20 text-blue-700"
+                    >
+                      Available
+                    </Badge>
+                  </div>
+                  <div className="flex items-center justify-between p-2 rounded-md bg-orange-500/10">
+                    <span className="text-sm">Response Time</span>
+                    <span className="text-sm font-medium">~1.2s</span>
+                  </div>
                 </CardContent>
               </Card>
             </div>

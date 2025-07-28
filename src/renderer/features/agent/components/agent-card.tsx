@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { MoreHorizontal, Pencil, Power, Trash2, User } from "lucide-react";
+import { MoreHorizontal, Pencil, Power, Trash2, User, Bot } from "lucide-react";
 
 import { AgentStatus } from "@/renderer/components/agent-status/agent-status";
 import {
@@ -7,6 +7,7 @@ import {
   AvatarFallback,
   AvatarImage,
 } from "@/renderer/components/ui/avatar";
+import { Badge } from "@/renderer/components/ui/badge";
 import { Button } from "@/renderer/components/ui/button";
 import { StatusIndicator } from "@/renderer/components/ui/status-indicator";
 import {
@@ -205,6 +206,155 @@ export function AgentCard({
         </div>
       </CardFooter>
     </Card>
+  );
+}
+
+// Horizontal list item component following provider card style
+interface AgentListItemProps {
+  agent: AgentWithAvatar;
+  onDelete?: (agent: AgentWithAvatar) => void;
+  onToggleStatus?: (agent: AgentWithAvatar) => void;
+  isLoading?: boolean;
+}
+
+export function AgentListItem({
+  agent,
+  onDelete,
+  onToggleStatus,
+  isLoading = false,
+}: AgentListItemProps) {
+  // Inline model parsing with error handling
+  const getModelName = () => {
+    if (!agent.modelConfig) return "Unknown Model";
+
+    try {
+      const config = JSON.parse(agent.modelConfig);
+      return config.model || "Unknown Model";
+    } catch {
+      return "Invalid Model Config";
+    }
+  };
+
+  // Inline action handlers
+  const handleDelete = () => onDelete?.(agent);
+  const handleToggleStatus = () => onToggleStatus?.(agent);
+
+  return (
+    <div
+      className={cn(
+        "group flex items-center gap-3 p-3 rounded-lg border transition-all duration-150",
+        "hover:bg-accent/50 hover:border-accent-foreground/20",
+        "bg-card border-border",
+        isLoading && "opacity-50 pointer-events-none",
+      )}
+    >
+      {/* Agent Avatar */}
+      <div className="relative shrink-0">
+        <Avatar className="size-10 ring-2 ring-primary/10 transition-all duration-200 group-hover:ring-primary/20">
+          <AvatarImage
+            src={isValidAvatarUrl(agent.avatar) || undefined}
+            alt={`${agent.name} avatar`}
+          />
+          <AvatarFallback className="bg-gradient-to-br from-primary/10 to-primary/5 text-primary border border-primary/20">
+            <Bot className="size-4" />
+          </AvatarFallback>
+        </Avatar>
+        {/* Status dot */}
+        <StatusIndicator
+          status={agent.status}
+          size="sm"
+          variant="dot"
+          className="absolute -bottom-0.5 -right-0.5 border-2 border-card"
+        />
+      </div>
+
+      {/* Agent Info */}
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center gap-2 mb-1">
+          <h3 className="text-sm font-medium text-foreground truncate">
+            {agent.name}
+          </h3>
+          {agent.status === "busy" && (
+            <Badge variant="secondary" className="h-4 px-1.5 text-xs">
+              Busy
+            </Badge>
+          )}
+        </div>
+        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+          <span className="truncate">{agent.role || "AI Agent"}</span>
+          <span>•</span>
+          <span className="truncate">{getModelName()}</span>
+          {agent.backstory && (
+            <>
+              <span>•</span>
+              <span className="truncate max-w-32">
+                {agent.backstory.slice(0, 30)}
+                {agent.backstory.length > 30 ? "..." : ""}
+              </span>
+            </>
+          )}
+        </div>
+      </div>
+
+      {/* Status Badge */}
+      <div className="shrink-0">
+        <Badge
+          variant={agent.isActive ? "default" : "secondary"}
+          className={cn(
+            "h-5 px-2 text-xs",
+            agent.isActive
+              ? "bg-green-500/10 text-green-600 border-green-500/20"
+              : "bg-gray-500/10 text-gray-600 border-gray-500/20",
+          )}
+        >
+          {agent.isActive ? "Active" : "Inactive"}
+        </Badge>
+      </div>
+
+      {/* Actions Menu */}
+      <div className="shrink-0">
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="size-8 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+              disabled={isLoading}
+              aria-label={`Actions for ${agent.name}`}
+            >
+              <MoreHorizontal className="size-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-40">
+            <DropdownMenuItem asChild>
+              <Link
+                to="/user/agents/edit/$agentId"
+                params={{ agentId: agent.id }}
+                className="cursor-pointer"
+              >
+                <Pencil className="mr-2 size-4" />
+                Edit
+              </Link>
+            </DropdownMenuItem>
+
+            <DropdownMenuItem onClick={handleToggleStatus}>
+              <Power className="mr-2 size-4" />
+              {agent.status === "active" ? "Deactivate" : "Activate"}
+            </DropdownMenuItem>
+
+            <DropdownMenuSeparator />
+
+            <DropdownMenuItem
+              onClick={handleDelete}
+              className="text-destructive focus:text-destructive"
+            >
+              <Trash2 className="mr-2 size-4" />
+              Delete
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+    </div>
   );
 }
 

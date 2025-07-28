@@ -103,7 +103,7 @@ export function RegisterForm(props: RegisterFormProps) {
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(handleSubmit)}
-          className="space-y-6"
+          className="space-y-3"
           noValidate
           aria-label="Create account form"
         >
@@ -111,7 +111,7 @@ export function RegisterForm(props: RegisterFormProps) {
             control={form.control}
             name="name"
             render={({ field }) => (
-              <FormItem>
+              <FormItem className="space-y-1.5">
                 <FormLabel className="text-sm font-medium">
                   Display name
                 </FormLabel>
@@ -125,7 +125,7 @@ export function RegisterForm(props: RegisterFormProps) {
                       {...field}
                       placeholder="Enter your display name"
                       disabled={form.formState.isSubmitting}
-                      className="pl-10 h-11"
+                      className="pl-10 h-10"
                       aria-describedby={field.name + "-error"}
                       autoComplete="name"
                     />
@@ -140,14 +140,14 @@ export function RegisterForm(props: RegisterFormProps) {
             control={form.control}
             name="username"
             render={({ field }) => (
-              <FormItem>
+              <FormItem className="space-y-1.5">
                 <FormLabel className="text-sm font-medium">Username</FormLabel>
                 <FormControl>
                   <Input
                     {...field}
                     placeholder="Choose a unique username"
                     disabled={form.formState.isSubmitting}
-                    className="h-11"
+                    className="h-10"
                     aria-describedby={field.name + "-error"}
                     autoComplete="username"
                   />
@@ -161,7 +161,7 @@ export function RegisterForm(props: RegisterFormProps) {
             control={form.control}
             name="password"
             render={({ field }) => (
-              <FormItem>
+              <FormItem className="space-y-1.5">
                 <FormLabel className="text-sm font-medium">Password</FormLabel>
                 <FormControl>
                   <div className="relative">
@@ -174,7 +174,7 @@ export function RegisterForm(props: RegisterFormProps) {
                       type={showPassword ? "text" : "password"}
                       placeholder="Create a secure password"
                       disabled={form.formState.isSubmitting}
-                      className="pl-10 pr-10 h-11"
+                      className="pl-10 pr-10 h-10"
                       aria-describedby={field.name + "-error"}
                       autoComplete="new-password"
                     />
@@ -206,7 +206,7 @@ export function RegisterForm(props: RegisterFormProps) {
             control={form.control}
             name="confirmPassword"
             render={({ field }) => (
-              <FormItem>
+              <FormItem className="space-y-1.5">
                 <FormLabel className="text-sm font-medium">
                   Confirm password
                 </FormLabel>
@@ -221,7 +221,7 @@ export function RegisterForm(props: RegisterFormProps) {
                       type={showConfirmPassword ? "text" : "password"}
                       placeholder="Confirm your password"
                       disabled={form.formState.isSubmitting}
-                      className="pl-10 pr-10 h-11"
+                      className="pl-10 pr-10 h-10"
                       aria-describedby={field.name + "-error"}
                       autoComplete="new-password"
                     />
@@ -251,11 +251,11 @@ export function RegisterForm(props: RegisterFormProps) {
             )}
           />
 
-          <div className="flex flex-col space-y-4 pt-2">
+          <div className="flex flex-col space-y-3 pt-2">
             <Button
               type="submit"
               disabled={form.formState.isSubmitting}
-              className="w-full h-11"
+              className="w-full h-10"
               aria-describedby="register-status"
             >
               {form.formState.isSubmitting ? (

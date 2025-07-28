@@ -1,4 +1,4 @@
-import { MessageSquare, Crown, Zap } from "lucide-react";
+import { MessageSquare } from "lucide-react";
 
 import type { UserSummary } from "@/main/features/user/user.service";
 
@@ -181,10 +181,9 @@ export function ConversationAvatar(props: ConversationAvatarProps) {
     );
   }
 
-  // For group conversations (3+ people), show overlapping avatars
+  // For group conversations (3+ people), show exactly 2 avatars
   const firstParticipant = otherParticipants[0];
-  const secondParticipant = otherParticipants[1];
-  const remainingCount = Math.max(0, otherParticipants.length - 2);
+  const totalParticipants = otherParticipants.length;
 
   if (!firstParticipant) {
     return (
@@ -208,12 +207,12 @@ export function ConversationAvatar(props: ConversationAvatarProps) {
 
   return (
     <div className={cn("relative flex", className)}>
-      {/* First participant avatar - smaller for group */}
+      {/* First avatar - back/top position with user initial and status */}
       <Avatar
         className={cn(
           groupSizeClasses[size],
           ringClasses[size],
-          "relative z-20 ring-background shadow-md transition-all duration-200 hover:shadow-lg",
+          "relative z-10 ring-background shadow-md transition-all duration-200 hover:shadow-lg",
         )}
       >
         <AvatarImage
@@ -224,63 +223,35 @@ export function ConversationAvatar(props: ConversationAvatarProps) {
         </AvatarFallback>
       </Avatar>
 
-      {/* Second participant or counter - more overlap */}
+      {/* Status indicator - only on the first avatar (back/top) */}
+      {showStatus && (
+        <div
+          className={cn(
+            "absolute -top-0.5 -right-0.5 rounded-full border-2 border-background z-20 shadow-sm status-pulse",
+            getStatusColor(getUserStatus(firstParticipant)),
+            statusSizeClasses[size],
+          )}
+        />
+      )}
+
+      {/* Second avatar - front/bottom position with participant count */}
       <Avatar
         className={cn(
           groupSizeClasses[size],
           ringClasses[size],
-          "relative z-10 ring-background shadow-md transition-all duration-200 hover:shadow-lg",
-          // Increased overlap based on size
-          size === "sm" ? "-ml-4" : size === "md" ? "-ml-5" : "-ml-6",
+          "relative z-20 ring-background shadow-md transition-all duration-200 hover:shadow-lg",
+          // Position in front/bottom with overlap
+          size === "sm"
+            ? "-ml-4 mt-2"
+            : size === "md"
+              ? "-ml-5 mt-2.5"
+              : "-ml-6 mt-3",
         )}
       >
-        {secondParticipant ? (
-          <>
-            <AvatarImage
-              src={isValidAvatarUrl(secondParticipant.avatar) || undefined}
-            />
-            <AvatarFallback className="bg-gradient-to-br from-emerald-500/10 to-teal-600/10 text-foreground font-semibold border border-border/50">
-              {secondParticipant.name.charAt(0).toUpperCase()}
-            </AvatarFallback>
-          </>
-        ) : (
-          <AvatarFallback className="bg-gradient-to-br from-muted to-muted-foreground/20 text-muted-foreground font-semibold border border-border/50">
-            +{remainingCount}
-          </AvatarFallback>
-        )}
+        <AvatarFallback className="bg-gradient-to-br from-primary/10 to-primary/20 text-foreground font-semibold border border-border/50">
+          +{totalParticipants}
+        </AvatarFallback>
       </Avatar>
-
-      {/* Additional count indicator if more than 2 extra participants */}
-      {remainingCount > 0 && secondParticipant && (
-        <div
-          className={cn(
-            "absolute -bottom-0.5 -right-0.5 bg-gradient-to-br from-primary to-primary/80 text-primary-foreground rounded-full text-xs font-bold shadow-md",
-            "flex items-center justify-center min-w-[1rem] h-4 px-1 z-30 ring-1 ring-background border border-primary/20",
-            "transition-all duration-200 hover:scale-[1.01]",
-          )}
-        >
-          <Crown className="h-2 w-2 mr-0.5" />
-          {remainingCount}
-        </div>
-      )}
-
-      {/* Status indicator for group - show if any user is online */}
-      {showStatus && (
-        <div
-          className={cn(
-            "absolute -bottom-0.5 -right-0.5 rounded-full border-2 border-background z-30 shadow-sm status-pulse",
-            // For group conversations, show emerald if any participant is online
-            otherParticipants.some((p) => getUserStatus(p) === "online")
-              ? "bg-emerald-500 shadow-emerald-500/30"
-              : "bg-gray-400 shadow-gray-400/20",
-            statusSizeClasses[size],
-          )}
-        >
-          {otherParticipants.some((p) => getUserStatus(p) === "online") && (
-            <Zap className="h-1.5 w-1.5 text-white absolute inset-0.5" />
-          )}
-        </div>
-      )}
     </div>
   );
 }

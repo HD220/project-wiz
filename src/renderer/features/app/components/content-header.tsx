@@ -34,11 +34,13 @@ export function ContentHeader(props: ContentHeaderProps) {
       <div className="relative flex items-center justify-between w-full px-[var(--spacing-layout-sm)] lg:px-[var(--spacing-layout-md)]">
         <div className="flex items-center gap-[var(--spacing-component-lg)] min-w-0 flex-1">
           <div className="flex items-center gap-[var(--spacing-component-md)] min-w-0">
-            <div className="flex items-center justify-center w-8 h-8 rounded-md bg-muted/30 border border-border/30">
-              {customIcon || (
+            {customIcon ? (
+              customIcon
+            ) : (
+              <div className="flex items-center justify-center w-8 h-8 rounded-md bg-muted/30 border border-border/30">
                 <IconComponent className="w-[var(--spacing-component-lg)] h-[var(--spacing-component-lg)] text-muted-foreground/80 flex-shrink-0" />
-              )}
-            </div>
+              </div>
+            )}
 
             <h1 className="truncate text-xl font-semibold leading-tight text-foreground">
               {title}

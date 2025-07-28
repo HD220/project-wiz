@@ -111,8 +111,8 @@ export function ConversationList(props: ConversationListProps) {
           onCreateConversation={() => setShowCreateDialog(true)}
         />
       ) : (
-        <ScrollArea className="flex-1 px-2">
-          <div className="py-1 space-y-0.5">
+        <ScrollArea className="flex-1">
+          <div className="space-y-1">
             {displayConversations.map((conversation) => (
               <ConversationListItem
                 key={conversation.id}
@@ -157,17 +157,17 @@ function ConversationListHeader(props: ConversationListHeaderProps) {
   const { onCreateConversation, showArchived, onToggleShowArchived } = props;
 
   return (
-    <div className="px-2 py-3 border-b border-border/50">
+    <div className="px-2 py-2 border-b border-sidebar-border/40">
       <div className="flex items-center justify-between mb-3">
-        <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+        <h2 className="text-xs font-semibold text-sidebar-foreground/60 uppercase tracking-wide">
           Direct Messages
         </h2>
         <Button
           variant="ghost"
           size="icon"
           className={cn(
-            "w-6 h-6 hover:bg-accent transition-colors rounded-sm",
-            "focus-visible:ring-1 focus-visible:ring-ring",
+            "w-6 h-6 hover:bg-sidebar-accent/60 transition-colors rounded-sm",
+            "focus-visible:ring-1 focus-visible:ring-sidebar-ring",
           )}
           onClick={onCreateConversation}
         >
@@ -177,10 +177,10 @@ function ConversationListHeader(props: ConversationListHeaderProps) {
       </div>
 
       {/* Archive Toggle - More compact */}
-      <div className="flex items-center justify-between text-xs bg-muted/20 rounded-md p-2 hover:bg-muted/30 transition-colors">
+      <div className="flex items-center justify-between text-xs bg-sidebar-accent/20 rounded-md p-2 hover:bg-sidebar-accent/30 transition-colors">
         <div className="flex items-center gap-2">
-          <Archive className="w-3.5 h-3.5 text-muted-foreground" />
-          <span className="text-muted-foreground font-medium">
+          <Archive className="w-3.5 h-3.5 text-sidebar-foreground/60" />
+          <span className="text-sidebar-foreground/80 font-medium">
             Show Archived
           </span>
         </div>
@@ -308,14 +308,14 @@ function ConversationListItem(props: ConversationListItemProps) {
         to="/user/dm/$conversationId"
         params={{ conversationId: conversation.id }}
         className={cn(
-          "flex items-center gap-2 px-2 py-1.5 mx-1 rounded transition-all duration-150",
-          "hover:bg-accent/60",
-          "focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
+          "flex items-center gap-2 px-2 py-1.5 mx-2 rounded transition-all duration-150",
+          "hover:bg-sidebar-accent/60 hover:text-sidebar-accent-foreground",
+          "focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-sidebar-ring",
           conversation.archivedAt && "opacity-60",
-          hasUnreadMessages && "bg-accent/30",
+          hasUnreadMessages && "bg-sidebar-accent/30",
         )}
         activeProps={{
-          className: "bg-accent/70 text-accent-foreground",
+          className: "bg-sidebar-accent/90 text-sidebar-accent-foreground",
         }}
       >
         {/* Avatar - smaller Discord style with space for overlapped groups */}
@@ -342,7 +342,9 @@ function ConversationListItem(props: ConversationListItemProps) {
               className={cn(
                 "text-sm font-medium truncate",
                 conversation.archivedAt && "line-through text-muted-foreground",
-                hasUnreadMessages ? "text-foreground" : "text-foreground/90",
+                hasUnreadMessages
+                  ? "text-sidebar-foreground"
+                  : "text-sidebar-foreground/80",
               )}
             >
               {conversationName}
@@ -390,7 +392,7 @@ function ConversationListItem(props: ConversationListItemProps) {
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="h-5 w-5 p-0 hover:bg-accent/60"
+                  className="h-5 w-5 p-0 hover:bg-sidebar-accent/60"
                 >
                   <MoreHorizontal className="h-3 w-3" />
                   <span className="sr-only">Conversation options</span>

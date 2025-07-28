@@ -52,7 +52,7 @@ export function RootSidebar(props: RootSidebarProps) {
                     variant="ghost"
                     size="icon"
                     className={cn(
-                      "w-12 h-12 p-0 rounded-2xl border-2 transition-all duration-200 ease-out group relative",
+                      "w-12 h-12 p-0 rounded-2xl border-2 transition-all duration-200 ease-out group relative cursor-pointer",
                       "focus-visible:ring-2 focus-visible:ring-sidebar-ring focus-visible:ring-offset-2 focus-visible:ring-offset-sidebar",
                       "hover:scale-[1.01] hover:shadow-lg hover:shadow-sidebar-primary/20",
                       isActive
@@ -105,7 +105,7 @@ export function RootSidebar(props: RootSidebarProps) {
                         variant="ghost"
                         size="icon"
                         className={cn(
-                          "w-12 h-12 p-0 rounded-2xl border-2 transition-all duration-200 ease-out group relative",
+                          "w-12 h-12 p-0 rounded-2xl border-2 transition-all duration-200 ease-out group relative cursor-pointer",
                           "focus-visible:ring-2 focus-visible:ring-sidebar-ring focus-visible:ring-offset-2 focus-visible:ring-offset-sidebar",
                           "hover:scale-[1.01] hover:shadow-lg hover:shadow-sidebar-primary/20",
                           isActive
@@ -163,7 +163,7 @@ export function RootSidebar(props: RootSidebarProps) {
                   variant="ghost"
                   size="icon"
                   className={cn(
-                    "w-12 h-12 p-0 rounded-2xl border-2 transition-all duration-200 ease-out group",
+                    "w-12 h-12 p-0 rounded-2xl border-2 transition-all duration-200 ease-out group cursor-pointer",
                     "bg-sidebar-accent/40 border-transparent text-sidebar-foreground/80",
                     "hover:bg-sidebar-accent hover:text-sidebar-foreground hover:rounded-[14px] hover:scale-[1.01] hover:shadow-md hover:shadow-sidebar-accent/25 hover:border-sidebar-border/30",
                     "focus-visible:ring-2 focus-visible:ring-sidebar-ring focus-visible:ring-offset-2 focus-visible:ring-offset-sidebar",
@@ -193,7 +193,7 @@ export function RootSidebar(props: RootSidebarProps) {
                 variant="ghost"
                 size="icon"
                 className={cn(
-                  "w-12 h-12 p-0 rounded-2xl border-2 transition-all duration-200 ease-out group",
+                  "w-12 h-12 p-0 rounded-2xl border-2 transition-all duration-200 ease-out group cursor-pointer",
                   "bg-sidebar-accent/40 border-transparent text-sidebar-foreground/80",
                   "hover:bg-sidebar-accent hover:text-sidebar-foreground hover:rounded-[14px] hover:scale-[1.01] hover:shadow-md hover:shadow-sidebar-accent/25 hover:border-sidebar-border/30",
                   "focus-visible:ring-2 focus-visible:ring-sidebar-ring focus-visible:ring-offset-2 focus-visible:ring-offset-sidebar",

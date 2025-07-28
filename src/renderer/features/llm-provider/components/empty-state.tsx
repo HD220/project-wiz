@@ -1,46 +1,59 @@
 import { Link } from "@tanstack/react-router";
-import { Bot, Plus } from "lucide-react";
+import { Plus, Server } from "lucide-react";
 
 import { Button } from "@/renderer/components/ui/button";
 
 export function EmptyState() {
   return (
-    <div className="flex flex-col items-center justify-center h-full text-center p-8">
-      <div className="max-w-sm space-y-6">
-        {/* Simple Icon */}
-        <div className="flex justify-center">
-          <div className="relative bg-primary/10 p-4 rounded-full">
-            <Bot className="size-8 text-primary" />
+    <div className="flex flex-col h-full">
+      {/* Professional Header */}
+      <div className="flex items-center justify-between px-6 py-4 border-b border-border/50 bg-background/95 backdrop-blur-sm">
+        <div className="flex items-center gap-4">
+          <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-primary/10">
+            <Server className="w-5 h-5 text-primary" />
+          </div>
+          <div>
+            <h1 className="text-xl font-semibold text-foreground">
+              LLM Providers
+            </h1>
+            <p className="text-sm text-muted-foreground">
+              Manage your AI providers and configurations
+            </p>
           </div>
         </div>
+        <Link
+          to="/user/settings/llm-providers/$providerId/new"
+          params={{ providerId: "new" }}
+        >
+          <Button className="gap-2">
+            <Plus className="w-4 h-4" />
+            Add Provider
+          </Button>
+        </Link>
+      </div>
 
-        {/* Content */}
-        <div className="space-y-3">
-          <h3 className="text-lg font-semibold text-foreground">
-            No AI Providers Configured
-          </h3>
-          <p className="text-sm text-muted-foreground leading-relaxed">
-            Add your first AI provider to enable intelligent conversations and
-            AI agents in your projects.
-          </p>
+      {/* Empty State */}
+      <div className="flex-1 flex flex-col items-center justify-center p-12 text-center">
+        <div className="w-20 h-20 rounded-2xl bg-muted/20 flex items-center justify-center mb-6">
+          <Server className="w-10 h-10 text-muted-foreground" />
         </div>
-
-        {/* Call-to-Action */}
-        <div className="space-y-3">
-          <Link
-            to="/user/settings/llm-providers/$providerId/new"
-            params={{ providerId: "new" }}
-          >
-            <Button className="gap-2 w-full">
-              <Plus className="size-4" />
-              Add Your First Provider
-            </Button>
-          </Link>
-
-          <p className="text-xs text-muted-foreground">
-            Supports OpenAI, Anthropic, Google, DeepSeek, and custom providers
-          </p>
-        </div>
+        <h3 className="text-xl font-semibold text-foreground mb-3">
+          No providers configured yet
+        </h3>
+        <p className="text-base text-muted-foreground mb-8 max-w-lg leading-relaxed">
+          Add your first AI provider to enable intelligent conversations and AI
+          agents in your projects. Supports OpenAI, Anthropic, Google, DeepSeek,
+          and custom providers.
+        </p>
+        <Link
+          to="/user/settings/llm-providers/$providerId/new"
+          params={{ providerId: "new" }}
+        >
+          <Button size="lg" className="gap-2">
+            <Plus className="w-5 h-5" />
+            Add Your First Provider
+          </Button>
+        </Link>
       </div>
     </div>
   );

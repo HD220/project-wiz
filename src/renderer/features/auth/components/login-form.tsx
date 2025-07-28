@@ -74,23 +74,23 @@ export function LoginForm(props: LoginFormProps) {
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(handleSubmit)}
-          className="space-y-[var(--spacing-component-xl)]"
+          className="space-y-4"
           noValidate
           aria-label="Sign in form"
         >
-          <div className="space-y-[var(--spacing-component-lg)]">
+          <div className="space-y-3">
             <FormField
               control={form.control}
               name="username"
               render={({ field }) => (
-                <FormItem className="space-y-[var(--spacing-component-sm)]">
-                  <FormLabel className="text-[var(--font-size-sm)] font-[var(--font-weight-medium)] text-foreground">
+                <FormItem className="space-y-1.5">
+                  <FormLabel className="text-sm font-medium text-foreground">
                     Username
                   </FormLabel>
                   <FormControl>
                     <div className="relative group">
                       <User
-                        className="absolute left-[var(--spacing-component-md)] top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground group-focus-within:text-ring transition-colors duration-200"
+                        className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground group-focus-within:text-ring transition-colors duration-200"
                         aria-hidden="true"
                       />
                       <Input
@@ -100,8 +100,8 @@ export function LoginForm(props: LoginFormProps) {
                         disabled={form.formState.isSubmitting}
                         className="
                           pl-10 
-                          h-12
-                          text-[var(--font-size-base)]
+                          h-10
+                          text-sm
                           border-input
                           bg-background
                           transition-all duration-200
@@ -120,7 +120,7 @@ export function LoginForm(props: LoginFormProps) {
                   </FormControl>
                   <FormMessage
                     id={field.name + "-error"}
-                    className="text-[var(--font-size-xs)] text-destructive flex items-center gap-[var(--spacing-component-xs)]"
+                    className="text-xs text-destructive flex items-center gap-1"
                   />
                 </FormItem>
               )}
@@ -130,8 +130,8 @@ export function LoginForm(props: LoginFormProps) {
               control={form.control}
               name="password"
               render={({ field }) => (
-                <FormItem className="space-y-[var(--spacing-component-sm)]">
-                  <FormLabel className="text-[var(--font-size-sm)] font-[var(--font-weight-medium)] text-foreground">
+                <FormItem className="space-y-1.5">
+                  <FormLabel className="text-sm font-medium text-foreground">
                     Password
                   </FormLabel>
                   <FormControl>
@@ -141,8 +141,8 @@ export function LoginForm(props: LoginFormProps) {
                       placeholder="Enter your password"
                       disabled={form.formState.isSubmitting}
                       className="
-                        h-12
-                        text-[var(--font-size-base)]
+                        h-10
+                        text-sm
                         border-input
                         bg-background
                         transition-all duration-200
@@ -160,22 +160,22 @@ export function LoginForm(props: LoginFormProps) {
                   </FormControl>
                   <FormMessage
                     id={field.name + "-error"}
-                    className="text-[var(--font-size-xs)] text-destructive flex items-center gap-[var(--spacing-component-xs)]"
+                    className="text-xs text-destructive flex items-center gap-1"
                   />
                 </FormItem>
               )}
             />
           </div>
 
-          <div className="flex flex-col space-y-[var(--spacing-component-lg)] pt-[var(--spacing-component-md)]">
+          <div className="flex flex-col space-y-3 pt-2">
             <Button
               type="submit"
               disabled={form.formState.isSubmitting}
               className="
                 w-full 
-                h-12
-                text-[var(--font-size-sm)]
-                font-[var(--font-weight-medium)]
+                h-10
+                text-sm
+                font-medium
                 bg-primary 
                 hover:bg-primary/90
                 focus:bg-primary/90
@@ -195,15 +195,12 @@ export function LoginForm(props: LoginFormProps) {
             >
               {form.formState.isSubmitting ? (
                 <>
-                  <Loader2 className="mr-[var(--spacing-component-sm)] h-4 w-4 animate-spin" />
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   <span>Signing in...</span>
                 </>
               ) : (
                 <>
-                  <LogIn
-                    className="mr-[var(--spacing-component-sm)] h-4 w-4"
-                    aria-hidden="true"
-                  />
+                  <LogIn className="mr-2 h-4 w-4" aria-hidden="true" />
                   <span>Sign in</span>
                 </>
               )}
@@ -225,22 +222,22 @@ export function LoginForm(props: LoginFormProps) {
                 <AlertCircle className="h-4 w-4" />
                 <AlertDescription
                   id="login-status"
-                  className="text-[var(--font-size-sm)] font-[var(--font-weight-medium)]"
+                  className="text-sm font-medium"
                 >
                   {form.formState.errors.root.message}
                 </AlertDescription>
               </Alert>
             )}
 
-            <div className="text-center pt-[var(--spacing-component-sm)]">
-              <p className="text-[var(--font-size-sm)] text-muted-foreground">
+            <div className="text-center pt-1">
+              <p className="text-sm text-muted-foreground">
                 Need an account?{" "}
                 <Button
                   variant="link"
                   className="
                     p-0 h-auto 
-                    text-[var(--font-size-sm)]
-                    font-[var(--font-weight-medium)]
+                    text-sm
+                    font-medium
                     text-primary
                     hover:text-primary/80
                     underline-offset-4

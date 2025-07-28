@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { Plus, Settings } from "lucide-react";
+import { Plus, Settings, Server } from "lucide-react";
 
 import type { LlmProvider } from "@/main/features/agent/llm-provider/llm-provider.types";
 
@@ -25,62 +25,41 @@ export function ProviderList(props: ProviderListProps) {
 
   return (
     <div className="flex flex-col h-full">
-      {/* Compact Discord-style Header */}
-      <div className="flex items-center justify-between p-4 border-b border-border">
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2">
-            <Settings className="size-4 text-muted-foreground" />
-            <h2 className="text-sm font-semibold text-foreground">
-              AI Providers
-            </h2>
+      {/* Professional Agent-style Header */}
+      <div className="flex items-center justify-between px-6 py-4 border-b border-border/50 bg-background/95 backdrop-blur-sm shrink-0">
+        <div className="flex items-center gap-4">
+          <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-primary/10">
+            <Server className="w-5 h-5 text-primary" />
           </div>
-          <div className="flex items-center gap-2 text-xs text-muted-foreground">
-            <span className="px-2 py-0.5 bg-primary/10 text-primary rounded text-xs font-medium">
-              {providers.length}
-            </span>
-            {activeProviders > 0 && (
-              <>
-                <span>•</span>
-                <span className="px-2 py-0.5 bg-green-500/10 text-green-600 rounded text-xs font-medium">
-                  {activeProviders} active
-                </span>
-              </>
-            )}
+          <div>
+            <h1 className="text-xl font-semibold text-foreground">
+              LLM Providers
+            </h1>
+            <p className="text-sm text-muted-foreground">
+              {providers.length} providers • {activeProviders} active
+              {defaultProvider && ` • Default: ${defaultProvider.name}`}
+            </p>
           </div>
         </div>
-
         <Link
           to="/user/settings/llm-providers/$providerId/new"
           params={{ providerId: "new" }}
         >
-          <Button size="sm" className="gap-1.5 h-8 px-3 text-xs">
-            <Plus className="size-3" />
+          <Button className="gap-2">
+            <Plus className="w-4 h-4" />
             Add Provider
           </Button>
         </Link>
       </div>
 
-      {/* Default Provider Status */}
-      {defaultProvider && (
-        <div className="px-4 py-2 border-b border-border bg-muted/30">
-          <div className="flex items-center gap-2 text-xs text-muted-foreground">
-            <div className="size-2 rounded-full bg-green-500" />
-            <span>Default:</span>
-            <span className="font-medium text-foreground">
-              {defaultProvider.name}
-            </span>
-            <span>•</span>
-            <span>{defaultProvider.defaultModel}</span>
-          </div>
-        </div>
-      )}
-
-      {/* Scrollable Provider List */}
+      {/* Scrollable Provider List with responsive 2-column layout */}
       <ScrollArea className="flex-1">
-        <div className="p-2 space-y-1">
-          {providers.map((provider: LlmProvider) => (
-            <ProviderCard key={provider.id} provider={provider} />
-          ))}
+        <div className="p-3 space-y-1">
+          <div className="grid grid-cols-1 xl:grid-cols-2 gap-1">
+            {providers.map((provider: LlmProvider) => (
+              <ProviderCard key={provider.id} provider={provider} />
+            ))}
+          </div>
         </div>
       </ScrollArea>
     </div>

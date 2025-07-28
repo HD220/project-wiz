@@ -55,21 +55,21 @@ export function AuthCard(props: AuthCardProps) {
     <Card
       className={cn(
         "w-full max-w-md mx-auto transition-all duration-200 hover:shadow-md",
-        "p-8 space-y-8",
+        "p-6 space-y-5",
         "shadow-lg border-border/50 bg-card/95 backdrop-blur-sm",
         "auth-form-enter", // Animation class
         className,
       )}
     >
-      <CardHeader className="text-center space-y-4 transition-colors duration-200">
-        <h3 className="text-3xl font-bold leading-tight tracking-tight text-foreground transition-colors duration-200">
+      <CardHeader className="text-center space-y-2 transition-colors duration-200">
+        <h3 className="text-2xl font-bold leading-tight tracking-tight text-foreground transition-colors duration-200">
           {title}
         </h3>
-        <p className="text-base text-muted-foreground leading-normal transition-colors duration-200">
+        <p className="text-sm text-muted-foreground leading-normal transition-colors duration-200">
           {description}
         </p>
       </CardHeader>
-      <CardContent className="space-y-8">{children}</CardContent>
+      <CardContent className="space-y-5">{children}</CardContent>
     </Card>
   );
 }

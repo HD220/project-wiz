@@ -138,17 +138,24 @@ export function CreateConversationDialog(props: CreateConversationDialogProps) {
 
                       {/* Avatar */}
                       <div className="relative">
-                        <Avatar className="size-8">
+                        <Avatar className="size-8 ring-1 ring-border/50 transition-all duration-200 hover:ring-primary/30 hover:scale-[1.02]">
                           <AvatarImage
                             src={isValidAvatarUrl(user.avatar) || undefined}
                           />
-                          <AvatarFallback className="text-xs bg-muted text-foreground">
+                          <AvatarFallback
+                            className={cn(
+                              "text-xs font-semibold border border-border/50",
+                              user.type === "agent"
+                                ? "bg-gradient-to-br from-primary/10 to-primary/5 text-primary"
+                                : "bg-gradient-to-br from-blue-500/10 to-purple-600/10 text-foreground",
+                            )}
+                          >
                             {user.name.charAt(0).toUpperCase()}
                           </AvatarFallback>
                         </Avatar>
 
                         {/* Type indicator */}
-                        <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 bg-background rounded-full flex items-center justify-center border border-border">
+                        <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 bg-background rounded-full flex items-center justify-center border border-border/50 shadow-sm">
                           {user.type === "agent" ? (
                             <Bot className="h-2 w-2 text-primary" />
                           ) : (
