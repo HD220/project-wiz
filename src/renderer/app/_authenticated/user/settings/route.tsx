@@ -8,6 +8,7 @@ import { X, Settings, Bot } from "lucide-react";
 import React from "react";
 
 import { Button } from "@/renderer/components/ui/button";
+import { ScrollArea } from "@/renderer/components/ui/scroll-area";
 
 function SettingsLayout() {
   const navigate = useNavigate();
@@ -84,7 +85,7 @@ function SettingsLayout() {
       </div>
 
       {/* Content */}
-      <div className="flex-1 overflow-auto">
+      <ScrollArea className="flex-1">
         {/* Header */}
         <div className="bg-background border-b px-6 py-3 flex items-center justify-between">
           <div className="text-sm text-muted-foreground">
@@ -110,7 +111,7 @@ function SettingsLayout() {
         <div className="p-4">
           <Outlet />
         </div>
-      </div>
+      </ScrollArea>
     </div>
   );
 }

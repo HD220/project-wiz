@@ -5,6 +5,7 @@ import {
   MemberSidebar,
   type Member,
 } from "@/renderer/components/members/member-sidebar";
+import { ScrollArea } from "@/renderer/components/ui/scroll-area";
 import { ContentHeader } from "@/renderer/features/app/components/content-header";
 import { ProjectView } from "@/renderer/features/app/components/server-view";
 import { loadApiData } from "@/renderer/lib/route-loader";
@@ -67,9 +68,11 @@ function ProjectPage() {
       />
       <div className="flex-1 flex">
         {/* Main Project Content */}
-        <main className="flex-1 overflow-auto">
-          <ProjectView project={project} />
-        </main>
+        <ScrollArea className="flex-1">
+          <main>
+            <ProjectView project={project} />
+          </main>
+        </ScrollArea>
 
         {/* Members Sidebar */}
         {!isMemberSidebarCollapsed && (

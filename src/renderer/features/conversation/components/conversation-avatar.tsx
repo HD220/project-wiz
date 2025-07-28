@@ -2,12 +2,8 @@ import { MessageSquare } from "lucide-react";
 
 import type { UserSummary } from "@/main/features/user/user.service";
 
-import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
-} from "@/renderer/components/ui/avatar";
-import { cn, isValidAvatarUrl } from "@/renderer/lib/utils";
+import { OptimizedAvatar } from "@/renderer/components/ui/optimized-avatar";
+import { cn } from "@/renderer/lib/utils";
 
 type UserStatus = "online" | "away" | "busy" | "offline";
 
@@ -66,12 +62,6 @@ export function ConversationAvatar(props: ConversationAvatarProps) {
     showStatus = false,
   } = props;
 
-  const sizeClasses = {
-    sm: "size-8 text-xs",
-    md: "size-9 text-sm",
-    lg: "size-11 text-base",
-  };
-
   // Group avatar sizes - smaller for overlapped display
   const groupSizeClasses = {
     sm: "size-6 text-xs",
@@ -103,18 +93,16 @@ export function ConversationAvatar(props: ConversationAvatarProps) {
   if (!participants.length || otherParticipants.length === 0) {
     return (
       <div className="relative">
-        <Avatar
+        <OptimizedAvatar
+          size={size}
+          fallbackContent={<MessageSquare className="w-1/2 h-1/2" />}
           className={cn(
-            sizeClasses[size],
             ringClasses[size],
             "ring-background shadow-md transition-all duration-200",
             className,
           )}
-        >
-          <AvatarFallback className="bg-gradient-to-br from-muted to-muted-foreground/20 text-muted-foreground border border-border/50">
-            <MessageSquare className="w-1/2 h-1/2" />
-          </AvatarFallback>
-        </Avatar>
+          fallbackClassName="bg-gradient-to-br from-muted to-muted-foreground/20 text-muted-foreground border border-border/50"
+        />
         {showStatus && (
           <div
             className={cn(
@@ -134,11 +122,12 @@ export function ConversationAvatar(props: ConversationAvatarProps) {
     if (!participant) {
       return (
         <div className="relative">
-          <Avatar className={cn(sizeClasses[size], className)}>
-            <AvatarFallback className="bg-gradient-to-br from-gray-400 to-gray-600 text-white">
-              <MessageSquare className="w-1/2 h-1/2" />
-            </AvatarFallback>
-          </Avatar>
+          <OptimizedAvatar
+            size={size}
+            fallbackContent={<MessageSquare className="w-1/2 h-1/2" />}
+            className={className}
+            fallbackClassName="bg-gradient-to-br from-gray-400 to-gray-600 text-white"
+          />
           {showStatus && (
             <div
               className={cn(
@@ -153,21 +142,16 @@ export function ConversationAvatar(props: ConversationAvatarProps) {
 
     return (
       <div className="relative">
-        <Avatar
+        <OptimizedAvatar
+          src={participant.avatar}
+          size={size}
+          fallbackContent={participant.name.charAt(0).toUpperCase()}
           className={cn(
-            sizeClasses[size],
             ringClasses[size],
             "ring-background shadow-md transition-all duration-200 hover:shadow-lg hover:scale-[1.01]",
             className,
           )}
-        >
-          <AvatarImage
-            src={isValidAvatarUrl(participant.avatar) || undefined}
-          />
-          <AvatarFallback className="bg-gradient-to-br from-blue-500/10 to-purple-600/10 text-foreground font-semibold border border-border/50">
-            {participant.name.charAt(0).toUpperCase()}
-          </AvatarFallback>
-        </Avatar>
+        />
         {showStatus && participant && (
           <div
             className={cn(
@@ -183,16 +167,17 @@ export function ConversationAvatar(props: ConversationAvatarProps) {
 
   // For group conversations (3+ people), show exactly 2 avatars
   const firstParticipant = otherParticipants[0];
-  const totalParticipants = otherParticipants.length;
+  const remainingParticipants = otherParticipants.length - 1; // Exclude the first participant being shown
 
   if (!firstParticipant) {
     return (
       <div className="relative">
-        <Avatar className={cn(sizeClasses[size], className)}>
-          <AvatarFallback className="bg-gradient-to-br from-gray-400 to-gray-600 text-white">
-            <MessageSquare className="w-1/2 h-1/2" />
-          </AvatarFallback>
-        </Avatar>
+        <OptimizedAvatar
+          size={size}
+          fallbackContent={<MessageSquare className="w-1/2 h-1/2" />}
+          className={className}
+          fallbackClassName="bg-gradient-to-br from-gray-400 to-gray-600 text-white"
+        />
         {showStatus && (
           <div
             className={cn(
@@ -208,34 +193,34 @@ export function ConversationAvatar(props: ConversationAvatarProps) {
   return (
     <div className={cn("relative flex", className)}>
       {/* First avatar - back/top position with user initial and status */}
-      <Avatar
-        className={cn(
-          groupSizeClasses[size],
-          ringClasses[size],
-          "relative z-10 ring-background shadow-md transition-all duration-200 hover:shadow-lg",
-        )}
-      >
-        <AvatarImage
-          src={isValidAvatarUrl(firstParticipant.avatar) || undefined}
-        />
-        <AvatarFallback className="bg-gradient-to-br from-blue-500/10 to-purple-600/10 text-foreground font-semibold border border-border/50">
-          {firstParticipant.name.charAt(0).toUpperCase()}
-        </AvatarFallback>
-      </Avatar>
-
-      {/* Status indicator - only on the first avatar (back/top) */}
-      {showStatus && (
-        <div
+      <div className="relative">
+        <OptimizedAvatar
+          src={firstParticipant.avatar}
+          size="sm" // Always use small size for group avatars
+          fallbackContent={firstParticipant.name.charAt(0).toUpperCase()}
           className={cn(
-            "absolute -top-0.5 -right-0.5 rounded-full border-2 border-background z-20 shadow-sm status-pulse",
-            getStatusColor(getUserStatus(firstParticipant)),
-            statusSizeClasses[size],
+            groupSizeClasses[size],
+            ringClasses[size],
+            "relative z-10 ring-background shadow-md transition-all duration-200 hover:shadow-lg",
           )}
         />
-      )}
+
+        {/* Status indicator - positioned on the first avatar */}
+        {showStatus && (
+          <div
+            className={cn(
+              "absolute -bottom-0.5 -right-0.5 rounded-full border-2 border-background z-20 shadow-sm status-pulse",
+              getStatusColor(getUserStatus(firstParticipant)),
+              statusSizeClasses[size],
+            )}
+          />
+        )}
+      </div>
 
       {/* Second avatar - front/bottom position with participant count */}
-      <Avatar
+      <OptimizedAvatar
+        size="sm" // Always use small size for group avatars
+        fallbackContent={`+${remainingParticipants}`}
         className={cn(
           groupSizeClasses[size],
           ringClasses[size],
@@ -247,11 +232,8 @@ export function ConversationAvatar(props: ConversationAvatarProps) {
               ? "-ml-5 mt-2.5"
               : "-ml-6 mt-3",
         )}
-      >
-        <AvatarFallback className="bg-gradient-to-br from-primary/10 to-primary/20 text-foreground font-semibold border border-border/50">
-          +{totalParticipants}
-        </AvatarFallback>
-      </Avatar>
+        fallbackClassName="bg-gradient-to-br from-primary/10 to-primary/20 text-foreground font-semibold border border-border/50"
+      />
     </div>
   );
 }

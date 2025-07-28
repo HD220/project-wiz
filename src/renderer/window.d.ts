@@ -9,6 +9,7 @@ import type {
   CreateProviderInput,
   LlmProvider,
 } from "@/main/features/agent/llm-provider/llm-provider.types";
+import type { ProviderFiltersInput } from "@/renderer/features/llm-provider/llm-provider.schema";
 import type {
   MemoryCreationInput,
   MemoryUpdateInput,
@@ -112,7 +113,9 @@ declare global {
         create: (
           input: CreateProviderInput,
         ) => Promise<IpcResponse<LlmProvider>>;
-        list: () => Promise<IpcResponse<LlmProvider[]>>;
+        list: (
+          filters?: ProviderFiltersInput,
+        ) => Promise<IpcResponse<LlmProvider[]>>;
         getById: (id: string) => Promise<IpcResponse<LlmProvider | null>>;
         update: (
           id: string,

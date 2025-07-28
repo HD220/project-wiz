@@ -42,21 +42,25 @@ export function ProjectSidebar(props: ProjectSidebarProps) {
   return (
     <aside
       className={cn(
-        "h-full flex flex-col bg-card/50 backdrop-blur-sm",
+        "h-full flex flex-col",
+        "bg-sidebar/95 backdrop-blur-md",
+        "border-r border-sidebar-border/60",
+        "shadow-lg/20",
+        "transition-all duration-300 ease-in-out",
         className,
       )}
       role="complementary"
       aria-label={`${project.name} navigation`}
     >
       {/* Project Header */}
-      <header className="h-12 bg-card/80 border-b border-border/50 flex items-center justify-between px-[var(--spacing-component-md)] backdrop-blur-sm">
-        <h1 className="text-foreground font-semibold text-base truncate">
+      <header className="h-12 bg-sidebar/95 backdrop-blur-md border-b border-sidebar-border/60 flex items-center justify-between px-[var(--spacing-component-md)]">
+        <h1 className="text-sidebar-foreground font-semibold text-base truncate">
           {project.name}
         </h1>
         <Button
           variant="ghost"
           size="icon"
-          className="w-8 h-8 text-muted-foreground hover:text-foreground hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring"
+          className="w-8 h-8 text-sidebar-foreground/60 hover:text-sidebar-foreground hover:bg-sidebar-accent/20 focus-visible:ring-2 focus-visible:ring-ring"
           aria-label="Project settings"
         >
           <Settings className="w-4 h-4" />

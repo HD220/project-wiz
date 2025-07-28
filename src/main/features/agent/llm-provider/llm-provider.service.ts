@@ -1,6 +1,6 @@
 import crypto from "crypto";
 
-import { eq, and, desc, sql } from "drizzle-orm";
+import { eq, and, desc, sql, like } from "drizzle-orm";
 
 import { getDatabase } from "@/main/database/connection";
 import { agentsTable } from "@/main/features/agent/agent.model";
@@ -8,9 +8,17 @@ import { llmProvidersTable } from "@/main/features/agent/llm-provider/llm-provid
 import type {
   CreateProviderInput,
   LlmProvider,
+  ProviderType,
 } from "@/main/features/agent/llm-provider/llm-provider.types";
 import { createProviderSchema } from "@/main/features/agent/llm-provider/llm-provider.types";
 // import { getLogger } from "@/main/utils/logger";
+
+// Filter interface for provider listing
+interface ProviderFilters {
+  type?: ProviderType;
+  search?: string;
+  showInactive?: boolean;
+}
 
 // Encryption key for API key storage (32 bytes for AES-256)
 const validEncryptionKey = Buffer.from(
@@ -102,15 +110,37 @@ export class LlmProviderService {
   }
 
   /**
-   * Find all providers for a user (sorted newest first, API keys masked)
+   * Find all providers for a user (sorted newest first, API keys masked, with filtering)
    */
-  static async findByUserId(userId: string): Promise<LlmProvider[]> {
+  static async findByUserId(
+    userId: string,
+    filters: ProviderFilters = {},
+  ): Promise<LlmProvider[]> {
     const db = getDatabase();
+
+    // Build where conditions inline following INLINE-FIRST principles
+    const conditions = [eq(llmProvidersTable.userId, userId)];
+
+    // Apply active/inactive filter inline
+    if (!filters.showInactive) {
+      conditions.push(eq(llmProvidersTable.isActive, true));
+    }
+
+    // Apply type filter inline
+    if (filters.type) {
+      conditions.push(eq(llmProvidersTable.type, filters.type));
+    }
+
+    // Apply search filter inline
+    if (filters.search && filters.search.trim()) {
+      const searchTerm = `%${filters.search.trim()}%`;
+      conditions.push(like(llmProvidersTable.name, searchTerm));
+    }
 
     const providers = await db
       .select()
       .from(llmProvidersTable)
-      .where(eq(llmProvidersTable.userId, userId))
+      .where(and(...conditions))
       .orderBy(desc(llmProvidersTable.createdAt));
 
     // Sanitize API keys for display

@@ -74,16 +74,16 @@ export function LoginForm(props: LoginFormProps) {
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(handleSubmit)}
-          className="space-y-4"
+          className="space-y-3"
           noValidate
           aria-label="Sign in form"
         >
-          <div className="space-y-3">
+          <div className="space-y-2.5">
             <FormField
               control={form.control}
               name="username"
               render={({ field }) => (
-                <FormItem className="space-y-1.5">
+                <FormItem className="space-y-1">
                   <FormLabel className="text-sm font-medium text-foreground">
                     Username
                   </FormLabel>
@@ -130,7 +130,7 @@ export function LoginForm(props: LoginFormProps) {
               control={form.control}
               name="password"
               render={({ field }) => (
-                <FormItem className="space-y-1.5">
+                <FormItem className="space-y-1">
                   <FormLabel className="text-sm font-medium text-foreground">
                     Password
                   </FormLabel>
@@ -167,7 +167,7 @@ export function LoginForm(props: LoginFormProps) {
             />
           </div>
 
-          <div className="flex flex-col space-y-3 pt-2">
+          <div className="flex flex-col space-y-2.5 pt-1.5">
             <Button
               type="submit"
               disabled={form.formState.isSubmitting}
@@ -229,7 +229,7 @@ export function LoginForm(props: LoginFormProps) {
               </Alert>
             )}
 
-            <div className="text-center pt-1">
+            <div className="text-center pt-0.5">
               <p className="text-sm text-muted-foreground">
                 Need an account?{" "}
                 <Button

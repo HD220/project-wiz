@@ -103,7 +103,7 @@ export function RegisterForm(props: RegisterFormProps) {
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(handleSubmit)}
-          className="space-y-3"
+          className="space-y-2.5"
           noValidate
           aria-label="Create account form"
         >
@@ -111,7 +111,7 @@ export function RegisterForm(props: RegisterFormProps) {
             control={form.control}
             name="name"
             render={({ field }) => (
-              <FormItem className="space-y-1.5">
+              <FormItem className="space-y-1">
                 <FormLabel className="text-sm font-medium">
                   Display name
                 </FormLabel>
@@ -140,7 +140,7 @@ export function RegisterForm(props: RegisterFormProps) {
             control={form.control}
             name="username"
             render={({ field }) => (
-              <FormItem className="space-y-1.5">
+              <FormItem className="space-y-1">
                 <FormLabel className="text-sm font-medium">Username</FormLabel>
                 <FormControl>
                   <Input
@@ -161,7 +161,7 @@ export function RegisterForm(props: RegisterFormProps) {
             control={form.control}
             name="password"
             render={({ field }) => (
-              <FormItem className="space-y-1.5">
+              <FormItem className="space-y-1">
                 <FormLabel className="text-sm font-medium">Password</FormLabel>
                 <FormControl>
                   <div className="relative">
@@ -206,7 +206,7 @@ export function RegisterForm(props: RegisterFormProps) {
             control={form.control}
             name="confirmPassword"
             render={({ field }) => (
-              <FormItem className="space-y-1.5">
+              <FormItem className="space-y-1">
                 <FormLabel className="text-sm font-medium">
                   Confirm password
                 </FormLabel>
@@ -251,7 +251,7 @@ export function RegisterForm(props: RegisterFormProps) {
             )}
           />
 
-          <div className="flex flex-col space-y-3 pt-2">
+          <div className="flex flex-col space-y-2.5 pt-1.5">
             <Button
               type="submit"
               disabled={form.formState.isSubmitting}
@@ -279,7 +279,7 @@ export function RegisterForm(props: RegisterFormProps) {
               </Alert>
             )}
 
-            <div className="text-center">
+            <div className="text-center pt-0.5">
               <p className="text-sm text-muted-foreground">
                 Already have an account?{" "}
                 <Button

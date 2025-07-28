@@ -9,6 +9,7 @@ import type {
   AgentStatus,
 } from "@/main/features/agent/agent.types";
 import type { CreateProviderInput } from "@/main/features/agent/llm-provider/llm-provider.types";
+import type { ProviderFiltersInput } from "@/renderer/features/llm-provider/llm-provider.schema";
 import type {
   MemoryCreationInput,
   MemoryUpdateInput,
@@ -112,7 +113,8 @@ contextBridge.exposeInMainWorld("api", {
   llmProviders: {
     create: (input: CreateProviderInput): Promise<IpcResponse> =>
       ipcRenderer.invoke("llm-providers:create", input),
-    list: (): Promise<IpcResponse> => ipcRenderer.invoke("llm-providers:list"),
+    list: (filters?: ProviderFiltersInput): Promise<IpcResponse> =>
+      ipcRenderer.invoke("llm-providers:list", filters),
     get: (id: string): Promise<IpcResponse> =>
       ipcRenderer.invoke("llm-providers:getById", id),
     getById: (id: string): Promise<IpcResponse> =>

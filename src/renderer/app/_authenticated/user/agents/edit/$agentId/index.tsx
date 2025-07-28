@@ -12,6 +12,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/renderer/components/ui/dialog";
+import { ScrollArea } from "@/renderer/components/ui/scroll-area";
 import type {
   CreateAgentInput,
   SelectAgent,
@@ -49,18 +50,20 @@ function EditAgentPage() {
 
   return (
     <Dialog open onOpenChange={(open) => !open && handleClose()}>
-      <DialogContent className="max-w-2xl lg:max-w-4xl xl:max-w-5xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-2xl lg:max-w-4xl xl:max-w-5xl max-h-[90vh]">
         <DialogHeader>
           <DialogTitle>Edit Agent</DialogTitle>
         </DialogHeader>
 
-        <AgentForm
-          initialData={agent as SelectAgent}
-          providers={providers as LlmProvider[]}
-          onSubmit={handleSubmit}
-          onCancel={handleClose}
-          isLoading={updateAgentMutation.isPending}
-        />
+        <ScrollArea className="max-h-[70vh]">
+          <AgentForm
+            initialData={agent as SelectAgent}
+            providers={providers as LlmProvider[]}
+            onSubmit={handleSubmit}
+            onCancel={handleClose}
+            isLoading={updateAgentMutation.isPending}
+          />
+        </ScrollArea>
       </DialogContent>
     </Dialog>
   );

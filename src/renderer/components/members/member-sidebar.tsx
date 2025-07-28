@@ -1,9 +1,12 @@
-import { Crown, Users } from "lucide-react";
+import { Crown, Users, Bot } from "lucide-react";
 
 import { Button } from "@/renderer/components/ui/button";
 import { ScrollArea } from "@/renderer/components/ui/scroll-area";
 import { Separator } from "@/renderer/components/ui/separator";
-import { UserAvatar } from "@/renderer/features/user/components/user-avatar";
+import {
+  OptimizedAvatar,
+  getUserInitials,
+} from "@/renderer/components/ui/optimized-avatar";
 import { UserStatus } from "@/renderer/features/user/components/user-status";
 import type { UserStatusType } from "@/renderer/features/user/components/user-status";
 import { cn } from "@/renderer/lib/utils";
@@ -15,6 +18,7 @@ interface Member {
   status: UserStatusType;
   role?: "owner" | "admin" | "member";
   avatarUrl?: string;
+  type?: "user" | "agent";
 }
 
 interface MemberSidebarProps {
@@ -53,12 +57,32 @@ export function MemberSidebar(props: MemberSidebarProps) {
   const MemberItem = ({ member }: { member: Member }) => (
     <Button
       variant="ghost"
-      className="w-full justify-start h-auto p-3 text-sm font-normal hover:bg-accent/60 transition-all duration-200 group rounded-lg focus-visible:ring-2 focus-visible:ring-ring"
+      className="w-full justify-start h-auto p-2 text-sm font-normal hover:bg-accent/50 transition-all duration-150 group rounded-md focus-visible:ring-2 focus-visible:ring-ring"
       aria-label={`${member.name} - ${getStatusLabel(member.status)}${member.role === "owner" ? " (Owner)" : ""}`}
     >
       <div className="flex items-center w-full gap-3">
         <div className="relative flex-shrink-0">
-          <UserAvatar name={member.name} size="md" showHover={false} />
+          <OptimizedAvatar
+            src={member.avatarUrl}
+            size="sm"
+            showHover={false}
+            fallbackContent={
+              member.type === "agent" ? (
+                <Bot className="w-4 h-4" />
+              ) : (
+                getUserInitials(member.name)
+              )
+            }
+            className={cn(
+              "ring-1 shadow-sm",
+              member.type === "agent" ? "ring-primary/20" : "ring-border/50",
+            )}
+            fallbackClassName={
+              member.type === "agent"
+                ? "bg-gradient-to-br from-primary/10 to-primary/5 text-primary border border-primary/20"
+                : undefined
+            }
+          />
           <div className="absolute -bottom-0.5 -right-0.5">
             <UserStatus status={member.status} size="sm" showLabel={false} />
           </div>
@@ -104,7 +128,7 @@ export function MemberSidebar(props: MemberSidebarProps) {
         role="group"
         aria-labelledby={`${status}-members-heading`}
       >
-        <div className="px-4 py-2">
+        <div className="px-3 py-1.5">
           <h3
             id={`${status}-members-heading`}
             className="text-xs font-semibold text-muted-foreground uppercase tracking-wide"
@@ -112,7 +136,7 @@ export function MemberSidebar(props: MemberSidebarProps) {
             {title} — {count}
           </h3>
         </div>
-        <div className="space-y-2" role="list">
+        <div className="space-y-1" role="list">
           {sectionMembers.map((member) => (
             <div key={member.id} role="listitem">
               <MemberItem member={member} />
@@ -141,7 +165,7 @@ export function MemberSidebar(props: MemberSidebarProps) {
       aria-label="Member list"
     >
       <ScrollArea className="flex-1">
-        <div className="p-4 space-y-4">
+        <div className="p-2 space-y-3">
           {/* Online Members */}
           <MemberSection
             title="ONLINE"

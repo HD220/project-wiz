@@ -1,10 +1,9 @@
-import { Link, useNavigate, useSearch } from "@tanstack/react-router";
+import { useNavigate, useSearch } from "@tanstack/react-router";
 import {
   Plus,
   Search,
   Eye,
   EyeOff,
-  Users,
   AlertCircle,
   LayoutGrid,
 } from "lucide-react";
@@ -29,6 +28,7 @@ import type {
 } from "@/renderer/features/agent/agent.types";
 import { AgentDeleteDialog } from "@/renderer/features/agent/components/agent-delete-dialog";
 import { AgentListItem } from "@/renderer/features/agent/components/agent-card";
+import { CreateAgentDialog } from "@/renderer/features/agent/components/create-agent-dialog";
 import { useApiMutation } from "@/renderer/hooks/use-api-mutation.hook";
 
 interface AgentListProps {
@@ -45,6 +45,7 @@ export function AgentList(props: AgentListProps) {
 
   // Local state for UI interactions only
   const [agentToDelete, setAgentToDelete] = useState<SelectAgent | null>(null);
+  const [showCreateDialog, setShowCreateDialog] = useState(false);
 
   // Inline API mutations with proper error handling
   const deleteAgentMutation = useApiMutation(
@@ -76,10 +77,6 @@ export function AgentList(props: AgentListProps) {
   // Inline action handlers following INLINE-FIRST principles
   function handleDelete(agent: SelectAgent) {
     setAgentToDelete(agent);
-  }
-
-  function handleRestore(agent: SelectAgent) {
-    restoreAgentMutation.mutate(agent.id);
   }
 
   function confirmDelete() {
@@ -170,12 +167,10 @@ export function AgentList(props: AgentListProps) {
               </p>
             </div>
           </div>
-          <Link to="/user/agents/new">
-            <Button className="gap-2">
-              <Plus className="w-4 h-4" />
-              New Agent
-            </Button>
-          </Link>
+          <Button className="gap-2" onClick={() => setShowCreateDialog(true)}>
+            <Plus className="w-4 h-4" />
+            New Agent
+          </Button>
         </div>
 
         {/* Empty State */}
@@ -190,12 +185,14 @@ export function AgentList(props: AgentListProps) {
             Create your first AI agent to start automating tasks, managing
             conversations, and building intelligent workflows for your projects.
           </p>
-          <Link to="/user/agents/new">
-            <Button size="lg" className="gap-2">
-              <Plus className="w-5 h-5" />
-              Create Your First Agent
-            </Button>
-          </Link>
+          <Button
+            size="lg"
+            className="gap-2"
+            onClick={() => setShowCreateDialog(true)}
+          >
+            <Plus className="w-5 h-5" />
+            Create Your First Agent
+          </Button>
         </div>
       </div>
     );
@@ -220,12 +217,10 @@ export function AgentList(props: AgentListProps) {
               </p>
             </div>
           </div>
-          <Link to="/user/agents/new">
-            <Button className="gap-2">
-              <Plus className="w-4 h-4" />
-              New Agent
-            </Button>
-          </Link>
+          <Button className="gap-2" onClick={() => setShowCreateDialog(true)}>
+            <Plus className="w-4 h-4" />
+            New Agent
+          </Button>
         </div>
 
         {/* Professional Filters */}
@@ -346,6 +341,12 @@ export function AgentList(props: AgentListProps) {
         onOpenChange={(open) => !open && setAgentToDelete(null)}
         onConfirm={confirmDelete}
         isLoading={deleteAgentMutation.isPending}
+      />
+
+      {/* Create Agent Dialog */}
+      <CreateAgentDialog
+        open={showCreateDialog}
+        onClose={() => setShowCreateDialog(false)}
       />
     </>
   );

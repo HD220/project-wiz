@@ -63,7 +63,7 @@ export function WelcomeView() {
             </div>
             <div className="flex items-center gap-2">
               <Button size="sm" asChild>
-                <Link to="/user/agents/new">
+                <Link to="/user/agents">
                   <Plus className="size-3 mr-1.5" />
                   Create Agent
                 </Link>
@@ -83,7 +83,7 @@ export function WelcomeView() {
               className="group hover:bg-accent/50 transition-colors cursor-pointer"
               asChild
             >
-              <Link to="/user/agents/new">
+              <Link to="/user/agents">
                 <CardContent className="p-3">
                   <div className="flex items-center gap-2">
                     <div className="p-1.5 rounded-md bg-primary/10">
@@ -200,7 +200,7 @@ export function WelcomeView() {
                             className="h-6 text-xs"
                             asChild
                           >
-                            <Link to="/user/agents/new">
+                            <Link to="/user/agents">
                               Get Started
                               <ArrowRight className="size-2.5 ml-1" />
                             </Link>

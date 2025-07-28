@@ -112,7 +112,7 @@ export function ConversationList(props: ConversationListProps) {
         />
       ) : (
         <ScrollArea className="flex-1">
-          <div className="space-y-1">
+          <div className="space-y-1 pt-1">
             {displayConversations.map((conversation) => (
               <ConversationListItem
                 key={conversation.id}
@@ -157,7 +157,7 @@ function ConversationListHeader(props: ConversationListHeaderProps) {
   const { onCreateConversation, showArchived, onToggleShowArchived } = props;
 
   return (
-    <div className="px-2 py-2 border-b border-sidebar-border/40">
+    <div className="pb-2 border-b border-sidebar-border/40">
       <div className="flex items-center justify-between mb-3">
         <h2 className="text-xs font-semibold text-sidebar-foreground/60 uppercase tracking-wide">
           Direct Messages
@@ -308,7 +308,7 @@ function ConversationListItem(props: ConversationListItemProps) {
         to="/user/dm/$conversationId"
         params={{ conversationId: conversation.id }}
         className={cn(
-          "flex items-center gap-2 px-2 py-1.5 mx-2 rounded transition-all duration-150",
+          "flex items-center gap-2 px-2 py-1.5 rounded transition-all duration-150",
           "hover:bg-sidebar-accent/60 hover:text-sidebar-accent-foreground",
           "focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-sidebar-ring",
           conversation.archivedAt && "opacity-60",

@@ -19,13 +19,13 @@ export function setupLlmProviderHandlers(): void {
     },
   );
 
-  // List LLM providers (use session instead of userId parameter)
-  createIpcHandler("llm-providers:list", async () => {
+  // List LLM providers with filters (use session instead of userId parameter)
+  createIpcHandler("llm-providers:list", async (filters: any = {}) => {
     const currentUser = await AuthService.getCurrentUser();
     if (!currentUser) {
       throw new Error("User not authenticated");
     }
-    return LlmProviderService.findByUserId(currentUser.id);
+    return LlmProviderService.findByUserId(currentUser.id, filters);
   });
 
   // Get LLM provider by ID

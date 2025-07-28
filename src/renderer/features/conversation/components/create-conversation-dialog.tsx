@@ -1,5 +1,5 @@
 import { Search, Check, User, Bot } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 import type { UserSummary } from "@/main/features/user/user.service";
 
@@ -22,6 +22,89 @@ import type { CreateConversationInput } from "@/renderer/features/conversation/t
 import type { AuthenticatedUser } from "@/renderer/features/conversation/types";
 import { useApiMutation } from "@/renderer/hooks/use-api-mutation.hook";
 import { isValidAvatarUrl, cn } from "@/renderer/lib/utils";
+
+// Custom hook to handle avatar image loading with proper dimensions
+function useAvatarImage(src: string | null | undefined) {
+  const [imageLoaded, setImageLoaded] = useState(false);
+  const [imageFailed, setImageFailed] = useState(false);
+  const validSrc = isValidAvatarUrl(src);
+
+  useEffect(() => {
+    if (!validSrc) {
+      setImageLoaded(false);
+      setImageFailed(true);
+      return;
+    }
+
+    setImageLoaded(false);
+    setImageFailed(false);
+
+    const img = new Image();
+    img.onload = () => {
+      setImageLoaded(true);
+      setImageFailed(false);
+    };
+    img.onerror = () => {
+      setImageLoaded(false);
+      setImageFailed(true);
+    };
+    img.src = validSrc;
+
+    return () => {
+      img.onload = null;
+      img.onerror = null;
+    };
+  }, [validSrc]);
+
+  return {
+    src: validSrc,
+    shouldShowImage: imageLoaded && !imageFailed,
+    isLoading: !imageLoaded && !imageFailed && !!validSrc,
+  };
+}
+
+// Optimized Avatar component that prevents layout shift
+interface OptimizedAvatarProps {
+  src?: string | null;
+  fallbackContent: React.ReactNode;
+  className?: string;
+  fallbackClassName?: string;
+  size: "sm" | "md" | "lg";
+}
+
+function OptimizedAvatar({
+  src,
+  fallbackContent,
+  className,
+  fallbackClassName,
+  size,
+}: OptimizedAvatarProps) {
+  const { shouldShowImage } = useAvatarImage(src);
+
+  const sizeClasses = {
+    sm: "size-8 text-xs",
+    md: "size-9 text-sm",
+    lg: "size-11 text-base",
+  };
+
+  return (
+    <Avatar className={cn(sizeClasses[size], className)}>
+      {shouldShowImage && src ? (
+        <AvatarImage src={src} className="object-cover" />
+      ) : null}
+      <AvatarFallback
+        className={cn(
+          "bg-gradient-to-br from-blue-500/10 to-purple-600/10 text-foreground font-semibold border border-border/50",
+          // Ensure consistent sizing during loading
+          "flex items-center justify-center",
+          fallbackClassName,
+        )}
+      >
+        {fallbackContent}
+      </AvatarFallback>
+    </Avatar>
+  );
+}
 
 interface CreateConversationDialogProps {
   availableUsers: UserSummary[];
@@ -138,21 +221,17 @@ export function CreateConversationDialog(props: CreateConversationDialogProps) {
 
                       {/* Avatar */}
                       <div className="relative">
-                        <Avatar className="size-8 ring-1 ring-border/50 transition-all duration-200 hover:ring-primary/30 hover:scale-[1.02]">
-                          <AvatarImage
-                            src={isValidAvatarUrl(user.avatar) || undefined}
-                          />
-                          <AvatarFallback
-                            className={cn(
-                              "text-xs font-semibold border border-border/50",
-                              user.type === "agent"
-                                ? "bg-gradient-to-br from-primary/10 to-primary/5 text-primary"
-                                : "bg-gradient-to-br from-blue-500/10 to-purple-600/10 text-foreground",
-                            )}
-                          >
-                            {user.name.charAt(0).toUpperCase()}
-                          </AvatarFallback>
-                        </Avatar>
+                        <OptimizedAvatar
+                          src={user.avatar}
+                          size="sm"
+                          fallbackContent={user.name.charAt(0).toUpperCase()}
+                          className="ring-1 ring-border/50 transition-all duration-200 hover:ring-primary/30 hover:scale-[1.02]"
+                          fallbackClassName={cn(
+                            user.type === "agent"
+                              ? "bg-gradient-to-br from-primary/10 to-primary/5 text-primary"
+                              : "bg-gradient-to-br from-blue-500/10 to-purple-600/10 text-foreground",
+                          )}
+                        />
 
                         {/* Type indicator */}
                         <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 bg-background rounded-full flex items-center justify-center border border-border/50 shadow-sm">
