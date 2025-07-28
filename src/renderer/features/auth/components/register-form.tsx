@@ -1,6 +1,14 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "@tanstack/react-router";
-import { UserPlus, User, Lock, Eye, EyeOff, Loader2 } from "lucide-react";
+import {
+  UserPlus,
+  User,
+  Lock,
+  Eye,
+  EyeOff,
+  Loader2,
+  AtSign,
+} from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -143,14 +151,20 @@ export function RegisterForm(props: RegisterFormProps) {
               <FormItem className="space-y-1">
                 <FormLabel className="text-sm font-medium">Username</FormLabel>
                 <FormControl>
-                  <Input
-                    {...field}
-                    placeholder="Choose a unique username"
-                    disabled={form.formState.isSubmitting}
-                    className="h-10"
-                    aria-describedby={field.name + "-error"}
-                    autoComplete="username"
-                  />
+                  <div className="relative group">
+                    <AtSign
+                      className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground group-focus-within:text-ring transition-colors duration-200"
+                      aria-hidden="true"
+                    />
+                    <Input
+                      {...field}
+                      placeholder="Choose a unique username"
+                      disabled={form.formState.isSubmitting}
+                      className="pl-10 h-10"
+                      aria-describedby={field.name + "-error"}
+                      autoComplete="username"
+                    />
+                  </div>
                 </FormControl>
                 <FormMessage id={field.name + "-error"} />
               </FormItem>

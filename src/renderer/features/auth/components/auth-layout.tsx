@@ -23,18 +23,23 @@ export function AuthLayout(props: AuthLayoutProps) {
       role="main"
       aria-label="Authentication page"
     >
-      {/* Subtle background pattern */}
+      {/* Diagonal block pattern from bottom-right to top-left */}
       <div
-        className="absolute inset-0 opacity-[0.02] pointer-events-none"
+        className="absolute inset-0 opacity-[0.15] pointer-events-none"
         style={{
-          backgroundImage: `radial-gradient(circle at 1px 1px, var(--foreground) 1px, transparent 0)`,
-          backgroundSize: "24px 24px",
+          backgroundImage: `repeating-linear-gradient(
+            -45deg,
+            transparent,
+            transparent 40px,
+            var(--muted-foreground) 40px,
+            var(--muted-foreground) 190px
+          )`,
         }}
         aria-hidden="true"
       />
 
       {/* Content container with proper semantic structure */}
-      <div className="relative w-full max-w-sm">{children}</div>
+      <div className="relative w-full max-w-md">{children}</div>
     </div>
   );
 }
@@ -55,21 +60,21 @@ export function AuthCard(props: AuthCardProps) {
     <Card
       className={cn(
         "w-full max-w-md mx-auto transition-all duration-200 hover:shadow-md",
-        "p-6 space-y-5",
+        "p-8 space-y-3",
         "shadow-lg border-border/50 bg-card/95 backdrop-blur-sm",
         "auth-form-enter", // Animation class
         className,
       )}
     >
-      <CardHeader className="text-center space-y-2 transition-colors duration-200">
-        <h3 className="text-2xl font-bold leading-tight tracking-tight text-foreground transition-colors duration-200">
+      <CardHeader className="text-center space-y-1 transition-colors duration-200 p-0">
+        <h3 className="text-3xl font-bold leading-tight tracking-tight text-foreground transition-colors duration-200">
           {title}
         </h3>
-        <p className="text-sm text-muted-foreground leading-normal transition-colors duration-200">
+        <p className="text-base text-muted-foreground leading-relaxed transition-colors duration-200">
           {description}
         </p>
       </CardHeader>
-      <CardContent className="space-y-5">{children}</CardContent>
+      <CardContent className="p-0">{children}</CardContent>
     </Card>
   );
 }
