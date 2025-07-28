@@ -4,12 +4,6 @@ import { useState, useRef, KeyboardEvent, useEffect } from "react";
 import { Button } from "@/renderer/components/ui/button";
 import { ScrollArea } from "@/renderer/components/ui/scroll-area";
 import { Textarea } from "@/renderer/components/ui/textarea";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/renderer/components/ui/tooltip";
 import { cn } from "@/renderer/lib/utils";
 
 interface MessageInputProps {
@@ -18,102 +12,6 @@ interface MessageInputProps {
   disabled?: boolean;
   placeholder?: string;
   className?: string;
-}
-
-// Action buttons composition for enhanced UX
-interface ActionButtonsProps {
-  onSend: () => void;
-  disabled: boolean;
-  isSending: boolean;
-  hasContent: boolean;
-  onAttachment?: () => void;
-  onEmoji?: () => void;
-}
-
-export function ActionButtons({
-  onSend,
-  disabled,
-  isSending,
-  hasContent,
-  onAttachment,
-  onEmoji,
-}: ActionButtonsProps) {
-  return (
-    <TooltipProvider>
-      <div className="absolute bottom-[var(--spacing-component-xs)] right-[var(--spacing-component-xs)] flex items-center gap-[var(--spacing-component-xs)]">
-        {/* Secondary action buttons - always show */}
-        <div className="flex items-center gap-[var(--spacing-component-xs)] mr-[var(--spacing-component-xs)]">
-          {onAttachment && (
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  type="button"
-                  size="sm"
-                  variant="ghost"
-                  onClick={onAttachment}
-                  disabled={disabled || isSending}
-                  className="h-7 w-7 p-0 text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all duration-150"
-                  aria-label="Attach file"
-                >
-                  <Paperclip className="h-4 w-4" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Attach file</p>
-              </TooltipContent>
-            </Tooltip>
-          )}
-
-          {onEmoji && (
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  type="button"
-                  size="sm"
-                  variant="ghost"
-                  onClick={onEmoji}
-                  disabled={disabled || isSending}
-                  className="h-7 w-7 p-0 text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all duration-150"
-                  aria-label="Add emoji"
-                >
-                  <Smile className="h-4 w-4" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Add emoji</p>
-              </TooltipContent>
-            </Tooltip>
-          )}
-        </div>
-
-        {/* Send button */}
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button
-              type="button"
-              size="sm"
-              variant="ghost"
-              onClick={onSend}
-              disabled={disabled || isSending || !hasContent}
-              className={cn(
-                "h-7 w-7 p-0 transition-all duration-150",
-                hasContent && !disabled && !isSending
-                  ? "bg-primary text-primary-foreground hover:bg-primary/90"
-                  : "text-muted-foreground hover:text-foreground hover:bg-muted/50",
-                isSending && "animate-pulse",
-              )}
-              aria-label="Send message"
-            >
-              <Send className="h-4 w-4" />
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent>
-            <p>{hasContent ? "Send message" : "Type a message"}</p>
-          </TooltipContent>
-        </Tooltip>
-      </div>
-    </TooltipProvider>
-  );
 }
 
 export function MessageInput(props: MessageInputProps) {
@@ -126,33 +24,34 @@ export function MessageInput(props: MessageInputProps) {
   } = props;
 
   const [message, setMessage] = useState("");
-  const [previousIsSending, setPreviousIsSending] = useState(false);
-  const [isFocused, setIsFocused] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const maxCharacters = 2000; // Standard message limit
 
-  // Auto-resize textarea and restore focus when message sending completes
+  // Auto-resize textarea based on content
   useEffect(() => {
-    // Auto-resize textarea based on content
     if (textareaRef.current) {
       textareaRef.current.style.height = "auto";
       textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
     }
+  }, [message]);
 
-    // Restore focus when message sending completes
-    if (previousIsSending && !isSending && textareaRef.current) {
-      setTimeout(() => {
-        if (textareaRef.current) {
-          textareaRef.current.focus();
-        }
-      }, 10);
+  // Restore focus when message sending completes
+  useEffect(() => {
+    if (!isSending && textareaRef.current) {
+      textareaRef.current.focus();
     }
-    setPreviousIsSending(isSending);
-  }, [message, isSending, previousIsSending]);
+  }, [isSending]);
 
   // Send message handler with enhanced validation
   async function handleSend() {
     const trimmedMessage = message.trim();
-    if (!trimmedMessage || isSending || disabled || isOverLimit) return;
+    if (
+      !trimmedMessage ||
+      isSending ||
+      disabled ||
+      message.length > maxCharacters
+    )
+      return;
 
     try {
       setMessage("");
@@ -178,36 +77,7 @@ export function MessageInput(props: MessageInputProps) {
     }
   }
 
-  // Textarea change handler
-  function handleTextareaChange(event: React.ChangeEvent<HTMLTextAreaElement>) {
-    setMessage(event.target.value);
-  }
-
   const hasContent = message.trim().length > 0;
-  const characterCount = message.length;
-  const maxCharacters = 2000; // Standard message limit
-  const isNearLimit = characterCount > maxCharacters * 0.8;
-  const isOverLimit = characterCount > maxCharacters;
-
-  // Focus handlers for enhanced visual feedback
-  function handleFocus() {
-    setIsFocused(true);
-  }
-
-  function handleBlur() {
-    setIsFocused(false);
-  }
-
-  // Placeholder action handlers (for future implementation)
-  function handleAttachment() {
-    // Future: file attachment functionality
-    console.log("Attachment clicked");
-  }
-
-  function handleEmoji() {
-    // Future: emoji picker functionality
-    console.log("Emoji clicked");
-  }
 
   return (
     <div className={cn("bg-background border-t border-border/60", className)}>
@@ -223,21 +93,18 @@ export function MessageInput(props: MessageInputProps) {
           <div
             className={cn(
               "bg-muted/40 rounded-lg border transition-all duration-200 relative",
-              isFocused
-                ? "border-primary/50 ring-1 ring-primary/20"
-                : "border-border/50 hover:border-border/70",
+              "border-border/50 hover:border-border/70 focus-within:border-primary/50 focus-within:ring-1 focus-within:ring-primary/20",
               disabled && "opacity-60 cursor-not-allowed",
-              isOverLimit && "border-destructive/50 ring-1 ring-destructive/20",
+              message.length > maxCharacters &&
+                "border-destructive/50 ring-1 ring-destructive/20",
             )}
           >
             <ScrollArea className="max-h-[120px]">
               <Textarea
                 ref={textareaRef}
                 value={message}
-                onChange={handleTextareaChange}
+                onChange={(e) => setMessage(e.target.value)}
                 onKeyDown={handleKeyDown}
-                onFocus={handleFocus}
-                onBlur={handleBlur}
                 placeholder={placeholder}
                 disabled={disabled || isSending}
                 maxLength={maxCharacters}
@@ -248,7 +115,7 @@ export function MessageInput(props: MessageInputProps) {
                   "placeholder:text-muted-foreground/60",
                   "transition-all duration-150",
                   disabled && "cursor-not-allowed opacity-50",
-                  isOverLimit && "text-destructive",
+                  message.length > maxCharacters && "text-destructive",
                 )}
                 rows={1}
                 aria-label="Type a message"
@@ -260,26 +127,69 @@ export function MessageInput(props: MessageInputProps) {
               />
             </ScrollArea>
 
-            <ActionButtons
-              onSend={handleSend}
-              disabled={disabled || isOverLimit}
-              isSending={isSending}
-              hasContent={hasContent}
-              onAttachment={handleAttachment}
-              onEmoji={handleEmoji}
-            />
+            {/* Action buttons - inlined for INLINE-FIRST compliance */}
+            <div className="absolute bottom-[var(--spacing-component-xs)] right-[var(--spacing-component-xs)] flex items-center gap-[var(--spacing-component-xs)]">
+              <div className="flex items-center gap-[var(--spacing-component-xs)] mr-[var(--spacing-component-xs)]">
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => console.log("Attachment - TODO")}
+                  disabled={disabled || isSending}
+                  className="h-7 w-7 p-0 text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all duration-150"
+                  title="Attach file"
+                  aria-label="Attach file"
+                >
+                  <Paperclip className="h-4 w-4" />
+                </Button>
+
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => console.log("Emoji - TODO")}
+                  disabled={disabled || isSending}
+                  className="h-7 w-7 p-0 text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all duration-150"
+                  title="Add emoji"
+                  aria-label="Add emoji"
+                >
+                  <Smile className="h-4 w-4" />
+                </Button>
+              </div>
+
+              <Button
+                type="button"
+                size="sm"
+                variant="ghost"
+                onClick={handleSend}
+                disabled={disabled || isSending || !hasContent}
+                className={cn(
+                  "h-7 w-7 p-0 transition-all duration-150",
+                  hasContent && !disabled && !isSending
+                    ? "bg-primary text-primary-foreground hover:bg-primary/90"
+                    : "text-muted-foreground hover:text-foreground hover:bg-muted/50",
+                  isSending && "animate-pulse",
+                )}
+                title={hasContent ? "Send message" : "Type a message"}
+                aria-label="Send message"
+              >
+                <Send className="h-4 w-4" />
+              </Button>
+            </div>
           </div>
 
           {/* Character count indicator - more compact */}
-          {(isNearLimit || isOverLimit) && (
+          {message.length > maxCharacters * 0.8 && (
             <div className="flex justify-end items-center mt-[var(--spacing-component-xs)] px-[var(--spacing-component-xs)]">
               <div
                 className={cn(
                   "text-xs transition-colors duration-200",
-                  isOverLimit ? "text-destructive" : "text-muted-foreground/80",
+                  message.length > maxCharacters
+                    ? "text-destructive"
+                    : "text-muted-foreground/80",
                 )}
               >
-                {characterCount}/{maxCharacters}
+                {message.length}/{maxCharacters}
               </div>
             </div>
           )}

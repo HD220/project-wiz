@@ -1,9 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
 
-import { RegisterForm } from "@/renderer/features/auth/components/register-form";
+import { AuthForm } from "@/renderer/features/auth/components/auth-form";
 
 function RegisterPage() {
-  return <RegisterForm />;
+  return <AuthForm mode="register" />;
 }
 
 export const Route = createFileRoute("/auth/register")({

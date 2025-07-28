@@ -319,6 +319,12 @@ function AgentFormProvider(props: AgentFormProviderProps) {
     topP: AI_DEFAULTS.TOP_P,
   };
 
+  // PERFORMANCE FIX: Parse modelConfig once per render instead of 4x
+  const modelConfigValue = form.watch("modelConfig");
+  const currentModelConfig = modelConfigValue
+    ? JSON.parse(modelConfigValue)
+    : defaultModelConfig;
+
   return (
     <div className="space-y-[var(--spacing-layout-md)]">
       {/* Section Header - Professional style */}
@@ -382,153 +388,131 @@ function AgentFormProvider(props: AgentFormProviderProps) {
           <FormField
             control={form.control}
             name="modelConfig"
-            render={({ field }) => {
-              const config = field.value
-                ? JSON.parse(field.value)
-                : defaultModelConfig;
-              return (
-                <FormItem className="space-y-[var(--spacing-component-lg)]">
-                  <FormLabel className="text-base font-medium">Model</FormLabel>
-                  <FormControl>
-                    <Input
-                      value={config.model}
-                      onChange={(event) => {
-                        const newConfig = {
-                          ...config,
-                          model: event.target.value,
-                        };
-                        field.onChange(JSON.stringify(newConfig));
-                      }}
-                      placeholder="gpt-4o"
-                      className="h-10"
-                    />
-                  </FormControl>
-                  <FormDescription className="text-sm text-muted-foreground">
-                    The specific AI model to use (e.g., gpt-4o,
-                    claude-3-5-sonnet)
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              );
-            }}
+            render={({ field }) => (
+              <FormItem className="space-y-[var(--spacing-component-lg)]">
+                <FormLabel className="text-base font-medium">Model</FormLabel>
+                <FormControl>
+                  <Input
+                    value={currentModelConfig.model}
+                    onChange={(event) => {
+                      const newConfig = {
+                        ...currentModelConfig,
+                        model: event.target.value,
+                      };
+                      field.onChange(JSON.stringify(newConfig));
+                    }}
+                    placeholder="gpt-4o"
+                    className="h-10"
+                  />
+                </FormControl>
+                <FormDescription className="text-sm text-muted-foreground">
+                  The specific AI model to use (e.g., gpt-4o, claude-3-5-sonnet)
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
           />
 
           <FormField
             control={form.control}
             name="modelConfig"
-            render={({ field }) => {
-              const config = field.value
-                ? JSON.parse(field.value)
-                : defaultModelConfig;
-              return (
-                <FormItem className="space-y-[var(--spacing-component-lg)]">
-                  <FormLabel className="text-base font-medium">
-                    Temperature
-                  </FormLabel>
-                  <FormControl>
-                    <Input
-                      type="number"
-                      min="0"
-                      max="2"
-                      step="0.1"
-                      value={config.temperature}
-                      onChange={(event) => {
-                        const newConfig = {
-                          ...config,
-                          temperature: parseFloat(event.target.value),
-                        };
-                        field.onChange(JSON.stringify(newConfig));
-                      }}
-                      placeholder="0.7"
-                      className="h-10"
-                    />
-                  </FormControl>
-                  <FormDescription className="text-sm text-muted-foreground">
-                    Controls randomness (0.0 = focused, 2.0 = creative)
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              );
-            }}
+            render={({ field }) => (
+              <FormItem className="space-y-[var(--spacing-component-lg)]">
+                <FormLabel className="text-base font-medium">
+                  Temperature
+                </FormLabel>
+                <FormControl>
+                  <Input
+                    type="number"
+                    min="0"
+                    max="2"
+                    step="0.1"
+                    value={currentModelConfig.temperature}
+                    onChange={(event) => {
+                      const newConfig = {
+                        ...currentModelConfig,
+                        temperature: parseFloat(event.target.value),
+                      };
+                      field.onChange(JSON.stringify(newConfig));
+                    }}
+                    placeholder="0.7"
+                    className="h-10"
+                  />
+                </FormControl>
+                <FormDescription className="text-sm text-muted-foreground">
+                  Controls randomness (0.0 = focused, 2.0 = creative)
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
           />
 
           <FormField
             control={form.control}
             name="modelConfig"
-            render={({ field }) => {
-              const config = field.value
-                ? JSON.parse(field.value)
-                : defaultModelConfig;
-              return (
-                <FormItem className="space-y-[var(--spacing-component-lg)]">
-                  <FormLabel className="text-base font-medium">
-                    Max Tokens
-                  </FormLabel>
-                  <FormControl>
-                    <Input
-                      type="number"
-                      min="1"
-                      value={config.maxTokens}
-                      onChange={(event) => {
-                        const newConfig = {
-                          ...config,
-                          maxTokens: parseInt(event.target.value),
-                        };
-                        field.onChange(JSON.stringify(newConfig));
-                      }}
-                      placeholder="4000"
-                      className="h-10"
-                    />
-                  </FormControl>
-                  <FormDescription className="text-sm text-muted-foreground">
-                    Maximum number of tokens in the response
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              );
-            }}
+            render={({ field }) => (
+              <FormItem className="space-y-[var(--spacing-component-lg)]">
+                <FormLabel className="text-base font-medium">
+                  Max Tokens
+                </FormLabel>
+                <FormControl>
+                  <Input
+                    type="number"
+                    min="1"
+                    value={currentModelConfig.maxTokens}
+                    onChange={(event) => {
+                      const newConfig = {
+                        ...currentModelConfig,
+                        maxTokens: parseInt(event.target.value),
+                      };
+                      field.onChange(JSON.stringify(newConfig));
+                    }}
+                    placeholder="4000"
+                    className="h-10"
+                  />
+                </FormControl>
+                <FormDescription className="text-sm text-muted-foreground">
+                  Maximum number of tokens in the response
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
           />
 
           <FormField
             control={form.control}
             name="modelConfig"
-            render={({ field }) => {
-              const config = field.value
-                ? JSON.parse(field.value)
-                : defaultModelConfig;
-              return (
-                <FormItem className="space-y-[var(--spacing-component-lg)]">
-                  <FormLabel className="text-base font-medium">
-                    Top P (Optional)
-                  </FormLabel>
-                  <FormControl>
-                    <Input
-                      type="number"
-                      min="0"
-                      max="1"
-                      step="0.1"
-                      value={config.topP || ""}
-                      onChange={(event) => {
-                        const newConfig = {
-                          ...config,
-                          topP: event.target.value
-                            ? parseFloat(event.target.value)
-                            : undefined,
-                        };
-                        field.onChange(JSON.stringify(newConfig));
-                      }}
-                      placeholder="0.9"
-                      className="h-10"
-                    />
-                  </FormControl>
-                  <FormDescription className="text-sm text-muted-foreground">
-                    Nucleus sampling parameter (0.0-1.0, leave empty for
-                    default)
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              );
-            }}
+            render={({ field }) => (
+              <FormItem className="space-y-[var(--spacing-component-lg)]">
+                <FormLabel className="text-base font-medium">
+                  Top P (Optional)
+                </FormLabel>
+                <FormControl>
+                  <Input
+                    type="number"
+                    min="0"
+                    max="1"
+                    step="0.1"
+                    value={currentModelConfig.topP || ""}
+                    onChange={(event) => {
+                      const newConfig = {
+                        ...currentModelConfig,
+                        topP: event.target.value
+                          ? parseFloat(event.target.value)
+                          : undefined,
+                      };
+                      field.onChange(JSON.stringify(newConfig));
+                    }}
+                    placeholder="0.9"
+                    className="h-10"
+                  />
+                </FormControl>
+                <FormDescription className="text-sm text-muted-foreground">
+                  Nucleus sampling parameter (0.0-1.0, leave empty for default)
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
           />
         </div>
       </div>

@@ -1,14 +1,14 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { z } from "zod";
 
-import { LoginForm } from "@/renderer/features/auth/components/login-form";
+import { AuthForm } from "@/renderer/features/auth/components/auth-form";
 
 const loginSearchSchema = z.object({
   redirect: z.string().optional(),
 });
 
 function LoginPage() {
-  return <LoginForm />;
+  return <AuthForm mode="login" />;
 }
 
 export const Route = createFileRoute("/auth/login")({
