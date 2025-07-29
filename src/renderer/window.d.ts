@@ -10,11 +10,8 @@ import type {
   LlmProvider,
 } from "@/renderer/features/agent/provider.types";
 import type { ProviderFiltersInput } from "@/renderer/features/agent/provider.schema";
-import type {
-  MemoryCreationInput,
-  MemoryUpdateInput,
-  MemorySearchInput,
-} from "@/main/features/agent/memory/memory.types";
+import type { CreateDMConversationInput } from "@/main/features/dm/dm-conversation.types";
+import type { CreateProjectChannelInput } from "@/main/features/project/project-channel.types";
 import type {
   LoginCredentials,
   RegisterUserInput,
@@ -87,25 +84,52 @@ declare global {
         archive: (id: string) => Promise<IpcResponse<SelectProject>>;
       };
 
-      // Conversations API
-      conversations: {
-        create: (
-          input: CreateConversationInput,
-        ) => Promise<IpcResponse<ConversationWithParticipants>>;
+      // DM Conversations API
+      dm: {
+        create: (input: CreateDMConversationInput) => Promise<IpcResponse>;
         getUserConversations: (options?: {
           includeInactive?: boolean;
           includeArchived?: boolean;
-        }) => Promise<IpcResponse<ConversationWithLastMessage[]>>;
-        archive: (conversationId: string) => Promise<IpcResponse<void>>;
-        unarchive: (conversationId: string) => Promise<IpcResponse<void>>;
+        }) => Promise<IpcResponse>;
+        findById: (dmId: string) => Promise<IpcResponse>;
+        archive: (dmId: string) => Promise<IpcResponse>;
+        unarchive: (dmId: string) => Promise<IpcResponse>;
+        sendMessage: (dmId: string, content: string) => Promise<IpcResponse>;
+        getMessages: (dmId: string) => Promise<IpcResponse>;
+        addParticipant: (
+          dmId: string,
+          participantId: string,
+        ) => Promise<IpcResponse>;
+        removeParticipant: (
+          dmId: string,
+          participantId: string,
+        ) => Promise<IpcResponse>;
+        delete: (dmId: string) => Promise<IpcResponse>;
       };
 
-      // Messages API
-      messages: {
-        send: (input: SendMessageInput) => Promise<IpcResponse<SelectMessage>>;
-        getConversationMessages: (
-          conversationId: string,
-        ) => Promise<IpcResponse<SelectMessage[]>>;
+      // Project Channels API
+      channels: {
+        create: (input: CreateProjectChannelInput) => Promise<IpcResponse>;
+        getProjectChannels: (
+          projectId: string,
+          options?: {
+            includeInactive?: boolean;
+            includeArchived?: boolean;
+          },
+        ) => Promise<IpcResponse>;
+        findById: (channelId: string) => Promise<IpcResponse>;
+        update: (
+          channelId: string,
+          updates: { name?: string; description?: string },
+        ) => Promise<IpcResponse>;
+        archive: (channelId: string) => Promise<IpcResponse>;
+        unarchive: (channelId: string) => Promise<IpcResponse>;
+        sendMessage: (
+          channelId: string,
+          content: string,
+        ) => Promise<IpcResponse>;
+        getMessages: (channelId: string) => Promise<IpcResponse>;
+        delete: (channelId: string) => Promise<IpcResponse>;
       };
 
       // LLM Providers API
@@ -148,48 +172,6 @@ declare global {
         ) => Promise<IpcResponse<SelectAgent>>;
         delete: (id: string) => Promise<IpcResponse<{ message: string }>>;
         restore: (id: string) => Promise<IpcResponse<SelectAgent>>;
-      };
-
-      // Agent Memory API
-      agentMemory: {
-        create: (input: MemoryCreationInput) => Promise<IpcResponse>;
-        findById: (id: string) => Promise<IpcResponse>;
-        search: (criteria: MemorySearchInput) => Promise<IpcResponse>;
-        getRecent: (
-          agentId: string,
-          userId: string,
-          limit?: number,
-        ) => Promise<IpcResponse>;
-        getByConversation: (
-          conversationId: string,
-          limit?: number,
-        ) => Promise<IpcResponse>;
-        update: (
-          id: string,
-          updates: MemoryUpdateInput,
-        ) => Promise<IpcResponse>;
-        archive: (id: string) => Promise<IpcResponse>;
-        delete: (id: string) => Promise<IpcResponse>;
-        createRelation: (
-          sourceMemoryId: string,
-          targetMemoryId: string,
-          relationType: string,
-          strength?: number,
-        ) => Promise<IpcResponse>;
-        getRelated: (memoryId: string) => Promise<IpcResponse>;
-        prune: (
-          agentId: string,
-          daysOld?: number,
-          minImportanceScore?: number,
-        ) => Promise<IpcResponse>;
-        performMaintenance: (
-          agentId: string,
-          config?: Record<string, unknown>,
-        ) => Promise<IpcResponse>;
-        getStatistics: (agentId: string) => Promise<IpcResponse>;
-        runAutomatedMaintenance: (
-          config?: Record<string, unknown>,
-        ) => Promise<IpcResponse>;
       };
 
       // General invoke method

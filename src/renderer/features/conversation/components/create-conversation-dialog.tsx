@@ -38,14 +38,14 @@ export function CreateConversationDialog(props: CreateConversationDialogProps) {
 
   // Mutation for creating conversation
   const createConversationMutation = useApiMutation(
-    (data: CreateConversationInput) => window.api.conversations.create(data),
+    (data: CreateConversationInput) => window.api.dm.create(data),
     {
       successMessage: "Conversation created successfully",
       errorMessage: "Failed to create conversation",
       invalidateRouter: false,
-      onSuccess: (conversation) => {
-        if (conversation?.id) {
-          onConversationCreated(conversation.id);
+      onSuccess: (response: any) => {
+        if (response?.data?.id) {
+          onConversationCreated(response.data.id);
         }
       },
     },
@@ -90,8 +90,7 @@ export function CreateConversationDialog(props: CreateConversationDialogProps) {
     const participantIds = [currentUser.id, ...selectedUserIds];
     createConversationMutation.mutate({
       participantIds,
-      name: null,
-      type: "dm" as const,
+      description: null,
     });
   }
 

@@ -2,7 +2,6 @@ import { createFileRoute, Outlet } from "@tanstack/react-router";
 
 import type { SelectDMConversation } from "@/renderer/features/dm/dm-conversation.types";
 import type { SelectMessage } from "@/renderer/features/message/message.types";
-import type { AuthenticatedUser } from "@/main/features/user/user.types";
 
 import { ContentHeader } from "@/renderer/features/layout/components/content-header";
 import {
@@ -128,15 +127,16 @@ function DMLayout() {
   }
 
   // Get conversation display info
-  const otherParticipants = conversation.participants
-    .filter((participant) => participant.userId !== user?.id)
-    .map((participant) =>
-      availableUsers.find(
-        (availableUser: { id: string }) =>
-          availableUser.id === participant.userId,
-      ),
-    )
-    .filter(Boolean);
+  const otherParticipants =
+    conversation.participants
+      ?.filter((participant: any) => participant.userId !== user?.id)
+      .map((participant: any) =>
+        availableUsers.find(
+          (availableUser: { id: string }) =>
+            availableUser.id === participant.userId,
+        ),
+      )
+      .filter(Boolean) || [];
 
   const displayName = conversation.name || "Unknown DM";
   const description =
@@ -160,6 +160,15 @@ function DMLayout() {
 
         if (otherParticipants.length === 1) {
           const participant = otherParticipants[0];
+          if (!participant) {
+            return (
+              <ProfileAvatar size="sm">
+                <ProfileAvatarImage
+                  fallbackIcon={<div className="text-xs font-bold">?</div>}
+                />
+              </ProfileAvatar>
+            );
+          }
           return (
             <ProfileAvatar size="sm">
               <ProfileAvatarImage
@@ -173,6 +182,16 @@ function DMLayout() {
 
         const firstParticipant = otherParticipants[0];
         const remainingCount = otherParticipants.length - 1;
+
+        if (!firstParticipant) {
+          return (
+            <ProfileAvatar size="sm">
+              <ProfileAvatarImage
+                fallbackIcon={<div className="text-xs font-bold">?</div>}
+              />
+            </ProfileAvatar>
+          );
+        }
 
         return (
           <ProfileAvatar size="sm">
@@ -245,8 +264,12 @@ export const Route = createFileRoute("/_authenticated/user/dm/$conversationId")(
           messages: messages || [],
         };
 
+        const rendererConversation = convertToRendererConversation(
+          conversationWithMessages as any,
+        );
+
         return {
-          conversation: convertToRendererConversation(conversationWithMessages),
+          conversation: rendererConversation as any,
           availableUsers,
           user,
         };

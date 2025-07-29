@@ -1,6 +1,6 @@
 import { Hash, Bot } from "lucide-react";
 
-import type { ConversationWithLastMessage } from "@/main/features/conversation/conversation.types";
+import type { ConversationWithLastMessage } from "@/renderer/types/chat.types";
 import type { UserSummary } from "@/main/features/user/user.service";
 
 import { ScrollArea } from "@/renderer/components/ui/scroll-area";

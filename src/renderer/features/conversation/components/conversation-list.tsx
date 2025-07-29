@@ -250,7 +250,7 @@ function ConversationListItem(props: ConversationListItemProps) {
 
   // Archive conversation mutation
   const archiveMutation = useApiMutation(
-    () => window.api.conversations.archive(conversation.id),
+    () => window.api.dm.archive(conversation.id),
     {
       successMessage: "Conversation archived",
       errorMessage: "Failed to archive conversation",
@@ -326,12 +326,13 @@ function ConversationListItem(props: ConversationListItemProps) {
         <div className="relative flex-shrink-0">
           {(() => {
             // Get other participants (exclude current user)
-            const otherParticipants = conversation.participants
-              .filter((participant) => participant.participantId !== user?.id)
-              .map((participant) =>
-                availableUsers.find((u) => u.id === participant.participantId),
-              )
-              .filter(Boolean) as UserSummary[];
+            const otherParticipants =
+              (conversation.participants
+                ?.filter((participant: any) => participant.userId !== user?.id)
+                .map((participant: any) =>
+                  availableUsers.find((u) => u.id === participant.userId),
+                )
+                .filter(Boolean) as UserSummary[]) || [];
 
             // If no other participants, show fallback
             if (otherParticipants.length === 0) {

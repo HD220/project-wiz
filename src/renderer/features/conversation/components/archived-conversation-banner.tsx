@@ -20,8 +20,7 @@ export function ArchivedConversationBanner(
 
   // Unarchive mutation with automatic error handling
   const unarchiveMutation = useApiMutation(
-    (conversationId: string) =>
-      window.api.conversations.unarchive(conversationId),
+    (conversationId: string) => window.api.dm.unarchive(conversationId),
     {
       successMessage: "Conversation unarchived successfully",
       onSuccess: () => {

@@ -4,7 +4,7 @@ import {
   useSearch,
 } from "@tanstack/react-router";
 
-import type { LlmProvider } from "@/main/features/agent/llm-provider/llm-provider.types";
+import type { LlmProvider } from "@/main/features/llm-provider/llm-provider.types";
 
 import {
   Dialog,

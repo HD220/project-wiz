@@ -29,9 +29,9 @@ export const Route = createFileRoute("/_authenticated/user")({
       throw new Error("User not authenticated");
     }
 
-    // Load all conversations (including archived) - filtering handled in component
+    // Load all DM conversations (including archived) - filtering handled in component
     const [conversationsResponse, availableUsersResponse] = await Promise.all([
-      window.api.conversations.getUserConversations({
+      window.api.dm.getUserConversations({
         includeArchived: true, // Always load all conversations
         includeInactive: false, // Always exclude inactive conversations
       }),
@@ -50,7 +50,7 @@ export const Route = createFileRoute("/_authenticated/user")({
       );
     }
 
-    const conversations = conversationsResponse.data || [];
+    const conversations = (conversationsResponse.data || []) as any;
     const availableUsers = availableUsersResponse.data || [];
 
     return {
