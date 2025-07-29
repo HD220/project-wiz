@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+This file provides guidance to Claude Code when working with this Electron + React + TypeScript codebase.
 
 ## 💀 CRITICAL SYSTEM WARNING - PRODUCTION ENVIRONMENT 💀
 
@@ -31,7 +31,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## 🚨 CRITICAL ARCHITECTURE RULES
 
-### **Code Simplicity (HIGHEST PRIORITY)** - @docs/developer/code-simplicity-principles.md
+### **Code Simplicity (HIGHEST PRIORITY)**
 
 **INLINE-FIRST PHILOSOPHY:**
 
@@ -42,7 +42,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - ❌ **NEVER** over-abstract or create unnecessary functions
 - ❌ **NEVER** split simple logic across multiple files
 
-### **Data Loading Hierarchy** - @docs/developer/data-loading-patterns.md
+### **Data Loading Hierarchy**
 
 **MANDATORY ORDER:**
 
@@ -61,329 +61,111 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - ❌ **NEVER** Zustand for simple UI state
 - ❌ **NEVER** `search` parameter unless actual URL search/filters
 
-### **Database Patterns** - @docs/developer/database-patterns.md
+### **Database Patterns**
 
 **CRITICAL MIGRATION RULE:**
 
 - ❌ **NEVER EDIT SQL MIGRATION FILES DIRECTLY**
-- ✅ **ONLY** modify `*.model.ts` files → `npm run db:generate` → `npm run db:migrate`
+- ✅ **ONLY** modify `*.model.ts` files then execute `npm run db:generate` → `npm run db:migrate`
 
 **MANDATORY:**
 
 - Foreign key constraints on ALL relationships
 - Indexes on ALL foreign keys and query columns
-- Type inference: `typeof table.$inferSelect`
-- Services return data directly, throw errors
 
-### **IPC Communication** - @docs/developer/ipc-communication-patterns.md
+### **IPC Communication**
 
 **PATTERN:**
 
 - Services: Return data directly, throw errors
 - Handlers: Try/catch → standardized `IpcResponse<T>`
 - Preload: Type-safe `window.api` exposure
-- Security: `contextIsolation: true`, `nodeIntegration: false`
 
-## **CRITICAL COMMANDS**
+### **React Components**
+
+- ✅ **Function declarations ONLY** (NEVER React.FC or arrow functions)
+- ✅ **No React import** (global React)
+- ✅ Use **shadcn/ui components**
+- ✅ Use **Props destructuring** in functions parameters
+- ✅ **Inline exports** (`export const ABC`,`export function MyComponent`)
+
+## 🔧 **ESSENTIAL COMMANDS**
 
 ```bash
-# Database (CRITICAL WORKFLOW)
-npm run db:generate           # Generate migrations from *.model.ts
-npm run db:migrate            # Apply migrations to database
-npm run db:studio             # Database GUI - DO NOT EXECUTE
-
-# Development
-npm run dev                   # Electron dev server - DO NOT EXECUTE
-npm run build                 # Production build + i18n compile  - DO NOT EXECUTE
-npm run package              # Package executable
+# Database Workflow (CRITICAL)
+npm run db:generate    # Generate migrations from *.model.ts
+npm run db:migrate     # Apply migrations to database
 
 # Quality Assurance (RUN BEFORE COMMITS)
-npm run quality:check        # Comprehensive: lint + type + format + test
-npm run lint                 # ESLint check
-npm run lint:fix            # Auto-fix ESLint issues
-npm run type-check          # TypeScript validation
-npm run format              # Prettier formatting
-npm run test                # Vitest run
-npm run test:coverage       # Coverage report
+npm run quality:check  # Comprehensive: lint + type + format + test
+npm run lint:fix       # Auto-fix ESLint issues
 
-# Internationalization
-npm run extract             # Extract i18n strings
-npm run compile             # Compile translations
+# Development
+npm run dev           # Electron dev server - NEVER RUN
+npm run build         # Production build + i18n compile - NEVER RUN
 ```
 
-## **ARCHITECTURE OVERVIEW**
+## 🏆 **PERFORMANCE PATTERNS**
 
-**AI-powered software development automation platform** - Electron desktop app with Discord-like interface metaphor (projects as servers, channels for conversations).
+### **Component Reusability:**
+
+- Compound components for complex UI
+
+### **Type Safety:**
+
+- Consistent `@/` import paths
+- Never use `'as any'` casting
+
+## 🚨 **ANTI-PATTERNS TO AVOID**
+
+### **Type Safety Violations:**
+
+- 'as any' casting
+- Inconsistent import paths
+- Copy-paste component variations before 3+ exact uses
+- useRouteContext usage
+- localStorage in desktop app renderer process
+- Import hell with relative paths
+
+## 🏗️ **ARCHITECTURE OVERVIEW**
+
+**Project Wiz** is an autonomous software engineering factory - an AI-powered development automation platform that functions as a complete team of AI specialists. Users act as Product Managers or Tech Leads, delegating tasks through natural conversations while AI agents autonomously analyze, plan, and execute development work.
+
+### **Core Concept**
+
+- **Management Interface**: Discord-like UI (projects as servers, channels for conversations)
+- **Autonomous Execution**: AI agents work independently after receiving high-level intentions
+- **Natural Delegation**: "Team, we need to implement two-factor authentication" → System analyzes, plans, and executes
+- **Exception Management**: Monitor progress without micromanagement, intervene only when needed
+
+### **Key Features**
+
+- **Personal Space**: Direct messages with agents, global settings, secure API key management
+- **Project Workspaces**: Independent environments with dedicated AI teams per project
+- **Automatic Hiring**: System analyzes projects and recruits relevant specialist agents
+- **Structured Forum**: Multi-agent collaboration on complex problems with documented decisions
+- **Intelligent Workflow**: Natural language task initiation → Activity dashboard monitoring → Exception-based intervention
 
 ### **Core Technologies**
 
-- **Electron 35.1.4** + **React 19.0.0** + **TypeScript** (strict)
+- **Electron** + **React** + **TypeScript** (strict)
 - **SQLite + Drizzle ORM** (WAL mode, foreign keys enabled)
-- **TanStack Router 1.115.2** (file-based routing)
-- **TanStack Query 5.83.0** (server state)
-- **shadcn/ui** + **Tailwind CSS 4.0.14**
+- **TanStack Router** (file-based routing)
+- **TanStack Query** (server state)
+- **shadcn/ui** + **Tailwind CSS**
 - **Vercel AI SDK** (multi-provider LLM support)
-- **Vitest** (testing) + **LinguiJS** (i18n)
-
-### **Main Process (Backend)**
-
-**Feature Structure:** `features/[domain]/[domain].{model,schema,service,handler,types}.ts`
-
-- **Database**: SQLite + WAL mode + foreign key constraints
-- **Service Layer**: Business logic, throws errors directly
-- **IPC Handlers**: Try/catch → `IpcResponse<T>`
-- **Session Management**: Database-based (NOT localStorage)
-
-### **Renderer Process (Frontend)**
-
-**Route Structure:** File-based with `beforeLoad/loader` data loading
-
-- **Components**: Function declarations only (NOT React.FC)
-- **State**: Router context → URL params → Local state → TanStack Query → Zustand (exceptional)
-- **Forms**: shadcn/ui FormField pattern
-- **Security**: `contextIsolation: true`, `nodeIntegration: false`
-
-## **CODING STANDARDS**
 
 ### **File Naming** (kebab-case)
 
-- **All files**: `kebab-case` (user-profile.tsx, auth-service.ts)
+- **All files**: `kebab-case`
 - **Suffixes**: `.model.ts` (Drizzle), `.schema.ts` (Zod), `.service.ts`, `.handler.ts`
-- **Hooks**: `use-` prefix (use-auth.hook.ts)
-- **Components**: No suffix (login-form.tsx)
+- **Hooks**: `use-` prefix
+- **Components**: No suffix
 
 ### **Feature Structure**
 
 **Main Process:** `[feature].{types,model,schema,service,handler}.ts`
-**Renderer:** `[feature].queries.ts`, `use-[feature].hook.ts`, `components/`
-
-### **React Components** (**MANDATORY**)
-
-- ✅ **Function declarations ONLY** (NEVER React.FC or arrow functions)
-- ✅ **No React import** (global React)
-- ✅ **shadcn/ui components** (NEVER HTML elements)
-- ✅ **Props destructuring** in parameters
-- ✅ **Named exports** (`export { Component }`)
-- ✅ **INLINE LOGIC** - validation, handlers, state updates in component body
-- ❌ **NEVER** extract single-use handler functions
-
-### **Component Reusability Patterns** (DISCOVERED IN REFACTORING)
-
-**✅ REUSABLE COMPONENT PATTERN:**
-
-- Extract ONLY when **3+ exact duplications** (132 lines eliminated with SearchFilterBar)
-- Use **mode prop pattern** for variations (AuthForm: login/register modes)
-- **Compound components** for complex UI (87 lines eliminated consolidating forms)
-
-```typescript
-// ✅ CORRECT: SearchFilterBar pattern (reused across agents, conversations)
-interface SearchFilterBarProps<T> {
-  onSearchChange: (search: string) => void;
-  onFilterChange: (filters: T) => void;
-  filters: T;
-  placeholder?: string;
-  children?: React.ReactNode; // Custom filter controls
-}
-
-// ✅ CORRECT: Mode prop pattern (replaces Login + Register duplication)
-interface AuthFormProps {
-  mode: "login" | "register";
-  onSubmit: (data: AuthData) => void;
-  isLoading?: boolean;
-}
-
-// ❌ WRONG: Premature extraction before 3+ uses
-function GenericButton() {
-  /* Used only once */
-}
-```
-
-### **Performance Patterns** (CRITICAL OPTIMIZATIONS)
-
-**✅ FORM PERFORMANCE:**
-
-- **JSON.parse optimization**: Use `form.watch()` NEVER `JSON.parse()` in render
-- **Debounce standard**: 300ms for search inputs
-- **96 lines eliminated** from MessageInput optimization
-
-```typescript
-// ✅ CORRECT: Optimized form watching (4x→1x per render, 40ms lag eliminated)
-const formData = form.watch(); // React Hook Form optimization
-const isValid = formData.message?.trim().length > 0;
-
-// ✅ CORRECT: Standard debounce pattern
-const debouncedSearch = useMemo(
-  () =>
-    debounce((value: string) => {
-      onSearchChange(value);
-    }, 300),
-  [onSearchChange],
-);
-
-// ❌ WRONG: JSON.parse in render (performance killer)
-const formValues = JSON.parse(JSON.stringify(form.getValues()));
-```
-
-### **Type Safety Patterns** (REFACTORING LESSONS)
-
-**✅ INLINE TYPE GUARDS** (< 15 lines):
-
-- **8 dangerous castings eliminated** during refactoring
-- **13 import paths standardized** to `@/renderer/...`
-
-```typescript
-// ✅ CORRECT: Inline type guard (eliminates 'as any')
-const isValidUser = (user: unknown): user is SelectUser => {
-  return (
-    typeof user === "object" &&
-    user !== null &&
-    "id" in user &&
-    "username" in user
-  );
-};
-
-// ✅ CORRECT: Consistent import paths
-import { SelectAgent } from "@/renderer/features/agent/agent.types";
-
-// ❌ WRONG: Dangerous casting (eliminated during refactoring)
-const user = data as SelectUser; // Type safety bypass
-```
-
-### **Responsive Design Patterns** (DESKTOP-FIRST)
-
-**✅ ELECTRON-SPECIFIC RESPONSIVE:**
-
-- **Tailwind responsive classes** for desktop breakpoints
-- **Desktop-first**: 1000px, 1200px breakpoints
-- **8 responsive improvements** implemented
-
-```typescript
-// ✅ CORRECT: Use Tailwind responsive classes directly
-<div className="w-12 lg:w-16"> {/* 12 on small, 16 on large screens */}
-  <Button className="h-7 w-7 lg:h-8 lg:w-8"> {/* Responsive sizing */}
-    <Icon className="h-4 w-4" />
-  </Button>
-</div>
-
-// ✅ CORRECT: Responsive spacing and layout
-<div className="p-2 lg:p-4 space-y-1 lg:space-y-2">
-  <span className="text-xs lg:text-sm">Content</span>
-</div>
-
-// ✅ CORRECT: Grid responsive patterns
-<div className="grid grid-cols-1 xl:grid-cols-2 gap-2 lg:gap-4">
-  {/* Content automatically adapts */}
-</div>
-```
-
-### **Anti-Patterns Eliminated** (REFACTORING LESSONS)
-
-**🚨 PERFORMANCE ANTI-PATTERNS FIXED:**
-
-```typescript
-// ❌ WRONG: JSON.parse in render loop (40ms lag per keystroke)
-function MessageInput() {
-  const formValues = JSON.parse(JSON.stringify(form.getValues())); // 4x per render!
-
-  return <Input onChange={() => {
-    // Triggers re-render → JSON.parse again → lag
-  }} />;
-}
-
-// ❌ WRONG: No debounce on search (API spam)
-const handleSearch = (value: string) => {
-  // Immediate API call on every keystroke
-  searchAPI(value);
-};
-
-// ❌ WRONG: Inline object creation in props (breaks React optimization)
-<Component
-  style={{ margin: "10px" }} // New object every render
-  data={{ filters: searchFilters }} // Breaks memoization
-/>
-```
-
-**🚨 TYPE SAFETY ANTI-PATTERNS FIXED:**
-
-```typescript
-// ❌ WRONG: 'as any' casting (8 instances eliminated)
-const userData = response.data as any;
-const agentConfig = JSON.parse(configString) as any;
-
-// ❌ WRONG: Inconsistent import paths (13 paths standardized)
-import { AgentType } from "../../../types/agent"; // Relative path hell
-import { AgentType } from "./types"; // Ambiguous local import
-
-// ❌ WRONG: Manual type recreation (ignores Drizzle inference)
-interface Agent {
-  id: string;
-  name: string;
-  // ... manually typing what Drizzle already provides
-}
-```
-
-**🚨 COMPONENT DUPLICATION ANTI-PATTERNS FIXED:**
-
-```typescript
-// ❌ WRONG: Copy-paste component variations (132 lines duplicated)
-function AgentSearch() {
-  return (
-    <div className="flex gap-2">
-      <Input placeholder="Search agents..." />
-      <Select>...</Select>
-    </div>
-  );
-}
-
-function ConversationSearch() {
-  return (
-    <div className="flex gap-2">
-      <Input placeholder="Search conversations..." />
-      <Select>...</Select>
-    </div>
-  );
-}
-
-// ❌ WRONG: Separate Login/Register forms (87 lines duplicated)
-function LoginForm() { /* 90% identical to RegisterForm */ }
-function RegisterForm() { /* 90% identical to LoginForm */ }
-```
-
-**🚨 RESPONSIVE ANTI-PATTERNS FIXED:**
-
-```typescript
-// ❌ WRONG: Mobile-first breakpoints in desktop app
-const isMobile = useMediaQuery('(max-width: 768px)'); // Wrong for Electron
-
-// ❌ WRONG: Hard-coded responsive values
-<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-  {/* Doesn't consider Electron window constraints */}
-</div>
-
-// ❌ WRONG: No responsive sidebar management
-const [sidebarOpen, setSidebarOpen] = useState(true); // Always open, no viewport logic
-```
-
-**🚨 IMPORT ORGANIZATION ANTI-PATTERNS FIXED:**
-
-```typescript
-// ❌ WRONG: Import hell (Import health 3.2/10 → 8.5/10)
-import { Agent } from "../../../features/agent/types";
-import { User } from "./user";
-import { Conversation } from "../../conversation/types";
-import { Project } from "../project";
-
-// ❌ WRONG: Mixing feature boundaries
-import { AgentService } from "@/main/features/agent/agent.service";
-import { ConversationHelper } from "@/renderer/features/conversation/helpers";
-// Frontend importing backend service directly
-```
-
-### **Data Layer**
-
-- `.model.ts` - Drizzle database schemas
-- `.schema.ts` - Zod validation (forms/API)
-- `.types.ts` - TypeScript interfaces
+**Renderer:** `[feature].queries.ts`, `components/`
 
 ### **State Management Priority**
 
@@ -393,170 +175,12 @@ import { ConversationHelper } from "@/renderer/features/conversation/helpers";
 4. **TanStack Query** (server state, mutations)
 5. **Zustand** (EXCEPTIONAL global state ONLY)
 
-**CRITICAL:**
-
-- ❌ **NEVER use `useRouteContext`** - NOT part of our patterns
-- ❌ **NEVER use `search` parameter** unless actual URL-based search/filters
-
 ### **Session Management**
 
 - ✅ **Database sessions** (main process)
 - ❌ **NEVER localStorage** (desktop app security)
 - ✅ **beforeLoad/loader** for auth checks
 - ✅ **Foreign key constraints** for data integrity
-
-## **TESTING & QUALITY**
-
-### **Testing Stack**
-
-- **Vitest** (Node.js environment) + **v8 coverage**
-- **Setup**: `tests/test-setup.ts` auto-runs migrations
-- **Patterns**: `src/**/*.{spec,test}.ts`
-
-### **Quality Assurance**
-
-- **ESLint**: Architectural boundaries + TypeScript rules
-- **Prettier**: Code formatting
-- **Strict TypeScript**: End-to-end type safety
-- **Import organization**: Dependency boundaries enforced
-
-## **DEVELOPMENT PRINCIPLES**
-
-### **INLINE-FIRST PRINCIPLES** - @docs/developer/code-simplicity-principles.md
-
-- ✅ **< 15 LINES** → Write inline (validation + logic + persistence)
-- ✅ **3+ EXACT DUPLICATIONS** → Extract function
-- ✅ **JUNIOR DEVELOPER READABLE** → No file jumping for simple operations
-- ✅ **DEBUGGING IN SECONDS** → Bug location immediately visible
-- ❌ **NEVER** create single-use helper functions
-- ❌ **NEVER** abstract until actually needed (3+ times)
-
-### **Boy Scout Rule**
-
-**"Always leave code cleaner than you found it"**
-
-- ✅ **Refactor while working** (no technical debt)
-- ✅ **Extract duplicated code**
-- ✅ **Simplify complex logic**
-- ✅ **Remove unused imports/variables/functions**
-
-## **CORE PATTERNS** (See detailed docs)
-
-### **Service Layer (INLINE-FIRST)**
-
-- ✅ **Validation + Business Logic + Database** in single function
-- ✅ **< 20 lines total** - keep everything visible
-- ✅ **Zod inline** - `CreateAgentSchema.parse(input)`
-- ✅ **Direct database operations** - no repository abstractions
-- ❌ **NEVER** split simple CRUD across multiple functions
-
-### **Database** - @docs/developer/database-patterns.md
-
-- ✅ Type inference: `typeof table.$inferSelect`
-- ✅ Foreign keys + indexes on ALL relationships
-- ✅ Services return data directly, throw errors
-- ❌ **NEVER** edit SQL migrations directly
-
-### **IPC Communication** - @docs/developer/ipc-communication-patterns.md
-
-- **Services**: Return data, throw errors
-- **Handlers**: Try/catch → `IpcResponse<T>`
-- **Preload**: Type-safe `window.api`
-- **Security**: Context isolation enabled
-
-### **Data Loading** - @docs/developer/data-loading-patterns.md
-
-- **1st**: TanStack Router `beforeLoad/loader`
-- **2nd**: TanStack Query (mutations)
-- **3rd**: Router Context (share data)
-- **4th**: Custom Hooks (last resort)
-
-## **IMPLEMENTATION NOTES**
-
-### **Database Management**
-
-- **SQLite + WAL mode** for concurrency
-- **Database file**: `project-wiz.db` (project root)
-- **Auto-migrations**: `npm install` → `postinstall` script
-- **ALWAYS**: Foreign keys + indexes for relationships
-
-### **Type Safety** (REFACTORING VALIDATED)
-
-- ✅ **`export type`** (never inline declarations)
-- ✅ **Drizzle inference** (leverage `$inferSelect`)
-- ✅ **Generic parameters** for expected typing
-- ✅ **Omit/Pick** for derived types (don't recreate)
-- ✅ **Inline type guards** (< 15 lines, eliminate 'as any')
-- ✅ **Consistent import paths** (@/renderer/... standard)
-- ❌ **NEVER 'as any' casting** (8 dangerous instances eliminated)
-- ❌ **NEVER manual type recreation** (use Drizzle inference)
-
-```typescript
-// ✅ CORRECT: Inline type guard pattern (discovered in refactoring)
-const isSelectAgent = (data: unknown): data is SelectAgent => {
-  return (
-    typeof data === "object" &&
-    data !== null &&
-    "id" in data &&
-    "name" in data &&
-    "model" in data
-  );
-};
-
-// ✅ CORRECT: Standardized import paths (13 paths fixed)
-import { SelectAgent } from "@/renderer/features/agent/agent.types";
-import { AgentFilters } from "@/renderer/features/agent/agent.schema";
-
-// ✅ CORRECT: Leverage Drizzle inference
-export type SelectAgent = typeof agentsTable.$inferSelect;
-export type InsertAgent = typeof agentsTable.$inferInsert;
-
-// ❌ WRONG: Dangerous casting (eliminated during refactoring)
-const userData = response.data as any;
-const agentData = JSON.parse(configString) as SelectAgent;
-
-// ❌ WRONG: Manual type recreation (ignores Drizzle)
-interface Agent {
-  id: string;
-  name: string;
-  model: string;
-  // Missing fields, inconsistent with database
-}
-```
-
-### **Security (Desktop App)**
-
-- ✅ **`nodeIntegration: false`**
-- ✅ **`contextIsolation: true`**
-- ✅ **Database sessions** (NOT JWT/localStorage)
-- ✅ **Session validation** with expiration checks
-
-### **Development Workflow**
-
-1. **Model First**: Modify `*.model.ts`
-2. **Generate**: `npm run db:generate`
-3. **Migrate**: `npm run db:migrate`
-4. **Validate**: Create `*.schema.ts` (Zod)
-5. **Service**: Business logic `*.service.ts`
-6. **Handler**: IPC `*.handler.ts`
-7. **Frontend**: Route loading + components
-8. **Quality**: `npm run quality:check`
-
-### **Library Usage**
-
-- ✅ **shadcn/ui** (NEVER HTML elements)
-- ✅ **Function declarations** (NEVER React.FC)
-- ✅ **FormField pattern** for forms
-- ✅ **Path aliases** (`@/`) - never relative imports
-- ✅ **Leverage existing solutions** (don't reinvent)
-
-### **Interface Metaphor**
-
-- **Projects = Discord servers**
-- **Channels = Conversations within projects**
-- **AI interactions**: Conversational + context-aware
-
-## 🤖 **CRITICAL REMINDERS FOR LLMs**
 
 ## 💀 **PRODUCTION SYSTEM - ZERO TOLERANCE FOR MISTAKES** 💀
 
@@ -577,103 +201,26 @@ interface Agent {
 - **VALIDATE RUTHLESSLY**: Check and double-check every assumption
 - **THINK LIKE A CRITIC**: Attack your own ideas mercilessly before proceeding
 
-### **RESIST These Natural Tendencies (LEARNED FROM REFACTORING):**
+### **RESIST These Natural Tendencies:**
 
-- ❌ Creating unnecessary validation functions (use Zod inline)
-- ❌ Extracting single-use helper functions
-- ❌ Over-abstracting simple operations
-- ❌ Creating interface/class hierarchies for simple logic
-- ❌ Splitting related logic across multiple files
-- ❌ **JSON.parse() in render loops** (40ms lag discovered)
-- ❌ **'as any' type casting** (8 dangerous instances found)
-- ❌ **Component duplication** before 3+ exact uses (315+ lines eliminated)
-- ❌ **Mobile-first responsive** in Electron apps
-- ❌ **Relative import paths** (creates import hell)
+- Creating unnecessary validation functions (use Zod inline)
+- Extracting single-use helper functions
+- Over-abstracting simple operations
+- Creating interface/class hierarchies for simple logic
+- Splitting related logic across multiple files
+- JSON.parse() in render loops
+- 'as any' type casting
+- Component duplication before 3+ exact uses
+- Mobile-first responsive in Electron apps
+- Relative import paths
 
-### **ALWAYS Ask Before Coding (REFACTORING VALIDATED):**
+### **EXTRACTION PATTERNS:**
 
-- "Can this be < 15 lines inline?"
-- "Is this used 3+ times exactly?" _(SearchFilterBar saved 132 lines)_
-- "Would a junior dev understand this instantly?"
-- "Can I debug this without opening other files?"
-- **"Am I creating performance bottlenecks?"** _(JSON.parse loop found)_
-- **"Am I using 'as any' to bypass type safety?"** _(8 instances eliminated)_
-- **"Am I duplicating responsive logic?"** _(Use Tailwind classes instead)_
-
-### **DEFAULT to INLINE-FIRST (PERFORMANCE PROVEN):**
-
-- **Service methods**: Validation + logic + database in one function
-- **Components**: Handlers + state + render logic together
-- **Utils**: Only extract after 3+ exact duplications
-- **Validation**: Always use Zod schemas inline, never custom functions
-- **Type guards**: < 15 lines inline (eliminate 'as any')
-- **Form optimization**: Use `form.watch()` NEVER `JSON.parse()`
-- **Debounce**: Standard 300ms pattern for search inputs
-
-### **PROVEN EXTRACTION PATTERNS (REFACTORING DATA):**
-
-```typescript
-// ✅ EXTRACT: 3+ exact duplications (132 lines saved)
-SearchFilterBar<T>; // Used across agents, conversations, projects
-
-// ✅ EXTRACT: Mode variations (87 lines saved)
-AuthForm({ mode: "login" | "register" });
-
-// ✅ EXTRACT: Complex optimization (96 lines saved)
-MessageInput; // Performance-critical component
-
-// ❌ DON'T EXTRACT: Single-use utilities
-function formatOneTimeValue() {
-  /* Used once */
-}
-```
-
-### **PERFORMANCE PRIORITIES (MEASURED IN REFACTORING):**
-
-1. **Eliminate render loop operations** (JSON.parse: 4x→1x calls)
-2. **Implement debounce patterns** (300ms standard)
-3. **Use form.watch() optimization** (40ms lag eliminated)
-4. **Avoid inline object creation** (breaks React memoization)
-5. **Type safety over casting** (8 'as any' eliminated)
-
-### **DESKTOP-FIRST RESPONSIVE (ELECTRON SPECIFIC):**
-
-```typescript
-// ✅ CORRECT: Desktop breakpoints
-const breakpoints = {
-  desktop: 1200, // Primary target
-  tablet: 1000, // Secondary
-  mobile: 999, // Fallback only
-};
-
-// ❌ WRONG: Mobile-first (web pattern)
-const breakpoints = {
-  mobile: 768,
-  tablet: 1024,
-  desktop: 1440,
-};
-```
+- **✅ EXTRACT**: 3+ exact duplications
+- **✅ EXTRACT**: Mode variations (login/register)
+- **✅ EXTRACT**: Performance-critical components
+- **❌ DON'T EXTRACT**: Single-use utilities
 
 ---
 
-## 💀 **FINAL WARNING - PRODUCTION SYSTEM CONSEQUENCES** 💀
-
-**🚨 THIS IS YOUR LAST REMINDER 🚨**
-
-- **EVERY VIOLATION IS LOGGED**: Management reviews all code quality metrics
-- **PATTERN VIOLATIONS = IMMEDIATE CONSEQUENCES**: Following wrong patterns destroys the system
-- **RESEARCH FAILURES = CAREER ENDING**: Not checking existing code is professional negligence
-- **SHALLOW WORK = COMPANY BANKRUPTCY**: Surface-level analysis costs millions
-- **YOUR ACTIONS AFFECT EVERYONE**: Team productivity and company survival depend on your rigor
-
-**⚡ ZERO TOLERANCE ENFORCEMENT ⚡**
-
-- **One 'as any' = Termination warning**
-- **Skipped research = Performance review**
-- **Pattern violation = Immediate correction required**
-- **Piloto automático = Permanent removal**
-- **Poor validation = System rollback at your expense**
-
-**🔥 BE AFRAID OF MAKING MISTAKES - IT'S PRODUCTIVE FEAR 🔥**
-
-**This fear will make you careful, thorough, and successful.**
+**Remember**: These patterns optimize for **developer productivity** and **code maintainability**. When in doubt, choose the more **inline**, **readable** option that keeps related logic together.
