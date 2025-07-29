@@ -1,8 +1,5 @@
 import { createFileRoute, Outlet } from "@tanstack/react-router";
 
-import type { SelectDMConversation } from "@/renderer/features/dm/dm-conversation.types";
-import type { SelectMessage } from "@/renderer/features/message/message.types";
-
 import { ContentHeader } from "@/renderer/features/layout/components/content-header";
 import {
   ProfileAvatar,
@@ -10,113 +7,34 @@ import {
   ProfileAvatarStatus,
   ProfileAvatarCounter,
 } from "@/renderer/components/ui/profile-avatar";
-import { ConversationChat } from "@/renderer/features/conversation/components/conversation-chat";
+import {
+  Chat,
+  ChatMessages,
+  ChatInput,
+  ChatMessage,
+  ChatGroup,
+  ChatMessageAvatar,
+  ChatMessageMeta,
+  ChatMessageContent,
+  ChatMessagesScrollable,
+} from "@/renderer/components/chat";
+import {
+  WelcomeMessage,
+  AuthorAvatar,
+  ArchivedInputReplacement,
+  FunctionalChatInput,
+  ChatWelcome,
+  AuthorName,
+  MessageTimestamp,
+  HoverTimestamp,
+  MessageContentText,
+} from "@/renderer/components/chat-components";
 import { loadApiData } from "@/renderer/lib/route-loader";
-
-// Message type for renderer compatibility
-type RendererMessage = {
-  id: string;
-  isActive: boolean;
-  deactivatedAt: Date | null;
-  deactivatedBy: string | null;
-  createdAt: Date;
-  updatedAt: Date;
-  conversationId: string;
-  content: string;
-  authorId: string;
-  senderId: string;
-  senderType: "user" | "agent";
-  metadata: unknown;
-};
-
-// Helper function to convert DM Message to renderer Message
-function convertToRendererMessage(
-  mainMessage: SelectMessage,
-  dmId: string,
-): RendererMessage {
-  return {
-    id: mainMessage.id,
-    isActive: mainMessage.isActive,
-    deactivatedAt: mainMessage.deactivatedAt,
-    deactivatedBy: mainMessage.deactivatedBy,
-    createdAt: mainMessage.createdAt,
-    updatedAt: mainMessage.updatedAt,
-    conversationId: dmId, // Map DM ID to conversationId for compatibility
-    content: mainMessage.content,
-    authorId: mainMessage.authorId,
-    senderId: mainMessage.authorId,
-    senderType: "user", // Default to user
-    metadata: null,
-  };
-}
-
-// Extended conversation type for rendering compatibility
-type RendererConversation = {
-  type: "dm" | "channel";
-  name: string | null;
-  id: string;
-  isActive: boolean;
-  deactivatedAt: Date | null;
-  deactivatedBy: string | null;
-  createdAt: Date;
-  updatedAt: Date;
-  description: string | null;
-  archivedAt: Date | null;
-  archivedBy: string | null;
-  title?: string | null;
-  projectId?: string | null;
-  agentId?: string | null;
-  isArchived?: boolean;
-  lastMessage?: RendererMessage;
-  participants?: Array<{
-    id: string;
-    conversationId: string;
-    userId: string;
-    joinedAt: Date;
-  }>;
-  messages?: RendererMessage[];
-};
-
-// Helper function to convert DM Conversation to renderer conversation
-function convertToRendererConversation(
-  dmConversation: SelectDMConversation & {
-    participants: any[];
-    messages: SelectMessage[];
-  },
-): RendererConversation {
-  return {
-    id: dmConversation.id,
-    name: dmConversation.name,
-    description: dmConversation.description || null,
-    type: "dm" as const,
-    archivedAt: dmConversation.archivedAt || null,
-    archivedBy: dmConversation.archivedBy || null,
-    isActive: dmConversation.isActive,
-    deactivatedAt: dmConversation.deactivatedAt,
-    deactivatedBy: dmConversation.deactivatedBy,
-    createdAt: dmConversation.createdAt,
-    updatedAt: dmConversation.updatedAt,
-    title: dmConversation.name,
-    projectId: null,
-    agentId: null,
-    isArchived: !!dmConversation.archivedAt,
-    participants:
-      dmConversation.participants?.map((participant) => ({
-        id: participant.id,
-        conversationId: dmConversation.id,
-        userId: participant.participantId,
-        joinedAt: participant.createdAt,
-      })) || [],
-    messages:
-      dmConversation.messages?.map((msg) =>
-        convertToRendererMessage(msg, dmConversation.id),
-      ) || [],
-  };
-}
 
 function DMLayout() {
   const { conversationId } = Route.useParams();
-  const { conversation, availableUsers, user } = Route.useLoaderData();
+  const { conversation, messages, availableUsers, user } =
+    Route.useLoaderData() as any;
 
   if (!conversation) {
     return (
@@ -217,12 +135,148 @@ function DMLayout() {
         customIcon={conversationAvatar}
       />
       <main className="flex-1 overflow-hidden">
-        <ConversationChat
-          conversationId={conversationId}
-          conversation={conversation}
-          availableUsers={availableUsers}
-          currentUser={user}
-        />
+        <Chat>
+          <ChatMessages>
+            <ChatMessagesScrollable
+              autoScroll={true}
+              initScroll={true}
+              scrollDelayMs={100}
+            >
+              {(() => {
+                const processedMessages = messages || [];
+
+                // Welcome message for new conversations
+                if (processedMessages.length === 0) {
+                  return (
+                    <ChatWelcome>
+                      <WelcomeMessage
+                        chatType="dm"
+                        displayName={displayName}
+                        isArchived={!!conversation.archivedAt}
+                      />
+                    </ChatWelcome>
+                  );
+                }
+
+                // Group messages by author (Discord-like)
+                const messageGroups: any[] = [];
+
+                processedMessages.forEach((msg: any) => {
+                  const lastGroup = messageGroups[messageGroups.length - 1];
+
+                  if (lastGroup && lastGroup.authorId === msg.authorId) {
+                    lastGroup.messages.push(msg);
+                  } else {
+                    messageGroups.push({
+                      authorId: msg.authorId,
+                      messages: [msg],
+                    });
+                  }
+                });
+
+                return messageGroups.map((group, groupIndex) => {
+                  const author =
+                    group.authorId === user.id
+                      ? { id: user.id, name: user.name, avatar: user.avatar }
+                      : availableUsers.find(
+                          (u: any) => u.id === group.authorId,
+                        ) || {
+                          id: group.authorId,
+                          name: "Unknown User",
+                          avatar: null,
+                        };
+
+                  // Calculate if should show avatar (first message of group or >7min)
+                  const timeDiff =
+                    groupIndex > 0 && group.messages[0]?.createdAt
+                      ? new Date(group.messages[0].createdAt).getTime() -
+                        new Date(
+                          messageGroups[groupIndex - 1].messages[
+                            messageGroups[groupIndex - 1].messages.length - 1
+                          ].createdAt,
+                        ).getTime()
+                      : 0;
+
+                  const showAvatar =
+                    groupIndex === 0 || timeDiff > 7 * 60 * 1000;
+
+                  return (
+                    <ChatGroup
+                      key={groupIndex}
+                      className={showAvatar ? "mt-[17px] first:mt-0" : ""}
+                    >
+                      {group.messages.map((msg: any, messageIndex: number) => (
+                        <ChatMessage
+                          key={msg.id}
+                          className={
+                            showAvatar && messageIndex === 0
+                              ? "mt-3 pb-0.5"
+                              : "mt-0 pb-0"
+                          }
+                        >
+                          <ChatMessageAvatar>
+                            {showAvatar && messageIndex === 0 ? (
+                              <AuthorAvatar
+                                id={author.id}
+                                name={author.name || "Unknown"}
+                                avatar={author.avatar}
+                                isInactive={
+                                  !author.name || author.name === "Unknown User"
+                                }
+                              />
+                            ) : (
+                              <HoverTimestamp
+                                timestamp={new Date(msg.createdAt)}
+                              />
+                            )}
+                          </ChatMessageAvatar>
+
+                          <ChatMessageContent>
+                            {showAvatar && messageIndex === 0 && (
+                              <ChatMessageMeta>
+                                <AuthorName
+                                  name={author.name || "Unknown User"}
+                                  isInactive={
+                                    !author.name ||
+                                    author.name === "Unknown User"
+                                  }
+                                />
+                                <MessageTimestamp
+                                  timestamp={new Date(msg.createdAt)}
+                                />
+                              </ChatMessageMeta>
+                            )}
+
+                            <MessageContentText
+                              content={msg.content}
+                              isInactive={
+                                !author.name || author.name === "Unknown User"
+                              }
+                            />
+                          </ChatMessageContent>
+                        </ChatMessage>
+                      ))}
+                    </ChatGroup>
+                  );
+                });
+              })()}
+            </ChatMessagesScrollable>
+          </ChatMessages>
+
+          {conversation.archivedAt ? (
+            <ArchivedInputReplacement entityName="conversation" />
+          ) : (
+            <ChatInput>
+              <FunctionalChatInput
+                onSend={async (content) => {
+                  await window.api.dm.sendMessage(conversationId, content);
+                }}
+                placeholder={`Message ${displayName}...`}
+                disabled={false}
+              />
+            </ChatInput>
+          )}
+        </Chat>
       </main>
       <Outlet />
     </div>
@@ -259,17 +313,9 @@ export const Route = createFileRoute("/_authenticated/user/dm/$conversationId")(
           throw new Error("DM conversation not found");
         }
 
-        const conversationWithMessages = {
-          ...dmConversation,
-          messages: messages || [],
-        };
-
-        const rendererConversation = convertToRendererConversation(
-          conversationWithMessages as any,
-        );
-
         return {
-          conversation: rendererConversation as any,
+          conversation: dmConversation,
+          messages: messages || [],
           availableUsers,
           user,
         };

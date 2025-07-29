@@ -5,8 +5,18 @@ import {
   MemberSidebar,
   type Member,
 } from "@/renderer/components/members/member-sidebar";
-import { ScrollArea } from "@/renderer/components/ui/scroll-area";
 import { ContentHeader } from "@/renderer/features/layout/components/content-header";
+import {
+  Chat,
+  ChatMessages,
+  ChatInput,
+  ChatMessagesScrollable,
+} from "@/renderer/components/chat";
+import {
+  EmptyState,
+  FunctionalChatInput,
+  ChatEmpty,
+} from "@/renderer/components/chat-components";
 
 function ChannelLayout() {
   const { channelId } = Route.useParams();
@@ -59,20 +69,32 @@ function ChannelLayout() {
       <div className="flex-1 flex">
         {/* Main Channel Content */}
         <main className="flex-1">
-          <ScrollArea className="h-full">
-            <div className="p-4">
-              <div className="text-center text-muted-foreground">
-                <p>
-                  Você está no canal: <strong>{channelId}</strong>
-                </p>
-                <p className="text-sm mt-2">
-                  Implementação do chat será adicionada aqui.
-                </p>
-              </div>
-            </div>
-            {/* Child Routes */}
-            <Outlet />
-          </ScrollArea>
+          <Chat>
+            <ChatMessages>
+              <ChatMessagesScrollable
+                autoScroll={true}
+                initScroll={false}
+                scrollDelayMs={0}
+              >
+                <div className="flex-1 flex items-center justify-center">
+                  <ChatEmpty>
+                    <EmptyState chatType="channel" isArchived={false} />
+                  </ChatEmpty>
+                </div>
+              </ChatMessagesScrollable>
+            </ChatMessages>
+            <ChatInput>
+              <FunctionalChatInput
+                onSend={async (content) => {
+                  console.log("Send message to channel:", channelId, content);
+                  // TODO: Implement channel message sending
+                }}
+                placeholder={`Message # ${channelId}...`}
+              />
+            </ChatInput>
+          </Chat>
+          {/* Child Routes */}
+          <Outlet />
         </main>
 
         {/* Members Sidebar */}
