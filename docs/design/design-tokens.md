@@ -294,8 +294,10 @@ Design tokens are the single source of truth for all visual properties in Projec
 
 ### **Component Development**
 
+Follows Project Wiz [coding standards](../developer/coding-standards.md) with [INLINE-FIRST principles](../developer/code-simplicity-principles.md):
+
 ```tsx
-// CORRECT: Use design tokens
+// CORRECT: Use design tokens with function declaration pattern
 export function ComponentName({ className, ...props }: ComponentProps) {
   return (
     <div
@@ -310,7 +312,7 @@ export function ComponentName({ className, ...props }: ComponentProps) {
   );
 }
 
-// INCORRECT: Hardcoded values
+// INCORRECT: Hardcoded values or React.FC patterns
 export function ComponentName({ className, ...props }: ComponentProps) {
   return (
     <div
@@ -324,6 +326,8 @@ export function ComponentName({ className, ...props }: ComponentProps) {
   );
 }
 ```
+
+Refer to [folder structure patterns](../developer/folder-structure.md) for proper component organization.
 
 ### **Responsive Usage**
 
@@ -367,8 +371,10 @@ className={cn(
 
 ### **Development Integration**
 
-- **[Coding Standards](../developer/coding-standards.md)** - React and TypeScript patterns
-- **[Code Simplicity Principles](../developer/code-simplicity-principles.md)** - INLINE-FIRST philosophy
+- **[Coding Standards](../developer/coding-standards.md)** - React function declarations, TypeScript patterns, and shadcn/ui integration
+- **[Code Simplicity Principles](../developer/code-simplicity-principles.md)** - INLINE-FIRST philosophy for design token usage
+- **[Developer Guide](../developer/README.md)** - Complete development workflow implementing these design tokens
+- **[Folder Structure](../developer/folder-structure.md)** - Feature-based organization for design token consistency
 
 ---
 

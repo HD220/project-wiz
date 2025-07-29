@@ -42,3 +42,34 @@ A PRP is PRD + curated codebase intelligence + agent/runbook—the minimum viabl
 
 The PRP can be small and focusing on a single task or large and covering multiple tasks.
 The true power of PRP is in the ability to chain tasks together in a PRP to build, validate and deploy complex features.
+
+## Integration with Development Workflows
+
+PRPs work seamlessly with Project Wiz development patterns:
+
+### **PRP ↔ INLINE-FIRST Connection**
+
+Both PRP methodology and [INLINE-FIRST principles](../../developer/code-simplicity-principles.md) optimize for AI-human collaboration:
+
+- **PRPs provide strategic context** → "What to build and why" with comprehensive implementation context
+- **INLINE-FIRST provides tactical patterns** → "How to build it" with minimal abstraction for LLM comprehension
+- **Both minimize cognitive overhead** → For humans and AI assistants working together
+
+### **When to Create PRPs in Development Context**
+
+Following [INLINE-FIRST principles](../../developer/code-simplicity-principles.md), create PRPs when:
+
+- **>3 services affected** → Complex integration requiring strategic planning
+- **>20 lines of complex logic** → Algorithm or workflow requiring detailed context
+- **Database architecture changes** → Schema modifications affecting multiple features
+- **Performance implications** → Optimization work requiring analysis and validation
+
+### **PRP-to-Implementation Workflow**
+
+```
+PRP Planning (Context-is-King) → INLINE-FIRST Implementation → Validation Gates
+      ↑                                                              ↓
+Strategic Context ←------ Implementation Feedback --------→ Refined Planning
+```
+
+See [Development Workflow Integration](../README.md#relationship-to-development-workflows) for complete bridges between PRP methodology and daily development patterns.

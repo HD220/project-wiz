@@ -13,11 +13,14 @@ Complete reference for all 48 implemented shadcn/ui components plus custom exten
 
 ### Implementation Standards
 
-- **Function Declaration Syntax** - No React.FC or arrow functions
+Follows Project Wiz [coding standards](../developer/coding-standards.md) and [INLINE-FIRST principles](../developer/code-simplicity-principles.md):
+
+- **Function Declaration Syntax** - No React.FC or arrow functions (see [coding standards](../developer/coding-standards.md#react-components))
 - **Destructured Props** - Props destructured in function parameters
 - **Named Exports Only** - No default exports for consistency
 - **Design Token Usage** - CSS custom properties for all styling
 - **Compound Patterns** - Complex components use compound architecture
+- **Feature Organization** - Components organized by [folder structure patterns](../developer/folder-structure.md)
 
 ## 📋 Form Components (12 Components)
 
@@ -938,9 +941,13 @@ export function AgentsRoute() {
 
 ### **Development Integration**
 
-- **[Coding Standards](../developer/coding-standards.md)** - React function declaration patterns
-- **[Code Simplicity Principles](../developer/code-simplicity-principles.md)** - INLINE-FIRST philosophy
-- **[Folder Structure](../developer/folder-structure.md)** - Component organization
+Integrates with Project Wiz development architecture:
+
+- **[Coding Standards](../developer/coding-standards.md)** - React function declaration patterns and shadcn/ui integration requirements
+- **[Code Simplicity Principles](../developer/code-simplicity-principles.md)** - INLINE-FIRST philosophy for component implementation
+- **[Folder Structure](../developer/folder-structure.md)** - Feature-based component organization matching design system structure
+- **[Developer Guide](../developer/README.md)** - Complete workflow for implementing these design guidelines
+- **[Data Loading Patterns](../developer/data-loading-patterns.md)** - TanStack Router integration with design system components
 
 ---
 

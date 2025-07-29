@@ -350,6 +350,35 @@ class ConversationService {
 - **Performance optimization** - Bottlenecks are visible
 - **Testing** - Logic is testable in isolation
 
+## 🤖 **Strategic Connection to PRP Methodology**
+
+The INLINE-FIRST philosophy aligns perfectly with our [PRP (Project Requirements & Planning) methodology](../prps/README.md):
+
+### **Shared AI-Optimization Goals:**
+
+- **PRP Planning**: "Context-is-king" approach provides LLMs with comprehensive implementation context
+- **INLINE-FIRST**: Keep related logic together so AI can understand full scope at once
+- **Both Systems**: Optimize for LLM understanding while maintaining human readability
+
+### **When to Use PRPs with INLINE-FIRST:**
+
+Consider creating a PRP when INLINE-FIRST principles suggest complexity warrants planning:
+
+- **>3 services affected** → Reference [Service Layer CRUD Duplication PRP](../prps/01-initials/service-layer-crud-duplication-refactor.md)
+- **>20 lines of complex logic** → Reference [Agent Service Complexity PRP](../prps/01-initials/agent-service-complexity-refactor.md)
+- **Database architecture changes** → Reference [Database Timestamp Standardization PRP](../prps/01-initials/database-timestamp-pattern-standardization.md)
+- **Performance implications** → Reference [Database Performance Indexes PRP](../prps/01-initials/database-performance-indexes.md)
+
+### **Workflow Integration:**
+
+```
+Assess Feature Complexity → Consider PRP Planning → Apply INLINE-FIRST Implementation → Update PRP Status
+        ↑                                                                                    ↓
+Complex (>3 services, >20 lines)  ←------ Implementation Learnings -------→  Simple (inline patterns)
+```
+
+The [PRP methodology](../prps/README.md) provides strategic planning context that complements INLINE-FIRST tactical implementation, both optimized for effective AI-human collaboration.
+
 ## 📋 **Checklist for Code Reviews**
 
 ### **Before Writing:**
@@ -392,8 +421,9 @@ class ConversationService {
 ### **📖 Must Read Next**
 
 - **[Contributing Guide](./contributing.md)** - Workflow that implements these principles **(15 min)**
-- **[Coding Standards](./coding-standards.md)** - File naming and structure patterns **(10 min)**
-- **[Data Loading Patterns](./data-loading-patterns.md)** - INLINE-FIRST in frontend **(15 min)**
+- **[Coding Standards](./coding-standards.md)** - File naming and structure patterns with [shadcn/ui integration](../design/component-design-guidelines.md) **(10 min)**
+- **[Data Loading Patterns](./data-loading-patterns.md)** - INLINE-FIRST in frontend with [design system components](../design/README.md) **(15 min)**
+- **[Design System Overview](../design/README.md)** - Component library that implements INLINE-FIRST principles **(25 min)**
 
 ### **🏗️ Implementation Patterns**
 

@@ -28,6 +28,56 @@ Project Wiz implements a **production-ready multi-provider AI system** with:
 - ✅ **Conversation handling**: Streaming with message persistence
 - ✅ **Provider registry**: Type-safe configuration management
 
+## 🔍 Discovery Pathways
+
+### **Problem-Solving Entry Points**
+
+#### **"I need to add AI features to my app"**
+
+**→ Start Here**: [Vercel AI SDK Guide](./vercel-ai-sdk-guide.md) - Complete multi-provider implementation
+
+#### **"I'm working with multiple AI providers"**
+
+**→ Go To**: [Provider Patterns](./ai-sdk-provider-patterns.md) - Multi-provider architecture and encrypted storage
+
+#### **"AI responses are too slow"**
+
+**→ Solution**: [Queue Patterns](./queue-patterns-implementation.md) + [Worker Threads](../electron/worker-threads-guide.md)
+
+#### **"I need custom AI provider implementation"**
+
+**→ Deep Dive**: [Provider Registry Guide](./createProviderRegistry-implementation-guide.md) - Custom provider creation
+
+#### **"I want to understand AI SDK design decisions"**
+
+**→ Research**: [AI SDK Comprehensive Research](./ai-sdk-comprehensive-research.md) - Technical analysis
+
+### **Integration Scenarios**
+
+#### **AI + Frontend Integration**
+
+**🎯 Building real-time AI conversation interfaces**
+
+1. **[Data Loading Foundation](../frontend/tanstack-router-data-loading-guide.md)** - MANDATORY hierarchy patterns
+2. **[AI SDK Streaming](./vercel-ai-sdk-guide.md#streaming-patterns)** - Real-time AI responses
+3. **[State Management](../../developer/data-loading-patterns.md)** - AI conversation state via data loading hierarchy
+
+#### **AI + Performance Optimization**
+
+**🎯 Building high-performance AI features**
+
+1. **[Queue Patterns](./queue-patterns-implementation.md)** - Background AI processing
+2. **[Worker Threads](../electron/worker-threads-guide.md)** - Isolate AI computations
+3. **[Async Patterns](../electron/nodejs-async-patterns.md)** - Optimize AI service layer
+
+#### **AI + Database Integration**
+
+**🎯 Persistent AI data with optimal performance**
+
+1. **[Provider Patterns](./ai-sdk-provider-patterns.md)** - Encrypted storage patterns
+2. **[Database Patterns](../../developer/database-patterns.md)** - AI data persistence
+3. **[Memory Architecture](../../../src/main/features/agent/memory/)** - Advanced AI memory systems
+
 ## 📚 Available Guides
 
 ### **Core AI Implementation** _(~60 min total)_
@@ -159,7 +209,7 @@ const provider = await LlmProviderService.create({
 const model = await LLMService.getModel("user-123", provider.id);
 const result = await generateText({
   model,
-  prompt: "Hello, world!",
+  prompt: "Hello, world\!",
 });
 ```
 
@@ -181,7 +231,7 @@ const memories = await MemoryService.searchMemories(
 );
 ```
 
-## 🔍 Related Documentation
+## 🔗 Related Documentation
 
 ### **Core Implementation**
 
@@ -193,7 +243,19 @@ const memories = await MemoryService.searchMemories(
 
 - **[Data Loading](../../developer/data-loading-patterns.md)** - Loading AI data in React
 - **[IPC Communication](../../developer/ipc-communication-patterns.md)** - AI service communication
-- **[Conversation Components](../frontend/README.md)** - UI for AI interactions
+- **[Frontend Architecture](../frontend/README.md)** - React patterns for AI features
+
+### **Performance & Background Processing**
+
+- **[Electron Performance](../electron/README.md)** - AI performance optimization
+- **[Worker Threads](../electron/worker-threads-guide.md)** - Background AI processing
+- **[Async Patterns](../electron/nodejs-async-patterns.md)** - Service layer optimization
+
+### **Strategic Planning Integration**
+
+- **[PRP Methodology](../../prps/README.md)** - Plan complex AI feature implementations
+- **[Active AI PRPs](../../prps/01-initials/README.md)** - Real AI implementation planning examples
+- **[INLINE-FIRST Philosophy](../../developer/code-simplicity-principles.md)** - Apply simplicity to AI implementations
 
 ### **Architecture Context**
 
@@ -208,8 +270,6 @@ const memories = await MemoryService.searchMemories(
 1. **[Vercel AI SDK Guide](./vercel-ai-sdk-guide.md)** - Core SDK patterns
 2. **[Provider Patterns](./ai-sdk-provider-patterns.md)** - Multi-provider architecture
 
-### **Phase 2: Advanced** _(~45 min)_
-
 3. **[Provider Registry](./createProviderRegistry-implementation-guide.md)** - Type-safe management
 4. **[Queue Patterns](./queue-patterns-implementation.md)** - Background processing
 5. **[Memory System](../../../src/main/features/agent/memory/)** - Advanced memory
@@ -218,9 +278,48 @@ const memories = await MemoryService.searchMemories(
 
 6. **[AI Research](./ai-sdk-comprehensive-research.md)** - Optimization techniques
 7. **Practice Implementation** - Build AI features
+8. **Cross-Domain Integration** - Combine with Frontend/Electron patterns
 
-**🎯 Success Criteria:** Can implement complete AI features with multi-provider support, encrypted storage, and advanced memory integration.
+### **Phase 4: Production** _(~45 min)_
+
+9. **[Security Implementation](./ai-sdk-provider-patterns.md#security-patterns)** - Production security
+10. **[Performance Optimization](../electron/README.md)** - AI-specific performance
+11. **[Testing Strategies](../../developer/README.md#testing-strategy)** - AI feature testing
+
+**🎯 Success Criteria:** Can implement complete AI features with multi-provider support, encrypted storage, advanced memory integration, and cross-domain optimization.
 
 ---
 
-**💡 Next Steps:** Start with the [Vercel AI SDK Guide](./vercel-ai-sdk-guide.md) for core implementation patterns, then progress through provider management and advanced features.
+## 🔍 Contextual Discovery Integration
+
+### **When to Use This Documentation**
+
+#### **From Developer Workflows**
+
+- **Starting AI Feature**: Developer Guide → AI Integration Overview → Specific guides
+- **Complex AI Planning**: [PRP Planning](../../prps/README.md) → AI Implementation guides
+- **Performance Issues**: [Performance Optimization](../electron/README.md) → AI Queue Patterns
+
+#### **From Technical Problems**
+
+- **AI Response Latency**: Queue Patterns + Worker Threads + Async Patterns
+- **Provider Management**: Provider Patterns → Provider Registry
+- **Security Concerns**: Provider Patterns (encryption) + Security best practices
+
+#### **From Cross-Domain Needs**
+
+- **AI + UI**: Frontend guides + AI Streaming patterns
+- **AI + Performance**: Electron guides + AI Queue processing
+- **AI + Database**: Database patterns + AI Memory systems
+
+### **Navigation Pathways**
+
+- **[← Back to Technical Guides](../README.md)** - All technical implementation guides
+- **[↑ Developer Guide](../../developer/README.md)** - Core development patterns
+- **[⚡ Electron Guides](../electron/README.md)** - Performance and background processing
+- **[🎨 Frontend Guides](../frontend/README.md)** - UI implementation for AI features
+
+---
+
+**💡 Next Steps:** Start with the [Vercel AI SDK Guide](./vercel-ai-sdk-guide.md) for core implementation patterns, then progress through provider management and advanced features based on your specific needs and integration requirements.
+EOF < /dev/null

@@ -9,10 +9,11 @@ This structure represents the **actual sophisticated organization** of the Proje
 ### **Regras Fundamentais:**
 
 - **SEM pasta `shared`** - não criar abstrações desnecessárias
-- **Componentes compartilhados** → `renderer/components/`
+- **Componentes compartilhados** → `renderer/components/` following [design system patterns](../design/README.md)
 - **Recursos globais** → suas respectivas pastas em `renderer/`
 - **Específico de feature** → dentro da própria feature
 - **Organização por domínio** → features agrupadas por contexto de negócio
+- **Design token consistency** → [OKLCH color system](../design/design-tokens.md) used throughout structure
 
 ### **Nomenclatura de Arquivos:**
 
@@ -130,7 +131,7 @@ src/
     │   │   └── index.ts          # Barrel export
     │   ├── auth-button.tsx        # Authentication button
     │   ├── custom-link.tsx        # Router-aware link component
-    │   └── ui/                    # shadcn/ui component library
+    │   └── ui/                    # shadcn/ui component library (48 components)
     │       ├── accordion.tsx      # Accordion component
     │       ├── alert-dialog.tsx   # Alert dialog
     │       ├── button.tsx         # Button variants
@@ -141,7 +142,7 @@ src/
     │       ├── select.tsx         # Select dropdowns
     │       ├── sidebar.tsx        # Sidebar component
     │       ├── table.tsx          # Table components
-    │       └── ... (40+ UI components)
+    │       └── ... (40+ UI components from [design system](../design/README.md))
     ├── features/                   # Feature-specific frontend code
     │   ├── auth/                  # Authentication feature
     │   │   ├── auth.schema.ts     # Frontend auth validation
@@ -578,3 +579,5 @@ Esta estrutura garante:
 - **Reutilização** de componentes e lógica
 - **Manutenibilidade** e escalabilidade
 - **Consistência** em todo o projeto
+- **Design system integration** - [48 shadcn/ui components](../design/README.md) with [OKLCH design tokens](../design/design-tokens.md)
+- **Visual consistency** - [Discord-like interface patterns](../design/visual-design-principles.md) implemented through folder structure

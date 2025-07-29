@@ -1,5 +1,14 @@
 # Design System Specification
 
+**📋 ARCHIVED DOCUMENT**
+
+- **Archived Date**: 2025-07-29
+- **Superseded By**: [Component Design Guidelines](../../design/component-design-guidelines.md) and related guides
+- **Archive Reason**: Superseded by component-specific implementation guides with actual production code patterns
+- **Historical Context**: Original comprehensive specification, preserved for understanding design system evolution
+
+---
+
 This document defines the complete visual design system for Project Wiz, establishing a modern, professional, and cohesive visual language for the AI-powered development platform.
 
 ## 🎨 Design Philosophy
@@ -566,13 +575,13 @@ This document defines the complete visual design system for Project Wiz, establi
 
 - **[Color Palette Specification](./color-palette-specification.md)** - Extended color system details **(15 min)**
 - **[Typography System](./typography-system.md)** - Complete typography implementation **(10 min)**
-- **[Component Design Guidelines](./component-design-guidelines.md)** - Visual component patterns **(20 min)**
+- **[Component Design Guidelines](./component-design-guidelines.md)** - Visual component patterns with [React implementation standards](../developer/coding-standards.md) **(20 min)**
 - **[Layout and Spacing](./layout-and-spacing.md)** - Grid systems and spacing rules **(10 min)**
 
 ### **🏗️ Implementation Planning**
 
-- **[Implementation Plan](./implementation-plan.md)** - Detailed execution strategy **(15 min)**
-- **[Component Migration Guide](./component-migration-guide.md)** - Step-by-step transformation **(20 min)**
+- **[Implementation Plan](./implementation-plan.md)** - Detailed execution strategy following [development workflow](../developer/README.md#development-workflow) **(15 min)**
+- **[Component Migration Guide](./component-migration-guide.md)** - Step-by-step transformation using [INLINE-FIRST principles](../developer/code-simplicity-principles.md) **(20 min)**
 
 ### **🔙 Navigation**
 
@@ -582,9 +591,9 @@ This document defines the complete visual design system for Project Wiz, establi
 
 ### **🎯 Next Steps**
 
-1. **Review:** Complete design system specification
-2. **Detail:** Read individual component guidelines
-3. **Plan:** Review implementation strategy
-4. **Implement:** Execute visual transformation
+1. **Review:** Complete design system specification and [developer architecture overview](../developer/README.md#architecture-overview)
+2. **Detail:** Read individual component guidelines and [coding standards](../developer/coding-standards.md)
+3. **Plan:** Review implementation strategy with [INLINE-FIRST principles](../developer/code-simplicity-principles.md)
+4. **Implement:** Execute visual transformation following [feature-based organization](../developer/folder-structure.md)
 
 **💡 Remember:** This design system serves as the foundation for all visual decisions in Project Wiz. Consistency in application creates a cohesive, professional user experience.

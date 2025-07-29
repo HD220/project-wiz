@@ -39,7 +39,7 @@ Documentação estratégica de planejamento, requisitos e especificações do Pr
 - **Technical capabilities** and architecture support
 - **Implementation priorities** and dependencies
 
-#### **[📊 Project Brief](../project-brief.md)** **(10 min)**
+#### **[📊 Project Brief](../../project-brief.md)** **(10 min)**
 
 - **Executive summary** for stakeholders
 - **High-level architecture** overview
@@ -85,13 +85,13 @@ Documentação estratégica de planejamento, requisitos e especificações do Pr
 
 #### **💼 Stakeholders**
 
-1. **Start:** [Project Brief](../project-brief.md) - Executive overview
+1. **Start:** [Project Brief](../../project-brief.md) - Executive overview
 2. **Detail:** [Product Requirements](./product-requirements.md) - Complete vision
 3. **Progress:** Check implementation in [Developer Documentation](../developer/)
 
 ### **By Timeline**
 
-- **Quick Overview** _(10 min)_: [Project Brief](../project-brief.md)
+- **Quick Overview** _(10 min)_: [Project Brief](../../project-brief.md)
 - **Strategic Planning** _(45 min)_: All core documents
 - **Deep Implementation** _(2+ hours)_: Add [PRP Methodology](../prps/) + [Technical Guides](../technical-guides/)
 
@@ -148,7 +148,7 @@ Use this documentation to:
 
 ### **Phase 1: Foundation** _(~30 min)_
 
-1. **[Project Brief](../project-brief.md)** - High-level understanding
+1. **[Project Brief](../../project-brief.md)** - High-level understanding
 2. **[Product Requirements](./product-requirements.md)** - Detailed vision
 3. **[System Features](./system-features.md)** - Technical capabilities
 

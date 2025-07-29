@@ -1,12 +1,14 @@
 # Electron Architecture & Performance Guides
 
-## Overview
+Advanced technical guides for implementing production-ready Electron applications with enterprise security, optimal performance, and modern development patterns.
+
+## 🎯 Architecture Overview
 
 Project Wiz implements a **production-ready Electron application** with enterprise-grade security, performance optimization, and advanced IPC communication patterns.
 
 **Current Implementation**: Electron 35.1.4 with React 19, TypeScript 5.8.3, and production security configurations.
 
-## Production Architecture Status
+## 📊 Production Architecture Status
 
 ### **Electron Configuration**
 
@@ -22,6 +24,52 @@ Project Wiz implements a **production-ready Electron application** with enterpri
 - ✅ **Database Integration**: SQLite with WAL mode
 - ✅ **Logging System**: Pino logger with structured logging
 - ✅ **Error Handling**: Standardized IPC error patterns
+
+## 🔍 Discovery Pathways
+
+### **Problem-Solving Entry Points**
+
+#### **"My app is slow or unresponsive"**
+
+**→ Start Here**: [Node.js Async Patterns](./nodejs-async-patterns.md) - Performance optimization fundamentals
+
+#### **"I need background processing"**
+
+**→ Solution**: [Worker Threads Guide](./worker-threads-guide.md) - Threading patterns for heavy work
+
+#### **"I want to understand Electron worker patterns"**
+
+**→ Deep Dive**: [Electron Worker Threads](./electron-worker-threads-guide.md) - Desktop-specific threading
+
+#### **"I need to compare worker solutions"**
+
+**→ Research**: [Worker Pool Libraries Comparison](./worker-pool-libraries-comparison.md) - Third-party analysis
+
+### **Integration Scenarios**
+
+#### **Electron + AI Performance**
+
+**🎯 Optimizing AI-powered desktop applications**
+
+1. **[Async Patterns](./nodejs-async-patterns.md)** - Service layer optimization for AI
+2. **[Worker Threads](./worker-threads-guide.md)** - Isolate AI processing from main thread
+3. **[AI Queue Processing](../ai-integration/queue-patterns-implementation.md)** - Background AI workload management
+
+#### **Electron + Frontend Performance**
+
+**🎯 Building responsive desktop UI**
+
+1. **[Electron Performance](./README.md#performance-patterns)** - Desktop-specific optimizations
+2. **[Frontend Performance](../frontend/README.md#performance-optimization)** - React 19 optimization
+3. **[IPC Optimization](../../developer/ipc-communication-patterns.md)** - Efficient main-renderer communication
+
+#### **Electron + Database Performance**
+
+**🎯 Optimal data persistence in desktop apps**
+
+1. **[Database Performance](../../developer/database-patterns.md#performance-patterns)** - SQLite optimization
+2. **[Async Patterns](./nodejs-async-patterns.md)** - Non-blocking database operations
+3. **[Worker Pool Solutions](./worker-pool-libraries-comparison.md)** - Database work distribution
 
 ## 📚 Available Guides
 
@@ -106,7 +154,7 @@ export class AgentService {
       .values(validatedInput)
       .returning();
 
-    if (!agent) {
+    if (\!agent) {
       throw new Error("Failed to create agent");
     }
 
@@ -170,7 +218,7 @@ contextBridge.exposeInMainWorld("api", {
 ### **Content Security Policy**
 
 ```html
-<!-- src/renderer/index.html -->
+<\!-- src/renderer/index.html -->
 <meta
   http-equiv="Content-Security-Policy"
   content="
@@ -209,7 +257,7 @@ agentUserActiveCreatedIdx: index("agents_user_active_created_idx").on(
 // Proper cleanup patterns
 app.on("window-all-closed", () => {
   // Close database connections
-  if (process.platform !== "darwin") {
+  if (process.platform \!== "darwin") {
     app.quit();
   }
 });
@@ -268,7 +316,7 @@ export const config: ForgeConfig = {
 };
 ```
 
-## Implementation Examples
+## 🚀 Implementation Examples
 
 ### **Complete Feature Handler Setup**
 
@@ -304,7 +352,7 @@ export class AgentService {
       .where(eq(agentsTable.id, id))
       .limit(1);
 
-    if (!agent) {
+    if (\!agent) {
       throw new Error(`Agent with id ${id} not found`);
     }
 
@@ -316,7 +364,92 @@ export class AgentService {
 // createIpcHandler converts thrown errors to IpcResponse<never>
 ```
 
-## Related Implementation Files
+## 🔗 Related Documentation
+
+### **Core Implementation**
+
+- **[IPC Communication Patterns](../../developer/ipc-communication-patterns.md)** - Main ↔ Renderer communication **(15 min)**
+- **[Database Patterns](../../developer/database-patterns.md)** - SQLite optimization and patterns **(15 min)**
+- **[Error Handling](../../developer/error-handling-patterns.md)** - Electron-specific error management **(15 min)**
+
+### **Cross-Domain Integration**
+
+- **[AI Integration](../ai-integration/README.md)** - AI features in Electron applications
+- **[Frontend Performance](../frontend/README.md)** - React optimization for desktop
+- **[Service Layer Patterns](../../developer/database-patterns.md#service-layer-pattern)** - Business logic organization
+
+### **Strategic Planning Integration**
+
+- **[PRP Methodology](../../prps/README.md)** - Plan complex Electron implementations
+- **[Active Electron PRPs](../../prps/01-initials/README.md)** - Real Electron planning examples
+- **[INLINE-FIRST Philosophy](../../developer/code-simplicity-principles.md)** - Apply simplicity to Electron complexity
+
+### **Architecture Context**
+
+- **[Developer Guide](../../developer/README.md)** - Complete development patterns
+- **[Design System](../../design/README.md)** - UI implementation for desktop
+- **[User Flows](../../user/user-flows.md)** - Desktop user experience requirements
+
+## 🎯 Learning Path
+
+### **Phase 1: Foundation** _(~30 min)_
+
+1. **[Node.js Async Patterns](./nodejs-async-patterns.md)** - Service layer optimization
+2. **[IPC Communication](../../developer/ipc-communication-patterns.md)** - Main-renderer communication
+
+### **Phase 2: Performance** _(~45 min)_
+
+3. **[Worker Threads Guide](./worker-threads-guide.md)** - Background processing
+4. **[Electron Worker Threads](./electron-worker-threads-guide.md)** - Desktop-specific patterns
+5. **[Database Performance](../../developer/database-patterns.md#performance-patterns)** - SQLite optimization
+
+### **Phase 3: Advanced** _(~30 min)_
+
+6. **[Worker Pool Comparison](./worker-pool-libraries-comparison.md)** - Third-party solutions
+7. **[Security Patterns](#security-implementation)** - Production security
+8. **Cross-Domain Integration** - Combine with AI/Frontend patterns
+
+### **Phase 4: Production** _(~30 min)_
+
+9. **[Build Configuration](#build--development-configuration)** - Production builds
+10. **[Memory Management](#memory-management)** - Resource optimization
+11. **Practice Implementation** - Build complete features
+
+**🎯 Success Criteria:** Can implement production-ready Electron applications with optimal performance, security hardening, and cross-domain integration capabilities.
+
+---
+
+## 🔍 Contextual Discovery Integration
+
+### **When to Use This Documentation**
+
+#### **From Developer Workflows**
+
+- **Starting Electron Feature**: Developer Guide → Electron Architecture → Specific patterns
+- **Complex Desktop Planning**: [PRP Planning](../../prps/README.md) → Electron Implementation guides
+
+#### **From Technical Problems**
+
+- **App Responsiveness**: [Async Patterns](./nodejs-async-patterns.md) + [Worker Threads](./worker-threads-guide.md)
+- **Background Processing**: [Worker patterns](./worker-threads-guide.md) + Integration guides
+- **Security Concerns**: [Security implementation](#security-implementation) + Best practices
+
+#### **From Cross-Domain Needs**
+
+- **Electron + AI**: AI performance patterns + Worker thread isolation
+- **Electron + Frontend**: Desktop UI optimization + React performance
+- **Electron + Database**: SQLite optimization + Async patterns
+
+### **Navigation Pathways**
+
+- **[← Back to Technical Guides](../README.md)** - All technical implementation guides
+- **[↑ Developer Guide](../../developer/README.md)** - Core development patterns
+- **[🤖 AI Integration](../ai-integration/README.md)** - AI features for desktop apps
+- **[🎨 Frontend Guides](../frontend/README.md)** - React patterns for Electron
+
+---
+
+## 📋 Related Implementation Files
 
 ### **Core Electron Files**
 
@@ -331,10 +464,5 @@ export class AgentService {
 - `/vite.renderer.config.mts` - Renderer process build configuration
 - `/forge.config.cts` - Electron Forge packaging configuration
 
-### **Related Guides**
-
-- [IPC Communication Patterns](../../developer/ipc-communication-patterns.md) - Communication patterns
-- [Database Patterns](../../developer/database-patterns.md) - Data persistence
-- [AI Integration](../ai-integration/README.md) - AI features in Electron
-
-**🎯 Next Steps**: Explore [Worker Threads Guide](./worker-threads-guide.md) for background processing or [Async Patterns](./nodejs-async-patterns.md) for performance optimization.
+**💡 Next Steps**: Explore [Worker Threads Guide](./worker-threads-guide.md) for background processing or [Async Patterns](./nodejs-async-patterns.md) for performance optimization based on your specific needs.
+EOF < /dev/null

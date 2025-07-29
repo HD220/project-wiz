@@ -1,5 +1,14 @@
 # TanStack Router Context: Comprehensive Research
 
+**📋 ARCHIVED DOCUMENT**
+
+- **Archived Date**: 2025-07-29
+- **Superseded By**: [Data Loading Patterns](../../developer/data-loading-patterns.md) - TanStack Router/Query integration
+- **Archive Reason**: Pattern not used in Project Wiz - uses data loading hierarchy instead of router contexts
+- **Historical Context**: Comprehensive TanStack Router context research preserved for technical reference
+
+---
+
 ⚠️ **DEPRECATED - DO NOT USE IN PROJECT WIZ**
 
 This documentation is for reference only. **Project Wiz does NOT use router contexts or `useRouteContext`**.

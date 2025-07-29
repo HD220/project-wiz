@@ -2,7 +2,7 @@
 
 **Data de Criação:** [DATA]  
 **Última Atualização:** [DATA]  
-**Relacionado aos Requisitos:** [Link para requirements.md]
+**Relacionado aos Requisitos:** [Link para requirements-template.md]
 
 ---
 
@@ -75,8 +75,8 @@
 
 ### Regras de Negócio Aplicadas
 
-- **RN001:** [Referência à regra do requirements.md]
-- **RN002:** [Referência à regra do requirements.md]
+- **RN001:** [Referência à regra do requirements-template.md]
+- **RN002:** [Referência à regra do requirements-template.md]
 
 ### Requisitos Relacionados
 

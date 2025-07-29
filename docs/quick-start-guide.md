@@ -90,7 +90,7 @@ _For product managers and project leaders_
 
 ### **Phase 1: Vision** _(15 min)_
 
-1. **[📄 Project Brief](./project-brief.md)** - Executive summary _(5 min)_
+1. **[📄 Project Brief](../project-brief.md)** - Executive summary _(5 min)_
 2. **[📋 Product Requirements](./planning/product-requirements.md)** - Complete vision _(10 min)_
 
 ### **Phase 2: Implementation** _(10 min)_
@@ -143,7 +143,7 @@ _For UX/UI designers and user experience professionals_
 
 ### **All Roles Should Know:**
 
-- **[Project Brief](./project-brief.md)** - What Project Wiz is and why it exists
+- **[Project Brief](../project-brief.md)** - What Project Wiz is and why it exists
 - **[Main Documentation](./README.md)** - How documentation is organized
 - **[Glossary](./glossary-and-search.md)** - Key concepts and terminology
 

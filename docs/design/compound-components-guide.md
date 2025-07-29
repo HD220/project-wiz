@@ -1814,7 +1814,7 @@ export { ComponentRoot as Component };
 
 ### **📖 Essential Reading**
 
-- **[Design System Overview](./design-system-overview.md)** - Overall design system architecture **(15 min)**
+- **[Design System Overview](./README.md)** - Complete design system documentation **(15 min)**
 - **[Design Tokens](./design-tokens.md)** - Color, spacing, and typography tokens **(10 min)**
 - **[Code Simplicity Principles](../developer/code-simplicity-principles.md)** - INLINE-FIRST philosophy **(10 min)**
 

@@ -6,11 +6,11 @@ This directory contains comprehensive templates for Project Wiz development, des
 
 ### Planning and Analysis Templates
 
-| Template                                        | Purpose                            | Complexity | Primary Agent                   | Estimated Time |
-| ----------------------------------------------- | ---------------------------------- | ---------- | ------------------------------- | -------------- |
-| [Brainstorm Template](./brainstorm-template.md) | Structured brainstorming sessions  | Low        | technical-brainstorming-partner | 1-2 hours      |
-| [Requirements Template](./requirements.md)      | Feature requirements documentation | Medium     | solution-architect              | 2-3 hours      |
-| [Use Cases Template](./use-cases.md)            | User workflow documentation        | Medium     | solution-architect              | 1-2 hours      |
+| Template                                            | Purpose                            | Complexity | Primary Agent                   | Estimated Time |
+| --------------------------------------------------- | ---------------------------------- | ---------- | ------------------------------- | -------------- |
+| [Brainstorm Template](./brainstorm-template.md)     | Structured brainstorming sessions  | Low        | technical-brainstorming-partner | 1-2 hours      |
+| [Requirements Template](./requirements-template.md) | Feature requirements documentation | Medium     | solution-architect              | 2-3 hours      |
+| [Use Cases Template](./use-cases-template.md)       | User workflow documentation        | Medium     | solution-architect              | 1-2 hours      |
 
 ### Architecture Templates
 
@@ -52,7 +52,7 @@ related_patterns: ["docs/developer/pattern.md"]
 
 Select the appropriate template based on your task:
 
-- **Planning new features:** Use [Requirements Template](./requirements.md)
+- **Planning new features:** Use [Requirements Template](./requirements-template.md)
 - **Exploring solutions:** Use [Brainstorm Template](./brainstorm-template.md)
 - **Architectural decisions:** Use [ADR Template](./architecture/adr-template.md)
 - **System design:** Use [System Design Template](./architecture/system-design-template.md)

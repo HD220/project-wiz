@@ -1,5 +1,14 @@
 # Design System Overview
 
+**📋 ARCHIVED DOCUMENT**
+
+- **Archived Date**: 2025-07-29
+- **Superseded By**: [Design System README](../../design/README.md)
+- **Archive Reason**: Superseded by comprehensive design documentation with production implementation details
+- **Historical Context**: Original high-level design system overview, preserved for architectural decision context
+
+---
+
 This document provides a high-level overview of the Project Wiz Design System architecture and its role in creating consistent, accessible interfaces.
 
 ## 🎯 System Purpose

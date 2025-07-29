@@ -31,59 +31,14 @@ Project Wiz frontend implements a **sophisticated desktop-first architecture** w
 - ✅ **State Management**: Hierarchical state with Router → Query → Local patterns
 - ✅ **Internationalization**: LinguiJS with English/Portuguese support
 
-## 🔍 Discovery Pathways
-
-### **Problem-Solving Entry Points**
-
-#### **"I need to implement authentication"**
-
-**→ Start Here**: [Data Loading Patterns](../../developer/data-loading-patterns.md) - Session-based auth via beforeLoad/loader
-
-#### **"My data loading is inconsistent"**
-
-**→ Solution**: [Data Loading Guide](./tanstack-router-data-loading-guide.md) - MANDATORY hierarchy patterns
-
-#### **"I need to share state between components"**
-
-**→ Go To**: [Data Loading Patterns](../../developer/data-loading-patterns.md) - State management hierarchy
-
-#### **"I want to understand authentication decisions"**
-
-**→ Research**: [Archived Research](../../archive/deprecated-technical-guides/) - Historical authentication analysis
-
-### **Integration Scenarios**
-
-#### **Frontend + AI Integration**
-
-**🎯 Building real-time AI conversation interfaces**
-
-1. **[Data Loading Foundation](./tanstack-router-data-loading-guide.md)** - Establish proper data hierarchy
-2. **[AI SDK Streaming](../ai-integration/vercel-ai-sdk-guide.md)** - Integrate AI streaming responses
-3. **[State Management](../../developer/data-loading-patterns.md)** - AI conversation state via data hierarchy
-
-#### **Frontend + Performance Optimization**
-
-**🎯 Building high-performance desktop UI**
-
-1. **[React 19 Patterns](./README.md#performance-optimization)** - Leverage concurrent features
-2. **[TanStack Query Optimization](./tanstack-router-data-loading-guide.md#performance-patterns)** - Efficient data caching
-3. **[Electron Performance](../electron/README.md)** - Desktop-specific optimizations
-
-#### **Frontend + Design System Integration**
-
-**🎯 Implementing consistent UI with shadcn/ui**
-
-1. **[Component Guidelines](../../design/component-design-guidelines.md)** - shadcn/ui usage patterns
-2. **[Design Tokens](../../design/design-tokens.md)** - Theming and styling
-3. **[Compound Components](../../design/compound-components-guide.md)** - Advanced UI patterns
-
 ## 📚 Available Guides
 
 ### **Core Frontend Patterns** _(~60 min total)_
 
 - **[TanStack Router Data Loading Guide](./tanstack-router-data-loading-guide.md)** - Complete data loading hierarchy and patterns **(20 min)**
-- **[Authentication Patterns](../../developer/data-loading-patterns.md)** - Session-based auth via beforeLoad/loader **(15 min)**
-- **[Legacy Research](../../archive/deprecated-technical-guides/)** - Historical context and authentication research (archived)
+- **[TanStack Router Authentication Guide](./tanstack-router-authentication-guide.md)** - Session-based auth implementation **(15 min)**
+- **[TanStack Router Contexts Guide](./tanstack-router-contexts-guide.md)** - Context management and data sharing **(15 min)**
+- **[TanStack Router Authentication Research](./tanstack-router-authentication-research.md)** - Auth architecture decisions **(10 min)**
 
 ### **Component Architecture** _(~45 min total)_
 
@@ -100,7 +55,7 @@ Project Wiz frontend implements a **sophisticated desktop-first architecture** w
 export const Route = createFileRoute('/_authenticated/agents/')({
   beforeLoad: async ({ context }) => {
     // Auth checks and global data
-    if (\!context.auth.user) throw redirect({ to: '/auth/login' });
+    if (!context.auth.user) throw redirect({ to: '/auth/login' });
     return { user: context.auth.user };
   },
   loader: async () => {
@@ -206,7 +161,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 // Route protection with beforeLoad
 export const AuthenticatedRoute = createFileRoute('/_authenticated')({
   beforeLoad: ({ context }) => {
-    if (\!context.auth.user) {
+    if (!context.auth.user) {
       throw redirect({ to: '/auth/login' });
     }
   }
@@ -262,7 +217,7 @@ const agents = useQuery({
 // File: /src/renderer/app/_authenticated/agents/index.tsx
 export const Route = createFileRoute('/_authenticated/agents/')({
   beforeLoad: async ({ context }) => {
-    if (\!context.auth.user) throw redirect({ to: '/auth/login' });
+    if (!context.auth.user) throw redirect({ to: '/auth/login' });
   },
   loader: async () => {
     const agents = await loadApiData(() => window.api.agents.list());
@@ -350,7 +305,7 @@ export function CreateAgentForm({ onSuccess }: CreateAgentFormProps) {
 }
 ```
 
-## 🔗 Related Documentation
+## 🔍 Related Documentation
 
 ### **Core Implementation**
 
@@ -364,31 +319,19 @@ export function CreateAgentForm({ onSuccess }: CreateAgentFormProps) {
 - **[Design Tokens](../../design/design-tokens.md)** - Styling and theming **(10 min)**
 - **[Compound Components](../../design/compound-components-guide.md)** - Advanced UI patterns **(20 min)**
 
-### **Cross-Domain Integration**
-
-- **[AI Integration](../ai-integration/README.md)** - AI features in React components
-- **[Electron Performance](../electron/README.md)** - Desktop optimization patterns
-- **[Database Patterns](../../developer/database-patterns.md)** - Data persistence for frontend features
-
-### **Strategic Planning Integration**
-
-- **[PRP Methodology](../../prps/README.md)** - Plan complex frontend implementations
-- **[Active Frontend PRPs](../../prps/01-initials/README.md)** - Real frontend planning examples
-- **[INLINE-FIRST Philosophy](../../developer/code-simplicity-principles.md)** - Apply simplicity to frontend complexity
-
 ### **Architecture Context**
 
 - **[Developer Guide](../../developer/README.md)** - Complete development documentation
-- **[User Flows](../../user/user-flows.md)** - UI requirements from user perspective
-- **[Design System](../../design/README.md)** - Complete design implementation
+- **[Electron Guides](../electron/README.md)** - Backend and system integration
+- **[AI Integration](../ai-integration/README.md)** - AI feature implementation
 
 ## 🎯 Learning Path
 
 ### **Phase 1: Foundation** _(~45 min)_
 
 1. **[Data Loading Guide](./tanstack-router-data-loading-guide.md)** - Core data patterns
-2. **[Authentication Patterns](../../developer/data-loading-patterns.md)** - Auth via beforeLoad/loader
-3. **[State Management](../../developer/data-loading-patterns.md)** - Data hierarchy and state patterns
+2. **[Authentication Guide](./tanstack-router-authentication-guide.md)** - Auth implementation
+3. **[Contexts Guide](./tanstack-router-contexts-guide.md)** - Data sharing patterns
 
 ### **Phase 2: Components** _(~40 min)_
 
@@ -396,51 +339,20 @@ export function CreateAgentForm({ onSuccess }: CreateAgentFormProps) {
 5. **[Coding Standards](../../developer/coding-standards.md)** - React best practices
 6. **[Compound Components](../../design/compound-components-guide.md)** - Advanced patterns
 
-### **Phase 3: Integration** _(~45 min)_
+### **Phase 3: Advanced** _(~30 min)_
 
 7. **[IPC Communication](../../developer/ipc-communication-patterns.md)** - Electron integration
-8. **[AI Integration](../ai-integration/README.md)** - AI features in UI
-9. **[Performance Optimization](../electron/README.md)** - Desktop performance
+8. **[Performance Optimization](../../developer/README.md#performance-patterns)** - React 19 features
+9. **Practice Implementation** - Build complete features
 
-### **Phase 4: Advanced** _(~30 min)_
-
-10. **[Archived Research](../../archive/deprecated-technical-guides/)** - Historical authentication design decisions
-11. **Practice Implementation** - Build complete features
-
-**🎯 Success Criteria:** Can implement complete features following the data loading hierarchy, authentication patterns, component architecture, and cross-domain integration requirements.
+**🎯 Success Criteria:** Can implement complete features following the data loading hierarchy, authentication patterns, and component architecture.
 
 ---
 
-## 🔍 Contextual Discovery Integration
+**Navigation:**
 
-### **When to Use This Documentation**
+- **[← Back to Technical Guides](../README.md)**
+- **[↑ Main Documentation](../../README.md)**
+- **[🔍 Search & Glossary](../../glossary-and-search.md)**
 
-#### **From Developer Workflows**
-
-- **Starting Frontend Feature**: Developer Guide → Frontend Architecture → Specific patterns
-- **Complex UI Planning**: [PRP Planning](../../prps/README.md) → Frontend Implementation guides
-- **Authentication Issues**: [Data Loading Patterns](../../developer/data-loading-patterns.md) → Session management
-
-#### **From Technical Problems**
-
-- **Data Loading Confusion**: [MANDATORY hierarchy](./tanstack-router-data-loading-guide.md)
-- **State Management Issues**: [Data Loading Patterns](../../developer/data-loading-patterns.md)
-- **Component Architecture**: [Component guidelines](../../design/component-design-guidelines.md)
-
-#### **From Cross-Domain Needs**
-
-- **Frontend + AI**: AI integration patterns + Frontend streaming
-- **Frontend + Performance**: React 19 optimization + Electron performance
-- **Frontend + Design**: Component patterns + Design system implementation
-
-### **Navigation Pathways**
-
-- **[← Back to Technical Guides](../README.md)** - All technical implementation guides
-- **[↑ Developer Guide](../../developer/README.md)** - Core development patterns
-- **[🤖 AI Integration](../ai-integration/README.md)** - AI features for frontend
-- **[⚡ Electron Guides](../electron/README.md)** - Desktop performance and architecture
-
----
-
-**💡 Next Steps:** Start with the [Data Loading Guide](./tanstack-router-data-loading-guide.md) to understand the foundation patterns, then progress through authentication and component architecture based on your specific implementation needs.
-EOF < /dev/null
+**💡 Next Steps:** Start with the [Data Loading Guide](./tanstack-router-data-loading-guide.md) to understand the foundation patterns, then progress through authentication and component architecture.

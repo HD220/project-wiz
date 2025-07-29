@@ -1,5 +1,14 @@
 # TanStack Router Authentication & Masked Routes - Comprehensive Guide
 
+**📋 ARCHIVED DOCUMENT**
+
+- **Archived Date**: 2025-07-29
+- **Superseded By**: [Data Loading Patterns](../../developer/data-loading-patterns.md) - Authentication via beforeLoad/loader
+- **Archive Reason**: Contains deprecated patterns not used in Project Wiz (useRouteContext, router contexts)
+- **Historical Context**: Comprehensive research preserved for understanding TanStack Router capabilities
+
+---
+
 ⚠️ **PARTIALLY DEPRECATED - SOME PATTERNS NOT USED IN PROJECT WIZ**
 
 **❌ IMPORTANT: Project Wiz does NOT use `useRouteContext` or router contexts. We use beforeLoad/loader for authentication checks only.**

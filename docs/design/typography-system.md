@@ -625,7 +625,7 @@ function Text({
 
 ### **📖 Essential Context**
 
-- **[Design System Specification](./design-system-specification.md)** - Complete design system overview **(20 min)**
+- **[Component Design Guidelines](./component-design-guidelines.md)** - Complete component implementation guide **(25 min)**
 - **[Color Palette Specification](./color-palette-specification.md)** - Color system for typography **(15 min)**
 - **[Component Design Guidelines](./component-design-guidelines.md)** - Typography in components **(15 min)**
 

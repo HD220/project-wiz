@@ -409,7 +409,7 @@ This document defines the complete color system for Project Wiz based on the exi
 
 ### **📖 Essential Context**
 
-- **[Design System Specification](./design-system-specification.md)** - Complete design system overview **(20 min)**
+- **[Component Design Guidelines](./component-design-guidelines.md)** - Complete component implementation guide **(25 min)**
 - **[Typography System](./typography-system.md)** - Typography implementation using existing tokens **(10 min)**
 - **[Component Design Guidelines](./component-design-guidelines.md)** - Visual component patterns **(15 min)**
 

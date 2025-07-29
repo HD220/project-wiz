@@ -36,10 +36,9 @@ Project Wiz Design System is a fully implemented visual design system providing:
 - **[Typography System](./typography-system.md)** - Font scales and text styles in use **(10 min)**
 - **[Layout and Spacing](./layout-and-spacing.md)** - 8px grid system and responsive patterns **(10 min)**
 
-### **📋 Legacy Documentation**
+### **📚 Implementation History**
 
-- **[Design System Overview](./design-system-overview.md)** - Legacy overview (superseded by this README)
-- **[Design System Specification](./design-system-specification.md)** - Legacy specification (superseded by component guides)
+See archived legacy documentation in [Design Archives](../archive/legacy-design/) for historical context and design system evolution.
 
 ## 🚀 Quick Start
 
@@ -215,6 +214,14 @@ All 48 components meet **WCAG 2.1 AA** accessibility standards:
 
 ## 🔧 Development Integration
 
+### **Implementation Architecture**
+
+This design system integrates with Project Wiz's sophisticated development patterns:
+
+- **[INLINE-FIRST Philosophy](../developer/code-simplicity-principles.md)** - Components optimized for readability and junior developer accessibility
+- **[React Function Patterns](../developer/coding-standards.md)** - Function declarations with props destructuring, no React.FC usage
+- **[Feature-Based Architecture](../developer/folder-structure.md)** - Component organization that mirrors design system structure
+
 ### **Actual File Structure** (Current Implementation)
 
 ```
@@ -235,6 +242,8 @@ src/renderer/components/
 
 ### **CSS Token Usage** (Required Pattern)
 
+Follows Project Wiz [coding standards](../developer/coding-standards.md) for design token implementation:
+
 ```tsx
 // CORRECT: Use design tokens
 className = "px-[var(--spacing-component-md)] py-[var(--spacing-component-sm)]";
@@ -242,6 +251,8 @@ className = "px-[var(--spacing-component-md)] py-[var(--spacing-component-sm)]";
 // INCORRECT: Hardcoded values
 className = "px-4 py-2";
 ```
+
+See [Code Simplicity Principles](../developer/code-simplicity-principles.md) for INLINE-FIRST token usage patterns.
 
 ### **Theme Integration** (Automatic)
 
@@ -256,16 +267,21 @@ className = "px-4 py-2";
 
 ## 🔗 Integration with Development Documentation
 
-### **Technical Implementation**
+### **Implementation Patterns**
 
-- **[Coding Standards](../developer/coding-standards.md)** - React function declarations and TypeScript patterns
-- **[Code Simplicity Principles](../developer/code-simplicity-principles.md)** - INLINE-FIRST component philosophy
-- **[Data Loading Patterns](../developer/data-loading-patterns.md)** - TanStack Router/Query integration
+- **[Coding Standards](../developer/coding-standards.md)** - React function declarations, TypeScript patterns, and shadcn/ui integration requirements
+- **[Code Simplicity Principles](../developer/code-simplicity-principles.md)** - INLINE-FIRST component philosophy that guides design system implementation
+- **[Data Loading Patterns](../developer/data-loading-patterns.md)** - TanStack Router/Query integration with design system components
 
 ### **System Architecture**
 
-- **[Folder Structure](../developer/folder-structure.md)** - Feature-based component organization
-- **[IPC Communication Patterns](../developer/ipc-communication-patterns.md)** - Electron main/renderer patterns
+- **[Folder Structure](../developer/folder-structure.md)** - Feature-based component organization that mirrors design system patterns
+- **[Developer Guide](../developer/README.md)** - Complete development workflow that implements this design system
+- **[IPC Communication Patterns](../developer/ipc-communication-patterns.md)** - Backend integration patterns for design system components
+
+### **Implementation Reality**
+
+All design tokens, components, and patterns documented here are actively used in the Project Wiz codebase following the [enterprise-grade development patterns](../developer/README.md#architecture-overview) established in the developer documentation.
 
 ## 📋 Component Quality Checklist (Production Standards)
 

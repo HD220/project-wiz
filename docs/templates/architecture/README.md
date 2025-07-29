@@ -83,8 +83,8 @@ Desktop app security patterns:
 ### Other Templates
 
 - [Brainstorm Template](../brainstorm-template.md)
-- [Requirements Template](../requirements.md)
-- [Use Cases Template](../use-cases.md)
+- [Requirements Template](../requirements-template.md)
+- [Use Cases Template](../use-cases-template.md)
 
 ## Template Naming Convention
 

@@ -13,7 +13,11 @@
       "WebFetch(domain:github.com)",
       "WebFetch(domain:raw.githubusercontent.com)",
       "Bash(grep:*)",
-      "WebFetch(domain:docs.anthropic.com)"
+      "WebFetch(domain:docs.anthropic.com)",
+      "WebFetch(domain:slack.engineering)",
+      "WebFetch(domain:electron-vite.org)",
+      "WebFetch(domain:medium.com)",
+      "WebFetch(domain:blog.logrocket.com)"
     ],
     "deny": []
   }

@@ -60,6 +60,7 @@ Welcome to the Project Wiz documentation! This comprehensive guide covers everyt
 
 ### 📁 **Project Organization**
 
+- **[🛠️ Technology Stack](./developer/technology-stack.md)** - Canonical versions and configurations **(10 min)**
 - **[📂 Folder Structure](./developer/folder-structure.md)** - Codebase organization **(5 min)**
 - **[🏛️ Architecture Overview](./developer/architecture/)** - System design & decisions **(15 min)**
 
@@ -98,20 +99,20 @@ Welcome to the Project Wiz documentation! This comprehensive guide covers everyt
 
 - **[📄 Product Requirements](./planning/product-requirements.md)** - Complete PRD and vision **(20 min)**
 - **[⚙️ System Features](./planning/system-features.md)** - Detailed feature specifications **(15 min)**
-- **[📊 Project Brief](./project-brief.md)** - Executive summary **(10 min)**
+- **[📊 Project Brief](../project-brief.md)** - Executive summary **(10 min)**
 
 ### 🔬 **PRP Methodology** _(~30 min total)_
 
-- **[📚 PRP Overview](./prps/README.md)** - Project Requirements & Planning system **(10 min)**
-- **[💡 PRP Concepts](./prps/concepts/README.md)** - Methodology foundation **(10 min)**
-- **[⚡ Initial PRPs](./prps/01-initials/README.md)** - Implementation planning **(10 min)**
+- **[📚 PRP Overview](./prps/README.md)** - AI-optimized planning system with **developer workflow integration** **(10 min)**
+- **[💡 PRP Concepts](./prps/concepts/README.md)** - Methodology foundation and **INLINE-FIRST connections** **(10 min)**
+- **[⚡ Initial PRPs](./prps/01-initials/README.md)** - Implementation planning examples with **development pattern references** **(10 min)**
 
 ### 📝 **Templates & Standards**
 
 - **[📋 Templates](./templates/)** - Documentation templates
 - **[🧠 Brainstorm Template](./templates/brainstorm-template.md)** - Structured ideation
-- **[📋 Requirements Template](./templates/requirements.md)** - Feature specification
-- **[🎯 Use Cases Template](./templates/use-cases.md)** - User scenario documentation
+- **[📋 Requirements Template](./templates/requirements-template.md)** - Feature specification
+- **[🎯 Use Cases Template](./templates/use-cases-template.md)** - User scenario documentation
 
 **💡 Learning Path:** Requirements → Features → PRPs → Templates  
 **🎯 Success Criteria:** Can plan and document new features effectively

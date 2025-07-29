@@ -333,6 +333,8 @@ contextBridge.exposeInMainWorld("electronAPI", electronAPI);
 
 ### Estrutura de Componentes UI
 
+Follows the [design system specification](../design/README.md) with 48 production-ready components:
+
 ```typescript
 // SEMPRE usar componentes shadcn/ui, NUNCA import React
 // dashboard-header.tsx
@@ -345,6 +347,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/renderer/com
 
 // SEMPRE usar a função cn() para classes CSS
 import { cn } from '@/renderer/lib/utils';
+
+// Use design tokens from the design system
+import { OKLCH_COLORS, SPACING_TOKENS } from '../design/design-tokens.md';
 
 interface DashboardHeaderProps {
   className?: string;
@@ -366,6 +371,8 @@ export { DashboardHeader };
 
 ### Componentes de Layout
 
+Implements [design system layout patterns](../design/layout-and-spacing.md) with design tokens:
+
 ```typescript
 // app-layout.tsx - Layout usando shadcn/ui e function declaration
 import { Card, CardContent } from '@/renderer/components/ui/card';
@@ -385,9 +392,9 @@ function AppLayout(props: AppLayoutProps) {
         {/* Header content */}
       </header>
 
-      <main className="container mx-auto p-6">
+      <main className="container mx-auto p-[var(--spacing-layout-md)]">
         <Card>
-          <CardContent className="p-6">
+          <CardContent className="p-[var(--spacing-component-lg)]">
             {children}
           </CardContent>
         </Card>
@@ -399,13 +406,17 @@ function AppLayout(props: AppLayoutProps) {
 export { AppLayout };
 ```
 
+See [design tokens documentation](../design/design-tokens.md#spacing-system-8px-grid) for spacing token usage.
+
 ### Formulários com shadcn/ui Form
+
+Follows [component design guidelines](../design/component-design-guidelines.md#form-components) for form implementation:
 
 ```typescript
 // SEMPRE usar shadcn/ui Form components
 // NUNCA usar register() diretamente nos inputs
 
-// ✅ CORRETO:
+// ✅ CORRETO: Using design system form patterns
 <FormField
   control={form.control}
   name="fieldName"
@@ -423,6 +434,8 @@ export { AppLayout };
 // ❌ ERRADO:
 <input {...register('fieldName')} />
 ```
+
+Refer to [design system form patterns](../design/component-design-guidelines.md#form-components-12-components) for complete form component usage.
 
 ## 🚫 Anti-Padrões - O que NUNCA fazer
 

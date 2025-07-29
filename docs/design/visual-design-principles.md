@@ -170,7 +170,7 @@ All components must meet **WCAG 2.1 AA** compliance:
 ### **Design System**
 
 - **[Design System Overview](./README.md)** - Main design system documentation
-- **[Design System Architecture](./design-system-overview.md)** - High-level system overview
+- **[Design System Architecture](./README.md)** - Complete design system overview
 - **[Design Tokens](./design-tokens.md)** - Colors, typography, spacing tokens
 - **[Compound Components Guide](./compound-components-guide.md)** - Component creation patterns
 

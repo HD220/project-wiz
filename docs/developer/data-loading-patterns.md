@@ -281,3 +281,23 @@ loader: async ({ deps }) => {
 4. **Finally:** [Coding Standards](./coding-standards.md) - Apply in React components
 
 **💡 Remember:** This hierarchy is MANDATORY. Always check if a higher-priority pattern can handle your use case before creating custom solutions.
+
+## 🔗 **Integration with PRP Planning**
+
+When planning complex frontend features, consider using [PRP methodology](../prps/README.md) to provide comprehensive context for data loading implementation:
+
+### **PRP Planning for Data Loading:**
+
+- **Complex Route Hierarchies** → Create PRP to document loader dependencies and data flow patterns
+- **Multi-service Integration** → Use PRP to plan TanStack Query strategies across multiple backend services
+- **Performance-Critical Features** → Document data loading optimization plans in PRP format
+- **AI-Assisted Implementation** → Provide PRPs as context for LLM-assisted data loading code generation
+
+### **Reference Active PRPs:**
+
+These active PRPs demonstrate data loading planning approaches:
+
+- **[Service Layer CRUD Duplication](../prps/01-initials/service-layer-crud-duplication-refactor.md)** - Shows service → IPC → TanStack Query integration planning
+- **[Agent Service Complexity Refactor](../prps/01-initials/agent-service-complexity-refactor.md)** - Documents complex service interactions affecting frontend data loading
+
+The data loading patterns work best when combined with [INLINE-FIRST principles](./code-simplicity-principles.md) for tactical implementation and [PRP methodology](../prps/README.md) for strategic planning.

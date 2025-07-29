@@ -158,26 +158,91 @@ Problem → PRP Planning → AI-Assisted Implementation → Validation
 - Dependencies on other PRPs
 ```
 
-## Relationship to Technical Guides
+## Relationship to Development Workflows
 
 ### Complementary Documentation
 
-- **PRPs** focus on **what to build and why**
-- **Technical Guides** focus on **how to build it**
+- **PRPs** focus on **what to build and why** with AI-optimized planning
+- **Developer Patterns** focus on **how to build it** with INLINE-FIRST methodology
+- **Technical Guides** focus on **specialized implementation** with production patterns
 
-### Integration Pattern
+### Strategic Integration Workflow
 
 ```
-PRP Planning → Technical Guide Reference → Implementation → PRP Validation
+PRP Planning → Developer Patterns → Technical Implementation → PRP Validation
+      ↑                                                              ↓
+Strategic Context ←------ Implementation Feedback --------→ Refined Planning
 ```
 
-### Cross-References
+### **PRP-to-Development Bridges**
 
-PRPs should reference relevant technical guides:
+When creating or following PRPs, connect to these development workflows:
 
-- `/docs/technical-guides/ai-integration/` for AI-related PRPs
-- `/docs/developer/` for implementation patterns
-- `/docs/developer/architecture/` for system design decisions
+#### **From Planning to Implementation:**
+
+- **Service Layer Planning** → Reference [Database Patterns](../developer/database-patterns.md) and [INLINE-FIRST principles](../developer/code-simplicity-principles.md)
+- **AI Feature Planning** → Reference [AI Integration Guide](../technical-guides/ai-integration/README.md) and [Vercel AI SDK patterns](../technical-guides/ai-integration/vercel-ai-sdk-guide.md)
+- **Frontend Planning** → Reference [Data Loading Hierarchy](../developer/data-loading-patterns.md) and [TanStack Router patterns](../technical-guides/frontend/README.md)
+- **Architecture Planning** → Reference [IPC Communication](../developer/ipc-communication-patterns.md) and [Error Handling patterns](../developer/error-handling-patterns.md)
+
+#### **Implementation Pattern Connections:**
+
+| PRP Category            | Development Patterns                                                                                                       | Technical Guides                                                          |
+| ----------------------- | -------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------- |
+| **Database PRPs**       | [Database Patterns](../developer/database-patterns.md) → [SQLite + Drizzle](../developer/database-patterns.md)             | [Performance Optimization](../technical-guides/electron/README.md)        |
+| **Service Layer PRPs**  | [Code Simplicity](../developer/code-simplicity-principles.md) → [INLINE-FIRST](../developer/code-simplicity-principles.md) | [Worker Threads](../technical-guides/electron/worker-threads-guide.md)    |
+| **AI Integration PRPs** | [IPC Patterns](../developer/ipc-communication-patterns.md) → [Type Safety](../developer/coding-standards.md)               | [AI SDK Guide](../technical-guides/ai-integration/vercel-ai-sdk-guide.md) |
+| **Frontend PRPs**       | [Data Loading](../developer/data-loading-patterns.md) → [TanStack Router](../developer/data-loading-patterns.md)           | [Authentication](../developer/data-loading-patterns.md)                   |
+
+### **Development-to-PRP Bridges**
+
+When implementing features, reference these PRP examples for planning context:
+
+#### **INLINE-FIRST ↔ PRP Methodology:**
+
+The [INLINE-FIRST philosophy](../developer/code-simplicity-principles.md) aligns perfectly with PRP methodology:
+
+- **PRP Planning**: "Context-is-king" approach provides LLMs with comprehensive implementation context
+- **INLINE-FIRST**: Minimize abstraction, keep related logic together for LLM comprehension
+- **Shared Goal**: Optimize for both human and AI understanding in collaborative development
+
+#### **When to Create PRPs:**
+
+Reference these development scenarios where PRPs add strategic value:
+
+- **Complex Service Refactoring** → See [Service Layer CRUD Duplication](./01-initials/service-layer-crud-duplication-refactor.md) example
+- **Database Architecture Changes** → See [Database Timestamp Standardization](./01-initials/database-timestamp-pattern-standardization.md) example
+- **Performance Optimization** → See [Database Performance Indexes](./01-initials/database-performance-indexes.md) example
+- **Large Component Refactoring** → See [Agent Service Complexity Refactor](./01-initials/agent-service-complexity-refactor.md) example
+
+### **Practical Workflow Integration**
+
+#### **For Developers Starting New Features:**
+
+1. **Check Existing PRPs** → Review [Active PRPs](./01-initials/README.md) for similar planning approaches
+2. **Assess Complexity** → If >3 services or >20 lines of logic, consider creating a PRP
+3. **Plan with Context** → Use PRP methodology to provide comprehensive LLM context
+4. **Implement with Patterns** → Follow [Developer Guide](../developer/README.md) patterns
+5. **Validate with PRP** → Update PRP status and document implementation learnings
+
+#### **For Teams Using AI Assistance:**
+
+- **Strategic Planning** → Use PRP methodology for complex feature planning
+- **Tactical Implementation** → Use INLINE-FIRST patterns for daily development
+- **AI Collaboration** → Both systems optimize for LLM understanding and assistance
+- **Context Management** → PRPs provide "why" context, patterns provide "how" context
+
+### Cross-References for Implementation
+
+PRPs should reference relevant implementation guides:
+
+- **[Developer Guide](../developer/README.md)** for core development patterns and INLINE-FIRST philosophy
+- **[Data Loading Patterns](../developer/data-loading-patterns.md)** for TanStack Router implementation
+- **[Database Patterns](../developer/database-patterns.md)** for SQLite + Drizzle ORM usage
+- **[AI Integration](../technical-guides/ai-integration/)** for Vercel AI SDK implementation
+- **[IPC Communication](../developer/ipc-communication-patterns.md)** for main ↔ renderer patterns
+- **[Error Handling](../developer/error-handling-patterns.md)** for consistent error management
+- **[Code Simplicity](../developer/code-simplicity-principles.md)** for INLINE-FIRST methodology
 
 ## Best Practices
 

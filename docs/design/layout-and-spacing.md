@@ -541,7 +541,7 @@ function AgentCard({ agent, className = "" }) {
 
 ### **📖 Essential Context**
 
-- **[Design System Specification](./design-system-specification.md)** - Complete design system overview **(20 min)**
+- **[Component Design Guidelines](./component-design-guidelines.md)** - Complete component implementation guide **(25 min)**
 - **[Color Palette Specification](./color-palette-specification.md)** - Color system for visual hierarchy **(15 min)**
 - **[Typography System](./typography-system.md)** - Typography spacing and scale **(10 min)**
 
