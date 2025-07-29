@@ -1,31 +1,37 @@
 // ===========================
 // CONVERSATION FEATURE TYPES
 // ===========================
-// Centralized, clean types following CLAUDE.md principles
+// Updated to use new domain separation (DM vs Channel)
 
-// Re-export base types from backend
+// Re-export domain types
 export type {
-  SelectConversation,
-  InsertConversation,
-  SelectConversationParticipant,
-} from "@/main/features/conversation/conversation.model";
+  SelectDMConversation,
+  DMConversationWithParticipants,
+  DMConversationWithLastMessage,
+  SelectDMParticipant,
+} from "@/renderer/features/dm/dm-conversation.types";
+
+export type {
+  SelectProjectChannel,
+  ProjectChannelWithLastMessage,
+} from "@/renderer/features/project/project-channel.types";
 
 export type {
   SelectMessage,
-  InsertMessage,
-} from "@/main/features/conversation/message.model";
+  MessageSourceType,
+} from "@/renderer/features/message/message.types";
 
 export type { AuthenticatedUser } from "@/main/features/auth/auth.types";
 
-// Define ConversationType locally to avoid import issues
+// ===========================
+// UNIFIED CONVERSATION TYPES
+// ===========================
+// For components that need to handle both DM and Channel
+
 export type ConversationType = "dm" | "channel";
 
-// ===========================
-// FRONTEND-SPECIFIC TYPES
-// ===========================
-
-// Conversation with participants (for list display)
-export interface ConversationWithParticipants {
+// Unified conversation interface for renderer compatibility
+export interface UnifiedConversation {
   type: ConversationType;
   name: string | null;
   id: string;
@@ -37,38 +43,25 @@ export interface ConversationWithParticipants {
   description: string | null;
   archivedAt: Date | null;
   archivedBy: string | null;
+  // Optional fields
+  projectId?: string | null;
   agentId?: string | null;
-  participants: Array<{
-    id: string;
-    conversationId: string;
-    participantId: string;
-    isActive: boolean;
-    deactivatedAt: Date | null;
-    deactivatedBy: string | null;
-    createdAt: Date;
-    updatedAt: Date;
-  }>;
-}
-
-// Conversation with last message (for sidebar with preview)
-export interface ConversationWithLastMessage
-  extends ConversationWithParticipants {
+  title?: string | null;
+  isArchived?: boolean;
   lastMessage?: {
     id: string;
-    isActive: boolean;
-    deactivatedAt: Date | null;
-    deactivatedBy: string | null;
-    createdAt: Date;
-    updatedAt: Date;
-    conversationId: string;
     content: string;
     authorId: string;
+    createdAt: Date;
+    updatedAt: Date;
   };
-}
-
-// Conversation with full messages (for chat view)
-export interface ConversationWithMessages extends ConversationWithParticipants {
-  messages: Array<{
+  participants?: Array<{
+    id: string;
+    conversationId: string;
+    userId: string;
+    joinedAt: Date;
+  }>;
+  messages?: Array<{
     id: string;
     isActive: boolean;
     deactivatedAt: Date | null;
@@ -78,6 +71,9 @@ export interface ConversationWithMessages extends ConversationWithParticipants {
     conversationId: string;
     content: string;
     authorId: string;
+    senderId: string;
+    senderType: "user" | "agent";
+    metadata: unknown;
   }>;
 }
 
@@ -85,40 +81,51 @@ export interface ConversationWithMessages extends ConversationWithParticipants {
 // API INPUT TYPES
 // ===========================
 
-// Create conversation input
-export interface CreateConversationInput {
-  name?: string | null;
-  description?: string | null;
-  type: ConversationType;
-  agentId?: string | null;
+// Create DM input
+export interface CreateDMInput {
   participantIds: string[];
+  description?: string;
 }
 
-// Send message input
+// Create Channel input
+export interface CreateChannelInput {
+  projectId: string;
+  name: string;
+  description?: string;
+}
+
+// Send message input (unified)
 export interface SendMessageInput {
-  conversationId: string;
-  authorId: string;
+  sourceType: MessageSourceType;
+  sourceId: string;
   content: string;
-}
-
-// Archive conversation input (without reason - removed per user request)
-export interface ArchiveConversationInput {
-  conversationId: string;
 }
 
 // ===========================
 // UI STATE TYPES
 // ===========================
 
-// UI-only state (for Zustand store)
+// UI-only state
 export interface ConversationUIState {
   selectedConversationId: string | null;
+  selectedConversationType: ConversationType | null;
   showCreateDialog: boolean;
-  showArchived: boolean; // New field for archive toggle
+  showCreateChannelDialog: boolean;
+  showArchived: boolean;
 }
 
-// Filters for conversation list
+// Filters for conversation lists
 export interface ConversationFilters {
   includeArchived?: boolean;
   includeInactive?: boolean;
 }
+
+// ===========================
+// LEGACY COMPATIBILITY
+// ===========================
+// For gradual migration of existing components
+
+export type ConversationWithParticipants = UnifiedConversation;
+export type ConversationWithLastMessage = UnifiedConversation;
+export type ConversationWithMessages = UnifiedConversation;
+export type CreateConversationInput = CreateDMInput; // Default to DM for backward compatibility

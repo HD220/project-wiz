@@ -1,8 +1,9 @@
 import { sql } from "drizzle-orm";
 import { sqliteTable, text, integer, index } from "drizzle-orm/sqlite-core";
 
-import { conversationsTable } from "@/main/features/conversation/conversation.model";
 import { usersTable } from "@/main/features/user/user.model";
+
+export type MessageSourceType = "dm" | "channel";
 
 export const messagesTable = sqliteTable(
   "messages",
@@ -10,9 +11,11 @@ export const messagesTable = sqliteTable(
     id: text("id")
       .primaryKey()
       .$defaultFn(() => crypto.randomUUID()),
-    conversationId: text("conversation_id")
-      .notNull()
-      .references(() => conversationsTable.id, { onDelete: "cascade" }),
+
+    // Polymorphic reference - can point to DM or Channel
+    sourceType: text("source_type").$type<MessageSourceType>().notNull(),
+    sourceId: text("source_id").notNull(), // dm_conversation_id or project_channel_id
+
     authorId: text("author_id")
       .notNull()
       .references(() => usersTable.id, { onDelete: "cascade" }),
@@ -31,10 +34,9 @@ export const messagesTable = sqliteTable(
       .default(sql`(unixepoch() * 1000)`),
   },
   (table) => ({
-    // Performance indexes
-    conversationIdIdx: index("messages_conversation_id_idx").on(
-      table.conversationId,
-    ),
+    // Performance indexes for foreign keys
+    sourceTypeIdx: index("messages_source_type_idx").on(table.sourceType),
+    sourceIdIdx: index("messages_source_id_idx").on(table.sourceId),
     authorIdIdx: index("messages_author_id_idx").on(table.authorId),
     createdAtIdx: index("messages_created_at_idx").on(table.createdAt),
     deactivatedByIdx: index("messages_deactivated_by_idx").on(
@@ -48,9 +50,16 @@ export const messagesTable = sqliteTable(
       table.createdAt,
     ),
 
-    // Composite index for conversation messages ordered by time
-    conversationTimeIdx: index("messages_conversation_time_idx").on(
-      table.conversationId,
+    // Query optimization indexes
+    sourceTimeIdx: index("messages_source_time_idx").on(
+      table.sourceType,
+      table.sourceId,
+      table.createdAt,
+    ),
+    sourceActiveTimeIdx: index("messages_source_active_time_idx").on(
+      table.sourceType,
+      table.sourceId,
+      table.isActive,
       table.createdAt,
     ),
   }),

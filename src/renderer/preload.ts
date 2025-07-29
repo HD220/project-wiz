@@ -8,18 +8,15 @@ import type {
   CreateAgentInput,
   AgentStatus,
 } from "@/main/features/agent/agent.types";
-import type { CreateProviderInput } from "@/renderer/features/agent/provider.types";
+import type { CreateProviderInput } from "@/main/features/llm-provider/llm-provider.types";
 import type { ProviderFiltersInput } from "@/renderer/features/agent/provider.schema";
-import type {
-  MemoryCreationInput,
-  MemoryUpdateInput,
-} from "@/main/features/agent/memory/memory.types";
+// Memory removed
 import type {
   LoginCredentials,
   RegisterUserInput,
 } from "@/main/features/auth/auth.types";
-import type { CreateConversationInput } from "@/main/features/conversation/conversation.types";
-import type { SendMessageInput } from "@/main/features/conversation/conversation.types";
+import type { CreateDMConversationInput } from "@/main/features/dm/dm-conversation.types";
+import type { CreateProjectChannelInput } from "@/main/features/project/project-channel.types";
 import type {
   InsertProject,
   UpdateProject,
@@ -78,35 +75,68 @@ contextBridge.exposeInMainWorld("api", {
       ipcRenderer.invoke("projects:archive", id),
   },
 
-  // Conversations API
-  conversations: {
-    create: (input: CreateConversationInput): Promise<IpcResponse> =>
-      ipcRenderer.invoke("conversations:create", input),
+  // DM Conversations API
+  dm: {
+    create: (input: CreateDMConversationInput): Promise<IpcResponse> =>
+      ipcRenderer.invoke("dm:create", input),
     getUserConversations: (options?: {
       includeInactive?: boolean;
       includeArchived?: boolean;
     }): Promise<IpcResponse> =>
-      ipcRenderer.invoke("conversations:getUserConversations", options),
-    archive: (conversationId: string): Promise<IpcResponse> =>
-      ipcRenderer.invoke("conversations:archive", conversationId),
-    unarchive: (conversationId: string): Promise<IpcResponse> =>
-      ipcRenderer.invoke("conversations:unarchive", conversationId),
-    regenerateTitles: (): Promise<IpcResponse> =>
-      ipcRenderer.invoke("conversations:regenerateTitles"),
+      ipcRenderer.invoke("dm:getUserConversations", options),
+    findById: (dmId: string): Promise<IpcResponse> =>
+      ipcRenderer.invoke("dm:findById", dmId),
+    archive: (dmId: string): Promise<IpcResponse> =>
+      ipcRenderer.invoke("dm:archive", dmId),
+    unarchive: (dmId: string): Promise<IpcResponse> =>
+      ipcRenderer.invoke("dm:unarchive", dmId),
+    sendMessage: (dmId: string, content: string): Promise<IpcResponse> =>
+      ipcRenderer.invoke("dm:sendMessage", dmId, content),
+    getMessages: (dmId: string): Promise<IpcResponse> =>
+      ipcRenderer.invoke("dm:getMessages", dmId),
+    addParticipant: (
+      dmId: string,
+      participantId: string,
+    ): Promise<IpcResponse> =>
+      ipcRenderer.invoke("dm:addParticipant", dmId, participantId),
+    removeParticipant: (
+      dmId: string,
+      participantId: string,
+    ): Promise<IpcResponse> =>
+      ipcRenderer.invoke("dm:removeParticipant", dmId, participantId),
+    delete: (dmId: string): Promise<IpcResponse> =>
+      ipcRenderer.invoke("dm:delete", dmId),
   },
 
-  // Messages API
-  messages: {
-    send: (input: SendMessageInput): Promise<IpcResponse> =>
-      ipcRenderer.invoke("messages:send", input),
-    getConversationMessages: async (
-      conversationId: string,
-    ): Promise<IpcResponse> => {
-      return await ipcRenderer.invoke(
-        "messages:getConversationMessages",
-        conversationId,
-      );
-    },
+  // Project Channels API
+  channels: {
+    create: (input: CreateProjectChannelInput): Promise<IpcResponse> =>
+      ipcRenderer.invoke("channels:create", input),
+    getProjectChannels: (
+      projectId: string,
+      options?: {
+        includeInactive?: boolean;
+        includeArchived?: boolean;
+      },
+    ): Promise<IpcResponse> =>
+      ipcRenderer.invoke("channels:getProjectChannels", projectId, options),
+    findById: (channelId: string): Promise<IpcResponse> =>
+      ipcRenderer.invoke("channels:findById", channelId),
+    update: (
+      channelId: string,
+      updates: { name?: string; description?: string },
+    ): Promise<IpcResponse> =>
+      ipcRenderer.invoke("channels:update", channelId, updates),
+    archive: (channelId: string): Promise<IpcResponse> =>
+      ipcRenderer.invoke("channels:archive", channelId),
+    unarchive: (channelId: string): Promise<IpcResponse> =>
+      ipcRenderer.invoke("channels:unarchive", channelId),
+    sendMessage: (channelId: string, content: string): Promise<IpcResponse> =>
+      ipcRenderer.invoke("channels:sendMessage", channelId, content),
+    getMessages: (channelId: string): Promise<IpcResponse> =>
+      ipcRenderer.invoke("channels:getMessages", channelId),
+    delete: (channelId: string): Promise<IpcResponse> =>
+      ipcRenderer.invoke("channels:delete", channelId),
   },
 
   // LLM Providers API
@@ -152,20 +182,6 @@ contextBridge.exposeInMainWorld("api", {
       ipcRenderer.invoke("agents:delete", id),
     restore: (id: string): Promise<IpcResponse> =>
       ipcRenderer.invoke("agents:restore", id),
-  },
-
-  // Agent Memory API (simplified - only implemented methods)
-  agentMemory: {
-    create: (input: MemoryCreationInput): Promise<IpcResponse> =>
-      ipcRenderer.invoke("agent-memory:create", input),
-    retrieve: (agentId: string, limit?: number): Promise<IpcResponse> =>
-      ipcRenderer.invoke("agent-memory:retrieve", agentId, limit),
-    findById: (id: string): Promise<IpcResponse> =>
-      ipcRenderer.invoke("agent-memory:find-by-id", id),
-    update: (id: string, updates: MemoryUpdateInput): Promise<IpcResponse> =>
-      ipcRenderer.invoke("agent-memory:update", id, updates),
-    delete: (id: string): Promise<IpcResponse> =>
-      ipcRenderer.invoke("agent-memory:delete", id),
   },
 
   // General invoke method

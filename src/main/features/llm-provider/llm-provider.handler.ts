@@ -1,5 +1,5 @@
-import { LlmProviderService } from "@/main/features/agent/llm-provider/llm-provider.service";
-import type { CreateProviderInput } from "@/main/features/agent/llm-provider/llm-provider.types";
+import { LlmProviderService } from "./llm-provider.service";
+import type { CreateProviderInput } from "./llm-provider.types";
 import { AuthService } from "@/main/features/auth/auth.service";
 import { createIpcHandler } from "@/main/utils/ipc-handler";
 

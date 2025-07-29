@@ -4,13 +4,13 @@ import { eq, and, desc, sql, like } from "drizzle-orm";
 
 import { getDatabase } from "@/main/database/connection";
 import { agentsTable } from "@/main/features/agent/agent.model";
-import { llmProvidersTable } from "@/main/features/agent/llm-provider/llm-provider.model";
+import { llmProvidersTable } from "./llm-provider.model";
 import type {
   CreateProviderInput,
   LlmProvider,
   ProviderType,
-} from "@/main/features/agent/llm-provider/llm-provider.types";
-import { createProviderSchema } from "@/main/features/agent/llm-provider/llm-provider.types";
+} from "./llm-provider.types";
+import { createProviderSchema } from "./llm-provider.types";
 // import { getLogger } from "@/main/utils/logger";
 
 // Filter interface for provider listing

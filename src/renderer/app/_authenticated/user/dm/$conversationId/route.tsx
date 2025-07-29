@@ -1,7 +1,7 @@
 import { createFileRoute, Outlet } from "@tanstack/react-router";
 
-import type { SelectConversationParticipant } from "@/main/features/conversation/conversation.model";
-import type { SelectMessage } from "@/main/features/conversation/message.model";
+import type { SelectDMConversation } from "@/renderer/features/dm/dm-conversation.types";
+import type { SelectMessage } from "@/renderer/features/message/message.types";
 import type { AuthenticatedUser } from "@/main/features/user/user.types";
 
 import { ContentHeader } from "@/renderer/features/layout/components/content-header";
@@ -14,8 +14,8 @@ import {
 import { ConversationChat } from "@/renderer/features/conversation/components/conversation-chat";
 import { loadApiData } from "@/renderer/lib/route-loader";
 
-// Message type for renderer
-type Message = {
+// Message type for renderer compatibility
+type RendererMessage = {
   id: string;
   isActive: boolean;
   deactivatedAt: Date | null;
@@ -30,8 +30,11 @@ type Message = {
   metadata: unknown;
 };
 
-// Helper function to convert main Message to renderer Message
-function convertToRendererMessage(mainMessage: SelectMessage): Message {
+// Helper function to convert DM Message to renderer Message
+function convertToRendererMessage(
+  mainMessage: SelectMessage,
+  dmId: string,
+): RendererMessage {
   return {
     id: mainMessage.id,
     isActive: mainMessage.isActive,
@@ -39,35 +42,16 @@ function convertToRendererMessage(mainMessage: SelectMessage): Message {
     deactivatedBy: mainMessage.deactivatedBy,
     createdAt: mainMessage.createdAt,
     updatedAt: mainMessage.updatedAt,
-    conversationId: mainMessage.conversationId,
+    conversationId: dmId, // Map DM ID to conversationId for compatibility
     content: mainMessage.content,
     authorId: mainMessage.authorId,
-    senderId: mainMessage.authorId, // Map authorId to senderId
-    senderType: "user", // Default to user, could be enhanced based on user type
-    metadata: null, // Default metadata
+    senderId: mainMessage.authorId,
+    senderType: "user", // Default to user
+    metadata: null,
   };
 }
 
-// Safe type guard for converting user data - INLINE-FIRST (< 15 lines)
-function convertToRendererUser(user: unknown): AuthenticatedUser {
-  if (!user || typeof user !== "object") {
-    throw new Error("Invalid user data: user is null or not an object");
-  }
-  const userData = user as Record<string, unknown>;
-
-  // Validate required fields exist
-  if (!userData["id"] || typeof userData["id"] !== "string") {
-    throw new Error("Invalid user data: missing or invalid id field");
-  }
-  if (!userData["name"] || typeof userData["name"] !== "string") {
-    throw new Error("Invalid user data: missing or invalid name field");
-  }
-
-  // Return validated user (fields match main process AuthenticatedUser)
-  return userData as AuthenticatedUser;
-}
-
-// Extended conversation type for rendering
+// Extended conversation type for rendering compatibility
 type RendererConversation = {
   type: "dm" | "channel";
   name: string | null;
@@ -84,59 +68,50 @@ type RendererConversation = {
   projectId?: string | null;
   agentId?: string | null;
   isArchived?: boolean;
-  lastMessage?: Message;
+  lastMessage?: RendererMessage;
   participants?: Array<{
     id: string;
     conversationId: string;
     userId: string;
     joinedAt: Date;
   }>;
-  messages?: Message[];
+  messages?: RendererMessage[];
 };
 
-// Helper function to convert main Conversation to renderer conversation
-function convertToRendererConversation(mainConversation: {
-  id: string;
-  name: string | null;
-  description?: string | null;
-  type?: "dm" | "channel";
-  archivedAt?: Date | null;
-  archivedBy?: string | null;
-  isActive: boolean;
-  deactivatedAt: Date | null;
-  deactivatedBy: string | null;
-  lastMessage?: SelectMessage;
-  participants?: SelectConversationParticipant[];
-  createdAt: Date;
-  updatedAt: Date;
-}): RendererConversation {
+// Helper function to convert DM Conversation to renderer conversation
+function convertToRendererConversation(
+  dmConversation: SelectDMConversation & {
+    participants: any[];
+    messages: SelectMessage[];
+  },
+): RendererConversation {
   return {
-    id: mainConversation.id,
-    name: mainConversation.name,
-    description: mainConversation.description || null,
-    type: mainConversation.type || "dm",
-    archivedAt: mainConversation.archivedAt || null,
-    archivedBy: mainConversation.archivedBy || null,
-    isActive: mainConversation.isActive,
-    deactivatedAt: mainConversation.deactivatedAt,
-    deactivatedBy: mainConversation.deactivatedBy,
-    createdAt: mainConversation.createdAt,
-    updatedAt: mainConversation.updatedAt,
-    // Additional renderer properties
-    title: mainConversation.name,
+    id: dmConversation.id,
+    name: dmConversation.name,
+    description: dmConversation.description || null,
+    type: "dm" as const,
+    archivedAt: dmConversation.archivedAt || null,
+    archivedBy: dmConversation.archivedBy || null,
+    isActive: dmConversation.isActive,
+    deactivatedAt: dmConversation.deactivatedAt,
+    deactivatedBy: dmConversation.deactivatedBy,
+    createdAt: dmConversation.createdAt,
+    updatedAt: dmConversation.updatedAt,
+    title: dmConversation.name,
     projectId: null,
     agentId: null,
-    isArchived: !!mainConversation.archivedAt,
-    lastMessage: mainConversation.lastMessage
-      ? convertToRendererMessage(mainConversation.lastMessage)
-      : undefined,
+    isArchived: !!dmConversation.archivedAt,
     participants:
-      mainConversation.participants?.map((participant) => ({
+      dmConversation.participants?.map((participant) => ({
         id: participant.id,
-        conversationId: participant.conversationId,
+        conversationId: dmConversation.id,
         userId: participant.participantId,
         joinedAt: participant.createdAt,
       })) || [],
+    messages:
+      dmConversation.messages?.map((msg) =>
+        convertToRendererMessage(msg, dmConversation.id),
+      ) || [],
   };
 }
 
@@ -147,46 +122,32 @@ function DMLayout() {
   if (!conversation) {
     return (
       <div className="h-full w-full flex items-center justify-center">
-        <div className="text-muted-foreground">Conversation not found</div>
+        <div className="text-muted-foreground">DM conversation not found</div>
       </div>
     );
   }
 
   // Get conversation display info
   const otherParticipants = conversation.participants
-    .filter((participant) => participant.participantId !== user?.id)
+    .filter((participant) => participant.userId !== user?.id)
     .map((participant) =>
       availableUsers.find(
         (availableUser: { id: string }) =>
-          availableUser.id === participant.participantId,
+          availableUser.id === participant.userId,
       ),
     )
     .filter(Boolean);
 
-  // Use generated title from backend or create fallback
-  const displayName = conversation.name || "Unknown Conversation";
-
-  // Create description based on participants, not duplicating the title
+  const displayName = conversation.name || "Unknown DM";
   const description =
     otherParticipants.length === 1
-      ? "Direct conversation"
-      : otherParticipants.length > 1
-        ? `${otherParticipants.length + 1} participants`
-        : "Conversation";
+      ? "Direct message"
+      : `${otherParticipants.length + 1} participants`;
 
-  // Create conversation avatar - use small size for header
+  // Create conversation avatar
   const conversationAvatar = (
     <div className="flex-shrink-0">
       {(() => {
-        // Get other participants (exclude current user)
-        const otherParticipants = conversation.participants
-          .filter((participant) => participant.participantId !== user?.id)
-          .map((participant) =>
-            availableUsers.find((u) => u.id === participant.participantId),
-          )
-          .filter(Boolean);
-
-        // If no other participants, show fallback
         if (otherParticipants.length === 0) {
           return (
             <ProfileAvatar size="sm">
@@ -197,18 +158,8 @@ function DMLayout() {
           );
         }
 
-        // For 1:1 conversations, show single avatar
         if (otherParticipants.length === 1) {
           const participant = otherParticipants[0];
-          if (!participant) {
-            return (
-              <ProfileAvatar size="sm">
-                <ProfileAvatarImage
-                  fallbackIcon={<div className="text-xs font-bold">?</div>}
-                />
-              </ProfileAvatar>
-            );
-          }
           return (
             <ProfileAvatar size="sm">
               <ProfileAvatarImage
@@ -220,19 +171,8 @@ function DMLayout() {
           );
         }
 
-        // For group conversations, show main avatar + counter
         const firstParticipant = otherParticipants[0];
         const remainingCount = otherParticipants.length - 1;
-
-        if (!firstParticipant) {
-          return (
-            <ProfileAvatar size="sm">
-              <ProfileAvatarImage
-                fallbackIcon={<div className="text-xs font-bold">?</div>}
-              />
-            </ProfileAvatar>
-          );
-        }
 
         return (
           <ProfileAvatar size="sm">
@@ -250,8 +190,6 @@ function DMLayout() {
     </div>
   );
 
-  // Safe user conversion - replace dangerous 'as any'
-  const safeCurrentUser = convertToRendererUser(user);
   return (
     <div className="h-full w-full flex flex-col">
       <ContentHeader
@@ -262,22 +200,11 @@ function DMLayout() {
       <main className="flex-1 overflow-hidden">
         <ConversationChat
           conversationId={conversationId}
-          conversation={{
-            ...convertToRendererConversation({
-              ...conversation,
-              name: conversation.name || "Untitled Conversation",
-              isActive: conversation.isActive ?? true,
-              deactivatedAt: conversation.deactivatedAt ?? null,
-              deactivatedBy: conversation.deactivatedBy ?? null,
-            }),
-            messages: conversation.messages.map(convertToRendererMessage),
-          }}
+          conversation={conversation}
           availableUsers={availableUsers}
-          currentUser={safeCurrentUser}
+          currentUser={user}
         />
       </main>
-
-      {/* Child Routes */}
       <Outlet />
     </div>
   );
@@ -289,50 +216,42 @@ export const Route = createFileRoute("/_authenticated/user/dm/$conversationId")(
       const { conversationId } = params;
 
       try {
-        // Load conversation with messages and required data in parallel
-        const [conversationResult, availableUsers, user] = await Promise.all([
-          // Direct conversation fetch with messages
-          Promise.all([
+        const [dmConversation, messages, availableUsers, user] =
+          await Promise.all([
             loadApiData(
-              () =>
-                window.api.conversations.getUserConversations({
-                  includeArchived: true,
-                  includeInactive: false,
-                }),
-              "Failed to load conversations",
+              () => window.api.dm.findById(conversationId),
+              "Failed to load DM conversation",
             ),
             loadApiData(
-              () => window.api.messages.getConversationMessages(conversationId),
-              "Failed to load messages",
+              () => window.api.dm.getMessages(conversationId),
+              "Failed to load DM messages",
             ),
-          ]).then(([conversations, messages]) => {
-            const conversation = conversations.find(
-              (conv) => conv.id === conversationId,
-            );
-            if (!conversation) {
-              throw new Error("Conversation not found");
-            }
-            return { ...conversation, messages };
-          }),
-          // Load users and auth in parallel
-          loadApiData(
-            () => window.api.users.listAvailableUsers(),
-            "Failed to load available users",
-          ),
-          loadApiData(
-            () => window.api.auth.getCurrentUser(),
-            "Failed to load current user",
-          ),
-        ]);
+            loadApiData(
+              () => window.api.users.listAvailableUsers(),
+              "Failed to load available users",
+            ),
+            loadApiData(
+              () => window.api.auth.getCurrentUser(),
+              "Failed to load current user",
+            ),
+          ]);
+
+        if (!dmConversation) {
+          throw new Error("DM conversation not found");
+        }
+
+        const conversationWithMessages = {
+          ...dmConversation,
+          messages: messages || [],
+        };
 
         return {
-          conversation: conversationResult,
+          conversation: convertToRendererConversation(conversationWithMessages),
           availableUsers,
           user,
         };
       } catch (error) {
-        // Enhanced error handling with more specific messages
-        console.error("Failed to load conversation data:", error);
+        console.error("Failed to load DM conversation data:", error);
         throw error;
       }
     },

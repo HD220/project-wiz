@@ -3,7 +3,7 @@ import { eq, and, ne } from "drizzle-orm";
 import { getDatabase } from "@/main/database/connection";
 import { agentsTable } from "@/main/features/agent/agent.model";
 import { userSessionsTable } from "@/main/features/auth/user-sessions.model";
-import { conversationParticipantsTable } from "@/main/features/conversation/conversation.model";
+import { dmParticipantsTable } from "@/main/features/dm/dm-conversation.model";
 import { projectsTable } from "@/main/features/project/project.model";
 import { usersTable } from "@/main/features/user/user.model";
 import type { SelectUser, InsertUser } from "@/main/features/user/user.model";
@@ -320,9 +320,9 @@ export class UserService {
           ),
         );
 
-      // 5. Soft delete conversation participations
+      // 5. Soft delete DM participations
       await tx
-        .update(conversationParticipantsTable)
+        .update(dmParticipantsTable)
         .set({
           isActive: false,
           deactivatedAt: new Date(),
@@ -331,8 +331,8 @@ export class UserService {
         })
         .where(
           and(
-            eq(conversationParticipantsTable.participantId, userId),
-            eq(conversationParticipantsTable.isActive, true),
+            eq(dmParticipantsTable.participantId, userId),
+            eq(dmParticipantsTable.isActive, true),
           ),
         );
 
@@ -373,7 +373,7 @@ export class UserService {
     ownedAgents: { active: number; inactive: number };
     ownedProjects: { active: number; inactive: number };
     activeSessions: number;
-    conversationParticipations: { active: number; inactive: number };
+    dmParticipations: { active: number; inactive: number };
   }> {
     const db = getDatabase();
 
@@ -424,24 +424,24 @@ export class UserService {
         ),
       );
 
-    // Count conversation participations
+    // Count DM participations
     const participationsActive = await db
-      .select({ count: conversationParticipantsTable.id })
-      .from(conversationParticipantsTable)
+      .select({ count: dmParticipantsTable.id })
+      .from(dmParticipantsTable)
       .where(
         and(
-          eq(conversationParticipantsTable.participantId, userId),
-          eq(conversationParticipantsTable.isActive, true),
+          eq(dmParticipantsTable.participantId, userId),
+          eq(dmParticipantsTable.isActive, true),
         ),
       );
 
     const participationsInactive = await db
-      .select({ count: conversationParticipantsTable.id })
-      .from(conversationParticipantsTable)
+      .select({ count: dmParticipantsTable.id })
+      .from(dmParticipantsTable)
       .where(
         and(
-          eq(conversationParticipantsTable.participantId, userId),
-          eq(conversationParticipantsTable.isActive, false),
+          eq(dmParticipantsTable.participantId, userId),
+          eq(dmParticipantsTable.isActive, false),
         ),
       );
 
@@ -455,7 +455,7 @@ export class UserService {
         inactive: ownedProjectsInactive.length,
       },
       activeSessions: activeSessions.length,
-      conversationParticipations: {
+      dmParticipations: {
         active: participationsActive.length,
         inactive: participationsInactive.length,
       },

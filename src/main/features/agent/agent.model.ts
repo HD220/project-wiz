@@ -1,7 +1,7 @@
 import { sql } from "drizzle-orm";
 import { sqliteTable, text, integer, index } from "drizzle-orm/sqlite-core";
 
-import { llmProvidersTable } from "@/main/features/agent/llm-provider/llm-provider.model";
+import { llmProvidersTable } from "@/main/features/llm-provider/llm-provider.model";
 import { usersTable } from "@/main/features/user/user.model";
 
 export type AgentStatus = "active" | "inactive" | "busy";

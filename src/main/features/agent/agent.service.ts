@@ -10,8 +10,7 @@ import type {
   InsertAgent,
 } from "@/main/features/agent/agent.types";
 import { createAgentSchema } from "@/main/features/agent/agent.types";
-import { llmProvidersTable } from "@/main/features/agent/llm-provider/llm-provider.model";
-import { agentMemoriesTable } from "@/main/features/agent/memory/memory.model";
+import { llmProvidersTable } from "@/main/features/llm-provider/llm-provider.model";
 import { usersTable } from "@/main/features/user/user.model";
 
 export class AgentService {
@@ -281,24 +280,6 @@ export class AgentService {
           updatedAt: new Date(),
         })
         .where(eq(agentsTable.id, id));
-
-      // Cascade soft delete to agent memories
-      await tx
-        .update(agentMemoriesTable)
-        .set({
-          isActive: false,
-          deactivatedAt: new Date(),
-          deactivatedBy: deletedBy,
-          updatedAt: new Date(),
-        })
-        .where(
-          and(
-            eq(agentMemoriesTable.agentId, id),
-            eq(agentMemoriesTable.isActive, true),
-          ),
-        );
-
-      // Note: Memory relations will be handled by the MemoryService if needed
     });
   }
 

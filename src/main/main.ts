@@ -4,11 +4,11 @@ import { app, BrowserWindow, ipcMain } from "electron";
 import squirrel from "electron-squirrel-startup";
 
 import { setupAgentHandlers } from "@/main/features/agent/agent.handler";
-import { setupLlmProviderHandlers } from "@/main/features/agent/llm-provider/llm-provider.handler";
-import { setupAgentMemoryHandlers } from "@/main/features/agent/memory/memory.handler";
+import { setupLlmProviderHandlers } from "@/main/features/llm-provider/llm-provider.handler";
 import { setupAuthHandlers } from "@/main/features/auth/auth.handler";
 import { AuthService } from "@/main/features/auth/auth.service";
-import { setupConversationsHandlers } from "@/main/features/conversation/conversation.handler";
+import { setupDMHandlers } from "@/main/features/dm/dm-conversation.handler";
+import { setupChannelHandlers } from "@/main/features/project/project-channel.handler";
 import { setupProjectHandlers } from "@/main/features/project/project.handler";
 import { setupProfileHandlers } from "@/main/features/user/profile.handler";
 import { setupUserHandlers } from "@/main/features/user/user.handler";
@@ -103,17 +103,17 @@ function setupAllIpcHandlers(): void {
   setupProjectHandlers();
   logger.info("Project IPC handlers registered");
 
-  setupConversationsHandlers();
-  logger.info("Conversations IPC handlers registered");
+  setupChannelHandlers();
+  logger.info("Channel IPC handlers registered");
+
+  setupDMHandlers();
+  logger.info("DM IPC handlers registered");
 
   setupLlmProviderHandlers();
   logger.info("LLM Provider IPC handlers registered");
 
   setupAgentHandlers();
   logger.info("Agent IPC handlers registered");
-
-  setupAgentMemoryHandlers();
-  logger.info("Agent Memory IPC handlers registered");
 
   setupWindowHandlers();
   logger.info("Window control IPC handlers registered");

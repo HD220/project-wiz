@@ -17,7 +17,8 @@
       "WebFetch(domain:slack.engineering)",
       "WebFetch(domain:electron-vite.org)",
       "WebFetch(domain:medium.com)",
-      "WebFetch(domain:blog.logrocket.com)"
+      "WebFetch(domain:blog.logrocket.com)",
+      "Bash(npm run:*)"
     ],
     "deny": []
   }

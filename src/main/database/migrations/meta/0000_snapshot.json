@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "7ee92a25-c3a4-44a2-a94b-0f1e1136858d",
+  "id": "213b8b9f-bb31-4f3d-999f-c2afe0029343",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "agents": {
@@ -192,593 +192,6 @@
         "agents_deactivated_by_users_id_fk": {
           "name": "agents_deactivated_by_users_id_fk",
           "tableFrom": "agents",
-          "tableTo": "users",
-          "columnsFrom": ["deactivated_by"],
-          "columnsTo": ["id"],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "checkConstraints": {}
-    },
-    "llm_providers": {
-      "name": "llm_providers",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "text",
-          "primaryKey": true,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "user_id": {
-          "name": "user_id",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "name": {
-          "name": "name",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "type": {
-          "name": "type",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "api_key": {
-          "name": "api_key",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "base_url": {
-          "name": "base_url",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "default_model": {
-          "name": "default_model",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": "'gpt-3.5-turbo'"
-        },
-        "is_default": {
-          "name": "is_default",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": false
-        },
-        "is_active": {
-          "name": "is_active",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": true
-        },
-        "deactivated_at": {
-          "name": "deactivated_at",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "deactivated_by": {
-          "name": "deactivated_by",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": "(strftime('%s', 'now'))"
-        },
-        "updated_at": {
-          "name": "updated_at",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": "(strftime('%s', 'now'))"
-        }
-      },
-      "indexes": {
-        "llm_providers_user_id_idx": {
-          "name": "llm_providers_user_id_idx",
-          "columns": ["user_id"],
-          "isUnique": false
-        },
-        "llm_providers_type_idx": {
-          "name": "llm_providers_type_idx",
-          "columns": ["type"],
-          "isUnique": false
-        },
-        "llm_providers_is_default_idx": {
-          "name": "llm_providers_is_default_idx",
-          "columns": ["is_default"],
-          "isUnique": false
-        },
-        "llm_providers_is_active_idx": {
-          "name": "llm_providers_is_active_idx",
-          "columns": ["is_active"],
-          "isUnique": false
-        },
-        "llm_providers_deactivated_by_idx": {
-          "name": "llm_providers_deactivated_by_idx",
-          "columns": ["deactivated_by"],
-          "isUnique": false
-        },
-        "llm_providers_is_active_created_at_idx": {
-          "name": "llm_providers_is_active_created_at_idx",
-          "columns": ["is_active", "created_at"],
-          "isUnique": false
-        }
-      },
-      "foreignKeys": {
-        "llm_providers_user_id_users_id_fk": {
-          "name": "llm_providers_user_id_users_id_fk",
-          "tableFrom": "llm_providers",
-          "tableTo": "users",
-          "columnsFrom": ["user_id"],
-          "columnsTo": ["id"],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
-        "llm_providers_deactivated_by_users_id_fk": {
-          "name": "llm_providers_deactivated_by_users_id_fk",
-          "tableFrom": "llm_providers",
-          "tableTo": "users",
-          "columnsFrom": ["deactivated_by"],
-          "columnsTo": ["id"],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "checkConstraints": {}
-    },
-    "agent_memories": {
-      "name": "agent_memories",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "text",
-          "primaryKey": true,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "agent_id": {
-          "name": "agent_id",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "user_id": {
-          "name": "user_id",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "conversation_id": {
-          "name": "conversation_id",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "content": {
-          "name": "content",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "summary": {
-          "name": "summary",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "type": {
-          "name": "type",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": "'conversation'"
-        },
-        "importance": {
-          "name": "importance",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": "'medium'"
-        },
-        "importance_score": {
-          "name": "importance_score",
-          "type": "real",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": 0.5
-        },
-        "access_count": {
-          "name": "access_count",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": 0
-        },
-        "last_accessed_at": {
-          "name": "last_accessed_at",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "keywords": {
-          "name": "keywords",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "metadata": {
-          "name": "metadata",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "is_archived": {
-          "name": "is_archived",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": false
-        },
-        "archived_at": {
-          "name": "archived_at",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "is_active": {
-          "name": "is_active",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": true
-        },
-        "deactivated_at": {
-          "name": "deactivated_at",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "deactivated_by": {
-          "name": "deactivated_by",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": "(strftime('%s', 'now'))"
-        },
-        "updated_at": {
-          "name": "updated_at",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": "(strftime('%s', 'now'))"
-        }
-      },
-      "indexes": {
-        "agent_memories_agent_id_idx": {
-          "name": "agent_memories_agent_id_idx",
-          "columns": ["agent_id"],
-          "isUnique": false
-        },
-        "agent_memories_user_id_idx": {
-          "name": "agent_memories_user_id_idx",
-          "columns": ["user_id"],
-          "isUnique": false
-        },
-        "agent_memories_conversation_id_idx": {
-          "name": "agent_memories_conversation_id_idx",
-          "columns": ["conversation_id"],
-          "isUnique": false
-        },
-        "agent_memories_deactivated_by_idx": {
-          "name": "agent_memories_deactivated_by_idx",
-          "columns": ["deactivated_by"],
-          "isUnique": false
-        },
-        "agent_memories_type_idx": {
-          "name": "agent_memories_type_idx",
-          "columns": ["type"],
-          "isUnique": false
-        },
-        "agent_memories_importance_idx": {
-          "name": "agent_memories_importance_idx",
-          "columns": ["importance"],
-          "isUnique": false
-        },
-        "agent_memories_importance_score_idx": {
-          "name": "agent_memories_importance_score_idx",
-          "columns": ["importance_score"],
-          "isUnique": false
-        },
-        "agent_memories_access_count_idx": {
-          "name": "agent_memories_access_count_idx",
-          "columns": ["access_count"],
-          "isUnique": false
-        },
-        "agent_memories_last_accessed_at_idx": {
-          "name": "agent_memories_last_accessed_at_idx",
-          "columns": ["last_accessed_at"],
-          "isUnique": false
-        },
-        "agent_memories_is_archived_idx": {
-          "name": "agent_memories_is_archived_idx",
-          "columns": ["is_archived"],
-          "isUnique": false
-        },
-        "agent_memories_created_at_idx": {
-          "name": "agent_memories_created_at_idx",
-          "columns": ["created_at"],
-          "isUnique": false
-        },
-        "agent_memories_is_active_idx": {
-          "name": "agent_memories_is_active_idx",
-          "columns": ["is_active"],
-          "isUnique": false
-        },
-        "agent_memories_is_active_created_at_idx": {
-          "name": "agent_memories_is_active_created_at_idx",
-          "columns": ["is_active", "created_at"],
-          "isUnique": false
-        },
-        "agent_memories_agent_user_idx": {
-          "name": "agent_memories_agent_user_idx",
-          "columns": ["agent_id", "user_id"],
-          "isUnique": false
-        },
-        "agent_memories_agent_type_idx": {
-          "name": "agent_memories_agent_type_idx",
-          "columns": ["agent_id", "type"],
-          "isUnique": false
-        },
-        "agent_memories_agent_importance_idx": {
-          "name": "agent_memories_agent_importance_idx",
-          "columns": ["agent_id", "importance"],
-          "isUnique": false
-        },
-        "agent_memories_user_conversation_idx": {
-          "name": "agent_memories_user_conversation_idx",
-          "columns": ["user_id", "conversation_id"],
-          "isUnique": false
-        }
-      },
-      "foreignKeys": {
-        "agent_memories_agent_id_agents_id_fk": {
-          "name": "agent_memories_agent_id_agents_id_fk",
-          "tableFrom": "agent_memories",
-          "tableTo": "agents",
-          "columnsFrom": ["agent_id"],
-          "columnsTo": ["id"],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
-        "agent_memories_user_id_users_id_fk": {
-          "name": "agent_memories_user_id_users_id_fk",
-          "tableFrom": "agent_memories",
-          "tableTo": "users",
-          "columnsFrom": ["user_id"],
-          "columnsTo": ["id"],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
-        "agent_memories_conversation_id_conversations_id_fk": {
-          "name": "agent_memories_conversation_id_conversations_id_fk",
-          "tableFrom": "agent_memories",
-          "tableTo": "conversations",
-          "columnsFrom": ["conversation_id"],
-          "columnsTo": ["id"],
-          "onDelete": "set null",
-          "onUpdate": "no action"
-        },
-        "agent_memories_deactivated_by_users_id_fk": {
-          "name": "agent_memories_deactivated_by_users_id_fk",
-          "tableFrom": "agent_memories",
-          "tableTo": "users",
-          "columnsFrom": ["deactivated_by"],
-          "columnsTo": ["id"],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "checkConstraints": {}
-    },
-    "memory_relations": {
-      "name": "memory_relations",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "text",
-          "primaryKey": true,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "source_memory_id": {
-          "name": "source_memory_id",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "target_memory_id": {
-          "name": "target_memory_id",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "relation_type": {
-          "name": "relation_type",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "strength": {
-          "name": "strength",
-          "type": "real",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": 0.5
-        },
-        "is_active": {
-          "name": "is_active",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": true
-        },
-        "deactivated_at": {
-          "name": "deactivated_at",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "deactivated_by": {
-          "name": "deactivated_by",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": "(strftime('%s', 'now'))"
-        }
-      },
-      "indexes": {
-        "memory_relations_source_memory_id_idx": {
-          "name": "memory_relations_source_memory_id_idx",
-          "columns": ["source_memory_id"],
-          "isUnique": false
-        },
-        "memory_relations_target_memory_id_idx": {
-          "name": "memory_relations_target_memory_id_idx",
-          "columns": ["target_memory_id"],
-          "isUnique": false
-        },
-        "memory_relations_relation_type_idx": {
-          "name": "memory_relations_relation_type_idx",
-          "columns": ["relation_type"],
-          "isUnique": false
-        },
-        "memory_relations_strength_idx": {
-          "name": "memory_relations_strength_idx",
-          "columns": ["strength"],
-          "isUnique": false
-        },
-        "memory_relations_deactivated_by_idx": {
-          "name": "memory_relations_deactivated_by_idx",
-          "columns": ["deactivated_by"],
-          "isUnique": false
-        },
-        "memory_relations_is_active_idx": {
-          "name": "memory_relations_is_active_idx",
-          "columns": ["is_active"],
-          "isUnique": false
-        },
-        "memory_relations_is_active_created_at_idx": {
-          "name": "memory_relations_is_active_created_at_idx",
-          "columns": ["is_active", "created_at"],
-          "isUnique": false
-        },
-        "memory_relations_source_relation_idx": {
-          "name": "memory_relations_source_relation_idx",
-          "columns": ["source_memory_id", "relation_type"],
-          "isUnique": false
-        },
-        "memory_relations_target_relation_idx": {
-          "name": "memory_relations_target_relation_idx",
-          "columns": ["target_memory_id", "relation_type"],
-          "isUnique": false
-        }
-      },
-      "foreignKeys": {
-        "memory_relations_source_memory_id_agent_memories_id_fk": {
-          "name": "memory_relations_source_memory_id_agent_memories_id_fk",
-          "tableFrom": "memory_relations",
-          "tableTo": "agent_memories",
-          "columnsFrom": ["source_memory_id"],
-          "columnsTo": ["id"],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
-        "memory_relations_target_memory_id_agent_memories_id_fk": {
-          "name": "memory_relations_target_memory_id_agent_memories_id_fk",
-          "tableFrom": "memory_relations",
-          "tableTo": "agent_memories",
-          "columnsFrom": ["target_memory_id"],
-          "columnsTo": ["id"],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
-        "memory_relations_deactivated_by_users_id_fk": {
-          "name": "memory_relations_deactivated_by_users_id_fk",
-          "tableFrom": "memory_relations",
           "tableTo": "users",
           "columnsFrom": ["deactivated_by"],
           "columnsTo": ["id"],
@@ -993,136 +406,8 @@
       "uniqueConstraints": {},
       "checkConstraints": {}
     },
-    "conversation_participants": {
-      "name": "conversation_participants",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "text",
-          "primaryKey": true,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "conversation_id": {
-          "name": "conversation_id",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "participant_id": {
-          "name": "participant_id",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "is_active": {
-          "name": "is_active",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": true
-        },
-        "deactivated_at": {
-          "name": "deactivated_at",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "deactivated_by": {
-          "name": "deactivated_by",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": "CURRENT_TIMESTAMP"
-        },
-        "updated_at": {
-          "name": "updated_at",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": "CURRENT_TIMESTAMP"
-        }
-      },
-      "indexes": {
-        "conversation_participants_conversation_id_idx": {
-          "name": "conversation_participants_conversation_id_idx",
-          "columns": ["conversation_id"],
-          "isUnique": false
-        },
-        "conversation_participants_participant_id_idx": {
-          "name": "conversation_participants_participant_id_idx",
-          "columns": ["participant_id"],
-          "isUnique": false
-        },
-        "conversation_participants_deactivated_by_idx": {
-          "name": "conversation_participants_deactivated_by_idx",
-          "columns": ["deactivated_by"],
-          "isUnique": false
-        },
-        "conversation_participants_is_active_idx": {
-          "name": "conversation_participants_is_active_idx",
-          "columns": ["is_active"],
-          "isUnique": false
-        },
-        "conversation_participants_is_active_created_at_idx": {
-          "name": "conversation_participants_is_active_created_at_idx",
-          "columns": ["is_active", "created_at"],
-          "isUnique": false
-        },
-        "conversation_participants_conversation_participant_idx": {
-          "name": "conversation_participants_conversation_participant_idx",
-          "columns": ["conversation_id", "participant_id"],
-          "isUnique": false
-        }
-      },
-      "foreignKeys": {
-        "conversation_participants_conversation_id_conversations_id_fk": {
-          "name": "conversation_participants_conversation_id_conversations_id_fk",
-          "tableFrom": "conversation_participants",
-          "tableTo": "conversations",
-          "columnsFrom": ["conversation_id"],
-          "columnsTo": ["id"],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
-        "conversation_participants_participant_id_users_id_fk": {
-          "name": "conversation_participants_participant_id_users_id_fk",
-          "tableFrom": "conversation_participants",
-          "tableTo": "users",
-          "columnsFrom": ["participant_id"],
-          "columnsTo": ["id"],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
-        "conversation_participants_deactivated_by_users_id_fk": {
-          "name": "conversation_participants_deactivated_by_users_id_fk",
-          "tableFrom": "conversation_participants",
-          "tableTo": "users",
-          "columnsFrom": ["deactivated_by"],
-          "columnsTo": ["id"],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "checkConstraints": {}
-    },
-    "conversations": {
-      "name": "conversations",
+    "dm_conversations": {
+      "name": "dm_conversations",
       "columns": {
         "id": {
           "name": "id",
@@ -1144,14 +429,6 @@
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false
-        },
-        "type": {
-          "name": "type",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": "'dm'"
         },
         "archived_at": {
           "name": "archived_at",
@@ -1207,60 +484,339 @@
         }
       },
       "indexes": {
-        "conversations_type_idx": {
-          "name": "conversations_type_idx",
-          "columns": ["type"],
-          "isUnique": false
-        },
-        "conversations_created_at_idx": {
-          "name": "conversations_created_at_idx",
+        "dm_conversations_created_at_idx": {
+          "name": "dm_conversations_created_at_idx",
           "columns": ["created_at"],
           "isUnique": false
         },
-        "conversations_deactivated_by_idx": {
-          "name": "conversations_deactivated_by_idx",
-          "columns": ["deactivated_by"],
-          "isUnique": false
-        },
-        "conversations_archived_by_idx": {
-          "name": "conversations_archived_by_idx",
+        "dm_conversations_archived_by_idx": {
+          "name": "dm_conversations_archived_by_idx",
           "columns": ["archived_by"],
           "isUnique": false
         },
-        "conversations_is_active_idx": {
-          "name": "conversations_is_active_idx",
+        "dm_conversations_deactivated_by_idx": {
+          "name": "dm_conversations_deactivated_by_idx",
+          "columns": ["deactivated_by"],
+          "isUnique": false
+        },
+        "dm_conversations_is_active_idx": {
+          "name": "dm_conversations_is_active_idx",
           "columns": ["is_active"],
           "isUnique": false
         },
-        "conversations_is_active_created_at_idx": {
-          "name": "conversations_is_active_created_at_idx",
+        "dm_conversations_is_active_created_at_idx": {
+          "name": "dm_conversations_is_active_created_at_idx",
           "columns": ["is_active", "created_at"],
           "isUnique": false
         },
-        "conversations_archived_at_idx": {
-          "name": "conversations_archived_at_idx",
+        "dm_conversations_archived_at_idx": {
+          "name": "dm_conversations_archived_at_idx",
           "columns": ["archived_at"],
           "isUnique": false
         },
-        "conversations_is_active_archived_at_idx": {
-          "name": "conversations_is_active_archived_at_idx",
+        "dm_conversations_is_active_archived_at_idx": {
+          "name": "dm_conversations_is_active_archived_at_idx",
           "columns": ["is_active", "archived_at"],
           "isUnique": false
         }
       },
       "foreignKeys": {
-        "conversations_archived_by_users_id_fk": {
-          "name": "conversations_archived_by_users_id_fk",
-          "tableFrom": "conversations",
+        "dm_conversations_archived_by_users_id_fk": {
+          "name": "dm_conversations_archived_by_users_id_fk",
+          "tableFrom": "dm_conversations",
           "tableTo": "users",
           "columnsFrom": ["archived_by"],
           "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
-        "conversations_deactivated_by_users_id_fk": {
-          "name": "conversations_deactivated_by_users_id_fk",
-          "tableFrom": "conversations",
+        "dm_conversations_deactivated_by_users_id_fk": {
+          "name": "dm_conversations_deactivated_by_users_id_fk",
+          "tableFrom": "dm_conversations",
+          "tableTo": "users",
+          "columnsFrom": ["deactivated_by"],
+          "columnsTo": ["id"],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "dm_participants": {
+      "name": "dm_participants",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "dm_conversation_id": {
+          "name": "dm_conversation_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "participant_id": {
+          "name": "participant_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "is_active": {
+          "name": "is_active",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": true
+        },
+        "deactivated_at": {
+          "name": "deactivated_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "deactivated_by": {
+          "name": "deactivated_by",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "CURRENT_TIMESTAMP"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "CURRENT_TIMESTAMP"
+        }
+      },
+      "indexes": {
+        "dm_participants_dm_conversation_id_idx": {
+          "name": "dm_participants_dm_conversation_id_idx",
+          "columns": ["dm_conversation_id"],
+          "isUnique": false
+        },
+        "dm_participants_participant_id_idx": {
+          "name": "dm_participants_participant_id_idx",
+          "columns": ["participant_id"],
+          "isUnique": false
+        },
+        "dm_participants_deactivated_by_idx": {
+          "name": "dm_participants_deactivated_by_idx",
+          "columns": ["deactivated_by"],
+          "isUnique": false
+        },
+        "dm_participants_is_active_idx": {
+          "name": "dm_participants_is_active_idx",
+          "columns": ["is_active"],
+          "isUnique": false
+        },
+        "dm_participants_is_active_created_at_idx": {
+          "name": "dm_participants_is_active_created_at_idx",
+          "columns": ["is_active", "created_at"],
+          "isUnique": false
+        },
+        "dm_participants_dm_participant_idx": {
+          "name": "dm_participants_dm_participant_idx",
+          "columns": ["dm_conversation_id", "participant_id"],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "dm_participants_dm_conversation_id_dm_conversations_id_fk": {
+          "name": "dm_participants_dm_conversation_id_dm_conversations_id_fk",
+          "tableFrom": "dm_participants",
+          "tableTo": "dm_conversations",
+          "columnsFrom": ["dm_conversation_id"],
+          "columnsTo": ["id"],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "dm_participants_participant_id_users_id_fk": {
+          "name": "dm_participants_participant_id_users_id_fk",
+          "tableFrom": "dm_participants",
+          "tableTo": "users",
+          "columnsFrom": ["participant_id"],
+          "columnsTo": ["id"],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "dm_participants_deactivated_by_users_id_fk": {
+          "name": "dm_participants_deactivated_by_users_id_fk",
+          "tableFrom": "dm_participants",
+          "tableTo": "users",
+          "columnsFrom": ["deactivated_by"],
+          "columnsTo": ["id"],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "llm_providers": {
+      "name": "llm_providers",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "type": {
+          "name": "type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "api_key": {
+          "name": "api_key",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "base_url": {
+          "name": "base_url",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "default_model": {
+          "name": "default_model",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'gpt-3.5-turbo'"
+        },
+        "is_default": {
+          "name": "is_default",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": false
+        },
+        "is_active": {
+          "name": "is_active",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": true
+        },
+        "deactivated_at": {
+          "name": "deactivated_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "deactivated_by": {
+          "name": "deactivated_by",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(strftime('%s', 'now'))"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(strftime('%s', 'now'))"
+        }
+      },
+      "indexes": {
+        "llm_providers_user_id_idx": {
+          "name": "llm_providers_user_id_idx",
+          "columns": ["user_id"],
+          "isUnique": false
+        },
+        "llm_providers_type_idx": {
+          "name": "llm_providers_type_idx",
+          "columns": ["type"],
+          "isUnique": false
+        },
+        "llm_providers_is_default_idx": {
+          "name": "llm_providers_is_default_idx",
+          "columns": ["is_default"],
+          "isUnique": false
+        },
+        "llm_providers_is_active_idx": {
+          "name": "llm_providers_is_active_idx",
+          "columns": ["is_active"],
+          "isUnique": false
+        },
+        "llm_providers_deactivated_by_idx": {
+          "name": "llm_providers_deactivated_by_idx",
+          "columns": ["deactivated_by"],
+          "isUnique": false
+        },
+        "llm_providers_is_active_created_at_idx": {
+          "name": "llm_providers_is_active_created_at_idx",
+          "columns": ["is_active", "created_at"],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "llm_providers_user_id_users_id_fk": {
+          "name": "llm_providers_user_id_users_id_fk",
+          "tableFrom": "llm_providers",
+          "tableTo": "users",
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "llm_providers_deactivated_by_users_id_fk": {
+          "name": "llm_providers_deactivated_by_users_id_fk",
+          "tableFrom": "llm_providers",
           "tableTo": "users",
           "columnsFrom": ["deactivated_by"],
           "columnsTo": ["id"],
@@ -1408,8 +964,15 @@
           "notNull": true,
           "autoincrement": false
         },
-        "conversation_id": {
-          "name": "conversation_id",
+        "source_type": {
+          "name": "source_type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "source_id": {
+          "name": "source_id",
           "type": "text",
           "primaryKey": false,
           "notNull": true,
@@ -1469,9 +1032,14 @@
         }
       },
       "indexes": {
-        "messages_conversation_id_idx": {
-          "name": "messages_conversation_id_idx",
-          "columns": ["conversation_id"],
+        "messages_source_type_idx": {
+          "name": "messages_source_type_idx",
+          "columns": ["source_type"],
+          "isUnique": false
+        },
+        "messages_source_id_idx": {
+          "name": "messages_source_id_idx",
+          "columns": ["source_id"],
           "isUnique": false
         },
         "messages_author_id_idx": {
@@ -1499,22 +1067,18 @@
           "columns": ["is_active", "created_at"],
           "isUnique": false
         },
-        "messages_conversation_time_idx": {
-          "name": "messages_conversation_time_idx",
-          "columns": ["conversation_id", "created_at"],
+        "messages_source_time_idx": {
+          "name": "messages_source_time_idx",
+          "columns": ["source_type", "source_id", "created_at"],
+          "isUnique": false
+        },
+        "messages_source_active_time_idx": {
+          "name": "messages_source_active_time_idx",
+          "columns": ["source_type", "source_id", "is_active", "created_at"],
           "isUnique": false
         }
       },
       "foreignKeys": {
-        "messages_conversation_id_conversations_id_fk": {
-          "name": "messages_conversation_id_conversations_id_fk",
-          "tableFrom": "messages",
-          "tableTo": "conversations",
-          "columnsFrom": ["conversation_id"],
-          "columnsTo": ["id"],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
         "messages_author_id_users_id_fk": {
           "name": "messages_author_id_users_id_fk",
           "tableFrom": "messages",
@@ -1527,6 +1091,175 @@
         "messages_deactivated_by_users_id_fk": {
           "name": "messages_deactivated_by_users_id_fk",
           "tableFrom": "messages",
+          "tableTo": "users",
+          "columnsFrom": ["deactivated_by"],
+          "columnsTo": ["id"],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "project_channels": {
+      "name": "project_channels",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "project_id": {
+          "name": "project_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "description": {
+          "name": "description",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "archived_at": {
+          "name": "archived_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "archived_by": {
+          "name": "archived_by",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "is_active": {
+          "name": "is_active",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": true
+        },
+        "deactivated_at": {
+          "name": "deactivated_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "deactivated_by": {
+          "name": "deactivated_by",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "CURRENT_TIMESTAMP"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "CURRENT_TIMESTAMP"
+        }
+      },
+      "indexes": {
+        "project_channels_project_id_idx": {
+          "name": "project_channels_project_id_idx",
+          "columns": ["project_id"],
+          "isUnique": false
+        },
+        "project_channels_created_at_idx": {
+          "name": "project_channels_created_at_idx",
+          "columns": ["created_at"],
+          "isUnique": false
+        },
+        "project_channels_archived_by_idx": {
+          "name": "project_channels_archived_by_idx",
+          "columns": ["archived_by"],
+          "isUnique": false
+        },
+        "project_channels_deactivated_by_idx": {
+          "name": "project_channels_deactivated_by_idx",
+          "columns": ["deactivated_by"],
+          "isUnique": false
+        },
+        "project_channels_is_active_idx": {
+          "name": "project_channels_is_active_idx",
+          "columns": ["is_active"],
+          "isUnique": false
+        },
+        "project_channels_is_active_created_at_idx": {
+          "name": "project_channels_is_active_created_at_idx",
+          "columns": ["is_active", "created_at"],
+          "isUnique": false
+        },
+        "project_channels_archived_at_idx": {
+          "name": "project_channels_archived_at_idx",
+          "columns": ["archived_at"],
+          "isUnique": false
+        },
+        "project_channels_is_active_archived_at_idx": {
+          "name": "project_channels_is_active_archived_at_idx",
+          "columns": ["is_active", "archived_at"],
+          "isUnique": false
+        },
+        "project_channels_project_active_idx": {
+          "name": "project_channels_project_active_idx",
+          "columns": ["project_id", "is_active"],
+          "isUnique": false
+        },
+        "project_channels_project_name_idx": {
+          "name": "project_channels_project_name_idx",
+          "columns": ["project_id", "name"],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "project_channels_project_id_projects_id_fk": {
+          "name": "project_channels_project_id_projects_id_fk",
+          "tableFrom": "project_channels",
+          "tableTo": "projects",
+          "columnsFrom": ["project_id"],
+          "columnsTo": ["id"],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "project_channels_archived_by_users_id_fk": {
+          "name": "project_channels_archived_by_users_id_fk",
+          "tableFrom": "project_channels",
+          "tableTo": "users",
+          "columnsFrom": ["archived_by"],
+          "columnsTo": ["id"],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "project_channels_deactivated_by_users_id_fk": {
+          "name": "project_channels_deactivated_by_users_id_fk",
+          "tableFrom": "project_channels",
           "tableTo": "users",
           "columnsFrom": ["deactivated_by"],
           "columnsTo": ["id"],
