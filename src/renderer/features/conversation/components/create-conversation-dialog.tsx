@@ -90,7 +90,7 @@ export function CreateConversationDialog(props: CreateConversationDialogProps) {
     const participantIds = [currentUser.id, ...selectedUserIds];
     createConversationMutation.mutate({
       participantIds,
-      description: null,
+      description: undefined,
     });
   }
 

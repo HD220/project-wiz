@@ -438,16 +438,16 @@ export class ConversationService {
       );
     }
 
-    const [conversation] = await db
-      .insert(conversationsTable)
+    const [channel] = await db
+      .insert(projectChannelsTable)
       .values(input)
       .returning();
 
-    if (!conversation) {
-      throw new Error("Failed to create conversation - database insert failed");
+    if (!channel) {
+      throw new Error("Failed to create channel - database insert failed");
     }
 
-    return conversation;
+    return channel;
   }
 }
 ```

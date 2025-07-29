@@ -95,8 +95,27 @@ export type UpdateAgent = Partial<InsertAgent> & { id: string };
 
 ```typescript
 // ✅ CORRECT: Always use foreign key constraints
-export const conversationsTable = sqliteTable(
-  "conversations",
+export const dmConversationsTable = sqliteTable(
+  "dm_conversations",
+  {
+    id: text("id")
+      .primaryKey()
+      .$defaultFn(() => crypto.randomUUID()),
+    name: text("name"),
+    description: text("description"),
+    archivedAt: integer("archived_at", { mode: "timestamp_ms" }),
+    archivedBy: text("archived_by").references(() => usersTable.id),
+  },
+  (table) => ({
+    createdAtIdx: index("dm_conversations_created_at_idx").on(table.createdAt),
+    archivedByIdx: index("dm_conversations_archived_by_idx").on(
+      table.archivedBy,
+    ),
+  }),
+);
+
+export const projectChannelsTable = sqliteTable(
+  "project_channels",
   {
     id: text("id")
       .primaryKey()
@@ -104,13 +123,15 @@ export const conversationsTable = sqliteTable(
     projectId: text("project_id")
       .notNull()
       .references(() => projectsTable.id, { onDelete: "cascade" }),
-    ownerId: text("owner_id")
-      .notNull()
-      .references(() => usersTable.id, { onDelete: "cascade" }),
+    name: text("name").notNull(),
+    description: text("description"),
   },
   (table) => ({
-    projectIdIdx: index("conversations_project_id_idx").on(table.projectId),
-    ownerIdIdx: index("conversations_owner_id_idx").on(table.ownerId),
+    projectIdIdx: index("project_channels_project_id_idx").on(table.projectId),
+    projectNameIdx: index("project_channels_project_name_idx").on(
+      table.projectId,
+      table.name,
+    ),
   }),
 );
 ```

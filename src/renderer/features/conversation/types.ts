@@ -3,10 +3,9 @@
 // ===========================
 // Re-export from simplified unified types
 
-export type {
-  ChatType as ConversationType,
+import type {
+  ChatType,
   UniversalConversation,
-  UniversalConversation as UnifiedConversation,
   RendererMessage,
   MessageGroup,
   ConversationFilters,
@@ -24,12 +23,33 @@ export type {
   AuthenticatedUser,
 } from "@/renderer/types/chat.types";
 
+// Re-export types
+export type {
+  ChatType as ConversationType,
+  UniversalConversation,
+  UniversalConversation as UnifiedConversation,
+  RendererMessage,
+  MessageGroup,
+  ConversationFilters,
+  SelectMessage,
+  MessageSourceType,
+  SendMessageInput,
+  SelectDMConversation,
+  DMConversationWithParticipants,
+  DMConversationWithLastMessage,
+  CreateDMConversationInput,
+  SelectProjectChannel,
+  ProjectChannelWithLastMessage,
+  CreateProjectChannelInput,
+  AuthenticatedUser,
+};
+
 // ===========================
-// API INPUT ALIASES
+// API INPUT TYPES
 // ===========================
 
-export type CreateDMInput = any; // Simplified for compatibility
-export type CreateChannelInput = any; // Simplified for compatibility
+export type CreateDMInput = CreateDMConversationInput;
+export type CreateChannelInput = CreateProjectChannelInput;
 
 // ===========================
 // UI STATE TYPES
@@ -37,18 +57,16 @@ export type CreateChannelInput = any; // Simplified for compatibility
 
 export interface ConversationUIState {
   selectedConversationId: string | null;
-  selectedConversationType: any; // Simplified for compatibility
+  selectedConversationType: ChatType;
   showCreateDialog: boolean;
   showCreateChannelDialog: boolean;
   showArchived: boolean;
 }
 
 // ===========================
-// LEGACY COMPATIBILITY
+// COMPONENT COMPATIBILITY TYPES
 // ===========================
 
-export type ConversationWithParticipants = any; // Simplified for compatibility
-export type ConversationWithLastMessage = any; // Simplified for compatibility
-export type ConversationWithMessages = any; // Simplified for compatibility
-export type SelectConversation = any; // Simplified for compatibility
-export type CreateConversationInput = CreateDMInput; // Default to DM for backward compatibility
+export type ConversationWithParticipants = DMConversationWithParticipants;
+export type ConversationWithLastMessage = UniversalConversation;
+export type CreateConversationInput = CreateDMConversationInput;
