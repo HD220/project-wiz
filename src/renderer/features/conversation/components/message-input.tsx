@@ -79,9 +79,13 @@ export function MessageInput(props: MessageInputProps) {
 
   const hasContent = message.trim().length > 0;
 
+  // Responsive configuration
+  const padding =
+    "px-[var(--spacing-component-sm)] lg:px-[var(--spacing-component-md)] py-[var(--spacing-component-xs)] lg:py-[var(--spacing-component-sm)]";
+
   return (
     <div className={cn("bg-background border-t border-border/60", className)}>
-      <div className="px-[var(--spacing-component-md)] py-[var(--spacing-component-sm)]">
+      <div className={padding}>
         {/* Form-like input container with enhanced design */}
         <form
           onSubmit={(e) => {
@@ -127,16 +131,19 @@ export function MessageInput(props: MessageInputProps) {
               />
             </ScrollArea>
 
-            {/* Action buttons - inlined for INLINE-FIRST compliance */}
-            <div className="absolute bottom-[var(--spacing-component-xs)] right-[var(--spacing-component-xs)] flex items-center gap-[var(--spacing-component-xs)]">
-              <div className="flex items-center gap-[var(--spacing-component-xs)] mr-[var(--spacing-component-xs)]">
+            {/* Action buttons - responsive sizing for touch */}
+            <div className="absolute flex items-center bottom-1 lg:bottom-[var(--spacing-component-xs)] right-1 lg:right-[var(--spacing-component-xs)] gap-1 lg:gap-[var(--spacing-component-xs)]">
+              <div className="flex items-center gap-1 lg:gap-[var(--spacing-component-xs)] mr-1 lg:mr-[var(--spacing-component-xs)]">
                 <Button
                   type="button"
                   size="sm"
                   variant="ghost"
                   onClick={() => console.log("Attachment - TODO")}
                   disabled={disabled || isSending}
-                  className="h-7 w-7 p-0 text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all duration-150"
+                  className={cn(
+                    "p-0 text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all duration-150",
+                    "h-7 w-7 lg:h-8 lg:w-8", // Responsive size
+                  )}
                   title="Attach file"
                   aria-label="Attach file"
                 >
@@ -149,7 +156,10 @@ export function MessageInput(props: MessageInputProps) {
                   variant="ghost"
                   onClick={() => console.log("Emoji - TODO")}
                   disabled={disabled || isSending}
-                  className="h-7 w-7 p-0 text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all duration-150"
+                  className={cn(
+                    "p-0 text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all duration-150",
+                    "h-7 w-7 lg:h-8 lg:w-8", // Responsive size
+                  )}
                   title="Add emoji"
                   aria-label="Add emoji"
                 >
@@ -164,7 +174,8 @@ export function MessageInput(props: MessageInputProps) {
                 onClick={handleSend}
                 disabled={disabled || isSending || !hasContent}
                 className={cn(
-                  "h-7 w-7 p-0 transition-all duration-150",
+                  "p-0 transition-all duration-150",
+                  "h-7 w-7 lg:h-8 lg:w-8", // Responsive size
                   hasContent && !disabled && !isSending
                     ? "bg-primary text-primary-foreground hover:bg-primary/90"
                     : "text-muted-foreground hover:text-foreground hover:bg-muted/50",

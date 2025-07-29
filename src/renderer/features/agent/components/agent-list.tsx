@@ -18,6 +18,7 @@ import { AgentDeleteDialog } from "@/renderer/features/agent/components/agent-de
 import { AgentListItem } from "@/renderer/features/agent/components/agent-card";
 import { CreateAgentDialog } from "@/renderer/features/agent/components/create-agent-dialog";
 import { useApiMutation } from "@/renderer/hooks/use-api-mutation.hook";
+import { cn } from "@/renderer/lib/utils";
 
 interface AgentListProps {
   agents: SelectAgent[];
@@ -136,6 +137,9 @@ export function AgentList(props: AgentListProps) {
     busy: agents.filter((agent) => agent.status === "busy").length,
   };
 
+  // Simple responsive grid using Tailwind breakpoints
+  const gridColumns = "grid-cols-1 xl:grid-cols-2"; // 1 column on small/medium, 2 on large screens
+
   // Render empty state when no agents exist and no filters are applied
   if (filteredAgents.length === 0 && !hasFilters) {
     return (
@@ -253,11 +257,16 @@ export function AgentList(props: AgentListProps) {
           </div>
         )}
 
-        {/* Professional Agent List with 2-column layout */}
+        {/* Professional Agent List with responsive grid layout */}
         {filteredAgents.length > 0 && (
           <ScrollArea className="flex-1">
-            <div className="p-[var(--spacing-component-sm)] space-y-[var(--spacing-component-xs)]">
-              <div className="grid grid-cols-1 xl:grid-cols-2 gap-[var(--spacing-component-xs)]">
+            <div className="p-[var(--spacing-component-xs)] lg:p-[var(--spacing-component-sm)] space-y-[var(--spacing-component-xs)]">
+              <div
+                className={cn(
+                  "grid gap-[var(--spacing-component-xxs)] lg:gap-[var(--spacing-component-xs)]",
+                  gridColumns,
+                )}
+              >
                 {filteredAgents.map((agent) => (
                   <AgentListItem
                     key={agent.id}

@@ -95,76 +95,99 @@ export function SearchFilterBar(props: SearchFilterBarProps) {
   return (
     <div
       className={cn(
-        "flex items-center gap-[var(--spacing-component-md)] px-[var(--spacing-component-lg)] py-[var(--spacing-component-sm)] border-b border-border/30 bg-background/50 shrink-0",
+        "border-b border-border/30 bg-background/50 shrink-0",
+        "px-[var(--spacing-component-md)] lg:px-[var(--spacing-component-lg)] py-[var(--spacing-component-xs)] lg:py-[var(--spacing-component-sm)]", // Responsive padding
         className,
       )}
     >
-      {/* Search Input with ARIA label for accessibility */}
-      <div className="relative flex-1 max-w-sm">
-        <Search
-          className="absolute left-3 top-1/2 w-4 h-4 -translate-y-1/2 text-muted-foreground"
-          aria-hidden="true"
-        />
-        <Input
-          placeholder={searchPlaceholder}
-          value={localSearchValue}
-          onChange={handleSearchInputChange}
-          className="pl-10 h-9 border-border/60 bg-background/50 focus:bg-background"
-          maxLength={100}
-          aria-label={searchPlaceholder}
-        />
-      </div>
+      {/* Responsive layout: wrap on small screens */}
+      <div
+        className={cn(
+          "flex items-center",
+          "gap-[var(--spacing-component-sm)] lg:gap-[var(--spacing-component-md)]", // Responsive gap
+          "flex-wrap lg:flex-nowrap", // Wrap on small screens
+        )}
+      >
+        {/* Search Input - responsive width and position */}
+        <div className="relative w-full min-w-0 order-1 lg:flex-1 lg:max-w-sm lg:order-none">
+          <Search
+            className="absolute left-3 top-1/2 w-4 h-4 -translate-y-1/2 text-muted-foreground"
+            aria-hidden="true"
+          />
+          <Input
+            placeholder={searchPlaceholder}
+            value={localSearchValue}
+            onChange={handleSearchInputChange}
+            className="pl-10 h-9 border-border/60 bg-background/50 focus:bg-background"
+            maxLength={100}
+            aria-label={searchPlaceholder}
+          />
+        </div>
 
-      {/* Filter Select */}
-      <Select value={filterValue} onValueChange={onFilterChange}>
-        <SelectTrigger className="w-36 h-9 border-border/60 bg-background/50">
-          <SelectValue placeholder={filterPlaceholder} />
-        </SelectTrigger>
-        <SelectContent>
-          {filterOptions.map((option) => (
-            <SelectItem key={option.value} value={option.value}>
-              {option.label}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
+        {/* Filter controls row - wrap in compact mode */}
+        <div className="flex items-center gap-[var(--spacing-component-sm)] lg:gap-[var(--spacing-component-md)] w-full order-2 flex-wrap lg:flex-shrink-0 lg:w-auto">
+          {/* Filter Select - responsive width */}
+          <Select value={filterValue} onValueChange={onFilterChange}>
+            <SelectTrigger className="h-9 border-border/60 bg-background/50 min-w-[120px] flex-1 lg:w-36 lg:flex-none">
+              <SelectValue placeholder={filterPlaceholder} />
+            </SelectTrigger>
+            <SelectContent>
+              {filterOptions.map((option) => (
+                <SelectItem key={option.value} value={option.value}>
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
 
-      {/* Show Inactive Toggle */}
-      <div className="flex items-center gap-[var(--spacing-component-sm)] px-[var(--spacing-component-sm)] py-[var(--spacing-component-sm)] rounded-md border border-border/60 bg-background/50">
-        <Switch
-          id={toggleId}
-          checked={toggleValue}
-          onCheckedChange={onToggleChange}
-        />
-        <label
-          htmlFor={toggleId}
-          className="text-sm text-muted-foreground cursor-pointer flex items-center gap-1"
-        >
-          {toggleValue ? (
-            <>
-              <Eye className="w-4 h-4" />
-              {toggleLabel}
-            </>
-          ) : (
-            <>
-              <EyeOff className="w-4 h-4" />
-              {toggleLabel.replace("Show", "Hide")}
-            </>
+          {/* Toggle Switch - compact layout */}
+          <div className="flex items-center gap-[var(--spacing-component-sm)] rounded-md border border-border/60 bg-background/50 px-2 py-1.5 lg:px-[var(--spacing-component-sm)] lg:py-[var(--spacing-component-sm)]">
+            <Switch
+              id={toggleId}
+              checked={toggleValue}
+              onCheckedChange={onToggleChange}
+            />
+            <label
+              htmlFor={toggleId}
+              className="text-muted-foreground cursor-pointer flex items-center gap-1 text-xs lg:text-sm"
+            >
+              {toggleValue ? (
+                <>
+                  <Eye className="w-4 h-4" />
+                  <span className="hidden lg:inline">{toggleLabel}</span>
+                  <span className="lg:hidden">
+                    {toggleLabel.split(" ")[1] || toggleLabel}
+                  </span>
+                </>
+              ) : (
+                <>
+                  <EyeOff className="w-4 h-4" />
+                  <span className="hidden lg:inline">
+                    {toggleLabel.replace("Show", "Hide")}
+                  </span>
+                  <span className="lg:hidden">
+                    {toggleLabel.replace("Show", "Hide").split(" ")[1] ||
+                      toggleLabel.replace("Show", "Hide")}
+                  </span>
+                </>
+              )}
+            </label>
+          </div>
+
+          {/* Clear Filters - responsive positioning */}
+          {hasFilters && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={onClearFilters}
+              className="h-9 px-2 text-xs lg:px-3 lg:text-sm"
+            >
+              <span className="lg:hidden">Clear</span>
+              <span className="hidden lg:inline">Clear Filters</span>
+            </Button>
           )}
-        </label>
+        </div>
       </div>
-
-      {/* Clear Filters */}
-      {hasFilters && (
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={onClearFilters}
-          className="h-9 px-3"
-        >
-          Clear Filters
-        </Button>
-      )}
     </div>
   );
 }

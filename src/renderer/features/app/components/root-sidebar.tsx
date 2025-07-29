@@ -16,7 +16,6 @@ import {
 } from "@/renderer/components/ui/tooltip";
 import { useAuth } from "@/renderer/contexts/auth.context";
 import { CreateProjectDialog } from "@/renderer/features/project/components";
-import { useElectronViewport } from "@/renderer/hooks/use-mobile";
 import { cn } from "@/renderer/lib/utils";
 
 interface RootSidebarProps {
@@ -31,8 +30,9 @@ export function RootSidebar(props: RootSidebarProps) {
   return (
     <nav
       className={cn(
-        "w-16 bg-sidebar/95 backdrop-blur-md flex flex-col items-center border-r border-sidebar-border/60 shadow-sm",
-        "py-[var(--spacing-component-md)]",
+        "w-12 lg:w-16", // Responsive width: 12 on small screens, 16 on large
+        "bg-sidebar/95 backdrop-blur-md flex flex-col items-center border-r border-sidebar-border/60 shadow-sm transition-all duration-200",
+        "py-[var(--spacing-component-sm)] lg:py-[var(--spacing-component-md)]", // Responsive padding
         className,
       )}
       role="navigation"
@@ -54,7 +54,8 @@ export function RootSidebar(props: RootSidebarProps) {
                     variant="ghost"
                     size="icon"
                     className={cn(
-                      "w-12 h-12 p-0 rounded-2xl border-2 transition-all duration-200 ease-out group relative cursor-pointer",
+                      "w-10 h-10 lg:w-12 lg:h-12", // Responsive button size
+                      "p-0 rounded-2xl border-2 transition-all duration-200 ease-out group relative cursor-pointer",
                       "focus-visible:ring-2 focus-visible:ring-sidebar-ring focus-visible:ring-offset-2 focus-visible:ring-offset-sidebar",
                       "hover:scale-[1.01] hover:shadow-lg hover:shadow-sidebar-primary/20",
                       isActive
@@ -63,8 +64,8 @@ export function RootSidebar(props: RootSidebarProps) {
                     )}
                     aria-label="Personal area"
                   >
-                    <Avatar className="size-8 transition-transform duration-200 group-hover:scale-[1.01]">
-                      <AvatarFallback className="bg-transparent text-inherit font-semibold text-sm">
+                    <Avatar className="size-6 lg:size-8 transition-transform duration-200 group-hover:scale-[1.01]">
+                      <AvatarFallback className="bg-transparent text-inherit font-semibold text-xs lg:text-sm">
                         {user?.name?.charAt(0).toUpperCase() || "U"}
                       </AvatarFallback>
                     </Avatar>
@@ -86,7 +87,7 @@ export function RootSidebar(props: RootSidebarProps) {
         </TooltipProvider>
       </div>
 
-      <Separator className="w-8 mb-[var(--spacing-component-md)] bg-sidebar-border/40" />
+      <Separator className="w-6 lg:w-8 mb-[var(--spacing-component-md)] bg-sidebar-border/40" />
 
       {/* Projects List */}
       <ScrollArea className="flex-1 px-1">
@@ -108,7 +109,8 @@ export function RootSidebar(props: RootSidebarProps) {
                           variant="ghost"
                           size="icon"
                           className={cn(
-                            "w-12 h-12 p-0 rounded-2xl border-2 transition-all duration-200 ease-out group relative cursor-pointer",
+                            "w-10 h-10 lg:w-12 lg:h-12", // Responsive button size
+                            "p-0 rounded-2xl border-2 transition-all duration-200 ease-out group relative cursor-pointer",
                             "focus-visible:ring-2 focus-visible:ring-sidebar-ring focus-visible:ring-offset-2 focus-visible:ring-offset-sidebar",
                             "hover:scale-[1.01] hover:shadow-lg hover:shadow-sidebar-primary/20",
                             isActive
@@ -121,10 +123,10 @@ export function RootSidebar(props: RootSidebarProps) {
                             <img
                               src={project.avatarUrl}
                               alt=""
-                              className="size-8 rounded-full transition-transform duration-200 group-hover:scale-[1.01]"
+                              className="size-6 lg:size-8 rounded-full transition-transform duration-200 group-hover:scale-[1.01]"
                             />
                           ) : (
-                            <span className="font-bold text-base transition-transform duration-200 group-hover:scale-[1.01]">
+                            <span className="font-bold transition-transform duration-200 group-hover:scale-[1.01] text-sm lg:text-base">
                               {project.name.charAt(0).toUpperCase()}
                             </span>
                           )}
@@ -155,7 +157,7 @@ export function RootSidebar(props: RootSidebarProps) {
         </div>
       </ScrollArea>
 
-      <Separator className="w-8 my-[var(--spacing-component-md)] bg-sidebar-border/40" />
+      <Separator className="w-6 lg:w-8 my-[var(--spacing-component-md)] bg-sidebar-border/40" />
 
       {/* Action Buttons */}
       <div className="flex flex-col items-center gap-[var(--spacing-component-sm)]">
@@ -167,7 +169,8 @@ export function RootSidebar(props: RootSidebarProps) {
                   variant="ghost"
                   size="icon"
                   className={cn(
-                    "w-12 h-12 p-0 rounded-2xl border-2 transition-all duration-200 ease-out group cursor-pointer",
+                    "w-10 h-10 lg:w-12 lg:h-12", // Responsive button size
+                    "p-0 rounded-2xl border-2 transition-all duration-200 ease-out group cursor-pointer",
                     "bg-sidebar-accent/40 border-transparent text-sidebar-foreground/80",
                     "hover:bg-sidebar-accent hover:text-sidebar-foreground hover:rounded-[14px] hover:scale-[1.01] hover:shadow-md hover:shadow-sidebar-accent/25 hover:border-sidebar-border/30",
                     "focus-visible:ring-2 focus-visible:ring-sidebar-ring focus-visible:ring-offset-2 focus-visible:ring-offset-sidebar",
@@ -175,7 +178,7 @@ export function RootSidebar(props: RootSidebarProps) {
                   )}
                   aria-label="Add new project"
                 >
-                  <Plus className="w-5 h-5 transition-transform duration-200 group-hover:scale-[1.01]" />
+                  <Plus className="w-4 h-4 lg:w-5 lg:h-5 transition-transform duration-200 group-hover:scale-[1.01]" />
                 </Button>
               </CreateProjectDialog>
             </TooltipTrigger>
@@ -197,7 +200,8 @@ export function RootSidebar(props: RootSidebarProps) {
                 variant="ghost"
                 size="icon"
                 className={cn(
-                  "w-12 h-12 p-0 rounded-2xl border-2 transition-all duration-200 ease-out group cursor-pointer",
+                  "w-10 h-10 lg:w-12 lg:h-12", // Responsive button size
+                  "p-0 rounded-2xl border-2 transition-all duration-200 ease-out group cursor-pointer",
                   "bg-sidebar-accent/40 border-transparent text-sidebar-foreground/80",
                   "hover:bg-sidebar-accent hover:text-sidebar-foreground hover:rounded-[14px] hover:scale-[1.01] hover:shadow-md hover:shadow-sidebar-accent/25 hover:border-sidebar-border/30",
                   "focus-visible:ring-2 focus-visible:ring-sidebar-ring focus-visible:ring-offset-2 focus-visible:ring-offset-sidebar",
@@ -205,7 +209,7 @@ export function RootSidebar(props: RootSidebarProps) {
                 )}
                 aria-label="Open settings"
               >
-                <Settings className="w-5 h-5 transition-transform duration-200 group-hover:scale-[1.01]" />
+                <Settings className="w-4 h-4 lg:w-5 lg:h-5 transition-transform duration-200 group-hover:scale-[1.01]" />
               </CustomLink>
             </TooltipTrigger>
             <TooltipContent

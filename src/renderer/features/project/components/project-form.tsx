@@ -274,80 +274,139 @@ export function ProjectForm(props: ProjectFormProps) {
           />
 
           {projectType === "github" && (
-            <div className="space-y-[var(--spacing-component-md)] p-[var(--spacing-component-md)] bg-muted/30 rounded-lg border">
-              <div className="flex items-center gap-[var(--spacing-component-sm)]">
+            <div
+              className={cn(
+                "bg-muted/30 rounded-lg border transition-all duration-200",
+                false
+                  ? "space-y-[var(--spacing-component-sm)] p-[var(--spacing-component-sm)]"
+                  : "space-y-[var(--spacing-component-md)] p-[var(--spacing-component-md)]",
+              )}
+            >
+              <div
+                className={cn(
+                  "flex items-center",
+                  false
+                    ? "gap-[var(--spacing-component-xs)]"
+                    : "gap-[var(--spacing-component-sm)]",
+                )}
+              >
                 <Github className="h-4 w-4 text-muted-foreground" />
-                <span className="text-sm font-medium">Repository Details</span>
+                <span
+                  className={cn("font-medium", false ? "text-xs" : "text-sm")}
+                >
+                  Repository Details
+                </span>
               </div>
 
-              <FormField
-                control={form.control}
-                name="gitUrl"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-sm font-medium">
-                      Repository URL
-                    </FormLabel>
-                    <FormControl>
-                      <Input
-                        type="url"
-                        placeholder="https://github.com/username/repository.git"
-                        disabled={isFormDisabled}
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
+              {/* Responsive grid for git fields in compact mode */}
+              <div
+                className={cn(
+                  false
+                    ? "space-y-[var(--spacing-component-sm)]"
+                    : "space-y-[var(--spacing-component-md)]",
                 )}
-              />
+              >
+                <FormField
+                  control={form.control}
+                  name="gitUrl"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel
+                        className={cn(
+                          "font-medium",
+                          false ? "text-xs" : "text-sm",
+                        )}
+                      >
+                        Repository URL
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          type="url"
+                          placeholder={
+                            false
+                              ? "github.com/user/repo.git"
+                              : "https://github.com/username/repository.git"
+                          }
+                          disabled={isFormDisabled}
+                          className={false ? "text-xs" : ""}
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-              <FormField
-                control={form.control}
-                name="branch"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-sm font-medium">
-                      Branch
-                    </FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="main"
-                        disabled={isFormDisabled}
-                        list="common-branches"
-                        {...field}
-                      />
-                    </FormControl>
-                    <datalist id="common-branches">
-                      <option value="main" />
-                      <option value="master" />
-                      <option value="develop" />
-                      <option value="dev" />
-                    </datalist>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                <FormField
+                  control={form.control}
+                  name="branch"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel
+                        className={cn(
+                          "font-medium",
+                          false ? "text-xs" : "text-sm",
+                        )}
+                      >
+                        Branch
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="main"
+                          disabled={isFormDisabled}
+                          list="common-branches"
+                          className={false ? "text-xs" : ""}
+                          {...field}
+                        />
+                      </FormControl>
+                      <datalist id="common-branches">
+                        <option value="main" />
+                        <option value="master" />
+                        <option value="develop" />
+                        <option value="dev" />
+                      </datalist>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
             </div>
           )}
         </div>
 
-        <div className="flex gap-[var(--spacing-component-sm)] pt-[var(--spacing-component-md)]">
+        <div
+          className={cn(
+            "flex pt-[var(--spacing-component-md)]",
+            false
+              ? "gap-[var(--spacing-component-xs)] flex-col"
+              : "gap-[var(--spacing-component-sm)] flex-row",
+          )}
+        >
           {onCancel && (
             <Button
               type="button"
               variant="outline"
               onClick={onCancel}
               disabled={isFormDisabled}
-              className="flex-1"
+              className={cn(false ? "w-full text-xs h-8" : "flex-1")}
             >
               Cancel
             </Button>
           )}
-          <Button type="submit" disabled={isFormDisabled} className="flex-1">
+          <Button
+            type="submit"
+            disabled={isFormDisabled}
+            className={cn(false ? "w-full text-xs h-8" : "flex-1")}
+          >
             {isLoading ? (
               <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Creating...
+                <Loader2
+                  className={cn(
+                    "animate-spin",
+                    false ? "mr-1 h-3 w-3" : "mr-2 h-4 w-4",
+                  )}
+                />
+                {false ? "Creating..." : "Creating..."}
               </>
             ) : (
               submitLabel

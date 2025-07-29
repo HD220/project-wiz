@@ -11,12 +11,17 @@ interface AuthLayoutProps {
 export function AuthLayout(props: AuthLayoutProps) {
   const { children, className } = props;
 
+  // Responsive layout for different screen sizes
+  const padding = "p-4 lg:p-6"; // Responsive padding
+  const alignment = "justify-center lg:justify-center"; // Center alignment
+
   return (
     <div
       className={cn(
         "min-h-screen w-full",
-        "flex items-center justify-center",
-        "p-6",
+        "flex items-center",
+        alignment,
+        padding,
         "relative overflow-hidden",
         className,
       )}
@@ -44,8 +49,15 @@ export function AuthLayout(props: AuthLayoutProps) {
         aria-hidden="true"
       />
 
-      {/* Content container with proper semantic structure */}
-      <div className="relative w-full max-w-md">{children}</div>
+      {/* Content container with responsive width */}
+      <div
+        className={cn(
+          "relative w-full",
+          "max-w-sm lg:max-w-md", // Responsive max width
+        )}
+      >
+        {children}
+      </div>
     </div>
   );
 }
@@ -62,21 +74,41 @@ interface AuthCardProps {
 export function AuthCard(props: AuthCardProps) {
   const { title, description, children, className } = props;
 
+  // Responsive card configuration
+  const padding = "p-6 lg:p-8"; // Responsive padding
+  const spacing = "space-y-2 lg:space-y-3"; // Responsive spacing
+
   return (
     <Card
       className={cn(
-        "w-full max-w-md mx-auto transition-all duration-200 hover:shadow-md",
-        "p-8 space-y-3",
+        "w-full mx-auto transition-all duration-200 hover:shadow-md",
+        padding,
+        spacing,
         "shadow-lg border-border/50 bg-card/95 backdrop-blur-sm",
         "auth-form-enter", // Animation class
         className,
       )}
     >
-      <CardHeader className="text-center space-y-1 transition-colors duration-200 p-0">
-        <h3 className="text-3xl font-bold leading-tight tracking-tight text-foreground transition-colors duration-200">
+      <CardHeader
+        className={cn(
+          "text-center transition-colors duration-200 p-0",
+          "space-y-0.5 lg:space-y-1", // Responsive header spacing
+        )}
+      >
+        <h3
+          className={cn(
+            "font-bold leading-tight tracking-tight text-foreground transition-colors duration-200",
+            "text-2xl lg:text-3xl", // Responsive title size
+          )}
+        >
           {title}
         </h3>
-        <p className="text-base text-muted-foreground leading-relaxed transition-colors duration-200">
+        <p
+          className={cn(
+            "text-muted-foreground leading-relaxed transition-colors duration-200",
+            "text-sm lg:text-base", // Responsive description size
+          )}
+        >
           {description}
         </p>
       </CardHeader>
