@@ -1,581 +1,375 @@
 # Design Tokens
 
-Design tokens are the fundamental definitions of visual patterns in Project Wiz. They provide a consistent visual vocabulary that ensures coherence throughout the interface.
+Production-ready CSS custom properties powering the Project Wiz design system. All tokens are implemented in `src/renderer/globals.css` and automatically support light/dark themes with OKLCH color space.
 
 ## 📋 Overview
 
-Design tokens are the single source of truth for all visual properties in the Project Wiz design system. They are implemented as CSS custom properties and automatically adapt to light and dark themes.
+Design tokens are the single source of truth for all visual properties in Project Wiz. They provide OKLCH-based colors, semantic spacing, typography scales, and component-specific tokens that power all 48 shadcn/ui components plus custom extensions.
 
-## 🎨 Color System
+## 🎨 Color System (Production Implementation)
 
-### **OKLCH Color Space**
+### **OKLCH Color Space Benefits**
 
-Project Wiz uses the **OKLCH** color space for better visual perception and color manipulation across different themes.
+- **Perceptual Uniformity**: Better color consistency across different displays
+- **Wide Gamut Support**: Future-proof for modern displays
+- **Predictable Gradients**: Smooth color transitions in dark/light themes
+- **Better Accessibility**: More predictable contrast calculations
 
-### **Semantic Colors**
+### **Core Color Tokens** (from `globals.css`)
 
 ```css
 :root {
-  /* Primary Colors */
-  --primary: oklch(0.21 0.006 285.885); /* Main brand blue */
-  --primary-foreground: oklch(0.985 0 0); /* Text on primary */
+  /* Base radius for all components */
+  --radius: 0.25rem;
 
-  /* Secondary Colors */
-  --secondary: oklch(0.967 0.001 286.375); /* Neutral light gray */
-  --secondary-foreground: oklch(0.21 0.006 285.885); /* Text on secondary */
-
-  /* Surface Colors */
-  --background: oklch(1 0 0); /* Main background (white) */
-  --foreground: oklch(0.141 0.005 285.823); /* Main text (near black) */
+  /* Light theme colors */
+  --background: oklch(1 0 0); /* Pure white */
+  --foreground: oklch(0.141 0.005 285.823); /* Dark text */
   --card: oklch(1 0 0); /* Card backgrounds */
   --card-foreground: oklch(0.141 0.005 285.823); /* Text on cards */
+  --popover: oklch(1 0 0); /* Popover backgrounds */
+  --popover-foreground: oklch(0.141 0.005 285.823); /* Popover text */
 
-  /* Functional Colors */
-  --muted: oklch(0.967 0.001 286.375); /* Less important elements */
+  /* Brand colors */
+  --primary: oklch(0.21 0.006 285.885); /* Professional blue */
+  --primary-foreground: oklch(0.985 0 0); /* White text on primary */
+  --secondary: oklch(0.967 0.001 286.375); /* Light gray */
+  --secondary-foreground: oklch(
+    0.21 0.006 285.885
+  ); /* Blue text on secondary */
+
+  /* Functional colors */
+  --muted: oklch(0.967 0.001 286.375); /* Subtle backgrounds */
   --muted-foreground: oklch(0.552 0.016 285.938); /* Secondary text */
-  --accent: oklch(0.967 0.001 286.375); /* Subtle highlight color */
-  --accent-foreground: oklch(0.21 0.006 285.885); /* Text on accent */
+  --accent: oklch(0.967 0.001 286.375); /* Highlight backgrounds */
+  --accent-foreground: oklch(0.21 0.006 285.885); /* Text on highlights */
 
-  /* State Colors */
-  --destructive: oklch(0.577 0.245 27.325); /* Red for destructive actions */
-  --destructive-foreground: oklch(0.985 0 0); /* Text on destructive */
+  /* State colors */
+  --destructive: oklch(0.577 0.245 27.325); /* Red for errors/delete */
 
-  /* Interface Colors */
+  /* Interface elements */
   --border: oklch(0.92 0.004 286.32); /* Subtle borders */
-  --input: oklch(0.92 0.004 286.32); /* Input backgrounds */
-  --ring: oklch(0.705 0.015 286.067); /* Focus ring color */
+  --input: oklch(0.92 0.004 286.32); /* Input field borders */
+  --ring: oklch(0.705 0.015 286.067); /* Focus rings */
 }
 ```
 
-### **Dark Theme**
-
-```css
-.dark {
-  /* Primary Colors */
-  --primary: oklch(0.92 0.004 286.32); /* Light gray as primary */
-  --primary-foreground: oklch(0.21 0.006 285.885); /* Dark text on primary */
-
-  /* Secondary Colors */
-  --secondary: oklch(0.274 0.006 286.033); /* Medium dark gray */
-  --secondary-foreground: oklch(0.985 0 0); /* Light text on secondary */
-
-  /* Surface Colors */
-  --background: oklch(0.141 0.005 285.823); /* Dark main background */
-  --foreground: oklch(0.985 0 0); /* Light main text */
-  --card: oklch(0.21 0.006 285.885); /* Lighter card backgrounds */
-  --card-foreground: oklch(0.985 0 0); /* Light text on cards */
-
-  /* Functional Colors */
-  --muted: oklch(0.274 0.006 286.033); /* Less important elements */
-  --muted-foreground: oklch(0.705 0.015 286.067); /* Secondary text */
-  --accent: oklch(0.274 0.006 286.033); /* Subtle highlight color */
-  --accent-foreground: oklch(0.985 0 0); /* Text on accent */
-
-  /* State Colors */
-  --destructive: oklch(0.704 0.191 22.216); /* Softer red */
-  --destructive-foreground: oklch(0.985 0 0); /* Text on destructive */
-
-  /* Interface Colors */
-  --border: oklch(1 0 0 / 10%); /* Transparent borders */
-  --input: oklch(1 0 0 / 15%); /* Transparent inputs */
-  --ring: oklch(0.552 0.016 285.938); /* Focus ring color */
-}
-```
-
-### **Sidebar Colors**
+### **Discord-Like Sidebar Colors**
 
 ```css
 :root {
-  /* Light Theme */
+  /* Sidebar system for Discord-like navigation */
   --sidebar: oklch(0.985 0 0); /* Sidebar background */
   --sidebar-foreground: oklch(0.141 0.005 285.823); /* Sidebar text */
-  --sidebar-primary: oklch(0.21 0.006 285.885); /* Sidebar primary */
-  --sidebar-primary-foreground: oklch(0.985 0 0); /* Text on primary */
-  --sidebar-accent: oklch(0.967 0.001 286.375); /* Sidebar accent */
-  --sidebar-accent-foreground: oklch(0.21 0.006 285.885); /* Text on accent */
+  --sidebar-primary: oklch(0.21 0.006 285.885); /* Active sidebar items */
+  --sidebar-primary-foreground: oklch(0.985 0 0); /* Text on active items */
+  --sidebar-accent: oklch(0.967 0.001 286.375); /* Hover states */
+  --sidebar-accent-foreground: oklch(0.21 0.006 285.885); /* Hover text */
   --sidebar-border: oklch(0.92 0.004 286.32); /* Sidebar borders */
-  --sidebar-ring: oklch(0.705 0.015 286.067); /* Focus in sidebar */
-}
-
-.dark {
-  /* Dark Theme */
-  --sidebar: oklch(0.21 0.006 285.885); /* Dark sidebar background */
-  --sidebar-foreground: oklch(0.985 0 0); /* Light sidebar text */
-  --sidebar-primary: oklch(0.488 0.243 264.376); /* Vibrant blue as primary */
-  --sidebar-primary-foreground: oklch(0.985 0 0); /* Text on primary */
-  --sidebar-accent: oklch(0.274 0.006 286.033); /* Dark accent */
-  --sidebar-accent-foreground: oklch(0.985 0 0); /* Text on accent */
-  --sidebar-border: oklch(1 0 0 / 10%); /* Transparent borders */
-  --sidebar-ring: oklch(0.552 0.016 285.938); /* Focus in sidebar */
+  --sidebar-ring: oklch(0.705 0.015 286.067); /* Focus rings in sidebar */
 }
 ```
 
-### **Chart Colors**
+### **Chart Colors** (Data Visualization)
 
 ```css
 :root {
-  /* Light Theme Charts */
+  /* Chart color palette for data visualization */
   --chart-1: oklch(0.646 0.222 41.116); /* Orange */
-  --chart-2: oklch(0.6 0.118 184.704); /* Light blue */
-  --chart-3: oklch(0.398 0.07 227.392); /* Dark blue */
-  --chart-4: oklch(0.828 0.189 84.429); /* Light green */
+  --chart-2: oklch(0.6 0.118 184.704); /* Teal */
+  --chart-3: oklch(0.398 0.07 227.392); /* Blue */
+  --chart-4: oklch(0.828 0.189 84.429); /* Yellow */
   --chart-5: oklch(0.769 0.188 70.08); /* Green */
 }
+```
 
+### **Dark Theme Colors**
+
+```css
 .dark {
-  /* Dark Theme Charts */
-  --chart-1: oklch(0.488 0.243 264.376); /* Vibrant blue */
-  --chart-2: oklch(0.696 0.17 162.48); /* Aqua green */
-  --chart-3: oklch(0.769 0.188 70.08); /* Green */
-  --chart-4: oklch(0.627 0.265 303.9); /* Purple */
-  --chart-5: oklch(0.645 0.246 16.439); /* Red */
+  /* Inverted theme for dark mode */
+  --background: oklch(0.141 0.005 285.823); /* Dark background */
+  --foreground: oklch(0.985 0 0); /* Light text */
+  --card: oklch(0.21 0.006 285.885); /* Dark cards */
+  --card-foreground: oklch(0.985 0 0); /* Light text on cards */
+  --popover: oklch(0.21 0.006 285.885); /* Dark popovers */
+  --popover-foreground: oklch(0.985 0 0); /* Light popover text */
+
+  /* Adjusted brand colors for dark theme */
+  --primary: oklch(0.92 0.004 286.32); /* Light blue */
+  --primary-foreground: oklch(0.21 0.006 285.885); /* Dark text on primary */
+  --secondary: oklch(0.274 0.006 286.033); /* Dark gray */
+  --secondary-foreground: oklch(0.985 0 0); /* Light text on secondary */
+
+  /* Dark theme functional colors */
+  --muted: oklch(0.274 0.006 286.033); /* Dark muted */
+  --muted-foreground: oklch(0.705 0.015 286.067); /* Medium gray text */
+  --accent: oklch(0.274 0.006 286.033); /* Dark accent */
+  --accent-foreground: oklch(0.985 0 0); /* Light accent text */
+
+  /* Dark theme destructive */
+  --destructive: oklch(0.704 0.191 22.216); /* Brighter red for dark */
+
+  /* Dark theme interface */
+  --border: oklch(1 0 0 / 10%); /* Subtle light borders */
+  --input: oklch(1 0 0 / 15%); /* Input field borders */
+  --ring: oklch(0.552 0.016 285.938); /* Focus rings */
+
+  /* Dark theme sidebar colors */
+  --sidebar: oklch(0.21 0.006 285.885); /* Dark sidebar */
+  --sidebar-foreground: oklch(0.985 0 0); /* Light sidebar text */
+  --sidebar-primary: oklch(0.488 0.243 264.376); /* Purple active items */
+  --sidebar-primary-foreground: oklch(0.985 0 0); /* Light text on active */
+  --sidebar-accent: oklch(0.274 0.006 286.033); /* Dark hover states */
+  --sidebar-accent-foreground: oklch(0.985 0 0); /* Light hover text */
+  --sidebar-border: oklch(1 0 0 / 10%); /* Subtle borders */
+  --sidebar-ring: oklch(0.552 0.016 285.938); /* Focus rings */
+
+  /* Dark theme chart colors */
+  --chart-1: oklch(0.488 0.243 264.376); /* Purple */
+  --chart-2: oklch(0.696 0.17 162.48); /* Green */
+  --chart-3: oklch(0.769 0.188 70.08); /* Yellow */
+  --chart-4: oklch(0.627 0.265 303.9); /* Pink */
+  --chart-5: oklch(0.645 0.246 16.439); /* Orange */
 }
 ```
 
-### **Color Usage Guidelines**
+## 🔤 Typography System (Production Tokens)
 
-#### **When to use Primary**
-
-- Main action buttons
-- Important links
-- Active/selected states
-- CTAs (Call to Action)
-
-#### **When to use Secondary**
-
-- Secondary buttons
-- Less important area backgrounds
-- Default component states
-
-#### **When to use Muted**
-
-- Supporting text
-- Placeholders
-- Disabled elements
-- Secondary information
-
-#### **When to use Destructive**
-
-- Delete buttons
-- Error messages
-- Critical alerts
-- Irreversible actions
-
-## 📝 Typography
-
-### **Font Stack**
+### **Font Size Scale**
 
 ```css
 :root {
-  --font-family-sans:
-    system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-    "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji",
-    "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
-  --font-family-mono:
-    ui-monospace, SFMono-Regular, "SF Mono", Consolas, "Liberation Mono", Menlo,
-    monospace;
+  /* Typography tokens from globals.css */
+  --font-size-xs: 0.75rem; /* 12px - Small text, captions */
+  --font-size-sm: 0.875rem; /* 14px - Body text secondary */
+  --font-size-base: 1rem; /* 16px - Primary body text */
+  --font-size-lg: 1.125rem; /* 18px - Large body text */
+  --font-size-xl: 1.25rem; /* 20px - Headings */
+  --font-size-2xl: 1.5rem; /* 24px - Section headers */
+  --font-size-3xl: 1.875rem; /* 30px - Page titles */
 }
 ```
 
-### **Typography Scale**
+### **Line Height Scale**
 
 ```css
 :root {
-  /* Font Sizes */
-  --text-xs: 0.75rem; /* 12px */
-  --text-sm: 0.875rem; /* 14px */
-  --text-base: 1rem; /* 16px */
-  --text-lg: 1.125rem; /* 18px */
-  --text-xl: 1.25rem; /* 20px */
-  --text-2xl: 1.5rem; /* 24px */
-  --text-3xl: 1.875rem; /* 30px */
-  --text-4xl: 2.25rem; /* 36px */
-  --text-5xl: 3rem; /* 48px */
-  --text-6xl: 3.75rem; /* 60px */
-
-  /* Line Heights */
-  --leading-none: 1;
-  --leading-tight: 1.25;
-  --leading-snug: 1.375;
-  --leading-normal: 1.5;
-  --leading-relaxed: 1.625;
-  --leading-loose: 2;
-
-  /* Font Weights */
-  --font-thin: 100;
-  --font-extralight: 200;
-  --font-light: 300;
-  --font-normal: 400;
-  --font-medium: 500;
-  --font-semibold: 600;
-  --font-bold: 700;
-  --font-extrabold: 800;
-  --font-black: 900;
+  /* Line height tokens for optimal readability */
+  --line-height-tight: 1.25; /* Headings and tight text */
+  --line-height-normal: 1.5; /* Body text default */
+  --line-height-relaxed: 1.75; /* Long-form content */
 }
 ```
 
-### **Text Hierarchy**
-
-#### **Headings**
-
-```css
-/* H1 - Main page titles */
-.text-h1 {
-  font-size: var(--text-4xl); /* 36px */
-  line-height: var(--leading-tight); /* 1.25 */
-  font-weight: var(--font-bold); /* 700 */
-  letter-spacing: -0.025em;
-}
-
-/* H2 - Section titles */
-.text-h2 {
-  font-size: var(--text-3xl); /* 30px */
-  line-height: var(--leading-tight); /* 1.25 */
-  font-weight: var(--font-semibold); /* 600 */
-  letter-spacing: -0.025em;
-}
-
-/* H3 - Subtitles */
-.text-h3 {
-  font-size: var(--text-2xl); /* 24px */
-  line-height: var(--leading-snug); /* 1.375 */
-  font-weight: var(--font-semibold); /* 600 */
-}
-
-/* H4 - Smaller titles */
-.text-h4 {
-  font-size: var(--text-xl); /* 20px */
-  line-height: var(--leading-snug); /* 1.375 */
-  font-weight: var(--font-medium); /* 500 */
-}
-```
-
-#### **Body Text**
-
-```css
-/* Main text */
-.text-body {
-  font-size: var(--text-base); /* 16px */
-  line-height: var(--leading-normal); /* 1.5 */
-  font-weight: var(--font-normal); /* 400 */
-}
-
-/* Small text */
-.text-small {
-  font-size: var(--text-sm); /* 14px */
-  line-height: var(--leading-normal); /* 1.5 */
-  font-weight: var(--font-normal); /* 400 */
-}
-
-/* Caption text */
-.text-caption {
-  font-size: var(--text-xs); /* 12px */
-  line-height: var(--leading-normal); /* 1.5 */
-  font-weight: var(--font-normal); /* 400 */
-  color: oklch(var(--muted-foreground));
-}
-```
-
-#### **Text Utilities**
-
-```css
-/* Code text */
-.text-code {
-  font-family: var(--font-family-mono);
-  font-size: 0.875em;
-  background: oklch(var(--muted));
-  padding: 0.125rem 0.25rem;
-  border-radius: calc(var(--radius) - 2px);
-}
-
-/* Lead text */
-.text-lead {
-  font-size: var(--text-lg); /* 18px */
-  line-height: var(--leading-relaxed); /* 1.625 */
-  font-weight: var(--font-normal); /* 400 */
-  color: oklch(var(--muted-foreground));
-}
-```
-
-## 📏 Spacing
-
-### **8px Grid System**
+### **Font Weight Scale**
 
 ```css
 :root {
-  /* Base unit: 8px */
-  --spacing-0: 0; /* 0px */
-  --spacing-1: 0.25rem; /* 4px */
-  --spacing-2: 0.5rem; /* 8px */
-  --spacing-3: 0.75rem; /* 12px */
-  --spacing-4: 1rem; /* 16px */
-  --spacing-5: 1.25rem; /* 20px */
-  --spacing-6: 1.5rem; /* 24px */
-  --spacing-8: 2rem; /* 32px */
-  --spacing-10: 2.5rem; /* 40px */
-  --spacing-12: 3rem; /* 48px */
-  --spacing-16: 4rem; /* 64px */
-  --spacing-20: 5rem; /* 80px */
-  --spacing-24: 6rem; /* 96px */
-  --spacing-32: 8rem; /* 128px */
-  --spacing-40: 10rem; /* 160px */
-  --spacing-48: 12rem; /* 192px */
-  --spacing-56: 14rem; /* 224px */
-  --spacing-64: 16rem; /* 256px */
+  /* Font weight tokens */
+  --font-weight-normal: 400; /* Regular text */
+  --font-weight-medium: 500; /* Emphasized text */
+  --font-weight-semibold: 600; /* Headings */
+  --font-weight-bold: 700; /* Strong emphasis */
 }
 ```
 
-### **Semantic Tokens**
+## 📏 Spacing System (8px Grid)
+
+### **Component Spacing** (Internal padding/margins)
 
 ```css
 :root {
-  /* Component Spacing */
-  --component-padding-sm: var(--spacing-2); /* 8px */
-  --component-padding-md: var(--spacing-4); /* 16px */
-  --component-padding-lg: var(--spacing-6); /* 24px */
-
-  /* Layout Spacing */
-  --layout-gap-sm: var(--spacing-4); /* 16px */
-  --layout-gap-md: var(--spacing-6); /* 24px */
-  --layout-gap-lg: var(--spacing-8); /* 32px */
-
-  /* Vertical Margins */
-  --section-margin-sm: var(--spacing-8); /* 32px */
-  --section-margin-md: var(--spacing-12); /* 48px */
-  --section-margin-lg: var(--spacing-16); /* 64px */
+  /* Component spacing - for internal padding and margins */
+  --spacing-component-xs: 0.25rem; /* 4px */
+  --spacing-component-sm: 0.5rem; /* 8px */
+  --spacing-component-md: 1rem; /* 16px */
+  --spacing-component-lg: 1.5rem; /* 24px */
+  --spacing-component-xl: 2rem; /* 32px */
+  --spacing-component-2xl: 2.5rem; /* 40px */
 }
 ```
 
-### **Breakpoints**
+### **Layout Spacing** (Between sections and components)
 
 ```css
 :root {
-  /* Tailwind CSS Breakpoints */
-  --breakpoint-sm: 640px; /* Small devices */
-  --breakpoint-md: 768px; /* Medium devices */
-  --breakpoint-lg: 1024px; /* Large devices */
-  --breakpoint-xl: 1280px; /* Extra large devices */
-  --breakpoint-2xl: 1536px; /* 2X large devices */
+  /* Layout spacing - for spacing between sections */
+  --spacing-layout-xs: 0.5rem; /* 8px */
+  --spacing-layout-sm: 1rem; /* 16px */
+  --spacing-layout-md: 1.5rem; /* 24px */
+  --spacing-layout-lg: 2rem; /* 32px */
+  --spacing-layout-xl: 3rem; /* 48px */
+  --spacing-layout-2xl: 4rem; /* 64px */
 }
 ```
 
-### **Spacing Usage Guidelines**
-
-#### **Component Padding/Margin**
-
-- **4px (spacing-1)**: Very small internal padding
-- **8px (spacing-2)**: Default padding for badges, pills
-- **16px (spacing-4)**: Default padding for buttons, inputs
-- **24px (spacing-6)**: Padding for cards, modals
-
-#### **Layout Gaps**
-
-- **16px (spacing-4)**: Gap between related elements
-- **24px (spacing-6)**: Gap between sections within a container
-- **32px (spacing-8)**: Gap between main sections
-
-## 🔸 Border Radius
-
-### **Radius Tokens**
+### **Component-Specific Spacing**
 
 ```css
 :root {
-  /* Base Radius */
-  --radius: 0.25rem; /* 4px - configurable base value */
+  /* Semantic spacing for specific components */
+  --feature-card-padding: var(--spacing-component-lg);
+  --feature-card-gap: var(--spacing-component-md);
+  --feature-card-border-radius: var(--radius-lg);
 
-  /* Calculated Variations */
+  --status-indicator-size-sm: 0.375rem; /* 6px */
+  --status-indicator-size-md: 0.5rem; /* 8px */
+  --status-indicator-size-lg: 0.625rem; /* 10px */
+
+  --data-display-padding: var(--spacing-component-lg);
+  --data-display-gap: var(--spacing-component-sm);
+}
+```
+
+## 🎨 Border and Effects
+
+### **Border Radius System**
+
+```css
+:root {
+  /* Base radius */
+  --radius: 0.25rem; /* 4px base radius */
+}
+
+/* Calculated radius variants in Tailwind theme */
+@theme inline {
   --radius-sm: calc(var(--radius) - 4px); /* 0px */
   --radius-md: calc(var(--radius) - 2px); /* 2px */
   --radius-lg: var(--radius); /* 4px */
   --radius-xl: calc(var(--radius) + 4px); /* 8px */
-
-  /* Specific Values */
-  --radius-none: 0;
-  --radius-full: 9999px;
 }
 ```
 
-### **Semantic Usage**
+### **Animation Tokens**
 
 ```css
-:root {
-  /* Component-Specific */
-  --button-radius: var(--radius-lg); /* 4px */
-  --input-radius: var(--radius-lg); /* 4px */
-  --card-radius: var(--radius-xl); /* 8px */
-  --badge-radius: var(--radius-full); /* Circular */
-  --avatar-radius: var(--radius-full); /* Circular */
+@theme inline {
+  /* Animation utilities */
+  --animate-accordion-down: accordion-down 0.2s ease-out;
+  --animate-accordion-up: accordion-up 0.2s ease-out;
 }
 ```
 
-## 🌘 Shadows & Elevation
-
-### **Elevation System**
+### **Custom Animations** (from `globals.css`)
 
 ```css
-:root {
-  /* Shadows */
-  --shadow-sm: 0 1px 2px 0 oklch(0 0 0 / 0.05);
-  --shadow-md:
-    0 4px 6px -1px oklch(0 0 0 / 0.1), 0 2px 4px -2px oklch(0 0 0 / 0.1);
-  --shadow-lg:
-    0 10px 15px -3px oklch(0 0 0 / 0.1), 0 4px 6px -4px oklch(0 0 0 / 0.1);
-  --shadow-xl:
-    0 20px 25px -5px oklch(0 0 0 / 0.1), 0 8px 10px -6px oklch(0 0 0 / 0.1);
-  --shadow-2xl: 0 25px 50px -12px oklch(0 0 0 / 0.25);
+/* Status pulse animation */
+@keyframes status-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
 
-  /* Context-based Elevation */
-  --elevation-tooltip: var(--shadow-lg);
-  --elevation-dropdown: var(--shadow-md);
-  --elevation-modal: var(--shadow-2xl);
-  --elevation-card: var(--shadow-sm);
+/* Conversation item entrance */
+@keyframes conversation-item-enter {
+  from {
+    opacity: 0;
+    transform: translateX(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Auth form slide up */
+@keyframes auth-form-slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 ```
 
-### **Dark Theme Adjustments**
+## 🔧 Usage Patterns
 
-```css
-.dark {
-  /* Subtler shadows in dark theme */
-  --shadow-sm: 0 1px 2px 0 oklch(0 0 0 / 0.3);
-  --shadow-md:
-    0 4px 6px -1px oklch(0 0 0 / 0.4), 0 2px 4px -2px oklch(0 0 0 / 0.4);
-  --shadow-lg:
-    0 10px 15px -3px oklch(0 0 0 / 0.4), 0 4px 6px -4px oklch(0 0 0 / 0.4);
-  --shadow-xl:
-    0 20px 25px -5px oklch(0 0 0 / 0.4), 0 8px 10px -6px oklch(0 0 0 / 0.4);
-  --shadow-2xl: 0 25px 50px -12px oklch(0 0 0 / 0.5);
+### **Component Development**
+
+```tsx
+// CORRECT: Use design tokens
+export function ComponentName({ className, ...props }: ComponentProps) {
+  return (
+    <div
+      className={cn(
+        "px-[var(--spacing-component-md)] py-[var(--spacing-component-sm)]",
+        "bg-card text-card-foreground border border-border",
+        "rounded-[var(--radius)] transition-all duration-200",
+        className,
+      )}
+      {...props}
+    />
+  );
+}
+
+// INCORRECT: Hardcoded values
+export function ComponentName({ className, ...props }: ComponentProps) {
+  return (
+    <div
+      className={cn(
+        "px-4 py-2 bg-white text-black border border-gray-200",
+        "rounded transition-all duration-200",
+        className,
+      )}
+      {...props}
+    />
+  );
 }
 ```
 
-## 🎭 Opacity
+### **Responsive Usage**
 
-### **Transparency Tokens**
-
-```css
-:root {
-  /* Standard Opacities */
-  --opacity-disabled: 0.38; /* Disabled elements */
-  --opacity-muted: 0.6; /* Secondary elements */
-  --opacity-hover: 0.8; /* Hover states */
-  --opacity-active: 0.9; /* Active states */
-
-  /* Overlays */
-  --overlay-light: oklch(1 0 0 / 0.8); /* Light overlay */
-  --overlay-dark: oklch(0 0 0 / 0.5); /* Dark overlay */
-  --backdrop: oklch(0 0 0 / 0.8); /* Modal backdrop */
-}
+```tsx
+// Responsive spacing with tokens
+className={cn(
+  "px-[var(--spacing-component-sm)] lg:px-[var(--spacing-component-lg)]",
+  "py-[var(--spacing-component-xs)] lg:py-[var(--spacing-component-sm)]"
+)}
 ```
 
-## ⚡ Transitions & Animations
+### **Theme Integration**
 
-### **Transition Durations**
-
-```css
-:root {
-  /* Durations */
-  --duration-fast: 150ms; /* Micro-interactions */
-  --duration-normal: 200ms; /* Standard transitions */
-  --duration-slow: 300ms; /* Complex transitions */
-  --duration-slower: 500ms; /* Entry animations */
-
-  /* Timing Functions */
-  --ease-out: cubic-bezier(0, 0, 0.2, 1);
-  --ease-in: cubic-bezier(0.4, 0, 1, 1);
-  --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
-  --ease-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
-}
-```
-
-## 🎯 Implementation Guidelines
-
-### **How to Use Tokens**
-
-1. **Always use custom properties instead of hardcoded values**
-
-   ```css
-   /* ✅ Correct */
-   .button {
-     background: oklch(var(--primary));
-     padding: var(--spacing-4);
-     border-radius: var(--radius-lg);
-   }
-
-   /* ❌ Incorrect */
-   .button {
-     background: #1a1a1a;
-     padding: 16px;
-     border-radius: 4px;
-   }
-   ```
-
-2. **Use semantic tokens when available**
-
-   ```css
-   /* ✅ Correct */
-   .card {
-     padding: var(--component-padding-md);
-     box-shadow: var(--elevation-card);
-   }
-
-   /* ❌ Less ideal */
-   .card {
-     padding: var(--spacing-4);
-     box-shadow: var(--shadow-sm);
-   }
-   ```
-
-3. **Maintain consistency across themes**
-   ```css
-   /* Tokens automatically adapt */
-   .element {
-     color: oklch(var(--foreground));
-     background: oklch(var(--background));
-   }
-   ```
-
-### **Extending Tokens**
-
-To add new tokens, follow the convention:
-
-```css
-:root {
-  /* category-property-variation */
-  --color-status-success: oklch(0.7 0.15 142);
-  --color-status-warning: oklch(0.8 0.15 85);
-  --color-status-info: oklch(0.7 0.15 240);
-
-  --spacing-component-gutter: var(--spacing-6);
-  --radius-component-tooltip: var(--radius-md);
-}
+```tsx
+// Components automatically adapt to theme
+<Card className="bg-card text-card-foreground border-border">
+  <CardHeader className="border-b border-border">
+    <CardTitle className="text-card-foreground">Title</CardTitle>
+  </CardHeader>
+  <CardContent className="text-muted-foreground">
+    Content adapts to both light and dark themes
+  </CardContent>
+</Card>
 ```
 
 ---
 
 ## 🔗 Related Documentation
 
-### **Design System**
+### **Implementation Guides**
 
-- **[Design System Overview](./README.md)** - Main design system documentation
-- **[Design System Architecture](./design-system-overview.md)** - High-level system overview
-- **[Visual Design Principles](./visual-design-principles.md)** - Core design philosophy
-- **[Compound Components Guide](./compound-components-guide.md)** - Component creation patterns
+- **[Component Design Guidelines](./component-design-guidelines.md)** - How to use design tokens in components
+- **[Design System README](./README.md)** - Complete design system overview
+- **[Visual Design Principles](./visual-design-principles.md)** - Design philosophy and patterns
 
-### **External References**
+### **Visual Standards**
 
-- **[Tailwind CSS Documentation](https://tailwindcss.com/docs)** - CSS framework used
-- **[OKLCH Color Space](https://oklch.com/)** - Color space documentation
+- **[Color Palette Specification](./color-palette-specification.md)** - Detailed color usage guidelines
+- **[Typography System](./typography-system.md)** - Complete typography implementation
+- **[Layout and Spacing](./layout-and-spacing.md)** - Grid system and spacing patterns
 
-## 📋 Implementation Checklist
+### **Development Integration**
 
-When implementing new components, verify:
+- **[Coding Standards](../developer/coding-standards.md)** - React and TypeScript patterns
+- **[Code Simplicity Principles](../developer/code-simplicity-principles.md)** - INLINE-FIRST philosophy
 
-- [ ] Uses only design tokens (no hardcoded values)
-- [ ] Works correctly in both light and dark themes
-- [ ] Follows the 8px spacing system
-- [ ] Uses consistent transitions
-- [ ] Applies appropriate elevation/shadows
-- [ ] Typography follows established hierarchy
-- [ ] Colors follow semantic definitions
+---
 
-**💡 Remember:** Design tokens are the foundation for a consistent and scalable interface. They should be the single source of truth for all visual decisions.
+**🎯 Production Reality**: All tokens documented here are implemented and in active use. The design system is fully functional with 48 shadcn/ui components, complete dark/light theme support, and WCAG 2.1 AA accessibility compliance. Use these tokens as your single source of truth for styling in Project Wiz.

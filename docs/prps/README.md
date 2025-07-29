@@ -204,20 +204,26 @@ PRPs should reference relevant technical guides:
 3. **Specify constraints clearly** - Help AI understand limitations and requirements
 4. **Reference existing patterns** - Point to established architectural decisions
 
-## Migration from Legacy PRPs
+## PRP Archive Management
 
 ### Current State
 
-- Many PRPs exist in `/00-miscellaneous/` from early development phases
-- Some contain technical implementation details better suited for technical guides
-- Organization could be improved for better discoverability
+- Active PRPs are maintained in their respective directories
+- Implemented PRPs are moved to `/docs/archive/prps-implemented/` for historical reference
+- Archive includes detailed implementation status reports
 
-### Reorganization Strategy
+### Archive Strategy
 
-1. **Preserve historical PRPs** in current locations with clear archival markers
-2. **Extract technical content** to appropriate technical guides
-3. **Create clear navigation** between PRPs and related technical documentation
-4. **Establish templates** for future PRP creation
+1. **Move completed PRPs** to archive with implementation evidence
+2. **Maintain active PRPs** in current locations with updated status
+3. **Create clear navigation** between active and archived PRPs
+4. **Provide implementation tracking** through status reports
+
+### Recent Archival Actions (2025-07-29)
+
+- **Database Column Naming Consistency** - Archived as implemented
+- **Memory Service Complexity Split** - Archived as implemented
+- **Design Implementation Plan** - Archived as superseded by current implementation
 
 ## Getting Started
 

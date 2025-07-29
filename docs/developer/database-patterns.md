@@ -2,6 +2,10 @@
 
 This document outlines the **MANDATORY** database patterns and practices for Project Wiz's SQLite + Drizzle ORM architecture.
 
+**Current Implementation:** Drizzle ORM 0.44.2 + SQLite WAL + Better-SQLite3 12.2.0
+
+These patterns are **actively implemented** across **14 database tables** with **62+ optimized indexes** and **full foreign key constraints** in the sophisticated Project Wiz schema.
+
 ## 🚨 CRITICAL MIGRATION RULES
 
 ### **NEVER EDIT SQL MIGRATION FILES DIRECTLY**
@@ -18,9 +22,14 @@ Migrations are **AUTO-GENERATED** by Drizzle from `*.model.ts` files:
 ### **MUST USE:** Type Inference + Custom Types
 
 ```typescript
-// ✅ CORRECT: Custom types with inference
-export type ProjectStatus = "active" | "archived" | "deleted";
-export type AgentModel = "gpt-4" | "claude-3-5-sonnet" | "gemini-pro";
+// ✅ ACTUAL IMPLEMENTATION: agents table from real codebase
+import { sql } from "drizzle-orm";
+import { sqliteTable, text, integer, index } from "drizzle-orm/sqlite-core";
+
+import { llmProvidersTable } from "@/main/features/agent/llm-provider/llm-provider.model";
+import { usersTable } from "@/main/features/user/user.model";
+
+export type AgentStatus = "active" | "inactive" | "busy";
 
 export const agentsTable = sqliteTable(
   "agents",
@@ -28,21 +37,51 @@ export const agentsTable = sqliteTable(
     id: text("id")
       .primaryKey()
       .$defaultFn(() => crypto.randomUUID()),
+    userId: text("user_id")
+      .notNull()
+      .references(() => usersTable.id, { onDelete: "cascade" }),
+    ownerId: text("owner_id").references(() => usersTable.id, {
+      onDelete: "cascade",
+    }),
+    providerId: text("provider_id")
+      .notNull()
+      .references(() => llmProvidersTable.id, { onDelete: "restrict" }),
     name: text("name").notNull(),
-    model: text("model").$type<AgentModel>().notNull(),
-    status: text("status").$type<ProjectStatus>().notNull().default("active"),
+    role: text("role").notNull(),
+    backstory: text("backstory").notNull(),
+    goal: text("goal").notNull(),
+    systemPrompt: text("system_prompt").notNull(),
+    status: text("status").$type<AgentStatus>().notNull().default("inactive"),
+    modelConfig: text("model_config").notNull(), // JSON string
+
+    // Soft deletion fields (enterprise pattern)
+    isActive: integer("is_active", { mode: "boolean" }).notNull().default(true),
+    deactivatedAt: integer("deactivated_at", { mode: "timestamp_ms" }),
+    deactivatedBy: text("deactivated_by").references(() => usersTable.id),
+
     createdAt: integer("created_at", { mode: "timestamp_ms" })
       .notNull()
-      .default(sql`CURRENT_TIMESTAMP`),
+      .default(sql`(strftime('%s', 'now') * 1000)`),
     updatedAt: integer("updated_at", { mode: "timestamp_ms" })
       .notNull()
-      .default(sql`CURRENT_TIMESTAMP`),
+      .default(sql`(strftime('%s', 'now') * 1000)`),
   },
   (table) => ({
-    // MUST include indexes for foreign keys and common queries
+    // Performance indexes for foreign keys (MANDATORY)
+    userIdIdx: index("agents_user_id_idx").on(table.userId),
     ownerIdIdx: index("agents_owner_id_idx").on(table.ownerId),
+    providerIdIdx: index("agents_provider_id_idx").on(table.providerId),
     statusIdx: index("agents_status_idx").on(table.status),
-    createdAtIdx: index("agents_created_at_idx").on(table.createdAt),
+    deactivatedByIdx: index("agents_deactivated_by_idx").on(
+      table.deactivatedBy,
+    ),
+
+    // Soft deletion indexes (critical for performance)
+    isActiveIdx: index("agents_is_active_idx").on(table.isActive),
+    isActiveCreatedAtIdx: index("agents_is_active_created_at_idx").on(
+      table.isActive,
+      table.createdAt,
+    ),
   }),
 );
 

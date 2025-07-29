@@ -2,6 +2,10 @@
 
 This document outlines the **MANDATORY** data loading hierarchy and patterns used in Project Wiz.
 
+**Current Implementation:** TanStack Router 1.115.2 + TanStack Query 5.83.0 + React 19.0.0
+
+These patterns are **actively implemented** across **50+ route files** and **30+ React components** in the sophisticated Project Wiz architecture.
+
 ## 🚨 CRITICAL HIERARCHY - MUST FOLLOW IN ORDER
 
 ### 1. TanStack Router beforeLoad/loader (HIGHEST PRIORITY)

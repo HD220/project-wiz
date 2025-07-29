@@ -1,6 +1,6 @@
 # Technical Implementation Guides
 
-Comprehensive technical guides for specialized aspects of Project Wiz development. These guides dive deep into specific technologies and implementation patterns.
+Advanced technical guides for specialized implementation patterns in Project Wiz - a production-ready AI-powered software development automation platform with Electron 35.1.4, React 19, and Vercel AI SDK v4.
 
 ## 🎯 Quick Navigation
 
@@ -24,13 +24,13 @@ Comprehensive technical guides for specialized aspects of Project Wiz developmen
 
 ## 🤖 AI Integration Guides
 
-_For AI SDK integration, provider patterns, and LLM implementation_
+_Production-ready AI SDK v4.3.16 with multi-provider support and encrypted storage_
 
 ### 🌟 **Essential Reading** _(~90 min total)_
 
-- **[📖 AI Integration Overview](./ai-integration/README.md)** - Complete AI implementation strategy **(20 min)**
-- **[🔧 Vercel AI SDK Guide](./ai-integration/vercel-ai-sdk-guide.md)** - Multi-provider setup and usage **(25 min)**
-- **[📦 Provider Patterns](./ai-integration/ai-sdk-provider-patterns.md)** - Provider registry implementation **(20 min)**
+- **[📖 AI Integration Overview](./ai-integration/README.md)** - Production AI architecture with Vercel AI SDK v4 **(20 min)**
+- **[🔧 Vercel AI SDK v4 Guide](./ai-integration/vercel-ai-sdk-guide.md)** - Multi-provider implementation patterns **(25 min)**
+- **[📦 Provider Patterns](./ai-integration/ai-sdk-provider-patterns.md)** - AES-256-GCM encryption and failover **(20 min)**
 - **[⚡ Queue Patterns](./ai-integration/queue-patterns-implementation.md)** - Background AI processing **(25 min)**
 
 ### 📚 **Deep Dive Documentation**
@@ -38,40 +38,40 @@ _For AI SDK integration, provider patterns, and LLM implementation_
 - **[🔬 AI SDK Research](./ai-integration/ai-sdk-comprehensive-research.md)** - Technical analysis and comparisons
 - **[🏗️ Provider Registry Guide](./ai-integration/createProviderRegistry-implementation-guide.md)** - Custom provider implementation
 
-**🎯 Use Cases:** Multi-LLM support, background AI processing, provider switching, AI feature integration
+**🎯 Use Cases:** OpenAI/Anthropic/DeepSeek providers, encrypted API keys, memory systems, conversation handling
 
 ---
 
 ## 🎨 Frontend & Routing Guides
 
-_For TanStack Router, authentication patterns, and frontend data management_
+_React 19.0.0 with TanStack Router v1.115.2 and 48+ shadcn/ui components_
 
 ### 🌟 **TanStack Router Essentials** _(~80 min total)_
 
-- **[📖 Frontend Overview](./frontend/README.md)** - Frontend development strategy **(15 min)**
-- **[🔐 Authentication Guide](./frontend/tanstack-router-authentication-guide.md)** - Complete auth implementation **(30 min)**
-- **[📊 Data Loading Guide](./frontend/tanstack-router-data-loading-guide.md)** - Data loading patterns **(25 min)**
+- **[📖 Frontend Architecture](./frontend/README.md)** - React 19 + TanStack Router patterns **(15 min)**
+- **[🔐 Authentication Guide](./frontend/tanstack-router-authentication-guide.md)** - Session-based auth implementation **(30 min)**
+- **[📊 Data Loading Guide](./frontend/tanstack-router-data-loading-guide.md)** - Mandatory hierarchy patterns **(25 min)**
 - **[🔄 Contexts Guide](./frontend/tanstack-router-contexts-guide.md)** - Context management **(10 min)**
 
 ### 📚 **Research & Analysis**
 
 - **[🔬 Authentication Research](./frontend/tanstack-router-authentication-research.md)** - Technical analysis and decisions
 
-**🎯 Use Cases:** Route-based authentication, data preloading, context sharing, frontend state management
+**🎯 Use Cases:** File-based routing, beforeLoad/loader patterns, type-safe IPC, 48+ components
 
 ---
 
 ## ⚡ Electron & Performance Guides
 
-_For Electron-specific patterns, worker threads, and performance optimization_
+_Electron 35.1.4 with enterprise security, SQLite WAL mode, and type-safe IPC_
 
 ### 🌟 **Performance Essentials** _(~60 min total)_
 
+- **[⚡ Electron Architecture](./electron/README.md)** - Production Electron 35 + security patterns **(20 min)**
 - **[🧵 Worker Threads Guide](./electron/worker-threads-guide.md)** - Background processing patterns **(20 min)**
 - **[🔄 Async Patterns](./electron/nodejs-async-patterns.md)** - Node.js async best practices **(20 min)**
-- **[⚡ Electron Optimization](./electron/README.md)** - Desktop app performance **(20 min)**
 
-**🎯 Use Cases:** CPU-intensive tasks, non-blocking operations, main process optimization, IPC performance
+**🎯 Use Cases:** Type-safe IPC, database optimization, security hardening, main process architecture
 
 ---
 
@@ -79,14 +79,15 @@ _For Electron-specific patterns, worker threads, and performance optimization_
 
 _Testing strategies, patterns, and best practices_
 
-### 🌟 **Testing Foundation** _(Coming Soon)_
+### 📋 **Testing Foundation** _(Future Enhancement)_
 
-- **Testing Strategies** - Unit, integration, and E2E testing approaches
-- **Service Layer Testing** - Business logic testing patterns
-- **IPC Testing** - Main ↔ Renderer communication testing
-- **AI Feature Testing** - Testing AI integrations and providers
+**Status**: Deferred until post-MVP phase
 
-**🎯 Use Cases:** Test-driven development, CI/CD integration, quality assurance
+Planned coverage:
+
+- Testing strategies for service layer and IPC communication
+- AI feature testing patterns and mocking strategies
+- E2E testing for Electron applications
 
 ---
 
@@ -94,14 +95,15 @@ _Testing strategies, patterns, and best practices_
 
 _Build, packaging, and deployment strategies_
 
-### 🌟 **Production Deployment** _(Coming Soon)_
+### 📋 **Production Deployment** _(Future Enhancement)_
 
-- **Build Optimization** - Production build strategies
-- **Electron Packaging** - Multi-platform distribution
-- **Auto-Updates** - Seamless update mechanisms
-- **CI/CD Pipeline** - Automated deployment workflows
+**Status**: Deferred until production deployment phase
 
-**🎯 Use Cases:** Production deployment, multi-platform distribution, automated releases
+Planned coverage:
+
+- Electron Forge production builds and packaging
+- Multi-platform distribution strategies
+- Auto-update mechanisms and CI/CD integration
 
 ---
 

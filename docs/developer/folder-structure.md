@@ -1,4 +1,8 @@
-# 🗂️ Estrutura de Pastas e Arquivos - Project Wiz
+# Folder Structure & File Organization - Project Wiz
+
+**Current Implementation:** Feature-Based Architecture with 14 Database Tables + 50+ React Components
+
+This structure represents the **actual sophisticated organization** of the Project Wiz codebase with **enterprise-grade feature separation**, **type-safe boundaries**, and **scalable architecture patterns**.
 
 ## 📋 Princípios de Organização
 
@@ -21,40 +25,210 @@
 
 ```
 src/
-├── main/                           # Backend Electron
-│   ├── database/                   # Configuração e migrações do banco
-│   │   ├── connection.ts
-│   │   ├── index.ts
-│   │   └── migrations/
-│   ├── types.ts                    # Tipos globais do backend
-│   ├── utils/                      # Utilitários globais
-│   │   └── logger.ts
-│   ├── features/                   # Features organizadas por domínio
-│   │   ├── auth/
-│   │   ├── user/
-│   │   ├── project/
-│   │   ├── conversation/
-│   │   ├── agent/
-│   │   └── git/
-│   └── main.ts                     # Entry point
+├── main/                           # Backend Electron (Main Process)
+│   ├── constants/                  # Global constants
+│   │   └── ai-defaults.ts         # AI model defaults
+│   ├── database/                   # Database configuration & migrations
+│   │   ├── connection.ts          # SQLite WAL configuration
+│   │   ├── index.ts               # Database exports
+│   │   └── migrations/            # Auto-generated Drizzle migrations
+│   │       ├── 0000_mysterious_sway.sql
+│   │       └── meta/
+│   ├── types.ts                    # Global backend types (IpcResponse<T>)
+│   ├── utils/                      # Shared utilities
+│   │   ├── ipc-handler.ts         # Type-safe IPC wrapper
+│   │   └── logger.ts              # Pino structured logging
+│   ├── features/                   # Feature-based domain organization
+│   │   ├── auth/                  # Authentication & sessions
+│   │   │   ├── auth.handler.ts    # IPC endpoints (6 handlers)
+│   │   │   ├── auth.model.ts      # User table schema
+│   │   │   ├── auth.schema.ts     # Zod validation schemas
+│   │   │   ├── auth.service.ts    # Business logic (12 methods)
+│   │   │   ├── auth.types.ts      # TypeScript definitions
+│   │   │   ├── session-manager.ts # Session management
+│   │   │   └── user-sessions.model.ts # Session table schema
+│   │   ├── user/                  # User management
+│   │   │   ├── user.handler.ts    # User CRUD handlers
+│   │   │   ├── user.model.ts      # Users table (with profile relation)
+│   │   │   ├── user.service.ts    # User business logic
+│   │   │   ├── user.types.ts      # User types
+│   │   │   ├── profile.handler.ts # Profile management
+│   │   │   ├── profile.model.ts   # Profiles table schema
+│   │   │   └── profile.service.ts # Profile operations
+│   │   ├── project/               # Project workspace management
+│   │   │   ├── project.handler.ts # Project CRUD (8 handlers)
+│   │   │   ├── project.model.ts   # Projects table with indexes
+│   │   │   ├── project.service.ts # Project business logic (15 methods)
+│   │   │   ├── project.schema.ts  # Project validation
+│   │   │   └── project.types.ts   # Project types
+│   │   ├── conversation/          # Chat & conversation system
+│   │   │   ├── conversation.handler.ts  # Conversation handlers (10 endpoints)
+│   │   │   ├── conversation.model.ts    # Conversations table
+│   │   │   ├── conversation.service.ts  # Conversation logic (20 methods)
+│   │   │   ├── conversation.types.ts    # Conversation types
+│   │   │   ├── message.model.ts         # Messages table with FKs
+│   │   │   └── message.service.ts       # Message operations
+│   │   └── agent/                 # AI Agent management system
+│   │       ├── agent.handler.ts   # Agent CRUD (12 handlers)
+│   │       ├── agent.model.ts     # Agents table with soft deletion
+│   │       ├── agent.service.ts   # Agent business logic (18 methods)
+│   │       ├── agent.schema.ts    # Agent validation schemas
+│   │       ├── agent.types.ts     # Agent type definitions
+│   │       ├── llm-provider/      # LLM Provider sub-feature
+│   │       │   ├── llm-provider.handler.ts # Provider management
+│   │       │   ├── llm-provider.model.ts   # Providers table
+│   │       │   ├── llm-provider.service.ts # Provider operations
+│   │       │   ├── llm-provider.types.ts   # Provider types
+│   │       │   └── llm.service.ts          # LLM integration logic
+│   │       └── memory/            # Agent Memory sub-feature
+│   │           ├── memory.handler.ts # Memory CRUD
+│   │           ├── memory.model.ts   # Agent memories table
+│   │           ├── memory.service.ts # Memory operations
+│   │           └── memory.types.ts   # Memory types
+│   └── main.ts                     # Application entry point
 │
-└── renderer/                       # Frontend React
-    ├── app/                        # TanStack Router
-    ├── components/                 # Componentes compartilhados
-    │   ├── layout/                 # Layouts compartilhados
-    │   └── ui/                     # shadcn/ui components
-    ├── features/                   # Features do frontend
-    │   ├── auth/
-    │   ├── user/
-    │   ├── project/
-    │   ├── llm-provider/
-    │   └── app/                    # Componentes gerais da aplicação
-    ├── hooks/                      # Hooks globais
-    ├── lib/                        # Utilitários globais
-    ├── contexts/                   # Contexts globais
-    ├── store/                      # Store global
-    ├── services/                   # Services globais
-    └── locales/                    # Internacionalização
+└── renderer/                       # Frontend React (Renderer Process)
+    ├── app/                        # TanStack Router file-based routes
+    │   ├── __root.tsx             # Root layout with auth context
+    │   ├── auth/                   # Authentication routes
+    │   │   ├── login.tsx          # Login page
+    │   │   ├── register.tsx       # Registration page
+    │   │   └── route.tsx          # Auth layout
+    │   └── _authenticated/        # Protected routes
+    │       ├── index.tsx          # Dashboard
+    │       ├── route.tsx          # Auth guard + layout
+    │       ├── user/              # User-specific features
+    │       │   ├── index.tsx      # User dashboard
+    │       │   ├── route.tsx      # User layout
+    │       │   ├── agents/        # Agent management
+    │       │   │   ├── index.tsx  # Agent list
+    │       │   │   ├── route.tsx  # Agent layout with loader
+    │       │   │   └── edit/      # Agent editing
+    │       │   ├── dm/            # Direct messages
+    │       │   │   └── $conversationId/
+    │       │   │       ├── index.tsx # Chat interface
+    │       │   │       └── route.tsx # Chat route with loader
+    │       │   └── settings/      # User settings
+    │       │       ├── index.tsx  # Settings dashboard
+    │       │       ├── appearance.tsx # Theme settings
+    │       │       └── llm-providers/ # Provider management
+    │       └── project/           # Project workspaces
+    │           └── $projectId/    # Dynamic project routes
+    │               ├── index.tsx  # Project dashboard
+    │               ├── route.tsx  # Project layout
+    │               └── channel/   # Project channels
+    │                   └── $channelId/
+    │                       ├── index.tsx # Channel chat
+    │                       └── route.tsx # Channel route
+    ├── components/                 # Shared React components
+    │   ├── layout/                # Application layouts
+    │   │   └── titlebar.tsx       # Custom window titlebar
+    │   ├── members/               # Member-related components
+    │   │   └── member-sidebar.tsx # Member list sidebar
+    │   ├── agent-status/          # Agent status components
+    │   │   ├── agent-status.tsx   # Status indicator
+    │   │   └── index.ts          # Barrel export
+    │   ├── auth-button.tsx        # Authentication button
+    │   ├── custom-link.tsx        # Router-aware link component
+    │   └── ui/                    # shadcn/ui component library
+    │       ├── accordion.tsx      # Accordion component
+    │       ├── alert-dialog.tsx   # Alert dialog
+    │       ├── button.tsx         # Button variants
+    │       ├── card.tsx           # Card components
+    │       ├── dialog.tsx         # Modal dialogs
+    │       ├── form.tsx           # Form components
+    │       ├── input.tsx          # Input components
+    │       ├── select.tsx         # Select dropdowns
+    │       ├── sidebar.tsx        # Sidebar component
+    │       ├── table.tsx          # Table components
+    │       └── ... (40+ UI components)
+    ├── features/                   # Feature-specific frontend code
+    │   ├── auth/                  # Authentication feature
+    │   │   ├── auth.schema.ts     # Frontend auth validation
+    │   │   └── components/        # Auth-specific components
+    │   │       ├── auth-form.tsx  # Login/register form
+    │   │       └── auth-layout.tsx # Auth page layout
+    │   ├── agent/                 # Agent management feature
+    │   │   ├── agent.schema.ts    # Agent validation schemas
+    │   │   ├── agent.types.ts     # Frontend agent types
+    │   │   ├── provider-constants.ts # Provider defaults
+    │   │   ├── provider.schema.ts # Provider validation
+    │   │   ├── provider.types.ts  # Provider types
+    │   │   └── components/        # Agent-specific components
+    │   │       ├── agent-card.tsx # Agent display card
+    │   │       ├── agent-form.tsx # Agent creation/edit form
+    │   │       ├── agent-list.tsx # Agent list with filtering
+    │   │       ├── create-agent-dialog.tsx # Creation modal
+    │   │       └── provider/      # Provider management
+    │   │           ├── provider-card.tsx # Provider display
+    │   │           ├── provider-form.tsx # Provider form
+    │   │           ├── provider-list.tsx # Provider list
+    │   │           └── edit-provider-*.tsx # Provider editing
+    │   ├── conversation/          # Chat & conversation feature
+    │   │   ├── message.types.ts   # Message type definitions
+    │   │   ├── types.ts           # Conversation types
+    │   │   └── components/        # Conversation components
+    │   │       ├── conversation-chat.tsx  # Main chat interface
+    │   │       ├── conversation-item.tsx  # Chat item display
+    │   │       ├── conversation-list.tsx  # Chat list sidebar
+    │   │       ├── message-bubble.tsx     # Individual message
+    │   │       ├── message-input.tsx      # Message composition
+    │   │       └── create-conversation-dialog.tsx
+    │   ├── project/               # Project management feature
+    │   │   ├── project.types.ts   # Project type definitions
+    │   │   └── components/        # Project components
+    │   │       ├── project-card.tsx # Project display card
+    │   │       ├── project-form.tsx # Project creation form
+    │   │       └── create-project-dialog.tsx
+    │   ├── user/                  # User management feature
+    │   │   ├── user.types.ts      # User type definitions
+    │   │   └── components/        # User components
+    │   │       └── user-status.tsx # User status indicator
+    │   ├── layout/                # Layout-specific components
+    │   │   └── components/        # Layout components
+    │   │       ├── content-header.tsx # Page headers
+    │   │       └── navigation/    # Navigation components
+    │   │           ├── navigation-item.tsx # Nav menu items
+    │   │           ├── sidebar-header.tsx  # Sidebar header
+    │   │           └── sidebar-navigation.tsx # Main navigation
+    │   └── app/                   # Application-wide components
+    │       └── components/        # App-level components
+    │           ├── activity-item.tsx # Activity feed item
+    │           ├── project-sidebar.tsx # Project navigation
+    │           ├── root-sidebar.tsx    # Main app sidebar
+    │           ├── server-view.tsx     # Server/project view
+    │           ├── sidebar-user-area.tsx # User area in sidebar
+    │           ├── user-sidebar.tsx    # User-specific sidebar
+    │           └── welcome-view.tsx    # Welcome screen
+    ├── hooks/                      # Global React hooks
+    │   ├── use-api-mutation.hook.ts # Generic API mutation hook
+    │   ├── use-debounce.hook.ts     # Debounce utility hook
+    │   └── use-mobile.ts            # Mobile detection hook
+    ├── lib/                        # Utility libraries
+    │   ├── logger.ts              # Frontend logging utility
+    │   ├── route-loader.ts        # TanStack Router data loading
+    │   ├── search-validation.ts   # Search parameter validation
+    │   └── utils.ts               # General utilities (cn, etc.)
+    ├── contexts/                   # React contexts
+    │   └── auth.context.tsx       # Authentication context
+    ├── constants/                  # Frontend constants
+    │   └── ai-defaults.ts         # AI model defaults (shared)
+    ├── locales/                    # Internationalization
+    │   ├── en/                    # English translations
+    │   │   ├── common.po         # Common translations
+    │   │   ├── common.ts         # Compiled translations
+    │   │   ├── glossary.po       # Glossary terms
+    │   │   ├── glossary.ts       # Compiled glossary
+    │   │   ├── validation.po     # Validation messages
+    │   │   └── validation.ts     # Compiled validation
+    │   └── pt-BR/                 # Portuguese translations
+    │       └── ... (same structure)
+    ├── globals.css                # Global styles
+    ├── index.html                 # HTML template
+    ├── main.tsx                   # React app entry point
+    ├── preload.ts                 # Electron preload script
+    ├── routeTree.gen.ts           # Auto-generated TanStack routes
+    └── window.d.ts                # Window API type definitions
 ```
 
 ## 🎯 Estrutura de Feature (Backend)

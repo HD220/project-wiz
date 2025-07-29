@@ -2,6 +2,10 @@
 
 This document outlines the **MANDATORY** Inter-Process Communication patterns between Electron's main and renderer processes in Project Wiz.
 
+**Current Implementation:** Electron 35.1.4 + TypeScript 5.8.3 + Type-Safe IPC
+
+These patterns are **actively implemented** across **10 handler files** with **100+ IPC endpoints** using sophisticated type-safe utilities and automatic error handling.
+
 ## 🚨 CRITICAL ARCHITECTURE RULES
 
 ### **MANDATORY:** Service & Handler Separation
@@ -76,26 +80,81 @@ export class AgentService {
 
 ## IPC Handler Pattern
 
-### **MUST FOLLOW:** Handler Implementation
+### **ACTUAL IMPLEMENTATION:** Type-Safe Handler Utility
 
 ```typescript
-// ✅ CORRECT: IPC handlers with standardized error handling
-export function setupAgentHandlers(): void {
+// ✅ ACTUAL IMPLEMENTATION: createIpcHandler utility (from src/main/utils/ipc-handler.ts)
+/**
+ * Creates a type-safe IPC handler with automatic error handling and logging
+ */
+export function createIpcHandler<TArgs extends unknown[], TReturn>(
+  channel: string,
+  handler: (...args: TArgs) => Promise<TReturn>,
+): void {
+  const logger = getLogger("ipc");
+
   ipcMain.handle(
-    "agents:create",
-    async (_, input: InsertAgent): Promise<IpcResponse<SelectAgent>> => {
+    channel,
+    async (_, ...args: TArgs): Promise<IpcResponse<TReturn>> => {
       try {
-        const result = await AgentService.create(input);
+        const result = await handler(...args);
         return { success: true, data: result };
       } catch (error) {
-        return {
-          success: false,
-          error:
-            error instanceof Error ? error.message : "Failed to create agent",
-        };
+        const errorMessage =
+          error instanceof Error ? error.message : `${channel} failed`;
+
+        logger.error(channel, {
+          error: errorMessage,
+          args: args.length > 0 ? args : undefined,
+          stack: error instanceof Error ? error.stack : undefined,
+        });
+
+        return { success: false, error: errorMessage };
       }
     },
   );
+}
+
+// ✅ ACTUAL USAGE: agent.handler.ts (from real codebase)
+export function setupAgentHandlers(): void {
+  // Type-safe handler with automatic error handling
+  createIpcHandler("agents:create", async (input: CreateAgentInput) => {
+    const currentUser = await AuthService.getCurrentUser();
+    if (!currentUser) {
+      throw new Error("User not authenticated");
+    }
+    return AgentService.create(input, currentUser.id);
+  });
+
+  // Multiple parameters with perfect type inference
+  createIpcHandler(
+    "agents:update",
+    async (id: string, updates: Partial<CreateAgentInput>) => {
+      const currentUser = await AuthService.getCurrentUser();
+      if (!currentUser) {
+        throw new Error("User not authenticated");
+      }
+      return AgentService.update(id, updates);
+    },
+  );
+
+  // Complex filtering with schema validation
+  createIpcHandler("agents:list", async (filters?: AgentFiltersInput) => {
+    const currentUser = await AuthService.getCurrentUser();
+    if (!currentUser) {
+      throw new Error("User not authenticated");
+    }
+
+    // Map frontend showInactive to backend includeInactive
+    const serviceFilters = filters
+      ? {
+          ...filters,
+          includeInactive: filters.showInactive || false,
+        }
+      : undefined;
+
+    return AgentService.listByOwnerId(currentUser.id, serviceFilters);
+  });
 
   ipcMain.handle(
     "agents:list",

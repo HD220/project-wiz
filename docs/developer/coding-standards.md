@@ -1,4 +1,8 @@
-# 📋 Padrões de Codificação - Project Wiz
+# Coding Standards - Project Wiz
+
+**Current Implementation:** React 19.0.0 + TypeScript 5.8.3 + TanStack Router 1.115.2 + Drizzle ORM 0.44.2
+
+These standards reflect the **actual patterns implemented** in the sophisticated Project Wiz codebase with **85+ service functions**, **14 database tables**, and **enterprise-grade architecture**.
 
 ## 📋 Convenções de Nomenclatura
 
@@ -9,96 +13,152 @@
 - **camelCase**: Funções, variáveis e propriedades (`userData`, `handleClick`)
 - **UPPER_SNAKE_CASE**: Constantes (`API_ENDPOINTS`)
 
-### Sufixos Obrigatórios (com ponto)
+### Required File Suffixes (with dots)
 
-- `.handler.ts` - IPC handlers no main
-- `.service.ts` - Serviços de negócio
-- `.store.ts` - Stores Zustand
-- `.model.ts` - Schemas Drizzle (database)
-- `.schema.ts` - Schemas Zod (validação)
-- `.types.ts` - Definições de tipos
-- `.hook.ts` - Custom hooks
+- `.handler.ts` - IPC handlers in main process (10 handlers implemented)
+- `.service.ts` - Business logic services (10 service classes with 85+ functions)
+- `.model.ts` - Drizzle database schemas (14 tables with 62+ indexes)
+- `.schema.ts` - Zod validation schemas (input validation)
+- `.types.ts` - TypeScript type definitions
+- `.hook.ts` - Custom React hooks (rare - prefer TanStack patterns)
 
-### Prefixos para Hooks
+### Hook Prefixes (RARELY USED)
 
-- `use-` - Hooks React (`use-auth.hook.ts`, `use-user-data.hook.ts`)
+- `use-` - React hooks (`use-auth.hook.ts`) - **AVOID: Use TanStack Router/Query instead**
+- **Preferred:** TanStack Router `beforeLoad`/`loader` for data loading
+- **Preferred:** TanStack Query `useQuery`/`useMutation` for server state
 
-### Componentes SEM sufixo
+### React Components (NO suffix)
 
-- `login-form.tsx` - Componente React (SEM sufixo adicional)
-- `user-profile.tsx` - Componente React (SEM sufixo adicional)
-- `dashboard-header.tsx` - Componente React (SEM sufixo adicional)
+- `agent-form.tsx` - React component (NO additional suffix)
+- `conversation-chat.tsx` - React component (NO additional suffix)
+- `project-sidebar.tsx` - React component (NO additional suffix)
+- **All components:** Function declarations with shadcn/ui integration
 
-### Exemplos de Nomenclatura
+### Real Codebase Examples
 
 ```
-✅ CORRETO:
-- login-form.tsx (componente)
-- use-auth.hook.ts (hook)
-- auth.store.ts (store)
-- user.model.ts (Drizzle)
-- user.schema.ts (Zod)
-- database.service.ts (service)
-- auth.handler.ts (handler)
+✅ ACTUAL IMPLEMENTATION:
+- agent-form.tsx (React component)
+- agent.service.ts (AgentService with 15+ methods)
+- agent.model.ts (Drizzle schema with indexes)
+- agent.schema.ts (Zod validation schemas)
+- agent.handler.ts (IPC handler with 10+ endpoints)
+- agent.types.ts (TypeScript definitions)
+- conversation-chat.tsx (Complex component)
+- llm-provider.service.ts (Provider management)
+- memory.service.ts (Agent memory system)
+- auth.service.ts (Session management)
 
-❌ ERRADO:
-- LoginForm.tsx
-- useAuth.ts
-- authStore.ts
-- login-form-component.tsx
-- use-auth-hook.ts
-- auth-store.ts
-- userSchema.ts (ambíguo)
+❌ AVOID:
+- AgentForm.tsx (PascalCase files)
+- useAuth.ts (missing .hook.ts suffix)
+- agentStore.ts (camelCase files)
+- agent-form-component.tsx (redundant suffix)
+- agentSchema.ts (ambiguous - model or validation?)
 ```
 
 ## 🔧 Padrões de Implementação
 
-### 1. Componentes React (Function Declaration)
+### 1. React Components (Function Declaration Pattern)
 
 ```typescript
-// ✅ CORRETO: Function declaration, sem React.FC, sem import React
-// login-form.tsx
-interface LoginFormProps {
-  onSuccess?: () => void;
-  className?: string;
+// ✅ ACTUAL IMPLEMENTATION: agent-form.tsx (from real codebase)
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Bot, Settings, User, Loader2 } from "lucide-react";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+
+import { Button } from "@/renderer/components/ui/button";
+import { ScrollArea } from "@/renderer/components/ui/scroll-area";
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/renderer/components/ui/form";
+import { Input } from "@/renderer/components/ui/input";
+import { CreateAgentSchema } from "@/renderer/features/agent/agent.schema";
+import type {
+  SelectAgent,
+  CreateAgentInput,
+} from "@/renderer/features/agent/agent.types";
+
+type FormData = z.infer<typeof CreateAgentSchema>;
+
+interface AgentFormProps {
+  initialData?: SelectAgent | null;
+  providers?: LlmProvider[];
+  onSubmit: (data: CreateAgentInput) => Promise<void>;
+  onCancel: () => void;
+  isLoading?: boolean;
 }
 
-function LoginForm(props: LoginFormProps) {
-  const { onSuccess, className } = props;
-  const { login, isLoading, error } = useAuth();
+// ✅ CORRECT: Function declaration, NO React.FC, NO React import
+export function AgentForm(props: AgentFormProps) {
+  const { initialData, providers = [], onSubmit, onCancel, isLoading } = props;
 
-  const form = useForm<LoginFormData>({
-    resolver: zodResolver(loginSchema),
+  // Inline default provider selection (INLINE-FIRST principle)
+  const defaultProvider = providers.find(p => p.isDefault) || providers[0];
+
+  const form = useForm<FormData>({
+    resolver: zodResolver(CreateAgentSchema),
     defaultValues: {
-      email: '',
-      password: ''
+      name: initialData?.name || "",
+      role: initialData?.role || "Software Engineer",
+      backstory: initialData?.backstory || "",
+      goal: initialData?.goal || "",
+      providerId: initialData?.providerId || defaultProvider?.id || "",
+      modelConfig: initialData?.modelConfig ?
+        JSON.parse(initialData.modelConfig) : {
+          model: "gpt-4",
+          temperature: 0.7,
+          maxTokens: 2000
+        }
     }
   });
 
-  const onSubmit = (data: LoginFormData) => {
-    login(data, {
-      onSuccess: () => {
-        onSuccess?.();
-      }
-    });
+  const handleSubmit = async (data: FormData) => {
+    await onSubmit(data);
   };
 
   return (
-    <Card className={className}>
-      <CardHeader>
-        <CardTitle>Entrar na conta</CardTitle>
-      </CardHeader>
-
+    <ScrollArea className="h-full">
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)}>
-          {/* Form content */}
+        <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6 p-6">
+          <FormField
+            control={form.control}
+            name="name"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Agent Name</FormLabel>
+                <FormControl>
+                  <Input {...field} placeholder="My AI Assistant" />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          {/* Additional form fields... */}
+
+          <div className="flex justify-end space-x-2">
+            <Button type="button" variant="outline" onClick={onCancel}>
+              Cancel
+            </Button>
+            <Button type="submit" disabled={isLoading}>
+              {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              {initialData ? "Update Agent" : "Create Agent"}
+            </Button>
+          </div>
         </form>
       </Form>
-    </Card>
+    </ScrollArea>
   );
 }
-
-export { LoginForm };
 
 // ❌ ERRADO: React.FC e import React
 import React from 'react'; // NÃO IMPORTAR

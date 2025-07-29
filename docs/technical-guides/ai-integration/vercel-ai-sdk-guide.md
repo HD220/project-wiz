@@ -1,189 +1,399 @@
-# Vercel AI SDK Guide for Project Wiz
+# Vercel AI SDK v4 Implementation Guide
 
 ## Overview
 
-The AI SDK is the TypeScript toolkit for building AI applications with React, Next.js, Vue, Svelte, Node.js, and more. It provides a unified API for generating text, structured objects, tool calls, and building agents with LLMs.
+Project Wiz implements a **production-ready AI integration** using Vercel AI SDK v4 with enterprise-grade patterns including multi-provider support, encrypted storage, and advanced memory systems.
 
-**Key Point**: The AI SDK Core can be used anywhere JavaScript runs, making it perfect for Electron applications.
+**Current Implementation**: AI SDK v4.3.16 with TypeScript strict mode, supporting OpenAI, Anthropic, DeepSeek, and custom providers.
 
-## Installation
+## Current Architecture
 
-```bash
-npm i ai
-npm i @ai-sdk/openai    # For OpenAI models
-npm i @ai-sdk/deepseek  # For DeepSeek models
-```
+### **Production Dependencies**
 
-## Core Concepts for Electron/Node.js
-
-### 1. Text Generation (Non-Streaming)
-
-In Electron's main process, use `generateText` instead of `streamText`:
-
-```typescript
-import { generateText } from "ai";
-import { openai } from "@ai-sdk/openai";
-
-export async function generateResponse(prompt: string) {
-  const { text } = await generateText({
-    model: openai("gpt-4o"),
-    system: "You are a helpful assistant.",
-    prompt: prompt,
-  });
-
-  return text;
+```json
+{
+  "@ai-sdk/anthropic": "^1.2.12",
+  "@ai-sdk/openai": "^1.3.23",
+  "@ai-sdk/openai-compatible": "^0.2.16",
+  "ai": "^4.3.16"
 }
 ```
 
-### 2. Streaming Considerations
+### **Provider Implementation Status**
 
-While the AI SDK supports streaming, in Electron you typically:
+- ✅ **OpenAI**: Complete with custom baseURL support
+- ✅ **Anthropic**: Full Claude integration
+- ✅ **DeepSeek**: OpenAI-compatible implementation
+- ✅ **Custom Providers**: Generic OpenAI-compatible pattern
 
-- Use `generateText` in the main process
-- Send complete responses via IPC to the renderer
-- This avoids complexity of streaming across process boundaries
+## Current Production Implementation
 
-### 3. Tool Calling for Agent Actions
+### **LLM Service Architecture**
 
-Agents can use tools to perform actions:
+The `LLMService` provides type-safe, encrypted model access across providers:
 
 ```typescript
-import { generateText, tool } from "ai";
-import { z } from "zod";
+// src/main/features/agent/llm-provider/llm.service.ts
+import { createAnthropic } from "@ai-sdk/anthropic";
+import { createOpenAI } from "@ai-sdk/openai";
+import { createOpenAICompatible } from "@ai-sdk/openai-compatible";
 
-const result = await generateText({
-  model: openai("gpt-4o"),
-  tools: {
-    writeFile: tool({
-      description: "Write content to a file",
-      parameters: z.object({
-        path: z.string(),
-        content: z.string(),
-      }),
-      execute: async ({ path, content }) => {
-        await fs.writeFile(path, content);
-        return { success: true };
-      },
-    }),
-  },
-  toolChoice: "auto",
-  prompt: "Create a new React component for a Button",
-});
+export class LLMService {
+  /**
+   * Get configured model for user with automatic provider resolution
+   */
+  static async getModel(
+    userId: string,
+    providerId?: string,
+    modelName?: string,
+  ) {
+    // 1. Resolve provider configuration
+    const provider = await this.getProviderConfig(userId, providerId);
+    const apiKey = await LlmProviderService.getDecryptedApiKey(provider.id);
+    const model = modelName || provider.defaultModel;
+
+    // 2. Create model based on provider type
+    switch (provider.type) {
+      case "openai": {
+        const openaiProvider = createOpenAI({
+          apiKey,
+          baseURL: provider.baseUrl || undefined,
+        });
+        return openaiProvider(model);
+      }
+
+      case "anthropic": {
+        const anthropicProvider = createAnthropic({
+          apiKey,
+          baseURL: provider.baseUrl || undefined,
+        });
+        return anthropicProvider(model);
+      }
+
+      case "deepseek":
+      case "google":
+      case "custom":
+      default: {
+        // Use OpenAI-compatible for everything else
+        const customProvider = createOpenAICompatible({
+          name: provider.type,
+          baseURL: provider.baseUrl || "https://api.openai.com/v1",
+          apiKey,
+        });
+        return customProvider(model);
+      }
+    }
+  }
+}
 ```
 
-### 4. Model Configuration
+### **Encrypted Provider Management**
+
+API keys are encrypted using AES-256-GCM before storage:
 
 ```typescript
-// OpenAI configuration
-const model = openai("gpt-4o-mini", {
-  apiKey: process.env.OPENAI_API_KEY,
-});
+// src/main/features/agent/llm-provider/llm-provider.service.ts
+export class LlmProviderService {
+  /**
+   * Create provider with encrypted API key storage
+   */
+  static async create(input: CreateProviderInput): Promise<LlmProvider> {
+    const validatedInput = createProviderSchema.parse(input);
+    const db = getDatabase();
 
-// DeepSeek configuration
-import { deepseek } from "@ai-sdk/deepseek";
-const model = deepseek("deepseek-chat", {
-  apiKey: process.env.DEEPSEEK_API_KEY,
-});
-```
+    // Encrypt API key before storage
+    const encryptedApiKey = this.encryptApiKey(validatedInput.apiKey);
 
-## Best Practices for Electron
+    const [provider] = await db
+      .insert(llmProvidersTable)
+      .values({
+        userId: validatedInput.userId,
+        name: validatedInput.name,
+        type: validatedInput.type,
+        apiKey: encryptedApiKey, // Stored encrypted
+        baseUrl: validatedInput.baseUrl,
+        defaultModel: validatedInput.defaultModel,
+        isDefault: validatedInput.isDefault,
+        isActive: validatedInput.isActive,
+      })
+      .returning();
 
-1. **API Key Management**
-   - Store in environment variables
-   - Never expose to renderer process
-   - Load from .env file in development
-
-2. **Error Handling**
-
-   ```typescript
-   try {
-     const { text } = await generateText({...});
-   } catch (error) {
-     if (error.name === 'AI_APICallError') {
-       // Handle API errors (rate limits, auth, etc.)
-     }
-   }
-   ```
-
-3. **Response Parsing**
-   ```typescript
-   // For structured responses
-   const { object } = await generateObject({
-     model: openai("gpt-4o"),
-     schema: z.object({
-       code: z.string(),
-       explanation: z.string(),
-     }),
-     prompt: "Generate a React component",
-   });
-   ```
-
-## Integration Pattern for Project Wiz
-
-```typescript
-// In agent.worker.ts
-import { generateText } from "ai";
-import { openai } from "@ai-sdk/openai";
-
-export class AgentWorker {
-  private model: any;
-
-  constructor(private config: AgentConfig) {
-    this.model = openai(config.model, {
-      apiKey: process.env.OPENAI_API_KEY,
-    });
+    return provider;
   }
 
-  async processTask(task: AgentTask) {
+  /**
+   * AES-256-GCM encryption implementation
+   */
+  private static encryptApiKey(apiKey: string): string {
+    const iv = crypto.randomBytes(16);
+    const cipher = crypto.createCipheriv("aes-256-gcm", validEncryptionKey, iv);
+
+    let encrypted = cipher.update(apiKey, "utf8", "base64");
+    encrypted += cipher.final("base64");
+
+    const authTag = cipher.getAuthTag();
+
+    // Combine IV, auth tag, and encrypted data
+    const combined = Buffer.concat([
+      iv,
+      authTag,
+      Buffer.from(encrypted, "base64"),
+    ]);
+    return combined.toString("base64");
+  }
+}
+```
+
+### **Memory System Integration**
+
+Advanced memory system with importance scoring:
+
+```typescript
+// src/main/features/agent/memory/memory.model.ts
+export const agentMemoriesTable = sqliteTable("agent_memories", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  agentId: text("agent_id")
+    .notNull()
+    .references(() => agentsTable.id),
+  userId: text("user_id")
+    .notNull()
+    .references(() => usersTable.id),
+  content: text("content").notNull(),
+  summary: text("summary"), // Brief summary for quick retrieval
+  type: text("type").$type<MemoryType>().notNull().default("conversation"),
+  importance: text("importance")
+    .$type<MemoryImportance>()
+    .notNull()
+    .default("medium"),
+  importanceScore: real("importance_score").notNull().default(0.5), // 0.0 to 1.0
+  accessCount: integer("access_count").notNull().default(0),
+  keywords: text("keywords"), // JSON array for search
+  metadata: text("metadata"), // JSON object for additional context
+  // ... timestamps and soft deletion fields
+});
+```
+
+## Production Usage Patterns
+
+### **1. Text Generation in Agent Service**
+
+```typescript
+// src/main/features/agent/agent.service.ts
+import { generateText } from "ai";
+
+export class AgentService {
+  static async generateResponse(
+    agentId: string,
+    userId: string,
+    message: string,
+  ): Promise<string> {
+    // Get configured model for user
+    const model = await LLMService.getModel(userId);
+    const agent = await this.findById(agentId);
+
     const { text } = await generateText({
-      model: this.model,
-      system: this.config.systemPrompt,
-      prompt: this.buildPrompt(task),
+      model,
+      system: agent.instructions,
+      prompt: message,
       temperature: 0.7,
       maxTokens: 2000,
     });
 
-    return this.parseResponse(text);
+    return text;
   }
 }
 ```
 
-## Common Patterns
-
-### 1. Conversation Context
+### **2. Conversation Context Management**
 
 ```typescript
+// Real conversation handling with message history
+const messages = conversation.messages.map((msg) => ({
+  role: msg.senderType === "user" ? ("user" as const) : ("assistant" as const),
+  content: msg.content,
+}));
+
 const { text } = await generateText({
-  model: openai("gpt-4o"),
+  model: await LLMService.getModel(userId, providerId),
   messages: [
-    { role: "system", content: systemPrompt },
-    { role: "user", content: userMessage },
-    { role: "assistant", content: previousResponse },
+    { role: "system", content: agent.instructions },
+    ...messages,
     { role: "user", content: newMessage },
   ],
 });
 ```
 
-### 2. JSON Mode
+### **3. Multi-Provider Failover**
 
 ```typescript
-const { text } = await generateText({
-  model: openai("gpt-4o"),
-  prompt: "Analyze this code and return JSON",
-  experimental_jsonMode: true,
+export class LLMService {
+  static async getModelWithFallback(userId: string) {
+    try {
+      // Try default provider first
+      return await this.getModel(userId);
+    } catch (error) {
+      console.warn("Default provider failed, trying fallback");
+
+      // Get all active providers for user
+      const providers = await LlmProviderService.findByUserId(userId);
+      const fallbackProvider = providers.find(
+        (p) => !p.isDefault && p.isActive,
+      );
+
+      if (fallbackProvider) {
+        return await this.getModel(userId, fallbackProvider.id);
+      }
+
+      throw new Error("No available providers");
+    }
+  }
+}
+```
+
+## Enterprise Security Patterns
+
+### **1. API Key Protection**
+
+- Keys encrypted with AES-256-GCM before database storage
+- Decryption only happens in main process for API calls
+- No keys exposed to renderer process or logs
+
+### **2. Provider Validation**
+
+```typescript
+// Zod schema validation for all provider inputs
+export const createProviderSchema = z.object({
+  userId: z.string().uuid(),
+  name: z.string().min(1).max(100),
+  type: z.enum(["openai", "anthropic", "deepseek", "google", "custom"]),
+  apiKey: z.string().min(1),
+  baseUrl: z.string().url().optional(),
+  defaultModel: z.string().min(1),
+  isDefault: z.boolean().default(false),
+  isActive: z.boolean().default(true),
 });
 ```
 
-### 3. Token Usage Tracking
+### **3. Error Handling Pattern**
 
 ```typescript
-const { text, usage } = await generateText({...});
-console.log(`Tokens used: ${usage.totalTokens}`);
+// Standardized error handling across all AI operations
+try {
+  const result = await generateText({ model, prompt });
+  return { success: true, data: result.text };
+} catch (error) {
+  const errorMessage =
+    error instanceof Error ? error.message : "AI generation failed";
+  logger.error("ai-generation", { error: errorMessage, userId, agentId });
+  return { success: false, error: errorMessage };
+}
 ```
 
-## References
+## Current Integration Architecture
 
-- [AI SDK Documentation](https://sdk.vercel.ai/docs)
-- [AI SDK Core - Generating Text](https://sdk.vercel.ai/docs/ai-sdk-core/generating-text)
-- [AI SDK Core - Tools and Tool Calling](https://sdk.vercel.ai/docs/ai-sdk-core/tools-and-tool-calling)
-- [GitHub Repository](https://github.com/vercel/ai)
+The current implementation spans multiple service layers:
+
+### **Main Process Services**
+
+- **`LLMService`**: Provider-agnostic model access
+- **`LlmProviderService`**: Encrypted provider management
+- **`AgentService`**: AI agent orchestration
+- **`MemoryService`**: Advanced memory system
+
+### **Database Layer**
+
+- **`llmProvidersTable`**: Encrypted provider configurations
+- **`agentMemoriesTable`**: Advanced memory with importance scoring
+- **`agentsTable`**: Agent configurations and instructions
+
+### **IPC Communication**
+
+- Type-safe handlers for all AI operations
+- Automatic error handling and logging
+- Standardized response patterns
+
+## Advanced Implementation Examples
+
+### **1. Agent with Memory Integration**
+
+```typescript
+export class AgentService {
+  static async generateWithMemory(
+    agentId: string,
+    userId: string,
+    message: string,
+  ) {
+    // Retrieve relevant memories
+    const memories = await MemoryService.searchMemories(agentId, message, {
+      limit: 5,
+      minImportance: 7.0,
+    });
+
+    // Build context from memories
+    const memoryContext = memories.map((m) => m.content).join("\n");
+
+    const model = await LLMService.getModel(userId);
+    const agent = await this.findById(agentId);
+
+    const { text } = await generateText({
+      model,
+      system: `${agent.instructions}\n\nRelevant memories:\n${memoryContext}`,
+      prompt: message,
+    });
+
+    // Store new memory
+    await MemoryService.storeMemory(agentId, text, 6.0);
+
+    return text;
+  }
+}
+```
+
+### **2. Streaming Implementation**
+
+```typescript
+// For future streaming implementation
+import { streamText } from "ai";
+
+export class ConversationService {
+  static async streamResponse(userId: string, message: string) {
+    const model = await LLMService.getModel(userId);
+
+    const stream = await streamText({
+      model,
+      prompt: message,
+    });
+
+    // Handle stream in main process, send chunks via IPC
+    for await (const chunk of stream.textStream) {
+      // Send chunk to renderer via IPC
+      mainWindow.webContents.send("ai-stream-chunk", chunk);
+    }
+  }
+}
+```
+
+## Implementation References
+
+### **Core Files**
+
+- `/src/main/features/agent/llm-provider/llm.service.ts` - Model access service
+- `/src/main/features/agent/llm-provider/llm-provider.service.ts` - Provider management
+- `/src/main/features/agent/memory/memory.service.ts` - Memory system
+- `/src/main/features/agent/agent.service.ts` - Agent orchestration
+
+### **Database Models**
+
+- `/src/main/features/agent/llm-provider/llm-provider.model.ts` - Provider schema
+- `/src/main/features/agent/memory/memory.model.ts` - Memory schema
+- `/src/main/features/agent/agent.model.ts` - Agent schema
+
+### **Related Guides**
+
+- [Provider Patterns](./ai-sdk-provider-patterns.md) - Multi-provider architecture
+- [Provider Registry](./createProviderRegistry-implementation-guide.md) - Management patterns
+- [Queue Patterns](./queue-patterns-implementation.md) - Background processing
+
+**🎯 Next Steps**: Explore [Provider Patterns](./ai-sdk-provider-patterns.md) for multi-provider implementation or [Memory System](../../../src/main/features/agent/memory/) for advanced memory patterns.

@@ -1,6 +1,6 @@
 # Compound Components Guide
 
-This document provides a comprehensive technical guide for creating Compound Components in the Project Wiz Design System. It focuses on the architecture, patterns, and implementation strategies for building maintainable and type-safe compound components.
+Real-world compound component patterns implemented in Project Wiz. This guide showcases production-ready patterns from the codebase, including ProfileAvatar, AgentCard, and SearchFilterBar implementations.
 
 ## 📋 Table of Contents
 
