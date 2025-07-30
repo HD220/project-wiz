@@ -3,6 +3,157 @@ import { cva, type VariantProps } from "class-variance-authority";
 
 import { cn } from "@/renderer/lib/utils";
 
+// Types for reducer
+type ChatState = {
+  messages: unknown[];
+  input: string;
+  loading: boolean;
+  typing: boolean;
+  history: string[];
+  historyIndex: number;
+  autoScroll: boolean;
+  pendingMessages: Set<string | number>;
+};
+
+type ChatAction =
+  | { type: "ADD_MESSAGE"; payload: unknown }
+  | {
+      type: "UPDATE_MESSAGE";
+      payload: {
+        id: string | number;
+        updates: Record<string, unknown>;
+        keyFn: (item: unknown, index: number) => string | number;
+      };
+    }
+  | {
+      type: "REMOVE_MESSAGE";
+      payload: {
+        id: string | number;
+        keyFn: (item: unknown, index: number) => string | number;
+      };
+    }
+  | { type: "SET_MESSAGES"; payload: unknown[] }
+  | { type: "SET_INPUT"; payload: string }
+  | { type: "SET_LOADING"; payload: boolean }
+  | { type: "SET_TYPING"; payload: boolean }
+  | { type: "SET_AUTO_SCROLL"; payload: boolean }
+  | { type: "TOGGLE_PENDING"; payload: string | number }
+  | { type: "CLEAR"; payload?: undefined }
+  | { type: "NAVIGATE_HISTORY"; payload: "up" | "down" };
+
+// Consolidated reducer - replaces complex setState logic
+function chatReducer(state: ChatState, action: ChatAction): ChatState {
+  switch (action.type) {
+    case "ADD_MESSAGE":
+      return {
+        ...state,
+        messages: [...state.messages, action.payload],
+        history:
+          state.input && !state.history.includes(state.input)
+            ? [...state.history, state.input].slice(-50)
+            : state.history,
+      };
+
+    case "UPDATE_MESSAGE": {
+      const { id, updates, keyFn } = action.payload;
+      return {
+        ...state,
+        messages: state.messages.map((msg) => {
+          const msgId = keyFn(msg, state.messages.indexOf(msg));
+          return msgId === id
+            ? { ...(msg as Record<string, unknown>), ...updates }
+            : msg;
+        }),
+      };
+    }
+
+    case "REMOVE_MESSAGE": {
+      const { id, keyFn } = action.payload;
+      const newPendingMessages = new Set(state.pendingMessages);
+      newPendingMessages.delete(id);
+
+      return {
+        ...state,
+        messages: state.messages.filter((msg) => {
+          const msgId = keyFn(msg, state.messages.indexOf(msg));
+          return msgId !== id;
+        }),
+        pendingMessages: newPendingMessages,
+      };
+    }
+
+    case "SET_MESSAGES":
+      return {
+        ...state,
+        messages: action.payload,
+      };
+
+    case "SET_INPUT":
+      return {
+        ...state,
+        input: action.payload,
+      };
+
+    case "SET_LOADING":
+      return {
+        ...state,
+        loading: action.payload,
+      };
+
+    case "SET_TYPING":
+      return {
+        ...state,
+        typing: action.payload,
+      };
+
+    case "SET_AUTO_SCROLL":
+      return {
+        ...state,
+        autoScroll: action.payload,
+      };
+
+    case "TOGGLE_PENDING": {
+      const newPendingMessages = new Set(state.pendingMessages);
+      if (newPendingMessages.has(action.payload)) {
+        newPendingMessages.delete(action.payload);
+      } else {
+        newPendingMessages.add(action.payload);
+      }
+      return {
+        ...state,
+        pendingMessages: newPendingMessages,
+      };
+    }
+
+    case "CLEAR":
+      return {
+        ...state,
+        messages: [],
+        input: "",
+        historyIndex: -1,
+        pendingMessages: new Set(),
+      };
+
+    case "NAVIGATE_HISTORY": {
+      const newIndex =
+        action.payload === "up"
+          ? Math.min(state.historyIndex + 1, state.history.length - 1)
+          : Math.max(state.historyIndex - 1, -1);
+      return {
+        ...state,
+        historyIndex: newIndex,
+        input:
+          newIndex >= 0
+            ? state.history[state.history.length - 1 - newIndex] || ""
+            : "",
+      };
+    }
+
+    default:
+      return state;
+  }
+}
+
 type ChatContextValue = {
   state: {
     messages: unknown[];
@@ -113,23 +264,25 @@ function Chat({
   const messagesRef = React.useRef<HTMLDivElement>(null);
   const inputRef = React.useRef<HTMLInputElement | HTMLTextAreaElement>(null);
 
-  const [state, setState] = React.useState({
+  const initialState: ChatState = {
     messages: value || defaultValue,
     input: "",
     loading: false,
     typing: false,
-    history: [] as string[],
+    history: [],
     historyIndex: -1,
     autoScroll: true,
     pendingMessages: new Set<string | number>(),
-  });
+  };
+
+  const [state, dispatch] = React.useReducer(chatReducer, initialState);
 
   // Controlled/uncontrolled pattern
   const messages = value !== undefined ? value : state.messages;
 
   React.useEffect(() => {
     if (value !== undefined) {
-      setState((prev) => ({ ...prev, messages: value }));
+      dispatch({ type: "SET_MESSAGES", payload: value });
     }
   }, [value]);
 
@@ -139,155 +292,100 @@ function Chat({
     }
   }, [state.autoScroll]);
 
-  const actions = React.useMemo(
-    () => ({
-      addMessage: (message: unknown) => {
-        const newMessages = [...messages, message];
-        setState((prev) => {
-          const newHistory =
-            prev.input && !prev.history.includes(prev.input)
-              ? [...prev.history, prev.input].slice(-50)
-              : prev.history;
+  // React Compiler optimizes - no useMemo needed
+  // Define contextValue first so it can be used in actions
+  const contextValue: ChatContextValue = {
+    state: { ...state, messages },
+    actions: {} as any, // Will be filled after actions definition
+    refs: { messagesRef, inputRef },
+    keyFn,
+  };
 
-          return {
-            ...prev,
-            messages: value === undefined ? newMessages : prev.messages,
-            history: newHistory,
-          };
-        });
-        onValueChange?.(newMessages);
-      },
-      updateMessage: (
-        id: string | number,
-        updates: Record<string, unknown>,
-      ) => {
-        const newMessages = messages.map((msg) => {
-          const msgId = keyFn(msg, messages.indexOf(msg));
-          return msgId === id
-            ? { ...(msg as Record<string, unknown>), ...updates }
-            : msg;
-        });
-        setState((prev) => ({
-          ...prev,
-          messages: value === undefined ? newMessages : prev.messages,
-        }));
-        onValueChange?.(newMessages);
-        onMessageUpdate?.(id, updates, contextValue);
-      },
-      removeMessage: (id: string | number) => {
-        const newMessages = messages.filter((msg) => {
-          const msgId = keyFn(msg, messages.indexOf(msg));
-          return msgId !== id;
-        });
-        setState((prev) => ({
-          ...prev,
-          messages: value === undefined ? newMessages : prev.messages,
-          pendingMessages: new Set(
-            [...prev.pendingMessages].filter((pid) => pid !== id),
-          ),
-        }));
-        onValueChange?.(newMessages);
-        onMessageRemove?.(id, contextValue);
-      },
-      setMessages: (
-        messagesOrFn: unknown[] | ((prev: unknown[]) => unknown[]),
-      ) => {
-        const newMessages =
-          typeof messagesOrFn === "function"
-            ? messagesOrFn(messages)
-            : messagesOrFn;
-        setState((prev) => ({
-          ...prev,
-          messages: value === undefined ? newMessages : prev.messages,
-        }));
-        onValueChange?.(newMessages);
-      },
-      setInput: (input: string) => setState((prev) => ({ ...prev, input })),
-      setLoading: (loading: boolean) =>
-        setState((prev) => ({ ...prev, loading })),
-      setTyping: (typing: boolean) => setState((prev) => ({ ...prev, typing })),
-      setAutoScroll: (autoScroll: boolean) =>
-        setState((prev) => ({ ...prev, autoScroll })),
-      addPendingMessage: (id: string | number) =>
-        setState((prev) => ({
-          ...prev,
-          pendingMessages: new Set([...prev.pendingMessages, id]),
-        })),
-      removePendingMessage: (id: string | number) =>
-        setState((prev) => ({
-          ...prev,
-          pendingMessages: new Set(
-            [...prev.pendingMessages].filter((pid) => pid !== id),
-          ),
-        })),
-      send: (customInput?: string) => {
-        const inputToSend = customInput ?? state.input.trim();
-        if (onSend && inputToSend && !state.loading && !disabled) {
-          onSend(inputToSend, contextValue);
-        }
-      },
-      clear: () => {
-        const newMessages: unknown[] = [];
-        setState((prev) => ({
-          ...prev,
-          messages: value === undefined ? newMessages : prev.messages,
-          input: "",
-          historyIndex: -1,
-          pendingMessages: new Set(),
-        }));
-        onValueChange?.(newMessages);
-        onClear?.(contextValue);
-      },
-      isPending: (id: string | number) => state.pendingMessages.has(id),
-      navigateHistory: (direction: "up" | "down") =>
-        setState((prev) => {
-          const newIndex =
-            direction === "up"
-              ? Math.min(prev.historyIndex + 1, prev.history.length - 1)
-              : Math.max(prev.historyIndex - 1, -1);
-          return {
-            ...prev,
-            historyIndex: newIndex,
-            input:
-              newIndex >= 0
-                ? prev.history[prev.history.length - 1 - newIndex] || ""
-                : "",
-          };
-        }),
-      scrollToBottom,
-    }),
-    [
-      messages,
-      state.input,
-      state.loading,
-      state.history,
-      state.historyIndex,
-      onSend,
-      onValueChange,
-      onMessageUpdate,
-      onMessageRemove,
-      onClear,
-      value,
-      disabled,
-      scrollToBottom,
-      keyFn,
-    ],
-  );
+  // Simplified actions using dispatch - React Compiler optimizes
+  const actions = {
+    addMessage: (message: unknown) => {
+      dispatch({ type: "ADD_MESSAGE", payload: message });
+      const newMessages = [...messages, message];
+      onValueChange?.(newMessages);
+    },
+
+    updateMessage: (id: string | number, updates: Record<string, unknown>) => {
+      dispatch({ type: "UPDATE_MESSAGE", payload: { id, updates, keyFn } });
+      const newMessages = messages.map((msg) => {
+        const msgId = keyFn(msg, messages.indexOf(msg));
+        return msgId === id
+          ? { ...(msg as Record<string, unknown>), ...updates }
+          : msg;
+      });
+      onValueChange?.(newMessages);
+      // contextValue will be defined below
+      onMessageUpdate?.(id, updates, contextValue);
+    },
+
+    removeMessage: (id: string | number) => {
+      dispatch({ type: "REMOVE_MESSAGE", payload: { id, keyFn } });
+      const newMessages = messages.filter((msg) => {
+        const msgId = keyFn(msg, messages.indexOf(msg));
+        return msgId !== id;
+      });
+      onValueChange?.(newMessages);
+      // contextValue will be defined below
+      onMessageRemove?.(id, contextValue);
+    },
+
+    setMessages: (
+      messagesOrFn: unknown[] | ((prev: unknown[]) => unknown[]),
+    ) => {
+      const newMessages =
+        typeof messagesOrFn === "function"
+          ? messagesOrFn(messages)
+          : messagesOrFn;
+      dispatch({ type: "SET_MESSAGES", payload: newMessages });
+      onValueChange?.(newMessages);
+    },
+
+    setInput: (input: string) =>
+      dispatch({ type: "SET_INPUT", payload: input }),
+    setLoading: (loading: boolean) =>
+      dispatch({ type: "SET_LOADING", payload: loading }),
+    setTyping: (typing: boolean) =>
+      dispatch({ type: "SET_TYPING", payload: typing }),
+    setAutoScroll: (autoScroll: boolean) =>
+      dispatch({ type: "SET_AUTO_SCROLL", payload: autoScroll }),
+
+    addPendingMessage: (id: string | number) =>
+      dispatch({ type: "TOGGLE_PENDING", payload: id }),
+    removePendingMessage: (id: string | number) =>
+      dispatch({ type: "TOGGLE_PENDING", payload: id }),
+
+    send: (customInput?: string) => {
+      const inputToSend = customInput ?? state.input.trim();
+      if (onSend && inputToSend && !state.loading && !disabled) {
+        // contextValue will be defined below
+        onSend(inputToSend, contextValue);
+      }
+    },
+
+    clear: () => {
+      dispatch({ type: "CLEAR" });
+      onValueChange?.([]);
+      // contextValue will be defined below
+      onClear?.(contextValue);
+    },
+
+    isPending: (id: string | number) => state.pendingMessages.has(id),
+    navigateHistory: (direction: "up" | "down") =>
+      dispatch({ type: "NAVIGATE_HISTORY", payload: direction }),
+    scrollToBottom,
+  };
+
+  // Update contextValue with the actual actions
+  contextValue.actions = actions;
 
   // Auto scroll when messages change
   React.useEffect(() => {
     scrollToBottom();
   }, [messages.length, scrollToBottom]);
-
-  const contextValue = React.useMemo<ChatContextValue>(
-    () => ({
-      state: { ...state, messages },
-      actions,
-      refs: { messagesRef, inputRef },
-      keyFn,
-    }),
-    [state, messages, actions, keyFn],
-  );
 
   return (
     <ChatContext.Provider value={contextValue}>
@@ -497,6 +595,50 @@ function ChatStatus({ render, showWhen }: ChatStatusProps) {
   }
 
   return render(status);
+}
+
+// Optional hooks for power users - not required for basic usage
+export function useChatInputState() {
+  const { state } = useChatContext();
+  return {
+    value: state.input,
+    loading: state.loading,
+    history: state.history,
+    historyIndex: state.historyIndex,
+  };
+}
+
+export function useChatActions() {
+  const { actions } = useChatContext();
+  return {
+    setValue: actions.setInput,
+    send: actions.send,
+    navigateHistory: actions.navigateHistory,
+    clear: () => actions.setInput(""),
+    addMessage: actions.addMessage,
+    updateMessage: actions.updateMessage,
+    removeMessage: actions.removeMessage,
+  };
+}
+
+export function useChatStatus() {
+  const { state } = useChatContext();
+  return {
+    loading: state.loading,
+    typing: state.typing,
+    messageCount: state.messages.length,
+    hasMessages: state.messages.length > 0,
+    pendingCount: state.pendingMessages.size,
+    input: state.input,
+    autoScroll: state.autoScroll,
+    historyIndex: state.historyIndex,
+    historyLength: state.history.length,
+  };
+}
+
+export function useChatRefs() {
+  const { refs } = useChatContext();
+  return refs;
 }
 
 export {
