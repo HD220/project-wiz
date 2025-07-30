@@ -464,66 +464,99 @@ function ChatMessages({ className, children, ...props }: ChatMessagesProps) {
 interface ChatMessageProps {
   messageData: unknown;
   messageIndex: number;
-  render: (
-    messageData: unknown,
-    chatState: ChatState,
-    chatActions: ChatActions,
-    messageIndex: number,
-  ) => React.ReactNode;
+  render: (message: {
+    data: unknown;
+    index: number;
+    // Actions específicas da mensagem
+    update: (updates: Record<string, unknown>) => void;
+    remove: () => void;
+    isPending: boolean;
+    // Estado mínimo para feedback visual
+    chatLoading: boolean;
+    chatTyping: boolean;
+  }) => React.ReactNode;
 }
 
 function ChatMessage({ messageData, messageIndex, render }: ChatMessageProps) {
   const context = useChatContext();
-  const { state, actions } = context;
+  const { state, actions, keyFn } = context;
 
-  return render(messageData, state, actions, messageIndex);
+  // Objeto focado apenas no que uma mensagem precisa
+  const message = {
+    data: messageData,
+    index: messageIndex,
+    // Actions específicas da mensagem
+    update: (updates: Record<string, unknown>) => {
+      const messageId = keyFn(messageData, messageIndex);
+      actions.updateMessage(messageId, updates);
+    },
+    remove: () => {
+      const messageId = keyFn(messageData, messageIndex);
+      actions.removeMessage(messageId);
+    },
+    isPending: (() => {
+      const messageId = keyFn(messageData, messageIndex);
+      return actions.isPending(messageId);
+    })(),
+    // Estado mínimo para feedback visual
+    chatLoading: state.loading,
+    chatTyping: state.typing,
+  };
+
+  return render(message);
 }
 
 interface ChatInputProps {
-  render: (
-    inputState: {
-      value: string;
-      loading: boolean;
-      history: string[];
-      historyIndex: number;
-    },
-    inputActions: {
-      setValue: (value: string) => void;
-      send: (value?: string) => void;
-      navigateHistory: (direction: "up" | "down") => void;
-      clear: () => void;
-    },
-    inputRefs: ChatRefs,
-  ) => React.ReactNode;
+  render: (chatInput: {
+    // State específico do input
+    value: string;
+    loading: boolean;
+    history: string[];
+    historyIndex: number;
+    // Actions específicas do input
+    setValue: (value: string) => void;
+    send: (value?: string) => void;
+    navigateHistory: (direction: "up" | "down") => void;
+    clear: () => void;
+    // Ref específica (apenas inputRef)
+    inputRef: React.RefObject<HTMLInputElement | HTMLTextAreaElement | null>;
+  }) => React.ReactNode;
 }
 
 function ChatInput({ render }: ChatInputProps) {
   const context = useChatContext();
   const { state, actions, refs } = context;
-  const inputState = {
+
+  // Objeto consolidado focado no input
+  const chatInput = {
+    // State específico do input
     value: state.input,
     loading: state.loading,
     history: state.history,
     historyIndex: state.historyIndex,
-  };
-
-  const inputActions = {
+    // Actions específicas do input
     setValue: actions.setInput,
     send: actions.send,
     navigateHistory: actions.navigateHistory,
     clear: () => actions.setInput(""),
+    // Ref específica (apenas inputRef)
+    inputRef: refs.inputRef,
   };
 
-  const inputRefs: ChatRefs = refs;
-
-  return render(inputState, inputActions, inputRefs);
+  return render(chatInput);
 }
 
 interface ChatStatusProps {
-  render: (status: ChatStatus) => React.ReactNode;
-  showWhen?: (
-    status: Omit<ChatStatus, "autoScroll" | "historyIndex" | "historyLength">,
-  ) => boolean;
+  render: (status: {
+    ui: { loading: boolean; typing: boolean };
+    stats: { messageCount: number; hasMessages: boolean; pendingCount: number };
+    control: { autoScroll: boolean };
+    history: { index: number; length: number; input: string };
+  }) => React.ReactNode;
+  showWhen?: (status: {
+    ui: { loading: boolean; typing: boolean };
+    stats: { messageCount: number; hasMessages: boolean; pendingCount: number };
+  }) => boolean;
 }
 
 function ChatStatus({ render, showWhen }: ChatStatusProps) {
@@ -531,19 +564,30 @@ function ChatStatus({ render, showWhen }: ChatStatusProps) {
   const { state } = context;
 
   // React Compiler optimizes - no useMemo needed
-  const status: ChatStatus = {
-    loading: state.loading,
-    typing: state.typing,
-    messageCount: state.messages.length,
-    hasMessages: state.messages.length > 0,
-    pendingCount: state.pendingMessages.size,
-    input: state.input,
-    autoScroll: state.autoScroll,
-    historyIndex: state.historyIndex,
-    historyLength: state.history.length,
+  // Objetos segregados por responsabilidade
+  const status = {
+    ui: {
+      loading: state.loading,
+      typing: state.typing,
+    },
+    stats: {
+      messageCount: state.messages.length,
+      hasMessages: state.messages.length > 0,
+      pendingCount: state.pendingMessages.size,
+    },
+    control: {
+      autoScroll: state.autoScroll,
+    },
+    history: {
+      index: state.historyIndex,
+      length: state.history.length,
+      input: state.input,
+    },
   };
 
-  const shouldShow = showWhen ? showWhen(status) : true;
+  const shouldShow = showWhen
+    ? showWhen({ ui: status.ui, stats: status.stats })
+    : true;
 
   if (!shouldShow) {
     return null;
