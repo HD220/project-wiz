@@ -28,7 +28,7 @@ export class AgentService {
     const validatedInput = createAgentSchema.parse(input);
     const db = getDatabase();
 
-    return db.transaction(async (tx) => {
+    const result = await db.transaction(async (tx) => {
       // Verify provider exists and is active
       const [provider] = await tx
         .select()
@@ -98,6 +98,8 @@ export class AgentService {
 
       return agent;
     });
+
+    return result;
   }
 
   /**
@@ -258,7 +260,7 @@ export class AgentService {
   static async softDelete(id: string, deletedBy: string): Promise<void> {
     const db = getDatabase();
 
-    await db.transaction(async (tx) => {
+    const result = await db.transaction(async (tx) => {
       // Verify agent exists and is active
       const [agent] = await tx
         .select()
@@ -280,7 +282,11 @@ export class AgentService {
           updatedAt: new Date(),
         })
         .where(eq(agentsTable.id, id));
+
+      return true;
     });
+
+    return result;
   }
 
   /**

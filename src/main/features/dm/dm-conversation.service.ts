@@ -56,7 +56,7 @@ export const dmConversationService = {
       input.currentUserId,
     );
 
-    return db.transaction(async (tx) => {
+    const result = await db.transaction(async (tx) => {
       const [dmConversation] = await tx
         .insert(dmConversationsTable)
         .values({
@@ -89,6 +89,8 @@ export const dmConversationService = {
         participants,
       };
     });
+
+    return result;
   },
 
   async getUserDMConversations(
@@ -327,7 +329,7 @@ export const dmConversationService = {
   async softDelete(id: string, deletedBy: string): Promise<void> {
     const db = getDatabase();
 
-    await db.transaction(async (tx) => {
+    const result = await db.transaction(async (tx) => {
       const [dmConversation] = await tx
         .select()
         .from(dmConversationsTable)
@@ -383,13 +385,17 @@ export const dmConversationService = {
             eq(messagesTable.isActive, true),
           ),
         );
+
+      return true;
     });
+
+    return result;
   },
 
   async restore(id: string): Promise<DMConversationWithParticipants> {
     const db = getDatabase();
 
-    return db.transaction(async (tx) => {
+    const result = await db.transaction(async (tx) => {
       const [restored] = await tx
         .update(dmConversationsTable)
         .set({
@@ -432,6 +438,8 @@ export const dmConversationService = {
         participants,
       };
     });
+
+    return result;
   },
 
   async addParticipant(dmId: string, participantId: string): Promise<void> {

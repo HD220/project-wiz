@@ -27,28 +27,7 @@ export function AuthLayout(props: AuthLayoutProps) {
       )}
       role="main"
       aria-label="Authentication page"
-      style={{
-        background: `linear-gradient(135deg, var(--background), rgba(128, 128, 128, 0.05))`,
-        backgroundSize: "100% 100%, 100% 100%",
-        backgroundRepeat: "repeat, no-repeat",
-      }}
     >
-      {/* Overlay for stripe pattern */}
-      <div
-        className="absolute inset-0 pointer-events-none"
-        style={{
-          background: `
-            repeating-linear-gradient(
-              135deg,
-              rgba(255, 255, 255, 0.02) 0px,
-              rgba(255, 255, 255, 0.02) 3px,
-              rgba(255, 255, 255, 0) 200px
-            )
-          `,
-        }}
-        aria-hidden="true"
-      />
-
       {/* Content container with responsive width */}
       <div
         className={cn(
