@@ -1,6 +1,6 @@
 import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
 
-import { RootSidebar } from "@/renderer/features/app/components/root-sidebar";
+import { RootSidebar } from "@/renderer/components/app/root-sidebar";
 import { loadApiDataWithFallback } from "@/renderer/lib/route-loader";
 
 function AuthenticatedLayout() {

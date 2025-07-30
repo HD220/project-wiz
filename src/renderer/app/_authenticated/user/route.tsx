@@ -1,6 +1,6 @@
 import { createFileRoute, Outlet } from "@tanstack/react-router";
 
-import { UserSidebar } from "@/renderer/features/app/components/user-sidebar";
+import { UserSidebar } from "@/renderer/components/app/user-sidebar";
 
 function UserLayout() {
   const { conversations, availableUsers } = Route.useLoaderData();

@@ -1,6 +1,6 @@
 import { createFileRoute, Outlet } from "@tanstack/react-router";
 
-import { ContentHeader } from "@/renderer/features/layout/components/content-header";
+import { ContentHeader } from "@/renderer/components/layout/content-header";
 import {
   ProfileAvatar,
   ProfileAvatarImage,

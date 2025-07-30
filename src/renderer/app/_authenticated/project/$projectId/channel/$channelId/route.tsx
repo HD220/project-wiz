@@ -5,7 +5,7 @@ import {
   MemberSidebar,
   type Member,
 } from "@/renderer/components/members/member-sidebar";
-import { ContentHeader } from "@/renderer/features/layout/components/content-header";
+import { ContentHeader } from "@/renderer/components/layout/content-header";
 import {
   Chat,
   ChatMessages,

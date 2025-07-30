@@ -1,6 +1,6 @@
 import { createFileRoute, Outlet } from "@tanstack/react-router";
 
-import { ProjectSidebar } from "@/renderer/features/app/components/project-sidebar";
+import { ProjectSidebar } from "@/renderer/components/app/project-sidebar";
 import { loadApiData } from "@/renderer/lib/route-loader";
 
 function ProjectLayout() {

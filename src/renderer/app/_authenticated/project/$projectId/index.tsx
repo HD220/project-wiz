@@ -6,8 +6,8 @@ import {
   type Member,
 } from "@/renderer/components/members/member-sidebar";
 import { ScrollArea } from "@/renderer/components/ui/scroll-area";
-import { ContentHeader } from "@/renderer/features/layout/components/content-header";
-import { ProjectView } from "@/renderer/features/app/components/server-view";
+import { ContentHeader } from "@/renderer/components/layout/content-header";
+import { ProjectView } from "@/renderer/components/app/server-view";
 import { loadApiData } from "@/renderer/lib/route-loader";
 
 function ProjectPage() {

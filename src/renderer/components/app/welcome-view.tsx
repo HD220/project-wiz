@@ -30,7 +30,7 @@ import {
 import { ScrollArea } from "@/renderer/components/ui/scroll-area";
 import { Separator } from "@/renderer/components/ui/separator";
 import { useAuth } from "@/renderer/contexts/auth.context";
-import { ActivityItem } from "@/renderer/features/app/components/activity-item";
+import { ActivityItem } from "@/renderer/components/app/activity-item";
 
 export function WelcomeView() {
   const { user } = useAuth();
