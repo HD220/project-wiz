@@ -42,17 +42,15 @@ type ChatRefs = {
   inputRef: React.RefObject<HTMLInputElement | HTMLTextAreaElement | null>;
 };
 
-type ChatStatus = {
-  loading: boolean;
-  typing: boolean;
+// Utility types para ChatStatus - DRY principle
+type ChatStatusUI = { loading: boolean; typing: boolean };
+type ChatStatusStats = {
   messageCount: number;
   hasMessages: boolean;
   pendingCount: number;
-  input: string;
-  autoScroll: boolean;
-  historyIndex: number;
-  historyLength: number;
 };
+type ChatStatusControl = { autoScroll: boolean };
+type ChatStatusHistory = { index: number; length: number; input: string };
 
 type ChatAction =
   | { type: "ADD_MESSAGE"; payload: unknown }
@@ -72,10 +70,7 @@ type ChatAction =
       };
     }
   | { type: "SET_MESSAGES"; payload: unknown[] }
-  | { type: "SET_INPUT"; payload: string }
-  | { type: "SET_LOADING"; payload: boolean }
-  | { type: "SET_TYPING"; payload: boolean }
-  | { type: "SET_AUTO_SCROLL"; payload: boolean }
+  | { type: "SET_PROPERTY"; payload: { key: keyof ChatState; value: any } }
   | { type: "TOGGLE_PENDING"; payload: string | number }
   | { type: "CLEAR"; payload?: undefined }
   | { type: "NAVIGATE_HISTORY"; payload: "up" | "down" };
@@ -127,28 +122,10 @@ function chatReducer(state: ChatState, action: ChatAction): ChatState {
         messages: action.payload,
       };
 
-    case "SET_INPUT":
+    case "SET_PROPERTY":
       return {
         ...state,
-        input: action.payload,
-      };
-
-    case "SET_LOADING":
-      return {
-        ...state,
-        loading: action.payload,
-      };
-
-    case "SET_TYPING":
-      return {
-        ...state,
-        typing: action.payload,
-      };
-
-    case "SET_AUTO_SCROLL":
-      return {
-        ...state,
-        autoScroll: action.payload,
+        [action.payload.key]: action.payload.value,
       };
 
     case "TOGGLE_PENDING": {
@@ -298,66 +275,89 @@ function Chat({
     }
   }, [state.autoScroll]);
 
-  // React Compiler optimizes - no useMemo needed
-  // Define contextValue first so it can be used in actions
-  const contextValue: ChatContextValue = {
-    state: { ...state, messages },
-    actions: {} as any, // Will be filled after actions definition
-    refs: { messagesRef, inputRef },
-    keyFn,
-  };
+  // Helper para eliminar duplicação de dispatch + onValueChange
+  const createAction =
+    (
+      actionType: ChatAction["type"],
+      payloadFn: (...args: any[]) => any,
+      messageCalculator?: (messages: unknown[], ...args: any[]) => unknown[],
+      callback?: (contextValue: ChatContextValue, ...args: any[]) => void,
+    ) =>
+    (...args: any[]) => {
+      dispatch({ type: actionType, payload: payloadFn(...args) });
+      if (messageCalculator) {
+        const newMessages = messageCalculator(messages, ...args);
+        onValueChange?.(newMessages);
+      }
+      if (callback) {
+        callback(contextValue, ...args); // contextValue será definido abaixo
+      }
+    };
 
-  // Simplified actions using dispatch - React Compiler optimizes
+  // Helper para simple property setters - consistência arquitetural
+  const createPropertySetter = (key: keyof ChatState) => (value: any) =>
+    dispatch({ type: "SET_PROPERTY", payload: { key, value } });
+
+  // Actions simplificadas usando helper centralizado
   const actions = {
-    addMessage: (message: unknown) => {
-      dispatch({ type: "ADD_MESSAGE", payload: message });
-      const newMessages = [...messages, message];
-      onValueChange?.(newMessages);
-    },
+    addMessage: createAction(
+      "ADD_MESSAGE",
+      (message: unknown) => message,
+      (msgs, message: unknown) => [...msgs, message],
+    ),
 
-    updateMessage: (id: string | number, updates: Record<string, unknown>) => {
-      dispatch({ type: "UPDATE_MESSAGE", payload: { id, updates, keyFn } });
-      const newMessages = messages.map((msg) => {
-        const msgId = keyFn(msg, messages.indexOf(msg));
-        return msgId === id
-          ? { ...(msg as Record<string, unknown>), ...updates }
-          : msg;
-      });
-      onValueChange?.(newMessages);
-      // contextValue will be defined below
-      onMessageUpdate?.(id, updates, contextValue);
-    },
+    updateMessage: createAction(
+      "UPDATE_MESSAGE",
+      (id: string | number, updates: Record<string, unknown>) => ({
+        id,
+        updates,
+        keyFn,
+      }),
+      (msgs, id: string | number, updates: Record<string, unknown>) => {
+        return msgs.map((msg) => {
+          const msgId = keyFn(msg, msgs.indexOf(msg));
+          return msgId === id
+            ? { ...(msg as Record<string, unknown>), ...updates }
+            : msg;
+        });
+      },
+      (ctx, id: string | number, updates: Record<string, unknown>) => {
+        onMessageUpdate?.(id, updates, ctx);
+      },
+    ),
 
-    removeMessage: (id: string | number) => {
-      dispatch({ type: "REMOVE_MESSAGE", payload: { id, keyFn } });
-      const newMessages = messages.filter((msg) => {
-        const msgId = keyFn(msg, messages.indexOf(msg));
-        return msgId !== id;
-      });
-      onValueChange?.(newMessages);
-      // contextValue will be defined below
-      onMessageRemove?.(id, contextValue);
-    },
+    removeMessage: createAction(
+      "REMOVE_MESSAGE",
+      (id: string | number) => ({ id, keyFn }),
+      (msgs, id: string | number) => {
+        return msgs.filter((msg) => {
+          const msgId = keyFn(msg, msgs.indexOf(msg));
+          return msgId !== id;
+        });
+      },
+      (ctx, id: string | number) => {
+        onMessageRemove?.(id, ctx);
+      },
+    ),
 
-    setMessages: (
-      messagesOrFn: unknown[] | ((prev: unknown[]) => unknown[]),
-    ) => {
-      const newMessages =
-        typeof messagesOrFn === "function"
+    setMessages: createAction(
+      "SET_MESSAGES",
+      (messagesOrFn: unknown[] | ((prev: unknown[]) => unknown[])) => {
+        return typeof messagesOrFn === "function"
           ? messagesOrFn(messages)
           : messagesOrFn;
-      dispatch({ type: "SET_MESSAGES", payload: newMessages });
-      onValueChange?.(newMessages);
-    },
+      },
+      (msgs, messagesOrFn: unknown[] | ((prev: unknown[]) => unknown[])) => {
+        return typeof messagesOrFn === "function"
+          ? messagesOrFn(msgs)
+          : messagesOrFn;
+      },
+    ),
 
-    setInput: (input: string) =>
-      dispatch({ type: "SET_INPUT", payload: input }),
-    setLoading: (loading: boolean) =>
-      dispatch({ type: "SET_LOADING", payload: loading }),
-    setTyping: (typing: boolean) =>
-      dispatch({ type: "SET_TYPING", payload: typing }),
-    setAutoScroll: (autoScroll: boolean) =>
-      dispatch({ type: "SET_AUTO_SCROLL", payload: autoScroll }),
+    setInput: createPropertySetter("input"),
+    setLoading: createPropertySetter("loading"),
+    setTyping: createPropertySetter("typing"),
+    setAutoScroll: createPropertySetter("autoScroll"),
 
     addPendingMessage: (id: string | number) =>
       dispatch({ type: "TOGGLE_PENDING", payload: id }),
@@ -372,12 +372,12 @@ function Chat({
       }
     },
 
-    clear: () => {
-      dispatch({ type: "CLEAR" });
-      onValueChange?.([]);
-      // contextValue will be defined below
-      onClear?.(contextValue);
-    },
+    clear: createAction(
+      "CLEAR",
+      () => undefined,
+      () => [],
+      (ctx) => onClear?.(ctx),
+    ),
 
     isPending: (id: string | number) => state.pendingMessages.has(id),
     navigateHistory: (direction: "up" | "down") =>
@@ -385,8 +385,13 @@ function Chat({
     scrollToBottom,
   };
 
-  // Update contextValue with the actual actions
-  contextValue.actions = actions;
+  // Context construction simplificada - definição direta sem mutação
+  const contextValue: ChatContextValue = {
+    state: { ...state, messages },
+    actions,
+    refs: { messagesRef, inputRef },
+    keyFn,
+  };
 
   // Auto scroll when messages change
   React.useEffect(() => {
@@ -481,23 +486,18 @@ function ChatMessage({ messageData, messageIndex, render }: ChatMessageProps) {
   const context = useChatContext();
   const { state, actions, keyFn } = context;
 
+  // Cálculo direto do messageId - React Compiler otimiza
+  const messageId = keyFn(messageData, messageIndex);
+
   // Objeto focado apenas no que uma mensagem precisa
   const message = {
     data: messageData,
     index: messageIndex,
-    // Actions específicas da mensagem
-    update: (updates: Record<string, unknown>) => {
-      const messageId = keyFn(messageData, messageIndex);
-      actions.updateMessage(messageId, updates);
-    },
-    remove: () => {
-      const messageId = keyFn(messageData, messageIndex);
-      actions.removeMessage(messageId);
-    },
-    isPending: (() => {
-      const messageId = keyFn(messageData, messageIndex);
-      return actions.isPending(messageId);
-    })(),
+    // Actions específicas da mensagem com messageId pré-calculado
+    update: (updates: Record<string, unknown>) =>
+      actions.updateMessage(messageId, updates),
+    remove: () => actions.removeMessage(messageId),
+    isPending: actions.isPending(messageId),
     // Estado mínimo para feedback visual
     chatLoading: state.loading,
     chatTyping: state.typing,
@@ -548,15 +548,12 @@ function ChatInput({ render }: ChatInputProps) {
 
 interface ChatStatusProps {
   render: (status: {
-    ui: { loading: boolean; typing: boolean };
-    stats: { messageCount: number; hasMessages: boolean; pendingCount: number };
-    control: { autoScroll: boolean };
-    history: { index: number; length: number; input: string };
+    ui: ChatStatusUI;
+    stats: ChatStatusStats;
+    control: ChatStatusControl;
+    history: ChatStatusHistory;
   }) => React.ReactNode;
-  showWhen?: (status: {
-    ui: { loading: boolean; typing: boolean };
-    stats: { messageCount: number; hasMessages: boolean; pendingCount: number };
-  }) => boolean;
+  showWhen?: (status: { ui: ChatStatusUI; stats: ChatStatusStats }) => boolean;
 }
 
 function ChatStatus({ render, showWhen }: ChatStatusProps) {
