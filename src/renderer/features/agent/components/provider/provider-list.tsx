@@ -2,7 +2,8 @@ import {
   validateSearchInput,
   validateProviderTypeFilter,
 } from "@/renderer/lib/search-validation";
-import { Link, useNavigate, useSearch } from "@tanstack/react-router";
+import { useNavigate, useSearch } from "@tanstack/react-router";
+import { CustomLink } from "@/renderer/components/custom-link";
 import { Plus, Server, Search, AlertCircle } from "lucide-react";
 
 import type { LlmProvider } from "@/renderer/features/agent/provider.types";
@@ -105,15 +106,10 @@ export function ProviderList(props: ProviderListProps) {
             </p>
           </div>
         </div>
-        <Link
-          to="/user/settings/llm-providers/$providerId/new"
-          params={{ providerId: "new" }}
-        >
-          <Button className="gap-2">
-            <Plus className="w-4 h-4" />
-            Add Provider
-          </Button>
-        </Link>
+        <CustomLink to="/user/settings/llm-providers/new" className="gap-2">
+          <Plus className="w-4 h-4" />
+          Add Provider
+        </CustomLink>
       </div>
 
       {/* Professional Filters */}

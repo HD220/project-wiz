@@ -15,7 +15,6 @@ import {
   TooltipTrigger,
 } from "@/renderer/components/ui/tooltip";
 import { useAuth } from "@/renderer/contexts/auth.context";
-import { CreateProjectDialog } from "@/renderer/features/project/components";
 import { cn } from "@/renderer/lib/utils";
 
 interface RootSidebarProps {
@@ -164,23 +163,22 @@ export function RootSidebar(props: RootSidebarProps) {
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
-              <CreateProjectDialog>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className={cn(
-                    "w-10 h-10 lg:w-12 lg:h-12", // Responsive button size
-                    "p-0 rounded-2xl border-2 transition-all duration-200 ease-out group cursor-pointer",
-                    "bg-sidebar-accent/40 border-transparent text-sidebar-foreground/80",
-                    "hover:bg-sidebar-accent hover:text-sidebar-foreground hover:rounded-[14px] hover:scale-[1.01] hover:shadow-md hover:shadow-sidebar-accent/25 hover:border-sidebar-border/30",
-                    "focus-visible:ring-2 focus-visible:ring-sidebar-ring focus-visible:ring-offset-2 focus-visible:ring-offset-sidebar",
-                    "active:scale-95 active:shadow-sm",
-                  )}
-                  aria-label="Add new project"
-                >
-                  <Plus className="w-4 h-4 lg:w-5 lg:h-5 transition-transform duration-200 group-hover:scale-[1.01]" />
-                </Button>
-              </CreateProjectDialog>
+              <CustomLink
+                to="/project/new"
+                variant="ghost"
+                size="icon"
+                className={cn(
+                  "w-10 h-10 lg:w-12 lg:h-12", // Responsive button size
+                  "p-0 rounded-2xl border-2 transition-all duration-200 ease-out group cursor-pointer",
+                  "bg-sidebar-accent/40 border-transparent text-sidebar-foreground/80",
+                  "hover:bg-sidebar-accent hover:text-sidebar-foreground hover:rounded-[14px] hover:scale-[1.01] hover:shadow-md hover:shadow-sidebar-accent/25 hover:border-sidebar-border/30",
+                  "focus-visible:ring-2 focus-visible:ring-sidebar-ring focus-visible:ring-offset-2 focus-visible:ring-offset-sidebar",
+                  "active:scale-95 active:shadow-sm",
+                )}
+                aria-label="Add new project"
+              >
+                <Plus className="w-4 h-4 lg:w-5 lg:h-5 transition-transform duration-200 group-hover:scale-[1.01]" />
+              </CustomLink>
             </TooltipTrigger>
             <TooltipContent
               side="right"

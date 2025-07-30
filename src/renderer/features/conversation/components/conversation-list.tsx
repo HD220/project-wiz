@@ -12,6 +12,7 @@ import { useState, useMemo } from "react";
 import type { UserSummary } from "@/main/features/user/user.service";
 
 import { Button } from "@/renderer/components/ui/button";
+import { CustomLink } from "@/renderer/components/custom-link";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -31,7 +32,6 @@ import {
   ProfileAvatarStatus,
   ProfileAvatarCounter,
 } from "@/components/profile-avatar";
-import { CreateConversationDialog } from "./create-conversation-dialog";
 
 import type { ConversationWithLastMessage } from "../types";
 
@@ -49,7 +49,6 @@ export function ConversationList(props: ConversationListProps) {
 
   // Use local state for switch - no URL manipulation
   const [showArchived, setShowArchived] = useState(false);
-  const [showCreateDialog, setShowCreateDialog] = useState(false);
 
   // Handle archive toggle with intelligent navigation - inline logic
   const handleToggleShowArchived = (checked: boolean) => {
@@ -104,16 +103,13 @@ export function ConversationList(props: ConversationListProps) {
   return (
     <div className="flex flex-col h-full">
       <ConversationListHeader
-        onCreateConversation={() => setShowCreateDialog(true)}
+        onCreateConversation={() => navigate({ to: "/user/dm/new" })}
         showArchived={showArchived}
         onToggleShowArchived={handleToggleShowArchived}
       />
 
       {displayConversations.length === 0 ? (
-        <ConversationListEmpty
-          showArchived={showArchived}
-          onCreateConversation={() => setShowCreateDialog(true)}
-        />
+        <ConversationListEmpty showArchived={showArchived} />
       ) : (
         <ScrollArea className="flex-1">
           <div className="space-y-[var(--spacing-component-xs)] pt-[var(--spacing-component-xs)]">
@@ -129,22 +125,6 @@ export function ConversationList(props: ConversationListProps) {
       )}
 
       {/* Create Dialog */}
-      {showCreateDialog && (
-        <CreateConversationDialog
-          availableUsers={availableUsers}
-          currentUser={currentUser}
-          onClose={() => setShowCreateDialog(false)}
-          onConversationCreated={(conversationId) => {
-            setShowCreateDialog(false);
-            // Navigate to the new conversation
-            // Don't call router.invalidate() here - useApiMutation already handles it
-            navigate({
-              to: "/user/dm/$conversationId",
-              params: { conversationId },
-            });
-          }}
-        />
-      )}
     </div>
   );
 }
@@ -201,11 +181,10 @@ function ConversationListHeader(props: ConversationListHeaderProps) {
 
 interface ConversationListEmptyProps {
   showArchived: boolean;
-  onCreateConversation: () => void;
 }
 
 function ConversationListEmpty(props: ConversationListEmptyProps) {
-  const { showArchived, onCreateConversation } = props;
+  const { showArchived } = props;
 
   return (
     <div className="flex flex-col items-center justify-center h-full text-center px-[var(--spacing-component-sm)] py-[var(--spacing-component-lg)]">
@@ -222,15 +201,15 @@ function ConversationListEmpty(props: ConversationListEmptyProps) {
             : "Start a conversation with someone to begin chatting."}
         </p>
         {!showArchived && (
-          <Button
+          <CustomLink
+            to="/user/dm/new"
             variant="outline"
             size="sm"
-            onClick={onCreateConversation}
             className="mt-3 h-7 text-xs"
           >
             <Plus className="w-3 h-3 mr-1.5" />
             New Message
-          </Button>
+          </CustomLink>
         )}
       </div>
     </div>
@@ -499,12 +478,11 @@ function ConversationListItem(props: ConversationListItemProps) {
 
 // Standalone EmptyConversations component for other use cases
 interface EmptyConversationsProps {
-  onCreateConversation: () => void;
   className?: string;
 }
 
 export function EmptyConversations(props: EmptyConversationsProps) {
-  const { onCreateConversation, className } = props;
+  const { className } = props;
 
   return (
     <div
@@ -523,10 +501,10 @@ export function EmptyConversations(props: EmptyConversationsProps) {
         Connect with other users or AI agents in private conversations. Select
         participants to begin chatting.
       </p>
-      <Button onClick={onCreateConversation} size="sm" className="h-7 text-xs">
+      <CustomLink to="/user/dm/new" size="sm" className="h-7 text-xs">
         <MessageCircle className="h-3 w-3 mr-1.5" />
         Start Conversation
-      </Button>
+      </CustomLink>
     </div>
   );
 }

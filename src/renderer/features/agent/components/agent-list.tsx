@@ -8,6 +8,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 
 import { Button } from "@/renderer/components/ui/button";
+import { CustomLink } from "@/renderer/components/custom-link";
 import { ScrollArea } from "@/renderer/components/ui/scroll-area";
 import { SearchFilterBar } from "@/renderer/components/search-filter-bar";
 import type {
@@ -16,7 +17,6 @@ import type {
 } from "@/renderer/features/agent/agent.types";
 import { AgentDeleteDialog } from "@/renderer/features/agent/components/agent-delete-dialog";
 import { AgentListItem } from "@/renderer/features/agent/components/agent-card";
-import { CreateAgentDialog } from "@/renderer/features/agent/components/create-agent-dialog";
 import { useApiMutation } from "@/renderer/hooks/use-api-mutation.hook";
 import { cn } from "@/renderer/lib/utils";
 
@@ -34,7 +34,6 @@ export function AgentList(props: AgentListProps) {
 
   // Local state for UI interactions only
   const [agentToDelete, setAgentToDelete] = useState<SelectAgent | null>(null);
-  const [showCreateDialog, setShowCreateDialog] = useState(false);
 
   // Inline API mutations with proper error handling
   const deleteAgentMutation = useApiMutation(
@@ -159,10 +158,10 @@ export function AgentList(props: AgentListProps) {
               </p>
             </div>
           </div>
-          <Button className="gap-2" onClick={() => setShowCreateDialog(true)}>
+          <CustomLink to="/user/agents/new" className="gap-2">
             <Plus className="w-4 h-4" />
             New Agent
-          </Button>
+          </CustomLink>
         </div>
 
         {/* Empty State */}
@@ -177,14 +176,10 @@ export function AgentList(props: AgentListProps) {
             Create your first AI agent to start automating tasks, managing
             conversations, and building intelligent workflows for your projects.
           </p>
-          <Button
-            size="lg"
-            className="gap-2"
-            onClick={() => setShowCreateDialog(true)}
-          >
+          <CustomLink to="/user/agents/new" size="lg" className="gap-2">
             <Plus className="w-5 h-5" />
             Create Your First Agent
-          </Button>
+          </CustomLink>
         </div>
       </div>
     );
@@ -209,10 +204,10 @@ export function AgentList(props: AgentListProps) {
               </p>
             </div>
           </div>
-          <Button className="gap-2" onClick={() => setShowCreateDialog(true)}>
+          <CustomLink to="/user/agents/new" className="gap-2">
             <Plus className="w-4 h-4" />
             New Agent
-          </Button>
+          </CustomLink>
         </div>
 
         {/* Professional Filters */}
@@ -293,12 +288,6 @@ export function AgentList(props: AgentListProps) {
         onOpenChange={(open) => !open && setAgentToDelete(null)}
         onConfirm={confirmDelete}
         isLoading={deleteAgentMutation.isPending}
-      />
-
-      {/* Create Agent Dialog */}
-      <CreateAgentDialog
-        open={showCreateDialog}
-        onClose={() => setShowCreateDialog(false)}
       />
     </>
   );

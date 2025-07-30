@@ -1,7 +1,6 @@
-import { Link } from "@tanstack/react-router";
 import { Plus, Server } from "lucide-react";
 
-import { Button } from "@/renderer/components/ui/button";
+import { CustomLink } from "@/renderer/components/custom-link";
 
 export function EmptyState() {
   return (
@@ -21,15 +20,10 @@ export function EmptyState() {
             </p>
           </div>
         </div>
-        <Link
-          to="/user/settings/llm-providers/$providerId/new"
-          params={{ providerId: "new" }}
-        >
-          <Button className="gap-2">
-            <Plus className="w-4 h-4" />
-            Add Provider
-          </Button>
-        </Link>
+        <CustomLink to="/user/settings/llm-providers/new" className="gap-2">
+          <Plus className="w-4 h-4" />
+          Add Provider
+        </CustomLink>
       </div>
 
       {/* Empty State */}
@@ -45,15 +39,14 @@ export function EmptyState() {
           agents in your projects. Supports OpenAI, Anthropic, Google, DeepSeek,
           and custom providers.
         </p>
-        <Link
-          to="/user/settings/llm-providers/$providerId/new"
-          params={{ providerId: "new" }}
+        <CustomLink
+          to="/user/settings/llm-providers/new"
+          size="lg"
+          className="gap-2"
         >
-          <Button size="lg" className="gap-2">
-            <Plus className="w-5 h-5" />
-            Add Your First Provider
-          </Button>
-        </Link>
+          <Plus className="w-5 h-5" />
+          Add Your First Provider
+        </CustomLink>
       </div>
     </div>
   );

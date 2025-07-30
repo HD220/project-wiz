@@ -2,7 +2,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 
 import { ProviderForm } from "@/renderer/features/agent/components/provider/provider-form";
 
-function NewProviderDialog() {
+function NewProviderPage() {
   const navigate = useNavigate();
 
   function handleClose() {
@@ -15,7 +15,7 @@ function NewProviderDialog() {
 }
 
 export const Route = createFileRoute(
-  "/_authenticated/user/settings/llm-providers/$providerId/new/",
+  "/_authenticated/user/settings/llm-providers/new/",
 )({
-  component: NewProviderDialog,
+  component: NewProviderPage,
 });

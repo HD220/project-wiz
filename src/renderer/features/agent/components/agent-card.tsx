@@ -128,7 +128,7 @@ export function AgentCard({
               >
                 <DropdownMenuItem asChild>
                   <Link
-                    to="/user/agents/edit/$agentId"
+                    to="/user/agents/$agentId/edit"
                     params={{ agentId: agent.id }}
                     className="cursor-pointer focus:bg-accent/50 transition-colors"
                   >
@@ -315,7 +315,7 @@ export function AgentListItem({
           <DropdownMenuContent align="end" className="w-40">
             <DropdownMenuItem asChild>
               <Link
-                to="/user/agents/edit/$agentId"
+                to="/user/agents/$agentId/edit"
                 params={{ agentId: agent.id }}
                 className="cursor-pointer"
               >

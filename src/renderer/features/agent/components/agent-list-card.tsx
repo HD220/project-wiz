@@ -147,7 +147,7 @@ export function AgentListCard(props: AgentListCardProps) {
               <>
                 <DropdownMenuItem asChild>
                   <Link
-                    to="/user/agents/edit/$agentId"
+                    to="/user/agents/$agentId/edit"
                     params={{ agentId: agent.id }}
                     className="cursor-pointer"
                   >

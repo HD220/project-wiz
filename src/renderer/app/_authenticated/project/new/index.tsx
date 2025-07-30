@@ -1,5 +1,4 @@
-import { useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { FolderIcon } from "lucide-react";
 
 import {
@@ -11,44 +10,31 @@ import {
   StandardFormModalActions,
   StandardFormModalCancelButton,
   StandardFormModalSubmitButton,
-  StandardFormModalTrigger,
 } from "@/renderer/components/form-modal";
+import { ProjectForm } from "@/renderer/features/project/components/project-form";
 
-import { ProjectForm } from "./project-form";
-
-interface CreateProjectDialogProps {
-  children: React.ReactNode;
-  onSuccess?: () => void;
-  className?: string;
-}
-
-export function CreateProjectDialog(props: CreateProjectDialogProps) {
-  const { children, onSuccess, className } = props;
-  const [open, setOpen] = useState(false);
+function CreateProjectPage() {
   const navigate = useNavigate();
 
   function handleSuccess(projectId: string) {
-    setOpen(false);
-
     // Navigate to the new project
     navigate({
       to: "/project/$projectId",
       params: { projectId },
     });
-
-    // Call optional success callback
-    onSuccess?.();
   }
 
-  function handleOpenChange(newOpen: boolean) {
-    setOpen(newOpen);
+  function handleClose() {
+    // Navigate back to root page
+    navigate({ to: "/" });
   }
 
+  // Correct masked route implementation - single modal only
   return (
-    <StandardFormModal open={open} onOpenChange={handleOpenChange}>
-      <StandardFormModalTrigger asChild className={className}>
-        {children}
-      </StandardFormModalTrigger>
+    <StandardFormModal
+      open
+      onOpenChange={(open: boolean) => !open && handleClose()}
+    >
       <StandardFormModalContent className="max-w-2xl">
         <StandardFormModalHeader
           title="Create Project"
@@ -59,7 +45,7 @@ export function CreateProjectDialog(props: CreateProjectDialogProps) {
         <StandardFormModalBody>
           <ProjectForm
             onSuccess={handleSuccess}
-            onCancel={() => setOpen(false)}
+            onCancel={handleClose}
             submitLabel="Create"
             hideActions={true}
           />
@@ -67,7 +53,7 @@ export function CreateProjectDialog(props: CreateProjectDialogProps) {
 
         <StandardFormModalFooter>
           <StandardFormModalActions>
-            <StandardFormModalCancelButton onCancel={() => setOpen(false)}>
+            <StandardFormModalCancelButton onCancel={handleClose}>
               Cancel
             </StandardFormModalCancelButton>
             <StandardFormModalSubmitButton form="project-form">
@@ -80,5 +66,6 @@ export function CreateProjectDialog(props: CreateProjectDialogProps) {
   );
 }
 
-// Compound component exports
-export { StandardFormModalTrigger as CreateProjectDialogTrigger };
+export const Route = createFileRoute("/_authenticated/project/new/")({
+  component: CreateProjectPage,
+});

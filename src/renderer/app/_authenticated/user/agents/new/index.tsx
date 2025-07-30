@@ -1,3 +1,4 @@
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { Bot, Loader2 } from "lucide-react";
 import { useState, useEffect } from "react";
 
@@ -16,31 +17,22 @@ import {
 import type { CreateAgentInput } from "@/renderer/features/agent/agent.types";
 import { AgentForm } from "@/renderer/features/agent/components/agent-form";
 import { useApiMutation } from "@/renderer/hooks/use-api-mutation.hook";
+import { loadApiData } from "@/renderer/lib/route-loader";
 
-interface CreateAgentDialogProps {
-  open: boolean;
-  onClose: () => void;
-  onAgentCreated?: () => void;
-}
-
-export function CreateAgentDialog(props: CreateAgentDialogProps) {
-  const { open, onClose, onAgentCreated } = props;
+function CreateAgentPage() {
+  const navigate = useNavigate();
   const [providers, setProviders] = useState<LlmProvider[]>([]);
-  const [isLoadingProviders, setIsLoadingProviders] = useState(false);
+  const [isLoadingProviders, setIsLoadingProviders] = useState(true);
 
-  // Load providers when dialog opens
+  // Load providers when page mounts
   useEffect(() => {
-    if (!open) return;
-
     async function loadProviders() {
-      setIsLoadingProviders(true);
       try {
-        const response = await window.api.llmProviders.list();
-        if (response.success) {
-          setProviders(response.data as LlmProvider[]);
-        } else {
-          console.error("Failed to load providers:", response.error);
-        }
+        const providersData = await loadApiData(
+          () => window.api.llmProviders.list(),
+          "Failed to load providers",
+        );
+        setProviders(providersData as LlmProvider[]);
       } catch (error) {
         console.error("Error loading providers:", error);
       } finally {
@@ -49,7 +41,7 @@ export function CreateAgentDialog(props: CreateAgentDialogProps) {
     }
 
     loadProviders();
-  }, [open]);
+  }, []);
 
   // Agent creation mutation
   const createAgentMutation = useApiMutation(
@@ -59,35 +51,29 @@ export function CreateAgentDialog(props: CreateAgentDialogProps) {
       errorMessage: "Failed to create agent",
       invalidateRouter: true,
       onSuccess: () => {
-        onClose();
-        onAgentCreated?.();
+        handleClose();
       },
     },
   );
 
   function handleClose() {
-    // Don't close if mutation is pending
-    if (createAgentMutation.isPending) return;
-    onClose();
+    // Navigate back to agents page
+    navigate({ to: "/user/agents" });
   }
 
   async function handleSubmit(data: CreateAgentInput) {
-    try {
-      createAgentMutation.mutate(data);
-    } catch (error) {
-      // Error handling is done by useApiMutation
-      console.error("Error in handleSubmit:", error);
-    }
+    createAgentMutation.mutate(data);
   }
 
   function handleCancel() {
     handleClose();
   }
 
+  // Correct masked route implementation - single modal only
   return (
     <StandardFormModal
-      open={open}
-      onOpenChange={(isOpen) => !isOpen && handleClose()}
+      open
+      onOpenChange={(open: boolean) => !open && handleClose()}
     >
       <StandardFormModalContent className="max-w-4xl">
         <StandardFormModalHeader
@@ -139,3 +125,7 @@ export function CreateAgentDialog(props: CreateAgentDialogProps) {
     </StandardFormModal>
   );
 }
+
+export const Route = createFileRoute("/_authenticated/user/agents/new/")({
+  component: CreateAgentPage,
+});

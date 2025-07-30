@@ -100,16 +100,12 @@ function StandardFormModalBody({
   maxHeight = "60vh",
   ...props
 }: React.ComponentProps<"div"> & { maxHeight?: string }) {
+  const heightClass = maxHeight === "70vh" ? "max-h-[70vh]" : "max-h-[60vh]";
+
   return (
-    <CardContent className="p-0">
-      <ScrollArea
-        className={cn(
-          "max-h-[60vh]",
-          maxHeight !== "60vh" && `max-h-[${maxHeight}]`,
-          className,
-        )}
-      >
-        <div className="space-y-6 pr-4" {...props}>
+    <CardContent className="p-0 overflow-hidden">
+      <ScrollArea className={cn(heightClass, className)}>
+        <div className="space-y-6 p-6 pr-4" {...props}>
           {children}
         </div>
       </ScrollArea>
@@ -199,7 +195,7 @@ function StandardFormModalSubmitButton({
     <Button
       type="submit"
       className={cn(
-        "w-full h-10 text-sm font-medium bg-primary hover:bg-primary/90 focus:bg-primary/90",
+        "h-10 text-sm font-medium bg-primary hover:bg-primary/90 focus:bg-primary/90",
         "text-primary-foreground transition-all duration-200 hover:shadow-lg hover:shadow-primary/25",
         "hover:-translate-y-0.5 active:translate-y-0 active:shadow-md",
         "disabled:opacity-60 disabled:hover:translate-y-0 disabled:hover:shadow-none disabled:cursor-not-allowed",

@@ -109,7 +109,7 @@ function EditAgentPage() {
 }
 
 export const Route = createFileRoute(
-  "/_authenticated/user/agents/edit/$agentId/",
+  "/_authenticated/user/agents/$agentId/edit/",
 )({
   loader: async ({ params }) => {
     const { agentId } = params;
