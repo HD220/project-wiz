@@ -2,8 +2,6 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { Bot, Loader2 } from "lucide-react";
 import { useState, useEffect } from "react";
 
-import type { LlmProvider } from "@/renderer/features/agent/provider.types";
-
 import {
   StandardFormModal,
   StandardFormModalContent,
@@ -16,6 +14,7 @@ import {
 } from "@/renderer/components/form-modal";
 import type { CreateAgentInput } from "@/renderer/features/agent/agent.types";
 import { AgentForm } from "@/renderer/features/agent/components/agent-form";
+import type { LlmProvider } from "@/renderer/features/agent/provider.types";
 import { useApiMutation } from "@/renderer/hooks/use-api-mutation.hook";
 import { loadApiData } from "@/renderer/lib/route-loader";
 

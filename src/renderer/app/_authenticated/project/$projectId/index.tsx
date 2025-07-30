@@ -1,13 +1,13 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 
+import { ProjectView } from "@/renderer/components/app/server-view";
+import { ContentHeader } from "@/renderer/components/layout/content-header";
 import {
   MemberSidebar,
   type Member,
 } from "@/renderer/components/members/member-sidebar";
 import { ScrollArea } from "@/renderer/components/ui/scroll-area";
-import { ContentHeader } from "@/renderer/components/layout/content-header";
-import { ProjectView } from "@/renderer/components/app/server-view";
 import { loadApiData } from "@/renderer/lib/route-loader";
 
 function ProjectPage() {

@@ -1,11 +1,11 @@
-import type { ConversationWithLastMessage } from "@/renderer/types/chat.types";
 import type { UserSummary } from "@/main/features/user/user.service";
 
-import { ScrollArea } from "@/renderer/components/ui/scroll-area";
+import { SidebarUserArea } from "@/renderer/components/app/sidebar-user-area";
 import { SidebarHeader } from "@/renderer/components/layout/navigation/sidebar-header";
 import { SidebarNavigation } from "@/renderer/components/layout/navigation/sidebar-navigation";
-import { SidebarUserArea } from "@/renderer/components/app/sidebar-user-area";
+import { ScrollArea } from "@/renderer/components/ui/scroll-area";
 import { cn } from "@/renderer/lib/utils";
+import type { ConversationWithLastMessage } from "@/renderer/types/chat.types";
 
 interface UserSidebarProps {
   conversations: ConversationWithLastMessage[];

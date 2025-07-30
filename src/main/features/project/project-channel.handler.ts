@@ -1,7 +1,9 @@
 import { AuthService } from "@/main/features/auth/auth.service";
-import { projectChannelService } from "./project-channel.service";
 import { messageService } from "@/main/features/message/message.service";
 import { createIpcHandler } from "@/main/utils/ipc-handler";
+
+import { projectChannelService } from "./project-channel.service";
+
 import type {
   CreateProjectChannelInput,
   ProjectChannelFilters,

@@ -1,17 +1,17 @@
 import { User, Hash } from "lucide-react";
 
 import { Badge } from "@/renderer/components/ui/badge";
-import {
-  ProfileAvatar,
-  ProfileAvatarImage,
-  ProfileAvatarStatus,
-  ProfileAvatarCounter,
-} from "@/components/profile-avatar";
 import type {
   ConversationWithParticipants,
   AuthenticatedUser,
 } from "@/renderer/features/conversation/types";
 import type { SelectMessage } from "@/renderer/features/conversation/types";
+import {
+  ProfileAvatar,
+  ProfileAvatarImage,
+  ProfileAvatarStatus,
+  ProfileAvatarCounter,
+} from "@/renderer/features/user/components/profile-avatar";
 import { cn, getTimeAgo } from "@/renderer/lib/utils";
 
 interface ConversationItemProps {

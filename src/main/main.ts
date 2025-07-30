@@ -4,10 +4,10 @@ import { app, BrowserWindow, ipcMain } from "electron";
 import squirrel from "electron-squirrel-startup";
 
 import { setupAgentHandlers } from "@/main/features/agent/agent.handler";
-import { setupLlmProviderHandlers } from "@/main/features/llm-provider/llm-provider.handler";
 import { setupAuthHandlers } from "@/main/features/auth/auth.handler";
 import { AuthService } from "@/main/features/auth/auth.service";
 import { setupDMHandlers } from "@/main/features/dm/dm-conversation.handler";
+import { setupLlmProviderHandlers } from "@/main/features/llm-provider/llm-provider.handler";
 import { setupChannelHandlers } from "@/main/features/project/project-channel.handler";
 import { setupProjectHandlers } from "@/main/features/project/project.handler";
 import { setupProfileHandlers } from "@/main/features/user/profile.handler";

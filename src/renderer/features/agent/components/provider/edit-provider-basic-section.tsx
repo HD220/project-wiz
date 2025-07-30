@@ -1,5 +1,5 @@
-import { UseFormReturn } from "react-hook-form";
 import { Settings, Type, Lock } from "lucide-react";
+import { UseFormReturn } from "react-hook-form";
 
 import {
   Card,
@@ -24,7 +24,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/renderer/components/ui/select";
-
 import {
   PROVIDER_CONFIGS,
   type ProviderFormData,

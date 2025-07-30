@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Monitor, Moon, Sun, Palette, Zap, Contrast, Eye } from "lucide-react";
+import { useTheme } from "next-themes";
 import { useState } from "react";
 
 import { Label } from "@/renderer/components/ui/label";
@@ -10,7 +11,6 @@ import {
 import { ScrollArea } from "@/renderer/components/ui/scroll-area";
 import { Separator } from "@/renderer/components/ui/separator";
 import { Switch } from "@/renderer/components/ui/switch";
-import { useTheme } from "next-themes";
 
 function AppearancePage() {
   const { theme, setTheme, resolvedTheme } = useTheme();

@@ -1,8 +1,7 @@
-import * as React from "react";
 import { Loader2 } from "lucide-react";
+import * as React from "react";
 
 import { Button } from "@/renderer/components/ui/button";
-import { Card, CardContent, CardHeader } from "@/renderer/components/ui/card";
 import {
   Dialog,
   DialogContent,

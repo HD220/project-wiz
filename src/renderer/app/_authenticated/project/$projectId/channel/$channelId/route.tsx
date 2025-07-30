@@ -1,20 +1,20 @@
 import { createFileRoute, Outlet } from "@tanstack/react-router";
+import { Send, Paperclip, Smile } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 
-import {
-  MemberSidebar,
-  type Member,
-} from "@/renderer/components/members/member-sidebar";
-import { ContentHeader } from "@/renderer/components/layout/content-header";
 import {
   Chat,
   ChatMessages,
   ChatMessage,
   ChatInput,
-} from "@/renderer/components/chat_new";
+} from "@/renderer/components/chat-new";
+import { ContentHeader } from "@/renderer/components/layout/content-header";
+import {
+  MemberSidebar,
+  type Member,
+} from "@/renderer/components/members/member-sidebar";
 import { Button } from "@/renderer/components/ui/button";
 import { Textarea } from "@/renderer/components/ui/textarea";
-import { Send, Paperclip, Smile } from "lucide-react";
 
 function ChannelLayout() {
   const { channelId } = Route.useParams();

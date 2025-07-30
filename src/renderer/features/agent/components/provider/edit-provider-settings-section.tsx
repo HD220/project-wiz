@@ -1,5 +1,5 @@
-import { UseFormReturn } from "react-hook-form";
 import { Shield, CheckCircle2, AlertCircle } from "lucide-react";
+import { UseFormReturn } from "react-hook-form";
 
 import {
   Card,
@@ -16,9 +16,8 @@ import {
   FormItem,
   FormLabel,
 } from "@/renderer/components/ui/form";
-import { cn } from "@/renderer/lib/utils";
-
 import { type ProviderFormData } from "@/renderer/features/agent/provider-constants";
+import { cn } from "@/renderer/lib/utils";
 
 interface EditProviderSettingsSectionProps {
   form: UseFormReturn<ProviderFormData>;

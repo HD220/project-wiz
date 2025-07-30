@@ -1,13 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { MoreHorizontal, Pencil, Power, Trash2 } from "lucide-react";
 
-import { AgentStatus } from "@/renderer/components/agent-status/agent-status";
 import { Badge } from "@/renderer/components/ui/badge";
-import {
-  ProfileAvatar,
-  ProfileAvatarImage,
-  ProfileAvatarStatus,
-} from "@/components/profile-avatar";
 import { Button } from "@/renderer/components/ui/button";
 import {
   Card,
@@ -26,6 +20,12 @@ import {
   DropdownMenuTrigger,
 } from "@/renderer/components/ui/dropdown-menu";
 import type { AgentWithAvatar } from "@/renderer/features/agent/agent.types";
+import { AgentStatus } from "@/renderer/features/agent/components/agent-status";
+import {
+  ProfileAvatar,
+  ProfileAvatarImage,
+  ProfileAvatarStatus,
+} from "@/renderer/features/user/components/profile-avatar";
 import { cn } from "@/renderer/lib/utils";
 
 // Main AgentCard component with INLINE-FIRST approach

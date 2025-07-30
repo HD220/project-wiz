@@ -1,12 +1,12 @@
 import { Hash, Bot } from "lucide-react";
 
-import type { ConversationWithLastMessage } from "@/renderer/types/chat.types";
 import type { UserSummary } from "@/main/features/user/user.service";
 
+import { NavigationItem } from "@/renderer/components/layout/navigation/navigation-item";
 import { ScrollArea } from "@/renderer/components/ui/scroll-area";
 import { Separator } from "@/renderer/components/ui/separator";
-import { NavigationItem } from "@/renderer/components/layout/navigation/navigation-item";
 import { ConversationList } from "@/renderer/features/conversation/components/conversation-list";
+import type { ConversationWithLastMessage } from "@/renderer/types/chat.types";
 
 interface SidebarNavigationProps {
   conversations: ConversationWithLastMessage[];

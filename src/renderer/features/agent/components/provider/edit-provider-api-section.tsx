@@ -1,7 +1,5 @@
-import { UseFormReturn } from "react-hook-form";
 import { Key, Globe, Bot, Shield } from "lucide-react";
-
-import type { ProviderType } from "@/renderer/features/agent/provider.types";
+import { UseFormReturn } from "react-hook-form";
 
 import {
   Card,
@@ -19,11 +17,11 @@ import {
   FormMessage,
 } from "@/renderer/components/ui/form";
 import { Input } from "@/renderer/components/ui/input";
-
 import {
   PROVIDER_CONFIGS,
   type ProviderFormData,
 } from "@/renderer/features/agent/provider-constants";
+import type { ProviderType } from "@/renderer/features/agent/provider.types";
 
 interface EditProviderApiSectionProps {
   form: UseFormReturn<ProviderFormData>;

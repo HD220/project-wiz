@@ -4,13 +4,15 @@ import { eq, and, desc, sql, like } from "drizzle-orm";
 
 import { getDatabase } from "@/main/database/connection";
 import { agentsTable } from "@/main/features/agent/agent.model";
+
 import { llmProvidersTable } from "./llm-provider.model";
+import { createProviderSchema } from "./llm-provider.types";
+
 import type {
   CreateProviderInput,
   LlmProvider,
   ProviderType,
 } from "./llm-provider.types";
-import { createProviderSchema } from "./llm-provider.types";
 // import { getLogger } from "@/main/utils/logger";
 
 // Filter interface for provider listing

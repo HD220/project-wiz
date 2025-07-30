@@ -18,6 +18,7 @@ import {
   MessageSquare,
 } from "lucide-react";
 
+import { ActivityItem } from "@/renderer/components/app/activity-item";
 import { Badge } from "@/renderer/components/ui/badge";
 import { Button } from "@/renderer/components/ui/button";
 import {
@@ -30,7 +31,6 @@ import {
 import { ScrollArea } from "@/renderer/components/ui/scroll-area";
 import { Separator } from "@/renderer/components/ui/separator";
 import { useAuth } from "@/renderer/contexts/auth.context";
-import { ActivityItem } from "@/renderer/components/app/activity-item";
 
 export function WelcomeView() {
   const { user } = useAuth();

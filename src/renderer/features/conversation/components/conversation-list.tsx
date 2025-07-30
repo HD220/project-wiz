@@ -11,8 +11,8 @@ import { useState, useMemo } from "react";
 
 import type { UserSummary } from "@/main/features/user/user.service";
 
-import { Button } from "@/renderer/components/ui/button";
 import { CustomLink } from "@/renderer/components/custom-link";
+import { Button } from "@/renderer/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -22,16 +22,16 @@ import {
 import { ScrollArea } from "@/renderer/components/ui/scroll-area";
 import { Switch } from "@/renderer/components/ui/switch";
 import { useAuth } from "@/renderer/contexts/auth.context";
-import { useApiMutation } from "@/renderer/hooks/use-api-mutation.hook";
-import { cn } from "@/renderer/lib/utils";
-
-import { ArchiveConversationDialog } from "./archive-conversation-dialog";
 import {
   ProfileAvatar,
   ProfileAvatarImage,
   ProfileAvatarStatus,
   ProfileAvatarCounter,
-} from "@/components/profile-avatar";
+} from "@/renderer/features/user/components/profile-avatar";
+import { useApiMutation } from "@/renderer/hooks/use-api-mutation.hook";
+import { cn } from "@/renderer/lib/utils";
+
+import { ArchiveConversationDialog } from "./archive-conversation-dialog";
 
 import type { ConversationWithLastMessage } from "../types";
 

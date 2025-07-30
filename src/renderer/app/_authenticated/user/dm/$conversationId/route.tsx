@@ -1,24 +1,24 @@
 import { createFileRoute, Outlet } from "@tanstack/react-router";
+import { Send, Paperclip, Smile } from "lucide-react";
+import { useRef, useEffect } from "react";
 
-import { ContentHeader } from "@/renderer/components/layout/content-header";
-import {
-  ProfileAvatar,
-  ProfileAvatarImage,
-  ProfileAvatarStatus,
-  ProfileAvatarCounter,
-} from "@/components/profile-avatar";
 import {
   Chat,
   ChatMessages,
   ChatMessage,
   ChatInput,
-} from "@/renderer/components/chat_new";
-import { loadApiData } from "@/renderer/lib/route-loader";
-import { cn } from "@/renderer/lib/utils";
+} from "@/renderer/components/chat-new";
+import { ContentHeader } from "@/renderer/components/layout/content-header";
 import { Button } from "@/renderer/components/ui/button";
 import { Textarea } from "@/renderer/components/ui/textarea";
-import { Send, Paperclip, Smile } from "lucide-react";
-import { useRef, useEffect } from "react";
+import {
+  ProfileAvatar,
+  ProfileAvatarImage,
+  ProfileAvatarStatus,
+  ProfileAvatarCounter,
+} from "@/renderer/features/user/components/profile-avatar";
+import { loadApiData } from "@/renderer/lib/route-loader";
+import { cn } from "@/renderer/lib/utils";
 
 function DMLayout() {
   const { conversationId } = Route.useParams();

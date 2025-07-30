@@ -1,7 +1,9 @@
 import { AuthService } from "@/main/features/auth/auth.service";
-import { dmConversationService } from "./dm-conversation.service";
 import { messageService } from "@/main/features/message/message.service";
 import { createIpcHandler } from "@/main/utils/ipc-handler";
+
+import { dmConversationService } from "./dm-conversation.service";
+
 import type {
   CreateDMConversationInput,
   DMConversationFilters,

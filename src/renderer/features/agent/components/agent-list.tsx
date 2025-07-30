@@ -1,23 +1,23 @@
-import {
-  validateSearchInput,
-  validateStatusFilter,
-} from "@/renderer/lib/search-validation";
 import { useNavigate, useSearch } from "@tanstack/react-router";
 import { Plus, Search, AlertCircle, LayoutGrid } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
-import { Button } from "@/renderer/components/ui/button";
 import { CustomLink } from "@/renderer/components/custom-link";
-import { ScrollArea } from "@/renderer/components/ui/scroll-area";
 import { SearchFilterBar } from "@/renderer/components/search-filter-bar";
+import { Button } from "@/renderer/components/ui/button";
+import { ScrollArea } from "@/renderer/components/ui/scroll-area";
 import type {
   SelectAgent,
   AgentStatus,
 } from "@/renderer/features/agent/agent.types";
-import { AgentDeleteDialog } from "@/renderer/features/agent/components/agent-delete-dialog";
 import { AgentListItem } from "@/renderer/features/agent/components/agent-card";
+import { AgentDeleteDialog } from "@/renderer/features/agent/components/agent-delete-dialog";
 import { useApiMutation } from "@/renderer/hooks/use-api-mutation.hook";
+import {
+  validateSearchInput,
+  validateStatusFilter,
+} from "@/renderer/lib/search-validation";
 import { cn } from "@/renderer/lib/utils";
 
 interface AgentListProps {

@@ -11,11 +11,6 @@ import {
 import { Badge } from "@/renderer/components/ui/badge";
 import { Button } from "@/renderer/components/ui/button";
 import {
-  ProfileAvatar,
-  ProfileAvatarImage,
-  ProfileAvatarStatus,
-} from "@/components/profile-avatar";
-import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -23,6 +18,11 @@ import {
   DropdownMenuTrigger,
 } from "@/renderer/components/ui/dropdown-menu";
 import type { SelectAgent } from "@/renderer/features/agent/agent.types";
+import {
+  ProfileAvatar,
+  ProfileAvatarImage,
+  ProfileAvatarStatus,
+} from "@/renderer/features/user/components/profile-avatar";
 import { cn } from "@/renderer/lib/utils";
 
 interface AgentListCardProps {

@@ -1,5 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { Search, Check, MessageSquare } from "lucide-react";
+import { AlertCircle } from "lucide-react";
 import { useState } from "react";
 
 import type { UserSummary } from "@/main/features/user/user.service";
@@ -14,17 +15,16 @@ import {
   StandardFormModalCancelButton,
   StandardFormModalSubmitButton,
 } from "@/renderer/components/form-modal";
+import { Alert, AlertDescription } from "@/renderer/components/ui/alert";
+import { Checkbox } from "@/renderer/components/ui/checkbox";
+import { Input } from "@/renderer/components/ui/input";
+import type { CreateConversationInput } from "@/renderer/features/conversation/types";
+import type { AuthenticatedUser } from "@/renderer/features/conversation/types";
 import {
   ProfileAvatar,
   ProfileAvatarImage,
   ProfileAvatarStatus,
-} from "@/renderer/components/profile-avatar";
-import { Input } from "@/renderer/components/ui/input";
-import { Checkbox } from "@/renderer/components/ui/checkbox";
-import { Alert, AlertDescription } from "@/renderer/components/ui/alert";
-import { AlertCircle } from "lucide-react";
-import type { CreateConversationInput } from "@/renderer/features/conversation/types";
-import type { AuthenticatedUser } from "@/renderer/features/conversation/types";
+} from "@/renderer/features/user/components/profile-avatar";
 import { useApiMutation } from "@/renderer/hooks/use-api-mutation.hook";
 import { loadApiData } from "@/renderer/lib/route-loader";
 import { cn } from "@/renderer/lib/utils";

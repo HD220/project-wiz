@@ -1,7 +1,9 @@
-import { LlmProviderService } from "./llm-provider.service";
-import type { CreateProviderInput } from "./llm-provider.types";
 import { AuthService } from "@/main/features/auth/auth.service";
 import { createIpcHandler } from "@/main/utils/ipc-handler";
+
+import { LlmProviderService } from "./llm-provider.service";
+
+import type { CreateProviderInput } from "./llm-provider.types";
 
 /**
  * Setup LLM provider IPC handlers

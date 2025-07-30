@@ -7,7 +7,7 @@ import {
   ProfileAvatar,
   ProfileAvatarImage,
   ProfileAvatarStatus,
-} from "@/components/profile-avatar";
+} from "@/renderer/features/user/components/profile-avatar";
 import type { UserStatusType } from "@/renderer/features/user/components/user-status";
 import { cn } from "@/renderer/lib/utils";
 

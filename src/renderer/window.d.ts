@@ -6,18 +6,13 @@ import type {
   AgentWithProvider,
 } from "@/main/features/agent/agent.types";
 import type {
-  CreateProviderInput,
-  LlmProvider,
-} from "@/renderer/features/agent/provider.types";
-import type { ProviderFiltersInput } from "@/renderer/features/agent/provider.schema";
-import type { CreateDMConversationInput } from "@/main/features/dm/dm-conversation.types";
-import type { CreateProjectChannelInput } from "@/main/features/project/project-channel.types";
-import type {
   LoginCredentials,
   RegisterUserInput,
   AuthResult,
   AuthenticatedUser,
 } from "@/main/features/auth/auth.types";
+import type { CreateDMConversationInput } from "@/main/features/dm/dm-conversation.types";
+import type { CreateProjectChannelInput } from "@/main/features/project/project-channel.types";
 import type {
   InsertProject,
   UpdateProject,
@@ -27,6 +22,11 @@ import type { UserSummary } from "@/main/features/user/user.service";
 import type { Theme } from "@/main/features/user/user.types";
 import type { IpcResponse } from "@/main/types";
 
+import type { ProviderFiltersInput } from "@/renderer/features/agent/provider.schema";
+import type {
+  CreateProviderInput,
+  LlmProvider,
+} from "@/renderer/features/agent/provider.types";
 import type {
   CreateConversationInput,
   SendMessageInput,

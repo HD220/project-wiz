@@ -2,19 +2,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Settings, Key, Shield, CheckCircle2, AlertCircle } from "lucide-react";
 import { useForm } from "react-hook-form";
 
-import type {
-  CreateProviderInput,
-  LlmProvider,
-} from "@/renderer/features/agent/provider.types";
-
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/renderer/components/ui/card";
-import { Checkbox } from "@/renderer/components/ui/checkbox";
 import {
   StandardFormModal,
   StandardFormModalContent,
@@ -26,6 +13,14 @@ import {
   StandardFormModalSubmitButton,
 } from "@/renderer/components/form-modal";
 import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/renderer/components/ui/card";
+import { Checkbox } from "@/renderer/components/ui/checkbox";
+import {
   Form,
   FormControl,
   FormDescription,
@@ -35,7 +30,6 @@ import {
   FormMessage,
 } from "@/renderer/components/ui/form";
 import { FormLayout } from "@/renderer/components/ui/form-layout";
-
 import { Input } from "@/renderer/components/ui/input";
 import {
   Select,
@@ -45,14 +39,17 @@ import {
   SelectValue,
 } from "@/renderer/components/ui/select";
 import { useAuth } from "@/renderer/contexts/auth.context";
-import { useApiMutation } from "@/renderer/hooks/use-api-mutation.hook";
-import { cn } from "@/renderer/lib/utils";
-
 import {
   PROVIDER_CONFIGS,
   providerFormSchema,
   type ProviderFormData,
 } from "@/renderer/features/agent/provider-constants";
+import type {
+  CreateProviderInput,
+  LlmProvider,
+} from "@/renderer/features/agent/provider.types";
+import { useApiMutation } from "@/renderer/hooks/use-api-mutation.hook";
+import { cn } from "@/renderer/lib/utils";
 
 interface ProviderFormProps {
   provider?: LlmProvider | null;

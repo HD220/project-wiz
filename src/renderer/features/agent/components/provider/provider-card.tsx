@@ -9,8 +9,6 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 
-import type { LlmProvider } from "@/renderer/features/agent/provider.types";
-
 import {
   AlertDialog,
   AlertDialogAction,
@@ -30,6 +28,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/renderer/components/ui/dropdown-menu";
+import type { LlmProvider } from "@/renderer/features/agent/provider.types";
 import { useApiMutation } from "@/renderer/hooks/use-api-mutation.hook";
 import { cn } from "@/renderer/lib/utils";
 

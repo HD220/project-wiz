@@ -257,7 +257,7 @@ export class AgentService {
   /**
    * Soft delete agent by ID with cascading deletion
    */
-  static async softDelete(id: string, deletedBy: string): Promise<void> {
+  static async softDelete(id: string, deletedBy: string): Promise<boolean> {
     const db = getDatabase();
 
     const result = await db.transaction(async (tx) => {

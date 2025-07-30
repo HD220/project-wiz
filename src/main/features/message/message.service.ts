@@ -1,7 +1,9 @@
 import { eq, asc, and } from "drizzle-orm";
 
 import { getDatabase } from "@/main/database/connection";
+
 import { messagesTable, llmMessagesTable } from "./message.model";
+
 import type {
   SelectMessage,
   SendMessageInput,

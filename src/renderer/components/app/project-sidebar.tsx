@@ -10,9 +10,9 @@ import {
 import { ScrollArea } from "@/renderer/components/ui/scroll-area";
 import { Separator } from "@/renderer/components/ui/separator";
 import type { SelectAgent } from "@/renderer/features/agent/agent.types";
-import type { SelectConversation } from "@/renderer/types/chat.types";
 import type { SelectProject } from "@/renderer/features/project/project.types";
 import { cn } from "@/renderer/lib/utils";
+import type { SelectConversation } from "@/renderer/types/chat.types";
 
 interface Channel {
   id: string;

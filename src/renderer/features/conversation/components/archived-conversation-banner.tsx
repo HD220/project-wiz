@@ -52,13 +52,12 @@ export function ArchivedConversationBanner(
         return "yesterday";
       } else if (diffInDays < 7) {
         return `${diffInDays} days ago`;
-      } else {
-        return new Intl.DateTimeFormat("en-US", {
-          day: "2-digit",
-          month: "2-digit",
-          year: "numeric",
-        }).format(archivedDate);
       }
+      return new Intl.DateTimeFormat("en-US", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+      }).format(archivedDate);
     } catch (error) {
       return "Invalid date";
     }

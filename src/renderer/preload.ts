@@ -8,14 +8,14 @@ import type {
   CreateAgentInput,
   AgentStatus,
 } from "@/main/features/agent/agent.types";
-import type { CreateProviderInput } from "@/main/features/llm-provider/llm-provider.types";
-import type { ProviderFiltersInput } from "@/renderer/features/agent/provider.schema";
+
 // Memory removed
 import type {
   LoginCredentials,
   RegisterUserInput,
 } from "@/main/features/auth/auth.types";
 import type { CreateDMConversationInput } from "@/main/features/dm/dm-conversation.types";
+import type { CreateProviderInput } from "@/main/features/llm-provider/llm-provider.types";
 import type { CreateProjectChannelInput } from "@/main/features/project/project-channel.types";
 import type {
   InsertProject,
@@ -23,6 +23,8 @@ import type {
 } from "@/main/features/project/project.types";
 import type { Theme } from "@/main/features/user/user.types";
 import type { IpcResponse } from "@/main/types";
+
+import type { ProviderFiltersInput } from "@/renderer/features/agent/provider.schema";
 
 // Expose protected methods that allow the renderer process to use
 // the ipcRenderer without exposing the entire object

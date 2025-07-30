@@ -1,12 +1,14 @@
 import { eq, and, sql, isNull, inArray } from "drizzle-orm";
 
 import { getDatabase } from "@/main/database/connection";
+import { messagesTable } from "@/main/features/message/message.model";
+import { UserService } from "@/main/features/user/user.service";
+
 import {
   dmConversationsTable,
   dmParticipantsTable,
 } from "./dm-conversation.model";
-import { messagesTable } from "@/main/features/message/message.model";
-import { UserService } from "@/main/features/user/user.service";
+
 import type {
   CreateDMConversationInput,
   DMConversationWithParticipants,
@@ -326,7 +328,7 @@ export const dmConversationService = {
     }
   },
 
-  async softDelete(id: string, deletedBy: string): Promise<void> {
+  async softDelete(id: string, deletedBy: string): Promise<boolean> {
     const db = getDatabase();
 
     const result = await db.transaction(async (tx) => {

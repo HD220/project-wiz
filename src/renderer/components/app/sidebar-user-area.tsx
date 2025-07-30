@@ -7,7 +7,7 @@ import {
   ProfileAvatar,
   ProfileAvatarImage,
   ProfileAvatarStatus,
-} from "@/components/profile-avatar";
+} from "@/renderer/features/user/components/profile-avatar";
 
 export function SidebarUserArea() {
   const router = useRouter();
