@@ -15,6 +15,45 @@ type ChatState = {
   pendingMessages: Set<string | number>;
 };
 
+// Utility types to reduce duplication
+type ChatActions = {
+  addMessage: (message: unknown) => void;
+  updateMessage: (
+    id: string | number,
+    updates: Record<string, unknown>,
+  ) => void;
+  removeMessage: (id: string | number) => void;
+  setMessages: (messages: unknown[] | ((prev: unknown[]) => unknown[])) => void;
+  setInput: (input: string) => void;
+  setLoading: (loading: boolean) => void;
+  setTyping: (typing: boolean) => void;
+  setAutoScroll: (autoScroll: boolean) => void;
+  addPendingMessage: (id: string | number) => void;
+  removePendingMessage: (id: string | number) => void;
+  send: (input?: string) => void;
+  clear: () => void;
+  navigateHistory: (direction: "up" | "down") => void;
+  scrollToBottom: () => void;
+  isPending: (id: string | number) => boolean;
+};
+
+type ChatRefs = {
+  messagesRef: React.RefObject<HTMLDivElement | null>;
+  inputRef: React.RefObject<HTMLInputElement | HTMLTextAreaElement | null>;
+};
+
+type ChatStatus = {
+  loading: boolean;
+  typing: boolean;
+  messageCount: number;
+  hasMessages: boolean;
+  pendingCount: number;
+  input: string;
+  autoScroll: boolean;
+  historyIndex: number;
+  historyLength: number;
+};
+
 type ChatAction =
   | { type: "ADD_MESSAGE"; payload: unknown }
   | {
@@ -155,42 +194,9 @@ function chatReducer(state: ChatState, action: ChatAction): ChatState {
 }
 
 type ChatContextValue = {
-  state: {
-    messages: unknown[];
-    input: string;
-    loading: boolean;
-    typing: boolean;
-    history: string[];
-    historyIndex: number;
-    autoScroll: boolean;
-    pendingMessages: Set<string | number>;
-  };
-  actions: {
-    addMessage: (message: unknown) => void;
-    updateMessage: (
-      id: string | number,
-      updates: Record<string, unknown>,
-    ) => void;
-    removeMessage: (id: string | number) => void;
-    setMessages: (
-      messages: unknown[] | ((prev: unknown[]) => unknown[]),
-    ) => void;
-    setInput: (input: string) => void;
-    setLoading: (loading: boolean) => void;
-    setTyping: (typing: boolean) => void;
-    setAutoScroll: (autoScroll: boolean) => void;
-    addPendingMessage: (id: string | number) => void;
-    removePendingMessage: (id: string | number) => void;
-    send: (input?: string) => void;
-    clear: () => void;
-    navigateHistory: (direction: "up" | "down") => void;
-    scrollToBottom: () => void;
-    isPending: (id: string | number) => boolean;
-  };
-  refs: {
-    messagesRef: React.RefObject<HTMLDivElement | null>;
-    inputRef: React.RefObject<HTMLInputElement | HTMLTextAreaElement | null>;
-  };
+  state: ChatState;
+  actions: ChatActions;
+  refs: ChatRefs;
   keyFn: (item: unknown, index: number) => string | number;
 };
 
@@ -460,38 +466,8 @@ interface ChatMessageProps {
   messageIndex: number;
   render: (
     messageData: unknown,
-    chatState: {
-      messages: unknown[];
-      loading: boolean;
-      typing: boolean;
-      input: string;
-      autoScroll: boolean;
-      history: string[];
-      historyIndex: number;
-      pendingMessages: Set<string | number>;
-    },
-    chatActions: {
-      addMessage: (message: unknown) => void;
-      updateMessage: (
-        id: string | number,
-        updates: Record<string, unknown>,
-      ) => void;
-      removeMessage: (id: string | number) => void;
-      setMessages: (
-        messages: unknown[] | ((prev: unknown[]) => unknown[]),
-      ) => void;
-      setInput: (input: string) => void;
-      setLoading: (loading: boolean) => void;
-      setTyping: (typing: boolean) => void;
-      setAutoScroll: (autoScroll: boolean) => void;
-      addPendingMessage: (id: string | number) => void;
-      removePendingMessage: (id: string | number) => void;
-      send: (input?: string) => void;
-      clear: () => void;
-      navigateHistory: (direction: "up" | "down") => void;
-      scrollToBottom: () => void;
-      isPending: (id: string | number) => boolean;
-    },
+    chatState: ChatState,
+    chatActions: ChatActions,
     messageIndex: number,
   ) => React.ReactNode;
 }
@@ -517,9 +493,7 @@ interface ChatInputProps {
       navigateHistory: (direction: "up" | "down") => void;
       clear: () => void;
     },
-    inputRefs: {
-      inputRef: React.RefObject<HTMLInputElement | HTMLTextAreaElement | null>;
-    },
+    inputRefs: ChatRefs,
   ) => React.ReactNode;
 }
 
@@ -540,53 +514,34 @@ function ChatInput({ render }: ChatInputProps) {
     clear: () => actions.setInput(""),
   };
 
-  const inputRefs = {
-    inputRef: refs.inputRef,
-  };
+  const inputRefs: ChatRefs = refs;
 
   return render(inputState, inputActions, inputRefs);
 }
 
 interface ChatStatusProps {
-  render: (status: {
-    loading: boolean;
-    typing: boolean;
-    messageCount: number;
-    hasMessages: boolean;
-    pendingCount: number;
-    input: string;
-    autoScroll: boolean;
-    historyIndex: number;
-    historyLength: number;
-  }) => React.ReactNode;
-  showWhen?: (status: {
-    loading: boolean;
-    typing: boolean;
-    messageCount: number;
-    hasMessages: boolean;
-    pendingCount: number;
-    input: string;
-  }) => boolean;
+  render: (status: ChatStatus) => React.ReactNode;
+  showWhen?: (
+    status: Omit<ChatStatus, "autoScroll" | "historyIndex" | "historyLength">,
+  ) => boolean;
 }
 
 function ChatStatus({ render, showWhen }: ChatStatusProps) {
   const context = useChatContext();
   const { state } = context;
 
-  const status = React.useMemo(
-    () => ({
-      loading: state.loading,
-      typing: state.typing,
-      messageCount: state.messages.length,
-      hasMessages: state.messages.length > 0,
-      pendingCount: state.pendingMessages.size,
-      input: state.input,
-      autoScroll: state.autoScroll,
-      historyIndex: state.historyIndex,
-      historyLength: state.history.length,
-    }),
-    [state],
-  );
+  // React Compiler optimizes - no useMemo needed
+  const status: ChatStatus = {
+    loading: state.loading,
+    typing: state.typing,
+    messageCount: state.messages.length,
+    hasMessages: state.messages.length > 0,
+    pendingCount: state.pendingMessages.size,
+    input: state.input,
+    autoScroll: state.autoScroll,
+    historyIndex: state.historyIndex,
+    historyLength: state.history.length,
+  };
 
   const shouldShow = showWhen ? showWhen(status) : true;
 
