@@ -1,13 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  Loader2,
-  Settings,
-  Key,
-  Shield,
-  CheckCircle2,
-  AlertCircle,
-  Plus,
-} from "lucide-react";
+import { Settings, Key, Shield, CheckCircle2, AlertCircle } from "lucide-react";
 import { useForm } from "react-hook-form";
 
 import type {
@@ -15,7 +7,6 @@ import type {
   LlmProvider,
 } from "@/renderer/features/agent/provider.types";
 
-import { Button } from "@/renderer/components/ui/button";
 import {
   Card,
   CardContent,
@@ -25,11 +16,15 @@ import {
 } from "@/renderer/components/ui/card";
 import { Checkbox } from "@/renderer/components/ui/checkbox";
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/renderer/components/ui/dialog";
+  StandardFormModal,
+  StandardFormModalContent,
+  StandardFormModalHeader,
+  StandardFormModalBody,
+  StandardFormModalFooter,
+  StandardFormModalActions,
+  StandardFormModalCancelButton,
+  StandardFormModalSubmitButton,
+} from "@/renderer/components/form-modal";
 import {
   Form,
   FormControl,
@@ -39,6 +34,8 @@ import {
   FormLabel,
   FormMessage,
 } from "@/renderer/components/ui/form";
+import { FormLayout } from "@/renderer/components/ui/form-layout";
+
 import { Input } from "@/renderer/components/ui/input";
 import {
   Select,
@@ -47,7 +44,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/renderer/components/ui/select";
-import { ScrollArea } from "@/renderer/components/ui/scroll-area";
 import { useAuth } from "@/renderer/contexts/auth.context";
 import { useApiMutation } from "@/renderer/hooks/use-api-mutation.hook";
 import { cn } from "@/renderer/lib/utils";
@@ -134,29 +130,25 @@ export function ProviderForm(props: ProviderFormProps) {
   }
 
   return (
-    <Dialog open onOpenChange={onClose}>
-      <DialogContent
-        className="max-w-2xl lg:max-w-4xl xl:max-w-5xl max-h-[90vh] bg-card/95 backdrop-blur-sm border border-border/60"
-        showCloseButton={false}
-      >
-        <DialogHeader className="space-y-[var(--spacing-component-sm)] pb-[var(--spacing-component-lg)] border-b border-border/40">
-          <DialogTitle className="text-2xl font-bold bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent">
-            {isEditing ? "Edit Provider" : "Add New Provider"}
-          </DialogTitle>
-          <p className="text-muted-foreground text-sm leading-relaxed">
-            {isEditing
+    <StandardFormModal open onOpenChange={onClose}>
+      <StandardFormModalContent className="max-w-4xl">
+        <StandardFormModalHeader
+          title={isEditing ? "Edit Provider" : "Add New Provider"}
+          description={
+            isEditing
               ? "Update your AI provider configuration and settings"
-              : "Configure a new AI provider to enable agent interactions"}
-          </p>
-        </DialogHeader>
+              : "Configure a new AI provider to enable agent interactions"
+          }
+          icon={Settings}
+        />
 
-        <Form {...form}>
-          <form
-            onSubmit={form.handleSubmit(onSubmit)}
-            className="space-y-[var(--spacing-component-md)]"
-          >
-            <ScrollArea className="max-h-[60vh]">
-              <div className="space-y-[var(--spacing-layout-md)] pr-4">
+        <StandardFormModalBody maxHeight="60vh">
+          <Form {...form}>
+            <FormLayout
+              id="provider-form"
+              onSubmit={form.handleSubmit(onSubmit)}
+            >
+              <div className="space-y-6">
                 {/* Provider Configuration Section */}
                 <Card className="bg-gradient-to-br from-primary/5 via-primary/3 to-primary/0 border border-border/60">
                   <CardHeader className="pb-[var(--spacing-component-md)]">
@@ -414,50 +406,28 @@ export function ProviderForm(props: ProviderFormProps) {
                   </CardContent>
                 </Card>
               </div>
-            </ScrollArea>
+            </FormLayout>
+          </Form>
+        </StandardFormModalBody>
 
-            {/* Enhanced Form Actions */}
-            <div className="flex items-center gap-[var(--spacing-component-md)] pt-[var(--spacing-component-lg)] border-t border-border/40">
-              <div className="flex-1" />
-              <Button
-                variant="outline"
-                onClick={onClose}
-                disabled={isLoading}
-                className="hover:bg-accent/50 transition-colors"
-              >
-                Cancel
-              </Button>
-              <Button
-                type="submit"
-                disabled={isLoading}
-                className={cn(
-                  "gap-[var(--spacing-component-sm)] shadow-sm",
-                  "bg-gradient-to-r from-primary to-primary/90",
-                  "hover:from-primary/90 hover:to-primary/80",
-                  "transition-all duration-200 hover:shadow-md hover:scale-[1.01]",
-                )}
-              >
-                {isLoading ? (
-                  <>
-                    <Loader2 className="size-4 animate-spin" />
-                    Saving...
-                  </>
-                ) : isEditing ? (
-                  <>
-                    <CheckCircle2 className="size-4" />
-                    Update Provider
-                  </>
-                ) : (
-                  <>
-                    <Plus className="size-4" />
-                    Create Provider
-                  </>
-                )}
-              </Button>
-            </div>
-          </form>
-        </Form>
-      </DialogContent>
-    </Dialog>
+        <StandardFormModalFooter>
+          <StandardFormModalActions>
+            <StandardFormModalCancelButton
+              onCancel={onClose}
+              disabled={isLoading}
+            >
+              Cancel
+            </StandardFormModalCancelButton>
+            <StandardFormModalSubmitButton
+              isSubmitting={isLoading}
+              loadingText="Saving..."
+              form="provider-form"
+            >
+              {isEditing ? "Update Provider" : "Create Provider"}
+            </StandardFormModalSubmitButton>
+          </StandardFormModalActions>
+        </StandardFormModalFooter>
+      </StandardFormModalContent>
+    </StandardFormModal>
   );
 }

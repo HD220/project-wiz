@@ -1,11 +1,9 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Bot, Settings, User, Loader2 } from "lucide-react";
+import { Bot, Settings, User } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { UseFormReturn } from "react-hook-form";
 import { z } from "zod";
 
-import { Button } from "@/renderer/components/ui/button";
-import { ScrollArea } from "@/renderer/components/ui/scroll-area";
 import {
   Form,
   FormControl,
@@ -15,6 +13,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/renderer/components/ui/form";
+import { FormLayout, FormSection } from "@/renderer/components/ui/form-layout";
 import { Input } from "@/renderer/components/ui/input";
 import {
   Select,
@@ -23,7 +22,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/renderer/components/ui/select";
-import { Separator } from "@/renderer/components/ui/separator";
 import { Textarea } from "@/renderer/components/ui/textarea";
 import { AI_DEFAULTS } from "@/renderer/constants/ai-defaults";
 import { CreateAgentSchema } from "@/renderer/features/agent/agent.schema";
@@ -40,12 +38,12 @@ interface AgentFormProps {
   initialData?: SelectAgent | null;
   providers?: LlmProvider[];
   onSubmit: (data: CreateAgentInput) => Promise<void>;
-  onCancel: () => void;
+  onCancel?: () => void;
   isLoading?: boolean;
 }
 
 export function AgentForm(props: AgentFormProps) {
-  const { initialData, providers = [], onSubmit, onCancel, isLoading } = props;
+  const { initialData, providers = [], onSubmit } = props;
 
   // Inline default provider selection following INLINE-FIRST principles
   const defaultProvider =
@@ -90,73 +88,23 @@ export function AgentForm(props: AgentFormProps) {
     }
   }
 
-  // Inline cancel handler with form reset
-  function handleCancel() {
-    form.reset();
-    onCancel();
-  }
-
-  // Inline validation state checks
-  const hasErrors = Object.keys(form.formState.errors).length > 0;
-  const isFormValid = form.formState.isValid;
-
   return (
-    <div className="flex-1 flex flex-col overflow-hidden">
-      <ScrollArea className="flex-1">
-        <div className="max-w-4xl mx-auto p-8 space-y-[var(--spacing-layout-lg)]">
-          <Form {...form}>
-            <form
-              onSubmit={form.handleSubmit(handleSubmit)}
-              className="space-y-[var(--spacing-layout-lg)]"
-              role="form"
-              aria-label={isEditing ? "Edit agent form" : "Create agent form"}
-            >
-              {/* Agent Identity Section */}
-              <AgentFormIdentity form={form} />
+    <Form {...form}>
+      <FormLayout
+        id="agent-form"
+        onSubmit={form.handleSubmit(handleSubmit)}
+        role="form"
+        aria-label={isEditing ? "Edit agent form" : "Create agent form"}
+      >
+        <FormSection className="space-y-6">
+          <AgentFormIdentity form={form} />
+        </FormSection>
 
-              {/* Separator */}
-              <div className="py-[var(--spacing-component-sm)]">
-                <Separator />
-              </div>
-
-              {/* Agent Provider Section */}
-              <AgentFormProvider form={form} providers={providers} />
-
-              {/* Form Actions */}
-              <div className="flex justify-end gap-[var(--spacing-component-md)] pt-[var(--spacing-component-lg)] border-t bg-background/50 p-[var(--spacing-component-lg)] -mx-6 mt-[var(--spacing-layout-lg)]">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={handleCancel}
-                  disabled={isLoading}
-                  size="lg"
-                  className="px-[var(--spacing-component-lg)]"
-                >
-                  Cancel
-                </Button>
-                <Button
-                  type="submit"
-                  disabled={isLoading || (!isFormValid && hasErrors)}
-                  size="lg"
-                  className="px-6 min-w-[120px]"
-                >
-                  {isLoading ? (
-                    <>
-                      <Loader2 className="mr-2 size-4 animate-spin" />
-                      {isEditing ? "Updating..." : "Creating..."}
-                    </>
-                  ) : isEditing ? (
-                    "Update Agent"
-                  ) : (
-                    "Create Agent"
-                  )}
-                </Button>
-              </div>
-            </form>
-          </Form>
-        </div>
-      </ScrollArea>
-    </div>
+        <FormSection className="space-y-6">
+          <AgentFormProvider form={form} providers={providers} />
+        </FormSection>
+      </FormLayout>
+    </Form>
   );
 }
 

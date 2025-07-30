@@ -24,6 +24,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/renderer/components/ui/form";
+import { FormLayout, FormSection } from "@/renderer/components/ui/form-layout";
 import { Input } from "@/renderer/components/ui/input";
 import { useAuth } from "@/renderer/contexts/auth.context";
 import {
@@ -309,13 +310,14 @@ export function AuthForm({ mode, className }: AuthFormProps) {
       className={className}
     >
       <Form {...form}>
-        <form
+        <FormLayout
           onSubmit={form.handleSubmit(handleSubmit)}
-          className={mode === "login" ? "space-y-3" : "space-y-2.5"}
           noValidate
           aria-label={`${mode === "login" ? "Sign in" : "Create account"} form`}
         >
-          <div className={mode === "login" ? "space-y-3" : "space-y-2.5"}>
+          <FormSection
+            className={mode === "login" ? "space-y-3" : "space-y-2.5"}
+          >
             {fieldsConfig.map((config) => (
               <FormField
                 key={config.name}
@@ -349,7 +351,7 @@ export function AuthForm({ mode, className }: AuthFormProps) {
                 )}
               />
             ))}
-          </div>
+          </FormSection>
 
           <div className="flex flex-col space-y-[var(--spacing-component-sm)] pt-1.5">
             <Button
@@ -438,7 +440,7 @@ export function AuthForm({ mode, className }: AuthFormProps) {
               </p>
             </div>
           </div>
-        </form>
+        </FormLayout>
       </Form>
     </AuthCard>
   );

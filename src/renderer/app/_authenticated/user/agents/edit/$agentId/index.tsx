@@ -7,12 +7,15 @@ import {
 import type { LlmProvider } from "@/main/features/llm-provider/llm-provider.types";
 
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/renderer/components/ui/dialog";
-import { ScrollArea } from "@/renderer/components/ui/scroll-area";
+  StandardFormModal,
+  StandardFormModalContent,
+  StandardFormModalHeader,
+  StandardFormModalBody,
+  StandardFormModalFooter,
+  StandardFormModalActions,
+  StandardFormModalCancelButton,
+  StandardFormModalSubmitButton,
+} from "@/renderer/components/form-modal";
 import type {
   CreateAgentInput,
   SelectAgent,
@@ -23,7 +26,8 @@ import { loadApiData } from "@/renderer/lib/route-loader";
 
 function EditAgentPage() {
   const navigate = useNavigate();
-  const { agent, providers } = Route.useLoaderData();
+  const loaderData = Route.useLoaderData();
+  const { agent, providers } = loaderData || { agent: null, providers: [] };
 
   // Get current search state from parent route to preserve filters
   const parentSearch = useSearch({ from: "/_authenticated/user/agents" });
@@ -40,7 +44,7 @@ function EditAgentPage() {
   );
 
   function handleClose() {
-    // Preserve user's current filter state when closing
+    // Navigate back to parent route, preserving search params
     navigate({ to: "/user/agents", search: parentSearch });
   }
 
@@ -48,24 +52,59 @@ function EditAgentPage() {
     updateAgentMutation.mutate(data);
   }
 
+  // Modal overlay implementation for masked route
   return (
-    <Dialog open onOpenChange={(open) => !open && handleClose()}>
-      <DialogContent className="max-w-2xl lg:max-w-4xl xl:max-w-5xl max-h-[90vh]">
-        <DialogHeader>
-          <DialogTitle>Edit Agent</DialogTitle>
-        </DialogHeader>
+    <>
+      {/* Backdrop overlay */}
+      <div
+        className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm"
+        onClick={handleClose}
+        aria-hidden="true"
+      />
 
-        <ScrollArea className="max-h-[70vh]">
-          <AgentForm
-            initialData={agent as SelectAgent}
-            providers={providers as LlmProvider[]}
-            onSubmit={handleSubmit}
-            onCancel={handleClose}
-            isLoading={updateAgentMutation.isPending}
-          />
-        </ScrollArea>
-      </DialogContent>
-    </Dialog>
+      {/* Modal content */}
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <StandardFormModal
+          open
+          onOpenChange={(open: boolean) => !open && handleClose()}
+        >
+          <StandardFormModalContent className="max-w-4xl relative z-10">
+            <StandardFormModalHeader
+              title="Edit Agent"
+              description="Update your AI agent configuration and settings"
+            />
+
+            <StandardFormModalBody maxHeight="70vh">
+              <AgentForm
+                initialData={agent as SelectAgent}
+                providers={providers as LlmProvider[]}
+                onSubmit={handleSubmit}
+                onCancel={handleClose}
+                isLoading={updateAgentMutation.isPending}
+              />
+            </StandardFormModalBody>
+
+            <StandardFormModalFooter>
+              <StandardFormModalActions>
+                <StandardFormModalCancelButton
+                  onCancel={handleClose}
+                  disabled={updateAgentMutation.isPending}
+                >
+                  Cancel
+                </StandardFormModalCancelButton>
+                <StandardFormModalSubmitButton
+                  isSubmitting={updateAgentMutation.isPending}
+                  loadingText="Updating..."
+                  form="agent-form"
+                >
+                  Update Agent
+                </StandardFormModalSubmitButton>
+              </StandardFormModalActions>
+            </StandardFormModalFooter>
+          </StandardFormModalContent>
+        </StandardFormModal>
+      </div>
+    </>
   );
 }
 

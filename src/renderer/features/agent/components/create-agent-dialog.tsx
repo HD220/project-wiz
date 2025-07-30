@@ -4,11 +4,15 @@ import { useState, useEffect } from "react";
 import type { LlmProvider } from "@/renderer/features/agent/provider.types";
 
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/renderer/components/ui/dialog";
+  StandardFormModal,
+  StandardFormModalContent,
+  StandardFormModalHeader,
+  StandardFormModalBody,
+  StandardFormModalFooter,
+  StandardFormModalActions,
+  StandardFormModalCancelButton,
+  StandardFormModalSubmitButton,
+} from "@/renderer/components/form-modal";
 import type { CreateAgentInput } from "@/renderer/features/agent/agent.types";
 import { AgentForm } from "@/renderer/features/agent/components/agent-form";
 import { useApiMutation } from "@/renderer/hooks/use-api-mutation.hook";
@@ -81,43 +85,57 @@ export function CreateAgentDialog(props: CreateAgentDialogProps) {
   }
 
   return (
-    <Dialog open={open} onOpenChange={(isOpen) => !isOpen && handleClose()}>
-      <DialogContent className="max-w-4xl h-[90vh] p-0 gap-0 border-border/80">
-        {/* Header */}
-        <DialogHeader className="px-6 py-4 border-b border-border/50 shrink-0">
-          <DialogTitle className="text-xl font-semibold flex items-center gap-3">
-            <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-primary/10">
-              <Bot className="size-4 text-primary" />
-            </div>
-            Create New Agent
-          </DialogTitle>
-        </DialogHeader>
+    <StandardFormModal
+      open={open}
+      onOpenChange={(isOpen) => !isOpen && handleClose()}
+    >
+      <StandardFormModalContent className="max-w-4xl">
+        <StandardFormModalHeader
+          title="Create New Agent"
+          description="Configure a new AI agent to help with your projects and tasks"
+          icon={Bot}
+        />
 
-        {/* Content */}
-        <div className="flex-1 overflow-hidden">
-          {isLoadingProviders ? (
-            // Loading state
-            <div className="flex-1 flex items-center justify-center">
-              <div className="flex flex-col items-center gap-4">
-                <Loader2 className="w-8 h-8 animate-spin text-primary" />
-                <p className="text-sm text-muted-foreground">
-                  Loading providers...
-                </p>
-              </div>
+        {isLoadingProviders ? (
+          <StandardFormModalBody>
+            <div className="flex flex-col items-center justify-center py-12 gap-4">
+              <Loader2 className="w-8 h-8 animate-spin text-primary" />
+              <p className="text-sm text-muted-foreground">
+                Loading providers...
+              </p>
             </div>
-          ) : (
-            // Agent form - remove extra scrolling since AgentForm has its own
-            <div className="h-full">
+          </StandardFormModalBody>
+        ) : (
+          <>
+            <StandardFormModalBody maxHeight="70vh">
               <AgentForm
                 providers={providers}
                 onSubmit={handleSubmit}
                 onCancel={handleCancel}
                 isLoading={createAgentMutation.isPending}
               />
-            </div>
-          )}
-        </div>
-      </DialogContent>
-    </Dialog>
+            </StandardFormModalBody>
+
+            <StandardFormModalFooter>
+              <StandardFormModalActions>
+                <StandardFormModalCancelButton
+                  onCancel={handleCancel}
+                  disabled={createAgentMutation.isPending}
+                >
+                  Cancel
+                </StandardFormModalCancelButton>
+                <StandardFormModalSubmitButton
+                  isSubmitting={createAgentMutation.isPending}
+                  loadingText="Creating..."
+                  form="agent-form"
+                >
+                  Create Agent
+                </StandardFormModalSubmitButton>
+              </StandardFormModalActions>
+            </StandardFormModalFooter>
+          </>
+        )}
+      </StandardFormModalContent>
+    </StandardFormModal>
   );
 }

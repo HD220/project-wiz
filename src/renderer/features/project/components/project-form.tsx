@@ -1,11 +1,10 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { FolderIcon, Github, Loader2 } from "lucide-react";
+import { FolderIcon, Github } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
 import type { InsertProject } from "@/main/features/project/project.types";
 
-import { Button } from "@/renderer/components/ui/button";
 import {
   Form,
   FormControl,
@@ -15,12 +14,18 @@ import {
   FormMessage,
 } from "@/renderer/components/ui/form";
 import { Input } from "@/renderer/components/ui/input";
+import { Textarea } from "@/renderer/components/ui/textarea";
+import {
+  FormActions,
+  FormCancelButton,
+  FormLayout,
+  FormSubmitButton,
+} from "@/renderer/components/ui/form-layout";
 import { Label } from "@/renderer/components/ui/label";
 import {
   RadioGroup,
   RadioGroupItem,
 } from "@/renderer/components/ui/radio-group";
-import { Textarea } from "@/renderer/components/ui/textarea";
 import { useAuth } from "@/renderer/contexts/auth.context";
 import { useApiMutation } from "@/renderer/hooks/use-api-mutation.hook";
 import { cn } from "@/renderer/lib/utils";
@@ -81,6 +86,7 @@ interface ProjectFormProps {
   initialData?: Partial<ProjectFormData>;
   submitLabel?: string;
   disabled?: boolean;
+  hideActions?: boolean;
 }
 
 export function ProjectForm(props: ProjectFormProps) {
@@ -90,6 +96,7 @@ export function ProjectForm(props: ProjectFormProps) {
     initialData,
     submitLabel = "Create Project",
     disabled = false,
+    hideActions = false,
   } = props;
   const { user } = useAuth();
 
@@ -189,13 +196,13 @@ export function ProjectForm(props: ProjectFormProps) {
 
   return (
     <Form {...form}>
-      <form
+      <FormLayout
+        id="project-form"
         onSubmit={form.handleSubmit(onSubmit)}
-        className="space-y-[var(--spacing-component-md)]"
         noValidate
         aria-label="Create project form"
       >
-        <div className="space-y-[var(--spacing-component-md)]">
+        <div className="space-y-4">
           <FormField
             control={form.control}
             name="name"
@@ -298,37 +305,20 @@ export function ProjectForm(props: ProjectFormProps) {
                 </span>
               </div>
 
-              {/* Responsive grid for git fields in compact mode */}
-              <div
-                className={cn(
-                  false
-                    ? "space-y-[var(--spacing-component-sm)]"
-                    : "space-y-[var(--spacing-component-md)]",
-                )}
-              >
+              <div className="space-y-4">
                 <FormField
                   control={form.control}
                   name="gitUrl"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel
-                        className={cn(
-                          "font-medium",
-                          false ? "text-xs" : "text-sm",
-                        )}
-                      >
+                      <FormLabel className="text-sm font-medium">
                         Repository URL
                       </FormLabel>
                       <FormControl>
                         <Input
                           type="url"
-                          placeholder={
-                            false
-                              ? "github.com/user/repo.git"
-                              : "https://github.com/username/repository.git"
-                          }
+                          placeholder="https://github.com/username/repository.git"
                           disabled={isFormDisabled}
-                          className={false ? "text-xs" : ""}
                           {...field}
                         />
                       </FormControl>
@@ -342,12 +332,7 @@ export function ProjectForm(props: ProjectFormProps) {
                   name="branch"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel
-                        className={cn(
-                          "font-medium",
-                          false ? "text-xs" : "text-sm",
-                        )}
-                      >
+                      <FormLabel className="text-sm font-medium">
                         Branch
                       </FormLabel>
                       <FormControl>
@@ -355,7 +340,6 @@ export function ProjectForm(props: ProjectFormProps) {
                           placeholder="main"
                           disabled={isFormDisabled}
                           list="common-branches"
-                          className={false ? "text-xs" : ""}
                           {...field}
                         />
                       </FormControl>
@@ -374,46 +358,23 @@ export function ProjectForm(props: ProjectFormProps) {
           )}
         </div>
 
-        <div
-          className={cn(
-            "flex pt-[var(--spacing-component-md)]",
-            false
-              ? "gap-[var(--spacing-component-xs)] flex-col"
-              : "gap-[var(--spacing-component-sm)] flex-row",
-          )}
-        >
-          {onCancel && (
-            <Button
-              type="button"
-              variant="outline"
-              onClick={onCancel}
-              disabled={isFormDisabled}
-              className={cn(false ? "w-full text-xs h-8" : "flex-1")}
-            >
-              Cancel
-            </Button>
-          )}
-          <Button
-            type="submit"
-            disabled={isFormDisabled}
-            className={cn(false ? "w-full text-xs h-8" : "flex-1")}
-          >
-            {isLoading ? (
-              <>
-                <Loader2
-                  className={cn(
-                    "animate-spin",
-                    false ? "mr-1 h-3 w-3" : "mr-2 h-4 w-4",
-                  )}
-                />
-                {false ? "Creating..." : "Creating..."}
-              </>
-            ) : (
-              submitLabel
+        {!hideActions && (
+          <FormActions>
+            {onCancel && (
+              <FormCancelButton onCancel={onCancel} disabled={isFormDisabled}>
+                Cancel
+              </FormCancelButton>
             )}
-          </Button>
-        </div>
-      </form>
+            <FormSubmitButton
+              isSubmitting={isLoading}
+              disabled={isFormDisabled}
+              loadingText="Creating..."
+            >
+              {submitLabel}
+            </FormSubmitButton>
+          </FormActions>
+        )}
+      </FormLayout>
     </Form>
   );
 }

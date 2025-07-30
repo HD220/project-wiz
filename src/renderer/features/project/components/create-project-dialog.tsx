@@ -1,16 +1,18 @@
 import { useNavigate } from "@tanstack/react-router";
-import { X } from "lucide-react";
 import { useState } from "react";
+import { FolderIcon } from "lucide-react";
 
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/renderer/components/ui/dialog";
-import { Button } from "@/renderer/components/ui/button";
-import { cn } from "@/renderer/lib/utils";
+  StandardFormModal,
+  StandardFormModalContent,
+  StandardFormModalHeader,
+  StandardFormModalBody,
+  StandardFormModalFooter,
+  StandardFormModalActions,
+  StandardFormModalCancelButton,
+  StandardFormModalSubmitButton,
+  StandardFormModalTrigger,
+} from "@/renderer/components/form-modal";
 
 import { ProjectForm } from "./project-form";
 
@@ -43,40 +45,40 @@ export function CreateProjectDialog(props: CreateProjectDialogProps) {
   }
 
   return (
-    <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogTrigger asChild className={className}>
+    <StandardFormModal open={open} onOpenChange={handleOpenChange}>
+      <StandardFormModalTrigger asChild className={className}>
         {children}
-      </DialogTrigger>
-      <DialogContent className={cn("sm:max-w-md p-0 gap-0")}>
-        {/* Discord-style header */}
-        <DialogHeader className="px-6 py-4 border-b">
-          <div className="flex items-center justify-between">
-            <DialogTitle className="text-lg font-semibold">
-              Create Project
-            </DialogTitle>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-6 w-6 p-0"
-              onClick={() => setOpen(false)}
-            >
-              <X className="h-4 w-4" />
-            </Button>
-          </div>
-        </DialogHeader>
+      </StandardFormModalTrigger>
+      <StandardFormModalContent className="max-w-2xl">
+        <StandardFormModalHeader
+          title="Create Project"
+          description="Start a new project workspace for your development tasks"
+          icon={FolderIcon}
+        />
 
-        {/* Compact content area */}
-        <div className="px-6 py-4">
+        <StandardFormModalBody>
           <ProjectForm
             onSuccess={handleSuccess}
             onCancel={() => setOpen(false)}
             submitLabel="Create"
+            hideActions={true}
           />
-        </div>
-      </DialogContent>
-    </Dialog>
+        </StandardFormModalBody>
+
+        <StandardFormModalFooter>
+          <StandardFormModalActions>
+            <StandardFormModalCancelButton onCancel={() => setOpen(false)}>
+              Cancel
+            </StandardFormModalCancelButton>
+            <StandardFormModalSubmitButton form="project-form">
+              Create Project
+            </StandardFormModalSubmitButton>
+          </StandardFormModalActions>
+        </StandardFormModalFooter>
+      </StandardFormModalContent>
+    </StandardFormModal>
   );
 }
 
 // Compound component exports
-export const CreateProjectDialogTrigger = DialogTrigger;
+export { StandardFormModalTrigger as CreateProjectDialogTrigger };
