@@ -7,7 +7,7 @@ import {
   ProfileAvatar,
   ProfileAvatarImage,
   ProfileAvatarStatus,
-} from "@/renderer/components/ui/profile-avatar";
+} from "@/components/profile-avatar";
 import { Button } from "@/renderer/components/ui/button";
 import {
   Card,

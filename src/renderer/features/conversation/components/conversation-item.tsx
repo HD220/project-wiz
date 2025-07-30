@@ -6,7 +6,7 @@ import {
   ProfileAvatarImage,
   ProfileAvatarStatus,
   ProfileAvatarCounter,
-} from "@/renderer/components/ui/profile-avatar";
+} from "@/components/profile-avatar";
 import type {
   ConversationWithParticipants,
   AuthenticatedUser,

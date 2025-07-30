@@ -30,7 +30,7 @@ import {
   ProfileAvatarImage,
   ProfileAvatarStatus,
   ProfileAvatarCounter,
-} from "@/renderer/components/ui/profile-avatar";
+} from "@/components/profile-avatar";
 import { CreateConversationDialog } from "./create-conversation-dialog";
 
 import type { ConversationWithLastMessage } from "../types";

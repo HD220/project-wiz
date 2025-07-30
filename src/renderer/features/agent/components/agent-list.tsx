@@ -9,7 +9,7 @@ import { toast } from "sonner";
 
 import { Button } from "@/renderer/components/ui/button";
 import { ScrollArea } from "@/renderer/components/ui/scroll-area";
-import { SearchFilterBar } from "@/renderer/components/ui/search-filter-bar";
+import { SearchFilterBar } from "@/components/search-filter-bar";
 import type {
   SelectAgent,
   AgentStatus,

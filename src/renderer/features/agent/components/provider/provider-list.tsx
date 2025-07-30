@@ -9,7 +9,7 @@ import type { LlmProvider } from "@/renderer/features/agent/provider.types";
 
 import { Button } from "@/renderer/components/ui/button";
 import { ScrollArea } from "@/renderer/components/ui/scroll-area";
-import { SearchFilterBar } from "@/renderer/components/ui/search-filter-bar";
+import { SearchFilterBar } from "@/components/search-filter-bar";
 import { EmptyState } from "@/renderer/features/agent/components/provider/empty-state";
 import { ProviderCard } from "@/renderer/features/agent/components/provider/provider-card";
 

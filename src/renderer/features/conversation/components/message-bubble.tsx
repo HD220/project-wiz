@@ -1,10 +1,7 @@
 import { Loader2, User, Check, CheckCheck, Clock } from "lucide-react";
 
 import { Badge } from "@/renderer/components/ui/badge";
-import {
-  ProfileAvatar,
-  ProfileAvatarImage,
-} from "@/renderer/components/ui/profile-avatar";
+import { ProfileAvatar, ProfileAvatarImage } from "@/components/profile-avatar";
 import type {
   SelectMessage,
   AuthenticatedUser,

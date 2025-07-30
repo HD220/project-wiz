@@ -8,7 +8,7 @@ import {
   ProfileAvatar,
   ProfileAvatarImage,
   ProfileAvatarStatus,
-} from "@/renderer/components/ui/profile-avatar";
+} from "@/components/profile-avatar";
 import {
   Dialog,
   DialogContent,

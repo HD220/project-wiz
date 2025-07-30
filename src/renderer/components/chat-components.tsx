@@ -4,7 +4,7 @@ import {
   ProfileAvatar,
   ProfileAvatarImage,
   ProfileAvatarStatus,
-} from "@/renderer/components/ui/profile-avatar";
+} from "@/components/profile-avatar";
 import { Button } from "@/renderer/components/ui/button";
 import { ScrollArea } from "@/renderer/components/ui/scroll-area";
 import { Textarea } from "@/renderer/components/ui/textarea";
@@ -161,114 +161,6 @@ export function EmptyState({ chatType, isArchived = false }: EmptyStateProps) {
         </div>
       )}
     </>
-  );
-}
-
-// ===========================
-// AUTHOR NAME - COMPONENTE ESPECÍFICO
-// ===========================
-
-interface AuthorNameProps {
-  name: string;
-  isInactive?: boolean;
-  onClick?: () => void;
-}
-
-export function AuthorName({
-  name,
-  isInactive = false,
-  onClick,
-}: AuthorNameProps) {
-  return (
-    <span
-      className={cn(
-        "text-sm font-medium hover:underline cursor-pointer",
-        isInactive
-          ? "text-muted-foreground"
-          : "text-foreground hover:text-primary",
-      )}
-      onClick={onClick}
-    >
-      {name}
-    </span>
-  );
-}
-
-// ===========================
-// MESSAGE TIMESTAMP - COMPONENTE ESPECÍFICO
-// ===========================
-
-interface MessageTimestampProps {
-  timestamp: Date;
-  format?: "short" | "full";
-}
-
-export function MessageTimestamp({
-  timestamp,
-  format = "full",
-}: MessageTimestampProps) {
-  const formatOptions =
-    format === "short"
-      ? { hour: "2-digit" as const, minute: "2-digit" as const }
-      : {
-          month: "short" as const,
-          day: "numeric" as const,
-          hour: "2-digit" as const,
-          minute: "2-digit" as const,
-        };
-
-  return (
-    <span className="text-xs text-muted-foreground/60 font-mono">
-      {new Date(timestamp).toLocaleString([], formatOptions)}
-    </span>
-  );
-}
-
-// ===========================
-// HOVER TIMESTAMP - COMPONENTE ESPECÍFICO
-// ===========================
-
-interface HoverTimestampProps {
-  timestamp: Date;
-}
-
-export function HoverTimestamp({ timestamp }: HoverTimestampProps) {
-  return (
-    <div className="flex justify-end items-start h-5 pt-0.5">
-      <span className="text-xs text-muted-foreground/40 opacity-0 group-hover:opacity-100 transition-opacity font-mono">
-        {new Date(timestamp).toLocaleTimeString([], {
-          hour: "2-digit",
-          minute: "2-digit",
-        })}
-      </span>
-    </div>
-  );
-}
-
-// ===========================
-// MESSAGE CONTENT TEXT - COMPONENTE ESPECÍFICO
-// ===========================
-
-interface MessageContentTextProps {
-  content: string;
-  isInactive?: boolean;
-}
-
-export function MessageContentText({
-  content,
-  isInactive = false,
-}: MessageContentTextProps) {
-  return (
-    <div
-      className={cn(
-        "text-sm leading-[1.375] break-words",
-        isInactive ? "text-muted-foreground/80" : "text-foreground",
-      )}
-    >
-      <p className="whitespace-pre-wrap selection:bg-primary/20 m-0">
-        {content}
-      </p>
-    </div>
   );
 }
 

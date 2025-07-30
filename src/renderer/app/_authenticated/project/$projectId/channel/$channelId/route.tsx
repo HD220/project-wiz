@@ -8,9 +8,10 @@ import {
 import { ContentHeader } from "@/renderer/features/layout/components/content-header";
 import {
   Chat,
-  ChatMessages,
+  ChatContent,
+  ChatFooter,
+  ChatScrollable,
   ChatInput,
-  ChatMessagesScrollable,
 } from "@/renderer/components/chat";
 import {
   EmptyState,
@@ -69,9 +70,9 @@ function ChannelLayout() {
       <div className="flex-1 flex">
         {/* Main Channel Content */}
         <main className="flex-1">
-          <Chat>
-            <ChatMessages>
-              <ChatMessagesScrollable
+          <Chat className="bg-background">
+            <ChatContent>
+              <ChatScrollable
                 autoScroll={true}
                 initScroll={false}
                 scrollDelayMs={0}
@@ -81,17 +82,19 @@ function ChannelLayout() {
                     <EmptyState chatType="channel" isArchived={false} />
                   </ChatEmpty>
                 </div>
-              </ChatMessagesScrollable>
-            </ChatMessages>
-            <ChatInput>
-              <FunctionalChatInput
-                onSend={async (content) => {
-                  console.log("Send message to channel:", channelId, content);
-                  // TODO: Implement channel message sending
-                }}
-                placeholder={`Message # ${channelId}...`}
-              />
-            </ChatInput>
+              </ChatScrollable>
+            </ChatContent>
+            <ChatFooter className="border-t border-border/60 px-4 py-3">
+              <ChatInput>
+                <FunctionalChatInput
+                  onSend={async (content) => {
+                    console.log("Send message to channel:", channelId, content);
+                    // TODO: Implement channel message sending
+                  }}
+                  placeholder={`Message # ${channelId}...`}
+                />
+              </ChatInput>
+            </ChatFooter>
           </Chat>
           {/* Child Routes */}
           <Outlet />
