@@ -61,7 +61,7 @@ function CreateAgentPage() {
     navigate({ to: "/user/agents" });
   }
 
-  async function handleSubmit(data: CreateAgentInput) {
+  function handleSubmit(data: CreateAgentInput) {
     createAgentMutation.mutate(data);
   }
 
@@ -93,7 +93,7 @@ function CreateAgentPage() {
           </StandardFormModalBody>
         ) : (
           <>
-            <StandardFormModalBody maxHeight="70vh">
+            <StandardFormModalBody>
               <AgentForm
                 providers={providers}
                 onSubmit={handleSubmit}

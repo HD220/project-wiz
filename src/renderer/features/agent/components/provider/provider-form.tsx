@@ -142,7 +142,7 @@ export function ProviderForm(props: ProviderFormProps) {
           icon={Settings}
         />
 
-        <StandardFormModalBody maxHeight="60vh">
+        <StandardFormModalBody>
           <Form {...form}>
             <FormLayout
               id="provider-form"

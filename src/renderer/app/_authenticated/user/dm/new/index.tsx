@@ -142,9 +142,9 @@ function CreateConversationPage() {
           icon={MessageSquare}
         />
 
-        <StandardFormModalBody maxHeight="400px">
+        <StandardFormModalBody>
           {/* Search input */}
-          <div className="mb-4">
+          <div className="mb-4 px-[2px]">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
@@ -182,7 +182,12 @@ function CreateConversationPage() {
                     {/* Checkbox */}
                     <Checkbox
                       checked={isSelected}
-                      onCheckedChange={() => handleUserToggle(user.id)}
+                      onCheckedChange={(checked) => {
+                        if (checked !== isSelected) {
+                          handleUserToggle(user.id);
+                        }
+                      }}
+                      onClick={(e) => e.stopPropagation()}
                       className="data-[state=checked]:bg-primary data-[state=checked]:border-primary"
                     />
 

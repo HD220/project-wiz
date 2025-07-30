@@ -48,63 +48,51 @@ function EditAgentPage() {
     navigate({ to: "/user/agents", search: parentSearch });
   }
 
-  async function handleSubmit(data: CreateAgentInput): Promise<void> {
+  function handleSubmit(data: CreateAgentInput) {
     updateAgentMutation.mutate(data);
   }
 
-  // Modal overlay implementation for masked route
+  // Correct masked route implementation - single modal only
   return (
-    <>
-      {/* Backdrop overlay */}
-      <div
-        className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm"
-        onClick={handleClose}
-        aria-hidden="true"
-      />
+    <StandardFormModal
+      open
+      onOpenChange={(open: boolean) => !open && handleClose()}
+    >
+      <StandardFormModalContent className="max-w-4xl">
+        <StandardFormModalHeader
+          title="Edit Agent"
+          description="Update your AI agent configuration and settings"
+        />
 
-      {/* Modal content */}
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-        <StandardFormModal
-          open
-          onOpenChange={(open: boolean) => !open && handleClose()}
-        >
-          <StandardFormModalContent className="max-w-4xl relative z-10">
-            <StandardFormModalHeader
-              title="Edit Agent"
-              description="Update your AI agent configuration and settings"
-            />
+        <StandardFormModalBody>
+          <AgentForm
+            initialData={agent as SelectAgent}
+            providers={providers as LlmProvider[]}
+            onSubmit={handleSubmit}
+            onCancel={handleClose}
+            isLoading={updateAgentMutation.isPending}
+          />
+        </StandardFormModalBody>
 
-            <StandardFormModalBody maxHeight="70vh">
-              <AgentForm
-                initialData={agent as SelectAgent}
-                providers={providers as LlmProvider[]}
-                onSubmit={handleSubmit}
-                onCancel={handleClose}
-                isLoading={updateAgentMutation.isPending}
-              />
-            </StandardFormModalBody>
-
-            <StandardFormModalFooter>
-              <StandardFormModalActions>
-                <StandardFormModalCancelButton
-                  onCancel={handleClose}
-                  disabled={updateAgentMutation.isPending}
-                >
-                  Cancel
-                </StandardFormModalCancelButton>
-                <StandardFormModalSubmitButton
-                  isSubmitting={updateAgentMutation.isPending}
-                  loadingText="Updating..."
-                  form="agent-form"
-                >
-                  Update Agent
-                </StandardFormModalSubmitButton>
-              </StandardFormModalActions>
-            </StandardFormModalFooter>
-          </StandardFormModalContent>
-        </StandardFormModal>
-      </div>
-    </>
+        <StandardFormModalFooter>
+          <StandardFormModalActions>
+            <StandardFormModalCancelButton
+              onCancel={handleClose}
+              disabled={updateAgentMutation.isPending}
+            >
+              Cancel
+            </StandardFormModalCancelButton>
+            <StandardFormModalSubmitButton
+              isSubmitting={updateAgentMutation.isPending}
+              loadingText="Updating..."
+              form="agent-form"
+            >
+              Update Agent
+            </StandardFormModalSubmitButton>
+          </StandardFormModalActions>
+        </StandardFormModalFooter>
+      </StandardFormModalContent>
+    </StandardFormModal>
   );
 }
 

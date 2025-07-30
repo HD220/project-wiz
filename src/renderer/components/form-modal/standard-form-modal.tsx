@@ -31,15 +31,14 @@ function StandardFormModalContent({
   return (
     <DialogContent
       className={cn(
-        "max-w-sm lg:max-w-md p-6 lg:p-8",
+        "max-w-sm lg:max-w-md p-4 lg:p-6",
         "shadow-lg border-border/50 bg-card/95 backdrop-blur-sm",
+        "max-h-[90vh] overflow-hidden",
         className,
       )}
       {...props}
     >
-      <Card className="w-full mx-auto transition-all duration-200 hover:shadow-md p-0 border-0 shadow-none bg-transparent">
-        {children}
-      </Card>
+      <div className="flex flex-col h-full">{children}</div>
     </DialogContent>
   );
 }
@@ -59,9 +58,9 @@ function StandardFormModalHeader({
   className,
 }: StandardFormModalHeaderProps) {
   return (
-    <CardHeader
+    <div
       className={cn(
-        "text-center transition-colors duration-200 p-0",
+        "text-center transition-colors duration-200 pb-4 flex-shrink-0",
         "space-y-0.5 lg:space-y-1",
         className,
       )}
@@ -89,7 +88,7 @@ function StandardFormModalHeader({
       >
         {description}
       </p>
-    </CardHeader>
+    </div>
   );
 }
 
@@ -97,19 +96,16 @@ function StandardFormModalHeader({
 function StandardFormModalBody({
   className,
   children,
-  maxHeight = "60vh",
-  ...props
-}: React.ComponentProps<"div"> & { maxHeight?: string }) {
-  const heightClass = maxHeight === "70vh" ? "max-h-[70vh]" : "max-h-[60vh]";
-
+}: {
+  className?: string;
+  children: React.ReactNode;
+}) {
   return (
-    <CardContent className="p-0 overflow-hidden">
-      <ScrollArea className={cn(heightClass, className)}>
-        <div className="space-y-6 p-6 pr-4" {...props}>
-          {children}
-        </div>
+    <div className="flex-1 min-h-0">
+      <ScrollArea className={cn("h-full max-h-[60vh]", className)}>
+        <div className="space-y-6 p-0 pt-2">{children}</div>
       </ScrollArea>
-    </CardContent>
+    </div>
   );
 }
 
@@ -122,7 +118,7 @@ function StandardFormModalFooter({
   return (
     <div
       className={cn(
-        "flex flex-col space-y-[var(--spacing-component-sm)] pt-6",
+        "flex flex-col space-y-[var(--spacing-component-sm)] pt-4 px-0 flex-shrink-0",
         className,
       )}
       {...props}
@@ -167,7 +163,7 @@ function StandardFormModalCancelButton({
     <Button
       type="button"
       variant="outline"
-      className={cn("", className)}
+      className={cn("h-10 text-sm font-medium", className)}
       onClick={onCancel}
       {...props}
     >
