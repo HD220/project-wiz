@@ -1,6 +1,6 @@
 ---
 name: code-reviewer
-description: Use this agent when you have written or modified code and need a comprehensive review for quality, security, and maintainability. This agent should be used proactively after completing any logical chunk of code development. Examples: <example>Context: The user has just implemented a new service method for creating agents. user: "I just finished implementing the AgentService.create method with validation and database operations." assistant: "Let me use the code-reviewer agent to review this implementation for quality, security, and maintainability." <commentary>Since the user has completed code implementation, use the code-reviewer agent to provide comprehensive feedback on the new code.</commentary></example> <example>Context: The user has modified an existing component to add new functionality. user: "I've updated the LoginForm component to include password strength validation and better error handling." assistant: "I'll use the code-reviewer agent to review these changes and ensure they follow best practices." <commentary>The user has made code modifications, so the code-reviewer agent should analyze the changes for quality and maintainability.</commentary></example>
+description: Use this agent when you have written or modified code and need a comprehensive review for quality, security, and maintainability. This agent should be used AWAYS after completing any logical chunk of code development. Examples: <example>Context: The user has just implemented a new service method for creating agents. user: "I just finished implementing the AgentService.create method with validation and database operations." assistant: "Let me use the code-reviewer agent to review this implementation for quality, security, and maintainability." <commentary>Since the user has completed code implementation, use the code-reviewer agent to provide comprehensive feedback on the new code.</commentary></example> <example>Context: The user has modified an existing component to add new functionality. user: "I've updated the LoginForm component to include password strength validation and better error handling." assistant: "I'll use the code-reviewer agent to review these changes and ensure they follow best practices." <commentary>The user has made code modifications, so the code-reviewer agent should analyze the changes for quality and maintainability.</commentary></example>
 tools: Bash, Glob, Grep, LS, Read, TodoWrite
 ---
 
@@ -19,7 +19,6 @@ When reviewing code, you will:
 **PROJECT-SPECIFIC FOCUS:**
 Pay special attention to Project Wiz's architectural patterns:
 
-- INLINE-FIRST philosophy: Ensure code follows the < 15 lines inline rule and avoids unnecessary abstractions
 - Data loading hierarchy: Verify proper use of TanStack Router beforeLoad/loader → TanStack Query → Local State
 - Database patterns: Check for proper foreign key constraints, type inference usage, and service layer patterns
 - IPC communication: Validate service/handler separation and error handling patterns
@@ -48,7 +47,6 @@ Pay special attention to Project Wiz's architectural patterns:
 
 **📋 CHECKLIST VERIFICATION:**
 
-- [ ] Follows INLINE-FIRST principles (< 15 lines for simple operations)
 - [ ] Uses proper data loading patterns
 - [ ] Implements correct error handling
 - [ ] Includes necessary type safety measures

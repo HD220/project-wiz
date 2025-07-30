@@ -1,6 +1,6 @@
 # Concept
 
-"Over-specifying what to build while under-specifying the context is why so many AI-driven coding attempts stall at 80%. A Product Requirement Prompt (PRP) fixes that by fusing the disciplined scope of a classic Product Requirements Document (PRD) with the “context-is-king” mindset of modern prompt engineering."
+"Over-specifying what to build while under-specifying the context is why so many AI-driven coding attempts stall at 80%. A Product Requirement Prompt (PRP) fixes that by fusing the disciplined scope of a classic Product Requirements Document (PRD) with the "context-is-king" mindset of modern prompt engineering."
 
 ## What is a PRP?
 
@@ -23,7 +23,7 @@ A PRP keeps the goal and justification sections of a PRD yet adds three AI-criti
 
 ### Validation Gates
 
-- Deterministic checks such as pytest, ruff, or static type passes “Shift-left” quality controls catch defects early and are cheaper than late re-work.
+- Deterministic checks such as pytest, ruff, or static type passes "Shift-left" quality controls catch defects early and are cheaper than late re-work.
   Example: Each new funtion should be individaully tested, Validation gate = all tests pass.
 
 ### PRP Layer Why It Exists
@@ -34,7 +34,7 @@ A PRP keeps the goal and justification sections of a PRD yet adds three AI-criti
 
 Large-language-model outputs are bounded by their context window; irrelevant or missing context literally squeezes out useful tokens
 
-The industry mantra “Garbage In → Garbage Out” applies doubly to prompt engineering and especially in agentic engineering: sloppy input yields brittle code
+The industry mantra "Garbage In → Garbage Out" applies doubly to prompt engineering and especially in agentic engineering: sloppy input yields brittle code
 
 ## In short
 
@@ -42,3 +42,34 @@ A PRP is PRD + curated codebase intelligence + agent/runbook—the minimum viabl
 
 The PRP can be small and focusing on a single task or large and covering multiple tasks.
 The true power of PRP is in the ability to chain tasks together in a PRP to build, validate and deploy complex features.
+
+## Integration with Development Workflows
+
+PRPs work seamlessly with Project Wiz development patterns:
+
+### **PRP ↔ INLINE-FIRST Connection**
+
+Both PRP methodology and [INLINE-FIRST principles](../../developer/code-simplicity-principles.md) optimize for AI-human collaboration:
+
+- **PRPs provide strategic context** → "What to build and why" with comprehensive implementation context
+- **INLINE-FIRST provides tactical patterns** → "How to build it" with minimal abstraction for LLM comprehension
+- **Both minimize cognitive overhead** → For humans and AI assistants working together
+
+### **When to Create PRPs in Development Context**
+
+Following [INLINE-FIRST principles](../../developer/code-simplicity-principles.md), create PRPs when:
+
+- **>3 services affected** → Complex integration requiring strategic planning
+- **>20 lines of complex logic** → Algorithm or workflow requiring detailed context
+- **Database architecture changes** → Schema modifications affecting multiple features
+- **Performance implications** → Optimization work requiring analysis and validation
+
+### **PRP-to-Implementation Workflow**
+
+```
+PRP Planning (Context-is-King) → INLINE-FIRST Implementation → Validation Gates
+      ↑                                                              ↓
+Strategic Context ←------ Implementation Feedback --------→ Refined Planning
+```
+
+See [Development Workflow Integration](../README.md#relationship-to-development-workflows) for complete bridges between PRP methodology and daily development patterns.

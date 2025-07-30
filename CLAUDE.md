@@ -80,6 +80,8 @@ This file provides guidance to Claude Code when working with this Electron + Rea
 - Services: Return data directly, throw errors
 - Handlers: Try/catch → standardized `IpcResponse<T>`
 - Preload: Type-safe `window.api` exposure
+- **Main Process → Renderer**: Use `ipcHandler` utility in `src/main/utils/ipc-handler.ts`
+- **Renderer → Main**: Use `window.api` methods defined in preload
 
 ### **React Components**
 
@@ -95,14 +97,33 @@ This file provides guidance to Claude Code when working with this Electron + Rea
 # Database Workflow (CRITICAL)
 npm run db:generate    # Generate migrations from *.model.ts
 npm run db:migrate     # Apply migrations to database
+npm run db:studio      # Open Drizzle Studio for database inspection
+npm run db:setup-demo  # Setup demo user for testing
 
 # Quality Assurance (RUN BEFORE COMMITS)
 npm run quality:check  # Comprehensive: lint + type + format + test
+npm run lint           # Run ESLint (no auto-fix)
 npm run lint:fix       # Auto-fix ESLint issues
+npm run type-check     # TypeScript type checking only
+
+# Testing (ESSENTIAL)
+npm run test           # Run all tests once
+npm run test:watch     # Run tests in watch mode
+npm run test:coverage  # Run tests with coverage report
+
+# Internationalization
+npm run extract        # Extract translatable strings
+npm run compile        # Compile translations to TypeScript
 
 # Development
-npm run dev           # Electron dev server - NEVER RUN
-npm run build         # Production build + i18n compile - NEVER RUN
+npm run dev           # Electron dev server
+npm run build         # Production build + i18n compile
+npm run package       # Package app for distribution
+
+# Maintenance
+npm run format        # Format code with Prettier
+npm run format:check  # Check code formatting
+npm run rebuild       # Rebuild native dependencies (better-sqlite3)
 ```
 
 ## 🏆 **PERFORMANCE PATTERNS**
@@ -115,6 +136,16 @@ npm run build         # Production build + i18n compile - NEVER RUN
 
 - Consistent `@/` import paths
 - Never use `'as any'` casting
+- Global React available (no React import needed)
+- TypeScript strict mode with additional safety checks enabled
+
+### **Testing Framework:**
+
+- **Vitest** for unit and integration tests
+- **@testing-library/react** for component testing
+- Tests in `src/**/*.{test,spec}.ts` and `src/**/*.{test,spec}.tsx`
+- SQLite in-memory database for test isolation
+- Coverage reporting with V8 provider
 
 ## 🚨 **ANTI-PATTERNS TO AVOID**
 
@@ -126,6 +157,13 @@ npm run build         # Production build + i18n compile - NEVER RUN
 - useRouteContext usage
 - localStorage in desktop app renderer process
 - Import hell with relative paths
+
+### **ESLint Boundary Rules (CRITICAL):**
+
+- **NEVER** import main process code from renderer (except types)
+- **NEVER** import renderer code from main process
+- Use `src/renderer/preload.ts` and `src/renderer/window.d.ts` for type-safe IPC
+- Boundaries enforced automatically by `eslint-plugin-boundaries`
 
 ## 🏗️ **ARCHITECTURE OVERVIEW**
 
@@ -181,6 +219,14 @@ npm run build         # Production build + i18n compile - NEVER RUN
 - ❌ **NEVER localStorage** (desktop app security)
 - ✅ **beforeLoad/loader** for auth checks
 - ✅ **Foreign key constraints** for data integrity
+
+### **Internationalization (i18n)**
+
+- **Lingui 5.3.2** for translations
+- **Supported locales**: `en` (English), `pt-BR` (Portuguese Brazil)
+- **Message files**: `.po` format in `src/renderer/locales/`
+- **Workflow**: Extract → Translate → Compile
+- **CRITICAL**: Always run `npm run compile` after translation changes
 
 ## 💀 **PRODUCTION SYSTEM - ZERO TOLERANCE FOR MISTAKES** 💀
 
