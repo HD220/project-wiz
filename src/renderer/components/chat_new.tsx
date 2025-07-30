@@ -59,115 +59,123 @@ type ChatAction =
       payload: {
         id: string | number;
         updates: Record<string, unknown>;
-        keyFn: (item: unknown, index: number) => string | number;
       };
     }
   | {
       type: "REMOVE_MESSAGE";
       payload: {
         id: string | number;
-        keyFn: (item: unknown, index: number) => string | number;
       };
     }
   | { type: "SET_MESSAGES"; payload: unknown[] }
   | { type: "SET_PROPERTY"; payload: { key: keyof ChatState; value: any } }
-  | { type: "TOGGLE_PENDING"; payload: string | number }
+  | { type: "ADD_PENDING"; payload: string | number }
+  | { type: "REMOVE_PENDING"; payload: string | number }
   | { type: "CLEAR"; payload?: undefined }
   | { type: "NAVIGATE_HISTORY"; payload: "up" | "down" };
 
-// Consolidated reducer - replaces complex setState logic
-function chatReducer(state: ChatState, action: ChatAction): ChatState {
-  switch (action.type) {
-    case "ADD_MESSAGE":
-      return {
-        ...state,
-        messages: [...state.messages, action.payload],
-        history:
-          state.input && !state.history.includes(state.input)
-            ? [...state.history, state.input].slice(-50)
-            : state.history,
-      };
+// Factory function para reducer com keyFn via closure
+function createChatReducer(
+  keyFn: (item: unknown, index: number) => string | number,
+) {
+  return function chatReducer(state: ChatState, action: ChatAction): ChatState {
+    switch (action.type) {
+      case "ADD_MESSAGE":
+        return {
+          ...state,
+          messages: [...state.messages, action.payload],
+          history:
+            state.input && !state.history.includes(state.input)
+              ? [...state.history, state.input].slice(-50)
+              : state.history,
+        };
 
-    case "UPDATE_MESSAGE": {
-      const { id, updates, keyFn } = action.payload;
-      return {
-        ...state,
-        messages: state.messages.map((msg) => {
-          const msgId = keyFn(msg, state.messages.indexOf(msg));
-          return msgId === id
-            ? { ...(msg as Record<string, unknown>), ...updates }
-            : msg;
-        }),
-      };
-    }
-
-    case "REMOVE_MESSAGE": {
-      const { id, keyFn } = action.payload;
-      const newPendingMessages = new Set(state.pendingMessages);
-      newPendingMessages.delete(id);
-
-      return {
-        ...state,
-        messages: state.messages.filter((msg) => {
-          const msgId = keyFn(msg, state.messages.indexOf(msg));
-          return msgId !== id;
-        }),
-        pendingMessages: newPendingMessages,
-      };
-    }
-
-    case "SET_MESSAGES":
-      return {
-        ...state,
-        messages: action.payload,
-      };
-
-    case "SET_PROPERTY":
-      return {
-        ...state,
-        [action.payload.key]: action.payload.value,
-      };
-
-    case "TOGGLE_PENDING": {
-      const newPendingMessages = new Set(state.pendingMessages);
-      if (newPendingMessages.has(action.payload)) {
-        newPendingMessages.delete(action.payload);
-      } else {
-        newPendingMessages.add(action.payload);
+      case "UPDATE_MESSAGE": {
+        const { id, updates } = action.payload;
+        return {
+          ...state,
+          messages: state.messages.map((msg) => {
+            const msgId = keyFn(msg, state.messages.indexOf(msg));
+            return msgId === id
+              ? { ...(msg as Record<string, unknown>), ...updates }
+              : msg;
+          }),
+        };
       }
-      return {
-        ...state,
-        pendingMessages: newPendingMessages,
-      };
+
+      case "REMOVE_MESSAGE": {
+        const { id } = action.payload;
+        const newPendingMessages = new Set(state.pendingMessages);
+        newPendingMessages.delete(id);
+
+        return {
+          ...state,
+          messages: state.messages.filter((msg) => {
+            const msgId = keyFn(msg, state.messages.indexOf(msg));
+            return msgId !== id;
+          }),
+          pendingMessages: newPendingMessages,
+        };
+      }
+
+      case "SET_MESSAGES":
+        return {
+          ...state,
+          messages: action.payload,
+        };
+
+      case "SET_PROPERTY":
+        return {
+          ...state,
+          [action.payload.key]: action.payload.value,
+        };
+
+      case "ADD_PENDING": {
+        const newPendingMessages = new Set(state.pendingMessages);
+        newPendingMessages.add(action.payload);
+        return {
+          ...state,
+          pendingMessages: newPendingMessages,
+        };
+      }
+
+      case "REMOVE_PENDING": {
+        const newPendingMessages = new Set(state.pendingMessages);
+        newPendingMessages.delete(action.payload);
+        return {
+          ...state,
+          pendingMessages: newPendingMessages,
+        };
+      }
+
+      case "CLEAR":
+        return {
+          ...state,
+          messages: [],
+          input: "",
+          historyIndex: -1,
+          pendingMessages: new Set(),
+        };
+
+      case "NAVIGATE_HISTORY": {
+        const newIndex =
+          action.payload === "up"
+            ? Math.min(state.historyIndex + 1, state.history.length - 1)
+            : Math.max(state.historyIndex - 1, -1);
+        return {
+          ...state,
+          historyIndex: newIndex,
+          input:
+            newIndex >= 0
+              ? state.history[state.history.length - 1 - newIndex] || ""
+              : "",
+        };
+      }
+
+      default:
+        return state;
     }
-
-    case "CLEAR":
-      return {
-        ...state,
-        messages: [],
-        input: "",
-        historyIndex: -1,
-        pendingMessages: new Set(),
-      };
-
-    case "NAVIGATE_HISTORY": {
-      const newIndex =
-        action.payload === "up"
-          ? Math.min(state.historyIndex + 1, state.history.length - 1)
-          : Math.max(state.historyIndex - 1, -1);
-      return {
-        ...state,
-        historyIndex: newIndex,
-        input:
-          newIndex >= 0
-            ? state.history[state.history.length - 1 - newIndex] || ""
-            : "",
-      };
-    }
-
-    default:
-      return state;
-  }
+  };
 }
 
 type ChatContextValue = {
@@ -258,7 +266,10 @@ function Chat({
     pendingMessages: new Set<string | number>(),
   };
 
-  const [state, dispatch] = React.useReducer(chatReducer, initialState);
+  const [state, dispatch] = React.useReducer(
+    createChatReducer(keyFn),
+    initialState,
+  );
 
   // Controlled/uncontrolled pattern
   const messages = value !== undefined ? value : state.messages;
@@ -275,7 +286,7 @@ function Chat({
     }
   }, [state.autoScroll]);
 
-  // Helper para eliminar duplicação de dispatch + onValueChange
+  // Helper para complex actions com callbacks
   const createAction =
     (
       actionType: ChatAction["type"],
@@ -294,10 +305,6 @@ function Chat({
       }
     };
 
-  // Helper para simple property setters - consistência arquitetural
-  const createPropertySetter = (key: keyof ChatState) => (value: any) =>
-    dispatch({ type: "SET_PROPERTY", payload: { key, value } });
-
   // Actions simplificadas usando helper centralizado
   const actions = {
     addMessage: createAction(
@@ -311,7 +318,6 @@ function Chat({
       (id: string | number, updates: Record<string, unknown>) => ({
         id,
         updates,
-        keyFn,
       }),
       (msgs, id: string | number, updates: Record<string, unknown>) => {
         return msgs.map((msg) => {
@@ -328,7 +334,7 @@ function Chat({
 
     removeMessage: createAction(
       "REMOVE_MESSAGE",
-      (id: string | number) => ({ id, keyFn }),
+      (id: string | number) => ({ id }),
       (msgs, id: string | number) => {
         return msgs.filter((msg) => {
           const msgId = keyFn(msg, msgs.indexOf(msg));
@@ -354,15 +360,31 @@ function Chat({
       },
     ),
 
-    setInput: createPropertySetter("input"),
-    setLoading: createPropertySetter("loading"),
-    setTyping: createPropertySetter("typing"),
-    setAutoScroll: createPropertySetter("autoScroll"),
+    setInput: (input: string) =>
+      dispatch({
+        type: "SET_PROPERTY",
+        payload: { key: "input", value: input },
+      }),
+    setLoading: (loading: boolean) =>
+      dispatch({
+        type: "SET_PROPERTY",
+        payload: { key: "loading", value: loading },
+      }),
+    setTyping: (typing: boolean) =>
+      dispatch({
+        type: "SET_PROPERTY",
+        payload: { key: "typing", value: typing },
+      }),
+    setAutoScroll: (autoScroll: boolean) =>
+      dispatch({
+        type: "SET_PROPERTY",
+        payload: { key: "autoScroll", value: autoScroll },
+      }),
 
     addPendingMessage: (id: string | number) =>
-      dispatch({ type: "TOGGLE_PENDING", payload: id }),
+      dispatch({ type: "ADD_PENDING", payload: id }),
     removePendingMessage: (id: string | number) =>
-      dispatch({ type: "TOGGLE_PENDING", payload: id }),
+      dispatch({ type: "REMOVE_PENDING", payload: id }),
 
     send: (customInput?: string) => {
       const inputToSend = customInput ?? state.input.trim();
