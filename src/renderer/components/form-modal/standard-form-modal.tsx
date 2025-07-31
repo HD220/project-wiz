@@ -5,6 +5,7 @@ import { Button } from "@/renderer/components/ui/button";
 import {
   Dialog,
   DialogContent,
+  DialogTitle,
   DialogTrigger,
 } from "@/renderer/components/ui/dialog";
 import { ScrollArea } from "@/renderer/components/ui/scroll-area";
@@ -70,14 +71,14 @@ function StandardFormModalHeader({
             <Icon className="size-4 text-primary" />
           </div>
         )}
-        <h3
+        <DialogTitle
           className={cn(
             "font-bold leading-tight tracking-tight text-foreground transition-colors duration-200",
             "text-2xl lg:text-3xl",
           )}
         >
           {title}
-        </h3>
+        </DialogTitle>
       </div>
       <p
         className={cn(

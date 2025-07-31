@@ -220,45 +220,49 @@ export class UserService {
   static async softDelete(userId: string, deletedBy: string): Promise<void> {
     const db = getDatabase();
 
-    await db.transaction(async (tx) => {
+    await db.transaction((tx) => {
       // 1. Soft delete user
-      await tx
+      tx
         .update(usersTable)
         .set({
           isActive: false,
           deactivatedAt: new Date(),
           deactivatedBy: deletedBy,
         })
-        .where(eq(usersTable.id, userId));
+        .where(eq(usersTable.id, userId))
+        .run();
 
       // 2. Cascade soft delete to owned entities
-      await tx
+      tx
         .update(agentsTable)
         .set({
           isActive: false,
           deactivatedAt: new Date(),
           deactivatedBy: deletedBy,
         })
-        .where(eq(agentsTable.ownerId, userId));
+        .where(eq(agentsTable.ownerId, userId))
+        .run();
 
-      await tx
+      tx
         .update(projectsTable)
         .set({
           isActive: false,
           deactivatedAt: new Date(),
           deactivatedBy: deletedBy,
         })
-        .where(eq(projectsTable.ownerId, userId));
+        .where(eq(projectsTable.ownerId, userId))
+        .run();
 
       // 3. Soft delete user sessions
-      await tx
+      tx
         .update(userSessionsTable)
         .set({
           isActive: false,
           deactivatedAt: new Date(),
           deactivatedBy: deletedBy,
         })
-        .where(eq(userSessionsTable.userId, userId));
+        .where(eq(userSessionsTable.userId, userId))
+        .run();
     });
   }
 }

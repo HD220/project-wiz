@@ -161,23 +161,26 @@ export class [FeatureName]Service {
     // Complex operation logic (extracted only if > 20 lines)
     const db = getDatabase();
 
-    return await db.transaction(async (tx) => {
+    return await db.transaction((tx) => {
       // Multi-step operation
-      const [updated] = await tx
+      const updatedResults = tx
         .update([tableName])
         .set({
           [field]: input.[field],
           updatedAt: new Date(),
         })
         .where(eq([tableName].id, entity.id))
-        .returning();
+        .returning()
+        .all();
+      
+      const [updated] = updatedResults;
 
       // Related operations
-      await tx.insert([relatedTable]).values({
+      tx.insert([relatedTable]).values({
         parentId: entity.id,
         action: '[operationName]',
         timestamp: new Date(),
-      });
+      }).run();
 
       return updated;
     });

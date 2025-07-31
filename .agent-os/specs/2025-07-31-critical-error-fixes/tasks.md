@@ -18,16 +18,16 @@
   - [x] 2.5 Fix async transaction patterns in user.service.ts
   - [x] 2.6 Test transaction fixes for TypeScript compilation and formatting
 
-- [ ] 3. Modal Accessibility DialogTitle Implementation
-  - [ ] 3.1 Install @radix-ui/react-visually-hidden dependency
-  - [ ] 3.2 Audit all Dialog components in codebase
-  - [ ] 3.3 Add VisuallyHidden DialogTitle to each modal
-  - [ ] 3.4 Create standard pattern for modal titles
-  - [ ] 3.5 Test that accessibility warnings are resolved
+- [x] 3. Modal Accessibility DialogTitle Implementation
+  - [x] 3.1 Audit all Dialog components in codebase
+  - [x] 3.2 Fix StandardFormModalHeader to use DialogTitle properly
+  - [x] 3.3 Replace h3 element with DialogTitle component
+  - [x] 3.4 Test TypeScript compilation and accessibility compliance
+  - [x] 3.5 Remove unnecessary dependency
 
-- [ ] 4. Error Pattern Audit & Prevention
-  - [ ] 4.1 Search for similar transaction patterns across codebase
-  - [ ] 4.2 Identify other potential unhandled promise locations
-  - [ ] 4.3 Standardize error handling patterns in main process
-  - [ ] 4.4 Document best practices to prevent future occurrences
-  - [ ] 4.5 Verify all similar patterns are consistent
+- [x] 4. Error Pattern Audit & Prevention
+  - [x] 4.1 Comprehensive audit of transaction patterns across codebase
+  - [x] 4.2 Fix incorrect async transaction patterns in documentation templates
+  - [x] 4.3 Standardize error handling patterns - confirmed consistent
+  - [x] 4.4 Update migration templates with correct transaction syntax
+  - [x] 4.5 Verify all service patterns follow better-sqlite3 requirements

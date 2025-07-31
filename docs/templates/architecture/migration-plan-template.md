@@ -171,9 +171,9 @@ export class [NewFeature]Service {
     }
 
     // Improved database operation with transaction
-    return await db.transaction(async (tx) => {
+    return await db.transaction((tx) => {
       // Main operation
-      const [result] = await tx
+      const resultArray = tx
         .insert([newTable]Table)
         .values({
           ...validated,
@@ -181,17 +181,20 @@ export class [NewFeature]Service {
           migrationVersion: 'v2.0',
           migratedAt: new Date(),
         })
-        .returning();
+        .returning()
+        .all();
+
+      const [result] = resultArray;
 
       // Enhanced audit logging
-      await tx.insert(auditLogTable).values({
+      tx.insert(auditLogTable).values({
         entityType: '[new-entity]',
         entityId: result.id,
         action: '[improved-operation]',
         userId: currentUser.id,
         details: { input: validated },
         timestamp: new Date(),
-      });
+      }).run();
 
       return result;
     });
@@ -346,12 +349,13 @@ export class [Feature]DataMigrationService {
     const errors: string[] = [];
 
     try {
-      return await db.transaction(async (tx) => {
+      return await db.transaction((tx) => {
         // Get all records to migrate
-        const legacyRecords = await tx
+        const legacyRecords = tx
           .select()
           .from([legacyTable])
-          .where(isNull([legacyTable].migratedAt));
+          .where(isNull([legacyTable].migratedAt))
+          .all();
 
         logger.info(`Starting migration of ${legacyRecords.length} records`);
 
@@ -361,23 +365,27 @@ export class [Feature]DataMigrationService {
             const transformedData = this.transformLegacyData(record);
 
             // Insert into new table
-            const [newRecord] = await tx
+            const newRecordResults = tx
               .insert([newTable]Table)
               .values({
                 ...transformedData,
                 migratedAt: new Date(),
                 migrationVersion: 'v2.0',
               })
-              .returning();
+              .returning()
+              .all();
+
+            const [newRecord] = newRecordResults;
 
             // Update legacy record to mark as migrated
-            await tx
+            tx
               .update([legacyTable])
               .set({
                 migratedAt: new Date(),
                 newRecordId: newRecord.id,
               })
-              .where(eq([legacyTable].id, record.id));
+              .where(eq([legacyTable].id, record.id))
+              .run();
 
             migratedCount++;
 
@@ -629,16 +637,16 @@ export class MigrationRollback {
   static async rollbackToPhase(targetPhase: number): Promise<RollbackResult> {
     const db = getDatabase();
 
-    return await db.transaction(async (tx) => {
+    return await db.transaction((tx) => {
       switch (targetPhase) {
         case 0: // Complete rollback
-          return await this.rollbackToOriginal(tx);
+          return this.rollbackToOriginal(tx);
 
         case 1: // Rollback to Phase 1 (keep schema, remove data)
-          return await this.rollbackToPhase1(tx);
+          return this.rollbackToPhase1(tx);
 
         case 2: // Rollback to Phase 2 (keep data, revert frontend)
-          return await this.rollbackToPhase2(tx);
+          return this.rollbackToPhase2(tx);
 
         default:
           throw new Error(`Invalid rollback phase: ${targetPhase}`);
