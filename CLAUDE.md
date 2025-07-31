@@ -68,10 +68,30 @@ This file provides guidance to Claude Code when working with this Electron + Rea
 - ❌ **NEVER EDIT SQL MIGRATION FILES DIRECTLY**
 - ✅ **ONLY** modify `*.model.ts` files then execute `npm run db:generate` → `npm run db:migrate`
 
+**CRITICAL TRANSACTION RULES:**
+
+**❌ NEVER DO THIS (will fail with "Transaction function cannot return a promise"):**
+```typescript
+db.transaction(async (tx) => {
+  const result = await tx.select()...
+});
+```
+
+**✅ ALWAYS DO THIS (better-sqlite3 is synchronous):**
+```typescript
+db.transaction((tx) => {
+  const results = tx.select().from(table).all();  // SELECT
+  tx.insert().values().run();                     // INSERT/UPDATE/DELETE
+  return results[0];
+});
+```
+
 **MANDATORY:**
 
 - Foreign key constraints on ALL relationships
 - Indexes on ALL foreign keys and query columns
+- Use `.all()`, `.run()`, `.get()` methods in transactions
+- No `async/await` in transaction callbacks
 
 ### **IPC Communication**
 

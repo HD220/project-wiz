@@ -6,7 +6,7 @@ This document outlines the **MANDATORY** database patterns and practices for Pro
 
 These patterns are **actively implemented** across **14 database tables** with **62+ optimized indexes** and **full foreign key constraints** in the sophisticated Project Wiz schema.
 
-## 🚨 CRITICAL MIGRATION RULES
+## 🚨 CRITICAL RULES
 
 ### **NEVER EDIT SQL MIGRATION FILES DIRECTLY**
 
@@ -16,6 +16,113 @@ Migrations are **AUTO-GENERATED** by Drizzle from `*.model.ts` files:
 2. Run `npm run db:generate` - auto-detects changes via `drizzle.config.ts`
 3. Run `npm run db:migrate` - applies migrations
 4. Direct SQL edits will be **OVERWRITTEN** and can **BREAK** the migration system
+
+### **CRITICAL: Transaction Pattern Rules**
+
+**better-sqlite3 is SYNCHRONOUS** - transactions must follow these exact patterns:
+
+**❌ NEVER DO THIS:**
+```typescript
+// This will fail with "Transaction function cannot return a promise"
+db.transaction(async (tx) => {
+  const result = await tx.select()...
+});
+```
+
+**✅ ALWAYS DO THIS:**
+```typescript
+// Synchronous callback with .all(), .run(), .get() methods
+db.transaction((tx) => {
+  const results = tx.select().from(table).all();
+  const result = results[0];
+  
+  tx.insert().values().run();  // For INSERT/UPDATE/DELETE
+  return result;
+});
+```
+
+### **Transaction Method Reference**
+
+| Method | Use Case | Returns | Example |
+|--------|----------|---------|---------|
+| `.all()` | SELECT queries | `Array<T>` | `tx.select().from(users).all()` |
+| `.get()` | Single row SELECT | `T \| undefined` | `tx.select().from(users).limit(1).get()` |
+| `.run()` | INSERT/UPDATE/DELETE | `RunResult` | `tx.insert(users).values({...}).run()` |
+| `.returning().all()` | INSERT/UPDATE with return | `Array<T>` | `tx.insert(users).values({...}).returning().all()` |
+
+### **Real-World Transaction Examples**
+
+**✅ Agent Creation (from AgentService.create):**
+```typescript
+return db.transaction((tx) => {
+  // 1. Validate provider exists
+  const providers = tx
+    .select()
+    .from(llmProvidersTable)
+    .where(eq(llmProvidersTable.id, providerId))
+    .limit(1)
+    .all();
+  
+  if (!providers[0]) {
+    throw new Error("Provider not found"); // Triggers rollback
+  }
+
+  // 2. Create user
+  const users = tx
+    .insert(usersTable)
+    .values({ name, type: "agent" })
+    .returning()
+    .all();
+
+  // 3. Create agent
+  const agents = tx
+    .insert(agentsTable)
+    .values({ userId: users[0].id, ... })
+    .returning()
+    .all();
+
+  return agents[0]; // Return created agent
+});
+```
+
+**✅ Soft Delete Pattern:**
+```typescript  
+return db.transaction((tx) => {
+  // Verify exists
+  const items = tx
+    .select()
+    .from(table)
+    .where(and(eq(table.id, id), eq(table.isActive, true)))
+    .limit(1)
+    .all();
+
+  if (!items[0]) {
+    throw new Error("Not found");
+  }
+
+  // Soft delete
+  tx
+    .update(table)
+    .set({
+      isActive: false,
+      deactivatedAt: new Date(),
+      deactivatedBy: userId
+    })
+    .where(eq(table.id, id))
+    .run();
+
+  return true;
+});
+```
+
+### **Why This Pattern Works**
+
+1. **better-sqlite3 is synchronous** - no async/await needed
+2. **Automatic rollback** - any thrown error rolls back the entire transaction
+3. **Type safety** - full TypeScript inference maintained
+4. **Performance** - synchronous operations are faster than promise overhead
+
+**Reference:** [Drizzle ORM GitHub Discussion #1170](https://github.com/drizzle-team/drizzle-orm/discussions/1170)
 
 ## Schema Definition Patterns
 
@@ -322,26 +429,32 @@ export class ProjectService {
   }> {
     const db = getDatabase();
 
-    return await db.transaction(async (tx) => {
-      // Create project
-      const [project] = await tx
+    return db.transaction((tx) => {
+      // Create project (synchronous with better-sqlite3)
+      const projects = tx
         .insert(projectsTable)
         .values(input)
-        .returning();
+        .returning()
+        .all();
+      
+      const project = projects[0];
 
       if (!project) {
         throw new Error("Failed to create project");
       }
 
-      // Create default channel
-      const [channel] = await tx
+      // Create default channel (synchronous with better-sqlite3)
+      const channels = tx
         .insert(channelsTable)
         .values({
           name: "general",
           projectId: project.id,
           type: "text",
         })
-        .returning();
+        .returning()
+        .all();
+      
+      const channel = channels[0];
 
       if (!channel) {
         throw new Error("Failed to create default channel");

@@ -188,6 +188,17 @@ export const usersTable = sqliteTable("users", {
 export type SelectUser = typeof usersTable.$inferSelect;
 export type InsertUser = typeof usersTable.$inferInsert;
 
+// ⚠️ CRITICAL: Database Transaction Pattern (better-sqlite3)
+// ❌ NEVER DO THIS:
+// db.transaction(async (tx) => { const result = await tx.select()... });
+//
+// ✅ ALWAYS DO THIS:
+// db.transaction((tx) => {
+//   const results = tx.select().from(table).all();
+//   const result = results[0];
+//   return result;
+// });
+
 // user.schema.ts - Zod/Validação
 import { z } from "zod";
 
