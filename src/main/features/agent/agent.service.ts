@@ -29,76 +29,81 @@ export class AgentService {
     const validatedInput = createAgentSchema.parse(input);
     const db = getDatabase();
 
-    return db.transaction(async (tx) => {
-      // Verify provider exists and is active
-      const [provider] = await tx
-        .select()
-        .from(llmProvidersTable)
-        .where(
-          and(
-            eq(llmProvidersTable.id, validatedInput.providerId),
-            eq(llmProvidersTable.isActive, true),
-          ),
-        )
-        .limit(1);
+    try {
+      return await db.transaction(async (tx) => {
+        // Verify provider exists and is active
+        const [provider] = await tx
+          .select()
+          .from(llmProvidersTable)
+          .where(
+            and(
+              eq(llmProvidersTable.id, validatedInput.providerId),
+              eq(llmProvidersTable.isActive, true),
+            ),
+          )
+          .limit(1);
 
-      if (!provider) {
-        throw new Error(
-          `LLM provider ${validatedInput.providerId} not found or inactive`,
-        );
-      }
+        if (!provider) {
+          throw new Error(
+            `LLM provider ${validatedInput.providerId} not found or inactive`,
+          );
+        }
 
-      // Create user for the agent first
-      const [agentUser] = await tx
-        .insert(usersTable)
-        .values({
-          name: validatedInput.name,
-          avatar: validatedInput.avatar || "",
-          type: "agent",
-        })
-        .returning();
+        // Create user for the agent first
+        const [agentUser] = await tx
+          .insert(usersTable)
+          .values({
+            name: validatedInput.name,
+            avatar: validatedInput.avatar || "",
+            type: "agent",
+          })
+          .returning();
 
-      if (!agentUser) {
-        throw new Error("Failed to create user for agent");
-      }
+        if (!agentUser) {
+          throw new Error("Failed to create user for agent");
+        }
 
-      if (!agentUser.id) {
-        throw new Error("Created user missing ID");
-      }
+        if (!agentUser.id) {
+          throw new Error("Created user missing ID");
+        }
 
-      // Generate system prompt
-      const systemPrompt = `You are a ${validatedInput.role}. ${validatedInput.backstory}. Your current goal is ${validatedInput.goal}. Always be helpful, professional, and focus on best practices in your domain. Provide clear, actionable advice and maintain a collaborative approach when working with humans and other agents.`;
+        // Generate system prompt
+        const systemPrompt = `You are a ${validatedInput.role}. ${validatedInput.backstory}. Your current goal is ${validatedInput.goal}. Always be helpful, professional, and focus on best practices in your domain. Provide clear, actionable advice and maintain a collaborative approach when working with humans and other agents.`;
 
-      // Create the agent record
-      const [agent] = await tx
-        .insert(agentsTable)
-        .values({
-          userId: agentUser.id, // Link to the user we just created
-          ownerId: ownerId, // Who created this agent
-          name: validatedInput.name,
-          role: validatedInput.role,
-          backstory: validatedInput.backstory,
-          goal: validatedInput.goal,
-          systemPrompt,
-          providerId: validatedInput.providerId,
-          modelConfig:
-            typeof validatedInput.modelConfig === "string"
-              ? validatedInput.modelConfig
-              : JSON.stringify(validatedInput.modelConfig),
-          status: "inactive" as AgentStatus,
-        })
-        .returning();
+        // Create the agent record
+        const [agent] = await tx
+          .insert(agentsTable)
+          .values({
+            userId: agentUser.id, // Link to the user we just created
+            ownerId: ownerId, // Who created this agent
+            name: validatedInput.name,
+            role: validatedInput.role,
+            backstory: validatedInput.backstory,
+            goal: validatedInput.goal,
+            systemPrompt,
+            providerId: validatedInput.providerId,
+            modelConfig:
+              typeof validatedInput.modelConfig === "string"
+                ? validatedInput.modelConfig
+                : JSON.stringify(validatedInput.modelConfig),
+            status: "inactive" as AgentStatus,
+          })
+          .returning();
 
-      if (!agent) {
-        throw new Error("Failed to create agent");
-      }
+        if (!agent) {
+          throw new Error("Failed to create agent");
+        }
 
-      if (!agent.id) {
-        throw new Error("Created agent missing ID");
-      }
+        if (!agent.id) {
+          throw new Error("Created agent missing ID");
+        }
 
-      return agent;
-    });
+        return agent;
+      });
+    } catch (error) {
+      // Re-throw the error to ensure proper error handling up the chain
+      throw error;
+    }
   }
 
   /**
@@ -259,31 +264,36 @@ export class AgentService {
   static async softDelete(id: string, deletedBy: string): Promise<boolean> {
     const db = getDatabase();
 
-    return db.transaction(async (tx) => {
-      // Verify agent exists and is active
-      const [agent] = await tx
-        .select()
-        .from(agentsTable)
-        .where(and(eq(agentsTable.id, id), eq(agentsTable.isActive, true)))
-        .limit(1);
+    try {
+      return await db.transaction(async (tx) => {
+        // Verify agent exists and is active
+        const [agent] = await tx
+          .select()
+          .from(agentsTable)
+          .where(and(eq(agentsTable.id, id), eq(agentsTable.isActive, true)))
+          .limit(1);
 
-      if (!agent) {
-        throw new Error("Agent not found or already inactive");
-      }
+        if (!agent) {
+          throw new Error("Agent not found or already inactive");
+        }
 
-      // Soft delete the agent
-      await tx
-        .update(agentsTable)
-        .set({
-          isActive: false,
-          deactivatedAt: new Date(),
-          deactivatedBy: deletedBy,
-          updatedAt: new Date(),
-        })
-        .where(eq(agentsTable.id, id));
+        // Soft delete the agent
+        await tx
+          .update(agentsTable)
+          .set({
+            isActive: false,
+            deactivatedAt: new Date(),
+            deactivatedBy: deletedBy,
+            updatedAt: new Date(),
+          })
+          .where(eq(agentsTable.id, id));
 
-      return true;
-    });
+        return true;
+      });
+    } catch (error) {
+      // Re-throw the error to ensure proper error handling up the chain
+      throw error;
+    }
   }
 
   /**
