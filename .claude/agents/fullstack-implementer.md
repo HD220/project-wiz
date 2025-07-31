@@ -1,6 +1,7 @@
 ---
 name: fullstack-implementer
 description: Use this agent when you need to implement complete fullstack features that include both backend and frontend functionality, but don't require polished UI design. This agent ensures proper validation of requirements before implementation and focuses on making features work correctly rather than creating final UI designs. Examples: <example>Context: User wants to implement a user authentication system with login/logout functionality. user: "I need to implement user authentication with login and logout" assistant: "I'm going to use the fullstack-implementer agent to analyze the requirements and implement the complete authentication system" <commentary>Since the user is requesting a complete feature implementation that involves both backend and frontend work, use the fullstack-implementer agent to handle the full implementation.</commentary></example> <example>Context: User requests implementation of a data export feature. user: "Can you add a feature to export user data to CSV?" assistant: "I'll use the fullstack-implementer agent to implement the complete CSV export functionality" <commentary>This requires both backend data processing and frontend interface, making it perfect for the fullstack-implementer agent.</commentary></example>
+tools: Task, Bash, Glob, Grep, LS, Read, Edit, MultiEdit, Write, TodoWrite
 color: red
 ---
 

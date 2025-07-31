@@ -28,20 +28,15 @@ function ProjectLayout() {
 
 export const Route = createFileRoute("/_authenticated/project/$projectId")({
   loader: async ({ params }) => {
-    try {
-      // Get basic project info for sidebar using loadApiData for consistency
-      const project = await loadApiData(
-        () => window.api.projects.findById(params.projectId),
-        "Project not found",
-      );
+    // Get basic project info for sidebar using loadApiData for consistency
+    const project = await loadApiData(
+      () => window.api.projects.findById(params.projectId),
+      "Project not found",
+    );
 
-      return {
-        project,
-      };
-    } catch (error) {
-      console.error("Failed to load project:", error);
-      throw error;
-    }
+    return {
+      project,
+    };
   },
   component: ProjectLayout,
 });

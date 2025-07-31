@@ -40,7 +40,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
           setUser(response.data.user);
         }
       } catch (error) {
-        console.warn("Failed to load active session:", error);
+        // Session load failure is expected when user is not logged in
       } finally {
         setIsLoading(false);
       }

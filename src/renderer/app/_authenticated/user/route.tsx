@@ -1,6 +1,9 @@
 import { createFileRoute, Outlet } from "@tanstack/react-router";
 
+import type { DMConversationWithLastMessage } from "@/main/features/dm/dm-conversation.types";
+
 import { UserSidebar } from "@/renderer/components/app/user-sidebar";
+import type { ConversationWithLastMessage } from "@/renderer/types/chat.types";
 
 function UserLayout() {
   const { conversations, availableUsers } = Route.useLoaderData();
@@ -50,8 +53,41 @@ export const Route = createFileRoute("/_authenticated/user")({
       );
     }
 
-    const conversations = (conversationsResponse.data || []) as any;
+    const dmConversations = (conversationsResponse.data ||
+      []) as DMConversationWithLastMessage[];
     const availableUsers = availableUsersResponse.data || [];
+
+    // Transform DM conversations to universal format
+    const conversations: ConversationWithLastMessage[] = dmConversations.map(
+      (dm) => ({
+        ...dm,
+        type: "dm" as const,
+        title: dm.name,
+        isArchived: dm.archivedAt !== null,
+        participants: dm.participants?.map((p) => ({
+          id: p.id,
+          conversationId: p.dmConversationId,
+          userId: p.participantId,
+          joinedAt: p.createdAt,
+        })),
+        lastMessage: dm.lastMessage
+          ? {
+              id: dm.lastMessage.id,
+              isActive: true,
+              deactivatedAt: null,
+              deactivatedBy: null,
+              createdAt: dm.lastMessage.createdAt,
+              updatedAt: dm.lastMessage.updatedAt,
+              conversationId: dm.id,
+              content: dm.lastMessage.content,
+              authorId: dm.lastMessage.authorId,
+              senderId: dm.lastMessage.authorId,
+              senderType: "user" as const,
+              metadata: null,
+            }
+          : undefined,
+      }),
+    );
 
     return {
       conversations,

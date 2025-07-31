@@ -8,7 +8,6 @@ import type {
   CreateAgentInput,
   AgentStatus,
 } from "@/main/features/agent/agent.types";
-
 // Memory removed
 import type {
   LoginCredentials,
@@ -200,5 +199,3 @@ contextBridge.exposeInMainWorld("electronAPI", {
     close: () => ipcRenderer.invoke("window:close"),
   },
 });
-
-console.log("Preload script loaded successfully");

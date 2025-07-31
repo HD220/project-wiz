@@ -79,7 +79,7 @@ export function AgentCard({
         className,
       )}
     >
-      <CardHeader className="pb-4 relative z-10">
+      <CardHeader className="pb-[var(--spacing-component-md)] relative z-10">
         <div className="flex items-start gap-[var(--spacing-component-md)]">
           {/* Avatar with status indicator */}
           <div className="relative">
@@ -166,7 +166,7 @@ export function AgentCard({
         </div>
       </CardHeader>
 
-      <CardContent className="pb-4 px-6 relative z-10">
+      <CardContent className="pb-[var(--spacing-component-md)] relative z-10">
         <div className="space-y-[var(--spacing-component-md)]">
           <p className="text-sm text-muted-foreground line-clamp-3 leading-relaxed">
             {agent.backstory || "No backstory provided."}
@@ -182,7 +182,7 @@ export function AgentCard({
         </div>
       </CardContent>
 
-      <CardFooter className="pt-0 px-6 pb-6 border-t border-border/40 bg-card/30 relative z-10">
+      <CardFooter className="pt-0 border-t border-border/40 bg-card/30 relative z-10">
         <div className="flex items-center justify-between w-full">
           <AgentStatus
             status={agent.status}
@@ -192,7 +192,7 @@ export function AgentCard({
 
           <time
             dateTime={agent.createdAt.toISOString()}
-            className="text-xs text-muted-foreground font-medium bg-muted/30 px-2 py-1 rounded-md"
+            className="text-xs text-muted-foreground font-medium bg-muted/30 px-[var(--spacing-component-sm)] py-[var(--spacing-component-xs)] rounded-md"
           >
             {formattedDate}
           </time>
@@ -235,7 +235,8 @@ export function AgentListItem({
   return (
     <div
       className={cn(
-        "group flex items-center gap-3 p-3 rounded-lg border transition-all duration-150",
+        "group flex items-center rounded-lg border transition-all duration-150",
+        "gap-[var(--spacing-component-md)] p-[var(--spacing-component-md)]",
         "hover:bg-accent/50 hover:border-accent-foreground/20",
         "bg-card border-border",
         isLoading && "opacity-50 pointer-events-none",
@@ -257,17 +258,20 @@ export function AgentListItem({
 
       {/* Agent Info */}
       <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2 mb-1">
+        <div className="flex items-center gap-[var(--spacing-component-sm)] mb-[var(--spacing-component-xs)]">
           <h3 className="text-sm font-medium text-foreground truncate">
             {agent.name}
           </h3>
           {agent.status === "busy" && (
-            <Badge variant="secondary" className="h-4 px-1.5 text-xs">
+            <Badge
+              variant="secondary"
+              className="h-4 px-[var(--spacing-component-sm)] text-xs"
+            >
               Busy
             </Badge>
           )}
         </div>
-        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+        <div className="flex items-center gap-[var(--spacing-component-sm)] text-xs text-muted-foreground">
           <span className="truncate">{agent.role || "AI Agent"}</span>
           <span>•</span>
           <span className="truncate">{getModelName()}</span>
@@ -288,7 +292,7 @@ export function AgentListItem({
         <Badge
           variant={agent.isActive ? "default" : "secondary"}
           className={cn(
-            "h-5 px-2 text-xs",
+            "h-5 px-[var(--spacing-component-sm)] text-xs",
             agent.isActive
               ? "bg-green-500/10 text-green-600 border-green-500/20"
               : "bg-gray-500/10 text-gray-600 border-gray-500/20",

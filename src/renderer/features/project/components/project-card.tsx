@@ -93,8 +93,11 @@ export function ProjectCardHeader({
   ...props
 }: ProjectCardHeaderProps) {
   return (
-    <CardHeader className={cn("pb-4", className)} {...props}>
-      <div className="flex items-start gap-3">
+    <CardHeader
+      className={cn("pb-[var(--spacing-component-md)]", className)}
+      {...props}
+    >
+      <div className="flex items-start gap-[var(--spacing-component-md)]">
         <Avatar className="size-10 shrink-0">
           <AvatarImage
             src={isValidAvatarUrl(project.avatarUrl) || undefined}
@@ -105,7 +108,7 @@ export function ProjectCardHeader({
           </AvatarFallback>
         </Avatar>
 
-        <div className="flex-1 min-w-0 space-y-1">
+        <div className="flex-1 min-w-0 space-y-[var(--spacing-component-xs)]">
           <CardTitle className="text-base font-semibold leading-tight truncate">
             {project.name}
           </CardTitle>
@@ -194,24 +197,30 @@ export function ProjectCardContent({
   ...props
 }: ProjectCardContentProps) {
   return (
-    <CardContent className={cn("pb-4 space-y-3", className)} {...props}>
+    <CardContent
+      className={cn(
+        "pb-[var(--spacing-component-md)] space-y-[var(--spacing-component-md)]",
+        className,
+      )}
+      {...props}
+    >
       {/* Repository information */}
-      <div className="space-y-2">
+      <div className="space-y-[var(--spacing-component-sm)]">
         {project.localPath && (
-          <div className="text-sm text-muted-foreground flex items-center gap-2">
+          <div className="text-sm text-muted-foreground flex items-center gap-[var(--spacing-component-sm)]">
             <Folder className="h-4 w-4 shrink-0" aria-hidden="true" />
-            <span className="truncate font-mono text-xs bg-muted px-2 py-1 rounded">
+            <span className="truncate font-mono text-xs bg-muted px-[var(--spacing-component-sm)] py-[var(--spacing-component-xs)] rounded">
               {project.localPath}
             </span>
           </div>
         )}
 
         {project.gitUrl && (
-          <div className="text-sm text-muted-foreground flex items-center gap-2">
+          <div className="text-sm text-muted-foreground flex items-center gap-[var(--spacing-component-sm)]">
             <GitBranch className="h-4 w-4 shrink-0" aria-hidden="true" />
             <span className="truncate">
               Branch:{" "}
-              <code className="bg-muted px-1.5 py-0.5 rounded text-xs font-mono">
+              <code className="bg-muted px-[var(--spacing-component-sm)] py-[var(--spacing-component-xs)] rounded text-xs font-mono">
                 {project.branch || "main"}
               </code>
             </span>
@@ -257,7 +266,7 @@ export function ProjectCardFooter({
 
         <time
           dateTime={project.createdAt.toISOString()}
-          className="text-sm text-muted-foreground font-medium flex items-center gap-1"
+          className="text-sm text-muted-foreground font-medium flex items-center gap-[var(--spacing-component-xs)]"
         >
           <Calendar className="h-3 w-3" />
           {formattedDate}
@@ -307,8 +316,8 @@ export function LegacyProjectCard(props: LegacyProjectCardProps) {
         project={project}
         className={cn("hover:shadow-sm", className)}
       >
-        <CardHeader className="pb-2">
-          <div className="flex items-center gap-3">
+        <CardHeader className="pb-[var(--spacing-component-sm)]">
+          <div className="flex items-center gap-[var(--spacing-component-md)]">
             <Avatar className="size-8">
               <AvatarImage
                 src={isValidAvatarUrl(project.avatarUrl) || undefined}

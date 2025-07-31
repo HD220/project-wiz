@@ -93,17 +93,12 @@ function ProjectPage() {
 
 export const Route = createFileRoute("/_authenticated/project/$projectId/")({
   loader: async ({ params }) => {
-    try {
-      const project = await loadApiData(
-        () => window.api.projects.findById(params.projectId),
-        "Project not found",
-      );
+    const project = await loadApiData(
+      () => window.api.projects.findById(params.projectId),
+      "Project not found",
+    );
 
-      return { project };
-    } catch (error) {
-      console.error("Failed to load project:", error);
-      throw error;
-    }
+    return { project };
   },
   component: ProjectPage,
 });

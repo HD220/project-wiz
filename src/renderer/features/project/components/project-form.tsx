@@ -131,7 +131,7 @@ export function ProjectForm(props: ProjectFormProps) {
   // Compact Discord-style option component
   function ProjectTypeOption({
     value,
-    icon: Icon,
+    icon: IconComponent,
     title,
     description,
   }: {
@@ -152,7 +152,7 @@ export function ProjectForm(props: ProjectFormProps) {
         )}
       >
         <RadioGroupItem value={value} id={value} />
-        <Icon className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
+        <IconComponent className="h-4 w-4 text-muted-foreground" />
         <div className="flex-1">
           <Label htmlFor={value} className="font-medium cursor-pointer text-sm">
             {title}
@@ -165,7 +165,7 @@ export function ProjectForm(props: ProjectFormProps) {
 
   function onSubmit(data: ProjectFormData) {
     if (!user?.id) {
-      console.error("User not authenticated");
+      // Authentication error - should not happen due to route guards
       return;
     }
 

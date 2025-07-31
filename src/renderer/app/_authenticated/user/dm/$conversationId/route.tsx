@@ -2,6 +2,11 @@ import { createFileRoute, Outlet } from "@tanstack/react-router";
 import { Send, Paperclip, Smile } from "lucide-react";
 import { useRef, useEffect } from "react";
 
+import type { DMConversationWithParticipants } from "@/main/features/dm/dm-conversation.types";
+import type { SelectMessage } from "@/main/features/message/message.types";
+import type { UserSummary } from "@/main/features/user/user.service";
+import type { AuthenticatedUser } from "@/main/features/user/user.types";
+
 import {
   Chat,
   ChatMessages,
@@ -20,10 +25,17 @@ import {
 import { loadApiData } from "@/renderer/lib/route-loader";
 import { cn } from "@/renderer/lib/utils";
 
+interface DMLoaderData {
+  conversation: DMConversationWithParticipants;
+  messages: SelectMessage[];
+  availableUsers: UserSummary[];
+  user: AuthenticatedUser;
+}
+
 function DMLayout() {
   const { conversationId } = Route.useParams();
   const { conversation, messages, availableUsers, user } =
-    Route.useLoaderData() as any;
+    Route.useLoaderData() as DMLoaderData;
 
   if (!conversation) {
     return (
@@ -277,7 +289,7 @@ function DMLayout() {
                                 <div className="flex justify-end items-start h-5 pt-0.5">
                                   <span className="text-xs text-muted-foreground/40 opacity-0 group-hover:opacity-100 transition-opacity font-mono">
                                     {new Date(
-                                      (message.data as any).createdAt,
+                                      (message.data as SelectMessage).createdAt,
                                     ).toLocaleTimeString([], {
                                       hour: "2-digit",
                                       minute: "2-digit",
@@ -304,7 +316,7 @@ function DMLayout() {
                                   </span>
                                   <span className="text-xs text-muted-foreground/60 font-mono">
                                     {new Date(
-                                      (message.data as any).createdAt,
+                                      (message.data as SelectMessage).createdAt,
                                     ).toLocaleString([], {
                                       month: "short",
                                       day: "numeric",
@@ -324,7 +336,7 @@ function DMLayout() {
                                 )}
                               >
                                 <p className="whitespace-pre-wrap selection:bg-primary/20 m-0">
-                                  {(message.data as any).content}
+                                  {(message.data as SelectMessage).content}
                                 </p>
                               </div>
                             </div>
@@ -476,41 +488,36 @@ export const Route = createFileRoute("/_authenticated/user/dm/$conversationId")(
     loader: async ({ params }) => {
       const { conversationId } = params;
 
-      try {
-        const [dmConversation, messages, availableUsers, user] =
-          await Promise.all([
-            loadApiData(
-              () => window.api.dm.findById(conversationId),
-              "Failed to load DM conversation",
-            ),
-            loadApiData(
-              () => window.api.dm.getMessages(conversationId),
-              "Failed to load DM messages",
-            ),
-            loadApiData(
-              () => window.api.users.listAvailableUsers(),
-              "Failed to load available users",
-            ),
-            loadApiData(
-              () => window.api.auth.getCurrentUser(),
-              "Failed to load current user",
-            ),
-          ]);
+      const [dmConversation, messages, availableUsers, user] =
+        await Promise.all([
+          loadApiData(
+            () => window.api.dm.findById(conversationId),
+            "Failed to load DM conversation",
+          ),
+          loadApiData(
+            () => window.api.dm.getMessages(conversationId),
+            "Failed to load DM messages",
+          ),
+          loadApiData(
+            () => window.api.users.listAvailableUsers(),
+            "Failed to load available users",
+          ),
+          loadApiData(
+            () => window.api.auth.getCurrentUser(),
+            "Failed to load current user",
+          ),
+        ]);
 
-        if (!dmConversation) {
-          throw new Error("DM conversation not found");
-        }
-
-        return {
-          conversation: dmConversation,
-          messages: messages || [],
-          availableUsers,
-          user,
-        };
-      } catch (error) {
-        console.error("Failed to load DM conversation data:", error);
-        throw error;
+      if (!dmConversation) {
+        throw new Error("DM conversation not found");
       }
+
+      return {
+        conversation: dmConversation,
+        messages: messages || [],
+        availableUsers,
+        user,
+      };
     },
     component: DMLayout,
   },

@@ -87,7 +87,8 @@ export function ProviderCard(props: ProviderCardProps) {
       {/* Compact Discord-style Provider Card */}
       <div
         className={cn(
-          "group flex items-center gap-3 p-3 rounded-lg border transition-all duration-150",
+          "group flex items-center rounded-lg border transition-all duration-150",
+          "gap-[var(--spacing-component-md)] p-[var(--spacing-component-md)]",
           "hover:bg-accent/50 hover:border-accent-foreground/20",
           provider.isDefault
             ? "bg-primary/5 border-primary/20"
@@ -97,24 +98,27 @@ export function ProviderCard(props: ProviderCardProps) {
       >
         {/* Provider Info */}
         <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 mb-1">
+          <div className="flex items-center gap-[var(--spacing-component-sm)] mb-[var(--spacing-component-xs)]">
             <h3 className="text-sm font-medium text-foreground truncate">
               {provider.name}
             </h3>
             {provider.isDefault && (
-              <Badge variant="secondary" className="h-4 px-1.5 text-xs">
+              <Badge
+                variant="secondary"
+                className="h-4 px-[var(--spacing-component-sm)] text-xs"
+              >
                 Default
               </Badge>
             )}
           </div>
-          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+          <div className="flex items-center gap-[var(--spacing-component-sm)] text-xs text-muted-foreground">
             <span>{getProviderLabel(provider.type)}</span>
             <span>•</span>
             <span className="truncate">{provider.defaultModel}</span>
             {provider.baseUrl && (
               <>
                 <span>•</span>
-                <span className="flex items-center gap-1">
+                <span className="flex items-center gap-[var(--spacing-component-xs)]">
                   <ExternalLink className="size-3" />
                   Custom
                 </span>
@@ -128,7 +132,7 @@ export function ProviderCard(props: ProviderCardProps) {
           <Badge
             variant={provider.isActive ? "default" : "secondary"}
             className={cn(
-              "h-5 px-2 text-xs",
+              "h-5 px-[var(--spacing-component-sm)] text-xs",
               provider.isActive
                 ? "bg-green-500/10 text-green-600 border-green-500/20"
                 : "bg-gray-500/10 text-gray-600 border-gray-500/20",

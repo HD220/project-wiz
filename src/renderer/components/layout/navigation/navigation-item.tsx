@@ -35,7 +35,8 @@ export function NavigationItem(props: NavigationItemProps) {
       variant={variant}
       size={size}
       className={cn(
-        "w-full justify-start px-2 h-8 text-sm font-medium transition-all duration-150 rounded border border-transparent group",
+        "w-full justify-start h-8 text-sm font-medium transition-all duration-150 rounded border border-transparent group",
+        "px-[var(--spacing-component-sm)]",
         "hover:bg-sidebar-accent/60 hover:text-sidebar-accent-foreground",
         "focus-visible:ring-1 focus-visible:ring-sidebar-ring",
         "text-sidebar-foreground/80",
@@ -53,7 +54,7 @@ export function NavigationItem(props: NavigationItemProps) {
       {children || (
         <>
           {IconComponent && (
-            <IconComponent className="flex-shrink-0 w-4 h-4 mr-3" />
+            <IconComponent className="flex-shrink-0 w-4 h-4 mr-[var(--spacing-component-md)]" />
           )}
           {label && <span className="truncate text-sm">{label}</span>}
         </>

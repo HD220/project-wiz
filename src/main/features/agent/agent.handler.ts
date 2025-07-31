@@ -6,6 +6,7 @@ import type {
 } from "@/main/features/agent/agent.types";
 import { AuthService } from "@/main/features/auth/auth.service";
 import { createIpcHandler } from "@/main/utils/ipc-handler";
+import { getLogger } from "@/main/utils/logger";
 
 /**
  * Setup agent IPC handlers
@@ -125,8 +126,10 @@ export function setupAgentHandlers(): void {
     if (!currentUser) {
       throw new Error("User not authenticated");
     }
-    console.warn(
+    const log = getLogger("agent.handler");
+    log.warn(
       "agents:hardDelete is deprecated. Use agents:delete (soft delete) instead.",
+      { agentId: id },
     );
     await AgentService.delete(id);
     return { message: "Agent permanently deleted" };

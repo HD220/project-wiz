@@ -61,7 +61,8 @@ export function AgentListCard(props: AgentListCardProps) {
     <div
       className={cn(
         // Discord-style compact row layout
-        "group flex items-center gap-3 px-3 py-2 rounded-md transition-all duration-150",
+        "group flex items-center rounded-md transition-all duration-150",
+        "gap-[var(--spacing-component-md)] px-[var(--spacing-component-md)] py-[var(--spacing-component-sm)]",
         "hover:bg-accent/50 cursor-pointer",
         // Inactive state styling
         !agent.isActive && "opacity-60",
@@ -80,7 +81,7 @@ export function AgentListCard(props: AgentListCardProps) {
 
       {/* Agent info - compact layout */}
       <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-[var(--spacing-component-sm)]">
           <span
             className={cn(
               "text-sm font-medium truncate",
@@ -95,7 +96,7 @@ export function AgentListCard(props: AgentListCardProps) {
             <Badge
               variant="secondary"
               className={cn(
-                "h-4 px-1.5 text-xs font-normal",
+                "h-4 px-[var(--spacing-component-sm)] text-xs font-normal",
                 agent.status === "active" &&
                   "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400",
                 agent.status === "busy" &&
@@ -110,14 +111,17 @@ export function AgentListCard(props: AgentListCardProps) {
 
           {/* Inactive indicator */}
           {!agent.isActive && (
-            <Badge variant="outline" className="h-4 px-1.5 text-xs">
+            <Badge
+              variant="outline"
+              className="h-4 px-[var(--spacing-component-sm)] text-xs"
+            >
               Inactive
             </Badge>
           )}
         </div>
 
         {/* Secondary info line */}
-        <div className="flex items-center gap-2 mt-0.5">
+        <div className="flex items-center gap-[var(--spacing-component-sm)] mt-[var(--spacing-component-xs)]">
           <span className="text-xs text-muted-foreground truncate">
             {agent.role}
           </span>

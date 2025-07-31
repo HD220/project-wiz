@@ -100,10 +100,15 @@ npm run db:migrate     # Apply migrations to database
 npm run db:studio      # Open Drizzle Studio for database inspection
 npm run db:setup-demo  # Setup demo user for testing
 
-# Quality Assurance (RUN BEFORE COMMITS)
+# Lint NEVER EXECUTE **PROIBIDED**
 npm run quality:check  # Comprehensive: lint + type + format + test
 npm run lint           # Run ESLint (no auto-fix)
 npm run lint:fix       # Auto-fix ESLint issues
+npm run dev            # Electron dev server
+npm run build          # Production build + i18n compile
+npm run package        # Package app for distribution
+
+# Quality Assurance (RUN BEFORE COMMITS)
 npm run type-check     # TypeScript type checking only
 
 # Testing (ESSENTIAL)
@@ -114,11 +119,6 @@ npm run test:coverage  # Run tests with coverage report
 # Internationalization
 npm run extract        # Extract translatable strings
 npm run compile        # Compile translations to TypeScript
-
-# Development
-npm run dev           # Electron dev server
-npm run build         # Production build + i18n compile
-npm run package       # Package app for distribution
 
 # Maintenance
 npm run format        # Format code with Prettier

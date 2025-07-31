@@ -12,6 +12,7 @@ import type {
 import { createAgentSchema } from "@/main/features/agent/agent.types";
 import { llmProvidersTable } from "@/main/features/llm-provider/llm-provider.model";
 import { usersTable } from "@/main/features/user/user.model";
+import { getLogger } from "@/main/utils/logger";
 
 export class AgentService {
   /**
@@ -358,9 +359,10 @@ export class AgentService {
    * Hard delete agent by ID - kept for backward compatibility
    */
   static async delete(id: string): Promise<void> {
-    console.warn(
-      "AgentService.delete() is deprecated. Use softDelete() instead.",
-    );
+    const log = getLogger("agent.service");
+    log.warn("AgentService.delete() is deprecated. Use softDelete() instead.", {
+      agentId: id,
+    });
     const db = getDatabase();
     await db.delete(agentsTable).where(eq(agentsTable.id, id));
   }

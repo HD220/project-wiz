@@ -4,7 +4,6 @@ import { ThemeProvider } from "next-themes";
 import ReactDOMClient from "react-dom/client";
 
 import "./globals.css";
-// import { detectLocale, dynamicActivate } from '@/config/i18n';
 
 import { AuthProvider, useAuth } from "@/renderer/contexts/auth.context";
 import { routeTree } from "@/renderer/routeTree.gen";

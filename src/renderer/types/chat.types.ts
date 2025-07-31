@@ -23,7 +23,19 @@ export type {
   CreateProjectChannelInput,
 } from "@/main/features/project/project-channel.types";
 
-export type { AuthenticatedUser } from "@/main/features/auth/auth.types";
+export type { AuthenticatedUser } from "@/main/features/user/user.types";
+
+// Note: Using import() syntax to avoid circular dependencies
+export interface UniversalChatProps {
+  chatType: ChatType;
+  sourceId: string; // dmId ou channelId
+  messages: RendererMessage[];
+  currentUser: import("@/main/features/user/user.types").AuthenticatedUser;
+  availableUsers: unknown[];
+  isArchived?: boolean;
+  archivedAt?: Date | null;
+  className?: string;
+}
 
 // ===========================
 // UNIVERSAL CHAT INTERFACE
@@ -31,17 +43,6 @@ export type { AuthenticatedUser } from "@/main/features/auth/auth.types";
 // Interface universal para componentes que trabalham com ambos (DM/Channel)
 
 export type ChatType = "dm" | "channel";
-
-export interface UniversalChatProps {
-  chatType: ChatType;
-  sourceId: string; // dmId ou channelId
-  messages: any[]; // Use any for now to avoid circular dependency
-  currentUser: any; // Use any for now to avoid circular dependency
-  availableUsers: unknown[];
-  isArchived?: boolean;
-  archivedAt?: Date | null;
-  className?: string;
-}
 
 // ===========================
 // SIMPLIFIED MESSAGE TYPES

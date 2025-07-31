@@ -9,7 +9,6 @@ let testDb: ReturnType<typeof getDatabase>;
 
 beforeEach(() => {
   testDb = getDatabase();
-  // setTestDb(testDb); // Removed as it doesn't exist
   migrate(testDb, {
     migrationsFolder: path.resolve(
       __dirname,

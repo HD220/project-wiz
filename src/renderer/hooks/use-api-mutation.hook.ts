@@ -37,7 +37,7 @@ export interface ApiMutationOptions<TReturn> {
  *   {
  *     successMessage: "Agent created successfully",
  *     errorMessage: "Failed to create agent",
- *     onSuccess: (agent) => console.log("Created:", agent.id),
+ *     onSuccess: (agent) => { // handle success },
  *   }
  * );
  *
@@ -78,9 +78,9 @@ export function useApiMutation<TArgs, TReturn>(
         }
       }
     },
-    onError: (error) => {
+    onError: (_error) => {
       // Network/system errors (IPC communication failure)
-      console.error("API mutation error:", error);
+      // Error is already logged by the toast system
       const errorMsg = options.errorMessage || "An unexpected error occurred";
       toast.error(errorMsg);
 
