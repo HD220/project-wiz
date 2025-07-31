@@ -26,6 +26,7 @@ The following features have been implemented:
 ### Features
 
 - [x] **Code Organization & Visual Refinement** - Continue improving codebase patterns and UI polish `M`
+- [ ] **Critical Error Fixes** - Resolve transaction errors, unhandled rejections, and modal accessibility issues `S`
 - [ ] **LLM Worker Service** - Background worker for processing AI agent requests `L`
 - [ ] **Agent Execution Engine** - Core system for running AI agents autonomously `XL`
 - [ ] **Direct Message Chat Integration** - Connect worker system with DM chat interface `M`
