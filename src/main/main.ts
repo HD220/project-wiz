@@ -7,12 +7,16 @@ import { setupAgentHandlers } from "@/main/features/agent/agent.handler";
 import { setupAuthHandlers } from "@/main/features/auth/auth.handler";
 import { AuthService } from "@/main/features/auth/auth.service";
 import { setupDMHandlers } from "@/main/features/dm/dm-conversation.handler";
+import { setupLLMJobQueueHandlers } from "@/main/features/llm-jobs/llm-job-queue.handler";
+import { llmJobResultHandlerService } from "@/main/features/llm-jobs/llm-job-result-handler.service";
+import { llmJobEventsHandler } from "@/main/features/llm-jobs/llm-job-events.handler";
 import { setupLlmProviderHandlers } from "@/main/features/llm-provider/llm-provider.handler";
 import { setupChannelHandlers } from "@/main/features/project/project-channel.handler";
 import { setupProjectHandlers } from "@/main/features/project/project.handler";
 import { setupProfileHandlers } from "@/main/features/user/profile.handler";
 import { setupUserHandlers } from "@/main/features/user/user.handler";
 import { getLogger } from "@/main/utils/logger";
+import { startLLMWorker, stopLLMWorker } from "@/main/workers/worker-manager";
 
 declare const MAIN_WINDOW_VITE_DEV_SERVER_URL: string | undefined;
 declare const MAIN_WINDOW_VITE_NAME: string;
@@ -61,11 +65,17 @@ function createMainWindow(): void {
   mainWindow.once("ready-to-show", () => {
     logger.info("Main window ready to show");
     mainWindow?.show();
+    
+    // Initialize job events handler after window is ready
+    if (mainWindow) {
+      llmJobEventsHandler.initialize(mainWindow);
+    }
   });
 
   // Handle window closed
   mainWindow.on("closed", () => {
     logger.info("Main window closed");
+    llmJobEventsHandler.cleanup();
     mainWindow = null;
   });
 
@@ -84,6 +94,31 @@ async function initializeSessionManager(): Promise<void> {
     logger.info("Session manager initialized");
   } catch (error) {
     logger.error("Failed to initialize session manager:", error);
+  }
+}
+
+/**
+ * Initialize job result handler service
+ */
+function initializeJobResultHandler(): void {
+  try {
+    llmJobResultHandlerService.start();
+    logger.info("Job result handler service started");
+  } catch (error) {
+    logger.error("Failed to start job result handler service:", error);
+  }
+}
+
+/**
+ * Initialize LLM worker process
+ */
+async function initializeLLMWorker(): Promise<void> {
+  try {
+    await startLLMWorker();
+    logger.info("LLM Worker process started successfully");
+  } catch (error) {
+    logger.error("Failed to start LLM Worker process:", error);
+    // Don't fail the app if worker fails to start - it can be started later
   }
 }
 
@@ -115,6 +150,9 @@ function setupAllIpcHandlers(): void {
   setupAgentHandlers();
   logger.info("Agent IPC handlers registered");
 
+  setupLLMJobQueueHandlers();
+  logger.info("LLM Job Queue IPC handlers registered");
+
   setupWindowHandlers();
   logger.info("Window control IPC handlers registered");
 }
@@ -140,6 +178,8 @@ app.whenReady().then(async () => {
 
   await initializeSessionManager();
   setupAllIpcHandlers();
+  initializeJobResultHandler();
+  await initializeLLMWorker();
   createMainWindow();
   setupMacOSHandlers();
 });
@@ -150,6 +190,19 @@ app.on("window-all-closed", () => {
   if (process.platform !== "darwin") {
     logger.info("Quitting application");
     app.quit();
+  }
+});
+
+// Cleanup job result handler and worker on app quit
+app.on("before-quit", async () => {
+  logger.info("App is quitting, cleaning up services");
+  llmJobResultHandlerService.stop();
+  
+  try {
+    await stopLLMWorker();
+    logger.info("LLM Worker stopped successfully");
+  } catch (error) {
+    logger.error("Error stopping LLM Worker:", error);
   }
 });
 

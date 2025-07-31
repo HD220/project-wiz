@@ -136,7 +136,7 @@
     "cors": "^2.8.5",
     "date-fns": "^4.1.0",
     "dompurify": "^3.2.5",
-    "drizzle-orm": "^0.44.2",
+    "drizzle-orm": "^0.44.4",
     "electron-squirrel-startup": "^1.0.1",
     "embla-carousel-react": "^8.6.0",
     "handlebars": "^4.7.8",

@@ -1,5 +1,6 @@
 import { AuthService } from "@/main/features/auth/auth.service";
 import { messageService } from "@/main/features/message/message.service";
+import { llmMessageProcessorService } from "@/main/features/llm-jobs/llm-message-processor.service";
 import { createIpcHandler } from "@/main/utils/ipc-handler";
 
 import { dmConversationService } from "./dm-conversation.service";
@@ -118,5 +119,56 @@ export function setupDMHandlers(): void {
       throw new Error("User not authenticated");
     }
     return dmConversationService.softDelete(dmId, currentUser.id);
+  });
+
+  // Process user message with LLM (submit job instead of direct API call)
+  createIpcHandler("dm:processMessage", async (dmId: string, content: string, options?: {
+    systemPrompt?: string;
+    model?: string;
+    temperature?: number;
+    maxTokens?: number;
+    priority?: number;
+  }) => {
+    const currentUser = await AuthService.getCurrentUser();
+    if (!currentUser) {
+      throw new Error("User not authenticated");
+    }
+
+    return llmMessageProcessorService.processUserMessage(
+      currentUser.id,
+      "dm",
+      dmId,
+      content,
+      options
+    );
+  });
+
+  // Trigger agent response in DM
+  createIpcHandler("dm:triggerAgentResponse", async (dmId: string, triggerMessageId: string, agentId?: string, options?: {
+    priority?: number;
+    customInstruction?: string;
+  }) => {
+    const currentUser = await AuthService.getCurrentUser();
+    if (!currentUser) {
+      throw new Error("User not authenticated");
+    }
+
+    // If no specific agent provided, find an active agent for this conversation
+    let targetAgentId = agentId;
+    if (!targetAgentId) {
+      const foundAgentId = await llmMessageProcessorService.getActiveAgentForConversation("dm", dmId);
+      if (!foundAgentId) {
+        throw new Error("No active agent available for this conversation");
+      }
+      targetAgentId = foundAgentId;
+    }
+
+    return llmMessageProcessorService.processAgentMessage(
+      targetAgentId,
+      "dm",
+      dmId,
+      triggerMessageId,
+      options
+    );
   });
 }
