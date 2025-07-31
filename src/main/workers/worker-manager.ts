@@ -15,6 +15,7 @@ export class WorkerManager {
   private running = false;
   private restartCount = 0;
   private config: Required<WorkerConfig>;
+  private messageCallbacks = new Map<string, (response: any) => void>();
 
   constructor(config: WorkerConfig = {}) {
     this.config = {
@@ -145,10 +146,11 @@ export class WorkerManager {
       }
     });
 
-    // Handle IPC messages (optional - for future use)
+    // Handle IPC messages
     this.worker.on("message", (message: any) => {
       console.log("📨 Worker message:", message);
-      // TODO: Handle worker messages if needed in the future
+      // Emit to all listeners (simple approach)
+      this.messageCallbacks.forEach(callback => callback(message));
     });
   }
 
@@ -156,7 +158,46 @@ export class WorkerManager {
     return new Promise(resolve => setTimeout(resolve, ms));
   }
 
-  // Utility method to send messages to worker (for future use)
+  // Send message and get response
+  async sendMessageWithResponse(message: any, timeoutMs: number = 30000): Promise<any> {
+    return new Promise((resolve, reject) => {
+      if (!this.worker) {
+        reject(new Error("Worker not running"));
+        return;
+      }
+
+      const messageId = Date.now().toString();
+      
+      // Set up timeout
+      const timeout = setTimeout(() => {
+        this.messageCallbacks.delete(messageId);
+        reject(new Error("Message timeout"));
+      }, timeoutMs);
+
+      // Set up response handler
+      this.messageCallbacks.set(messageId, (response: any) => {
+        clearTimeout(timeout);
+        this.messageCallbacks.delete(messageId);
+        
+        if (response.success) {
+          resolve(response.result);
+        } else {
+          reject(new Error(response.error));
+        }
+      });
+
+      // Send message
+      try {
+        this.worker.postMessage(message);
+      } catch (error) {
+        clearTimeout(timeout);
+        this.messageCallbacks.delete(messageId);
+        reject(error);
+      }
+    });
+  }
+
+  // Utility method to send messages to worker (for simple fire-and-forget)
   sendMessage(message: any): boolean {
     if (this.worker) {
       try {
