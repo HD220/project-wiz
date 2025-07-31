@@ -13,7 +13,7 @@ import { setupProjectHandlers } from "@/main/features/project/project.handler";
 import { setupProfileHandlers } from "@/main/features/user/profile.handler";
 import { setupUserHandlers } from "@/main/features/user/user.handler";
 import { getLogger } from "@/main/utils/logger";
-import { startLLMWorker, stopLLMWorker } from "@/main/workers/worker-manager";
+import { startWorker, stopWorker } from "@/main/workers/worker-manager";
 
 declare const MAIN_WINDOW_VITE_DEV_SERVER_URL: string | undefined;
 declare const MAIN_WINDOW_VITE_NAME: string;
@@ -104,14 +104,14 @@ function initializeJobResultHandler(): void {
 }
 
 /**
- * Initialize LLM worker process
+ * Initialize worker process
  */
-async function initializeLLMWorker(): Promise<void> {
+async function initializeWorker(): Promise<void> {
   try {
-    await startLLMWorker();
-    logger.info("LLM Worker process started successfully");
+    await startWorker();
+    logger.info("Worker process started successfully");
   } catch (error) {
-    logger.error("Failed to start LLM Worker process:", error);
+    logger.error("Failed to start worker process:", error);
     // Don't fail the app if worker fails to start - it can be started later
   }
 }
@@ -144,7 +144,7 @@ function setupAllIpcHandlers(): void {
   setupAgentHandlers();
   logger.info("Agent IPC handlers registered");
 
-  logger.info("LLM Job Queue IPC handlers registered");
+  logger.info("IPC handlers registered");
 
   setupWindowHandlers();
   logger.info("Window control IPC handlers registered");
@@ -172,7 +172,7 @@ app.whenReady().then(async () => {
   await initializeSessionManager();
   setupAllIpcHandlers();
   initializeJobResultHandler();
-  await initializeLLMWorker();
+  await initializeWorker();
   createMainWindow();
   setupMacOSHandlers();
 });
@@ -191,10 +191,10 @@ app.on("before-quit", async () => {
   logger.info("App is quitting, cleaning up services");
   
   try {
-    await stopLLMWorker();
-    logger.info("LLM Worker stopped successfully");
+    await stopWorker();
+    logger.info("Worker stopped successfully");
   } catch (error) {
-    logger.error("Error stopping LLM Worker:", error);
+    logger.error("Error stopping worker:", error);
   }
 });
 

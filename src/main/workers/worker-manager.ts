@@ -1,4 +1,4 @@
-// Simple worker manager using utilityProcess.fork for LLM job processing
+// Simple worker manager using utilityProcess.fork for job processing
 // Based on final architecture decision - single worker with automatic restart
 
 import { utilityProcess } from "electron";
@@ -32,7 +32,7 @@ export class WorkerManager {
     }
 
     try {
-      console.log("🚀 Starting LLM worker process...");
+      console.log("🚀 Starting worker process...");
       this.running = true;
       this.restartCount = 0;
 
@@ -45,7 +45,7 @@ export class WorkerManager {
   }
 
   async stopWorker(): Promise<void> {
-    console.log("🛑 Stopping LLM worker...");
+    console.log("🛑 Stopping worker...");
     this.running = false;
 
     if (this.worker) {
@@ -61,7 +61,7 @@ export class WorkerManager {
   }
 
   async restartWorker(): Promise<void> {
-    console.log("🔄 Restarting LLM worker...");
+    console.log("🔄 Restarting worker...");
     await this.stopWorker();
     await this.delay(this.config.restartDelay);
     await this.startWorker();
@@ -83,7 +83,7 @@ export class WorkerManager {
       console.log(`🔧 Spawning worker from: ${workerPath}`);
 
       this.worker = utilityProcess.fork(workerPath, [], {
-        serviceName: "llm-worker",
+        serviceName: "job-worker",
         stdio: "pipe", // Capture stdout/stderr
       });
 
@@ -235,8 +235,8 @@ export const workerManager = new WorkerManager({
 });
 
 // Utility functions for external usage
-export const startLLMWorker = () => workerManager.startWorker();
-export const stopLLMWorker = () => workerManager.stopWorker();
-export const restartLLMWorker = () => workerManager.restartWorker();
-export const isLLMWorkerRunning = () => workerManager.isRunning();
-export const getLLMWorkerStatus = () => workerManager.getStatus();
+export const startWorker = () => workerManager.startWorker();
+export const stopWorker = () => workerManager.stopWorker();
+export const restartWorker = () => workerManager.restartWorker();
+export const isWorkerRunning = () => workerManager.isRunning();
+export const getWorkerStatus = () => workerManager.getStatus();
