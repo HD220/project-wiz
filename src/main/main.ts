@@ -144,7 +144,6 @@ function setupAllIpcHandlers(): void {
   setupAgentHandlers();
   logger.info("Agent IPC handlers registered");
 
-  logger.info("IPC handlers registered");
 
   setupWindowHandlers();
   logger.info("Window control IPC handlers registered");
