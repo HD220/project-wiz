@@ -58,22 +58,24 @@ export const dmConversationService = {
       input.currentUserId,
     );
 
-    const result = await db.transaction(async (tx) => {
-      const [dmConversation] = await tx
+    const result = await db.transaction((tx) => {
+      const dmConversationResults = tx
         .insert(dmConversationsTable)
         .values({
           name: conversationName,
           description: input.description,
         })
-        .returning();
+        .returning()
+        .all();
 
+      const [dmConversation] = dmConversationResults;
       if (!dmConversation) {
         throw new Error("Failed to create DM conversation");
       }
 
       const participants = [];
       if (input.participantIds.length > 0) {
-        const insertedParticipants = await tx
+        const insertedParticipants = tx
           .insert(dmParticipantsTable)
           .values(
             input.participantIds.map((participantId) => ({
@@ -81,7 +83,8 @@ export const dmConversationService = {
               participantId,
             })),
           )
-          .returning();
+          .returning()
+          .all();
 
         participants.push(...insertedParticipants);
       }
@@ -331,8 +334,8 @@ export const dmConversationService = {
   async softDelete(id: string, deletedBy: string): Promise<boolean> {
     const db = getDatabase();
 
-    const result = await db.transaction(async (tx) => {
-      const [dmConversation] = await tx
+    const result = await db.transaction((tx) => {
+      const dmConversationResults = tx
         .select()
         .from(dmConversationsTable)
         .where(
@@ -341,24 +344,26 @@ export const dmConversationService = {
             eq(dmConversationsTable.isActive, true),
           ),
         )
-        .limit(1);
+        .limit(1)
+        .all();
+
+      const [dmConversation] = dmConversationResults;
 
       if (!dmConversation) {
         throw new Error("DM conversation not found or already inactive");
       }
 
-      await tx
-        .update(dmConversationsTable)
+      tx.update(dmConversationsTable)
         .set({
           isActive: false,
           deactivatedAt: new Date(),
           deactivatedBy: deletedBy,
           updatedAt: new Date(),
         })
-        .where(eq(dmConversationsTable.id, id));
+        .where(eq(dmConversationsTable.id, id))
+        .run();
 
-      await tx
-        .update(dmParticipantsTable)
+      tx.update(dmParticipantsTable)
         .set({
           isActive: false,
           deactivatedAt: new Date(),
@@ -370,10 +375,10 @@ export const dmConversationService = {
             eq(dmParticipantsTable.dmConversationId, id),
             eq(dmParticipantsTable.isActive, true),
           ),
-        );
+        )
+        .run();
 
-      await tx
-        .update(messagesTable)
+      tx.update(messagesTable)
         .set({
           isActive: false,
           deactivatedAt: new Date(),
@@ -386,7 +391,8 @@ export const dmConversationService = {
             eq(messagesTable.sourceType, "dm"),
             eq(messagesTable.isActive, true),
           ),
-        );
+        )
+        .run();
 
       return true;
     });
@@ -397,8 +403,8 @@ export const dmConversationService = {
   async restore(id: string): Promise<DMConversationWithParticipants> {
     const db = getDatabase();
 
-    const result = await db.transaction(async (tx) => {
-      const [restored] = await tx
+    const result = await db.transaction((tx) => {
+      const restoredResults = tx
         .update(dmConversationsTable)
         .set({
           isActive: true,
@@ -412,28 +418,31 @@ export const dmConversationService = {
             eq(dmConversationsTable.isActive, false),
           ),
         )
-        .returning();
+        .returning()
+        .all();
 
+      const [restored] = restoredResults;
       if (!restored) {
         throw new Error(
           "DM conversation not found or not in soft deleted state",
         );
       }
 
-      await tx
-        .update(dmParticipantsTable)
+      tx.update(dmParticipantsTable)
         .set({
           isActive: true,
           deactivatedAt: null,
           deactivatedBy: null,
           updatedAt: new Date(),
         })
-        .where(eq(dmParticipantsTable.dmConversationId, id));
+        .where(eq(dmParticipantsTable.dmConversationId, id))
+        .run();
 
-      const participants = await tx
+      const participants = tx
         .select()
         .from(dmParticipantsTable)
-        .where(eq(dmParticipantsTable.dmConversationId, id));
+        .where(eq(dmParticipantsTable.dmConversationId, id))
+        .all();
 
       return {
         ...restored,

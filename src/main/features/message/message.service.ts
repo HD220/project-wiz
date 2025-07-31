@@ -53,20 +53,24 @@ export const messageService = {
   async sendWithLlmData(input: SendLlmMessageInput): Promise<SelectMessage> {
     const db = getDatabase();
 
-    return db.transaction(async (tx) => {
-      const [message] = await tx
+    return db.transaction((tx) => {
+      const messageResults = tx
         .insert(messagesTable)
         .values(input.messageInput)
-        .returning();
+        .returning()
+        .all();
 
+      const [message] = messageResults;
       if (!message) {
         throw new Error("Failed to send message");
       }
 
-      await tx.insert(llmMessagesTable).values({
-        messageId: message.id,
-        ...input.llmData,
-      });
+      tx.insert(llmMessagesTable)
+        .values({
+          messageId: message.id,
+          ...input.llmData,
+        })
+        .run();
 
       return message;
     });
@@ -157,29 +161,30 @@ export const messageService = {
   async softDelete(id: string, deletedBy: string): Promise<void> {
     const db = getDatabase();
 
-    await db.transaction(async (tx) => {
-      const [message] = await tx
+    await db.transaction((tx) => {
+      const messageResults = tx
         .select()
         .from(messagesTable)
         .where(and(eq(messagesTable.id, id), eq(messagesTable.isActive, true)))
-        .limit(1);
+        .limit(1)
+        .all();
 
+      const [message] = messageResults;
       if (!message) {
         throw new Error("Message not found or already inactive");
       }
 
-      await tx
-        .update(messagesTable)
+      tx.update(messagesTable)
         .set({
           isActive: false,
           deactivatedAt: new Date(),
           deactivatedBy: deletedBy,
           updatedAt: new Date(),
         })
-        .where(eq(messagesTable.id, id));
+        .where(eq(messagesTable.id, id))
+        .run();
 
-      await tx
-        .update(llmMessagesTable)
+      tx.update(llmMessagesTable)
         .set({
           isActive: false,
           deactivatedAt: new Date(),
@@ -191,15 +196,16 @@ export const messageService = {
             eq(llmMessagesTable.messageId, id),
             eq(llmMessagesTable.isActive, true),
           ),
-        );
+        )
+        .run();
     });
   },
 
   async restore(id: string): Promise<SelectMessage> {
     const db = getDatabase();
 
-    return db.transaction(async (tx) => {
-      const [restored] = await tx
+    return db.transaction((tx) => {
+      const restoredResults = tx
         .update(messagesTable)
         .set({
           isActive: true,
@@ -208,21 +214,23 @@ export const messageService = {
           updatedAt: new Date(),
         })
         .where(and(eq(messagesTable.id, id), eq(messagesTable.isActive, false)))
-        .returning();
+        .returning()
+        .all();
 
+      const [restored] = restoredResults;
       if (!restored) {
         throw new Error("Message not found or not in soft deleted state");
       }
 
-      await tx
-        .update(llmMessagesTable)
+      tx.update(llmMessagesTable)
         .set({
           isActive: true,
           deactivatedAt: null,
           deactivatedBy: null,
           updatedAt: new Date(),
         })
-        .where(eq(llmMessagesTable.messageId, id));
+        .where(eq(llmMessagesTable.messageId, id))
+        .run();
 
       return restored;
     });

@@ -253,32 +253,33 @@ export class UserService {
   static async softDelete(userId: string, deletedBy: string): Promise<void> {
     const db = getDatabase();
 
-    await db.transaction(async (tx) => {
+    await db.transaction((tx) => {
       // Verify user exists and is active
-      const [user] = await tx
+      const userResults = tx
         .select()
         .from(usersTable)
         .where(and(eq(usersTable.id, userId), eq(usersTable.isActive, true)))
-        .limit(1);
+        .limit(1)
+        .all();
 
+      const [user] = userResults;
       if (!user) {
         throw new Error("User not found or already inactive");
       }
 
       // 1. Soft delete the user
-      await tx
-        .update(usersTable)
+      tx.update(usersTable)
         .set({
           isActive: false,
           deactivatedAt: new Date(),
           deactivatedBy: deletedBy,
           updatedAt: new Date(),
         })
-        .where(eq(usersTable.id, userId));
+        .where(eq(usersTable.id, userId))
+        .run();
 
       // 2. Cascade soft delete to owned agents
-      await tx
-        .update(agentsTable)
+      tx.update(agentsTable)
         .set({
           isActive: false,
           deactivatedAt: new Date(),
@@ -287,11 +288,11 @@ export class UserService {
         })
         .where(
           and(eq(agentsTable.ownerId, userId), eq(agentsTable.isActive, true)),
-        );
+        )
+        .run();
 
       // 3. Cascade soft delete to owned projects
-      await tx
-        .update(projectsTable)
+      tx.update(projectsTable)
         .set({
           isActive: false,
           deactivatedAt: new Date(),
@@ -303,11 +304,11 @@ export class UserService {
             eq(projectsTable.ownerId, userId),
             eq(projectsTable.isActive, true),
           ),
-        );
+        )
+        .run();
 
       // 4. Soft delete user sessions (no updatedAt field in this table)
-      await tx
-        .update(userSessionsTable)
+      tx.update(userSessionsTable)
         .set({
           isActive: false,
           deactivatedAt: new Date(),
@@ -318,11 +319,11 @@ export class UserService {
             eq(userSessionsTable.userId, userId),
             eq(userSessionsTable.isActive, true),
           ),
-        );
+        )
+        .run();
 
       // 5. Soft delete DM participations
-      await tx
-        .update(dmParticipantsTable)
+      tx.update(dmParticipantsTable)
         .set({
           isActive: false,
           deactivatedAt: new Date(),
@@ -334,7 +335,8 @@ export class UserService {
             eq(dmParticipantsTable.participantId, userId),
             eq(dmParticipantsTable.isActive, true),
           ),
-        );
+        )
+        .run();
 
       // Note: Messages, memories, and other related entities will be handled
       // by their respective services through foreign key cascading

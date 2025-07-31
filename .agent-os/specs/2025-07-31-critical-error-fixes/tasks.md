@@ -10,12 +10,13 @@
   - [x] 1.5 Verify agent is still created successfully
   - [x] 1.6 Document transaction patterns to prevent future issues
 
-- [ ] 2. Conversation Creation Unhandled Rejection Fix
-  - [ ] 2.1 Audit conversation creation in main process handlers
-  - [ ] 2.2 Identify source of unhandled promise rejection
-  - [ ] 2.3 Implement proper error handling with try/catch blocks
-  - [ ] 2.4 Add proper logging for debugging unhandled rejections
-  - [ ] 2.5 Test conversation creation to ensure no main process errors
+- [x] 2. Conversation Creation Unhandled Rejection Fix
+  - [x] 2.1 Audit conversation creation in main process handlers
+  - [x] 2.2 Fix async transaction patterns in dm-conversation.service.ts
+  - [x] 2.3 Fix async transaction patterns in project-channel.service.ts
+  - [x] 2.4 Fix async transaction patterns in message.service.ts
+  - [x] 2.5 Fix async transaction patterns in user.service.ts
+  - [x] 2.6 Test transaction fixes for TypeScript compilation and formatting
 
 - [ ] 3. Modal Accessibility DialogTitle Implementation
   - [ ] 3.1 Install @radix-ui/react-visually-hidden dependency

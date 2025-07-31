@@ -19,9 +19,9 @@ export const projectChannelService = {
   ): Promise<SelectProjectChannel> {
     const db = getDatabase();
 
-    return db.transaction(async (tx) => {
+    return db.transaction((tx) => {
       // Verify project exists and is active
-      const [project] = await tx
+      const projectResults = tx
         .select()
         .from(projectsTable)
         .where(
@@ -30,21 +30,25 @@ export const projectChannelService = {
             eq(projectsTable.isActive, true),
           ),
         )
-        .limit(1);
+        .limit(1)
+        .all();
 
+      const [project] = projectResults;
       if (!project) {
         throw new Error("Project not found or inactive");
       }
 
-      const [channel] = await tx
+      const channelResults = tx
         .insert(projectChannelsTable)
         .values({
           projectId: input.projectId,
           name: input.name,
           description: input.description,
         })
-        .returning();
+        .returning()
+        .all();
 
+      const [channel] = channelResults;
       if (!channel) {
         throw new Error("Failed to create project channel");
       }
@@ -259,8 +263,8 @@ export const projectChannelService = {
   async deleteChannel(id: string, deletedBy: string): Promise<void> {
     const db = getDatabase();
 
-    await db.transaction(async (tx) => {
-      const [channel] = await tx
+    await db.transaction((tx) => {
+      const channelResults = tx
         .select()
         .from(projectChannelsTable)
         .where(
@@ -269,24 +273,25 @@ export const projectChannelService = {
             eq(projectChannelsTable.isActive, true),
           ),
         )
-        .limit(1);
+        .limit(1)
+        .all();
 
+      const [channel] = channelResults;
       if (!channel) {
         throw new Error("Channel not found or already inactive");
       }
 
-      await tx
-        .update(projectChannelsTable)
+      tx.update(projectChannelsTable)
         .set({
           isActive: false,
           deactivatedAt: new Date(),
           deactivatedBy: deletedBy,
           updatedAt: new Date(),
         })
-        .where(eq(projectChannelsTable.id, id));
+        .where(eq(projectChannelsTable.id, id))
+        .run();
 
-      await tx
-        .update(messagesTable)
+      tx.update(messagesTable)
         .set({
           isActive: false,
           deactivatedAt: new Date(),
@@ -299,7 +304,8 @@ export const projectChannelService = {
             eq(messagesTable.sourceType, "channel"),
             eq(messagesTable.isActive, true),
           ),
-        );
+        )
+        .run();
     });
   },
 
