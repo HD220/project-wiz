@@ -1,5 +1,5 @@
 // Worker process entry point for autonomous LLM job processing
-import { JobProcessor } from "./features/llm-jobs/llm-jobs.service";
+import { Worker } from "./worker/worker";
 
 console.log("🔄 LLM Worker process starting...");
 

@@ -2,7 +2,7 @@ import { sql } from "drizzle-orm";
 import { sqliteTable, text, integer, index } from "drizzle-orm/sqlite-core";
 
 // Worker-isolated model for LLM jobs - same schema as main but isolated import
-export const llmJobsTable = sqliteTable(
+export const jobsTable = sqliteTable(
   "llm_jobs",
   {
     // Primary identifier
@@ -31,7 +31,7 @@ export const llmJobsTable = sqliteTable(
     delay: integer("delay").notNull().default(0), // Delay in milliseconds
     
     // Dependencies (BullMQ-style) - ONLY foreign key relationship
-    parentJobId: text("parent_job_id").references((): any => llmJobsTable.id, { onDelete: "set null" }),
+    parentJobId: text("parent_job_id").references((): any => jobsTable.id, { onDelete: "set null" }),
     dependencyCount: integer("dependency_count").notNull().default(0), // Number of dependencies remaining
     
     // Results
@@ -71,9 +71,9 @@ export const llmJobsTable = sqliteTable(
   }),
 );
 
-export type SelectLLMJob = typeof llmJobsTable.$inferSelect;
-export type InsertLLMJob = typeof llmJobsTable.$inferInsert;
-export type UpdateLLMJob = Partial<InsertLLMJob> & { id: string };
+export type SelectJob = typeof jobsTable.$inferSelect;
+export type InsertJob = typeof jobsTable.$inferInsert;
+export type UpdateJob = Partial<InsertJob> & { id: string };
 
 // Type-safe job status literals
 export type JobStatus = "waiting" | "active" | "completed" | "failed" | "delayed" | "paused";

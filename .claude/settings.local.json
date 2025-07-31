@@ -18,7 +18,8 @@
       "WebFetch(domain:electron-vite.org)",
       "WebFetch(domain:medium.com)",
       "WebFetch(domain:blog.logrocket.com)",
-      "Bash(npm run:*)"
+      "Bash(npm run:*)",
+      "Bash(cp:*)"
     ],
     "deny": []
   }
