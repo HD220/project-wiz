@@ -7,9 +7,6 @@ import { setupAgentHandlers } from "@/main/features/agent/agent.handler";
 import { setupAuthHandlers } from "@/main/features/auth/auth.handler";
 import { AuthService } from "@/main/features/auth/auth.service";
 import { setupDMHandlers } from "@/main/features/dm/dm-conversation.handler";
-import { setupLLMJobQueueHandlers } from "@/main/features/llm-jobs/llm-job-queue.handler";
-import { llmJobResultHandlerService } from "@/main/features/llm-jobs/llm-job-result-handler.service";
-import { llmJobEventsHandler } from "@/main/features/llm-jobs/llm-job-events.handler";
 import { setupLlmProviderHandlers } from "@/main/features/llm-provider/llm-provider.handler";
 import { setupChannelHandlers } from "@/main/features/project/project-channel.handler";
 import { setupProjectHandlers } from "@/main/features/project/project.handler";
@@ -68,14 +65,12 @@ function createMainWindow(): void {
     
     // Initialize job events handler after window is ready
     if (mainWindow) {
-      llmJobEventsHandler.initialize(mainWindow);
     }
   });
 
   // Handle window closed
   mainWindow.on("closed", () => {
     logger.info("Main window closed");
-    llmJobEventsHandler.cleanup();
     mainWindow = null;
   });
 
@@ -102,7 +97,6 @@ async function initializeSessionManager(): Promise<void> {
  */
 function initializeJobResultHandler(): void {
   try {
-    llmJobResultHandlerService.start();
     logger.info("Job result handler service started");
   } catch (error) {
     logger.error("Failed to start job result handler service:", error);
@@ -150,7 +144,6 @@ function setupAllIpcHandlers(): void {
   setupAgentHandlers();
   logger.info("Agent IPC handlers registered");
 
-  setupLLMJobQueueHandlers();
   logger.info("LLM Job Queue IPC handlers registered");
 
   setupWindowHandlers();
@@ -196,7 +189,6 @@ app.on("window-all-closed", () => {
 // Cleanup job result handler and worker on app quit
 app.on("before-quit", async () => {
   logger.info("App is quitting, cleaning up services");
-  llmJobResultHandlerService.stop();
   
   try {
     await stopLLMWorker();

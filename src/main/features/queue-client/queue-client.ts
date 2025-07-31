@@ -3,6 +3,7 @@
  */
 
 import { workerManager } from "@/main/workers/worker-manager";
+import type { JobOptions, Job } from "@/worker/queue/job.types";
 
 export class QueueClient {
   private queueName: string;
@@ -11,7 +12,7 @@ export class QueueClient {
     this.queueName = queueName;
   }
 
-  async add(jobName: string, data: any, opts: any = {}): Promise<{ id: string }> {
+  async add(data: any, opts: JobOptions = {}): Promise<{ jobId: string }> {
     const message = {
       action: "add",
       queueName: this.queueName,
@@ -31,7 +32,7 @@ export class QueueClient {
     return this.sendMessage(message);
   }
 
-  async getWaiting(): Promise<any[]> {
+  async getWaiting(): Promise<Job[]> {
     const message = {
       action: "getWaiting",
       queueName: this.queueName,
@@ -40,7 +41,7 @@ export class QueueClient {
     return this.sendMessage(message);
   }
 
-  async getCompleted(): Promise<any[]> {
+  async getCompleted(): Promise<Job[]> {
     const message = {
       action: "getCompleted",
       queueName: this.queueName,
@@ -49,7 +50,7 @@ export class QueueClient {
     return this.sendMessage(message);
   }
 
-  async getFailed(): Promise<any[]> {
+  async getFailed(): Promise<Job[]> {
     const message = {
       action: "getFailed",
       queueName: this.queueName,
@@ -59,26 +60,6 @@ export class QueueClient {
   }
 
   private async sendMessage(message: any): Promise<any> {
-    return new Promise((resolve, reject) => {
-      if (!workerManager.isRunning()) {
-        reject(new Error("Worker is not running"));
-        return;
-      }
-
-      // Listen for response
-      const messageListener = (response: any) => {
-        if (response.success) {
-          resolve(response.result);
-        } else {
-          reject(new Error(response.error));
-        }
-      };
-
-      // Send message
-      const success = workerManager.sendMessage(message);
-      if (!success) {
-        reject(new Error("Failed to send message to worker"));
-      }
-    });
+    return workerManager.sendMessageWithResponse(message);
   }
 }

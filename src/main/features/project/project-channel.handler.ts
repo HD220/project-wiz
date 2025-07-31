@@ -1,6 +1,5 @@
 import { AuthService } from "@/main/features/auth/auth.service";
 import { messageService } from "@/main/features/message/message.service";
-import { llmMessageProcessorService } from "@/main/features/llm-jobs/llm-message-processor.service";
 import { createIpcHandler } from "@/main/utils/ipc-handler";
 
 import { projectChannelService } from "./project-channel.service";
@@ -107,54 +106,4 @@ export function setupChannelHandlers(): void {
     return projectChannelService.deleteChannel(channelId, currentUser.id);
   });
 
-  // Process user message with LLM (submit job instead of direct API call)
-  createIpcHandler("channels:processMessage", async (channelId: string, content: string, options?: {
-    systemPrompt?: string;
-    model?: string;
-    temperature?: number;
-    maxTokens?: number;
-    priority?: number;
-  }) => {
-    const currentUser = await AuthService.getCurrentUser();
-    if (!currentUser) {
-      throw new Error("User not authenticated");
-    }
-
-    return llmMessageProcessorService.processUserMessage(
-      currentUser.id,
-      "channel",
-      channelId,
-      content,
-      options
-    );
-  });
-
-  // Trigger agent response in channel
-  createIpcHandler("channels:triggerAgentResponse", async (channelId: string, triggerMessageId: string, agentId?: string, options?: {
-    priority?: number;
-    customInstruction?: string;
-  }) => {
-    const currentUser = await AuthService.getCurrentUser();
-    if (!currentUser) {
-      throw new Error("User not authenticated");
-    }
-
-    // If no specific agent provided, find an active agent for this conversation
-    let targetAgentId = agentId;
-    if (!targetAgentId) {
-      const foundAgentId = await llmMessageProcessorService.getActiveAgentForConversation("channel", channelId);
-      if (!foundAgentId) {
-        throw new Error("No active agent available for this channel");
-      }
-      targetAgentId = foundAgentId;
-    }
-
-    return llmMessageProcessorService.processAgentMessage(
-      targetAgentId,
-      "channel",
-      channelId,
-      triggerMessageId,
-      options
-    );
-  });
 }

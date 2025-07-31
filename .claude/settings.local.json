@@ -19,7 +19,9 @@
       "WebFetch(domain:medium.com)",
       "WebFetch(domain:blog.logrocket.com)",
       "Bash(npm run:*)",
-      "Bash(cp:*)"
+      "Bash(cp:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)"
     ],
     "deny": []
   }

@@ -5,6 +5,7 @@
 import { eq, and, desc, asc } from "drizzle-orm";
 import { db } from "../database";
 import { jobsTable } from "./job.model";
+import type { JobOptions } from "./job.types";
 
 export class MessageHandler {
   async handleMessage(message: any): Promise<any> {
@@ -26,7 +27,7 @@ export class MessageHandler {
     }
   }
 
-  private async addJob(queueName: string, data: any) {
+  private async addJob(queueName: string, data: { jobData: any; opts?: JobOptions }) {
     const jobId = crypto.randomUUID();
     const now = Date.now();
 
