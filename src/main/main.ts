@@ -1,15 +1,18 @@
 import * as path from "path";
 
-import { app, BrowserWindow } from "electron";
+import { app, BrowserWindow, ipcMain } from "electron";
 import squirrel from "electron-squirrel-startup";
 
-import { setupAgentHandlers } from "./agents/agent.handlers";
-import { setupLlmProviderHandlers } from "./agents/llm-providers/llm-provider.handlers";
-import { setupConversationsHandlers } from "./conversations/conversations.handlers";
-import { setupProjectHandlers } from "./project/project.handlers";
-import { setupAuthHandlers } from "./user/authentication/auth.handlers";
-import { setupProfileHandlers } from "./user/profile/profile.handlers";
-import { getLogger } from "./utils/logger";
+import { setupAgentHandlers } from "@/main/features/agent/agent.handler";
+import { setupAuthHandlers } from "@/main/features/auth/auth.handler";
+import { AuthService } from "@/main/features/auth/auth.service";
+import { setupDMHandlers } from "@/main/features/dm/dm-conversation.handler";
+import { setupLlmProviderHandlers } from "@/main/features/llm-provider/llm-provider.handler";
+import { setupChannelHandlers } from "@/main/features/project/project-channel.handler";
+import { setupProjectHandlers } from "@/main/features/project/project.handler";
+import { setupProfileHandlers } from "@/main/features/user/profile.handler";
+import { setupUserHandlers } from "@/main/features/user/user.handler";
+import { getLogger } from "@/main/utils/logger";
 
 declare const MAIN_WINDOW_VITE_DEV_SERVER_URL: string | undefined;
 declare const MAIN_WINDOW_VITE_NAME: string;
@@ -36,17 +39,18 @@ function createMainWindow(): void {
     height: 800,
     width: 1200,
     webPreferences: {
-      preload: path.join(__dirname, "../preload.js"),
+      preload: path.join(__dirname, "preload.js"),
       nodeIntegration: false,
       contextIsolation: true,
     },
-    titleBarStyle: "hiddenInset",
+    frame: false, // Remove frame for custom titlebar
     show: false, // Don't show until ready
   });
 
   // Load the app
   if (MAIN_WINDOW_VITE_DEV_SERVER_URL) {
     mainWindow.loadURL(MAIN_WINDOW_VITE_DEV_SERVER_URL);
+    logger.info(`DEV URL: ${MAIN_WINDOW_VITE_DEV_SERVER_URL}`);
   } else {
     mainWindow.loadFile(
       path.join(__dirname, `../renderer/${MAIN_WINDOW_VITE_NAME}/index.html`),
@@ -72,14 +76,26 @@ function createMainWindow(): void {
 }
 
 /**
- * App event handlers
+ * Initialize session manager
  */
-app.whenReady().then(() => {
-  logger.info("App is ready, initializing IPC handlers and main window");
+async function initializeSessionManager(): Promise<void> {
+  try {
+    await AuthService.initializeSession();
+    logger.info("Session manager initialized");
+  } catch (error) {
+    logger.error("Failed to initialize session manager:", error);
+  }
+}
 
-  // Setup IPC handlers
+/**
+ * Setup all IPC handlers
+ */
+function setupAllIpcHandlers(): void {
   setupAuthHandlers();
   logger.info("Authentication IPC handlers registered");
+
+  setupUserHandlers();
+  logger.info("User IPC handlers registered");
 
   setupProfileHandlers();
   logger.info("Profile IPC handlers registered");
@@ -87,8 +103,11 @@ app.whenReady().then(() => {
   setupProjectHandlers();
   logger.info("Project IPC handlers registered");
 
-  setupConversationsHandlers();
-  logger.info("Conversations IPC handlers registered");
+  setupChannelHandlers();
+  logger.info("Channel IPC handlers registered");
+
+  setupDMHandlers();
+  logger.info("DM IPC handlers registered");
 
   setupLlmProviderHandlers();
   logger.info("LLM Provider IPC handlers registered");
@@ -96,8 +115,14 @@ app.whenReady().then(() => {
   setupAgentHandlers();
   logger.info("Agent IPC handlers registered");
 
-  createMainWindow();
+  setupWindowHandlers();
+  logger.info("Window control IPC handlers registered");
+}
 
+/**
+ * Setup macOS specific event handlers
+ */
+function setupMacOSHandlers(): void {
   // On macOS, re-create window when dock icon is clicked
   app.on("activate", () => {
     if (BrowserWindow.getAllWindows().length === 0) {
@@ -105,6 +130,18 @@ app.whenReady().then(() => {
       createMainWindow();
     }
   });
+}
+
+/**
+ * App event handlers
+ */
+app.whenReady().then(async () => {
+  logger.info("App is ready, initializing IPC handlers and main window");
+
+  await initializeSessionManager();
+  setupAllIpcHandlers();
+  createMainWindow();
+  setupMacOSHandlers();
 });
 
 // Quit when all windows are closed, except on macOS
@@ -140,5 +177,38 @@ process.on("uncaughtException", (error) => {
 process.on("unhandledRejection", (reason, promise) => {
   logger.error("Unhandled rejection at:", promise, "reason:", reason);
 });
+
+/**
+ * Setup window control IPC handlers
+ */
+function setupWindowHandlers(): void {
+  ipcMain.handle("window:minimize", () => {
+    if (mainWindow) {
+      mainWindow.minimize();
+    }
+  });
+
+  ipcMain.handle("window:maximize", () => {
+    if (mainWindow) {
+      mainWindow.maximize();
+    }
+  });
+
+  ipcMain.handle("window:toggle-maximize", () => {
+    if (mainWindow) {
+      if (mainWindow.isMaximized()) {
+        mainWindow.unmaximize();
+      } else {
+        mainWindow.maximize();
+      }
+    }
+  });
+
+  ipcMain.handle("window:close", () => {
+    if (mainWindow) {
+      mainWindow.close();
+    }
+  });
+}
 
 logger.info("Main process initialized");

@@ -1,6 +1,25 @@
 {
   "permissions": {
-    "allow": ["Bash(npm run type-check:*)"],
+    "allow": [
+      "Bash(npm run type-check:*)",
+      "Bash(find:*)",
+      "WebFetch(domain:ai-sdk.dev)",
+      "Bash(rm:*)",
+      "Bash(mkdir:*)",
+      "Bash(mv:*)",
+      "Bash(ls:*)",
+      "WebFetch(domain:tanstack.com)",
+      "WebFetch(domain:stackoverflow.com)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "Bash(grep:*)",
+      "WebFetch(domain:docs.anthropic.com)",
+      "WebFetch(domain:slack.engineering)",
+      "WebFetch(domain:electron-vite.org)",
+      "WebFetch(domain:medium.com)",
+      "WebFetch(domain:blog.logrocket.com)",
+      "Bash(npm run:*)"
+    ],
     "deny": []
   }
 }

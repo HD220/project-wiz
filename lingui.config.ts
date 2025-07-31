@@ -3,7 +3,6 @@ import { defineConfig } from "@lingui/cli";
 export default defineConfig({
   sourceLocale: "en",
   locales: ["en", "pt-BR"],
-  // catalogsMergePath: "<rootDir>/src/renderer/locales/{locale}",
   catalogs: [
     {
       name: "common",
