@@ -6,11 +6,12 @@ This is the technical specification for the spec detailed in @.agent-os/specs/20
 
 ### Architecture Overview
 
+- **Three-Process Architecture**: `src/main/` (Electron main), `src/renderer/` (UI), `src/worker/` (job processing)
 - **BullMQ-Inspired Design**: Job queue system with dependency management and flexible job types
-- **Worker Thread Pool**: Use Node.js worker_threads managed in-memory (no database persistence)
-- **Job-Based Processing**: All work units are described as "jobs" with textual descriptions and data payloads
-- **Dependency Management**: Jobs can depend on other jobs, enabling complex autonomous workflows
-- **Provider Agnostic**: Support multiple LLM providers through existing provider system integration
+- **Electron Utility Process**: Worker using utilityProcess.fork with own Vite/Forge configuration
+- **Complete Isolation**: Worker has zero knowledge of main/renderer models and structures
+- **Shared Database Only**: Worker uses Drizzle ORM but only accesses job queue tables
+- **Independent Build System**: Worker has its own Vite config, TypeScript setup, and dependencies
 
 ### Job Queue System Specifications
 
@@ -21,35 +22,51 @@ This is the technical specification for the spec detailed in @.agent-os/specs/20
 - **Job Data**: JSON payloads containing job descriptions and parameters
 - **Progress Tracking**: 0-100 progress percentage for long-running jobs
 
-### Worker Process Requirements (In-Memory Management)
+### Worker Process Requirements (src/worker/)
 
-- **Dynamic Pool**: Workers spawned/destroyed based on job queue depth
-- **No Database Tracking**: Worker processes managed entirely in memory
-- **Job Processing**: Workers poll for jobs matching their capabilities
-- **Resource Isolation**: Each worker operates independently
-- **Failure Recovery**: Failed jobs returned to queue, crashed workers respawned automatically
+- **Independent Source Directory**: Complete `src/worker/` with own models, services, and entry point
+- **Drizzle ORM Access**: Worker uses Drizzle but only imports job queue models, not main/renderer models
+- **Own Build Configuration**: Separate Vite config (`vite.worker.config.mts`) and Forge integration
+- **Process Isolation**: Launched via utilityProcess.fork with complete separation
+- **Database Schema Isolation**: Worker only knows about `llm_jobs` table, ignorant of other system tables
 
-### LLM Integration Layer
+### LLM Integration Layer (Worker-Contained)
 
-- **Provider Abstraction**: Use existing LLM provider system with queue-aware wrapper
-- **Request Batching**: Group multiple requests to same provider when possible for efficiency
-- **Rate Limiting**: Respect provider rate limits at worker level, queue requests when limits reached
-- **Streaming Support**: Support streaming responses with incremental result delivery
-- **Context Management**: Maintain conversation context across multiple worker processes
+- **Self-Contained Providers**: Worker process includes its own LLM provider implementations
+- **No System Dependencies**: Worker doesn't depend on main application's provider system
+- **Direct API Communication**: Worker makes direct calls to LLM APIs (OpenAI, Anthropic, etc.)
+- **Rate Limiting**: Built-in rate limiting within worker process
+- **Error Handling**: Complete error handling and retry logic within worker
 
-### Performance Requirements
+### Performance Requirements (I/O Bound - Simplified)
 
-- **Response Time**: User messages processed within 2-5 seconds under normal load
-- **Queue Throughput**: System must handle minimum 10 concurrent LLM requests
-- **Memory Usage**: Worker pool should not exceed 500MB total memory footprint
-- **CPU Utilization**: Workers should use available CPU cores efficiently without starving main thread
-- **Database Performance**: Queue operations must not impact UI responsiveness
+- **Single Process**: One utility process handles jobs sequentially (sufficient for I/O bound)
+- **Response Time**: 2-5 seconds acceptable (background processing, not realtime)
+- **Memory Usage**: Worker process should not exceed 50MB (just HTTP calls)
+- **Database Polling**: Fast polling (100ms) - responsive background processing
+- **Process Isolation**: Lightweight isolation for simple HTTP operations
+
+### Build System Requirements
+
+- **Vite Worker Config**: `vite.worker.config.mts` for worker-specific build settings
+- **Forge Integration**: Update `forge.config.cts` to include worker build pipeline
+- **TypeScript Configuration**: Worker has access to shared `tsconfig.json` but only imports job models
+- **Separate Entry Points**: Worker main file (`src/worker/main.ts`) independent of main process
+- **Build Artifacts**: Worker builds to separate directory for utilityProcess.fork
+
+### System Communication
+
+- **Database-Only Communication**: Worker and main process communicate only through SQLite database
+- **Shared Drizzle Schema**: Both processes access same database but worker only imports job models
+- **No IPC Required**: All communication happens via job status updates in database
+- **Schema Boundaries**: Worker imports from `src/worker/models/` only, never from `src/main/models/`
 
 ## External Dependencies
 
-This specification uses existing system components and does not require new external dependencies:
+This specification maintains architectural separation:
 
-- **Existing LLM Provider System** - Leverages current provider abstractions
-- **SQLite + Drizzle ORM** - Uses existing database infrastructure
-- **Node.js worker_threads** - Built-in Node.js module for background processing
-- **Existing IPC System** - Uses current renderer-main communication patterns
+- **Shared Database**: Same SQLite database accessed via Drizzle ORM in both processes
+- **Isolated Drizzle Models**: Worker has its own model definitions for job queue only
+- **Electron utilityProcess**: Built-in Electron API for process isolation
+- **Independent LLM Clients**: Worker implements its own HTTP clients for LLM APIs
+- **Separate Build Pipeline**: Worker has its own Vite config and dependency management

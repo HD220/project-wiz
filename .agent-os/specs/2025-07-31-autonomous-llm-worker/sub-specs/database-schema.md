@@ -14,9 +14,7 @@ Primary job queue table inspired by BullMQ architecture.
 CREATE TABLE llm_jobs (
   id TEXT PRIMARY KEY,
   name TEXT NOT NULL, -- Job type identifier
-  conversation_id TEXT NOT NULL,
-  user_id TEXT NOT NULL,
-  conversation_type TEXT NOT NULL CHECK (conversation_type IN ('dm', 'project_channel')),
+  -- System agnostic - no foreign keys to current system
 
   -- Job Content (BullMQ-style data)
   data TEXT NOT NULL, -- JSON string with job description and parameters
@@ -46,9 +44,7 @@ CREATE TABLE llm_jobs (
   processed_on INTEGER, -- When job started processing
   finished_on INTEGER, -- When job finished (success or failure)
 
-  -- Foreign Keys
-  FOREIGN KEY (conversation_id) REFERENCES dm_conversations(id) ON DELETE CASCADE,
-  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+  -- Self-referential foreign key only
   FOREIGN KEY (parent_job_id) REFERENCES llm_jobs(id) ON DELETE SET NULL
 );
 ```
@@ -58,8 +54,6 @@ CREATE TABLE llm_jobs (
 ```sql
 -- Performance indexes for job queue (BullMQ-style)
 CREATE INDEX idx_llm_jobs_queue_processing ON llm_jobs(status, priority DESC, created_at);
-CREATE INDEX idx_llm_jobs_conversation ON llm_jobs(conversation_id, created_at);
-CREATE INDEX idx_llm_jobs_user ON llm_jobs(user_id, created_at);
 CREATE INDEX idx_llm_jobs_dependencies ON llm_jobs(parent_job_id, dependency_count);
 CREATE INDEX idx_llm_jobs_delayed ON llm_jobs(status, delay, created_at) WHERE status = 'delayed';
 ```
@@ -91,16 +85,10 @@ Since this adds new functionality, all changes are additive:
 - **Cascading workflows** enable complex multi-step autonomous agent tasks
 - **Self-referential design** allows arbitrary depth of job dependencies
 
-### Worker Process Management (In-Memory)
+### System Independence Design
 
-- **No database persistence** - workers are managed in memory only
-- **Process spawning** handled by Node.js worker pool manager
-- **Dynamic scaling** based on job queue depth and system resources
-- **Failure recovery** through job status monitoring rather than worker tracking
-
-### Foreign Key Relationships
-
-- **Conversation linkage** maintains data integrity across conversations
-- **User association** enables per-user job filtering and limits
-- **Dependency relationships** ensure proper cleanup of dependent jobs
-- **Cascade deletes** clean up jobs when conversations are removed
+- **No foreign keys to existing system** - Worker subsystem operates independently
+- **Self-contained job data** - All context stored in JSON `data` field
+- **Dependency relationships only** - Jobs can depend on other jobs within the queue
+- **System agnostic** - Queue can be used by any system, not tied to current DB schema
+- **Utility process isolation** - Single worker process using Electron's utilityProcess.fork
