@@ -1,4 +1,4 @@
-import { generateText, type CoreMessage } from "ai";
+import { generateText, type CoreMessage, type LanguageModelV1 } from "ai";
 import { loadProvider } from "../llm/provider-load";
 import type { JobFunction, Job } from "../queue/job.types";
 
@@ -25,7 +25,7 @@ export const responseGenerator: JobFunction<ResponseGeneratorJobData, string> = 
   
   // Generate response
   const result = await generateText({
-    model: providerInstance,
+    model: providerInstance as LanguageModelV1,
     system: systemPrompt,
     messages: messages
   });

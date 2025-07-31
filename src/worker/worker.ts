@@ -1,9 +1,10 @@
 // Worker process entry point for autonomous LLM job processing
-import { Worker } from "./worker/worker";
+import { Worker } from "./queue/worker";
+import { responseGenerator } from "./processors/response-generator";
 
 console.log("🔄 LLM Worker process starting...");
 
-const processor = new JobProcessor();
+const processor = new Worker("llm-jobs", responseGenerator);
 
 async function main() {
   try {

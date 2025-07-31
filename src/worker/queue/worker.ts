@@ -1,5 +1,5 @@
 import { and, eq, desc, asc } from "drizzle-orm";
-import { db } from "../../database";
+import { db } from "../database";
 import { jobsTable, type SelectJob } from "./job.model";
 import type { JobExecutionResult, ProcessorConfig, JobFunction } from "./job.types";
 
@@ -56,6 +56,7 @@ export class Worker {
       .from(jobsTable)
       .where(
         and(
+          eq(jobsTable.name, this.queueName), // Filter by queue name
           eq(jobsTable.dependencyCount, 0),
           // Include waiting jobs or delayed jobs where processedOn time has passed
         ),

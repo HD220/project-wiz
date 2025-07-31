@@ -1,29 +1,33 @@
-import { anthropic } from "@ai-sdk/anthropic";
-import { openai } from "@ai-sdk/openai";
-import { google } from "@ai-sdk/google";
-import { deepseek } from "@ai-sdk/deepseek";
+import { createAnthropic } from "@ai-sdk/anthropic";
+import { createOpenAI } from "@ai-sdk/openai";
+import { createGoogleGenerativeAI } from "@ai-sdk/google";
+import { createDeepSeek } from "@ai-sdk/deepseek";
 
 export function loadProvider(provider: string, model: string, apiKey: string) {
   switch (provider.toLowerCase()) {
     case "anthropic":
-      return anthropic(model, {
+      const anthropic = createAnthropic({
         apiKey: apiKey
       });
+      return anthropic(model);
 
     case "openai":
-      return openai(model, {
+      const openai = createOpenAI({
         apiKey: apiKey
       });
+      return openai(model);
 
     case "gemini":
-      return google(model, {
+      const google = createGoogleGenerativeAI({
         apiKey: apiKey
       });
+      return google(model);
 
     case "deepseek":
-      return deepseek(model, {
+      const deepseek = createDeepSeek({
         apiKey: apiKey
       });
+      return deepseek(model);
 
     default:
       throw new Error(`Unsupported provider: ${provider}. Supported providers: anthropic, openai, gemini, deepseek`);
