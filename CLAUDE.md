@@ -72,14 +72,14 @@ This file provides guidance to Claude Code when working with this Electron + Rea
 
 **❌ NEVER DO THIS (will fail with "Transaction function cannot return a promise"):**
 ```typescript
-db.transaction(async (tx) => {
+db.transaction(async (tx) => {  // ← async callback is the problem
   const result = await tx.select()...
 });
 ```
 
-**✅ ALWAYS DO THIS (better-sqlite3 is synchronous):**
+**✅ ALWAYS DO THIS (await transaction, but synchronous callback):**
 ```typescript
-db.transaction((tx) => {
+const result = await db.transaction((tx) => {  // ← await is OK here
   const results = tx.select().from(table).all();  // SELECT
   tx.insert().values().run();                     // INSERT/UPDATE/DELETE
   return results[0];

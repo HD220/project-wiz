@@ -9,7 +9,7 @@
 ### ❌ **NEVER DO THIS** (Will Fail)
 ```typescript
 // This will throw: "Transaction function cannot return a promise"
-db.transaction(async (tx) => {
+db.transaction(async (tx) => {  // ← async callback is the problem
   const result = await tx.select().from(table)...
   return result;
 });
@@ -17,8 +17,8 @@ db.transaction(async (tx) => {
 
 ### ✅ **ALWAYS DO THIS** (Correct Pattern)
 ```typescript
-// Synchronous callback with .all(), .run(), .get() methods
-db.transaction((tx) => {
+// await the transaction, but callback must be synchronous
+const result = await db.transaction((tx) => {  // ← await is OK here
   const results = tx.select().from(table).all();
   const result = results[0];
   
@@ -44,10 +44,10 @@ db.transaction((tx) => {
 ### ✅ Create Operation with Validation
 ```typescript
 // From AgentService.create() - Production code
-static create(input: CreateAgentInput, ownerId: string): SelectAgent {
+static async create(input: CreateAgentInput, ownerId: string): Promise<SelectAgent> {
   const db = getDatabase();
   
-  return db.transaction((tx) => {
+  return await db.transaction((tx) => {  // ← await is OK here
     // 1. Validate dependencies exist
     const providers = tx
       .select()
@@ -100,10 +100,10 @@ static create(input: CreateAgentInput, ownerId: string): SelectAgent {
 ### ✅ Soft Delete Pattern
 ```typescript
 // From AgentService.softDelete() - Production code
-static softDelete(id: string, deletedBy: string): boolean {
+static async softDelete(id: string, deletedBy: string): Promise<boolean> {
   const db = getDatabase();
   
-  return db.transaction((tx) => {
+  return await db.transaction((tx) => {  // ← await is OK here
     // 1. Verify record exists and is active
     const agents = tx
       .select()

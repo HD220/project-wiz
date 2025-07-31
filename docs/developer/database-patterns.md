@@ -24,15 +24,15 @@ Migrations are **AUTO-GENERATED** by Drizzle from `*.model.ts` files:
 **❌ NEVER DO THIS:**
 ```typescript
 // This will fail with "Transaction function cannot return a promise"
-db.transaction(async (tx) => {
+db.transaction(async (tx) => {  // ← async callback is the problem
   const result = await tx.select()...
 });
 ```
 
 **✅ ALWAYS DO THIS:**
 ```typescript
-// Synchronous callback with .all(), .run(), .get() methods
-db.transaction((tx) => {
+// await the transaction, but callback must be synchronous
+const result = await db.transaction((tx) => {  // ← await is OK here
   const results = tx.select().from(table).all();
   const result = results[0];
   
@@ -54,7 +54,7 @@ db.transaction((tx) => {
 
 **✅ Agent Creation (from AgentService.create):**
 ```typescript
-return db.transaction((tx) => {
+return await db.transaction((tx) => {  // ← await is OK here
   // 1. Validate provider exists
   const providers = tx
     .select()
@@ -87,7 +87,7 @@ return db.transaction((tx) => {
 
 **✅ Soft Delete Pattern:**
 ```typescript  
-return db.transaction((tx) => {
+return await db.transaction((tx) => {  // ← await is OK here
   // Verify exists
   const items = tx
     .select()

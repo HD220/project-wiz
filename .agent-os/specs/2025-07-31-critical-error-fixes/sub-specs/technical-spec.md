@@ -6,10 +6,13 @@ This is the technical specification for the spec detailed in @.agent-os/specs/20
 
 ### Agent Creation Transaction Fix
 
-- Investigate Drizzle ORM transaction functions in agent.service.ts
-- Ensure transaction callbacks return values, not promises
-- Implement proper async/await patterns within transactions
-- Fix toast notifications to only show on actual errors
+- ✅ **RESOLVED**: Identified better-sqlite3 synchronous callback requirement
+- ✅ **ROOT CAUSE**: `db.transaction(async (tx) => {...})` fails with "Transaction function cannot return a promise"
+- ✅ **SOLUTION**: Use `await db.transaction((tx) => {...})` - await the transaction, but synchronous callback
+- ✅ **PATTERN**: Use `.all()`, `.run()`, `.get()` methods instead of await inside transaction
+- ✅ **RESULT**: Transaction errors eliminated, proper rollback behavior restored
+
+**Reference**: [Drizzle ORM GitHub Discussion #1170](https://github.com/drizzle-team/drizzle-orm/discussions/1170)
 
 ### Conversation Creation Error Handling
 
