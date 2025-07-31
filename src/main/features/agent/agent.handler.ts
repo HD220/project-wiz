@@ -13,13 +13,20 @@ import { getLogger } from "@/main/utils/logger";
  * Exposes AgentService methods to the frontend via IPC
  */
 export function setupAgentHandlers(): void {
+  const log = getLogger("agent.handler");
+
   // Create agent (with session-based auth)
   createIpcHandler("agents:create", async (input: CreateAgentInput) => {
+    log.info({ agentName: input.name }, "IPC: agents:create called");
+    
     const currentUser = await AuthService.getCurrentUser();
     if (!currentUser) {
       throw new Error("User not authenticated");
     }
-    return AgentService.create(input, currentUser.id);
+    
+    const result = await AgentService.create(input, currentUser.id);
+    log.info({ agentId: result.id, agentName: result.name }, "IPC: agents:create completed successfully");
+    return result;
   });
 
   // Update agent (with session-based auth)
@@ -36,11 +43,15 @@ export function setupAgentHandlers(): void {
 
   // Soft delete agent (with session-based auth)
   createIpcHandler("agents:delete", async (id: string) => {
+    log.info({ agentId: id }, "IPC: agents:delete called");
+    
     const currentUser = await AuthService.getCurrentUser();
     if (!currentUser) {
       throw new Error("User not authenticated");
     }
-    await AgentService.softDelete(id, currentUser.id);
+    
+    const result = await AgentService.softDelete(id, currentUser.id);
+    log.info({ agentId: id, success: result }, "IPC: agents:delete completed successfully");
     return { message: "Agent deactivated successfully" };
   });
 

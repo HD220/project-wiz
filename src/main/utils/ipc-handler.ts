@@ -33,18 +33,22 @@ export function createIpcHandler<TArgs extends unknown[], TReturn>(
   ipcMain.handle(
     channel,
     async (_, ...args: TArgs): Promise<IpcResponse<TReturn>> => {
+      logger.debug({ channel, args: args.length > 0 ? args : undefined }, "IPC call started");
+      
       try {
         const result = await handler(...args);
+        logger.info({ channel, success: true }, "IPC call completed successfully");
         return { success: true, data: result };
       } catch (error) {
         const errorMessage =
           error instanceof Error ? error.message : `${channel} failed`;
 
-        logger.error(channel, {
+        logger.error({
+          channel,
           error: errorMessage,
           args: args.length > 0 ? args : undefined,
           stack: error instanceof Error ? error.stack : undefined,
-        });
+        }, "IPC call failed");
 
         return { success: false, error: errorMessage };
       }

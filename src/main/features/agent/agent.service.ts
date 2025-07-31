@@ -22,12 +22,20 @@ export class AgentService {
     input: CreateAgentInput,
     ownerId: string,
   ): Promise<SelectAgent> {
+    const log = getLogger("agent.service");
+    
     if (!ownerId) {
       throw new Error("Owner ID is required");
     }
 
     const validatedInput = createAgentSchema.parse(input);
     const db = getDatabase();
+
+    log.info({ 
+      agentName: validatedInput.name,
+      ownerId,
+      providerId: validatedInput.providerId 
+    }, "Starting agent creation transaction");
 
     try {
       return await db.transaction(async (tx) => {
@@ -98,9 +106,11 @@ export class AgentService {
           throw new Error("Created agent missing ID");
         }
 
+        log.info({ agentId: agent.id, agentName: agent.name }, "Agent creation transaction completed successfully");
         return agent;
       });
     } catch (error) {
+      log.error({ error, agentName: validatedInput.name, ownerId }, "Agent creation transaction failed");
       // Re-throw the error to ensure proper error handling up the chain
       throw error;
     }
@@ -262,7 +272,10 @@ export class AgentService {
    * Soft delete agent by ID with cascading deletion
    */
   static async softDelete(id: string, deletedBy: string): Promise<boolean> {
+    const log = getLogger("agent.service");
     const db = getDatabase();
+
+    log.info({ agentId: id, deletedBy }, "Starting agent soft delete transaction");
 
     try {
       return await db.transaction(async (tx) => {
@@ -288,9 +301,11 @@ export class AgentService {
           })
           .where(eq(agentsTable.id, id));
 
+        log.info({ agentId: id }, "Agent soft delete transaction completed successfully");
         return true;
       });
     } catch (error) {
+      log.error({ error, agentId: id, deletedBy }, "Agent soft delete transaction failed");
       // Re-throw the error to ensure proper error handling up the chain
       throw error;
     }
