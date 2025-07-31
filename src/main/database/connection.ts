@@ -24,11 +24,14 @@ class DrizzleLogger implements Logger {
   private logger = getLogger("database");
 
   logQuery(query: string, params: unknown[]): void {
-    this.logger.debug({
-      query,
-      params,
-      type: "query"
-    }, "Database query executed");
+    this.logger.debug(
+      {
+        query,
+        params,
+        type: "query",
+      },
+      "Database query executed",
+    );
   }
 }
 

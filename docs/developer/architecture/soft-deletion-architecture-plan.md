@@ -222,8 +222,7 @@ export class UserService {
 
     await db.transaction((tx) => {
       // 1. Soft delete user
-      tx
-        .update(usersTable)
+      tx.update(usersTable)
         .set({
           isActive: false,
           deactivatedAt: new Date(),
@@ -233,8 +232,7 @@ export class UserService {
         .run();
 
       // 2. Cascade soft delete to owned entities
-      tx
-        .update(agentsTable)
+      tx.update(agentsTable)
         .set({
           isActive: false,
           deactivatedAt: new Date(),
@@ -243,8 +241,7 @@ export class UserService {
         .where(eq(agentsTable.ownerId, userId))
         .run();
 
-      tx
-        .update(projectsTable)
+      tx.update(projectsTable)
         .set({
           isActive: false,
           deactivatedAt: new Date(),
@@ -254,8 +251,7 @@ export class UserService {
         .run();
 
       // 3. Soft delete user sessions
-      tx
-        .update(userSessionsTable)
+      tx.update(userSessionsTable)
         .set({
           isActive: false,
           deactivatedAt: new Date(),

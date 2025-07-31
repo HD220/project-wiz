@@ -71,6 +71,7 @@ This file provides guidance to Claude Code when working with this Electron + Rea
 **CRITICAL TRANSACTION RULES:**
 
 **❌ NEVER DO THIS (will fail with "Transaction function cannot return a promise"):**
+
 ```typescript
 db.transaction(async (tx) => {  // ← async callback is the problem
   const result = await tx.select()...
@@ -78,10 +79,12 @@ db.transaction(async (tx) => {  // ← async callback is the problem
 ```
 
 **✅ ALWAYS DO THIS (await transaction, but synchronous callback):**
+
 ```typescript
-const result = await db.transaction((tx) => {  // ← await is OK here
-  const results = tx.select().from(table).all();  // SELECT
-  tx.insert().values().run();                     // INSERT/UPDATE/DELETE
+const result = await db.transaction((tx) => {
+  // ← await is OK here
+  const results = tx.select().from(table).all(); // SELECT
+  tx.insert().values().run(); // INSERT/UPDATE/DELETE
   return results[0];
 });
 ```

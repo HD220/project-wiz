@@ -7,6 +7,7 @@
 ## 🚨 CRITICAL RULE: No Async Transaction Callbacks
 
 ### ❌ **NEVER DO THIS** (Will Fail)
+
 ```typescript
 // This will throw: "Transaction function cannot return a promise"
 db.transaction(async (tx) => {  // ← async callback is the problem
@@ -16,37 +17,40 @@ db.transaction(async (tx) => {  // ← async callback is the problem
 ```
 
 ### ✅ **ALWAYS DO THIS** (Correct Pattern)
+
 ```typescript
 // await the transaction, but callback must be synchronous
-const result = await db.transaction((tx) => {  // ← await is OK here
+const result = await db.transaction((tx) => {
+  // ← await is OK here
   const results = tx.select().from(table).all();
   const result = results[0];
-  
+
   if (!result) {
     throw new Error("Not found"); // Triggers automatic rollback
   }
-  
+
   return result;
 });
 ```
 
 ## Transaction Method Reference
 
-| Method | Use Case | Returns | Example |
-|--------|----------|---------|---------|
-| `.all()` | SELECT queries | `Array<T>` | `tx.select().from(users).all()` |
-| `.get()` | Single row SELECT | `T \| undefined` | `tx.select().from(users).limit(1).get()` |
-| `.run()` | INSERT/UPDATE/DELETE | `RunResult` | `tx.insert(users).values({...}).run()` |
-| `.returning().all()` | INSERT/UPDATE with return | `Array<T>` | `tx.insert(users).values({...}).returning().all()` |
+| Method               | Use Case                  | Returns          | Example                                            |
+| -------------------- | ------------------------- | ---------------- | -------------------------------------------------- |
+| `.all()`             | SELECT queries            | `Array<T>`       | `tx.select().from(users).all()`                    |
+| `.get()`             | Single row SELECT         | `T \| undefined` | `tx.select().from(users).limit(1).get()`           |
+| `.run()`             | INSERT/UPDATE/DELETE      | `RunResult`      | `tx.insert(users).values({...}).run()`             |
+| `.returning().all()` | INSERT/UPDATE with return | `Array<T>`       | `tx.insert(users).values({...}).returning().all()` |
 
 ## Real-World Examples
 
 ### ✅ Create Operation with Validation
+
 ```typescript
 // From AgentService.create() - Production code
 static async create(input: CreateAgentInput, ownerId: string): Promise<SelectAgent> {
   const db = getDatabase();
-  
+
   return await db.transaction((tx) => {  // ← await is OK here
     // 1. Validate dependencies exist
     const providers = tx
@@ -55,7 +59,7 @@ static async create(input: CreateAgentInput, ownerId: string): Promise<SelectAge
       .where(eq(llmProvidersTable.id, input.providerId))
       .limit(1)
       .all();
-    
+
     if (!providers[0]) {
       throw new Error("Provider not found"); // Automatic rollback
     }
@@ -98,18 +102,19 @@ static async create(input: CreateAgentInput, ownerId: string): Promise<SelectAge
 ```
 
 ### ✅ Soft Delete Pattern
+
 ```typescript
 // From AgentService.softDelete() - Production code
 static async softDelete(id: string, deletedBy: string): Promise<boolean> {
   const db = getDatabase();
-  
+
   return await db.transaction((tx) => {  // ← await is OK here
     // 1. Verify record exists and is active
     const agents = tx
       .select()
       .from(agentsTable)
       .where(and(
-        eq(agentsTable.id, id), 
+        eq(agentsTable.id, id),
         eq(agentsTable.isActive, true)
       ))
       .limit(1)
@@ -137,13 +142,14 @@ static async softDelete(id: string, deletedBy: string): Promise<boolean> {
 ```
 
 ### ✅ Complex Multi-Table Operation
+
 ```typescript
 static createProjectWithChannel(input: CreateProjectInput): {
   project: SelectProject;
   channel: SelectChannel;
 } {
   const db = getDatabase();
-  
+
   return db.transaction((tx) => {
     // 1. Create project
     const projects = tx
@@ -151,7 +157,7 @@ static createProjectWithChannel(input: CreateProjectInput): {
       .values(input)
       .returning()
       .all();
-    
+
     const project = projects[0];
     if (!project) {
       throw new Error("Failed to create project");
@@ -167,7 +173,7 @@ static createProjectWithChannel(input: CreateProjectInput): {
       })
       .returning()
       .all();
-    
+
     const channel = channels[0];
     if (!channel) {
       throw new Error("Failed to create default channel");
@@ -181,32 +187,34 @@ static createProjectWithChannel(input: CreateProjectInput): {
 ## Error Handling & Rollback
 
 ### Automatic Rollback
+
 ```typescript
 db.transaction((tx) => {
   // Any thrown error automatically rolls back ALL operations
   const results = tx.select().from(table).all();
-  
+
   if (results.length === 0) {
     throw new Error("No data found"); // ← Triggers rollback
   }
-  
+
   // This won't execute if error is thrown above
   tx.insert(otherTable).values({...}).run();
-  
+
   return results[0];
 });
 ```
 
 ### Manual Rollback (Advanced)
+
 ```typescript
 db.transaction((tx) => {
   const results = tx.select().from(table).all();
-  
+
   if (someComplexCondition) {
     tx.rollback(); // Explicit rollback (advanced usage)
     return null;
   }
-  
+
   return results[0];
 });
 ```
@@ -221,6 +229,7 @@ db.transaction((tx) => {
 ## Common Mistakes to Avoid
 
 ### ❌ Using await inside transaction
+
 ```typescript
 db.transaction((tx) => {
   const result = await tx.select()...; // ← ERROR: Cannot use await
@@ -228,6 +237,7 @@ db.transaction((tx) => {
 ```
 
 ### ❌ Forgetting .all()/.run()/.get()
+
 ```typescript
 db.transaction((tx) => {
   const query = tx.select().from(table); // ← ERROR: Returns query object, not data
@@ -236,6 +246,7 @@ db.transaction((tx) => {
 ```
 
 ### ❌ Not handling array results
+
 ```typescript
 db.transaction((tx) => {
   const result = tx.select().from(table).all(); // ← Returns Array<T>

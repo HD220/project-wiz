@@ -172,7 +172,7 @@ export class [FeatureName]Service {
         .where(eq([tableName].id, entity.id))
         .returning()
         .all();
-      
+
       const [updated] = updatedResults;
 
       // Related operations

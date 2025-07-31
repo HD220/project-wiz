@@ -22,6 +22,7 @@ Migrations are **AUTO-GENERATED** by Drizzle from `*.model.ts` files:
 **better-sqlite3 is SYNCHRONOUS** - transactions must follow these exact patterns:
 
 **❌ NEVER DO THIS:**
+
 ```typescript
 // This will fail with "Transaction function cannot return a promise"
 db.transaction(async (tx) => {  // ← async callback is the problem
@@ -30,29 +31,32 @@ db.transaction(async (tx) => {  // ← async callback is the problem
 ```
 
 **✅ ALWAYS DO THIS:**
+
 ```typescript
 // await the transaction, but callback must be synchronous
-const result = await db.transaction((tx) => {  // ← await is OK here
+const result = await db.transaction((tx) => {
+  // ← await is OK here
   const results = tx.select().from(table).all();
   const result = results[0];
-  
-  tx.insert().values().run();  // For INSERT/UPDATE/DELETE
+
+  tx.insert().values().run(); // For INSERT/UPDATE/DELETE
   return result;
 });
 ```
 
 ### **Transaction Method Reference**
 
-| Method | Use Case | Returns | Example |
-|--------|----------|---------|---------|
-| `.all()` | SELECT queries | `Array<T>` | `tx.select().from(users).all()` |
-| `.get()` | Single row SELECT | `T \| undefined` | `tx.select().from(users).limit(1).get()` |
-| `.run()` | INSERT/UPDATE/DELETE | `RunResult` | `tx.insert(users).values({...}).run()` |
-| `.returning().all()` | INSERT/UPDATE with return | `Array<T>` | `tx.insert(users).values({...}).returning().all()` |
+| Method               | Use Case                  | Returns          | Example                                            |
+| -------------------- | ------------------------- | ---------------- | -------------------------------------------------- |
+| `.all()`             | SELECT queries            | `Array<T>`       | `tx.select().from(users).all()`                    |
+| `.get()`             | Single row SELECT         | `T \| undefined` | `tx.select().from(users).limit(1).get()`           |
+| `.run()`             | INSERT/UPDATE/DELETE      | `RunResult`      | `tx.insert(users).values({...}).run()`             |
+| `.returning().all()` | INSERT/UPDATE with return | `Array<T>`       | `tx.insert(users).values({...}).returning().all()` |
 
 ### **Real-World Transaction Examples**
 
 **✅ Agent Creation (from AgentService.create):**
+
 ```typescript
 return await db.transaction((tx) => {  // ← await is OK here
   // 1. Validate provider exists
@@ -62,7 +66,7 @@ return await db.transaction((tx) => {  // ← await is OK here
     .where(eq(llmProvidersTable.id, providerId))
     .limit(1)
     .all();
-  
+
   if (!providers[0]) {
     throw new Error("Provider not found"); // Triggers rollback
   }
@@ -86,8 +90,10 @@ return await db.transaction((tx) => {  // ← await is OK here
 ```
 
 **✅ Soft Delete Pattern:**
-```typescript  
-return await db.transaction((tx) => {  // ← await is OK here
+
+```typescript
+return await db.transaction((tx) => {
+  // ← await is OK here
   // Verify exists
   const items = tx
     .select()
@@ -101,12 +107,11 @@ return await db.transaction((tx) => {  // ← await is OK here
   }
 
   // Soft delete
-  tx
-    .update(table)
+  tx.update(table)
     .set({
       isActive: false,
       deactivatedAt: new Date(),
-      deactivatedBy: userId
+      deactivatedBy: userId,
     })
     .where(eq(table.id, id))
     .run();
@@ -431,12 +436,8 @@ export class ProjectService {
 
     return db.transaction((tx) => {
       // Create project (synchronous with better-sqlite3)
-      const projects = tx
-        .insert(projectsTable)
-        .values(input)
-        .returning()
-        .all();
-      
+      const projects = tx.insert(projectsTable).values(input).returning().all();
+
       const project = projects[0];
 
       if (!project) {
@@ -453,7 +454,7 @@ export class ProjectService {
         })
         .returning()
         .all();
-      
+
       const channel = channels[0];
 
       if (!channel) {

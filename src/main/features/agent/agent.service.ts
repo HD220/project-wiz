@@ -23,7 +23,7 @@ export class AgentService {
     ownerId: string,
   ): Promise<SelectAgent> {
     const log = getLogger("agent.service");
-    
+
     if (!ownerId) {
       throw new Error("Owner ID is required");
     }
@@ -31,11 +31,14 @@ export class AgentService {
     const validatedInput = createAgentSchema.parse(input);
     const db = getDatabase();
 
-    log.info({ 
-      agentName: validatedInput.name,
-      ownerId,
-      providerId: validatedInput.providerId 
-    }, "Starting agent creation transaction");
+    log.info(
+      {
+        agentName: validatedInput.name,
+        ownerId,
+        providerId: validatedInput.providerId,
+      },
+      "Starting agent creation transaction",
+    );
 
     try {
       return db.transaction((tx) => {
@@ -51,7 +54,7 @@ export class AgentService {
           )
           .limit(1)
           .all();
-        
+
         const provider = providers[0];
 
         if (!provider) {
@@ -70,7 +73,7 @@ export class AgentService {
           })
           .returning()
           .all();
-        
+
         const agentUser = agentUsers[0];
 
         if (!agentUser) {
@@ -104,7 +107,7 @@ export class AgentService {
           })
           .returning()
           .all();
-        
+
         const agent = agents[0];
 
         if (!agent) {
@@ -115,11 +118,17 @@ export class AgentService {
           throw new Error("Created agent missing ID");
         }
 
-        log.info({ agentId: agent.id, agentName: agent.name }, "Agent creation transaction completed successfully");
+        log.info(
+          { agentId: agent.id, agentName: agent.name },
+          "Agent creation transaction completed successfully",
+        );
         return agent;
       });
     } catch (error) {
-      log.error({ error, agentName: validatedInput.name, ownerId }, "Agent creation transaction failed");
+      log.error(
+        { error, agentName: validatedInput.name, ownerId },
+        "Agent creation transaction failed",
+      );
       // Re-throw the error to ensure proper error handling up the chain
       throw error;
     }
@@ -284,7 +293,10 @@ export class AgentService {
     const log = getLogger("agent.service");
     const db = getDatabase();
 
-    log.info({ agentId: id, deletedBy }, "Starting agent soft delete transaction");
+    log.info(
+      { agentId: id, deletedBy },
+      "Starting agent soft delete transaction",
+    );
 
     try {
       return db.transaction((tx) => {
@@ -295,7 +307,7 @@ export class AgentService {
           .where(and(eq(agentsTable.id, id), eq(agentsTable.isActive, true)))
           .limit(1)
           .all();
-        
+
         const agent = agents[0];
 
         if (!agent) {
@@ -303,8 +315,7 @@ export class AgentService {
         }
 
         // Soft delete the agent (synchronous)
-        tx
-          .update(agentsTable)
+        tx.update(agentsTable)
           .set({
             isActive: false,
             deactivatedAt: new Date(),
@@ -314,11 +325,17 @@ export class AgentService {
           .where(eq(agentsTable.id, id))
           .run();
 
-        log.info({ agentId: id }, "Agent soft delete transaction completed successfully");
+        log.info(
+          { agentId: id },
+          "Agent soft delete transaction completed successfully",
+        );
         return true;
       });
     } catch (error) {
-      log.error({ error, agentId: id, deletedBy }, "Agent soft delete transaction failed");
+      log.error(
+        { error, agentId: id, deletedBy },
+        "Agent soft delete transaction failed",
+      );
       // Re-throw the error to ensure proper error handling up the chain
       throw error;
     }
