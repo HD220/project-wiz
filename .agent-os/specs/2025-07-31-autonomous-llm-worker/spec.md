@@ -1,50 +1,60 @@
 # Spec Requirements Document
 
-> Spec: Autonomous LLM Worker System
-> Created: 2025-07-31
-> Status: Planning
+> Spec: Autonomous LLM Worker Integration  
+> Created: 2025-07-31  
+> Updated: 2025-08-01  
+> Status: Architecture Finalized - Ready for Implementation
 
 ## Overview
 
-Implement an autonomous background worker system that processes LLM requests through a task queue, enabling AI agents to work independently without blocking the UI or requiring direct user supervision. This worker system will handle all LLM communications asynchronously, ensuring scalable agent execution while maintaining system responsiveness and enabling true autonomous software development workflows.
+Implement a centralized event-driven orchestration system that integrates AI worker processing with Project Wiz messaging platform. The system enables autonomous AI agent responses in conversations through a clean, agnostic worker integration that maintains existing architectural patterns while providing real-time AI capabilities.
 
 ## User Stories
 
-### Background Agent Processing
+### Autonomous Agent Conversations
 
-As a user engaging with AI agents in conversations, I want agents to process my requests autonomously in the background, so that I can continue working while agents analyze requirements, generate responses, and execute tasks without freezing the interface.
+As a user conversing with AI agents, I want agents to automatically respond to my messages with contextually appropriate responses, so that I can have natural, flowing conversations without manual intervention or UI blocking.
 
-**Detailed Workflow:** User sends a message in a DM or project channel → System queues the request with context → Worker picks up task → LLM processes request with full conversation history → Response is generated and delivered back to the UI → User sees the response appear naturally in the conversation flow.
+**Detailed Workflow:** User sends message in DM conversation → Message service publishes event → AgenticWorkerHandler creates job with complete conversation context → Worker processes using all available agent data → Agent response is automatically created and displayed in UI → Conversation continues naturally.
 
-### Autonomous Task Execution
+### Multiple Agent Collaboration  
 
-As a development team manager, I want to delegate high-level intentions to AI agents and have them work independently, so that I can focus on strategic decisions while agents handle implementation details autonomously.
+As a project manager, I want multiple AI agents to participate in conversations intelligently, so that I can leverage different expertise areas and get comprehensive responses to complex questions.
 
-**Detailed Workflow:** User provides high-level task ("implement authentication") → System breaks down into actionable tasks → Multiple workers process different aspects → Agents coordinate through the queue system → Progress is reported back → Final implementation is delivered with documentation.
+**Detailed Workflow:** User sends message to conversation with multiple agents → System evaluates which agents should respond based on context and availability → Selected agents generate responses → Multiple agent responses appear in conversation → User can continue discussion with relevant agents.
 
-### Queue Management and Prioritization
+### Graceful Error Handling
 
-As a system administrator, I want the worker system to intelligently prioritize and manage task queues, so that critical user interactions are processed first while background analysis tasks run efficiently without affecting performance.
+As a system user, I want the system to handle AI processing failures gracefully, so that temporary issues don't break my workflow and I receive appropriate feedback when problems occur.
 
-**Detailed Workflow:** System receives multiple requests → Tasks are categorized by priority (user messages = high, analysis = medium, background optimization = low) → Workers process based on priority and available resources → System maintains fair processing while ensuring responsiveness.
+**Detailed Workflow:** User sends message → Worker processing fails due to API issues → System creates error message from agent explaining the issue → Agent status is reset to available → User can retry or continue with alternative approaches.
 
 ## Spec Scope
 
-1. **Asynchronous Task Queue** - Implement SQLite-based task queue with priority management and worker assignment
-2. **Background Worker Processes** - Create Node.js worker threads that continuously process LLM requests without blocking main thread
-3. **LLM Integration Layer** - Build queue-aware LLM service that supports multiple providers and handles retries/failures
-4. **Real-time Result Delivery** - Implement IPC system to deliver worker results back to UI components seamlessly
-5. **Worker Pool Management** - Create dynamic worker allocation based on system resources and task load
+1. **Event-Driven Orchestration** - Central AgenticWorkerHandler manages all worker communication through event bus
+2. **Complete Data Preparation** - All database queries performed in main process before sending to worker
+3. **Worker Result Processing** - Automatic creation of agent response messages from worker results  
+4. **Agent Status Management** - Proper lifecycle management of agent busy/active states
+5. **Real-time UI Updates** - Renderer notifications for conversation updates and cache invalidation
 
 ## Out of Scope
 
-- Direct LLM API calls from renderer process (must go through queue)
-- Synchronous LLM processing (all requests must be asynchronous)
-- File system operations from workers (workers focus only on LLM processing)
-- Complex multi-step workflows (initial version handles single LLM requests)
+- Direct worker database access (worker only uses job data)
+- Service registration patterns (AgenticWorkerHandler calls services directly) 
+- Complex agent coordination logic (handled by worker processors)
+- Database schema changes (uses existing table structures)
+- Metrics and monitoring systems (basic logging only)
 
 ## Expected Deliverable
 
-1. **Queue-Based Chat Responses** - Users can send messages and receive AI responses without UI blocking
-2. **Background Agent Processing** - Agents work autonomously on tasks while users continue other activities
-3. **Scalable Worker Management** - System automatically manages worker resources based on load and system capabilities
+1. **Natural Agent Conversations** - Users receive automatic, contextual responses from AI agents in conversations
+2. **Event-Driven Integration** - Services remain decoupled through clean event bus communication
+3. **Worker System Agnosticism** - Worker system maintains complete independence from domain logic
+4. **Real-time UI Experience** - Conversations update automatically when agents respond without manual refresh
+
+## Cross-References
+
+- **Architecture**: @sub-specs/ai-integration-architecture.md - Complete technical architecture specification
+- **Implementation Plan**: @tasks.md - Detailed 4-phase implementation breakdown
+- **Technical Details**: @sub-specs/technical-spec.md - Original worker system implementation
+- **Database Schema**: @sub-specs/database-schema.md - Current database structure (no changes required)

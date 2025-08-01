@@ -1,556 +1,964 @@
 # AI Integration Architecture Specification
 
-> **Spec**: Autonomous LLM Worker Integration
-> **Created**: 2025-08-01
-> **Status**: Analysis Complete - Ready for Implementation
-> **Analysis Method**: Multi-Agent Investigation (Technical Investigator, Fullstack Implementer, Component Architect, Context Fetcher)
+> **Spec**: Autonomous LLM Worker Integration  
+> **Created**: 2025-08-01  
+> **Status**: Architecture Finalized - Ready for Implementation  
+> **Pattern**: Centralized Event-Driven Orchestration
 
-## 📋 Executive Summary
+## 📋 Executive Summary  
 
-This document provides a simplified architectural analysis for integrating the existing AI worker system with the Project Wiz messaging platform. The focus is on creating a clean, agnostic integration that maintains the worker system's generic nature while enabling agent responses in conversations.
+This document defines the definitive architecture for integrating the AI worker system with Project Wiz messaging platform. The solution uses a **centralized orchestration pattern** where the `AgenticWorkerHandler` serves as the single point of integration with the worker system, managing the complete lifecycle of AI jobs while keeping services decoupled through an event bus.
 
-**Key Finding**: Project Wiz has excellent foundational infrastructure but lacks the orchestration layer to connect messaging with AI processing. The recommended solution is a **Job Completion Handler** pattern that processes worker results and creates appropriate responses without altering core worker/job structures.
-
----
-
-## 🔍 Current System Analysis
-
-### ✅ Architectural Strengths Identified
-
-1. **Robust Service Layer**: Excellent separation of concerns with high cohesion, low coupling
-2. **Functional Worker System**: Complete job processing with auto-restart and error handling
-3. **Enterprise Database**: 14 interconnected tables with soft deletion and full audit trails
-4. **Type-Safe IPC**: Standardized main/renderer communication with error handling
-5. **ACID Transactions**: Robust database operations with consistency guarantees
-6. **Agnostic Worker Design**: Generic job system that can handle any processor type
-
-### ❌ Critical Integration Gaps
-
-1. **Zero Message-Worker Integration**: No connection between message creation and AI processing
-2. **Missing Context Management**: No system to build conversation context for LLM processing
-3. **No Agent Triggering**: No mechanism for agents to automatically respond to messages
-4. **Missing Real-time Updates**: No system to notify UI about completed jobs
-5. **No Job Result Processing**: No system to handle completed job results
+**Key Innovation**: Services are "dumb" regarding the worker - they only publish events. The `AgenticWorkerHandler` proactively calls services when needed, eliminating the need for services to register listeners or wait for worker results.
 
 ---
 
-## 🏗️ Current Architecture Deep Dive
+## 🎯 Core Architecture Principles
 
-### Message System Structure
+### **1. Centralized Worker Orchestration**
+- **Single Point of Integration**: `AgenticWorkerHandler` is the ONLY component that communicates with the worker
+- **Proactive Service Calls**: Handler calls services directly when processing results
+- **Complete Data Preparation**: All database queries performed in main process before sending to worker
 
-```typescript
-// Current Message Flow
-messagesTable {
-  id: string (UUID)
-  sourceType: "dm" | "channel"  // Polymorphic reference
-  sourceId: string              // dm_conversation_id or project_channel_id
-  authorId: string              // references usersTable.id
-  content: string
-  isActive: boolean             // Soft deletion
-  createdAt: timestamp_ms
-  updatedAt: timestamp_ms
-}
+### **2. Event-Driven Decoupling**
+- **Services Publish Events**: Services emit events to global event bus without knowing about worker
+- **Handler Listens**: `AgenticWorkerHandler` listens to relevant events and acts accordingly
+- **Zero Service Coupling**: Services don't know worker exists or register for worker events
 
-llmMessagesTable {
-  id: string (UUID)
-  messageId: string             // references messagesTable.id
-  role: "user" | "assistant" | "system" | "tool"
-  content: string
-  isActive: boolean
-  createdAt: timestamp_ms
-  updatedAt: timestamp_ms
-}
-```
-
-### Agent System Structure
-
-```typescript
-// Agent Configuration
-agentsTable {
-  id: string (UUID)
-  userId: string               // Links agent to user record
-  ownerId: string              // Who created the agent
-  providerId: string           // references llmProvidersTable.id
-  name: string
-  role: string
-  backstory: string
-  goal: string
-  systemPrompt: string         // Auto-generated from role/backstory/goal
-  status: "active" | "inactive" | "busy"
-  modelConfig: string (JSON)   // LLM configuration
-  isActive: boolean
-  createdAt: timestamp_ms
-  updatedAt: timestamp_ms
-}
-```
-
-### Worker System Structure (UNCHANGED)
-
-```typescript
-// Job Processing (keep existing structure)
-jobsTable {
-  id: string (UUID)
-  name: string                 // Job type (e.g., "response_generator")
-  data: string (JSON)          // Job parameters
-  opts: string (JSON)          // Job options (delay, attempts, etc.)
-  priority: integer
-  status: "waiting" | "active" | "completed" | "failed" | "delayed" | "paused"
-  progress: integer (0-100)
-  attempts: integer
-  maxAttempts: integer
-  result: string (JSON)        // Job result data
-  failureReason: string
-  createdAt: timestamp_ms
-  processedOn: timestamp_ms
-  finishedOn: timestamp_ms
-}
-```
+### **3. Worker Agnosticism**
+- **Zero External Queries**: Worker only accesses `jobsTable`, all data comes in `job.data`
+- **Complete Job Payloads**: All necessary data (agents, providers, context) included in job creation
+- **Pure Processing**: Worker focuses solely on LLM processing logic
 
 ---
 
-## 🎯 Recommended Architecture: Simple Job Result Processing
+## 🏗️ Component Architecture
 
-### Architectural Pattern Selection
-
-**Simple Job Completion Handler** pattern that:
-- Keeps worker system completely agnostic
-- Processes job results without altering job/worker structures
-- Uses existing messageService to create responses
-- Maintains clean separation of concerns
-
-### Why This Approach?
-
-- **Maintains Worker Agnosticism**: Job and worker systems remain generic
-- **Simple Integration**: Minimal new code, maximum reuse of existing patterns
-- **Future-Proof**: Can handle any job type, not just agent responses
-- **Clean Separation**: Processors handle job-specific logic, handlers process results
-
----
-
-## 🔧 Implementation Architecture
-
-### 1. Core Components
-
-#### **Job Completion Handler** (New Component)
+### **1. Global Event Bus**
 ```typescript
-// src/main/shared/job/job-completion.handler.ts
-export class JobCompletionHandler {
-  // Process any completed job result
-  async handleJobCompletion(jobId: string, result: any): Promise<void>
-  
-  // Delegate to specific result processors
-  private async processResponseGeneratorResult(jobData: any, result: any): Promise<void>
-  
-  // Future: processCodeAnalysisResult, processFileGenerationResult, etc.
-}
-```
-
-**Responsibilities**:
-- Listen for job completion events from worker
-- Route job results to appropriate processors based on job type
-- Handle job failures with appropriate error responses
-- Notify renderer process of updates
-
-#### **Enhanced Message Service** (Minor Modification)
-```typescript
-// Add to existing messageService - NO major changes
-async sendToDM(dmId: string, authorId: string, content: string): Promise<SelectMessage> {
-  const message = await this.send({
-    sourceType: "dm",
-    sourceId: dmId,
-    authorId,
-    content,
-  });
-
-  // NEW: Check if this should trigger agent processing
-  await this.checkForAgentTrigger(dmId, message);
-
-  return message;
-}
-
-private async checkForAgentTrigger(dmId: string, userMessage: SelectMessage): Promise<void> {
-  // Simple logic to create jobs when user messages agents
-  const conversation = await dmConversationService.findById(dmId);
-  const agents = await this.getActiveAgentsInConversation(dmId);
-  
-  if (agents.length > 0) {
-    await this.createAgentJob(dmId, userMessage, agents[0]);
-  }
-}
-```
-
-### 2. Data Flow Architecture
-
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                    SIMPLIFIED INTEGRATION                       │
-├─────────────────────────────────────────────────────────────────┤
-│                                                                 │
-│ 👤 User Message                                                │
-│      │                                                          │
-│      ▼                                                          │
-│ 📝 DM Handler → Message Service → Database                     │
-│      │                    │                                     │
-│      │                    ▼                                     │
-│      │           Check for Agent Trigger                       │
-│      │                    │                                     │
-│      │                    ▼                                     │
-│      │         Create Job (if agents present)                  │
-│      │                    │                                     │
-│      ▼                    ▼                                     │
-│ 📱 Return to User    🔄 Worker Processes Job                   │
-│                                                                 │
-│                    ┌─────────────────────┐                     │
-│                    │   WORKER PROCESS    │                     │
-│                    │   (UNCHANGED)       │                     │
-│                    │                     │                     │
-│                    │ 🔄 Process Job      │                     │
-│                    │ 🧠 Generate Response│                     │
-│                    │ 💾 Save Result      │                     │
-│                    │ 📤 Notify Main      │                     │
-│                    └─────────┬───────────┘                     │
-│                              │                                 │
-│                              ▼                                 │
-│                    📨 Job Completion Handler                   │
-│                              │                                 │
-│                              ├─→ Create Agent Message          │
-│                              ├─→ Update Agent Status           │
-│                              └─→ Notify Renderer               │
-│                                                                 │
-│                              ▼                                 │
-│                    📱 UI Updates with Agent Response           │
-│                                                                 │
-└─────────────────────────────────────────────────────────────────┘
-```
-
-### 3. Job Data Structure (For Processors)
-
-```typescript
-// Data passed to response_generator processor
-export interface ResponseGeneratorJobData {
-  // Core LLM data
-  agent: {
-    name: string;
-    role: string;
-    backstory: string;
-  };
-  messages: CoreMessage[];
-  provider: string;
-  model: string;
-  apiKey: string;
-  
-  // Metadata for result processing (added to job.data)
-  conversationId: string;
-  triggerMessageId: string;
-  agentUserId: string; // Agent's user ID for creating response
-}
-```
-
----
-
-## 🔧 Implementation Details
-
-### 1. Job Creation Logic
-
-```typescript
-// In messageService
-private async createAgentJob(dmId: string, userMessage: SelectMessage, agent: SelectAgent): Promise<void> {
-  // Build conversation context
-  const messages = await this.buildConversationContext(dmId);
-  
-  // Get agent configuration
-  const provider = await llmProviderService.findById(agent.providerId);
-  const modelConfig = JSON.parse(agent.modelConfig);
-  
-  // Create job data
-  const jobData: ResponseGeneratorJobData = {
-    agent: {
-      name: agent.name,
-      role: agent.role,
-      backstory: agent.backstory
-    },
-    messages,
-    provider: provider.name,
-    model: modelConfig.model,
-    apiKey: provider.apiKey,
-    
-    // Metadata for result processing
-    conversationId: dmId,
-    triggerMessageId: userMessage.id,
-    agentUserId: agent.userId
+// shared/events/event-bus.ts
+export interface SystemEvents {
+  // User interactions
+  'user-sent-message': {
+    conversationId: string;
+    message: SelectMessage;
+    conversationContext: ConversationContext;
   };
   
-  // Send to worker
-  const queueClient = new QueueClient("llm-jobs");
-  await queueClient.add(jobData, { priority: 1, attempts: 3 });
+  // Agent lifecycle
+  'agent-status-changed': {
+    agentId: string;
+    oldStatus: AgentStatus;
+    newStatus: AgentStatus;
+  };
   
-  // Update agent status
-  await agentService.updateStatus(agent.id, 'busy');
+  // System notifications
+  'conversation-updated': {
+    conversationId: string;
+    updateType: 'new-message' | 'agent-response' | 'status-change';
+  };
 }
 
-private async buildConversationContext(dmId: string): Promise<CoreMessage[]> {
-  // Get recent messages
-  const messages = await this.getDMMessages(dmId);
-  const recentMessages = messages.slice(-20); // Last 20 messages
-  
-  // Convert to LLM format
-  const llmMessages: CoreMessage[] = [];
-  
-  for (const message of recentMessages) {
-    const llmData = await this.getMessageWithLlmData(message.id);
-    
-    if (llmData?.llmMessage) {
-      llmMessages.push({
-        role: llmData.llmMessage.role,
-        content: llmData.llmMessage.content
-      });
-    } else {
-      llmMessages.push({
-        role: 'user',
-        content: message.content
-      });
-    }
-  }
-  
-  return llmMessages;
+export class EventBus extends EventEmitter {
+  emit<K extends keyof SystemEvents>(event: K, payload: SystemEvents[K]): boolean
+  on<K extends keyof SystemEvents>(event: K, listener: (payload: SystemEvents[K]) => void): this
 }
+
+// Global singleton instance
+export const eventBus = new EventBus();
 ```
 
-### 2. Job Completion Processing
-
+### **2. AgenticWorkerHandler - Central Orchestrator**
 ```typescript
-// src/main/shared/job/job-completion.handler.ts
-export class JobCompletionHandler {
-  async handleJobCompletion(jobId: string, result: any): Promise<void> {
+// shared/worker/agentic-worker.handler.ts
+export class AgenticWorkerHandler extends EventEmitter {
+  private queueClient: QueueClient;
+  private activeJobs = new Map<string, JobContext>();
+  
+  constructor() {
+    super();
+    this.queueClient = new QueueClient("llm-jobs");
+    this.setupEventListeners();    // Listen to event bus
+    this.setupWorkerListeners();   // Listen to worker results
+  }
+  
+  /**
+   * CORE RESPONSIBILITY: Listen to system events and create worker jobs
+   */
+  private setupEventListeners(): void {
+    eventBus.on('user-sent-message', this.handleUserMessage.bind(this));
+    eventBus.on('agent-status-changed', this.handleAgentStatusChange.bind(this));
+  }
+  
+  /**
+   * CORE RESPONSIBILITY: Listen to worker results and process them
+   */
+  private setupWorkerListeners(): void {
+    this.queueClient.on('job-completed', this.handleJobCompleted.bind(this));
+    this.queueClient.on('job-failed', this.handleJobFailed.bind(this));
+    this.queueClient.on('job-progress', this.handleJobProgress.bind(this));
+  }
+  
+  /**
+   * EVENT HANDLER: User sent message - create job if agents present
+   */
+  private async handleUserMessage(payload: SystemEvents['user-sent-message']): Promise<void> {
+    const { conversationId, message, conversationContext } = payload;
+    
     try {
-      // Get job details
-      const job = await this.getJobById(jobId);
-      const jobData = JSON.parse(job.data);
+      // Build COMPLETE job data (all queries done here)
+      const completeJobData = await this.buildCompleteJobData(conversationId, message, conversationContext);
       
-      // Route based on job name
-      switch (job.name) {
-        case 'response_generator':
-          await this.processResponseGeneratorResult(jobData, result);
-          break;
-        
-        // Future job types:
-        // case 'code_analyzer':
-        //   await this.processCodeAnalysisResult(jobData, result);
-        //   break;
-        
-        default:
-          logger.warn(`Unknown job type: ${job.name}`);
+      if (completeJobData.agents.length === 0) {
+        logger.debug(`No active agents in conversation ${conversationId}, skipping job creation`);
+        return;
       }
+      
+      // Create job with complete data
+      const jobResult = await this.queueClient.add(completeJobData, {
+        priority: 1,
+        attempts: 3,
+        timeout: 30000
+      });
+      
+      // Track job for result processing
+      this.activeJobs.set(jobResult.jobId, {
+        type: 'conversation',
+        conversationId,
+        triggerMessageId: message.id,
+        agentIds: completeJobData.agents.map(a => a.id),
+        createdAt: new Date()
+      });
+      
+      // Update agent status to busy (call service directly)
+      await this.updateAgentsStatus(completeJobData.agents.map(a => a.id), 'busy');
+      
+      logger.info(`Created conversation job ${jobResult.jobId} for conversation ${conversationId} with ${completeJobData.agents.length} agents`);
       
     } catch (error) {
-      logger.error(`Error processing job completion: ${error}`);
+      logger.error(`Error creating job for conversation ${conversationId}:`, error);
     }
   }
   
-  private async processResponseGeneratorResult(jobData: ResponseGeneratorJobData, result: any): Promise<void> {
-    // Create agent response message
-    const agentMessage = await messageService.sendWithLlmData({
-      messageInput: {
-        sourceType: 'dm',
-        sourceId: jobData.conversationId,
-        authorId: jobData.agentUserId,
-        content: result.response
-      },
-      llmData: {
-        role: 'assistant',
-        content: result.response
+  /**
+   * WORKER RESULT HANDLER: Process completed job results
+   */
+  private async handleJobCompleted(jobResult: any): Promise<void> {
+    const { jobId, result } = jobResult;
+    const jobContext = this.activeJobs.get(jobId);
+    
+    if (!jobContext) {
+      logger.warn(`Received result for unknown job ${jobId}`);
+      return;
+    }
+    
+    try {
+      // Route result processing based on action type
+      await this.processJobResult(result, jobContext);
+      
+      // Clean up tracking
+      this.activeJobs.delete(jobId);
+      
+      logger.info(`Successfully processed job ${jobId} result: ${result.action}`);
+      
+    } catch (error) {
+      logger.error(`Error processing job result ${jobId}:`, error);
+      await this.handleProcessingError(jobId, jobContext, error);
+    }
+  }
+  
+  /**
+   * RESULT PROCESSOR: Route job results to appropriate handlers
+   */
+  private async processJobResult(result: any, jobContext: JobContext): Promise<void> {
+    switch (result.action) {
+      case 'agent-responses':
+        await this.processAgentResponses(result, jobContext);
+        break;
+        
+      case 'no-response':
+        await this.processNoResponse(result, jobContext);
+        break;
+        
+      case 'analysis-complete':
+        await this.processAnalysisResult(result, jobContext);
+        break;
+        
+      // Future job types can be added here
+      default:
+        logger.warn(`Unknown job result action: ${result.action} for job type: ${jobContext.type}`);
+    }
+  }
+  
+  /**
+   * SPECIFIC PROCESSOR: Handle agent responses
+   */
+  private async processAgentResponses(result: any, jobContext: JobContext): Promise<void> {
+    const { conversationId } = jobContext;
+    const { responses } = result;
+    
+    logger.info(`Processing ${responses.length} agent responses for conversation ${conversationId}`);
+    
+    // Process each agent response
+    for (const response of responses) {
+      try {
+        // CALL messageService directly - no registration needed
+        await messageService.sendWithLlmData({
+          messageInput: {
+            sourceType: 'dm',
+            sourceId: conversationId,
+            authorId: response.agentUserId,
+            content: response.response
+          },
+          llmData: {
+            role: 'assistant',
+            content: response.response
+          }
+        });
+        
+        // CALL agentService to update status
+        await agentService.updateStatus(response.agentId, 'active');
+        
+        logger.debug(`Created response message for agent ${response.agentId}`);
+        
+      } catch (error) {
+        logger.error(`Error processing response for agent ${response.agentId}:`, error);
       }
-    });
-    
-    // Update agent status back to active
-    const agent = await agentService.findByUserId(jobData.agentUserId);
-    if (agent) {
-      await agentService.updateStatus(agent.id, 'active');
     }
     
-    // Notify renderer
-    this.notifyRenderer('agent-response-ready', {
-      conversationId: jobData.conversationId,
-      message: agentMessage
+    // CALL renderer to update UI
+    await this.notifyRenderer('conversation-updated', {
+      conversationId,
+      updateType: 'agent-response',
+      messageCount: responses.length
+    });
+    
+    // PUBLISH event for other interested parties
+    eventBus.emit('conversation-updated', {
+      conversationId,
+      updateType: 'agent-response'
     });
   }
   
-  private notifyRenderer(event: string, data: any): void {
-    const mainWindow = this.getMainWindow();
+  /**
+   * DATA BUILDER: Create complete job data with all necessary information
+   */
+  private async buildCompleteJobData(
+    conversationId: string, 
+    message: SelectMessage, 
+    context: ConversationContext
+  ): Promise<CompleteJobData> {
+    
+    // Get all active agents in conversation
+    const agents = await dmConversationService.getActiveAgentsInConversation(conversationId);
+    
+    // Build complete agent data with providers (ALL queries done here)
+    const completeAgents = await Promise.all(
+      agents.map(async (agent) => {
+        const provider = await llmProviderService.findById(agent.providerId);
+        const decryptedApiKey = await this.decryptApiKey(provider.encryptedApiKey);
+        
+        return {
+          id: agent.id,
+          userId: agent.userId,
+          name: agent.name,
+          role: agent.role,
+          backstory: agent.backstory,
+          goal: agent.goal,
+          systemPrompt: agent.systemPrompt,
+          status: agent.status,
+          modelConfig: JSON.parse(agent.modelConfig),
+          provider: {
+            name: provider.name,
+            apiKey: decryptedApiKey,
+            baseUrl: provider.baseUrl,
+            model: provider.defaultModel,
+            rateLimits: provider.rateLimits ? JSON.parse(provider.rateLimits) : null
+          }
+        };
+      })
+    );
+    
+    // Build conversation message history
+    const messages = await messageService.getDMMessages(conversationId);
+    const recentMessages = messages.slice(-20); // Last 20 messages for context
+    const llmMessages = await this.convertToLLMFormat(recentMessages);
+    
+    return {
+      type: 'conversation',
+      conversationId,
+      triggerMessage: {
+        id: message.id,
+        content: message.content,
+        authorId: message.authorId,  
+        createdAt: message.createdAt
+      },
+      agents: completeAgents,
+      messages: llmMessages,
+      conversationContext: {
+        ...context,
+        totalMessages: messages.length,
+        participants: await dmConversationService.getParticipants(conversationId)
+      }
+    };
+  }
+  
+  /**
+   * ERROR HANDLER: Handle job failures
+   */
+  private async handleJobFailed(jobResult: any): Promise<void> {
+    const { jobId, error, attempts, maxAttempts } = jobResult;
+    const jobContext = this.activeJobs.get(jobId);
+    
+    if (!jobContext) {
+      logger.warn(`Received failure for unknown job ${jobId}`);
+      return;
+    }
+    
+    if (attempts < maxAttempts) {
+      logger.warn(`Job ${jobId} failed, will retry (${attempts}/${maxAttempts}): ${error}`);
+      return; // QueueClient handles retry automatically
+    }
+    
+    // Final failure - handle gracefully
+    logger.error(`Job ${jobId} failed permanently after ${maxAttempts} attempts: ${error}`);
+    
+    await this.handleFinalJobFailure(jobContext, error);
+    this.activeJobs.delete(jobId);
+  }
+  
+  /**
+   * FAILURE HANDLER: Create error responses for failed jobs
+   */
+  private async handleFinalJobFailure(jobContext: JobContext, error: string): Promise<void> {
+    if (jobContext.type === 'conversation') {
+      // Create error message from first agent
+      const agents = await agentService.findByIds(jobContext.agentIds);
+      if (agents.length > 0) {
+        const firstAgent = agents[0];
+        
+        await messageService.sendWithLlmData({
+          messageInput: {
+            sourceType: 'dm',
+            sourceId: jobContext.conversationId,
+            authorId: firstAgent.userId,
+            content: 'Desculpe, tive um problema técnico. Pode tentar novamente?'
+          },
+          llmData: {
+            role: 'assistant',
+            content: `Error response due to job failure: ${error}`
+          }
+        });
+        
+        // Update agent status back to active
+        await agentService.updateStatus(firstAgent.id, 'active');
+      }
+      
+      // Notify UI
+      await this.notifyRenderer('conversation-updated', {
+        conversationId: jobContext.conversationId,
+        updateType: 'agent-response'
+      });
+    }
+  }
+  
+  /**
+   * UTILITY: Update multiple agent statuses
+   */
+  private async updateAgentsStatus(agentIds: string[], status: AgentStatus): Promise<void> {
+    await Promise.all(
+      agentIds.map(agentId => agentService.updateStatus(agentId, status))
+    );
+  }
+  
+  /**
+   * UTILITY: Notify renderer process
+   */
+  private async notifyRenderer(event: string, data: any): Promise<void> {
+    const mainWindow = this.getMainWindow(); // From electron-main context
     if (mainWindow) {
       mainWindow.webContents.send(event, data);
     }
   }
 }
+
+// Global singleton instance
+export const agenticWorkerHandler = new AgenticWorkerHandler();
 ```
 
-### 3. Worker Integration
-
+### **3. Enhanced QueueClient as EventEmitter**
 ```typescript
-// In worker-manager.ts (minimal changes)
-// Add job completion handler to existing worker message handling
-
-// When worker sends completion message:
-workerProcess.on('message', (message) => {
-  if (message.type === 'job-completed') {
-    // NEW: Handle job completion
-    jobCompletionHandler.handleJobCompletion(message.jobId, message.result);
+// features/queue-client/queue-client.ts
+export class QueueClient extends EventEmitter {
+  private queueName: string;
+  private logger = getLogger("queue-client");
+  
+  constructor(queueName: string) {
+    super();
+    this.queueName = queueName;
+    this.setupWorkerCommunication();
   }
   
-  // Existing response handling...
-  const callback = this.responseCallbacks.get(message.id);
-  if (callback) {
-    callback(message);
-    this.responseCallbacks.delete(message.id);
+  /**
+   * Add job to queue
+   */
+  async add(data: any, opts: JobOptions = {}): Promise<{ jobId: string }> {
+    const message = {
+      action: "add",
+      queueName: this.queueName,
+      jobData: data,
+      opts,
+    };
+
+    this.logger.debug(`Adding job to queue ${this.queueName}:`, { message });
+    return this.sendMessage(message);
   }
-});
+  
+  /**
+   * Setup worker communication and event emission
+   */
+  private setupWorkerCommunication(): void {
+    workerManager.on('message', (message) => {
+      if (message.queueName === this.queueName) {
+        this.logger.debug(`Received worker message for queue ${this.queueName}:`, message);
+        
+        switch (message.type) {
+          case 'job-completed':
+            this.emit('job-completed', {
+              jobId: message.jobId,
+              result: message.result,
+              queueName: this.queueName
+            });
+            break;
+            
+          case 'job-failed':
+            this.emit('job-failed', {
+              jobId: message.jobId,
+              error: message.error,
+              attempts: message.attempts,
+              maxAttempts: message.maxAttempts,
+              queueName: this.queueName
+            });
+            break;
+            
+          case 'job-progress':
+            this.emit('job-progress', {
+              jobId: message.jobId,
+              progress: message.progress,
+              queueName: this.queueName
+            });
+            break;
+            
+          default:
+            this.logger.warn(`Unknown worker message type: ${message.type}`);
+        }
+      }
+    });
+  }
+  
+  /**
+   * Send message to worker with response handling
+   */
+  private async sendMessage(message: any): Promise<any> {
+    this.logger.debug(`Sending message to worker:`, message);
+    try {
+      const result = await workerManager.sendMessageWithResponse(message);
+      this.logger.debug(`Worker response:`, result);
+      return result;
+    } catch (error) {
+      this.logger.error(`Worker communication error:`, error);
+      throw error;
+    }
+  }
+}
+```
+
+### **4. Service Integration Pattern (Example: MessageService)**
+```typescript
+// features/message/message.service.ts (Enhanced)
+export const messageService = {
+  /**
+   * Send message to DM - publishes event for worker processing
+   */
+  async sendToDM(dmId: string, authorId: string, content: string): Promise<SelectMessage> {
+    // Save message to database
+    const message = await this.send({
+      sourceType: "dm",
+      sourceId: dmId,  
+      authorId,
+      content,
+    });
+
+    try {
+      // Build conversation context for potential agent processing
+      const conversationContext = await this.buildConversationContext(dmId);
+      
+      // PUBLISH EVENT - AgenticWorkerHandler listens and acts
+      eventBus.emit('user-sent-message', {
+        conversationId: dmId,
+        message,
+        conversationContext
+      });
+      
+      logger.debug(`Published user-sent-message event for conversation ${dmId}`);
+      
+    } catch (error) {
+      logger.error(`Error building conversation context for ${dmId}:`, error);
+      // Don't fail message sending if context building fails
+    }
+
+    return message;
+  },
+  
+  /**
+   * Build conversation context with all necessary data
+   */
+  async buildConversationContext(dmId: string): Promise<ConversationContext> {
+    const conversation = await dmConversationService.findById(dmId);
+    const participants = await dmConversationService.getParticipants(dmId);
+    const messageCount = await this.getMessageCount('dm', dmId);
+    
+    return {
+      conversation: {
+        id: conversation.id,
+        name: conversation.name,
+        description: conversation.description,
+        createdAt: conversation.createdAt,
+        updatedAt: conversation.updatedAt
+      },
+      participants: participants.map(p => ({
+        id: p.id,
+        participantId: p.participantId,
+        role: p.role || 'member'
+      })),
+      metadata: {
+        totalMessages: messageCount,
+        lastActivity: conversation.updatedAt,
+        hasActiveAgents: participants.some(p => p.isAgent && p.isActive)
+      }
+    };
+  },
+  
+  // ... existing methods remain unchanged
+};
 ```
 
 ---
 
-## 🛡️ Error Handling
+## 🔄 Complete Data Flow
 
-### Job Failure Processing
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                 CENTRALIZED ORCHESTRATION FLOW                 │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│ 👤 User sends message via UI                                   │
+│      │                                                          │
+│      ▼                                                          │
+│ 📝 DM Handler → MessageService.sendToDM()                      │
+│      ├─→ Save message to messagesTable                         │
+│      ├─→ Build conversation context                            │
+│      └─→ eventBus.emit('user-sent-message', {...})             │
+│                    │                                            │
+│                    ▼                                            │
+│ 🎯 AgenticWorkerHandler.handleUserMessage() [LISTENS]          │
+│      ├─→ Get agents in conversation                            │
+│      ├─→ Get agent providers + decrypt API keys               │
+│      ├─→ Get message history (last 20)                        │
+│      ├─→ Build COMPLETE job data                               │
+│      ├─→ queueClient.add(completeJobData)                     │
+│      ├─→ agentService.updateStatus(agents, 'busy')            │
+│      └─→ Track job in activeJobs map                          │
+│                    │                                            │
+│                    ▼                                            │
+│ 🔄 Worker: ConversationProcessor.process()                     │
+│      ├─→ Use ONLY job.data (no external queries)              │
+│      ├─→ Select which agents should respond                   │
+│      ├─→ Generate LLM responses for selected agents           │
+│      └─→ Return { action: 'agent-responses', responses: [...]} │
+│                    │                                            │
+│                    ▼                                            │
+│ 📡 QueueClient emits 'job-completed' event                    │
+│                    │                                            │
+│                    ▼                                            │
+│ 🎯 AgenticWorkerHandler.handleJobCompleted() [RECEIVES]        │
+│      ├─→ Route to processAgentResponses()                     │
+│      ├─→ FOR EACH response:                                   │
+│      │   ├─→ messageService.sendWithLlmData() [CALLS DIRECT]  │
+│      │   └─→ agentService.updateStatus(id, 'active') [CALLS]  │
+│      ├─→ notifyRenderer('conversation-updated')               │
+│      ├─→ eventBus.emit('conversation-updated')                │
+│      └─→ Clean up activeJobs tracking                         │
+│                    │                                            │
+│                    ▼                                            │
+│ 📱 Renderer receives IPC → Updates UI                         │
+│      ├─→ Invalidate TanStack Query cache                      │
+│      ├─→ Show new agent messages                              │
+│      └─→ Update agent status indicators                       │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘
+```
 
+---
+
+## 🔧 Worker Side Implementation
+
+### **Conversation Processor (Enhanced)**
 ```typescript
-// In JobCompletionHandler
-async handleJobFailure(jobId: string, error: any): Promise<void> {
-  const job = await this.getJobById(jobId);
-  const jobData = JSON.parse(job.data);
-  
-  // Create error response message
-  await messageService.sendWithLlmData({
-    messageInput: {
-      sourceType: 'dm',
-      sourceId: jobData.conversationId,
-      authorId: jobData.agentUserId,
-      content: 'Desculpe, tive um problema técnico. Pode tentar novamente?'
-    },
-    llmData: {
-      role: 'assistant',
-      content: 'Error response due to job failure'
+// worker/processors/conversation-processor.ts
+export class ConversationProcessor {
+  async process(job: Job<CompleteJobData>): Promise<JobResult> {
+    const { conversationId, triggerMessage, agents, messages, conversationContext } = job.data;
+    
+    logger.info(`Processing conversation job for ${conversationId} with ${agents.length} agents`);
+    
+    try {
+      // Select which agents should respond based on context
+      const respondingAgents = await this.selectRespondingAgents(agents, messages, conversationContext);
+      
+      if (respondingAgents.length === 0) {
+        return {
+          action: 'no-response',
+          reason: 'No agents available to respond',
+          conversationId
+        };
+      }
+      
+      // Generate responses from selected agents
+      const responses = await this.generateAgentResponses(respondingAgents, messages);
+      
+      return {
+        action: 'agent-responses',
+        conversationId,
+        responses
+      };
+      
+    } catch (error) {
+      logger.error(`Error processing conversation job:`, error);
+      throw error;
     }
-  });
+  }
   
-  // Update agent status back to active
-  const agent = await agentService.findByUserId(jobData.agentUserId);
-  if (agent) {
-    await agentService.updateStatus(agent.id, 'active');
+  /**
+   * Select which agents should respond based on conversation context
+   */
+  private async selectRespondingAgents(
+    agents: CompleteAgent[], 
+    messages: LLMMessage[], 
+    context: ConversationContext
+  ): Promise<CompleteAgent[]> {
+    
+    // Filter to active agents only
+    const activeAgents = agents.filter(agent => agent.status === 'active');
+    
+    if (activeAgents.length === 0) {
+      return [];
+    }
+    
+    // Simple selection: first active agent responds
+    // Future: More sophisticated selection based on:
+    // - Agent relevance to message content
+    // - Agent availability/rate limits
+    // - Conversation context and history
+    // - Agent specialization matching
+    
+    return [activeAgents[0]];
+  }
+  
+  /**
+   * Generate LLM responses for selected agents
+   */
+  private async generateAgentResponses(
+    agents: CompleteAgent[], 
+    messages: LLMMessage[]
+  ): Promise<AgentResponse[]> {
+    
+    const responses = [];
+    
+    for (const agent of agents) {
+      try {
+        // Build system prompt
+        const systemPrompt = `${agent.systemPrompt}\n\nYou are ${agent.name}, ${agent.role}. ${agent.backstory}. Your goal: ${agent.goal}`;
+        
+        // Prepare messages for LLM
+        const llmMessages = [
+          { role: 'system', content: systemPrompt },
+          ...messages
+        ];
+        
+        // Generate response using agent's provider
+        const response = await this.callLLM(agent.provider, agent.modelConfig, llmMessages);
+        
+        responses.push({
+          agentId: agent.id,
+          agentUserId: agent.userId,
+          response: response.content,
+          model: agent.modelConfig.model,
+          tokensUsed: response.usage?.total_tokens || 0
+        });
+        
+      } catch (error) {
+        logger.error(`Error generating response for agent ${agent.id}:`, error);
+        // Continue with other agents
+      }
+    }
+    
+    return responses;
+  }
+  
+  /**
+   * Call LLM API using agent's provider configuration
+   */
+  private async callLLM(
+    provider: ProviderConfig, 
+    modelConfig: ModelConfig, 
+    messages: LLMMessage[]
+  ): Promise<LLMResponse> {
+    
+    // Use provider configuration to make LLM call
+    // This is where the actual LLM API integration happens
+    // Implementation depends on provider (OpenAI, Anthropic, DeepSeek, etc.)
+    
+    const response = await generateText({
+      model: openai(modelConfig.model), // or anthropic(), etc.
+      messages,
+      apiKey: provider.apiKey,
+      baseURL: provider.baseUrl,
+      temperature: modelConfig.temperature || 0.7,
+      maxTokens: modelConfig.maxTokens || 1000,
+    });
+    
+    return {
+      content: response.text,
+      usage: response.usage
+    };
   }
 }
 ```
+
+---
+
+## 📊 Type Definitions
+
+```typescript
+// shared/types/worker.types.ts
+export interface CompleteJobData {
+  type: 'conversation' | 'analysis' | 'generation';
+  conversationId: string;
+  triggerMessage: {
+    id: string;
+    content: string;
+    authorId: string;
+    createdAt: Date;
+  };
+  agents: CompleteAgent[];
+  messages: LLMMessage[];
+  conversationContext: ConversationContext;
+}
+
+export interface CompleteAgent {
+  id: string;
+  userId: string;
+  name: string;
+  role: string;
+  backstory: string;
+  goal: string;
+  systemPrompt: string;
+  status: AgentStatus;
+  modelConfig: ModelConfig;
+  provider: ProviderConfig;
+}
+
+export interface ProviderConfig {
+  name: string;
+  apiKey: string;
+  baseUrl?: string;
+  model: string;
+  rateLimits?: {
+    requestsPerMinute: number;
+    tokensPerMinute: number;
+  };
+}
+
+export interface JobContext {
+  type: 'conversation' | 'analysis' | 'generation';
+  conversationId: string;
+  triggerMessageId: string;
+  agentIds: string[];
+  createdAt: Date;
+}
+
+export interface JobResult {
+  action: 'agent-responses' | 'no-response' | 'analysis-complete';
+  conversationId: string;
+  responses?: AgentResponse[];
+  reason?: string;
+}
+
+export interface AgentResponse {
+  agentId: string;
+  agentUserId: string;
+  response: string;
+  model: string;
+  tokensUsed: number;
+}
+
+export interface ConversationContext {
+  conversation: {
+    id: string;
+    name: string;
+    description: string;
+    createdAt: Date;
+    updatedAt: Date;
+  };
+  participants: {
+    id: string;
+    participantId: string;
+    role: string;
+  }[];
+  metadata: {
+    totalMessages: number;
+    lastActivity: Date;
+    hasActiveAgents: boolean;
+  };
+}
+```
+
+---
+
+## 🛡️ Error Handling & Resilience
+
+### **Job Failure Management**
+- **Automatic Retry**: QueueClient handles retry logic with exponential backoff
+- **Graceful Degradation**: Failed jobs create error messages from agents
+- **Status Recovery**: Agent status reset to 'active' even on job failure
+- **Error Logging**: Comprehensive logging for debugging
+
+### **Service Call Failures**
+- **Transaction Safety**: Database operations wrapped in transactions
+- **Partial Success**: Single agent failures don't break entire job processing
+- **UI Consistency**: Renderer always notified of conversation updates
+
+### **Worker Communication**
+- **Timeout Handling**: Jobs have configurable timeouts
+- **Connection Recovery**: Worker manager handles reconnection
+- **Message Integrity**: All worker messages include queue context
 
 ---
 
 ## 🚀 Implementation Plan
 
-### Phase 1: Basic Integration (Week 1)
-- [ ] **Create JobCompletionHandler**
-  - [ ] Basic job completion processing
-  - [ ] Response generator result handling
-  - [ ] Agent status updates
+### **Phase 1: Core Infrastructure (Week 1)**
+- [ ] **Create EventBus system**
+  - [ ] Define SystemEvents interface
+  - [ ] Implement EventBus class with typed events
+  - [ ] Create global singleton instance
 
+- [ ] **Create AgenticWorkerHandler**
+  - [ ] Basic class structure with event listening
+  - [ ] Worker communication setup
+  - [ ] Job tracking implementation
+
+- [ ] **Enhance QueueClient**
+  - [ ] Add EventEmitter functionality
+  - [ ] Implement worker message routing
+  - [ ] Add comprehensive logging
+
+### **Phase 2: Message Integration (Week 1)**
 - [ ] **Enhance MessageService**
-  - [ ] Add agent trigger checking
-  - [ ] Add conversation context building
-  - [ ] Add job creation for agent conversations
+  - [ ] Add event publishing to sendToDM
+  - [ ] Implement conversation context building
+  - [ ] Add error handling for context failures
 
-- [ ] **Basic Testing**
-  - [ ] User sends message → Job created
-  - [ ] Job completes → Agent response created
-  - [ ] Agent status updates correctly
+- [ ] **Implement Job Creation**
+  - [ ] Complete data gathering logic
+  - [ ] Agent and provider data compilation
+  - [ ] Message history formatting
 
-### Phase 2: Error Handling & Polish (Week 1)
+- [ ] **Basic End-to-End Test**
+  - [ ] User message → Event → Job creation
+  - [ ] Verify complete job data structure
+
+### **Phase 3: Result Processing (Week 1)**
+- [ ] **Implement Job Result Handling**
+  - [ ] Job completion processing
+  - [ ] Agent response creation
+  - [ ] Agent status management
+
 - [ ] **Add Error Handling**
   - [ ] Job failure processing
-  - [ ] Error response creation
-  - [ ] Proper logging
+  - [ ] Error message creation
+  - [ ] Status recovery logic
 
-- [ ] **Add UI Notifications**
-  - [ ] IPC events for job completion
-  - [ ] Renderer updates for new messages
-  - [ ] Agent status indicators
+- [ ] **UI Integration**
+  - [ ] Renderer notification system
+  - [ ] Cache invalidation triggers
+  - [ ] Real-time updates
 
-- [ ] **End-to-End Testing**
-  - [ ] Complete user→agent→response flow
-  - [ ] Error scenarios (job failures, timeouts)
-  - [ ] Multiple conversations simultaneously
+### **Phase 4: Testing & Polish (Week 1)**
+- [ ] **Comprehensive Testing**
+  - [ ] End-to-end conversation flows
+  - [ ] Error scenarios and recovery
+  - [ ] Multiple agent scenarios
+  - [ ] Performance under load
 
----
-
-## 📊 Database Schema (NO CHANGES)
-
-### Existing Tables Used (NO MODIFICATIONS)
-- `messagesTable` - Store user and agent messages
-- `llmMessagesTable` - Store LLM-specific message data
-- `agentsTable` - Agent configuration (NO new columns)
-- `jobsTable` - Job processing (NO changes to structure)
-- `dmConversationsTable` - Conversation management
-- `dmParticipantsTable` - Conversation participants
-
-### Job Data Usage
-```typescript
-// Job data contains all needed info for processing results
-{
-  // LLM processing data
-  agent: { name, role, backstory },
-  messages: CoreMessage[],
-  provider: string,
-  model: string,
-  apiKey: string,
-  
-  // Result processing metadata
-  conversationId: string,
-  triggerMessageId: string,
-  agentUserId: string
-}
-```
+- [ ] **Documentation & Monitoring**
+  - [ ] API documentation
+  - [ ] Logging standardization
+  - [ ] Performance metrics
 
 ---
 
-## 🎯 Success Criteria
+## 📋 Database Schema (No Changes Required)
 
-### Functional Requirements ✅
-- [ ] Users can send messages to agents and receive automated responses
-- [ ] Agent responses are contextually appropriate based on conversation history
-- [ ] Failed agent jobs result in appropriate error messages to users
-- [ ] Agent status correctly reflects processing state (active/busy)
-- [ ] System works with existing worker/job infrastructure unchanged
+The architecture uses existing database tables without modifications:
 
-### Quality Requirements 🏆
-- [ ] Zero changes to core worker/job system structures
-- [ ] All agent responses stored with proper audit trails
-- [ ] Comprehensive logging for debugging
-- [ ] Clean separation between job processing and result handling
+- **`messagesTable`** - Store user and agent messages
+- **`llmMessagesTable`** - Store LLM-specific message data  
+- **`agentsTable`** - Agent configuration and status
+- **`jobsTable`** - Worker job processing (unchanged)
+- **`dmConversationsTable`** - Conversation management
+- **`dmParticipantsTable`** - Conversation participants
+- **`llmProvidersTable`** - Provider configurations
 
----
-
-## 📚 Implementation Files
-
-### New Files to Create
-- `src/main/shared/job/job-completion.handler.ts` - Main job result processor
-- `src/main/shared/job/job-completion.types.ts` - Type definitions
-
-### Files to Modify (Minor Changes)
-- `src/main/features/message/message.service.ts` - Add agent triggering
-- `src/main/workers/worker-manager.ts` - Add job completion handling
-
-### Files Unchanged
-- All worker system files remain exactly the same
-- All job system files remain exactly the same
-- All database models remain exactly the same
+All integration data is managed in memory (job tracking) or passed through job data payload.
 
 ---
 
-## ✅ Conclusion
+## ✅ Success Criteria
 
-This simplified architectural approach maintains the agnostic nature of the worker system while enabling AI agent responses in conversations. The implementation focuses on:
+### **Functional Requirements**
+- [ ] Users can send messages to agents and receive contextual responses
+- [ ] Multiple agents can participate in conversations with intelligent selection
+- [ ] System handles job failures gracefully with error messages
+- [ ] Agent status accurately reflects processing state
+- [ ] UI updates in real-time when agents respond
 
-1. **Clean Integration**: No changes to core worker/job infrastructure
-2. **Simple Flow**: User message → Job creation → Result processing → Agent response
-3. **Future-Proof**: Can handle any job type, not just agent responses
-4. **Maintainable**: Minimal new code, maximum reuse of existing patterns
+### **Architecture Requirements**
+- [ ] Services remain decoupled from worker system
+- [ ] Worker maintains complete data agnosticism
+- [ ] All database queries performed in main process
+- [ ] Event-driven communication works reliably
+- [ ] Single point of worker integration maintained
 
-The system provides a solid foundation for autonomous AI agents while keeping the architecture clean and extensible for future enhancements.
+### **Quality Requirements**
+- [ ] Zero changes to core worker/job system
+- [ ] Comprehensive error handling and recovery
+- [ ] Clean separation of concerns maintained
+- [ ] Performance suitable for real-time conversations
+- [ ] Extensive logging for debugging and monitoring
 
-**Next Step**: Begin Phase 1 implementation with JobCompletionHandler and basic message-job integration.
+---
+
+## 🎯 Conclusion
+
+This architecture provides a robust, scalable foundation for AI agent integration while maintaining clean separation of concerns. The centralized orchestration pattern ensures that the worker system remains agnostic while services stay decoupled through event-driven communication.
+
+**Key Benefits:**
+- **Single Responsibility**: Each component has a clear, focused role
+- **Future-Proof**: Easy to add new job types and processors
+- **Maintainable**: Clean interfaces and minimal coupling
+- **Reliable**: Comprehensive error handling and recovery
+- **Scalable**: Event-driven architecture supports growth
+
+**Next Step**: Begin Phase 1 implementation with EventBus and AgenticWorkerHandler core infrastructure.

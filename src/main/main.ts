@@ -19,6 +19,8 @@ import { setupUserHandlers } from "@/main/features/user/user.handler";
 // import { QueueClient } from "@/main/features/queue-client/queue-client"; // Commented out - used only in test code
 import { getLogger } from "@/shared/logger/config";
 import { startWorker, stopWorker } from "@/main/workers/worker-manager";
+import { initializeEventBus, eventBus } from "@/shared/events/event-bus";
+import { initializeAgenticWorkerHandler, agenticWorkerHandler } from "@/shared/worker/agentic-worker.handler";
 
 declare const MAIN_WINDOW_VITE_DEV_SERVER_URL: string | undefined;
 declare const MAIN_WINDOW_VITE_NAME: string;
@@ -227,6 +229,8 @@ function setupMacOSHandlers(): void {
 app.whenReady().then(async () => {
   logger.info("App is ready, initializing IPC handlers and main window");
 
+  initializeEventBus();
+  initializeAgenticWorkerHandler();
   await initializeSessionManager();
   setupAllIpcHandlers();
   initializeJobResultHandler();
@@ -249,10 +253,12 @@ app.on("before-quit", async () => {
   logger.info("App is quitting, cleaning up services");
   
   try {
+    agenticWorkerHandler.shutdown();
+    eventBus.shutdown();
     await stopWorker();
-    logger.info("Worker stopped successfully");
+    logger.info("AgenticWorkerHandler, EventBus and Worker stopped successfully");
   } catch (error) {
-    logger.error("Error stopping worker:", error);
+    logger.error("Error stopping services:", error);
   }
 });
 
