@@ -145,7 +145,7 @@ function DMLayout() {
             // Clear the input immediately
             context.actions.setInput("");
           }}
-          className="bg-background h-full"
+          className="bg-background flex-1 flex flex-col"
         >
           <ChatMessages className="px-4 py-2">
             {(() => {
