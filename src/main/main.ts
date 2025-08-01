@@ -1,5 +1,9 @@
 import * as path from "path";
 
+// Load environment variables first
+import dotenv from "dotenv";
+dotenv.config();
+
 import { app, BrowserWindow, ipcMain } from "electron";
 import squirrel from "electron-squirrel-startup";
 
