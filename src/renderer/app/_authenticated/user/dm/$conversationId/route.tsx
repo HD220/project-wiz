@@ -1,6 +1,6 @@
 import { createFileRoute, Outlet, useRouter } from "@tanstack/react-router";
 import { Send, Paperclip, Smile } from "lucide-react";
-import { useRef, useLayoutEffect, useState } from "react";
+import { useRef, useLayoutEffect, useEffect, useState } from "react";
 
 import type { DMConversationWithParticipants } from "@/main/features/dm/dm-conversation.types";
 import type { SelectMessage } from "@/main/features/message/message.types";
