@@ -147,7 +147,7 @@ function DMLayout() {
           }}
           className="bg-background flex-1 flex flex-col"
         >
-          <ChatMessages className="px-4 py-2">
+          <ChatMessages>
             {(() => {
               const processedMessages = optimisticMessages || [];
 
