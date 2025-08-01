@@ -6,42 +6,44 @@ import { eq, and, desc, asc } from "drizzle-orm";
 import { db } from "../database";
 import { jobsTable } from "./job.model";
 import type { JobOptions } from "./job.types";
+import { getLogger } from "@/shared/logger/config";
 
 export class MessageHandler {
+  private logger = getLogger("worker-message-handler");
   async handleMessage(message: any): Promise<any> {
-    console.log("🟡 [MessageHandler] Processing message:", message);
+    this.logger.debug("🟡 [MessageHandler] Processing message:", message);
     const { action, queueName, ...data } = message;
-    console.log("🟡 [MessageHandler] Extracted:", { action, queueName, data });
+    this.logger.debug("🟡 [MessageHandler] Extracted:", { action, queueName, data });
 
     switch (action) {
       case "add":
-        console.log("🟡 [MessageHandler] Handling 'add' action");
+        this.logger.debug("🟡 [MessageHandler] Handling 'add' action");
         return this.addJob(queueName, data);
       case "getStats":
-        console.log("🟡 [MessageHandler] Handling 'getStats' action");
+        this.logger.debug("🟡 [MessageHandler] Handling 'getStats' action");
         return this.getStats(queueName);
       case "getWaiting":
-        console.log("🟡 [MessageHandler] Handling 'getWaiting' action");
+        this.logger.debug("🟡 [MessageHandler] Handling 'getWaiting' action");
         return this.getWaiting(queueName);
       case "getCompleted":
-        console.log("🟡 [MessageHandler] Handling 'getCompleted' action");
+        this.logger.debug("🟡 [MessageHandler] Handling 'getCompleted' action");
         return this.getCompleted(queueName);
       case "getFailed":
-        console.log("🟡 [MessageHandler] Handling 'getFailed' action");
+        this.logger.debug("🟡 [MessageHandler] Handling 'getFailed' action");
         return this.getFailed(queueName);
       default:
-        console.error("🟡 [MessageHandler] Unknown action:", action);
+        this.logger.error("🟡 [MessageHandler] Unknown action:", action);
         throw new Error(`Unknown action: ${action}`);
     }
   }
 
   private async addJob(queueName: string, data: { jobData: any; opts?: JobOptions }) {
-    console.log("🟢 [MessageHandler] Adding job to queue:", queueName, "with data:", data);
+    this.logger.debug("🟢 [MessageHandler] Adding job to queue:", queueName, "with data:", data);
     
     const jobId = crypto.randomUUID();
     const now = Date.now();
     
-    console.log("🟢 [MessageHandler] Generated jobId:", jobId);
+    this.logger.debug("🟢 [MessageHandler] Generated jobId:", jobId);
 
     try {
       const jobValues = {
@@ -55,7 +57,7 @@ export class MessageHandler {
         createdAt: new Date(now),
       };
       
-      console.log("🟢 [MessageHandler] Inserting job with values:", {
+      this.logger.debug("🟢 [MessageHandler] Inserting job with values:", {
         id: jobId.substring(0, 8),
         name: queueName,
         priority: jobValues.priority,
@@ -65,10 +67,10 @@ export class MessageHandler {
       
       await db.insert(jobsTable).values(jobValues);
 
-      console.log("🟢 [MessageHandler] Job inserted successfully into database");
+      this.logger.debug("🟢 [MessageHandler] Job inserted successfully into database");
       return { jobId };
     } catch (error) {
-      console.error("🟢 [MessageHandler] Error inserting job:", error);
+      this.logger.error("🟢 [MessageHandler] Error inserting job:", error);
       throw error;
     }
   }

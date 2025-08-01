@@ -2,9 +2,12 @@ import { createAnthropic } from "@ai-sdk/anthropic";
 import { createOpenAI } from "@ai-sdk/openai";
 import { createGoogleGenerativeAI } from "@ai-sdk/google";
 import { createDeepSeek } from "@ai-sdk/deepseek";
+import { getLogger } from "@/shared/logger/config";
+
+const logger = getLogger("worker-provider-loader");
 
 export function loadProvider(provider: string, model: string, apiKey: string) {
-  console.log("🔥 [ProviderLoader] Loading provider:", { provider, model, hasApiKey: !!apiKey });
+  logger.debug("🔥 [ProviderLoader] Loading provider:", { provider, model, hasApiKey: !!apiKey });
   
   switch (provider.toLowerCase()) {
     case "anthropic":
@@ -26,12 +29,12 @@ export function loadProvider(provider: string, model: string, apiKey: string) {
       return google(model);
 
     case "deepseek":
-      console.log("🔥 [ProviderLoader] Creating DeepSeek provider instance");
+      logger.debug("🔥 [ProviderLoader] Creating DeepSeek provider instance");
       const deepseek = createDeepSeek({
         apiKey: apiKey
       });
       const modelInstance = deepseek(model);
-      console.log("🔥 [ProviderLoader] DeepSeek model instance created");
+      logger.debug("🔥 [ProviderLoader] DeepSeek model instance created");
       return modelInstance;
 
     default:

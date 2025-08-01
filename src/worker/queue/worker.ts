@@ -2,6 +2,7 @@ import { and, eq, desc, asc } from "drizzle-orm";
 import { db } from "../database";
 import { jobsTable, type SelectJob } from "./job.model";
 import type { JobExecutionResult, ProcessorConfig, JobFunction } from "./job.types";
+import { getLogger } from "@/shared/logger/config";
 
 export class Worker {
   private running = false;
@@ -12,6 +13,7 @@ export class Worker {
   };
   private queueName: string;
   private jobFunction: JobFunction;
+  private logger = getLogger("worker-queue");
 
   constructor(queueName: string, jobFunction: JobFunction, config?: Partial<ProcessorConfig>) {
     this.queueName = queueName;
@@ -23,7 +25,7 @@ export class Worker {
 
   async start(): Promise<void> {
     this.running = true;
-    console.log("🔄 Job processor started with config:", this.config);
+    this.logger.info("🔄 Job processor started with config:", this.config);
 
     while (this.running) {
       try {
@@ -36,14 +38,14 @@ export class Worker {
           await this.delay(this.config.pollInterval);
         }
       } catch (error) {
-        console.error("💥 Job processing error:", error);
+        this.logger.error("💥 Job processing error:", error);
         await this.delay(this.config.pollInterval);
       }
     }
   }
 
   async stop(): Promise<void> {
-    console.log("🛑 Stopping job processor...");
+    this.logger.info("🛑 Stopping job processor...");
     this.running = false;
   }
 
@@ -71,7 +73,7 @@ export class Worker {
 
   private async processJob(job: SelectJob): Promise<void> {
     const startTime = Date.now();
-    console.log(`🔄 Processing job ${job.id} (${job.name})`);
+    this.logger.debug(`🔄 Processing job ${job.id} (${job.name})`);
 
     try {
       // Mark job as active
@@ -83,9 +85,9 @@ export class Worker {
       // Mark job as completed
       await this.markJobCompleted(job.id, result, Date.now() - startTime);
 
-      console.log(`✅ Job ${job.id} completed successfully`);
+      this.logger.info(`✅ Job ${job.id} completed successfully`);
     } catch (error) {
-      console.error(`❌ Job ${job.id} failed:`, error);
+      this.logger.error(`❌ Job ${job.id} failed:`, error);
       await this.markJobFailed(job.id, error as Error, Date.now() - startTime);
     }
   }
@@ -148,7 +150,7 @@ export class Worker {
       .get();
 
     if (!job) {
-      console.error(`Job ${jobId} not found when marking as failed`);
+      this.logger.error(`Job ${jobId} not found when marking as failed`);
       return;
     }
 
@@ -156,7 +158,7 @@ export class Worker {
     const shouldRetry = newAttempts < job.maxAttempts;
 
     if (shouldRetry) {
-      console.log(`🔄 Retrying job ${jobId} (attempt ${newAttempts}/${job.maxAttempts})`);
+      this.logger.info(`🔄 Retrying job ${jobId} (attempt ${newAttempts}/${job.maxAttempts})`);
       
       // Mark as waiting for retry with backoff delay
       const retryDelay = this.calculateRetryDelay(newAttempts);
@@ -171,9 +173,9 @@ export class Worker {
         })
         .where(eq(jobsTable.id, jobId));
 
-      console.log(`⏰ Job ${jobId} will retry in ${retryDelay}ms`);
+      this.logger.info(`⏰ Job ${jobId} will retry in ${retryDelay}ms`);
     } else {
-      console.log(`❌ Job ${jobId} exhausted all retry attempts (${newAttempts}/${job.maxAttempts})`);
+      this.logger.warn(`❌ Job ${jobId} exhausted all retry attempts (${newAttempts}/${job.maxAttempts})`);
       
       // Mark as permanently failed
       await db

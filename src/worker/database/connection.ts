@@ -1,31 +1,23 @@
-import path from "path";
+// Worker process database connection - now using shared configuration
+// This file maintains backward compatibility with existing imports
+// Worker uses database without Drizzle logging for performance
 
-import Database from "better-sqlite3";
-import { drizzle } from "drizzle-orm/better-sqlite3";
+import { createDatabaseConnection } from "@/shared/database/config";
 
-// Database file path - same as main process
-const DB_PATH = process.env["DB_FILE_NAME"] || "./project-wiz.db";
-const dbPath = path.resolve(DB_PATH);
+// Create database connection using shared configuration 
+// Disable Drizzle logging for worker performance (worker only accesses job queue tables)
+const { db, sqlite, getDatabase: getSharedDatabase } = createDatabaseConnection(false);
 
-// Initialize SQLite database
-const sqlite = new Database(dbPath);
+// Export database instance - SAME AS BEFORE
+export { db };
 
-// Enable WAL mode for better concurrency
-sqlite.pragma("journal_mode = WAL");
-
-// Enable foreign key constraints
-sqlite.pragma("foreign_keys = ON");
-
-// Create Drizzle database instance without schema option (as specified)
-// Worker only accesses job queue tables, no need for full schema
-export const db = drizzle(sqlite);
-
+// Export type - SAME AS BEFORE  
 export type DatabaseType = typeof db;
 
-// Export sqlite instance for direct access if needed
+// Export sqlite instance for direct access if needed - SAME AS BEFORE
 export { sqlite };
 
-// Utility function to get database instance
+// Utility function to get database instance - SAME AS BEFORE
 export function getDatabase(): typeof db {
-  return db;
+  return getSharedDatabase();
 }

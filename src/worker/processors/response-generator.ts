@@ -1,6 +1,7 @@
 import { generateText, type CoreMessage, type LanguageModelV1 } from "ai";
 import { loadProvider } from "../llm/provider-load";
 import type { JobFunction, Job } from "../queue/job.types";
+import { getLogger } from "@/shared/logger/config";
 
 export interface ResponseGeneratorJobData {
   agent: {
@@ -14,23 +15,25 @@ export interface ResponseGeneratorJobData {
   apiKey: string;
 }
 
+const logger = getLogger("worker-response-generator");
+
 export const responseGenerator: JobFunction<ResponseGeneratorJobData, string> = async (job: Job<ResponseGeneratorJobData>) => {
-  console.log("🔥 [ResponseGenerator] Starting job processing:", job.id);
+  logger.info("🔥 [ResponseGenerator] Starting job processing:", job.id);
   
   const { agent, messages, provider, model, apiKey } = job.data;
   
   // Mount system prompt
   const systemPrompt = `You are ${agent.name}, ${agent.role}. ${agent.backstory}`;
-  console.log("🔥 [ResponseGenerator] System prompt:", systemPrompt);
-  console.log("🔥 [ResponseGenerator] Messages:", messages);
-  console.log("🔥 [ResponseGenerator] Provider/Model:", provider, model);
+  logger.debug("🔥 [ResponseGenerator] System prompt:", systemPrompt);
+  logger.debug("🔥 [ResponseGenerator] Messages:", messages);
+  logger.debug("🔥 [ResponseGenerator] Provider/Model:", provider, model);
   
   // Load provider
-  console.log("🔥 [ResponseGenerator] Loading provider...");
+  logger.debug("🔥 [ResponseGenerator] Loading provider...");
   const providerInstance = loadProvider(provider, model, apiKey);
   
   // Generate response
-  console.log("🔥 [ResponseGenerator] Calling generateText...");
+  logger.debug("🔥 [ResponseGenerator] Calling generateText...");
   
   try {
     const result = await generateText({
@@ -39,14 +42,14 @@ export const responseGenerator: JobFunction<ResponseGeneratorJobData, string> = 
       messages: messages
     });
     
-    console.log("🔥 [ResponseGenerator] Generated response:", result.text);
-    console.log("🔥 [ResponseGenerator] Usage stats:", result.usage);
-    console.log("🔥 [ResponseGenerator] Job completed successfully:", job.id);
+    logger.debug("🔥 [ResponseGenerator] Generated response:", result.text);
+    logger.debug("🔥 [ResponseGenerator] Usage stats:", result.usage);
+    logger.info("🔥 [ResponseGenerator] Job completed successfully:", job.id);
     
     return result.text;
   } catch (error) {
-    console.error("❌ [ResponseGenerator] Error during generateText:", error);
-    console.error("❌ [ResponseGenerator] Error details:", {
+    logger.error("❌ [ResponseGenerator] Error during generateText:", error);
+    logger.error("❌ [ResponseGenerator] Error details:", {
       message: error instanceof Error ? error.message : String(error),
       stack: error instanceof Error ? error.stack : undefined,
       provider,
