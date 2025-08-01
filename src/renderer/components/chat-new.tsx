@@ -283,7 +283,12 @@ function Chat({
 
   const scrollToBottom = React.useCallback(() => {
     if (messagesRef.current && state.autoScroll) {
-      messagesRef.current.scrollTop = messagesRef.current.scrollHeight;
+      // Use async scrolling for dynamic content as recommended by Radix
+      setTimeout(() => {
+        if (messagesRef.current) {
+          messagesRef.current.scrollTop = messagesRef.current.scrollHeight;
+        }
+      }, 0);
     }
   }, [state.autoScroll]);
 
@@ -442,17 +447,40 @@ function Chat({
   );
 }
 
-interface ChatMessagesProps extends React.ComponentProps<typeof ScrollArea> {
+interface ChatMessagesProps extends React.ComponentProps<"div"> {
   children: React.ReactNode;
 }
 
 function ChatMessages({ className, children, ...props }: ChatMessagesProps) {
   const context = useChatContext();
   const { refs, actions, state } = context;
+  
+  const containerRef = React.useRef<HTMLDivElement>(null);
+  const scrollViewportRef = React.useRef<HTMLDivElement | null>(null);
 
-  const handleScroll = React.useCallback(
-    (e: React.UIEvent<HTMLDivElement>) => {
-      const { scrollTop, scrollHeight, clientHeight } = e.currentTarget;
+  // Find and setup viewport ref after mount
+  React.useEffect(() => {
+    if (containerRef.current) {
+      // Find the viewport element inside ScrollArea using querySelector
+      const viewport = containerRef.current.querySelector('[data-slot="scroll-area-viewport"]') as HTMLDivElement;
+      if (viewport) {
+        scrollViewportRef.current = viewport;
+        
+        // Update the chat context ref to point to viewport for scrolling
+        if (refs.messagesRef) {
+          (refs.messagesRef as React.MutableRefObject<HTMLDivElement | null>).current = viewport;
+        }
+      }
+    }
+  }, [refs.messagesRef]);
+
+  // Handle scroll events on the ScrollArea viewport
+  React.useEffect(() => {
+    const viewport = scrollViewportRef.current;
+    if (!viewport) return;
+
+    const handleScroll = () => {
+      const { scrollTop, scrollHeight, clientHeight } = viewport;
       const isAtBottom = scrollHeight - scrollTop - clientHeight < 10;
 
       if (!isAtBottom && state.autoScroll) {
@@ -460,28 +488,27 @@ function ChatMessages({ className, children, ...props }: ChatMessagesProps) {
       } else if (isAtBottom && !state.autoScroll) {
         actions.setAutoScroll(true);
       }
-    },
-    [state.autoScroll, actions],
-  );
+    };
+
+    viewport.addEventListener('scroll', handleScroll);
+    return () => viewport.removeEventListener('scroll', handleScroll);
+  }, [state.autoScroll, actions]);
 
   return (
-    <ScrollArea 
-      className={cn("flex-1", className)} 
-      {...props}
-    >
-      <div
-        ref={refs.messagesRef}
-        data-slot="chat-messages-container"
-        className="flex flex-col space-y-1 p-4"
-        onScroll={handleScroll}
-        role="log"
-        aria-label="Messages"
-        aria-live="polite"
-        tabIndex={0}
-      >
-        {children}
-      </div>
-    </ScrollArea>
+    <div ref={containerRef} className={cn("flex-1 min-h-0", className)} {...props}>
+      <ScrollArea className="h-full">
+        <div
+          data-slot="chat-messages-container"
+          className="flex flex-col space-y-1 p-4"
+          role="log"
+          aria-label="Messages"
+          aria-live="polite"
+          tabIndex={0}
+        >
+          {children}
+        </div>
+      </ScrollArea>
+    </div>
   );
 }
 
