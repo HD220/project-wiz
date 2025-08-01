@@ -150,9 +150,13 @@ export class WorkerManager {
 
     // Handle IPC messages
     this.worker.on("message", (message: any) => {
-      console.log("📨 Worker message:", message);
+      console.log("📨 Worker message received:", message);
+      console.log(`📨 Active callbacks: ${this.messageCallbacks.size}`);
       // Emit to all listeners (simple approach)
-      this.messageCallbacks.forEach(callback => callback(message));
+      this.messageCallbacks.forEach((callback, messageId) => {
+        console.log(`📨 Calling callback for messageId: ${messageId}`);
+        callback(message);
+      });
     });
   }
 
@@ -163,21 +167,27 @@ export class WorkerManager {
   // Send message and get response
   async sendMessageWithResponse(message: any, timeoutMs: number = 30000): Promise<any> {
     return new Promise((resolve, reject) => {
+      console.log(`[WorkerManager] Sending message to worker:`, message);
+      
       if (!this.worker) {
+        console.error(`[WorkerManager] Worker not running`);
         reject(new Error("Worker not running"));
         return;
       }
 
       const messageId = Date.now().toString();
+      console.log(`[WorkerManager] Generated messageId: ${messageId}`);
       
       // Set up timeout
       const timeout = setTimeout(() => {
+        console.error(`[WorkerManager] Message timeout for messageId: ${messageId}`);
         this.messageCallbacks.delete(messageId);
         reject(new Error("Message timeout"));
       }, timeoutMs);
 
       // Set up response handler
       this.messageCallbacks.set(messageId, (response: any) => {
+        console.log(`[WorkerManager] Received response for messageId ${messageId}:`, response);
         clearTimeout(timeout);
         this.messageCallbacks.delete(messageId);
         
@@ -190,8 +200,11 @@ export class WorkerManager {
 
       // Send message
       try {
+        console.log(`[WorkerManager] Posting message to worker process`);
         this.worker.postMessage(message);
+        console.log(`[WorkerManager] Message posted successfully`);
       } catch (error) {
+        console.error(`[WorkerManager] Error posting message:`, error);
         clearTimeout(timeout);
         this.messageCallbacks.delete(messageId);
         reject(error);

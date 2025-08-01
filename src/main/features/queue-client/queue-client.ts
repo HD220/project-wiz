@@ -20,6 +20,7 @@ export class QueueClient {
       opts,
     };
 
+    console.log(`[QueueClient] Sending add job message:`, { message });
     return this.sendMessage(message);
   }
 
@@ -60,6 +61,14 @@ export class QueueClient {
   }
 
   private async sendMessage(message: any): Promise<any> {
-    return workerManager.sendMessageWithResponse(message);
+    console.log(`[QueueClient] Calling workerManager.sendMessageWithResponse`);
+    try {
+      const result = await workerManager.sendMessageWithResponse(message);
+      console.log(`[QueueClient] Got response from worker:`, result);
+      return result;
+    } catch (error) {
+      console.error(`[QueueClient] Error from worker:`, error);
+      throw error;
+    }
   }
 }

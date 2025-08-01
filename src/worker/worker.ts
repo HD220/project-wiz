@@ -35,14 +35,28 @@ process.on("SIGTERM", async () => {
 
 // Handle messages from main process
 process.on("message", async (message: any) => {
+  console.log("🔴 [WORKER] Received message from main process:", message);
   try {
+    console.log("🔴 [WORKER] Processing message with messageHandler");
     const result = await messageHandler.handleMessage(message);
+    console.log("🔴 [WORKER] Message processed successfully, result:", result);
+    
     if (process.send) {
-      process.send({ success: true, result });
+      const response = { success: true, result };
+      console.log("🔴 [WORKER] Sending response back to main:", response);
+      process.send(response);
+    } else {
+      console.error("🔴 [WORKER] process.send is not available!");
     }
   } catch (error) {
+    console.error("🔴 [WORKER] Error processing message:", error);
+    
     if (process.send) {
-      process.send({ success: false, error: error instanceof Error ? error.message : String(error) });
+      const response = { success: false, error: error instanceof Error ? error.message : String(error) };
+      console.log("🔴 [WORKER] Sending error response back to main:", response);
+      process.send(response);
+    } else {
+      console.error("🔴 [WORKER] process.send is not available for error response!");
     }
   }
 });

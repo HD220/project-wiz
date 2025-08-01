@@ -133,9 +133,12 @@ async function initializeStartupJob(): Promise<void> {
       return;
     }
 
-    const queueClient = new QueueClient("llm-jobs");
+    logger.info("Starting startup job creation process");
     
-    const jobResult = await queueClient.add({
+    const queueClient = new QueueClient("llm-jobs");
+    logger.info("QueueClient created for llm-jobs queue");
+    
+    const jobData = {
       agent: {
         name: "StartupAgent",
         role: "System Initialization Agent",
@@ -148,14 +151,26 @@ async function initializeStartupJob(): Promise<void> {
       provider: "openai",
       model: "gpt-4",
       apiKey: apiKey
-    }, {
+    };
+    
+    const jobOptions = {
       priority: 1,
       attempts: 3
-    });
+    };
+    
+    logger.info("About to send job to worker", { jobData, jobOptions });
+    
+    const jobResult = await queueClient.add(jobData, jobOptions);
 
     logger.info(`Startup job created successfully with ID: ${jobResult.jobId}`);
   } catch (error) {
     logger.error("Failed to create startup job:", error);
+    if (error instanceof Error) {
+      logger.error("Error details:", {
+        message: error.message,
+        stack: error.stack
+      });
+    }
   }
 }
 
