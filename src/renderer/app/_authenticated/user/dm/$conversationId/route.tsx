@@ -349,6 +349,7 @@ function DMLayout() {
               <ChatInput
                 render={(chatInput) => (
                   <FunctionalChatInput
+                    inputRef={chatInput.inputRef}
                     value={chatInput.value}
                     loading={sendingMessage}
                     onValueChange={chatInput.setValue}
@@ -378,6 +379,7 @@ function DMLayout() {
 
 // Functional Chat Input Component
 interface FunctionalChatInputProps {
+  inputRef?: React.RefObject<HTMLInputElement | HTMLTextAreaElement | null>;
   value: string;
   loading: boolean;
   onValueChange: (value: string) => void;
@@ -388,6 +390,7 @@ interface FunctionalChatInputProps {
 }
 
 function FunctionalChatInput({
+  inputRef,
   value,
   loading,
   onValueChange,
@@ -397,6 +400,13 @@ function FunctionalChatInput({
   disabled = false,
 }: FunctionalChatInputProps) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  // Conectar o inputRef do ChatInput com o ref local
+  useEffect(() => {
+    if (inputRef && textareaRef.current) {
+      (inputRef as React.MutableRefObject<HTMLTextAreaElement | null>).current = textareaRef.current;
+    }
+  }, [inputRef]);
 
   const handleSubmit = () => {
     if (value.trim() && !loading && !disabled) {
