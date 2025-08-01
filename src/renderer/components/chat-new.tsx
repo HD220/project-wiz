@@ -1,6 +1,7 @@
 import { cva, type VariantProps } from "class-variance-authority";
 import * as React from "react";
 
+import { ScrollArea } from "@/renderer/components/ui/scroll-area";
 import { cn } from "@/renderer/lib/utils";
 
 // Types for reducer
@@ -441,7 +442,7 @@ function Chat({
   );
 }
 
-interface ChatMessagesProps extends React.ComponentProps<"div"> {
+interface ChatMessagesProps extends React.ComponentProps<typeof ScrollArea> {
   children: React.ReactNode;
 }
 
@@ -449,12 +450,30 @@ function ChatMessages({ className, children, ...props }: ChatMessagesProps) {
   const context = useChatContext();
   const { refs, actions, state } = context;
 
+  const handleScroll = React.useCallback(
+    (e: React.UIEvent<HTMLDivElement>) => {
+      const { scrollTop, scrollHeight, clientHeight } = e.currentTarget;
+      const isAtBottom = scrollHeight - scrollTop - clientHeight < 10;
+
+      if (!isAtBottom && state.autoScroll) {
+        actions.setAutoScroll(false);
+      } else if (isAtBottom && !state.autoScroll) {
+        actions.setAutoScroll(true);
+      }
+    },
+    [state.autoScroll, actions],
+  );
+
   return (
-    <div className={cn("flex-1 overflow-hidden", className)} {...props}>
+    <ScrollArea 
+      className={cn("flex-1", className)} 
+      {...props}
+    >
       <div
         ref={refs.messagesRef}
         data-slot="chat-messages-container"
-        className="h-full overflow-y-auto flex flex-col space-y-1 p-4"
+        className="flex flex-col space-y-1 p-4"
+        onScroll={handleScroll}
         role="log"
         aria-label="Messages"
         aria-live="polite"
@@ -462,7 +481,7 @@ function ChatMessages({ className, children, ...props }: ChatMessagesProps) {
       >
         {children}
       </div>
-    </div>
+    </ScrollArea>
   );
 }
 
