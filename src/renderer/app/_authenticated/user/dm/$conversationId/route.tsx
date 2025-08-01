@@ -144,6 +144,10 @@ function DMLayout() {
             handleSendMessage(input);
             // Clear the input immediately
             context.actions.setInput("");
+            // Focus back to input after sending
+            setTimeout(() => {
+              context.refs.inputRef?.current?.focus();
+            }, 0);
           }}
           className="bg-background flex-1 flex flex-col"
         >
