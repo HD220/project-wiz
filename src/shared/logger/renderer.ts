@@ -3,12 +3,13 @@
 
 import pino from "pino";
 import { getRendererLoggerConfig } from "../config/renderer";
+import { Logger } from "./config";
 
 // Global logger instance - created once and reused
 let globalLogger: pino.Logger | null = null;
 
 // Context-specific loggers cache
-const contextLoggers = new Map<string, pino.Logger>();
+const contextLoggers = new Map<string, Logger>();
 
 /**
  * Create the global logger instance for renderer process
@@ -54,12 +55,13 @@ export function getRendererGlobalLogger(): pino.Logger {
  * Get a logger instance with specific context for renderer process
  * This is the main function to use in renderer components
  * @param context - The context string to identify log source
- * @returns A child logger with the specified context
+ * @returns A Logger wrapper with the specified context
  */
-export function getRendererLogger(context: string): pino.Logger {
+export function getRendererLogger(context: string): Logger {
   if (!contextLoggers.has(context)) {
     const globalLogger = getRendererGlobalLogger();
-    contextLoggers.set(context, globalLogger.child({ context }));
+    const pinoChild = globalLogger.child({ context });
+    contextLoggers.set(context, new Logger(pinoChild));
   }
   return contextLoggers.get(context)!;
 }
@@ -73,5 +75,13 @@ export function resetRendererLoggerCache(): void {
   contextLoggers.clear();
 }
 
+/**
+ * Get the global renderer logger wrapped in our Logger class
+ * @returns Logger wrapper instance
+ */
+export function getRendererGlobalLoggerWrapper(): Logger {
+  return new Logger(getRendererGlobalLogger());
+}
+
 // Default logger export for simple cases
-export default getRendererGlobalLogger;
+export default getRendererGlobalLoggerWrapper;
