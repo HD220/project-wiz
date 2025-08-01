@@ -17,9 +17,9 @@ import { AgentForm } from "@/renderer/features/agent/components/agent-form";
 import type { LlmProvider } from "@/renderer/features/agent/provider.types";
 import { useApiMutation } from "@/renderer/hooks/use-api-mutation.hook";
 import { loadApiData } from "@/renderer/lib/route-loader";
-import { getLogger } from "@/shared/logger/config";
+import { getRendererLogger } from "@/shared/logger/renderer";
 
-const logger = getLogger("agent-new");
+const logger = getRendererLogger("agent-new");
 
 function CreateAgentPage() {
   const navigate = useNavigate();

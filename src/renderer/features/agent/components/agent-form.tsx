@@ -3,9 +3,9 @@ import { Bot, Settings, User } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { UseFormReturn } from "react-hook-form";
 import { z } from "zod";
-import { getLogger } from "@/shared/logger/config";
+import { getRendererLogger } from "@/shared/logger/renderer";
 
-const logger = getLogger("agent-form");
+const logger = getRendererLogger("agent-form");
 
 import {
   Card,

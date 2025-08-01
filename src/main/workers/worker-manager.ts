@@ -134,21 +134,10 @@ export class WorkerManager {
       this.restartCount = 0; // Reset restart count on successful spawn
     });
 
-    // Handle stdout (worker logs)
-    this.worker.stdout?.on("data", (data: Buffer) => {
-      const message = data.toString().trim();
-      if (message) {
-        this.logger.info(`[WORKER] ${message}`);
-      }
-    });
-
-    // Handle stderr (worker errors)
-    this.worker.stderr?.on("data", (data: Buffer) => {
-      const message = data.toString().trim();
-      if (message) {
-        this.logger.error(`[WORKER ERROR] ${message}`);
-      }
-    });
+    // Worker uses structured logging - pipe stdout/stderr directly to avoid duplicate logs
+    // The worker's Pino logger will handle proper formatting and context
+    this.worker.stdout?.pipe(process.stdout);
+    this.worker.stderr?.pipe(process.stderr);
 
     // Handle IPC messages from worker
     this.worker.on("message", (message: any) => {

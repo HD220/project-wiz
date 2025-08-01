@@ -1,7 +1,7 @@
 import type { IpcResponse } from "../../main/types";
-import { getLogger } from "@/shared/logger/config";
+import { getRendererLogger } from "@/shared/logger/renderer";
 
-const logger = getLogger("route-loader");
+const logger = getRendererLogger("route-loader");
 
 /**
  * Unwraps IpcResponse in route loaders with proper error handling

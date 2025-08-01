@@ -21,9 +21,9 @@ import {
 import { Button } from "@/renderer/components/ui/button";
 import { Textarea } from "@/renderer/components/ui/textarea";
 import { loadApiData } from "@/renderer/lib/route-loader";
-import { getLogger } from "@/shared/logger/config";
+import { getRendererLogger } from "@/shared/logger/renderer";
 
-const logger = getLogger("channel-route");
+const logger = getRendererLogger("channel-route");
 
 interface ChannelLoaderData {
   channel: SelectProjectChannel;
