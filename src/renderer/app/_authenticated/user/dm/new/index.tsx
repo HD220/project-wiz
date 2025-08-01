@@ -31,24 +31,10 @@ import { cn } from "@/renderer/lib/utils";
 
 function CreateConversationPage() {
   const navigate = useNavigate();
-  const availableUsers = Route.useLoaderData();
+  const { availableUsers, currentUser } = Route.useLoaderData();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedUserIds, setSelectedUserIds] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
-
-  // Get current user - this should be available from auth context
-  // For now using a placeholder - in real app would come from useAuth()
-  const currentUser: AuthenticatedUser = {
-    id: "current-user-id", // This should come from auth context
-    name: "Current User",
-    type: "human",
-    avatar: null,
-    isActive: true,
-    deactivatedAt: null,
-    deactivatedBy: null,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  };
 
   // Mutation for creating conversation
   const createConversationMutation = useApiMutation(
@@ -57,7 +43,7 @@ function CreateConversationPage() {
       successMessage: "Conversation created successfully",
       errorMessage: "Failed to create conversation",
       invalidateRouter: false,
-      onSuccess: (response: any) => {
+      onSuccess: (response: { data?: { id?: string } }) => {
         if (response?.data?.id) {
           handleSuccess(response.data.id);
         }
@@ -153,7 +139,6 @@ function CreateConversationPage() {
                 onChange={(e) => handleSearchChange(e.target.value)}
                 className="pl-10 h-9 bg-muted/30 border-0 focus:bg-background focus-visible:ring-1 focus-visible:ring-ring"
                 maxLength={100}
-                autoFocus
               />
             </div>
           </div>
@@ -178,6 +163,14 @@ function CreateConversationPage() {
                       isSelected && "bg-primary/10",
                     )}
                     onClick={() => handleUserToggle(user.id)}
+                    onKeyDown={(event) => {
+                      if (event.key === "Enter" || event.key === " ") {
+                        event.preventDefault();
+                        handleUserToggle(user.id);
+                      }
+                    }}
+                    role="button"
+                    tabIndex={0}
                   >
                     {/* Checkbox */}
                     <Checkbox
@@ -257,13 +250,34 @@ function CreateConversationPage() {
 }
 
 export const Route = createFileRoute("/_authenticated/user/dm/new/")({
-  loader: async () => {
+  loader: async ({ context }) => {
+    const { auth } = context;
+
+    // Defensive check - ensure user exists
+    if (!auth.user?.id) {
+      throw new Error("User not authenticated");
+    }
+
     // Load available users for conversation creation
     const users = await loadApiData(
       () => window.api.users.listAvailableUsers(),
       "Failed to load users",
     );
-    return users;
+
+    return {
+      availableUsers: users,
+      currentUser: {
+        id: auth.user.id,
+        name: auth.user.name || "Current User",
+        type: auth.user.type || "human",
+        avatar: auth.user.avatar || null,
+        isActive: auth.user.isActive !== false,
+        deactivatedAt: auth.user.deactivatedAt || null,
+        deactivatedBy: auth.user.deactivatedBy || null,
+        createdAt: auth.user.createdAt || new Date(),
+        updatedAt: auth.user.updatedAt || new Date(),
+      } as AuthenticatedUser,
+    };
   },
   component: CreateConversationPage,
 });

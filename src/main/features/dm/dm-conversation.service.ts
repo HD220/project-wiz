@@ -4,6 +4,7 @@ import { createDatabaseConnection } from "@/shared/database/config";
 
 const { getDatabase } = createDatabaseConnection(true);
 import { messagesTable } from "@/main/features/message/message.model";
+import { usersTable } from "@/main/features/user/user.model";
 import { UserService } from "@/main/features/user/user.service";
 
 import {
@@ -54,6 +55,30 @@ export const dmConversationService = {
     input: CreateDMConversationInput,
   ): Promise<DMConversationWithParticipants> {
     const db = getDatabase();
+
+    // Validate all participant IDs exist before creating DM conversation
+    if (input.participantIds.length === 0) {
+      throw new Error(
+        "At least one participant is required for DM conversation",
+      );
+    }
+
+    // Check that all participant IDs exist in the users table
+    const existingUsers = await db
+      .select({ id: usersTable.id, name: usersTable.name })
+      .from(usersTable)
+      .where(inArray(usersTable.id, input.participantIds));
+
+    const existingUserIds = new Set(existingUsers.map((user) => user.id));
+    const invalidParticipantIds = input.participantIds.filter(
+      (id) => !existingUserIds.has(id),
+    );
+
+    if (invalidParticipantIds.length > 0) {
+      throw new Error(
+        `Invalid participant IDs: ${invalidParticipantIds.join(", ")}`,
+      );
+    }
 
     const conversationName = await generateDMTitle(
       input.participantIds,
