@@ -1,0 +1,3 @@
+# Spec Summary (Lite)
+
+Implement comprehensive frontend user experience enhancements including conversation unarchive functionality, unread message indicators, real project data integration, and notification systems. This feature set completes remaining frontend TODOs to provide polished conversation management, real-time status tracking, and authentic data integration throughout the user interface.
