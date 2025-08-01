@@ -57,11 +57,14 @@ The following features have been implemented:
 ### Features
 
 - [x] **DM Creation Foreign Key Fix** - Resolve critical bug preventing DM conversation creation due to foreign key constraint violations `S`
+- [ ] **Conversation UI Critical Fixes** - Fix modal auto-close, real-time message updates, sidebar overflow, avatar consistency, scrolling, and styling issues `M`
 - [ ] **Conversation Unarchive Functionality** - Allow users to restore archived conversations to active status `M`
 - [ ] **Unread Message Logic** - Visual indicators and tracking system for unread messages in conversations `M`
 - [ ] **Real Project Data Integration** - Replace mock data with actual database-driven project member information `S`
 - [ ] **Notification System Enhancement** - Sidebar notifications for conversation updates and agent status changes `M`
 - [ ] **UI/UX Polish** - Consistent design patterns, accessibility, and error handling across all components `S`
+
+**Spec:** @.agent-os/specs/2025-08-01-conversation-ui-fixes/
 
 ## Phase 1.6: Core System Enhancements (Spec Ready - 3-4 weeks)
 
