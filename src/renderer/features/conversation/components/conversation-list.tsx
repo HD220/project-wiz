@@ -18,7 +18,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/renderer/components/ui/dropdown-menu";
-import { ScrollArea } from "@/renderer/components/ui/scroll-area";
 import { Switch } from "@/renderer/components/ui/switch";
 import { useAuth } from "@/renderer/contexts/auth.context";
 import { getOtherParticipants, createConversationAvatar } from "@/renderer/features/conversation/utils/conversation-avatar.utils";
@@ -105,8 +104,8 @@ export function ConversationList(props: ConversationListProps) {
       {displayConversations.length === 0 ? (
         <ConversationListEmpty showArchived={showArchived} />
       ) : (
-        <ScrollArea className="flex-1">
-          <div className="space-y-[var(--spacing-component-xs)] pt-[var(--spacing-component-xs)] min-h-0 overflow-hidden">
+        <div className="flex-1 overflow-y-auto">
+          <div className="space-y-[var(--spacing-component-xs)] pt-[var(--spacing-component-xs)]">
             {displayConversations.map((conversation) => (
               <ConversationListItem
                 key={conversation.id}
@@ -115,7 +114,7 @@ export function ConversationList(props: ConversationListProps) {
               />
             ))}
           </div>
-        </ScrollArea>
+        </div>
       )}
 
       {/* Create Dialog */}
