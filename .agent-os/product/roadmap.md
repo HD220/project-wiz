@@ -29,6 +29,7 @@ The following features have been implemented:
 
 - [x] **Code Organization & Visual Refinement** - Improved codebase patterns and UI polish `M`
 - [x] **Critical Error Fixes** - Resolved all database transaction errors, unhandled rejections, and modal accessibility issues `S`
+- [ ] **Shared Database and Logger Config** - Centralized configuration for consistent database and logging across main/worker processes `S`
 - [ ] **LLM Worker Service** - Background worker for processing AI agent requests `L`
 - [ ] **Agent Execution Engine** - Core system for running AI agents autonomously `XL`
 - [ ] **Direct Message Chat Integration** - Connect worker system with DM chat interface `M`
