@@ -148,8 +148,8 @@ async function initializeStartupJob(): Promise<void> {
         role: "user",
         content: "System has started successfully. Please confirm initialization and provide a brief status report."
       }],
-      provider: "openai",
-      model: "gpt-4",
+      provider: "deepseek",
+      model: "deepseek-chat",
       apiKey: apiKey
     };
     
