@@ -5,22 +5,8 @@
     {
       "idx": 0,
       "version": "6",
-      "when": 1753795113678,
-      "tag": "0000_massive_vin_gonzales",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "6",
-      "when": 1753985321613,
-      "tag": "0001_jittery_warhawk",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "6",
-      "when": 1754050100825,
-      "tag": "0002_tense_impossible_man",
+      "when": 1754050409884,
+      "tag": "0000_yellow_deathbird",
       "breakpoints": true
     }
   ]
