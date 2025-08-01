@@ -3,6 +3,7 @@
 
 import { utilityProcess } from "electron";
 import path from "path";
+import { fileURLToPath } from "url";
 
 export interface WorkerConfig {
   maxRestarts?: number;
@@ -77,8 +78,9 @@ export class WorkerManager {
 
   private async spawnWorker(): Promise<void> {
     try {
-      // Path to the built worker file
-      const workerPath = path.join(__dirname, "../worker/worker.js");
+      // Path to the built worker file using ESM import.meta.url
+      const currentDir = path.dirname(fileURLToPath(import.meta.url));
+      const workerPath = path.join(currentDir, "../worker/worker.js");
       
       console.log(`🔧 Spawning worker from: ${workerPath}`);
 
