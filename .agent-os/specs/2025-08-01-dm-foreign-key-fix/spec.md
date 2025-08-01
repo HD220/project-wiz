@@ -2,7 +2,7 @@
 
 > Spec: DM Creation Foreign Key Constraint Fix  
 > Created: 2025-08-01
-> Status: Planning
+> Status: Completed
 
 ## Overview
 
