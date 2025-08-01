@@ -26,3 +26,6 @@ export * from "@/main/features/agent/agent.model";
 // LLM Provider domain
 export * from "@/main/features/llm-provider/llm-provider.model";
 
+// Worker jobs domain
+export * from "@/worker/queue/job.model";
+
