@@ -44,15 +44,26 @@ export class MessageHandler {
     console.log("🟢 [MessageHandler] Generated jobId:", jobId);
 
     try {
-      await db.insert(jobsTable).values({
+      const jobValues = {
         id: jobId,
         name: queueName,
         data: JSON.stringify(data.jobData),
         opts: data.opts ? JSON.stringify(data.opts) : null,
         priority: data.opts?.priority || 0,
-        status: "waiting",
+        status: "waiting" as const,
+        dependencyCount: 0, // Explicitly set to 0
         createdAt: new Date(now),
+      };
+      
+      console.log("🟢 [MessageHandler] Inserting job with values:", {
+        id: jobId.substring(0, 8),
+        name: queueName,
+        priority: jobValues.priority,
+        status: jobValues.status,
+        dependencyCount: jobValues.dependencyCount
       });
+      
+      await db.insert(jobsTable).values(jobValues);
 
       console.log("🟢 [MessageHandler] Job inserted successfully into database");
       return { jobId };

@@ -50,6 +50,22 @@ export class Worker {
   private async getNextJob(): Promise<SelectJob | null> {
     const now = Date.now();
     
+    console.log(`🔍 [Worker] Looking for jobs in queue: ${this.queueName}`);
+    
+    // First, let's see ALL jobs in the queue for debugging
+    const allJobs = await db
+      .select()
+      .from(jobsTable)
+      .where(eq(jobsTable.name, this.queueName))
+      .all();
+    
+    console.log(`🔍 [Worker] Found ${allJobs.length} total jobs in queue:`, allJobs.map(j => ({
+      id: j.id.substring(0, 8),
+      status: j.status,
+      dependencyCount: j.dependencyCount,
+      priority: j.priority
+    })));
+    
     // Get waiting jobs or delayed jobs that are ready to be processed
     const job = await db
       .select()
@@ -64,6 +80,12 @@ export class Worker {
       .orderBy(desc(jobsTable.priority), asc(jobsTable.createdAt))
       .limit(1)
       .get();
+      
+    console.log(`🔍 [Worker] Query result:`, job ? {
+      id: job.id.substring(0, 8), 
+      status: job.status,
+      dependencyCount: job.dependencyCount
+    } : 'null');
 
     // Filter jobs by status and delay
     if (!job) return null;
