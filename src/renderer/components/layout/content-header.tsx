@@ -28,8 +28,8 @@ export function ContentHeader(props: ContentHeaderProps) {
   } = props;
 
   return (
-    <header className="h-14 bg-background/95 backdrop-blur-sm border-b border-border/50 flex items-center justify-between relative shadow-sm/50">
-      <div className="absolute inset-0 bg-gradient-to-r from-background via-background/98 to-background/95 pointer-events-none" />
+    <header className="h-14 bg-sidebar/95 backdrop-blur-sm border-b border-sidebar-border/60 flex items-center justify-between relative shadow-sm/50">
+      <div className="absolute inset-0 bg-gradient-to-r from-sidebar via-sidebar/98 to-sidebar/95 pointer-events-none" />
 
       <div className="relative flex items-center justify-between w-full px-[var(--spacing-layout-sm)] lg:px-[var(--spacing-layout-md)]">
         <div className="flex items-center gap-[var(--spacing-component-lg)] min-w-0 flex-1">
@@ -42,18 +42,18 @@ export function ContentHeader(props: ContentHeaderProps) {
               </div>
             )}
 
-            <h1 className="truncate text-xl font-semibold leading-tight text-foreground">
+            <h1 className="truncate text-xl font-semibold leading-tight text-sidebar-foreground">
               {title}
             </h1>
           </div>
 
           <Separator
             orientation="vertical"
-            className="h-6 bg-border/40 flex-shrink-0"
+            className="h-6 bg-sidebar-border/40 flex-shrink-0"
           />
 
           <div className="min-w-0 flex-1">
-            <p className="truncate text-sm text-muted-foreground">
+            <p className="truncate text-sm text-sidebar-foreground/60">
               {description}
             </p>
           </div>
@@ -77,7 +77,7 @@ export function ContentHeader(props: ContentHeaderProps) {
         )}
       </div>
 
-      <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-border/60 to-transparent" />
+      <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-sidebar-border/60 to-transparent" />
     </header>
   );
 }

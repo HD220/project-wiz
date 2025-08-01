@@ -35,7 +35,7 @@ export function SidebarNavigation(props: SidebarNavigationProps) {
         <Separator className="my-[var(--spacing-component-md)] bg-sidebar-border/40" />
 
         {/* Conversations List with enhanced container */}
-        <div role="region" aria-label="Conversations" className="min-h-0">
+        <div role="region" aria-label="Conversations" className="min-h-0 w-full overflow-hidden">
           <ConversationList
             conversations={conversations}
             availableUsers={availableUsers}

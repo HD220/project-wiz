@@ -1,6 +1,6 @@
-import { createFileRoute, Outlet } from "@tanstack/react-router";
+import { createFileRoute, Outlet, useRouter } from "@tanstack/react-router";
 import { Send, Paperclip, Smile } from "lucide-react";
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, useState } from "react";
 
 import type { DMConversationWithParticipants } from "@/main/features/dm/dm-conversation.types";
 import type { SelectMessage } from "@/main/features/message/message.types";
@@ -20,8 +20,8 @@ import {
   ProfileAvatar,
   ProfileAvatarImage,
   ProfileAvatarStatus,
-  ProfileAvatarCounter,
 } from "@/renderer/features/user/components/profile-avatar";
+import { getOtherParticipants, createConversationAvatar } from "@/renderer/features/conversation/utils/conversation-avatar.utils";
 import { loadApiData } from "@/renderer/lib/route-loader";
 import { cn } from "@/renderer/lib/utils";
 
@@ -34,8 +34,56 @@ interface DMLoaderData {
 
 function DMLayout() {
   const { conversationId } = Route.useParams();
+  const router = useRouter();
   const { conversation, messages, availableUsers, user } =
     Route.useLoaderData() as DMLoaderData;
+  const [optimisticMessages, setOptimisticMessages] = useState(messages || []);
+  const [sendingMessage, setSendingMessage] = useState(false);
+
+  // Update optimistic messages when route data changes
+  useEffect(() => {
+    setOptimisticMessages(messages || []);
+  }, [messages]);
+
+  // Handle message sending with optimistic updates
+  const handleSendMessage = async (input: string) => {
+    if (!input.trim() || sendingMessage) return;
+
+    setSendingMessage(true);
+
+    // Create optimistic message
+    const optimisticMessage: SelectMessage = {
+      id: `temp-${Date.now()}`, // Temporary ID
+      sourceType: "dm",
+      sourceId: conversationId,
+      authorId: user.id,
+      content: input.trim(),
+      isActive: true,
+      deactivatedAt: null,
+      deactivatedBy: null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+
+    // Add optimistic message immediately
+    setOptimisticMessages(prev => [...prev, optimisticMessage]);
+
+    try {
+      // Send message to backend
+      await window.api.dm.sendMessage(conversationId, input.trim());
+      
+      // Invalidate router to refresh messages from backend
+      router.invalidate();
+    } catch (error) {
+      // Remove optimistic message on error
+      setOptimisticMessages(prev => 
+        prev.filter(msg => msg.id !== optimisticMessage.id)
+      );
+      console.error("Failed to send message:", error);
+    } finally {
+      setSendingMessage(false);
+    }
+  };
 
   if (!conversation) {
     return (
@@ -46,16 +94,7 @@ function DMLayout() {
   }
 
   // Get conversation display info
-  const otherParticipants =
-    conversation.participants
-      ?.filter((participant: any) => participant.userId !== user?.id)
-      .map((participant: any) =>
-        availableUsers.find(
-          (availableUser: { id: string }) =>
-            availableUser.id === participant.userId,
-        ),
-      )
-      .filter(Boolean) || [];
+  const otherParticipants = getOtherParticipants(conversation, user.id, availableUsers);
 
   const displayName = conversation.name || "Unknown DM";
   const description =
@@ -66,65 +105,7 @@ function DMLayout() {
   // Create conversation avatar
   const conversationAvatar = (
     <div className="flex-shrink-0">
-      {(() => {
-        if (otherParticipants.length === 0) {
-          return (
-            <ProfileAvatar size="sm">
-              <ProfileAvatarImage
-                fallbackIcon={<div className="text-xs font-bold">?</div>}
-              />
-            </ProfileAvatar>
-          );
-        }
-
-        if (otherParticipants.length === 1) {
-          const participant = otherParticipants[0];
-          if (!participant) {
-            return (
-              <ProfileAvatar size="sm">
-                <ProfileAvatarImage
-                  fallbackIcon={<div className="text-xs font-bold">?</div>}
-                />
-              </ProfileAvatar>
-            );
-          }
-          return (
-            <ProfileAvatar size="sm">
-              <ProfileAvatarImage
-                src={participant.avatar}
-                name={participant.name}
-              />
-              <ProfileAvatarStatus id={participant.id} size="sm" />
-            </ProfileAvatar>
-          );
-        }
-
-        const firstParticipant = otherParticipants[0];
-        const remainingCount = otherParticipants.length - 1;
-
-        if (!firstParticipant) {
-          return (
-            <ProfileAvatar size="sm">
-              <ProfileAvatarImage
-                fallbackIcon={<div className="text-xs font-bold">?</div>}
-              />
-            </ProfileAvatar>
-          );
-        }
-
-        return (
-          <ProfileAvatar size="sm">
-            <ProfileAvatarImage
-              src={firstParticipant.avatar}
-              name={firstParticipant.name}
-            />
-            <ProfileAvatarStatus id={firstParticipant.id} size="sm" />
-            {remainingCount > 0 && (
-              <ProfileAvatarCounter count={remainingCount} size="sm" />
-            )}
-          </ProfileAvatar>
-        );
-      })()}
+      {createConversationAvatar(otherParticipants, "sm")}
     </div>
   );
 
@@ -158,15 +139,17 @@ function DMLayout() {
       <main className="flex-1 overflow-hidden">
         <Chat
           keyFn={(message: any) => message.id}
-          value={messages || []}
-          onSend={async (input) => {
-            await window.api.dm.sendMessage(conversationId, input);
+          value={optimisticMessages}
+          onSend={(input, context) => {
+            handleSendMessage(input);
+            // Clear the input immediately
+            context.actions.setInput("");
           }}
           className="bg-background h-full"
         >
           <ChatMessages className="px-4 py-2">
             {(() => {
-              const processedMessages = messages || [];
+              const processedMessages = optimisticMessages || [];
 
               // Welcome message for new conversations
               if (processedMessages.length === 0) {
@@ -363,7 +346,7 @@ function DMLayout() {
                 render={(chatInput) => (
                   <FunctionalChatInput
                     value={chatInput.value}
-                    loading={chatInput.loading}
+                    loading={sendingMessage}
                     onValueChange={chatInput.setValue}
                     onSend={chatInput.send}
                     onKeyDown={(e) => {
@@ -376,7 +359,7 @@ function DMLayout() {
                       }
                     }}
                     placeholder={`Message ${displayName}...`}
-                    disabled={false}
+                    disabled={sendingMessage}
                   />
                 )}
               />

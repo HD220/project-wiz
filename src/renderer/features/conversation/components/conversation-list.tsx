@@ -5,7 +5,6 @@ import {
   Archive,
   Plus,
   MoreHorizontal,
-  Hash,
 } from "lucide-react";
 import { useState, useMemo } from "react";
 
@@ -22,12 +21,7 @@ import {
 import { ScrollArea } from "@/renderer/components/ui/scroll-area";
 import { Switch } from "@/renderer/components/ui/switch";
 import { useAuth } from "@/renderer/contexts/auth.context";
-import {
-  ProfileAvatar,
-  ProfileAvatarImage,
-  ProfileAvatarStatus,
-  ProfileAvatarCounter,
-} from "@/renderer/features/user/components/profile-avatar";
+import { getOtherParticipants, createConversationAvatar } from "@/renderer/features/conversation/utils/conversation-avatar.utils";
 import { useApiMutation } from "@/renderer/hooks/use-api-mutation.hook";
 import { cn } from "@/renderer/lib/utils";
 
@@ -101,7 +95,7 @@ export function ConversationList(props: ConversationListProps) {
   }
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full min-w-0 w-full overflow-hidden">
       <ConversationListHeader
         onCreateConversation={() => navigate({ to: "/user/dm/new" })}
         showArchived={showArchived}
@@ -112,7 +106,7 @@ export function ConversationList(props: ConversationListProps) {
         <ConversationListEmpty showArchived={showArchived} />
       ) : (
         <ScrollArea className="flex-1">
-          <div className="space-y-[var(--spacing-component-xs)] pt-[var(--spacing-component-xs)]">
+          <div className="space-y-[var(--spacing-component-xs)] pt-[var(--spacing-component-xs)] min-h-0">
             {displayConversations.map((conversation) => (
               <ConversationListItem
                 key={conversation.id}
@@ -286,7 +280,7 @@ function ConversationListItem(props: ConversationListItemProps) {
   const hasUnreadMessages = conversation.lastMessage && false; // TODO: Implement proper unread logic
 
   return (
-    <div className="group relative">
+    <div className="group relative w-full min-w-0">
       <Link
         to="/user/dm/$conversationId"
         params={{ conversationId: conversation.id }}
@@ -294,6 +288,7 @@ function ConversationListItem(props: ConversationListItemProps) {
           "flex items-center gap-[var(--spacing-component-sm)] px-[var(--spacing-component-sm)] py-[var(--spacing-component-xs)] rounded transition-all duration-150",
           "hover:bg-sidebar-accent/60 hover:text-sidebar-accent-foreground",
           "focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-sidebar-ring",
+          "w-full min-w-0 max-w-full overflow-hidden",
           conversation.archivedAt && "opacity-60",
           hasUnreadMessages && "bg-sidebar-accent/30",
         )}
@@ -303,86 +298,19 @@ function ConversationListItem(props: ConversationListItemProps) {
       >
         {/* Avatar - smaller Discord style with space for overlapped groups */}
         <div className="relative flex-shrink-0">
-          {(() => {
-            // Get other participants (exclude current user)
-            const otherParticipants =
-              (conversation.participants
-                ?.filter((participant: any) => participant.userId !== user?.id)
-                .map((participant: any) =>
-                  availableUsers.find((u) => u.id === participant.userId),
-                )
-                .filter(Boolean) as UserSummary[]) || [];
-
-            // If no other participants, show fallback
-            if (otherParticipants.length === 0) {
-              return (
-                <ProfileAvatar size="sm">
-                  <ProfileAvatarImage
-                    fallbackIcon={<Hash className="w-1/2 h-1/2" />}
-                  />
-                </ProfileAvatar>
-              );
-            }
-
-            // For 1:1 conversations, show single avatar
-            if (otherParticipants.length === 1) {
-              const participant = otherParticipants[0];
-              if (!participant) {
-                return (
-                  <ProfileAvatar size="sm">
-                    <ProfileAvatarImage
-                      fallbackIcon={<Hash className="w-1/2 h-1/2" />}
-                    />
-                  </ProfileAvatar>
-                );
-              }
-              return (
-                <ProfileAvatar size="sm">
-                  <ProfileAvatarImage
-                    src={participant.avatar}
-                    name={participant.name}
-                  />
-                  <ProfileAvatarStatus id={participant.id} size="sm" />
-                </ProfileAvatar>
-              );
-            }
-
-            // For group conversations, show main avatar + counter
-            const firstParticipant = otherParticipants[0];
-            const remainingCount = otherParticipants.length - 1;
-
-            if (!firstParticipant) {
-              return (
-                <ProfileAvatar size="sm">
-                  <ProfileAvatarImage
-                    fallbackIcon={<Hash className="w-1/2 h-1/2" />}
-                  />
-                </ProfileAvatar>
-              );
-            }
-
-            return (
-              <ProfileAvatar size="sm">
-                <ProfileAvatarImage
-                  src={firstParticipant.avatar}
-                  name={firstParticipant.name}
-                />
-                <ProfileAvatarStatus id={firstParticipant.id} size="sm" />
-                {remainingCount > 0 && (
-                  <ProfileAvatarCounter count={remainingCount} size="sm" />
-                )}
-              </ProfileAvatar>
-            );
-          })()}
+          {createConversationAvatar(
+            getOtherParticipants(conversation, user?.id || "", availableUsers),
+            "sm"
+          )}
         </div>
 
         {/* Content - more compact */}
-        <div className="flex-1 min-w-0">
+        <div className="flex-1 min-w-0 max-w-0">
           {/* Name and time in same line */}
-          <div className="flex items-center justify-between gap-[var(--spacing-component-xs)]">
+          <div className="flex items-center justify-between gap-[var(--spacing-component-xs)] w-full">
             <span
               className={cn(
-                "text-sm font-medium truncate",
+                "text-sm font-medium truncate flex-1 min-w-0",
                 conversation.archivedAt && "line-through text-muted-foreground",
                 hasUnreadMessages
                   ? "text-sidebar-foreground"
@@ -394,7 +322,7 @@ function ConversationListItem(props: ConversationListItemProps) {
             {formattedTime && (
               <span
                 className={cn(
-                  "text-xs whitespace-nowrap",
+                  "text-xs whitespace-nowrap flex-shrink-0",
                   hasUnreadMessages
                     ? "text-primary font-medium"
                     : "text-muted-foreground/80",
@@ -408,7 +336,7 @@ function ConversationListItem(props: ConversationListItemProps) {
           {/* Message preview - more compact */}
           <div
             className={cn(
-              "text-xs truncate text-muted-foreground/70 leading-tight",
+              "text-xs truncate text-muted-foreground/70 leading-tight w-full overflow-hidden text-ellipsis",
               hasUnreadMessages && "text-muted-foreground font-medium",
             )}
           >

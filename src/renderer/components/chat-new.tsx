@@ -1,6 +1,7 @@
 import { cva, type VariantProps } from "class-variance-authority";
 import * as React from "react";
 
+import { ScrollArea } from "@/renderer/components/ui/scroll-area";
 import { cn } from "@/renderer/lib/utils";
 
 // Types for reducer
@@ -441,7 +442,7 @@ function Chat({
   );
 }
 
-interface ChatMessagesProps extends React.ComponentProps<"div"> {
+interface ChatMessagesProps extends React.ComponentProps<typeof ScrollArea> {
   children: React.ReactNode;
 }
 
@@ -464,10 +465,10 @@ function ChatMessages({ className, children, ...props }: ChatMessagesProps) {
   );
 
   return (
-    <div
+    <ScrollArea
       data-slot="chat-messages"
       className={cn(
-        "flex-1 overflow-y-auto p-0 will-change-scroll contain-layout contain-style",
+        "flex-1 p-0 will-change-scroll contain-layout contain-style",
         className,
       )}
       {...props}
@@ -484,7 +485,7 @@ function ChatMessages({ className, children, ...props }: ChatMessagesProps) {
       >
         {children}
       </div>
-    </div>
+    </ScrollArea>
   );
 }
 

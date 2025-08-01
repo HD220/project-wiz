@@ -38,7 +38,7 @@ export function RootSidebar(props: RootSidebarProps) {
       aria-label="Main navigation"
     >
       {/* User Space / Direct Messages */}
-      <div className="mb-[var(--spacing-component-md)]">
+      <div className="mb-[var(--spacing-component-md)] ml-1">
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
@@ -69,7 +69,7 @@ export function RootSidebar(props: RootSidebarProps) {
                       </AvatarFallback>
                     </Avatar>
                     {isActive && (
-                      <div className="absolute -left-1 top-1/2 -translate-y-1/2 w-1 h-6 bg-sidebar-primary-foreground rounded-full" />
+                      <div className="absolute -left-0.5 top-1/2 -translate-y-1/2 w-1 h-6 bg-sidebar-primary-foreground rounded-full z-10" />
                     )}
                   </Button>
                 )}
@@ -90,7 +90,7 @@ export function RootSidebar(props: RootSidebarProps) {
 
       {/* Projects List */}
       <ScrollArea className="flex-1 px-1">
-        <div className="flex flex-col items-center gap-[var(--spacing-component-sm)]">
+        <div className="flex flex-col items-center gap-[var(--spacing-component-sm)] ml-1">
           {projects.length > 0 ? (
             projects.map((project) => (
               <TooltipProvider key={project.id}>
@@ -130,7 +130,7 @@ export function RootSidebar(props: RootSidebarProps) {
                             </span>
                           )}
                           {isActive && (
-                            <div className="absolute -left-1 top-1/2 -translate-y-1/2 w-1 h-6 bg-sidebar-primary-foreground rounded-full" />
+                            <div className="absolute -left-0.5 top-1/2 -translate-y-1/2 w-1 h-6 bg-sidebar-primary-foreground rounded-full z-10" />
                           )}
                         </Button>
                       )}

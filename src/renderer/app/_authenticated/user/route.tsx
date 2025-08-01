@@ -10,13 +10,13 @@ function UserLayout() {
 
   return (
     <div className="h-full w-full flex">
-      <div className="w-60 h-full">
+      <div className="w-60 h-full flex-shrink-0 min-w-0 overflow-hidden">
         <UserSidebar
           conversations={conversations}
           availableUsers={availableUsers}
         />
       </div>
-      <main className="flex-1 h-full">
+      <main className="flex-1 h-full min-w-0">
         <Outlet />
       </main>
     </div>

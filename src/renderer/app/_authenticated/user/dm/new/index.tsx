@@ -42,7 +42,7 @@ function CreateConversationPage() {
     {
       successMessage: "Conversation created successfully",
       errorMessage: "Failed to create conversation",
-      invalidateRouter: false,
+      invalidateRouter: true,
       onSuccess: (response: { data?: { id?: string } }) => {
         if (response?.data?.id) {
           handleSuccess(response.data.id);
