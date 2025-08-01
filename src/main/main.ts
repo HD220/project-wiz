@@ -133,7 +133,7 @@ async function initializeStartupJob(): Promise<void> {
       return;
     }
 
-    const queueClient = new QueueClient("llm-queue");
+    const queueClient = new QueueClient("llm-jobs");
     
     const jobResult = await queueClient.add({
       agent: {
