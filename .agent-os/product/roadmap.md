@@ -1,7 +1,7 @@
 # Product Roadmap
 
 > Last Updated: 2025-08-01
-> Version: 1.2.0
+> Version: 1.3.0
 > Status: Active Development
 
 ## Phase 0: Already Completed
@@ -63,24 +63,63 @@ The following features have been implemented:
 - [ ] **Notification System Enhancement** - Sidebar notifications for conversation updates and agent status changes `M`
 - [ ] **UI/UX Polish** - Consistent design patterns, accessibility, and error handling across all components `S`
 
-## Phase 1.6: Event Bus Background Task Architecture (Spec Ready - 2-3 weeks)
+## Phase 1.6: Core System Enhancements (Spec Ready - 3-4 weeks)
 
-**Goal:** Transform main process to maximize event bus usage for background task decoupling and long-running operation management
-**Success Criteria:** All long-running operations (>2s) process asynchronously with real-time progress tracking, responsive UI, and production-ready error handling
-**Progress:** 📋 **SPEC COMPLETED** - Comprehensive specification created (August 2025) - @.agent-os/specs/2025-08-01-event-bus-background-tasks/
+**Goal:** Implement essential system improvements for production readiness and enhanced user experience
+**Success Criteria:** Complete project setup automation, database-backed user settings, and foundational infrastructure for autonomous development
+**Progress:** 📋 **ALL SPECS COMPLETED** - Four comprehensive specifications created (August 2025)
 
 ### Features
 
+#### Event Bus Background Task Architecture
 - [ ] **Event Bus Infrastructure Extension** - Extend SystemEvents with 6 new task lifecycle event types and correlation ID system `M`
 - [ ] **Background Task Queue System** - Generic task queue with priority-based execution, concurrency control, and retry mechanisms `L`
 - [ ] **Smart IPC Handler Migration** - AsyncIpcHandler utility with intelligent routing (sync <2s, async ≥2s operations) `L`
 - [ ] **Built-in Task Types** - File operations, database operations, analysis operations, and external API task types `M`
 - [ ] **Real-time Progress Broadcasting** - Event bus-driven progress updates with debouncing and automatic IPC forwarding `M`
 
+**Spec:** @.agent-os/specs/2025-08-01-event-bus-background-tasks/
+
+#### Project Creation Automation
+- [ ] **General Channel Auto-Creation** - Automatically create default "general" channel during project creation `S`
+- [ ] **User Auto-Membership** - Add creating user as project member with appropriate permissions `S`
+- [ ] **Default Agent Assignment** - Identify and add user's default agent to new projects automatically `M`
+- [ ] **Channel Member Assignment** - Configure both user and agent as members of general channel `S`
+- [ ] **Complete Transaction Setup** - Atomic project creation with all memberships for immediate usability `M`
+
+**Spec:** @.agent-os/specs/2025-08-01-project-creation-defaults/
+
+#### Worker Git Repository Management
+- [ ] **Repository Discovery and Cloning** - Automatic git repository management from project metadata `M`
+- [ ] **Git Worktree Orchestration** - Create isolated workspaces for concurrent agent task execution `L`
+- [ ] **Branch Management System** - Handle branch creation, switching, and synchronization across worktrees `M`
+- [ ] **Workspace Isolation** - Complete file system isolation between concurrent agent tasks `M`
+- [ ] **Resource Management** - Automatic cleanup and maintenance of repositories and worktrees `M`
+
+**Spec:** @.agent-os/specs/2025-08-01-worker-git-worktrees/
+
+#### AI Agent Tool-Set Integration
+- [ ] **File System Tools** - Comprehensive file operations within agent workspace context `L`
+- [ ] **Git Operation Tools** - Structured git command execution with safety validation `M`
+- [ ] **Code Analysis Tools** - AST parsing and code understanding capabilities `L`
+- [ ] **Platform Integration Tools** - Agent interaction with Project Wiz features (projects, channels, messages) `M`
+- [ ] **Type-Safe Tool Framework** - Complete Vercel AI SDK integration with Zod validation `M`
+
+**Spec:** @.agent-os/specs/2025-08-01-ai-agent-toolset/
+
+#### User Settings Database Migration
+- [ ] **Settings Discovery** - Audit and migrate all localStorage-based user settings `S`
+- [ ] **Database Schema Implementation** - Create proper user_settings table with foreign key constraints `S`
+- [ ] **Migration System** - Seamless migration from localStorage to database with fallback handling `M`
+- [ ] **Settings Service Layer** - Complete CRUD operations for user settings management `M`
+- [ ] **Cross-Device Synchronization** - Reliable settings persistence across devices and browsers `S`
+
+**Spec:** @.agent-os/specs/2025-08-01-user-settings-persistence/
+
 ### Dependencies
 
-- Phase 1 completion (EventBus foundation)
-- Existing AgenticWorkerHandler patterns for reference
+- Phase 1 completion (EventBus foundation and AgenticWorkerHandler patterns)
+- Current project and user management systems
 
 ## Phase 2: Autonomous Development (3-4 weeks)
 
