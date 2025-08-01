@@ -283,7 +283,7 @@ function ConversationListItem(props: ConversationListItemProps) {
         to="/user/dm/$conversationId"
         params={{ conversationId: conversation.id }}
         className={cn(
-          "flex items-center gap-[var(--spacing-component-sm)] px-[var(--spacing-component-sm)] py-[var(--spacing-component-xs)] rounded transition-all duration-150",
+          "flex items-center gap-2 px-2 py-[var(--spacing-component-xs)] rounded transition-all duration-150",
           "hover:bg-sidebar-accent/60 hover:text-sidebar-accent-foreground",
           "focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-sidebar-ring",
           "w-full overflow-hidden",
@@ -338,15 +338,15 @@ function ConversationListItem(props: ConversationListItemProps) {
         </div>
 
         {/* Unread indicator and actions */}
-        <div className="flex items-center gap-[var(--spacing-component-xs)] flex-shrink-0">
+        <div className="flex items-center gap-1 flex-shrink-0 w-5">
           {hasUnreadMessages && (
             <div className="w-1.5 h-1.5 bg-primary rounded-full" />
           )}
 
-          {/* Actions menu - smaller */}
+          {/* Actions menu - minimal */}
           <div
             className={cn(
-              "opacity-0 group-hover:opacity-100 transition-opacity",
+              "opacity-0 group-hover:opacity-100 transition-opacity w-4",
             )}
             onClick={(e) => e.preventDefault()}
           >
@@ -355,9 +355,9 @@ function ConversationListItem(props: ConversationListItemProps) {
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="h-5 w-5 p-0 hover:bg-sidebar-accent/60"
+                  className="h-4 w-4 p-0 hover:bg-sidebar-accent/60"
                 >
-                  <MoreHorizontal className="h-3 w-3" />
+                  <MoreHorizontal className="h-2.5 w-2.5" />
                   <span className="sr-only">Conversation options</span>
                 </Button>
               </DropdownMenuTrigger>
