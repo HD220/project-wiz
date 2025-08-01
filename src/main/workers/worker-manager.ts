@@ -1,7 +1,7 @@
 // Simple worker manager using utilityProcess.fork for job processing
 // Based on final architecture decision - single worker with automatic restart
 
-import { utilityProcess, MessageChannelMain } from "electron";
+import { utilityProcess } from "electron";
 import path from "path";
 import { fileURLToPath } from "url";
 
@@ -17,7 +17,6 @@ export class WorkerManager {
   private restartCount = 0;
   private config: Required<WorkerConfig>;
   private messageCallbacks = new Map<string, (response: any) => void>();
-  private messageChannel: Electron.MessageChannelMain | null = null;
 
   constructor(config: WorkerConfig = {}) {
     this.config = {
@@ -84,17 +83,11 @@ export class WorkerManager {
       const workerPath = path.join(currentDir, "worker.js");
       
       console.log(`🔧 Spawning worker from: ${workerPath}`);
-
-      // Create MessageChannel for IPC
-      this.messageChannel = new MessageChannelMain();
       
       this.worker = utilityProcess.fork(workerPath, [], {
         serviceName: "job-worker",
         stdio: "pipe", // Capture stdout/stderr
       });
-
-      // Send port2 to worker for communication
-      this.worker.postMessage({ port: this.messageChannel.port2 }, [this.messageChannel.port2]);
 
       // Set up event handlers
       this.setupWorkerEventHandlers();
@@ -155,21 +148,16 @@ export class WorkerManager {
       }
     });
 
-    // Handle IPC messages via MessageChannel
-    if (this.messageChannel) {
-      this.messageChannel.port1.on("message", (event) => {
-        const message = event.data;
-        console.log("📨 Worker message received via MessageChannel:", message);
-        console.log(`📨 Active callbacks: ${this.messageCallbacks.size}`);
-        // Emit to all listeners (simple approach)
-        this.messageCallbacks.forEach((callback, messageId) => {
-          console.log(`📨 Calling callback for messageId: ${messageId}`);
-          callback(message);
-        });
+    // Handle IPC messages from worker
+    this.worker.on("message", (message: any) => {
+      console.log("📨 Worker message received:", message);
+      console.log(`📨 Active callbacks: ${this.messageCallbacks.size}`);
+      // Emit to all listeners (simple approach)
+      this.messageCallbacks.forEach((callback, messageId) => {
+        console.log(`📨 Calling callback for messageId: ${messageId}`);
+        callback(message);
       });
-      
-      this.messageChannel.port1.start();
-    }
+    });
   }
 
   private delay(ms: number): Promise<void> {
@@ -210,15 +198,11 @@ export class WorkerManager {
         }
       });
 
-      // Send message via MessageChannel
+      // Send message to worker
       try {
-        console.log(`[WorkerManager] Posting message via MessageChannel`);
-        if (this.messageChannel) {
-          this.messageChannel.port1.postMessage(message);
-          console.log(`[WorkerManager] Message posted successfully via MessageChannel`);
-        } else {
-          throw new Error("MessageChannel not available");
-        }
+        console.log(`[WorkerManager] Posting message to worker`);
+        this.worker.postMessage(message);
+        console.log(`[WorkerManager] Message posted successfully`);
       } catch (error) {
         console.error(`[WorkerManager] Error posting message:`, error);
         clearTimeout(timeout);
