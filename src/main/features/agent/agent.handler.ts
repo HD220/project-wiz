@@ -17,7 +17,7 @@ export function setupAgentHandlers(): void {
 
   // Create agent (with session-based auth)
   createIpcHandler("agents:create", async (input: CreateAgentInput) => {
-    log.info({ agentName: input.name }, "IPC: agents:create called");
+    log.info("IPC: agents:create called", { agentName: input.name });
 
     const currentUser = await AuthService.getCurrentUser();
     if (!currentUser) {
@@ -26,8 +26,8 @@ export function setupAgentHandlers(): void {
 
     const result = await AgentService.create(input, currentUser.id);
     log.info(
-      { agentId: result.id, agentName: result.name },
       "IPC: agents:create completed successfully",
+      { agentId: result.id, agentName: result.name }
     );
     return result;
   });
@@ -46,7 +46,7 @@ export function setupAgentHandlers(): void {
 
   // Soft delete agent (with session-based auth)
   createIpcHandler("agents:delete", async (id: string) => {
-    log.info({ agentId: id }, "IPC: agents:delete called");
+    log.info("IPC: agents:delete called", { agentId: id });
 
     const currentUser = await AuthService.getCurrentUser();
     if (!currentUser) {
@@ -55,8 +55,8 @@ export function setupAgentHandlers(): void {
 
     const result = await AgentService.softDelete(id, currentUser.id);
     log.info(
-      { agentId: id, success: result },
       "IPC: agents:delete completed successfully",
+      { agentId: id, success: result }
     );
     return { message: "Agent deactivated successfully" };
   });
