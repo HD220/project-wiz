@@ -50,22 +50,6 @@ export class Worker {
   private async getNextJob(): Promise<SelectJob | null> {
     const now = Date.now();
     
-    console.log(`🔍 [Worker] Looking for jobs in queue: ${this.queueName}`);
-    
-    // First, let's see ALL jobs in the queue for debugging
-    const allJobs = await db
-      .select()
-      .from(jobsTable)
-      .where(eq(jobsTable.name, this.queueName))
-      .all();
-    
-    console.log(`🔍 [Worker] Found ${allJobs.length} total jobs in queue:`, allJobs.map(j => ({
-      id: j.id.substring(0, 8),
-      status: j.status,
-      dependencyCount: j.dependencyCount,
-      priority: j.priority
-    })));
-    
     // Get waiting jobs or delayed jobs that are ready to be processed
     const job = await db
       .select()
@@ -74,44 +58,15 @@ export class Worker {
         and(
           eq(jobsTable.name, this.queueName), // Filter by queue name
           eq(jobsTable.dependencyCount, 0),
-          // Include waiting jobs or delayed jobs where processedOn time has passed
+          eq(jobsTable.status, "waiting") // Only get waiting jobs
         ),
       )
       .orderBy(desc(jobsTable.priority), asc(jobsTable.createdAt))
       .limit(1)
       .get();
-      
-    console.log(`🔍 [Worker] Query result:`, job ? {
-      id: job.id.substring(0, 8), 
-      status: job.status,
-      dependencyCount: job.dependencyCount
-    } : 'null');
 
-    // Filter jobs by status and delay
-    if (!job) return null;
-
-    if (job.status === "waiting") {
-      return job;
-    }
-
-    if (job.status === "delayed") {
-      // Check if delay time has passed
-      const isReady = job.processedOn && job.processedOn.getTime() <= now;
-      if (isReady) {
-        // Update job to waiting status before processing
-        await db
-          .update(jobsTable)
-          .set({
-            status: "waiting",
-            delay: 0,
-          })
-          .where(eq(jobsTable.id, job.id));
-        
-        return { ...job, status: "waiting" as const };
-      }
-    }
-
-    return null;
+    // Job is already filtered to be "waiting" status, so just return it
+    return job;
   }
 
   private async processJob(job: SelectJob): Promise<void> {
