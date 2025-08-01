@@ -78,9 +78,9 @@ export class WorkerManager {
 
   private async spawnWorker(): Promise<void> {
     try {
-      // Path to the built worker file in .vite/build directory
+      // Path to the built worker file - same pattern as preload
       const currentDir = path.dirname(fileURLToPath(import.meta.url));
-      const workerPath = path.join(currentDir, "../../.vite/build/worker.js");
+      const workerPath = path.join(currentDir, "worker.js");
       
       console.log(`🔧 Spawning worker from: ${workerPath}`);
 
