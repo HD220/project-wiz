@@ -1,6 +1,6 @@
 import { createFileRoute, Outlet, useRouter } from "@tanstack/react-router";
 import { Send, Paperclip, Smile } from "lucide-react";
-import { useRef, useEffect, useState } from "react";
+import { useRef, useLayoutEffect, useState } from "react";
 
 import type { DMConversationWithParticipants } from "@/main/features/dm/dm-conversation.types";
 import type { SelectMessage } from "@/main/features/message/message.types";
@@ -146,7 +146,9 @@ function DMLayout() {
             context.actions.setInput("");
             // Focus back to input after sending
             setTimeout(() => {
+              console.log('🎯 Attempting focus:', context.refs.inputRef?.current);
               context.refs.inputRef?.current?.focus();
+              console.log('🎯 Focus completed');
             }, 0);
           }}
           className="bg-background flex-1 flex flex-col"
@@ -378,8 +380,8 @@ function DMLayout() {
 }
 
 // Functional Chat Input Component
-interface FunctionalChatInputProps {
-  inputRef?: React.RefObject<HTMLInputElement | HTMLTextAreaElement | null>;
+interface FunctionalChatInputProps extends React.ComponentProps<"div"> {
+  inputRef?: React.RefObject<HTMLTextAreaElement>;
   value: string;
   loading: boolean;
   onValueChange: (value: string) => void;
@@ -401,12 +403,15 @@ function FunctionalChatInput({
 }: FunctionalChatInputProps) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  // Conectar o inputRef do ChatInput com o ref local
-  useEffect(() => {
+  // Conectar o inputRef do ChatInput com o ref local - usando useLayoutEffect para timing correto
+  useLayoutEffect(() => {
     if (inputRef && textareaRef.current) {
-      (inputRef as React.MutableRefObject<HTMLTextAreaElement | null>).current = textareaRef.current;
+      inputRef.current = textareaRef.current;
+      console.log('✅ Ref connected:', textareaRef.current);
+    } else {
+      console.log('❌ Ref connection failed:', { inputRef, textareaRef: textareaRef.current });
     }
-  }, [inputRef]);
+  }); // Sem dependências - executa após cada render
 
   const handleSubmit = () => {
     if (value.trim() && !loading && !disabled) {
