@@ -16,7 +16,7 @@ import { setupChannelHandlers } from "@/main/features/project/project-channel.ha
 import { setupProjectHandlers } from "@/main/features/project/project.handler";
 import { setupProfileHandlers } from "@/main/features/user/profile.handler";
 import { setupUserHandlers } from "@/main/features/user/user.handler";
-import { QueueClient } from "@/main/features/queue-client/queue-client";
+// import { QueueClient } from "@/main/features/queue-client/queue-client"; // Commented out - used only in test code
 import { getLogger } from "@/shared/logger/config";
 import { startWorker, stopWorker } from "@/main/workers/worker-manager";
 
@@ -69,9 +69,9 @@ function createMainWindow(): void {
     mainWindow?.show();
     
     // Initialize job creation after window is ready
-    if (mainWindow) {
-      await initializeStartupJob();
-    }
+    // if (mainWindow) {
+    //   await initializeStartupJob();
+    // }
   });
 
   // Handle window closed
@@ -124,55 +124,56 @@ async function initializeWorker(): Promise<void> {
 
 /**
  * Initialize startup job with API key from environment
+ * COMMENTED OUT - Test code for worker functionality
  */
-async function initializeStartupJob(): Promise<void> {
-  try {
-    const apiKey = process.env["LLM_API_KEY"];
-    if (!apiKey) {
-      logger.warn("LLM_API_KEY environment variable not found, skipping startup job creation");
-      return;
-    }
+// async function initializeStartupJob(): Promise<void> {
+//   try {
+//     const apiKey = process.env["LLM_API_KEY"];
+//     if (!apiKey) {
+//       logger.warn("LLM_API_KEY environment variable not found, skipping startup job creation");
+//       return;
+//     }
 
-    logger.info("Starting startup job creation process");
+//     logger.info("Starting startup job creation process");
     
-    const queueClient = new QueueClient("llm-jobs");
-    logger.info("QueueClient created for llm-jobs queue");
+//     const queueClient = new QueueClient("llm-jobs");
+//     logger.info("QueueClient created for llm-jobs queue");
     
-    const jobData = {
-      agent: {
-        name: "StartupAgent",
-        role: "System Initialization Agent",
-        backstory: "A specialized agent responsible for system startup verification and initialization tasks."
-      },
-      messages: [{
-        role: "user",
-        content: "System has started successfully. Please confirm initialization and provide a brief status report."
-      }],
-      provider: "deepseek",
-      model: "deepseek-chat",
-      apiKey: apiKey
-    };
+//     const jobData = {
+//       agent: {
+//         name: "StartupAgent",
+//         role: "System Initialization Agent",
+//         backstory: "A specialized agent responsible for system startup verification and initialization tasks."
+//       },
+//       messages: [{
+//         role: "user",
+//         content: "System has started successfully. Please confirm initialization and provide a brief status report."
+//       }],
+//       provider: "deepseek",
+//       model: "deepseek-chat",
+//       apiKey: apiKey
+//     };
     
-    const jobOptions = {
-      priority: 1,
-      attempts: 3
-    };
+//     const jobOptions = {
+//       priority: 1,
+//       attempts: 3
+//     };
     
-    logger.info("About to send job to worker", { jobData, jobOptions });
+//     logger.info("About to send job to worker", { jobData, jobOptions });
     
-    const jobResult = await queueClient.add(jobData, jobOptions);
+//     const jobResult = await queueClient.add(jobData, jobOptions);
 
-    logger.info(`Startup job created successfully with ID: ${jobResult.jobId}`);
-  } catch (error) {
-    logger.error("Failed to create startup job:", error);
-    if (error instanceof Error) {
-      logger.error("Error details:", {
-        message: error.message,
-        stack: error.stack
-      });
-    }
-  }
-}
+//     logger.info(`Startup job created successfully with ID: ${jobResult.jobId}`);
+//   } catch (error) {
+//     logger.error("Failed to create startup job:", error);
+//     if (error instanceof Error) {
+//       logger.error("Error details:", {
+//         message: error.message,
+//         stack: error.stack
+//       });
+//     }
+//   }
+// }
 
 /**
  * Setup all IPC handlers
