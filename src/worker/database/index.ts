@@ -2,5 +2,5 @@
 export { db, getDatabase } from "./connection";
 export type { DatabaseType } from "./connection";
 
-// Export all shared models from main database
-export * from "@/main/database";
+// Worker database only exports its own connection
+// Models should be imported directly from their respective locations
