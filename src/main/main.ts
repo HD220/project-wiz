@@ -12,6 +12,7 @@ import { setupChannelHandlers } from "@/main/features/project/project-channel.ha
 import { setupProjectHandlers } from "@/main/features/project/project.handler";
 import { setupProfileHandlers } from "@/main/features/user/profile.handler";
 import { setupUserHandlers } from "@/main/features/user/user.handler";
+import { QueueClient } from "@/main/features/queue-client/queue-client";
 import { getLogger } from "@/main/utils/logger";
 import { startWorker, stopWorker } from "@/main/workers/worker-manager";
 
@@ -59,12 +60,13 @@ function createMainWindow(): void {
   }
 
   // Show window when ready to prevent visual flash
-  mainWindow.once("ready-to-show", () => {
+  mainWindow.once("ready-to-show", async () => {
     logger.info("Main window ready to show");
     mainWindow?.show();
     
-    // Initialize job events handler after window is ready
+    // Initialize job creation after window is ready
     if (mainWindow) {
+      await initializeStartupJob();
     }
   });
 
@@ -113,6 +115,35 @@ async function initializeWorker(): Promise<void> {
   } catch (error) {
     logger.error("Failed to start worker process:", error);
     // Don't fail the app if worker fails to start - it can be started later
+  }
+}
+
+/**
+ * Initialize startup job with API key from environment
+ */
+async function initializeStartupJob(): Promise<void> {
+  try {
+    const apiKey = process.env["LLM_API_KEY"];
+    if (!apiKey) {
+      logger.warn("LLM_API_KEY environment variable not found, skipping startup job creation");
+      return;
+    }
+
+    const queueClient = new QueueClient("llm-queue");
+    
+    const jobResult = await queueClient.add({
+      type: "startup",
+      apiKey: apiKey,
+      timestamp: new Date().toISOString(),
+      message: "Application startup job"
+    }, {
+      priority: 1,
+      attempts: 3
+    });
+
+    logger.info(`Startup job created successfully with ID: ${jobResult.jobId}`);
+  } catch (error) {
+    logger.error("Failed to create startup job:", error);
   }
 }
 
