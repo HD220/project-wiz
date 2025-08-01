@@ -414,13 +414,18 @@ function FunctionalChatInput({
     onKeyDown?.(e);
   };
 
-  // Auto-resize textarea usando inputRef diretamente
-  useEffect(() => {
+  // Auto-resize textarea com throttling para performance
+  const resizeTextarea = () => {
     if (inputRef?.current) {
       inputRef.current.style.height = "auto";
       inputRef.current.style.height = `${inputRef.current.scrollHeight}px`;
     }
-  }, [value, inputRef]);
+  };
+
+  useEffect(() => {
+    const timeoutId = setTimeout(resizeTextarea, 0);
+    return () => clearTimeout(timeoutId);
+  }, [value]);
 
   return (
     <div className="flex items-end gap-3">
@@ -428,7 +433,10 @@ function FunctionalChatInput({
         <Textarea
           ref={inputRef}
           value={value}
-          onChange={(e) => onValueChange(e.target.value)}
+          onChange={(e) => {
+            const newValue = e.target.value;
+            onValueChange(newValue);
+          }}
           onKeyDown={handleKeyDown}
           placeholder={placeholder}
           className="min-h-[44px] max-h-[200px] resize-none rounded-lg border-input bg-background px-3 py-2 text-sm focus-visible:ring-1 focus-visible:ring-ring/50 focus-visible:ring-offset-1"
