@@ -1,6 +1,8 @@
 import { eq, asc, and } from "drizzle-orm";
 
-import { getDatabase } from "@/main/database/connection";
+import { createDatabaseConnection } from "@/shared/database/config";
+
+const { getDatabase } = createDatabaseConnection(true);
 
 import { messagesTable, llmMessagesTable } from "./message.model";
 

@@ -4,9 +4,11 @@
 
 import { workerManager } from "@/main/workers/worker-manager";
 import type { JobOptions, Job } from "@/worker/queue/job.types";
+import { getLogger } from "@/shared/logger/config";
 
 export class QueueClient {
   private queueName: string;
+  private logger = getLogger("queue-client");
 
   constructor(queueName: string) {
     this.queueName = queueName;
@@ -20,7 +22,7 @@ export class QueueClient {
       opts,
     };
 
-    console.log(`[QueueClient] Sending add job message:`, { message });
+    this.logger.debug(`[QueueClient] Sending add job message:`, { message });
     return this.sendMessage(message);
   }
 
@@ -61,13 +63,13 @@ export class QueueClient {
   }
 
   private async sendMessage(message: any): Promise<any> {
-    console.log(`[QueueClient] Calling workerManager.sendMessageWithResponse`);
+    this.logger.debug(`[QueueClient] Calling workerManager.sendMessageWithResponse`);
     try {
       const result = await workerManager.sendMessageWithResponse(message);
-      console.log(`[QueueClient] Got response from worker:`, result);
+      this.logger.debug(`[QueueClient] Got response from worker:`, result);
       return result;
     } catch (error) {
-      console.error(`[QueueClient] Error from worker:`, error);
+      this.logger.error(`[QueueClient] Error from worker:`, error);
       throw error;
     }
   }

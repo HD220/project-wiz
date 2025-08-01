@@ -2,6 +2,9 @@ import { LogOut, User } from "lucide-react";
 
 import { Button } from "@/renderer/components/ui/button";
 import { useAuth } from "@/renderer/contexts/auth.context";
+import { getLogger } from "@/shared/logger/config";
+
+const logger = getLogger("auth-button");
 
 export function AuthButton() {
   const { user, isAuthenticated, logout } = useAuth();
@@ -12,7 +15,7 @@ export function AuthButton() {
         await logout();
       }
     } catch (error) {
-      console.error("Auth error:", error);
+      logger.error("Auth error:", error);
     }
   };
 

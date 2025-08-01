@@ -3,6 +3,9 @@ import { Bot, Settings, User } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { UseFormReturn } from "react-hook-form";
 import { z } from "zod";
+import { getLogger } from "@/shared/logger/config";
+
+const logger = getLogger("agent-form");
 
 import {
   Card,
@@ -91,7 +94,7 @@ export function AgentForm(props: AgentFormProps) {
     } catch (error) {
       // Error handling is done by the parent component via useApiMutation
       // This catch prevents unhandled promise rejection
-      console.error("Error in handleSubmit:", error);
+      logger.error("Error in handleSubmit:", error);
     }
   }
 

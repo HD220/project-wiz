@@ -1,6 +1,8 @@
 import { eq, and, ne } from "drizzle-orm";
 
-import { getDatabase } from "@/main/database/connection";
+import { createDatabaseConnection } from "@/shared/database/config";
+
+const { getDatabase } = createDatabaseConnection(true);
 import { agentsTable } from "@/main/features/agent/agent.model";
 import { userSessionsTable } from "@/main/features/auth/user-sessions.model";
 import { dmParticipantsTable } from "@/main/features/dm/dm-conversation.model";

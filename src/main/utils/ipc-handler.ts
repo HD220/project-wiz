@@ -2,7 +2,7 @@ import { ipcMain } from "electron";
 
 import { IpcResponse } from "../types";
 
-import { getLogger } from "./logger";
+import { getLogger } from "@/shared/logger/config";
 
 /**
  * Creates a type-safe IPC handler with automatic error handling and logging

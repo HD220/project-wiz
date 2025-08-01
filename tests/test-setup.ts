@@ -3,7 +3,9 @@ import path from "path";
 import { migrate } from "drizzle-orm/better-sqlite3/migrator";
 import { beforeAll as _beforeAll, beforeEach, afterAll } from "vitest";
 
-import { getDatabase } from "../src/main/database/connection";
+import { createDatabaseConnection } from "../src/shared/database/config";
+
+const { getDatabase } = createDatabaseConnection(false); // No logging for tests
 
 let testDb: ReturnType<typeof getDatabase>;
 

@@ -1,6 +1,8 @@
 import { eq, and, sql, isNull, inArray } from "drizzle-orm";
 
-import { getDatabase } from "@/main/database/connection";
+import { createDatabaseConnection } from "@/shared/database/config";
+
+const { getDatabase } = createDatabaseConnection(true);
 import { messagesTable } from "@/main/features/message/message.model";
 import { UserService } from "@/main/features/user/user.service";
 

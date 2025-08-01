@@ -1,4 +1,7 @@
 import type { IpcResponse } from "../../main/types";
+import { getLogger } from "@/shared/logger/config";
+
+const logger = getLogger("route-loader");
 
 /**
  * Unwraps IpcResponse in route loaders with proper error handling
@@ -79,7 +82,7 @@ export async function loadApiDataWithFallback<T>(
     return await loadApiData(apiCall, errorMessage);
   } catch (error) {
     // Log the error but don't throw - return fallback instead
-    console.warn(
+    logger.warn(
       `API call failed, using fallback: ${errorMessage || "Unknown error"}`,
       error,
     );

@@ -4,6 +4,7 @@
 import { utilityProcess } from "electron";
 import path from "path";
 import { fileURLToPath } from "url";
+import { getLogger } from "@/shared/logger/config";
 
 export interface WorkerConfig {
   maxRestarts?: number;
@@ -17,6 +18,7 @@ export class WorkerManager {
   private restartCount = 0;
   private config: Required<WorkerConfig>;
   private messageCallbacks = new Map<string, (response: any) => void>();
+  private logger = getLogger("worker-manager");
 
   constructor(config: WorkerConfig = {}) {
     this.config = {
@@ -28,25 +30,25 @@ export class WorkerManager {
 
   async startWorker(): Promise<void> {
     if (this.running) {
-      console.log("🔄 Worker is already running");
+      this.logger.info("🔄 Worker is already running");
       return;
     }
 
     try {
-      console.log("🚀 Starting worker process...");
+      this.logger.info("🚀 Starting worker process...");
       this.running = true;
       this.restartCount = 0;
 
       await this.spawnWorker();
     } catch (error) {
-      console.error("💥 Failed to start worker:", error);
+      this.logger.error("💥 Failed to start worker:", error);
       this.running = false;
       throw error;
     }
   }
 
   async stopWorker(): Promise<void> {
-    console.log("🛑 Stopping worker...");
+    this.logger.info("🛑 Stopping worker...");
     this.running = false;
 
     if (this.worker) {
@@ -54,15 +56,15 @@ export class WorkerManager {
         // Gracefully terminate the worker
         this.worker.kill();
         this.worker = null;
-        console.log("✅ Worker stopped successfully");
+        this.logger.info("✅ Worker stopped successfully");
       } catch (error) {
-        console.error("❌ Error stopping worker:", error);
+        this.logger.error("❌ Error stopping worker:", error);
       }
     }
   }
 
   async restartWorker(): Promise<void> {
-    console.log("🔄 Restarting worker...");
+    this.logger.info("🔄 Restarting worker...");
     await this.stopWorker();
     await this.delay(this.config.restartDelay);
     await this.startWorker();
@@ -82,7 +84,7 @@ export class WorkerManager {
       const currentDir = path.dirname(fileURLToPath(import.meta.url));
       const workerPath = path.join(currentDir, "worker.js");
       
-      console.log(`🔧 Spawning worker from: ${workerPath}`);
+      this.logger.info(`🔧 Spawning worker from: ${workerPath}`);
       
       this.worker = utilityProcess.fork(workerPath, [], {
         serviceName: "job-worker",
@@ -92,9 +94,9 @@ export class WorkerManager {
       // Set up event handlers
       this.setupWorkerEventHandlers();
 
-      console.log(`✅ Worker spawned successfully (PID: ${this.worker.pid})`);
+      this.logger.info(`✅ Worker spawned successfully (PID: ${this.worker.pid})`);
     } catch (error) {
-      console.error("💥 Failed to spawn worker:", error);
+      this.logger.error("💥 Failed to spawn worker:", error);
       throw error;
     }
   }
@@ -104,31 +106,31 @@ export class WorkerManager {
 
     // Handle worker exit
     this.worker.on("exit", (code: number) => {
-      console.log(`🔄 Worker exited with code: ${code}`);
+      this.logger.info(`🔄 Worker exited with code: ${code}`);
       this.worker = null;
 
       // Auto-restart if still running and within restart limits
       if (this.running && this.restartCount < this.config.maxRestarts) {
         this.restartCount++;
-        console.log(`🔄 Auto-restarting worker (attempt ${this.restartCount}/${this.config.maxRestarts})`);
+        this.logger.info(`🔄 Auto-restarting worker (attempt ${this.restartCount}/${this.config.maxRestarts})`);
         
         setTimeout(() => {
           if (this.running) {
             this.spawnWorker().catch((error) => {
-              console.error("💥 Failed to auto-restart worker:", error);
+              this.logger.error("💥 Failed to auto-restart worker:", error);
               this.running = false;
             });
           }
         }, this.config.restartDelay);
       } else if (this.restartCount >= this.config.maxRestarts) {
-        console.error(`💥 Worker restart limit reached (${this.config.maxRestarts}). Stopping.`);
+        this.logger.error(`💥 Worker restart limit reached (${this.config.maxRestarts}). Stopping.`);
         this.running = false;
       }
     });
 
     // Handle worker spawn failure
     this.worker.on("spawn", () => {
-      console.log("🎯 Worker spawned successfully");
+      this.logger.info("🎯 Worker spawned successfully");
       this.restartCount = 0; // Reset restart count on successful spawn
     });
 
@@ -136,7 +138,7 @@ export class WorkerManager {
     this.worker.stdout?.on("data", (data: Buffer) => {
       const message = data.toString().trim();
       if (message) {
-        console.log(`[WORKER] ${message}`);
+        this.logger.info(`[WORKER] ${message}`);
       }
     });
 
@@ -144,17 +146,17 @@ export class WorkerManager {
     this.worker.stderr?.on("data", (data: Buffer) => {
       const message = data.toString().trim();
       if (message) {
-        console.error(`[WORKER ERROR] ${message}`);
+        this.logger.error(`[WORKER ERROR] ${message}`);
       }
     });
 
     // Handle IPC messages from worker
     this.worker.on("message", (message: any) => {
-      console.log("📨 Worker message received:", message);
-      console.log(`📨 Active callbacks: ${this.messageCallbacks.size}`);
+      this.logger.info("📨 Worker message received:", message);
+      this.logger.info(`📨 Active callbacks: ${this.messageCallbacks.size}`);
       // Emit to all listeners (simple approach)
       this.messageCallbacks.forEach((callback, messageId) => {
-        console.log(`📨 Calling callback for messageId: ${messageId}`);
+        this.logger.info(`📨 Calling callback for messageId: ${messageId}`);
         callback(message);
       });
     });
@@ -167,27 +169,27 @@ export class WorkerManager {
   // Send message and get response
   async sendMessageWithResponse(message: any, timeoutMs: number = 30000): Promise<any> {
     return new Promise((resolve, reject) => {
-      console.log(`[WorkerManager] Sending message to worker:`, message);
+      this.logger.info(`[WorkerManager] Sending message to worker:`, message);
       
       if (!this.worker) {
-        console.error(`[WorkerManager] Worker not running`);
+        this.logger.error(`[WorkerManager] Worker not running`);
         reject(new Error("Worker not running"));
         return;
       }
 
       const messageId = Date.now().toString();
-      console.log(`[WorkerManager] Generated messageId: ${messageId}`);
+      this.logger.info(`[WorkerManager] Generated messageId: ${messageId}`);
       
       // Set up timeout
       const timeout = setTimeout(() => {
-        console.error(`[WorkerManager] Message timeout for messageId: ${messageId}`);
+        this.logger.error(`[WorkerManager] Message timeout for messageId: ${messageId}`);
         this.messageCallbacks.delete(messageId);
         reject(new Error("Message timeout"));
       }, timeoutMs);
 
       // Set up response handler
       this.messageCallbacks.set(messageId, (response: any) => {
-        console.log(`[WorkerManager] Received response for messageId ${messageId}:`, response);
+        this.logger.info(`[WorkerManager] Received response for messageId ${messageId}:`, response);
         clearTimeout(timeout);
         this.messageCallbacks.delete(messageId);
         
@@ -200,11 +202,11 @@ export class WorkerManager {
 
       // Send message to worker
       try {
-        console.log(`[WorkerManager] Posting message to worker`);
+        this.logger.info(`[WorkerManager] Posting message to worker`);
         this.worker.postMessage(message);
-        console.log(`[WorkerManager] Message posted successfully`);
+        this.logger.info(`[WorkerManager] Message posted successfully`);
       } catch (error) {
-        console.error(`[WorkerManager] Error posting message:`, error);
+        this.logger.error(`[WorkerManager] Error posting message:`, error);
         clearTimeout(timeout);
         this.messageCallbacks.delete(messageId);
         reject(error);
@@ -219,7 +221,7 @@ export class WorkerManager {
         this.worker.postMessage(message);
         return true;
       } catch (error) {
-        console.error("❌ Failed to send message to worker:", error);
+        this.logger.error("❌ Failed to send message to worker:", error);
         return false;
       }
     }

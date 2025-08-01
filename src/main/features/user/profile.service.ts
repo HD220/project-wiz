@@ -1,6 +1,8 @@
 import { eq } from "drizzle-orm";
 
-import { getDatabase } from "@/main/database/connection";
+import { createDatabaseConnection } from "@/shared/database/config";
+
+const { getDatabase } = createDatabaseConnection(true);
 import {
   userPreferencesTable,
   type Theme,

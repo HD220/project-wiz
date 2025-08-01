@@ -21,6 +21,9 @@ import {
 import { Button } from "@/renderer/components/ui/button";
 import { Textarea } from "@/renderer/components/ui/textarea";
 import { loadApiData } from "@/renderer/lib/route-loader";
+import { getLogger } from "@/shared/logger/config";
+
+const logger = getLogger("channel-route");
 
 interface ChannelLoaderData {
   channel: SelectProjectChannel;
@@ -341,7 +344,7 @@ export const Route = createFileRoute(
         user,
       };
     } catch (error) {
-      console.error("Failed to load channel data:", error);
+      logger.error("Failed to load channel data:", error);
       throw error;
     }
   },

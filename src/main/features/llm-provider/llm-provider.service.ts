@@ -2,7 +2,9 @@ import crypto from "crypto";
 
 import { eq, and, desc, sql, like } from "drizzle-orm";
 
-import { getDatabase } from "@/main/database/connection";
+import { createDatabaseConnection } from "@/shared/database/config";
+
+const { getDatabase } = createDatabaseConnection(true);
 import { agentsTable } from "@/main/features/agent/agent.model";
 
 import { llmProvidersTable } from "./llm-provider.model";
@@ -13,7 +15,6 @@ import type {
   LlmProvider,
   ProviderType,
 } from "./llm-provider.types";
-// import { getLogger } from "@/main/utils/logger";
 
 // Filter interface for provider listing
 interface ProviderFilters {

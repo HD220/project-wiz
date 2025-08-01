@@ -6,7 +6,7 @@ import type {
 } from "@/main/features/agent/agent.types";
 import { AuthService } from "@/main/features/auth/auth.service";
 import { createIpcHandler } from "@/main/utils/ipc-handler";
-import { getLogger } from "@/main/utils/logger";
+import { getLogger } from "@/shared/logger/config";
 
 /**
  * Setup agent IPC handlers

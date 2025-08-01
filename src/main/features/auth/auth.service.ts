@@ -1,7 +1,9 @@
 import bcrypt from "bcryptjs";
 import { eq, and, gt, desc } from "drizzle-orm";
 
-import { getDatabase } from "@/main/database/connection";
+import { createDatabaseConnection } from "@/shared/database/config";
+
+const { getDatabase } = createDatabaseConnection(true);
 import { accountsTable } from "@/main/features/auth/auth.model";
 import type {
   LoginCredentials,

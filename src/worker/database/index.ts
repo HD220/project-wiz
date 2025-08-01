@@ -1,6 +1,9 @@
-// Export database connection
-export { db, getDatabase } from "./connection";
-export type { DatabaseType } from "./connection";
+// Worker database - exports shared database connection directly
+import { createDatabaseConnection } from "@/shared/database/config";
 
-// Worker database only exports its own connection
-// Models should be imported directly from their respective locations
+// Create database connection with no Drizzle logging for worker performance
+const { db, getDatabase } = createDatabaseConnection(false);
+
+// Export database connection
+export { db, getDatabase };
+export type { DatabaseType } from "@/shared/database/config";

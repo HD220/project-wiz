@@ -17,7 +17,7 @@ import { setupProjectHandlers } from "@/main/features/project/project.handler";
 import { setupProfileHandlers } from "@/main/features/user/profile.handler";
 import { setupUserHandlers } from "@/main/features/user/user.handler";
 import { QueueClient } from "@/main/features/queue-client/queue-client";
-import { getLogger } from "@/main/utils/logger";
+import { getLogger } from "@/shared/logger/config";
 import { startWorker, stopWorker } from "@/main/workers/worker-manager";
 
 declare const MAIN_WINDOW_VITE_DEV_SERVER_URL: string | undefined;

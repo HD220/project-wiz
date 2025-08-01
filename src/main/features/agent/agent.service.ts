@@ -1,6 +1,8 @@
 import { eq, and, desc, like, or } from "drizzle-orm";
 
-import { getDatabase } from "@/main/database/connection";
+import { createDatabaseConnection } from "@/shared/database/config";
+
+const { getDatabase } = createDatabaseConnection(true);
 import { agentsTable } from "@/main/features/agent/agent.model";
 import type {
   CreateAgentInput,
@@ -12,7 +14,7 @@ import type {
 import { createAgentSchema } from "@/main/features/agent/agent.types";
 import { llmProvidersTable } from "@/main/features/llm-provider/llm-provider.model";
 import { usersTable } from "@/main/features/user/user.model";
-import { getLogger } from "@/main/utils/logger";
+import { getLogger } from "@/shared/logger/config";
 
 export class AgentService {
   /**

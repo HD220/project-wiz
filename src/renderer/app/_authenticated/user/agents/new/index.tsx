@@ -17,6 +17,9 @@ import { AgentForm } from "@/renderer/features/agent/components/agent-form";
 import type { LlmProvider } from "@/renderer/features/agent/provider.types";
 import { useApiMutation } from "@/renderer/hooks/use-api-mutation.hook";
 import { loadApiData } from "@/renderer/lib/route-loader";
+import { getLogger } from "@/shared/logger/config";
+
+const logger = getLogger("agent-new");
 
 function CreateAgentPage() {
   const navigate = useNavigate();
@@ -33,7 +36,7 @@ function CreateAgentPage() {
         );
         setProviders(providersData as LlmProvider[]);
       } catch (error) {
-        console.error("Error loading providers:", error);
+        logger.error("Error loading providers:", error);
       } finally {
         setIsLoadingProviders(false);
       }
