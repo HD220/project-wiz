@@ -31,14 +31,31 @@ export const responseGenerator: JobFunction<ResponseGeneratorJobData, string> = 
   
   // Generate response
   console.log("🔥 [ResponseGenerator] Calling generateText...");
-  const result = await generateText({
-    model: providerInstance as LanguageModelV1,
-    system: systemPrompt,
-    messages: messages
-  });
   
-  console.log("🔥 [ResponseGenerator] Generated response:", result.text);
-  console.log("🔥 [ResponseGenerator] Job completed successfully:", job.id);
-  
-  return result.text;
+  try {
+    const result = await generateText({
+      model: providerInstance as LanguageModelV1,
+      system: systemPrompt,
+      messages: messages
+    });
+    
+    console.log("🔥 [ResponseGenerator] Generated response:", result.text);
+    console.log("🔥 [ResponseGenerator] Usage stats:", result.usage);
+    console.log("🔥 [ResponseGenerator] Job completed successfully:", job.id);
+    
+    return result.text;
+  } catch (error) {
+    console.error("❌ [ResponseGenerator] Error during generateText:", error);
+    console.error("❌ [ResponseGenerator] Error details:", {
+      message: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined,
+      provider,
+      model,
+      hasApiKey: !!apiKey,
+      apiKeyLength: apiKey?.length
+    });
+    
+    // Re-throw the error so the job fails properly
+    throw error;
+  }
 };

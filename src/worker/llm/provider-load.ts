@@ -4,6 +4,8 @@ import { createGoogleGenerativeAI } from "@ai-sdk/google";
 import { createDeepSeek } from "@ai-sdk/deepseek";
 
 export function loadProvider(provider: string, model: string, apiKey: string) {
+  console.log("🔥 [ProviderLoader] Loading provider:", { provider, model, hasApiKey: !!apiKey });
+  
   switch (provider.toLowerCase()) {
     case "anthropic":
       const anthropic = createAnthropic({
@@ -24,10 +26,13 @@ export function loadProvider(provider: string, model: string, apiKey: string) {
       return google(model);
 
     case "deepseek":
+      console.log("🔥 [ProviderLoader] Creating DeepSeek provider instance");
       const deepseek = createDeepSeek({
         apiKey: apiKey
       });
-      return deepseek(model);
+      const modelInstance = deepseek(model);
+      console.log("🔥 [ProviderLoader] DeepSeek model instance created");
+      return modelInstance;
 
     default:
       throw new Error(`Unsupported provider: ${provider}. Supported providers: anthropic, openai, gemini, deepseek`);
