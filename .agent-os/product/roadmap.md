@@ -1,7 +1,7 @@
 # Product Roadmap
 
 > Last Updated: 2025-08-01
-> Version: 1.1.0
+> Version: 1.2.0
 > Status: Active Development
 
 ## Phase 0: Already Completed
@@ -63,11 +63,24 @@ The following features have been implemented:
 - [ ] **Notification System Enhancement** - Sidebar notifications for conversation updates and agent status changes `M`
 - [ ] **UI/UX Polish** - Consistent design patterns, accessibility, and error handling across all components `S`
 
+## Phase 1.6: Event Bus Background Task Architecture (Spec Ready - 2-3 weeks)
+
+**Goal:** Transform main process to maximize event bus usage for background task decoupling and long-running operation management
+**Success Criteria:** All long-running operations (>2s) process asynchronously with real-time progress tracking, responsive UI, and production-ready error handling
+**Progress:** 📋 **SPEC COMPLETED** - Comprehensive specification created (August 2025) - @.agent-os/specs/2025-08-01-event-bus-background-tasks/
+
+### Features
+
+- [ ] **Event Bus Infrastructure Extension** - Extend SystemEvents with 6 new task lifecycle event types and correlation ID system `M`
+- [ ] **Background Task Queue System** - Generic task queue with priority-based execution, concurrency control, and retry mechanisms `L`
+- [ ] **Smart IPC Handler Migration** - AsyncIpcHandler utility with intelligent routing (sync <2s, async ≥2s operations) `L`
+- [ ] **Built-in Task Types** - File operations, database operations, analysis operations, and external API task types `M`
+- [ ] **Real-time Progress Broadcasting** - Event bus-driven progress updates with debouncing and automatic IPC forwarding `M`
+
 ### Dependencies
 
-- Phase 1 completion
-- Existing EventBus and messaging infrastructure
-- Current shadcn/ui component library
+- Phase 1 completion (EventBus foundation)
+- Existing AgenticWorkerHandler patterns for reference
 
 ## Phase 2: Autonomous Development (3-4 weeks)
 
@@ -84,7 +97,7 @@ The following features have been implemented:
 
 ### Dependencies
 
-- Phase 1.5 completion (polished UI foundation)
+- Phase 1.6 completion (background task architecture for responsive autonomous work)
 - Agent specialization system
 - Inter-agent communication protocols
 
