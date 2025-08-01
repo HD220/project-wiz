@@ -286,7 +286,7 @@ function ConversationListItem(props: ConversationListItemProps) {
           "flex items-center gap-[var(--spacing-component-sm)] px-[var(--spacing-component-sm)] py-[var(--spacing-component-xs)] rounded transition-all duration-150",
           "hover:bg-sidebar-accent/60 hover:text-sidebar-accent-foreground",
           "focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-sidebar-ring",
-          "w-full min-w-0 overflow-hidden",
+          "w-full min-w-0 max-w-full overflow-hidden",
           conversation.archivedAt && "opacity-60",
           hasUnreadMessages && "bg-sidebar-accent/30",
         )}
@@ -308,7 +308,7 @@ function ConversationListItem(props: ConversationListItemProps) {
           <div className="flex items-center w-full min-w-0">
             <span
               className={cn(
-                "text-sm font-medium overflow-hidden text-ellipsis whitespace-nowrap flex-1 min-w-0",
+                "text-sm font-medium overflow-hidden text-ellipsis whitespace-nowrap flex-1 min-w-0 max-w-0",
                 conversation.archivedAt && "line-through text-muted-foreground",
                 hasUnreadMessages
                   ? "text-sidebar-foreground"
@@ -332,7 +332,7 @@ function ConversationListItem(props: ConversationListItemProps) {
           </div>
 
           {/* Message preview - CSS ellipsis handling */}
-          <div className="text-xs text-muted-foreground/70 leading-tight overflow-hidden text-ellipsis whitespace-nowrap min-w-0">
+          <div className="text-xs text-muted-foreground/70 leading-tight overflow-hidden text-ellipsis whitespace-nowrap min-w-0 max-w-0">
             {messagePreview}
           </div>
         </div>
