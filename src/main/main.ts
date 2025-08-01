@@ -132,10 +132,18 @@ async function initializeStartupJob(): Promise<void> {
     const queueClient = new QueueClient("llm-queue");
     
     const jobResult = await queueClient.add({
-      type: "startup",
-      apiKey: apiKey,
-      timestamp: new Date().toISOString(),
-      message: "Application startup job"
+      agent: {
+        name: "StartupAgent",
+        role: "System Initialization Agent",
+        backstory: "A specialized agent responsible for system startup verification and initialization tasks."
+      },
+      messages: [{
+        role: "user",
+        content: "System has started successfully. Please confirm initialization and provide a brief status report."
+      }],
+      provider: "openai",
+      model: "gpt-4",
+      apiKey: apiKey
     }, {
       priority: 1,
       attempts: 3
