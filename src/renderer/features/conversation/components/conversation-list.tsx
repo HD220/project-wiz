@@ -236,11 +236,9 @@ function ConversationListItem(props: ConversationListItemProps) {
   // Inline logic for display name - simplified
   const conversationName = conversation.name || "Unnamed Conversation";
 
-  // Inline logic for message preview with aggressive truncation
+  // Inline logic for message preview - let CSS handle ellipsis
   const messagePreview = conversation.lastMessage
-    ? conversation.lastMessage.content.length > 30
-      ? `${conversation.lastMessage.content.substring(0, 30)}...`
-      : conversation.lastMessage.content
+    ? conversation.lastMessage.content
     : "No messages yet";
 
   // Inline logic for time formatting - Discord style
@@ -310,7 +308,7 @@ function ConversationListItem(props: ConversationListItemProps) {
           <div className="flex items-center w-full min-w-0">
             <span
               className={cn(
-                "text-sm font-medium truncate flex-1 min-w-0 max-w-0",
+                "text-sm font-medium overflow-hidden text-ellipsis whitespace-nowrap flex-1 min-w-0",
                 conversation.archivedAt && "line-through text-muted-foreground",
                 hasUnreadMessages
                   ? "text-sidebar-foreground"
@@ -333,8 +331,8 @@ function ConversationListItem(props: ConversationListItemProps) {
             )}
           </div>
 
-          {/* Message preview - simplified classes, enforced truncation */}
-          <div className="text-xs text-muted-foreground/70 leading-tight truncate min-w-0 max-w-full">
+          {/* Message preview - CSS ellipsis handling */}
+          <div className="text-xs text-muted-foreground/70 leading-tight overflow-hidden text-ellipsis whitespace-nowrap min-w-0">
             {messagePreview}
           </div>
         </div>
