@@ -145,9 +145,7 @@ function DMLayout() {
             // Clear the input immediately
             context.actions.setInput("");
             // Focus back to input after sending
-            setTimeout(() => {
-              context.refs.inputRef?.current?.focus();
-            }, 0);
+            context.refs.inputRef?.current?.focus();
           }}
           className="bg-background flex-1 flex flex-col"
         >
@@ -402,7 +400,7 @@ function FunctionalChatInput({
   // Usar inputRef diretamente - sem ref local desnecessário
 
   const handleSubmit = () => {
-    if (value.trim() && !loading && !disabled) {
+    if (value.trim() && !loading) {
       onSend();
     }
   };
@@ -433,8 +431,7 @@ function FunctionalChatInput({
           onChange={(e) => onValueChange(e.target.value)}
           onKeyDown={handleKeyDown}
           placeholder={placeholder}
-          disabled={disabled || loading}
-          className="min-h-[44px] max-h-[200px] resize-none rounded-lg border-input bg-background px-3 py-2 text-sm focus-visible:ring-1 focus-visible:ring-ring/50 focus-visible:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-50"
+          className="min-h-[44px] max-h-[200px] resize-none rounded-lg border-input bg-background px-3 py-2 text-sm focus-visible:ring-1 focus-visible:ring-ring/50 focus-visible:ring-offset-1"
         />
       </div>
 
