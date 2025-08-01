@@ -1,49 +1,22 @@
-import path from "path";
+// Main process database connection - now using shared configuration
+// This file maintains backward compatibility with existing imports
 
-import Database from "better-sqlite3";
-import { drizzle } from "drizzle-orm/better-sqlite3";
-import { Logger } from "drizzle-orm/logger";
+import { createDatabaseConnection } from "@/shared/database/config";
 
-import { getLogger } from "../utils/logger";
+// Create database connection using shared configuration
+// This ensures consistency with worker process while maintaining all existing functionality
+const { db, sqlite, getDatabase: getSharedDatabase } = createDatabaseConnection(true);
 
-// Database file path
-const DB_PATH = process.env["DB_FILE_NAME"] || "./project-wiz.db";
-const dbPath = path.resolve(DB_PATH);
+// Export database instance - SAME AS BEFORE
+export { db };
 
-// Initialize SQLite database
-const sqlite = new Database(dbPath);
-
-// Enable WAL mode for better concurrency
-sqlite.pragma("journal_mode = WAL");
-
-// Enable foreign key constraints
-sqlite.pragma("foreign_keys = ON");
-
-// Custom Drizzle logger that integrates with our Pino logger
-class DrizzleLogger implements Logger {
-  private logger = getLogger("database");
-
-  logQuery(query: string, params: unknown[]): void {
-    this.logger.debug(
-      {
-        query,
-        params,
-        type: "query",
-      },
-      "Database query executed",
-    );
-  }
-}
-
-// Create Drizzle database instance with logging
-export const db = drizzle(sqlite, { logger: new DrizzleLogger() });
-
+// Export type - SAME AS BEFORE  
 export type DatabaseType = typeof db;
 
-// Export sqlite instance for direct access if needed
+// Export sqlite instance for direct access if needed - SAME AS BEFORE
 export { sqlite };
 
-// Utility function to get database instance
+// Utility function to get database instance - SAME AS BEFORE
 export function getDatabase(): typeof db {
-  return db;
+  return getSharedDatabase();
 }
