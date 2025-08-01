@@ -303,7 +303,7 @@ function ConversationListItem(props: ConversationListItemProps) {
         </div>
 
         {/* Content - more compact with enforced constraints */}
-        <div className="flex-1 min-w-0 max-w-0 overflow-hidden">
+        <div className="flex-1 min-w-0 overflow-hidden">
           {/* Name and time in same line - enforced width constraints */}
           <div className="flex items-center w-full min-w-0">
             <span
