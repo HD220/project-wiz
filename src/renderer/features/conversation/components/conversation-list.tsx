@@ -106,7 +106,7 @@ export function ConversationList(props: ConversationListProps) {
         <ConversationListEmpty showArchived={showArchived} />
       ) : (
         <ScrollArea className="flex-1">
-          <div className="space-y-[var(--spacing-component-xs)] pt-[var(--spacing-component-xs)] min-h-0">
+          <div className="space-y-[var(--spacing-component-xs)] pt-[var(--spacing-component-xs)] min-h-0 overflow-hidden">
             {displayConversations.map((conversation) => (
               <ConversationListItem
                 key={conversation.id}
@@ -236,10 +236,10 @@ function ConversationListItem(props: ConversationListItemProps) {
   // Inline logic for display name - simplified
   const conversationName = conversation.name || "Unnamed Conversation";
 
-  // Inline logic for message preview with proper truncation
+  // Inline logic for message preview with aggressive truncation
   const messagePreview = conversation.lastMessage
-    ? conversation.lastMessage.content.length > 35
-      ? `${conversation.lastMessage.content.substring(0, 35)}...`
+    ? conversation.lastMessage.content.length > 30
+      ? `${conversation.lastMessage.content.substring(0, 30)}...`
       : conversation.lastMessage.content
     : "No messages yet";
 
@@ -280,7 +280,7 @@ function ConversationListItem(props: ConversationListItemProps) {
   const hasUnreadMessages = conversation.lastMessage && false; // TODO: Implement proper unread logic
 
   return (
-    <div className="group relative w-full min-w-0">
+    <div className="group relative w-full min-w-0 overflow-hidden">
       <Link
         to="/user/dm/$conversationId"
         params={{ conversationId: conversation.id }}
@@ -288,7 +288,7 @@ function ConversationListItem(props: ConversationListItemProps) {
           "flex items-center gap-[var(--spacing-component-sm)] px-[var(--spacing-component-sm)] py-[var(--spacing-component-xs)] rounded transition-all duration-150",
           "hover:bg-sidebar-accent/60 hover:text-sidebar-accent-foreground",
           "focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-sidebar-ring",
-          "w-full min-w-0 max-w-full overflow-hidden",
+          "w-full min-w-0 overflow-hidden",
           conversation.archivedAt && "opacity-60",
           hasUnreadMessages && "bg-sidebar-accent/30",
         )}
@@ -304,13 +304,13 @@ function ConversationListItem(props: ConversationListItemProps) {
           )}
         </div>
 
-        {/* Content - more compact */}
-        <div className="flex-1 min-w-0">
-          {/* Name and time in same line */}
-          <div className="flex items-center justify-between gap-[var(--spacing-component-xs)] w-full">
+        {/* Content - more compact with enforced constraints */}
+        <div className="flex-1 min-w-0 max-w-0 overflow-hidden">
+          {/* Name and time in same line - enforced width constraints */}
+          <div className="flex items-center w-full min-w-0">
             <span
               className={cn(
-                "text-sm font-medium truncate flex-1 min-w-0",
+                "text-sm font-medium truncate flex-1 min-w-0 max-w-0",
                 conversation.archivedAt && "line-through text-muted-foreground",
                 hasUnreadMessages
                   ? "text-sidebar-foreground"
@@ -322,7 +322,7 @@ function ConversationListItem(props: ConversationListItemProps) {
             {formattedTime && (
               <span
                 className={cn(
-                  "text-xs whitespace-nowrap flex-shrink-0",
+                  "text-xs whitespace-nowrap flex-shrink-0 ml-2 max-w-12 overflow-hidden",
                   hasUnreadMessages
                     ? "text-primary font-medium"
                     : "text-muted-foreground/80",
@@ -333,13 +333,8 @@ function ConversationListItem(props: ConversationListItemProps) {
             )}
           </div>
 
-          {/* Message preview - more compact */}
-          <div
-            className={cn(
-              "text-xs truncate text-muted-foreground/70 leading-tight w-full overflow-hidden text-ellipsis",
-              hasUnreadMessages && "text-muted-foreground font-medium",
-            )}
-          >
+          {/* Message preview - simplified classes, enforced truncation */}
+          <div className="text-xs text-muted-foreground/70 leading-tight truncate min-w-0 max-w-full">
             {messagePreview}
           </div>
         </div>
