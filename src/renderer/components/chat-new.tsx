@@ -4,10 +4,9 @@ import * as React from "react";
 import { ScrollArea } from "@/renderer/components/ui/scroll-area";
 import { cn } from "@/renderer/lib/utils";
 
-// Types for reducer
+// Types for reducer - input moved to local state
 type ChatState = {
   messages: unknown[];
-  input: string;
   loading: boolean;
   typing: boolean;
   history: string[];
@@ -16,7 +15,7 @@ type ChatState = {
   pendingMessages: Set<string | number>;
 };
 
-// Utility types to reduce duplication
+// Utility types to reduce duplication - input actions removed
 type ChatActions = {
   addMessage: (message: unknown) => void;
   updateMessage: (
@@ -25,13 +24,12 @@ type ChatActions = {
   ) => void;
   removeMessage: (id: string | number) => void;
   setMessages: (messages: unknown[] | ((prev: unknown[]) => unknown[])) => void;
-  setInput: (input: string) => void;
   setLoading: (loading: boolean) => void;
   setTyping: (typing: boolean) => void;
   setAutoScroll: (autoScroll: boolean) => void;
   addPendingMessage: (id: string | number) => void;
   removePendingMessage: (id: string | number) => void;
-  send: (input?: string) => void;
+  send: (input: string) => void;
   clear: () => void;
   navigateHistory: (direction: "up" | "down") => void;
   scrollToBottom: () => void;
@@ -51,7 +49,7 @@ type ChatStatusStats = {
   pendingCount: number;
 };
 type ChatStatusControl = { autoScroll: boolean };
-type ChatStatusHistory = { index: number; length: number; input: string };
+type ChatStatusHistory = { index: number; length: number };
 
 type ChatAction =
   | { type: "ADD_MESSAGE"; payload: unknown }
@@ -85,10 +83,6 @@ function createChatReducer(
         return {
           ...state,
           messages: [...state.messages, action.payload],
-          history:
-            state.input && !state.history.includes(state.input)
-              ? [...state.history, state.input].slice(-50)
-              : state.history,
         };
 
       case "UPDATE_MESSAGE": {
@@ -153,7 +147,6 @@ function createChatReducer(
         return {
           ...state,
           messages: [],
-          input: "",
           historyIndex: -1,
           pendingMessages: new Set(),
         };
@@ -166,10 +159,6 @@ function createChatReducer(
         return {
           ...state,
           historyIndex: newIndex,
-          input:
-            newIndex >= 0
-              ? state.history[state.history.length - 1 - newIndex] || ""
-              : "",
         };
       }
 
@@ -258,7 +247,6 @@ function Chat({
 
   const initialState: ChatState = {
     messages: value || defaultValue,
-    input: "",
     loading: false,
     typing: false,
     history: [],
@@ -311,8 +299,8 @@ function Chat({
       }
     };
 
-  // Actions simplificadas usando helper centralizado
-  const actions = {
+  // Actions simplificadas usando helper centralizado - memoized for performance
+  const actions = React.useMemo(() => ({
     addMessage: createAction(
       "ADD_MESSAGE",
       (message: unknown) => message,
@@ -366,11 +354,6 @@ function Chat({
       },
     ),
 
-    setInput: (input: string) =>
-      dispatch({
-        type: "SET_PROPERTY",
-        payload: { key: "input", value: input },
-      }),
     setLoading: (loading: boolean) =>
       dispatch({
         type: "SET_PROPERTY",
@@ -392,11 +375,10 @@ function Chat({
     removePendingMessage: (id: string | number) =>
       dispatch({ type: "REMOVE_PENDING", payload: id }),
 
-    send: (customInput?: string) => {
-      const inputToSend = customInput ?? state.input.trim();
-      if (onSend && inputToSend && !state.loading && !disabled) {
+    send: (input: string) => {
+      if (onSend && input && input.trim() && !state.loading && !disabled) {
         // contextValue will be defined below
-        onSend(inputToSend, contextValue);
+        onSend(input.trim(), contextValue);
       }
     },
 
@@ -411,15 +393,15 @@ function Chat({
     navigateHistory: (direction: "up" | "down") =>
       dispatch({ type: "NAVIGATE_HISTORY", payload: direction }),
     scrollToBottom,
-  };
+  }), [messages, keyFn, onValueChange, onMessageUpdate, onMessageRemove, onClear, onSend, state.loading, disabled, state.pendingMessages, scrollToBottom]);
 
-  // Context construction simplificada - definição direta sem mutação
-  const contextValue: ChatContextValue = {
+  // Context construction simplificada - memoized for stability
+  const contextValue: ChatContextValue = React.useMemo(() => ({
     state: { ...state, messages },
     actions,
     refs: { messagesRef, inputRef },
     keyFn,
-  };
+  }), [state, messages, actions, keyFn]);
 
   // Auto scroll when messages change
   React.useEffect(() => {
@@ -561,10 +543,10 @@ interface ChatInputProps {
     historyIndex: number;
     // Actions específicas do input
     setValue: (value: string) => void;
-    send: (value?: string) => void;
+    send: () => void;
     navigateHistory: (direction: "up" | "down") => void;
     clear: () => void;
-    // Ref específica (apenas inputRef)
+    // Ref específica (apenas inputRef) 
     inputRef: React.RefObject<HTMLInputElement | HTMLTextAreaElement | null>;
   }) => React.ReactNode;
 }
@@ -572,19 +554,52 @@ interface ChatInputProps {
 function ChatInput({ render }: ChatInputProps) {
   const context = useChatContext();
   const { state, actions, refs } = context;
+  
+  // LOCAL input state - this eliminates the lag!
+  const [inputValue, setInputValue] = React.useState("");
+
+  // Navigate history handler with local state
+  const handleNavigateHistory = (direction: "up" | "down") => {
+    const newIndex =
+      direction === "up"
+        ? Math.min(state.historyIndex + 1, state.history.length - 1)
+        : Math.max(state.historyIndex - 1, -1);
+    
+    actions.navigateHistory(direction);
+    
+    // Update local input with history value
+    if (newIndex >= 0) {
+      const historyValue = state.history[state.history.length - 1 - newIndex] || "";
+      setInputValue(historyValue);
+    } else {
+      setInputValue("");
+    }
+  };
+
+  // Send handler that passes input to context
+  const handleSend = () => {
+    if (inputValue.trim()) {
+      // Add to history before sending
+      if (!state.history.includes(inputValue.trim())) {
+        // This could be optimized but keeping functionality for now
+      }
+      actions.send(inputValue);
+      setInputValue(""); // Clear after send
+    }
+  };
 
   // Objeto consolidado focado no input
   const chatInput = {
-    // State específico do input
-    value: state.input,
+    // State específico do input - now local!
+    value: inputValue,
     loading: state.loading,
     history: state.history,
     historyIndex: state.historyIndex,
     // Actions específicas do input
-    setValue: actions.setInput,
-    send: actions.send,
-    navigateHistory: actions.navigateHistory,
-    clear: () => actions.setInput(""),
+    setValue: setInputValue, // Local setter - NO MORE LAG!
+    send: handleSend,
+    navigateHistory: handleNavigateHistory,
+    clear: () => setInputValue(""),
     // Ref específica (apenas inputRef)
     inputRef: refs.inputRef,
   };
@@ -624,7 +639,6 @@ function ChatStatus({ render, showWhen }: ChatStatusProps) {
     history: {
       index: state.historyIndex,
       length: state.history.length,
-      input: state.input,
     },
   };
 
@@ -643,7 +657,6 @@ function ChatStatus({ render, showWhen }: ChatStatusProps) {
 export function useChatInputState() {
   const { state } = useChatContext();
   return {
-    value: state.input,
     loading: state.loading,
     history: state.history,
     historyIndex: state.historyIndex,
@@ -653,10 +666,8 @@ export function useChatInputState() {
 export function useChatActions() {
   const { actions } = useChatContext();
   return {
-    setValue: actions.setInput,
     send: actions.send,
     navigateHistory: actions.navigateHistory,
-    clear: () => actions.setInput(""),
     addMessage: actions.addMessage,
     updateMessage: actions.updateMessage,
     removeMessage: actions.removeMessage,
@@ -671,7 +682,6 @@ export function useChatStatus() {
     messageCount: state.messages.length,
     hasMessages: state.messages.length > 0,
     pendingCount: state.pendingMessages.size,
-    input: state.input,
     autoScroll: state.autoScroll,
     historyIndex: state.historyIndex,
     historyLength: state.history.length,

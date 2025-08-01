@@ -1,6 +1,6 @@
 import { createFileRoute, Outlet, useRouter } from "@tanstack/react-router";
 import { Send, Paperclip, Smile } from "lucide-react";
-import { useRef, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 
 import type { DMConversationWithParticipants } from "@/main/features/dm/dm-conversation.types";
 import type { SelectMessage } from "@/main/features/message/message.types";
@@ -142,9 +142,7 @@ function DMLayout() {
           value={optimisticMessages}
           onSend={(input, context) => {
             handleSendMessage(input);
-            // Clear the input immediately
-            context.actions.setInput("");
-            // Focus back to input after sending
+            // Focus back to input after sending (input clears automatically now)
             context.refs.inputRef?.current?.focus();
           }}
           className="bg-background flex-1 flex flex-col"
@@ -377,7 +375,7 @@ function DMLayout() {
 
 // Functional Chat Input Component
 interface FunctionalChatInputProps extends React.ComponentProps<"div"> {
-  inputRef?: React.RefObject<HTMLTextAreaElement>;
+  inputRef?: React.RefObject<HTMLTextAreaElement | null>;
   value: string;
   loading: boolean;
   onValueChange: (value: string) => void;
