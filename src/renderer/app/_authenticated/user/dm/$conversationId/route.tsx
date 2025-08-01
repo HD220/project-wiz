@@ -363,7 +363,7 @@ function DMLayout() {
                       }
                     }}
                     placeholder={`Message ${displayName}...`}
-                    disabled={sendingMessage}
+                    disabled={false}
                   />
                 )}
               />
@@ -431,7 +431,7 @@ function FunctionalChatInput({
           onKeyDown={handleKeyDown}
           placeholder={placeholder}
           disabled={disabled || loading}
-          className="min-h-[44px] max-h-[200px] resize-none rounded-lg border-input bg-background px-3 py-2 text-sm focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+          className="min-h-[44px] max-h-[200px] resize-none rounded-lg border-input bg-background px-3 py-2 text-sm focus-visible:ring-1 focus-visible:ring-ring/50 focus-visible:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-50"
         />
       </div>
 
