@@ -1,6 +1,6 @@
 import { createFileRoute, Outlet, useRouter } from "@tanstack/react-router";
 import { Send, Paperclip, Smile } from "lucide-react";
-import { useRef, useLayoutEffect, useEffect, useState } from "react";
+import { useRef, useEffect, useState } from "react";
 
 import type { DMConversationWithParticipants } from "@/main/features/dm/dm-conversation.types";
 import type { SelectMessage } from "@/main/features/message/message.types";
@@ -146,9 +146,7 @@ function DMLayout() {
             context.actions.setInput("");
             // Focus back to input after sending
             setTimeout(() => {
-              console.log('🎯 Attempting focus:', context.refs.inputRef?.current);
               context.refs.inputRef?.current?.focus();
-              console.log('🎯 Focus completed');
             }, 0);
           }}
           className="bg-background flex-1 flex flex-col"
@@ -401,17 +399,7 @@ function FunctionalChatInput({
   placeholder = "Type a message...",
   disabled = false,
 }: FunctionalChatInputProps) {
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
-
-  // Conectar o inputRef do ChatInput com o ref local - usando useLayoutEffect para timing correto
-  useLayoutEffect(() => {
-    if (inputRef && textareaRef.current) {
-      inputRef.current = textareaRef.current;
-      console.log('✅ Ref connected:', textareaRef.current);
-    } else {
-      console.log('❌ Ref connection failed:', { inputRef, textareaRef: textareaRef.current });
-    }
-  }); // Sem dependências - executa após cada render
+  // Usar inputRef diretamente - sem ref local desnecessário
 
   const handleSubmit = () => {
     if (value.trim() && !loading && !disabled) {
@@ -428,19 +416,19 @@ function FunctionalChatInput({
     onKeyDown?.(e);
   };
 
-  // Auto-resize textarea
+  // Auto-resize textarea usando inputRef diretamente
   useEffect(() => {
-    if (textareaRef.current) {
-      textareaRef.current.style.height = "auto";
-      textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
+    if (inputRef?.current) {
+      inputRef.current.style.height = "auto";
+      inputRef.current.style.height = `${inputRef.current.scrollHeight}px`;
     }
-  }, [value]);
+  }, [value, inputRef]);
 
   return (
     <div className="flex items-end gap-3">
       <div className="flex-1 relative">
         <Textarea
-          ref={textareaRef}
+          ref={inputRef}
           value={value}
           onChange={(e) => onValueChange(e.target.value)}
           onKeyDown={handleKeyDown}
