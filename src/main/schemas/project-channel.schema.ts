@@ -1,9 +1,8 @@
 import { sql } from "drizzle-orm";
 import { sqliteTable, text, integer, index, primaryKey } from "drizzle-orm/sqlite-core";
 
-import { usersTable } from "./user.schema";
-
-import { projectsTable } from "./project.schema";
+import { usersTable } from "@/main/schemas/user.schema";
+import { projectsTable } from "@/main/schemas/project.schema";
 
 export const projectChannelsTable = sqliteTable(
   "project_channels",

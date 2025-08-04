@@ -2,8 +2,8 @@ import Database from "better-sqlite3";
 import { drizzle } from "drizzle-orm/better-sqlite3";
 import { Logger } from "drizzle-orm/logger";
 
-import { getDatabaseConfig } from "../config";
-import { getLogger } from "../logger/config";
+import { getDatabaseConfig } from "@/shared/config/index";
+import { getLogger } from "@/shared/services/logger/config";
 
 /**
  * Shared DrizzleLogger that integrates with our centralized Pino logger

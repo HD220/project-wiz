@@ -1,7 +1,7 @@
 import { sql } from "drizzle-orm";
 import { sqliteTable, text, integer, index, primaryKey } from "drizzle-orm/sqlite-core";
 
-import { usersTable } from "./user.schema";
+import { usersTable } from "@/main/schemas/user.schema";
 
 export const dmConversationsTable = sqliteTable(
   "dm_conversations",

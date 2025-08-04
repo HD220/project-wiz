@@ -1,7 +1,7 @@
 import { sql } from "drizzle-orm";
 import { sqliteTable, text, integer, index, primaryKey } from "drizzle-orm/sqlite-core";
 
-import { usersTable } from "@/main/database/schemas/user.schema";
+import { usersTable } from "@/main/schemas/user.schema";
 
 export type ProviderType =
   | "openai"
