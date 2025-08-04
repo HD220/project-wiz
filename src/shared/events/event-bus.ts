@@ -3,96 +3,66 @@ import { getLogger } from "@/shared/logger/config";
 
 const logger = getLogger("event-bus");
 
-// System event type definitions
-export interface SystemEvents {
-  "user-sent-message": {
-    messageId: string;
-    conversationId: string;
-    conversationType: "dm" | "channel";
-    authorId: string;
-    content: string;
-    timestamp: Date;
-  };
-  "agent-status-changed": {
-    agentId: string;
-    oldStatus: string;
-    newStatus: string;
-    conversationId?: string;
-    timestamp: Date;
-  };
-  "conversation-updated": {
-    conversationId: string;
-    conversationType: "dm" | "channel";
-    updateType: "message-added" | "agent-response" | "status-changed";
-    data?: any;
-    timestamp: Date;
-  };
-}
-
-export type SystemEventName = keyof SystemEvents;
-export type SystemEventData<T extends SystemEventName> = SystemEvents[T];
-
 /**
- * Type-safe Event Bus extending Node.js EventEmitter
- * Provides centralized event coordination for the AI integration system
+ * Generic type-safe Event Bus extending Node.js EventEmitter
+ * Provides centralized event coordination with flexible event types
  */
-export class EventBus extends EventEmitter {
+export class EventBus<TEvents extends Record<string, any> = Record<string, any>> extends EventEmitter {
   constructor() {
     super();
-    this.setMaxListeners(50); // Allow more listeners for complex event flows
     logger.info("🔄 EventBus initialized");
   }
 
   /**
    * Type-safe event emission
    */
-  emit<T extends SystemEventName>(
+  emit<T extends keyof TEvents>(
     eventName: T,
-    data: SystemEventData<T>
+    data: TEvents[T]
   ): boolean {
-    logger.debug(`📤 Emitting event: ${eventName}`, data);
-    return super.emit(eventName, data);
+    logger.debug(`📤 Emitting event: ${String(eventName)}`, data);
+    return super.emit(eventName as string, data);
   }
 
   /**
    * Type-safe event listener registration
    */
-  on<T extends SystemEventName>(
+  on<T extends keyof TEvents>(
     eventName: T,
-    listener: (data: SystemEventData<T>) => void
+    listener: (data: TEvents[T]) => void
   ): this {
-    logger.debug(`👂 Registering listener for: ${eventName}`);
-    return super.on(eventName, listener);
+    logger.debug(`👂 Registering listener for: ${String(eventName)}`);
+    return super.on(eventName as string, listener);
   }
 
   /**
    * Type-safe one-time event listener registration
    */
-  once<T extends SystemEventName>(
+  once<T extends keyof TEvents>(
     eventName: T,
-    listener: (data: SystemEventData<T>) => void
+    listener: (data: TEvents[T]) => void
   ): this {
-    logger.debug(`👂 Registering one-time listener for: ${eventName}`);
-    return super.once(eventName, listener);
+    logger.debug(`👂 Registering one-time listener for: ${String(eventName)}`);
+    return super.once(eventName as string, listener);
   }
 
   /**
    * Remove all listeners for a specific event
    */
-  removeAllListeners<T extends SystemEventName>(eventName?: T): this {
+  removeAllListeners<T extends keyof TEvents>(eventName?: T): this {
     if (eventName) {
-      logger.debug(`🗑️ Removing all listeners for: ${eventName}`);
+      logger.debug(`🗑️ Removing all listeners for: ${String(eventName)}`);
     } else {
       logger.debug("🗑️ Removing all listeners");
     }
-    return super.removeAllListeners(eventName);
+    return super.removeAllListeners(eventName as string);
   }
 
   /**
    * Get listener count for debugging
    */
-  getEventListenerCount<T extends SystemEventName>(eventName: T): number {
-    return this.listenerCount(eventName);
+  getEventListenerCount<T extends keyof TEvents>(eventName: T): number {
+    return this.listenerCount(eventName as string);
   }
 
   /**
@@ -104,11 +74,16 @@ export class EventBus extends EventEmitter {
   }
 }
 
-// Global singleton instance
+// Global singleton instance - can be typed with specific event interface when needed
 export const eventBus = new EventBus();
 
 // Export singleton initialization function for explicit setup
 export function initializeEventBus(): EventBus {
   logger.info("🚀 EventBus singleton initialized");
   return eventBus;
+}
+
+// Helper function to create typed event bus instances
+export function createEventBus<TEvents extends Record<string, any>>(): EventBus<TEvents> {
+  return new EventBus<TEvents>();
 }
