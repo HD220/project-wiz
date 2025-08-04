@@ -18,15 +18,15 @@ contextBridge.exposeInMainWorld("api", {
     login: (credentials) =>
       ipcRenderer.invoke("invoke:auth:login", credentials),
     getCurrentUser: () =>
-      ipcRenderer.invoke("invoke:auth:get-current-user"),
+      ipcRenderer.invoke("invoke:auth:get-current"),
     getActiveSession: () =>
-      ipcRenderer.invoke("invoke:auth:get-active-session"),
+      ipcRenderer.invoke("invoke:auth:get-session"),
     logout: () => 
       ipcRenderer.invoke("invoke:auth:logout"),
     isLoggedIn: () =>
-      ipcRenderer.invoke("invoke:auth:is-logged-in"),
+      ipcRenderer.invoke("invoke:auth:check-login"),
     getUserById: (userId) =>
-      ipcRenderer.invoke("invoke:auth:get-user-by-id", userId),
+      ipcRenderer.invoke("invoke:auth:get-user", userId),
   } satisfies WindowAPI.Auth,
 
   // Users API (new colocated handlers)
@@ -34,23 +34,23 @@ contextBridge.exposeInMainWorld("api", {
     listAvailableUsers: (params) =>
       ipcRenderer.invoke("invoke:user:list-available-users", params),
     listAllUsers: (input) =>
-      ipcRenderer.invoke("invoke:user:list-all-users", input),
+      ipcRenderer.invoke("invoke:user:list", input),
     listHumans: (input) =>
       ipcRenderer.invoke("invoke:user:list-humans", input),
     listAgents: (input) =>
       ipcRenderer.invoke("invoke:user:list-agents", input),
     findById: (input) =>
-      ipcRenderer.invoke("invoke:user:find-by-id", input),
+      ipcRenderer.invoke("invoke:user:get", input),
     findByIdAndType: (input) =>
-      ipcRenderer.invoke("invoke:user:find-by-id-and-type", input),
+      ipcRenderer.invoke("invoke:user:get-by-type", input),
     create: (input) =>
       ipcRenderer.invoke("invoke:user:create", input),
     update: (input) =>
       ipcRenderer.invoke("invoke:user:update", input),
-    softDelete: (input) =>
-      ipcRenderer.invoke("invoke:user:soft-delete", input),
-    restore: (userId) =>
-      ipcRenderer.invoke("invoke:user:restore", userId),
+    inactivate: (input) =>
+      ipcRenderer.invoke("invoke:user:inactivate", input),
+    activate: (userId) =>
+      ipcRenderer.invoke("invoke:user:activate", userId),
     getUserStats: (userId) =>
       ipcRenderer.invoke("invoke:user:get-user-stats", userId),
   } satisfies WindowAPI.User,
@@ -60,9 +60,9 @@ contextBridge.exposeInMainWorld("api", {
     create: (input) =>
       ipcRenderer.invoke("invoke:project:create", input),
     findById: (id) =>
-      ipcRenderer.invoke("invoke:project:find-by-id", id),
+      ipcRenderer.invoke("invoke:project:get", id),
     listAll: () => 
-      ipcRenderer.invoke("invoke:project:list-all"),
+      ipcRenderer.invoke("invoke:project:list"),
     update: (input) =>
       ipcRenderer.invoke("invoke:project:update", input),
     archive: (id) =>
@@ -76,17 +76,17 @@ contextBridge.exposeInMainWorld("api", {
     list: (filters) =>
       ipcRenderer.invoke("invoke:llm-provider:list", filters),
     getById: (id) =>
-      ipcRenderer.invoke("invoke:llm-provider:get-by-id", id),
+      ipcRenderer.invoke("invoke:llm-provider:get", id),
     update: (input) =>
       ipcRenderer.invoke("invoke:llm-provider:update", input),
-    delete: (id) =>
-      ipcRenderer.invoke("invoke:llm-provider:delete", id),
+    inactivate: (id) =>
+      ipcRenderer.invoke("invoke:llm-provider:inactivate", id),
     setDefault: (input) =>
       ipcRenderer.invoke("invoke:llm-provider:set-default", input),
     getDefault: () =>
       ipcRenderer.invoke("invoke:llm-provider:get-default"),
     getDecryptedKey: (providerId) =>
-      ipcRenderer.invoke("invoke:llm-provider:get-decrypted-key", providerId),
+      ipcRenderer.invoke("invoke:llm-provider:get-key", providerId),
   } satisfies WindowAPI.LlmProvider,
 
   // Agents API (new colocated handlers)
@@ -98,21 +98,19 @@ contextBridge.exposeInMainWorld("api", {
     get: (id) =>
       ipcRenderer.invoke("invoke:agent:get", id),
     getWithProvider: (id) =>
-      ipcRenderer.invoke("invoke:agent:get-with-provider", id),
-    updateStatus: (input) =>
-      ipcRenderer.invoke("invoke:agent:update-status", input),
+      ipcRenderer.invoke("invoke:agent:get-by-provider", id),
     update: (input) =>
       ipcRenderer.invoke("invoke:agent:update", input),
-    delete: (id) =>
-      ipcRenderer.invoke("invoke:agent:delete", id),
-    restore: (id) =>
-      ipcRenderer.invoke("invoke:agent:restore", id),
+    inactivate: (id) =>
+      ipcRenderer.invoke("invoke:agent:inactivate", id),
+    activate: (id) =>
+      ipcRenderer.invoke("invoke:agent:activate", id),
     hardDelete: (id) =>
       ipcRenderer.invoke("invoke:agent:hard-delete", id),
     getActiveCount: () =>
-      ipcRenderer.invoke("invoke:agent:get-active-count"),
+      ipcRenderer.invoke("invoke:agent:count-active"),
     getActiveForConversation: () =>
-      ipcRenderer.invoke("invoke:agent:get-active-for-conversation"),
+      ipcRenderer.invoke("invoke:agent:list-for-conversation"),
   } satisfies WindowAPI.Agent,
 
   // DM Conversations API (new colocated handlers)
@@ -120,9 +118,9 @@ contextBridge.exposeInMainWorld("api", {
     create: (input) =>
       ipcRenderer.invoke("invoke:dm:create", input),
     getUserConversations: (options) =>
-      ipcRenderer.invoke("invoke:dm:get-user-conversations", options),
+      ipcRenderer.invoke("invoke:dm:list", options),
     findById: (dmId) =>
-      ipcRenderer.invoke("invoke:dm:find-by-id", dmId),
+      ipcRenderer.invoke("invoke:dm:get", dmId),
     archive: (input) =>
       ipcRenderer.invoke("invoke:dm:archive", input),
     unarchive: (channelId) =>
@@ -130,13 +128,13 @@ contextBridge.exposeInMainWorld("api", {
     sendMessage: (input) =>
       ipcRenderer.invoke("invoke:dm:send-message", input),
     getMessages: (input) =>
-      ipcRenderer.invoke("invoke:dm:get-messages", input),
+      ipcRenderer.invoke("invoke:dm:list-messages", input),
     addParticipant: (input) =>
       ipcRenderer.invoke("invoke:dm:add-participant", input),
     removeParticipant: (input) =>
       ipcRenderer.invoke("invoke:dm:remove-participant", input),
-    delete: (input) =>
-      ipcRenderer.invoke("invoke:dm:delete", input),
+    inactivate: (input) =>
+      ipcRenderer.invoke("invoke:dm:inactivate", input),
   } satisfies WindowAPI.Dm,
 
   // Project Channels API (new colocated handlers)
@@ -144,9 +142,9 @@ contextBridge.exposeInMainWorld("api", {
     create: (input) =>
       ipcRenderer.invoke("invoke:channel:create", input),
     getProjectChannels: (input) =>
-      ipcRenderer.invoke("invoke:channel:get-project-channels", input),
+      ipcRenderer.invoke("invoke:channel:list", input),
     findById: (channelId) =>
-      ipcRenderer.invoke("invoke:channel:find-by-id", channelId),
+      ipcRenderer.invoke("invoke:channel:get", channelId),
     update: (input) =>
       ipcRenderer.invoke("invoke:channel:update", input),
     archive: (input) =>
@@ -156,17 +154,17 @@ contextBridge.exposeInMainWorld("api", {
     sendMessage: (input) =>
       ipcRenderer.invoke("invoke:channel:send-message", input),
     getMessages: (input) =>
-      ipcRenderer.invoke("invoke:channel:get-messages", input),
-    delete: (input) =>
-      ipcRenderer.invoke("invoke:channel:delete", input),
+      ipcRenderer.invoke("invoke:channel:list-messages", input),
+    inactivate: (input) =>
+      ipcRenderer.invoke("invoke:channel:inactivate", input),
   } satisfies WindowAPI.Channel,
 
   // Profile API (new colocated handlers)
   profile: {
     getTheme: (userId) =>
       ipcRenderer.invoke("invoke:profile:get-theme", userId),
-    updateTheme: (input) =>
-      ipcRenderer.invoke("invoke:profile:update-theme", input),
+    update: (input) =>
+      ipcRenderer.invoke("invoke:profile:update", input),
   } satisfies WindowAPI.Profile,
 
   // Window API (new colocated handlers)
