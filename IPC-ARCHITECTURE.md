@@ -23,10 +23,10 @@ O Project Wiz é uma plataforma de automação de desenvolvimento AI que utiliza
 - Convenção sobre configuração
 - Event-bus para comunicação automática entre handlers
 
-### 4. **Separação MVC Flexível**
+### 4. **Separação MVC Obrigatória**
 - **Handler (invoke.ts)**: Entry point IPC (obrigatório)
 - **Controller**: Orquestrador de use cases (opcional - use quando necessário)
-- **Model**: Regras de negócio + acesso a dados (opcional - extraia quando a lógica crescer)
+- **Model**: Zod schemas + acesso direto ao banco (opcional - NUNCA use services)
 
 ### 5. **Multi-Process Architecture**
 - **Renderer Process**: UI React + interação do usuário
@@ -120,11 +120,11 @@ export default async function(params: Params): Promise<Response> {
   return result
 }
 
-// Type augmentation no mesmo arquivo
+// Module augmentation define o tipo da feature
 declare global {
   namespace WindowAPI {
-    interface InvokeHandlers {
-      'invoke:user:create': (params: Params) => Promise<Response>
+    interface User {
+      create: (params: Params) => Promise<Response>
     }
   }
 }
@@ -133,38 +133,81 @@ declare global {
 ### Global Type Definitions
 
 ```typescript
-// renderer/window.d.ts
+// renderer/window.d.ts - Usa os tipos do module augmentation
 declare global {
+  // Module augmentation define os tipos de cada feature
   namespace WindowAPI {
-    interface InvokeHandlers {}
-    interface ListenHandlers {}
+    interface Auth {
+      login: (params: LoginInput) => Promise<LoginOutput>
+      register: (params: RegisterInput) => Promise<RegisterOutput>
+      getCurrentUser: () => Promise<UserOutput | null>
+      logout: () => Promise<{ success: boolean }>
+    }
+    interface User {
+      create: (params: CreateUserInput) => Promise<UserOutput>
+      list: () => Promise<UserOutput[]>
+      update: (params: UpdateUserInput) => Promise<UserOutput>
+      delete: (id: string) => Promise<{ success: boolean }>
+    }
+    interface Project {
+      create: (params: CreateProjectInput) => Promise<ProjectOutput>
+      list: () => Promise<ProjectOutput[]>
+      // ... etc
+    }
   }
   
+  // Window API usa os tipos definidos acima
   interface Window {
     api: {
-      invoke<K extends keyof WindowAPI.InvokeHandlers>(
-        channel: K,
-        ...args: Parameters<WindowAPI.InvokeHandlers[K]>
-      ): ReturnType<WindowAPI.InvokeHandlers[K]>
-      
-      on<K extends keyof WindowAPI.ListenHandlers>(
-        channel: K,
-        callback: WindowAPI.ListenHandlers[K]
-      ): void
+      auth: WindowAPI.Auth      // <- Usa o tipo do augmentation
+      user: WindowAPI.User      // <- Usa o tipo do augmentation  
+      project: WindowAPI.Project // <- Usa o tipo do augmentation
+      // ... outras features
     }
   }
 }
 ```
 
+### Preload Implementation
+
+```typescript
+// renderer/preload.ts
+contextBridge.exposeInMainWorld("api", {
+  auth: {
+    login: (params: LoginInput) => ipcRenderer.invoke("invoke:auth:login", params),
+    register: (params: RegisterInput) => ipcRenderer.invoke("invoke:auth:register", params),
+    getCurrentUser: () => ipcRenderer.invoke("invoke:auth:get-current-user"),
+    logout: () => ipcRenderer.invoke("invoke:auth:logout"),
+  },
+  user: {
+    create: (params: CreateUserInput) => ipcRenderer.invoke("invoke:user:create", params),
+    list: () => ipcRenderer.invoke("invoke:user:list"),
+    update: (params: UpdateUserInput) => ipcRenderer.invoke("invoke:user:update", params),
+    delete: (id: string) => ipcRenderer.invoke("invoke:user:delete", id),
+  },
+  project: {
+    create: (params: CreateProjectInput) => ipcRenderer.invoke("invoke:project:create", params),
+    list: () => ipcRenderer.invoke("invoke:project:list"),
+    // ... etc
+  }
+});
+```
+
 ### Usage no Renderer
 
 ```typescript
-// Completamente type-safe
-const result = await window.api.invoke('invoke:user:create', { 
-  name: 'João', 
-  email: 'joao@example.com' 
+// Interfaces específicas por feature - NUNCA métodos genéricos
+const user = await window.api.auth.login({ 
+  username: 'joao', 
+  password: 'senha123' 
 })
-// result é tipado como: { id: string; success: boolean }
+
+const project = await window.api.project.create({
+  name: 'Meu Projeto',
+  description: 'Descrição do projeto'
+})
+
+const users = await window.api.user.list()
 ```
 
 ## Auto-Loader com Middleware
@@ -351,34 +394,51 @@ export async function createUserController(params: { name: string; email: string
 - Side effects importantes (emails, notifications, etc.)
 - Reutilização da lógica em outros contextos
 
-### 3. Model - Data Access + Business Rules (Opcional)
+### 3. Model - Zod Schemas + Data Access (Obrigatório quando há validação)
 
 ```typescript
 // main/ipc/user/create/model.ts
-import { db } from '../../../database' // ou onde estiver o db
+import { z } from "zod";
+import { db } from '../../../database'
 import { users } from '../../../database/schema'
 import { eq } from 'drizzle-orm'
 
-export async function validateUserData(params: { name: string; email: string }) {
-  if (!params.name || params.name.length < 2) {
-    throw new Error('Name must be at least 2 characters long')
-  }
-  
-  if (!params.email || !isValidEmail(params.email)) {
-    throw new Error('Invalid email format')
-  }
+// Input validation schema usando Zod
+export const CreateUserInputSchema = z.object({
+  name: z.string().min(2, "Name must be at least 2 characters long"),
+  email: z.string().email("Invalid email format"),
+  username: z.string().min(3, "Username must be at least 3 characters"),
+});
+
+// Output validation schema usando Zod
+export const CreateUserOutputSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  email: z.string(),
+  createdAt: z.date(),
+});
+
+// Tipos inferidos do Zod - NUNCA use any ou unknown
+export type CreateUserInput = z.infer<typeof CreateUserInputSchema>;
+export type CreateUserOutput = z.infer<typeof CreateUserOutputSchema>;
+
+export async function validateUserData(params: CreateUserInput): Promise<CreateUserInput> {
+  return CreateUserInputSchema.parse(params);
 }
 
-export async function saveUser(params: { name: string; email: string }) {
+export async function saveUser(params: CreateUserInput): Promise<CreateUserOutput> {
   const newUser = {
     name: params.name,
     email: params.email,
+    username: params.username,
     createdAt: new Date(),
     isActive: true
   }
   
   const result = await db.insert(users).values(newUser).returning()
-  return result[0]
+  
+  // Valida saída com Zod
+  return CreateUserOutputSchema.parse(result[0]);
 }
 
 export async function getUserByEmail(email: string) {
@@ -389,11 +449,6 @@ export async function getUserByEmail(email: string) {
     .limit(1)
   
   return result[0] || null
-}
-
-function isValidEmail(email: string): boolean {
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-  return emailRegex.test(email)
 }
 ```
 
@@ -589,17 +644,16 @@ declare global {
 ### 1. Criação de Usuário (Request-Response)
 
 ```typescript
-// Renderer
-const result = await window.api.invoke('invoke:user:create', {
+// Renderer - Interfaces específicas por feature
+const result = await window.api.user.create({
   name: 'Maria Silva',
-  email: 'maria@example.com'
+  email: 'maria@example.com',
+  username: 'maria.silva'
 })
 
-if (result.success) {
-  console.log('User created with ID:', result.data.id)
-} else {
-  console.error('Error:', result.error)
-}
+// result é tipado automaticamente como CreateUserOutput
+console.log('User created with ID:', result.id)
+console.log('Created at:', result.createdAt)
 ```
 
 ### 2. Execução de Agente com Worker Process
@@ -649,32 +703,34 @@ if (result.success) {
 ## Benefícios da Arquitetura
 
 ### 1. **Escalabilidade**
-- Adicionar nova funcionalidade = criar nova pasta com 3 arquivos
+- Adicionar nova funcionalidade = criar nova pasta com invoke.ts + controller/model quando necessário
 - Auto-discovery elimina configuração manual
 - Event-bus permite integração loose-coupled
 
 ### 2. **Manutenibilidade**
 - Colocated structure mantém contexto
-- Separação MVC clara
-- Type safety previne errors em runtime
+- Separação MVC clara e obrigatória (sem services)
+- Type safety via Zod previne errors em runtime
 
-### 3. **Segurança e Isolamento**
-- Worker Process isola operações perigosas dos agentes
-- Guardrails previnem execução de comandos destrutivos
-- Tools específicas para operações de arquivo com validação
-- Logging completo para auditoria e debugging
+### 3. **Type Safety Completa**
+- Schemas Zod garantem validação entrada/saída
+- Interfaces específicas por feature (não genéricas)
+- Zero `any` ou `unknown` - tipos sempre inferidos
 
-### 4. **Developer Experience**
-- Auto-complete completo no renderer
-- Types colocated com implementação
-- Convenções simples e consistentes
+### 4. **Developer Experience**  
+- Auto-complete completo com interfaces específicas: `window.api.auth.login()`
+- Module augmentation define tipos, window.d.ts reutiliza com `WindowAPI.Auth`
+- Convenções claras e obrigatórias
 
-### 5. **Testabilidade**
-- Controllers podem ser testados isoladamente
-- Models têm lógica de negócio pura
-- Worker Process pode ser mockado para testes
-- Guardrails podem ser testados independentemente
-- Event-bus permite integração loose-coupled
+### 5. **Migração Completa**
+- Substituição total de services por controllers/models
+- Acesso direto ao banco de dados no model
+- Validação centralizada via Zod schemas
+
+### 6. **Testabilidade**
+- Controllers testados isoladamente (sem dependência de services)
+- Models com regras de negócio puras + Zod
+- Schemas testáveis independentemente
 
 ---
 

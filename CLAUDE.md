@@ -119,43 +119,77 @@ const result = await db.transaction((tx) => {
 
 ## IPC Architecture
 
-**Advanced Colocated IPC pattern** with sophisticated auto-registration system:
+**Colocated IPC Architecture** with auto-registration and MVC pattern:
 
-### Core Patterns
-- **Type-Safe Communication**: Complete TypeScript coverage across processes using module augmentation
-- **Auto-Registration**: Handlers discovered via filesystem at `.handler.ts` files with zero configuration
-- **Colocated Organization**: All related functionality in same folder (handler, controller, model)
-- **Event Bus**: Global event coordination for complex workflows and cross-process communication
-- **Worker Integration**: Isolated AI operations with security guardrails and command validation
+### Core Principles
+- **Colocated Organization**: All related functionality in same folder (invoke.ts, controller.ts, model.ts)
+- **Auto-Registration**: Handlers discovered via filesystem with zero configuration
+- **Type Safety**: Zod schemas for input/output validation in model layer
+- **Feature-Specific Interfaces**: `window.api.auth.login()` instead of generic methods
+- **Complete Migration**: All existing features migrated from services to controllers/models
 
 ### File Structure Convention
 ```
-main/features/[domain]/
-├── [domain].handler.ts    # IPC entry point (required)
-├── [domain].service.ts    # Business logic orchestration (optional)
-├── [domain].model.ts      # Data access and business rules (optional)
-├── [domain].schema.ts     # Zod validation schemas
-└── [domain].types.ts      # TypeScript type definitions
+main/ipc/[domain]/[action]/
+├── invoke.ts           # IPC entry point (required)
+├── controller.ts       # Use case orchestration (optional - complex logic)
+└── model.ts           # Data access + business rules (optional - Zod schemas)
 ```
 
+### MVC Pattern Rules
+- **invoke.ts**: Always present, delegates to controller or contains simple logic
+- **controller.ts**: Extract when multiple steps, business rules, or side effects
+- **model.ts**: Use Zod schemas for validation, direct database access, NO services
+- **NO Services**: Replace all service calls with controller/model pattern
+
 ### Type Safety with Module Augmentation
-Each handler automatically adds its types to the global `WindowAPI` interface:
 ```typescript
-// In any .handler.ts file
+// main/ipc/auth/login/invoke.ts - Define tipo via module augmentation
 declare global {
   namespace WindowAPI {
-    interface InvokeHandlers {
-      'invoke:user:create': (params: CreateUserParams) => Promise<CreateUserResponse>
+    interface Auth {
+      login: (params: LoginInput) => Promise<LoginOutput>
     }
+  }
+}
+
+// renderer/window.d.ts - Usa o tipo do augmentation
+interface Window {
+  api: {
+    auth: WindowAPI.Auth  // <- Usa o tipo definido acima
   }
 }
 ```
 
-### Critical IPC Patterns
-- **Invoke**: Request-response communication (`invoke:domain:action`)
-- **Listen**: Event-based updates (`listen:domain:event`)
-- **Worker Communication**: Isolated execution for AI operations with guardrails
-- **Error Handling**: Unified error responses with type safety
+### Window API Structure
+```typescript
+window.api.auth.login()      // NOT window.api.invoke()
+window.api.user.create()     // Feature-specific methods
+window.api.project.list()    // Clear, typed interfaces
+```
+
+### Preload Implementation
+```typescript
+// renderer/preload.ts - Mapeia para canais IPC
+contextBridge.exposeInMainWorld("api", {
+  auth: {
+    login: (params) => ipcRenderer.invoke("invoke:auth:login", params),
+    register: (params) => ipcRenderer.invoke("invoke:auth:register", params),
+    getCurrentUser: () => ipcRenderer.invoke("invoke:auth:get-current-user"),
+  },
+  user: {
+    create: (params) => ipcRenderer.invoke("invoke:user:create", params),
+    list: () => ipcRenderer.invoke("invoke:user:list"),
+  },
+  // ... outras features
+});
+```
+
+### Processo de Tipagem
+1. **Module Augmentation**: Cada invoke.ts declara tipo em `WindowAPI.[Feature]`
+2. **Reutilização de Tipos**: `window.d.ts` usa `WindowAPI.Auth`, `WindowAPI.User`, etc.
+3. **Zod Integration**: Schemas obrigatórios em model.ts para validação
+4. **NO `unknown`/`any`**: Sempre usar tipos inferidos do Zod
 
 **See `/IPC-ARCHITECTURE.md` for complete implementation details and examples.**
 

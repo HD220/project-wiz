@@ -7,20 +7,14 @@ dotenv.config();
 import { app, BrowserWindow, ipcMain } from "electron";
 import squirrel from "electron-squirrel-startup";
 
-import { setupAgentHandlers } from "@/main/features/agent/agent.handler";
-import { setupAuthHandlers } from "@/main/features/auth/auth.handler";
-import { AuthService } from "@/main/features/auth/auth.service";
-import { setupDMHandlers } from "@/main/features/dm/dm-conversation.handler";
-import { setupLlmProviderHandlers } from "@/main/features/llm-provider/llm-provider.handler";
-import { setupChannelHandlers } from "@/main/features/project/project-channel.handler";
-import { setupProjectHandlers } from "@/main/features/project/project.handler";
-import { setupProfileHandlers } from "@/main/features/user/profile.handler";
-import { setupUserHandlers } from "@/main/features/user/user.handler";
+import { sessionRegistry } from "@/main/utils/session-registry";
 // import { QueueClient } from "@/main/features/queue-client/queue-client"; // Commented out - used only in test code
 import { getLogger } from "@/shared/logger/config";
 import { startWorker, stopWorker } from "@/main/workers/worker-manager";
 import { initializeEventBus, eventBus } from "@/shared/events/event-bus";
-import { initializeAgenticWorkerHandler, agenticWorkerHandler } from "@/shared/worker/agentic-worker.handler";
+// import { initializeAgenticWorkerHandler, agenticWorkerHandler } from "@/shared/worker/agentic-worker.handler"; // Removed - will be rewritten
+import { loadIpcHandlers } from "@/main/utils/ipc-loader";
+import { registerWindow } from "@/main/utils/window-registry";
 
 declare const MAIN_WINDOW_VITE_DEV_SERVER_URL: string | undefined;
 declare const MAIN_WINDOW_VITE_NAME: string;
@@ -54,6 +48,9 @@ function createMainWindow(): void {
     frame: false, // Remove frame for custom titlebar
     show: false, // Don't show until ready
   });
+
+  // Register window in WindowRegistry for IPC handlers
+  registerWindow("main", mainWindow);
 
   // Load the app
   if (MAIN_WINDOW_VITE_DEV_SERVER_URL) {
@@ -93,10 +90,10 @@ function createMainWindow(): void {
  */
 async function initializeSessionManager(): Promise<void> {
   try {
-    await AuthService.initializeSession();
-    logger.info("Session manager initialized");
+    await sessionRegistry.loadFromDatabase();
+    logger.info("Session registry initialized");
   } catch (error) {
-    logger.error("Failed to initialize session manager:", error);
+    logger.error("Failed to initialize session registry:", error);
   }
 }
 
@@ -178,36 +175,25 @@ async function initializeWorker(): Promise<void> {
 // }
 
 /**
- * Setup all IPC handlers
+ * Setup all IPC handlers via auto-discovery system
  */
-function setupAllIpcHandlers(): void {
-  setupAuthHandlers();
-  logger.info("Authentication IPC handlers registered");
-
-  setupUserHandlers();
-  logger.info("User IPC handlers registered");
-
-  setupProfileHandlers();
-  logger.info("Profile IPC handlers registered");
-
-  setupProjectHandlers();
-  logger.info("Project IPC handlers registered");
-
-  setupChannelHandlers();
-  logger.info("Channel IPC handlers registered");
-
-  setupDMHandlers();
-  logger.info("DM IPC handlers registered");
-
-  setupLlmProviderHandlers();
-  logger.info("LLM Provider IPC handlers registered");
-
-  setupAgentHandlers();
-  logger.info("Agent IPC handlers registered");
+async function setupAllIpcHandlers(): Promise<void> {
+  // Load all IPC handlers via auto-discovery
+  try {
+    await loadIpcHandlers();
+    logger.info("✅ All IPC handlers loaded via auto-discovery");
+  } catch (error) {
+    logger.error("❌ Failed to load colocated IPC handlers:", error);
+  }
 
 
-  setupWindowHandlers();
-  logger.info("Window control IPC handlers registered");
+
+
+
+
+
+
+
 }
 
 /**
@@ -230,9 +216,9 @@ app.whenReady().then(async () => {
   logger.info("App is ready, initializing IPC handlers and main window");
 
   initializeEventBus();
-  initializeAgenticWorkerHandler();
+  // initializeAgenticWorkerHandler(); // Removed - will be rewritten
   await initializeSessionManager();
-  setupAllIpcHandlers();
+  await setupAllIpcHandlers();
   initializeJobResultHandler();
   await initializeWorker();
   createMainWindow();
@@ -253,7 +239,7 @@ app.on("before-quit", async () => {
   logger.info("App is quitting, cleaning up services");
   
   try {
-    agenticWorkerHandler.shutdown();
+    // agenticWorkerHandler.shutdown(); // Removed - will be rewritten
     eventBus.shutdown();
     await stopWorker();
     logger.info("AgenticWorkerHandler, EventBus and Worker stopped successfully");
@@ -287,37 +273,5 @@ process.on("unhandledRejection", (reason, promise) => {
   logger.error("Unhandled rejection at:", promise, "reason:", reason);
 });
 
-/**
- * Setup window control IPC handlers
- */
-function setupWindowHandlers(): void {
-  ipcMain.handle("window:minimize", () => {
-    if (mainWindow) {
-      mainWindow.minimize();
-    }
-  });
-
-  ipcMain.handle("window:maximize", () => {
-    if (mainWindow) {
-      mainWindow.maximize();
-    }
-  });
-
-  ipcMain.handle("window:toggle-maximize", () => {
-    if (mainWindow) {
-      if (mainWindow.isMaximized()) {
-        mainWindow.unmaximize();
-      } else {
-        mainWindow.maximize();
-      }
-    }
-  });
-
-  ipcMain.handle("window:close", () => {
-    if (mainWindow) {
-      mainWindow.close();
-    }
-  });
-}
 
 logger.info("Main process initialized");

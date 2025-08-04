@@ -14,7 +14,7 @@ export function Titlebar(props: TitlebarProps) {
   }
 
   function handleMaximize() {
-    window.electronAPI?.window.toggleMaximize();
+    window.electronAPI?.window.toggleSize();
   }
 
   function handleClose() {

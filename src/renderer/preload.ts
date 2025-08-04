@@ -3,27 +3,6 @@
 
 import { contextBridge, ipcRenderer } from "electron";
 
-import type { AgentFiltersInput } from "@/main/features/agent/agent.schema";
-import type {
-  CreateAgentInput,
-  AgentStatus,
-} from "@/main/features/agent/agent.types";
-// Memory removed
-import type {
-  LoginCredentials,
-  RegisterUserInput,
-} from "@/main/features/auth/auth.types";
-import type { CreateDMConversationInput } from "@/main/features/dm/dm-conversation.types";
-import type { CreateProviderInput } from "@/main/features/llm-provider/llm-provider.types";
-import type { CreateProjectChannelInput } from "@/main/features/project/project-channel.types";
-import type {
-  InsertProject,
-  UpdateProject,
-} from "@/main/features/project/project.types";
-import type { Theme } from "@/main/features/user/user.types";
-import type { IpcResponse } from "@/main/types";
-
-import type { ProviderFiltersInput } from "@/renderer/features/agent/provider.schema";
 
 // Expose protected methods that allow the renderer process to use
 // the ipcRenderer without exposing the entire object
@@ -32,170 +11,177 @@ contextBridge.exposeInMainWorld("api", {
   platform: process.platform,
   version: process.versions.electron,
 
-  // Authentication API (Desktop - session managed by main process)
+  // Authentication API (new colocated handlers)
   auth: {
-    register: (input: RegisterUserInput): Promise<IpcResponse> =>
-      ipcRenderer.invoke("auth:register", input),
-    login: (credentials: LoginCredentials): Promise<IpcResponse> =>
-      ipcRenderer.invoke("auth:login", credentials),
-    getCurrentUser: (): Promise<IpcResponse> =>
-      ipcRenderer.invoke("auth:getCurrentUser"),
-    getActiveSession: (): Promise<IpcResponse> =>
-      ipcRenderer.invoke("auth:getActiveSession"),
-    logout: (): Promise<IpcResponse> => ipcRenderer.invoke("auth:logout"),
-    isLoggedIn: (): Promise<IpcResponse> =>
-      ipcRenderer.invoke("auth:isLoggedIn"),
-    getUserById: (userId: string): Promise<IpcResponse> =>
-      ipcRenderer.invoke("auth:getUserById", userId),
-  },
+    register: (params) =>
+      ipcRenderer.invoke("invoke:auth:register", params),
+    login: (credentials) =>
+      ipcRenderer.invoke("invoke:auth:login", credentials),
+    getCurrentUser: () =>
+      ipcRenderer.invoke("invoke:auth:get-current-user"),
+    getActiveSession: () =>
+      ipcRenderer.invoke("invoke:auth:get-active-session"),
+    logout: () => 
+      ipcRenderer.invoke("invoke:auth:logout"),
+    isLoggedIn: () =>
+      ipcRenderer.invoke("invoke:auth:is-logged-in"),
+    getUserById: (userId) =>
+      ipcRenderer.invoke("invoke:auth:get-user-by-id", userId),
+  } satisfies WindowAPI.Auth,
 
-  // Profile API
-  profile: {
-    getTheme: (): Promise<IpcResponse> =>
-      ipcRenderer.invoke("profile:getTheme"),
-    updateTheme: (theme: Theme): Promise<IpcResponse> =>
-      ipcRenderer.invoke("profile:updateTheme", theme),
-  },
+  // Users API (new colocated handlers)
+  user: {
+    listAvailableUsers: (params) =>
+      ipcRenderer.invoke("invoke:user:list-available-users", params),
+    listAllUsers: (input) =>
+      ipcRenderer.invoke("invoke:user:list-all-users", input),
+    listHumans: (input) =>
+      ipcRenderer.invoke("invoke:user:list-humans", input),
+    listAgents: (input) =>
+      ipcRenderer.invoke("invoke:user:list-agents", input),
+    findById: (input) =>
+      ipcRenderer.invoke("invoke:user:find-by-id", input),
+    findByIdAndType: (input) =>
+      ipcRenderer.invoke("invoke:user:find-by-id-and-type", input),
+    create: (input) =>
+      ipcRenderer.invoke("invoke:user:create", input),
+    update: (input) =>
+      ipcRenderer.invoke("invoke:user:update", input),
+    softDelete: (input) =>
+      ipcRenderer.invoke("invoke:user:soft-delete", input),
+    restore: (userId) =>
+      ipcRenderer.invoke("invoke:user:restore", userId),
+    getUserStats: (userId) =>
+      ipcRenderer.invoke("invoke:user:get-user-stats", userId),
+  } satisfies WindowAPI.User,
 
-  // Users API
-  users: {
-    listAvailableUsers: (): Promise<IpcResponse> =>
-      ipcRenderer.invoke("user:listAvailableUsers"),
-  },
+  // Projects API (new colocated handlers)  
+  project: {
+    create: (input) =>
+      ipcRenderer.invoke("invoke:project:create", input),
+    findById: (id) =>
+      ipcRenderer.invoke("invoke:project:find-by-id", id),
+    listAll: () => 
+      ipcRenderer.invoke("invoke:project:list-all"),
+    update: (input) =>
+      ipcRenderer.invoke("invoke:project:update", input),
+    archive: (id) =>
+      ipcRenderer.invoke("invoke:project:archive", id),
+  } satisfies WindowAPI.Project,
 
-  // Projects API
-  projects: {
-    create: (input: InsertProject): Promise<IpcResponse> =>
-      ipcRenderer.invoke("projects:create", input),
-    findById: (id: string): Promise<IpcResponse> =>
-      ipcRenderer.invoke("projects:findById", id),
-    listAll: (): Promise<IpcResponse> => ipcRenderer.invoke("projects:listAll"),
-    update: (input: UpdateProject): Promise<IpcResponse> =>
-      ipcRenderer.invoke("projects:update", input),
-    archive: (id: string): Promise<IpcResponse> =>
-      ipcRenderer.invoke("projects:archive", id),
-  },
+  // LLM Providers API (new colocated handlers)
+  llmProvider: {
+    create: (input) =>
+      ipcRenderer.invoke("invoke:llm-provider:create", input),
+    list: (filters) =>
+      ipcRenderer.invoke("invoke:llm-provider:list", filters),
+    getById: (id) =>
+      ipcRenderer.invoke("invoke:llm-provider:get-by-id", id),
+    update: (input) =>
+      ipcRenderer.invoke("invoke:llm-provider:update", input),
+    delete: (id) =>
+      ipcRenderer.invoke("invoke:llm-provider:delete", id),
+    setDefault: (input) =>
+      ipcRenderer.invoke("invoke:llm-provider:set-default", input),
+    getDefault: () =>
+      ipcRenderer.invoke("invoke:llm-provider:get-default"),
+    getDecryptedKey: (providerId) =>
+      ipcRenderer.invoke("invoke:llm-provider:get-decrypted-key", providerId),
+  } satisfies WindowAPI.LlmProvider,
 
-  // DM Conversations API
+  // Agents API (new colocated handlers)
+  agent: {
+    create: (input) =>
+      ipcRenderer.invoke("invoke:agent:create", input),
+    list: (filters) =>
+      ipcRenderer.invoke("invoke:agent:list", filters),
+    get: (id) =>
+      ipcRenderer.invoke("invoke:agent:get", id),
+    getWithProvider: (id) =>
+      ipcRenderer.invoke("invoke:agent:get-with-provider", id),
+    updateStatus: (input) =>
+      ipcRenderer.invoke("invoke:agent:update-status", input),
+    update: (input) =>
+      ipcRenderer.invoke("invoke:agent:update", input),
+    delete: (id) =>
+      ipcRenderer.invoke("invoke:agent:delete", id),
+    restore: (id) =>
+      ipcRenderer.invoke("invoke:agent:restore", id),
+    hardDelete: (id) =>
+      ipcRenderer.invoke("invoke:agent:hard-delete", id),
+    getActiveCount: () =>
+      ipcRenderer.invoke("invoke:agent:get-active-count"),
+    getActiveForConversation: () =>
+      ipcRenderer.invoke("invoke:agent:get-active-for-conversation"),
+  } satisfies WindowAPI.Agent,
+
+  // DM Conversations API (new colocated handlers)
   dm: {
-    create: (input: CreateDMConversationInput): Promise<IpcResponse> =>
-      ipcRenderer.invoke("dm:create", input),
-    getUserConversations: (options?: {
-      includeInactive?: boolean;
-      includeArchived?: boolean;
-    }): Promise<IpcResponse> =>
-      ipcRenderer.invoke("dm:getUserConversations", options),
-    findById: (dmId: string): Promise<IpcResponse> =>
-      ipcRenderer.invoke("dm:findById", dmId),
-    archive: (dmId: string): Promise<IpcResponse> =>
-      ipcRenderer.invoke("dm:archive", dmId),
-    unarchive: (dmId: string): Promise<IpcResponse> =>
-      ipcRenderer.invoke("dm:unarchive", dmId),
-    sendMessage: (dmId: string, content: string): Promise<IpcResponse> =>
-      ipcRenderer.invoke("dm:sendMessage", dmId, content),
-    getMessages: (dmId: string): Promise<IpcResponse> =>
-      ipcRenderer.invoke("dm:getMessages", dmId),
-    addParticipant: (
-      dmId: string,
-      participantId: string,
-    ): Promise<IpcResponse> =>
-      ipcRenderer.invoke("dm:addParticipant", dmId, participantId),
-    removeParticipant: (
-      dmId: string,
-      participantId: string,
-    ): Promise<IpcResponse> =>
-      ipcRenderer.invoke("dm:removeParticipant", dmId, participantId),
-    delete: (dmId: string): Promise<IpcResponse> =>
-      ipcRenderer.invoke("dm:delete", dmId),
-  },
+    create: (input) =>
+      ipcRenderer.invoke("invoke:dm:create", input),
+    getUserConversations: (options) =>
+      ipcRenderer.invoke("invoke:dm:get-user-conversations", options),
+    findById: (dmId) =>
+      ipcRenderer.invoke("invoke:dm:find-by-id", dmId),
+    archive: (input) =>
+      ipcRenderer.invoke("invoke:dm:archive", input),
+    unarchive: (channelId) =>
+      ipcRenderer.invoke("invoke:dm:unarchive", channelId),
+    sendMessage: (input) =>
+      ipcRenderer.invoke("invoke:dm:send-message", input),
+    getMessages: (input) =>
+      ipcRenderer.invoke("invoke:dm:get-messages", input),
+    addParticipant: (input) =>
+      ipcRenderer.invoke("invoke:dm:add-participant", input),
+    removeParticipant: (input) =>
+      ipcRenderer.invoke("invoke:dm:remove-participant", input),
+    delete: (input) =>
+      ipcRenderer.invoke("invoke:dm:delete", input),
+  } satisfies WindowAPI.Dm,
 
-  // Project Channels API
-  channels: {
-    create: (input: CreateProjectChannelInput): Promise<IpcResponse> =>
-      ipcRenderer.invoke("channels:create", input),
-    getProjectChannels: (
-      projectId: string,
-      options?: {
-        includeInactive?: boolean;
-        includeArchived?: boolean;
-      },
-    ): Promise<IpcResponse> =>
-      ipcRenderer.invoke("channels:getProjectChannels", projectId, options),
-    findById: (channelId: string): Promise<IpcResponse> =>
-      ipcRenderer.invoke("channels:findById", channelId),
-    update: (
-      channelId: string,
-      updates: { name?: string; description?: string },
-    ): Promise<IpcResponse> =>
-      ipcRenderer.invoke("channels:update", channelId, updates),
-    archive: (channelId: string): Promise<IpcResponse> =>
-      ipcRenderer.invoke("channels:archive", channelId),
-    unarchive: (channelId: string): Promise<IpcResponse> =>
-      ipcRenderer.invoke("channels:unarchive", channelId),
-    sendMessage: (channelId: string, content: string): Promise<IpcResponse> =>
-      ipcRenderer.invoke("channels:sendMessage", channelId, content),
-    getMessages: (channelId: string): Promise<IpcResponse> =>
-      ipcRenderer.invoke("channels:getMessages", channelId),
-    delete: (channelId: string): Promise<IpcResponse> =>
-      ipcRenderer.invoke("channels:delete", channelId),
-  },
+  // Project Channels API (new colocated handlers)
+  channel: {
+    create: (input) =>
+      ipcRenderer.invoke("invoke:channel:create", input),
+    getProjectChannels: (input) =>
+      ipcRenderer.invoke("invoke:channel:get-project-channels", input),
+    findById: (channelId) =>
+      ipcRenderer.invoke("invoke:channel:find-by-id", channelId),
+    update: (input) =>
+      ipcRenderer.invoke("invoke:channel:update", input),
+    archive: (input) =>
+      ipcRenderer.invoke("invoke:channel:archive", input),
+    unarchive: (channelId) =>
+      ipcRenderer.invoke("invoke:channel:unarchive", channelId),
+    sendMessage: (input) =>
+      ipcRenderer.invoke("invoke:channel:send-message", input),
+    getMessages: (input) =>
+      ipcRenderer.invoke("invoke:channel:get-messages", input),
+    delete: (input) =>
+      ipcRenderer.invoke("invoke:channel:delete", input),
+  } satisfies WindowAPI.Channel,
 
-  // LLM Providers API
-  llmProviders: {
-    create: (input: CreateProviderInput): Promise<IpcResponse> =>
-      ipcRenderer.invoke("llm-providers:create", input),
-    list: (filters?: ProviderFiltersInput): Promise<IpcResponse> =>
-      ipcRenderer.invoke("llm-providers:list", filters),
-    get: (id: string): Promise<IpcResponse> =>
-      ipcRenderer.invoke("llm-providers:getById", id),
-    getById: (id: string): Promise<IpcResponse> =>
-      ipcRenderer.invoke("llm-providers:getById", id),
-    update: (
-      id: string,
-      updates: Partial<CreateProviderInput>,
-    ): Promise<IpcResponse> =>
-      ipcRenderer.invoke("llm-providers:update", id, updates),
-    delete: (id: string): Promise<IpcResponse> =>
-      ipcRenderer.invoke("llm-providers:delete", id),
-    setDefault: (providerId: string): Promise<IpcResponse> =>
-      ipcRenderer.invoke("llm-providers:setDefault", providerId),
-    getDefault: (): Promise<IpcResponse> =>
-      ipcRenderer.invoke("llm-providers:getDefault"),
-  },
+  // Profile API (new colocated handlers)
+  profile: {
+    getTheme: (userId) =>
+      ipcRenderer.invoke("invoke:profile:get-theme", userId),
+    updateTheme: (input) =>
+      ipcRenderer.invoke("invoke:profile:update-theme", input),
+  } satisfies WindowAPI.Profile,
 
-  // Agents API
-  agents: {
-    create: (input: CreateAgentInput): Promise<IpcResponse> =>
-      ipcRenderer.invoke("agents:create", input),
-    list: (filters?: AgentFiltersInput): Promise<IpcResponse> =>
-      ipcRenderer.invoke("agents:list", filters),
-    get: (id: string): Promise<IpcResponse> =>
-      ipcRenderer.invoke("agents:get", id),
-    getWithProvider: (id: string): Promise<IpcResponse> =>
-      ipcRenderer.invoke("agents:getWithProvider", id),
-    updateStatus: (id: string, status: AgentStatus): Promise<IpcResponse> =>
-      ipcRenderer.invoke("agents:updateStatus", id, status),
-    update: (
-      id: string,
-      updates: Partial<CreateAgentInput>,
-    ): Promise<IpcResponse> => ipcRenderer.invoke("agents:update", id, updates),
-    delete: (id: string): Promise<IpcResponse> =>
-      ipcRenderer.invoke("agents:delete", id),
-    restore: (id: string): Promise<IpcResponse> =>
-      ipcRenderer.invoke("agents:restore", id),
-  },
+  // Window API (new colocated handlers)
+  window: {
+    minimize: () =>
+      ipcRenderer.invoke("invoke:window:minimize"),
+    maximize: () =>
+      ipcRenderer.invoke("invoke:window:maximize"),
+    toggleSize: () =>
+      ipcRenderer.invoke("invoke:window:toggle-size"),
+    close: () =>
+      ipcRenderer.invoke("invoke:window:close"),
+  } satisfies WindowAPI.Window,
 
   // General invoke method
-  invoke: (channel: string, ...args: unknown[]): Promise<IpcResponse> =>
+  invoke: (channel: string, ...args: unknown[]) =>
     ipcRenderer.invoke(channel, ...args),
-});
-
-// Expose window control APIs
-contextBridge.exposeInMainWorld("electronAPI", {
-  window: {
-    minimize: () => ipcRenderer.invoke("window:minimize"),
-    maximize: () => ipcRenderer.invoke("window:maximize"),
-    toggleMaximize: () => ipcRenderer.invoke("window:toggle-maximize"),
-    close: () => ipcRenderer.invoke("window:close"),
-  },
-});
+} satisfies WindowAPI.API);
