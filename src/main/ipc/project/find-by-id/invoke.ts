@@ -1,27 +1,50 @@
-import { 
-  findProjectById,
-  type FindProjectByIdInput,
-  type FindProjectByIdOutput 
-} from "./queries";
+import { z } from "zod";
+import { findProjectById } from "./queries";
+import { ProjectSchema } from "@/shared/types";
 import { getLogger } from "@/shared/logger/config";
 
 const logger = getLogger("project.find-by-id.invoke");
 
-export default async function(id: FindProjectByIdInput): Promise<FindProjectByIdOutput> {
+// Input/Output schemas
+const InputSchema = z.string().min(1);
+const OutputSchema = ProjectSchema.nullable();
+
+export default async function(input: unknown): Promise<z.infer<typeof OutputSchema>> {
+  const id = InputSchema.parse(input);
+  
   logger.debug("Finding project by ID", { projectId: id });
 
-  // Execute core business logic
   const result = await findProjectById(id);
   
-  logger.debug("Project found", { found: !!result, projectId: id });
+  if (!result) {
+    logger.debug("Project not found", { projectId: id });
+    return null;
+  }
+
+  // Map database result to public schema (remove technical fields)
+  const publicProject = {
+    id: result.id,
+    name: result.name,
+    description: result.description,
+    avatarUrl: result.avatarUrl,
+    gitUrl: result.gitUrl,
+    branch: result.branch,
+    localPath: result.localPath,
+    ownerId: result.ownerId,
+    status: result.status,
+    createdAt: new Date(result.createdAt),
+    updatedAt: new Date(result.updatedAt),
+  };
   
-  return result;
+  logger.debug("Project found", { projectId: id });
+  
+  return OutputSchema.parse(publicProject);
 }
 
 declare global {
   namespace WindowAPI {
     interface Project {
-      findById: (id: FindProjectByIdInput) => Promise<FindProjectByIdOutput>
+      findById: (id: string) => Promise<z.infer<typeof ProjectSchema> | null>
     }
   }
 }

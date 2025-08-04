@@ -1,8 +1,11 @@
-import { 
-  getTheme,
+import { z } from "zod";
+import { getTheme } from "./queries";
+import {
+  GetThemeInputSchema,
+  GetThemeOutputSchema,
   type GetThemeInput,
   type GetThemeOutput 
-} from "./queries";
+} from "@/shared/types/profile";
 import { requireAuth } from "@/main/utils/session-registry";
 import { getLogger } from "@/shared/logger/config";
 
@@ -11,15 +14,19 @@ const logger = getLogger("profile.get-theme.controller");
 export default async function(input: GetThemeInput): Promise<GetThemeOutput> {
   logger.debug("Getting user theme");
 
-  // 1. Check authentication
+  // 1. Parse and validate input (void input)
+  const parsedInput = GetThemeInputSchema.parse(input);
+
+  // 2. Check authentication
   const currentUser = requireAuth();
   
-  // 2. Execute core business logic using current user ID
+  // 3. Execute core business logic using current user ID
   const result = await getTheme(currentUser.id);
   
   logger.debug("User theme retrieved", { theme: result.theme });
   
-  return result;
+  // 4. Parse and return output
+  return GetThemeOutputSchema.parse(result);
 }
 
 declare global {

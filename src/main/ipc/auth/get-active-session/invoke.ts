@@ -1,22 +1,13 @@
 import { z } from "zod";
 import { initializeSessionFromDatabase, getCurrentUserFromCache } from "./queries";
+import { UserSchema } from "@/shared/types";
 import { getLogger } from "@/shared/logger/config";
 
 const logger = getLogger("auth.get-active-session");
 
-// Output schema baseado no return original: user ? { user } : null
+// Output schema usando shared schema
 const GetActiveSessionOutputSchema = z.object({
-  user: z.object({
-    id: z.string(),
-    name: z.string(),
-    avatar: z.string().nullable(),
-    type: z.enum(["human", "agent"]),
-    isActive: z.boolean(),
-    deactivatedAt: z.date().nullable(),
-    deactivatedBy: z.string().nullable(),
-    createdAt: z.date(),
-    updatedAt: z.date(),
-  })
+  user: UserSchema
 }).nullable();
 
 export type GetActiveSessionOutput = z.infer<typeof GetActiveSessionOutputSchema>;
@@ -28,13 +19,23 @@ export default async function(): Promise<GetActiveSessionOutput> {
   await initializeSessionFromDatabase();
   
   // 2. Get current user from cache
-  const user = getCurrentUserFromCache();
+  const dbUser = getCurrentUserFromCache();
   
-  if (!user) {
+  if (!dbUser) {
     return null;
   }
   
-  return GetActiveSessionOutputSchema.parse({ user });
+  // 3. Map to API format (sem campos técnicos)
+  const apiUser = {
+    id: dbUser.id,
+    name: dbUser.name,
+    avatar: dbUser.avatar,
+    type: dbUser.type,
+    createdAt: new Date(dbUser.createdAt),
+    updatedAt: new Date(dbUser.updatedAt),
+  };
+  
+  return GetActiveSessionOutputSchema.parse({ user: apiUser });
 }
 
 declare global {

@@ -1,28 +1,34 @@
 import { z } from "zod";
+import { getProjectChannels } from "./queries";
 import { 
-  getProjectChannels,
+  GetProjectChannelsInputSchema,
+  GetProjectChannelsOutputSchema,
   type GetProjectChannelsInput,
   type GetProjectChannelsOutput 
-} from "./queries";
+} from "@/shared/types/channel";
 import { requireAuth } from "@/main/utils/session-registry";
 import { getLogger } from "@/shared/logger/config";
 
 const logger = getLogger("channel.get-project-channels.invoke");
 
-export default async function(input: GetProjectChannelsInput): Promise<GetProjectChannelsOutput> {
-  logger.debug("Getting project channels", { projectId: input.projectId });
+export default async function(input: unknown): Promise<GetProjectChannelsOutput> {
+  // Parse and validate input
+  const validatedInput = GetProjectChannelsInputSchema.parse(input);
+  
+  logger.debug("Getting project channels", { projectId: validatedInput.projectId });
 
   // 1. Check authentication (replicando a lógica do controller original)
   const currentUser = requireAuth();
   
   // 2. Execute core business logic
-  const result = await getProjectChannels(input);
+  const result = await getProjectChannels(validatedInput);
   
-  logger.debug("Retrieved project channels", { count: result.length, projectId: input.projectId });
+  logger.debug("Retrieved project channels", { count: result.length, projectId: validatedInput.projectId });
   
   // Note: No event emission for GET operations
   
-  return result;
+  // Parse and return output
+  return GetProjectChannelsOutputSchema.parse(result);
 }
 
 declare global {

@@ -1,27 +1,75 @@
-import { 
-  restoreAgent,
-  type RestoreAgentInput,
-  type RestoreAgentOutput 
-} from "./queries";
+import { z } from "zod";
+import { restoreAgent } from "./queries";
+import { AgentSchema } from "@/shared/types";
 import { requireAuth } from "@/main/utils/session-registry";
 import { eventBus } from "@/shared/events/event-bus";
 import { getLogger } from "@/shared/logger/config";
 
 const logger = getLogger("agent.restore.invoke");
 
-export default async function(id: RestoreAgentInput): Promise<RestoreAgentOutput> {
-  logger.debug("Restoring agent", { agentId: id });
+// Input schema
+const RestoreAgentInputSchema = z.string().min(1);
 
-  // 1. Check authentication (replicando a lógica do handler original)
+// Output schema
+const RestoreAgentOutputSchema = z.object({
+  success: z.boolean(),
+  agent: AgentSchema.nullable(),
+  message: z.string(),
+});
+
+type RestoreAgentInput = z.infer<typeof RestoreAgentInputSchema>;
+type RestoreAgentOutput = z.infer<typeof RestoreAgentOutputSchema>;
+
+export default async function(input: RestoreAgentInput): Promise<RestoreAgentOutput> {
+  logger.debug("Restoring agent");
+
+  // 1. Validate input
+  const validatedInput = RestoreAgentInputSchema.parse(input);
+
+  // 2. Check authentication
   const currentUser = requireAuth();
   
-  // 2. Execute core business logic
-  const result = await restoreAgent(id);
+  // 3. Execute database operation
+  const dbAgent = await restoreAgent(validatedInput);
   
-  // 3. Emit specific event for agent restore
-  eventBus.emit("agent:restored", { agentId: result.agent.id });
+  if (!dbAgent) {
+    const result = RestoreAgentOutputSchema.parse({
+      success: false,
+      agent: null,
+      message: "Agent not found or not in soft deleted state"
+    });
+    return result;
+  }
   
-  logger.debug("Agent restored", { agentId: result.agent.id, agentName: result.agent.name });
+  // 4. Map to API format (sem campos técnicos)
+  const apiAgent = {
+    id: dbAgent.id,
+    userId: dbAgent.userId,
+    ownerId: dbAgent.ownerId,
+    name: dbAgent.name,
+    role: dbAgent.role,
+    backstory: dbAgent.backstory,
+    goal: dbAgent.goal,
+    systemPrompt: dbAgent.systemPrompt,
+    providerId: dbAgent.providerId,
+    modelConfig: dbAgent.modelConfig,
+    status: dbAgent.status,
+    avatar: dbAgent.avatar,
+    createdAt: new Date(dbAgent.createdAt),
+    updatedAt: new Date(dbAgent.updatedAt),
+  };
+  
+  // 5. Validate output
+  const result = RestoreAgentOutputSchema.parse({
+    success: true,
+    agent: apiAgent,
+    message: "Agent restored successfully"
+  });
+  
+  // 6. Emit event
+  eventBus.emit("agent:restored", { agentId: result.agent!.id });
+  
+  logger.debug("Agent restored", { success: result.success });
   
   return result;
 }
@@ -29,7 +77,7 @@ export default async function(id: RestoreAgentInput): Promise<RestoreAgentOutput
 declare global {
   namespace WindowAPI {
     interface Agent {
-      restore: (id: RestoreAgentInput) => Promise<RestoreAgentOutput>
+      restore: (input: RestoreAgentInput) => Promise<RestoreAgentOutput>
     }
   }
 }

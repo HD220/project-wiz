@@ -1,37 +1,52 @@
-import { 
-  softDeleteUser,
-  type SoftDeleteUserInput,
-  type SoftDeleteUserOutput 
-} from "./model";
+import { z } from "zod";
+import { softDeleteUser } from "./queries";
 import { requireAuth } from "@/main/utils/session-registry";
 import { getLogger } from "@/shared/logger/config";
-import { eventBus } from "@/main/core/event-bus";
+import { eventBus } from "@/shared/events/event-bus";
 
 const logger = getLogger("user.soft-delete.invoke");
 
-// Input type para o invoke (sem deletedBy que é adicionado automaticamente)
-export type SoftDeleteUserInvokeInput = Omit<SoftDeleteUserInput, "deletedBy">;
+// Input schema
+const SoftDeleteUserInputSchema = z.object({
+  id: z.string(),
+  deletedBy: z.string()
+});
 
-export default async function(input: SoftDeleteUserInvokeInput): Promise<SoftDeleteUserOutput> {
-  logger.debug("Soft deleting user", { userId: input.userId });
+// Output schema
+const SoftDeleteUserOutputSchema = z.object({
+  success: z.boolean(),
+  message: z.string()
+});
 
-  // 1. Check authentication
+type SoftDeleteUserInput = z.infer<typeof SoftDeleteUserInputSchema>;
+type SoftDeleteUserOutput = z.infer<typeof SoftDeleteUserOutputSchema>;
+
+export default async function(input: { id: string }): Promise<SoftDeleteUserOutput> {
+  logger.debug("Soft deleting user", { userId: input.id });
+
+  // 1. Validate input
+  const validatedInput = z.object({ id: z.string() }).parse(input);
+
+  // 2. Check authentication
   const currentUser = requireAuth();
   
-  // 2. Add deletedBy from current user
-  const deleteData = {
-    ...input,
-    deletedBy: currentUser.id
+  // 3. Execute core business logic
+  const success = await softDeleteUser(validatedInput.id, currentUser.id);
+  
+  // 4. Mapeamento inline
+  const apiResult = {
+    success,
+    message: success ? "User soft deleted successfully with cascading" : "Failed to soft delete user"
   };
   
-  // 3. Execute core business logic
-  const result = await softDeleteUser(deleteData);
+  // 5. Validate output
+  const result = SoftDeleteUserOutputSchema.parse(apiResult);
   
-  logger.debug("User soft deleted", { userId: input.userId, success: result.success });
+  logger.debug("User soft deleted", { userId: input.id, success: result.success });
   
-  // 4. Emit specific event for deletion
+  // 6. Emit specific event for deletion
   if (result.success) {
-    eventBus.emit("user:deleted", { userId: input.userId });
+    eventBus.emit("user:deleted", { userId: input.id });
   }
   
   return result;
@@ -40,7 +55,7 @@ export default async function(input: SoftDeleteUserInvokeInput): Promise<SoftDel
 declare global {
   namespace WindowAPI {
     interface User {
-      softDelete: (input: SoftDeleteUserInvokeInput) => Promise<SoftDeleteUserOutput>
+      softDelete: (input: { id: string }) => Promise<SoftDeleteUserOutput>
     }
   }
 }

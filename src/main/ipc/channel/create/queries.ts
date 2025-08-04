@@ -1,42 +1,20 @@
-import { z } from "zod";
 import { eq, and } from "drizzle-orm";
 import { createDatabaseConnection } from "@/shared/database/config";
 import { 
   projectChannelsTable,
-  type SelectProjectChannel 
+  type SelectProjectChannel,
+  type InsertProjectChannel
 } from "@/main/database/schemas/project-channel.schema";
 import { projectsTable } from "@/main/database/schemas/project.schema";
 
 const { getDatabase } = createDatabaseConnection(true);
 
-// Input validation schema
-export const CreateChannelInputSchema = z.object({
-  projectId: z.string().min(1, "Project ID is required"),
-  name: z.string().min(1, "Channel name is required"),
-  description: z.string().optional(),
-});
-
-// Output validation schema
-export const CreateChannelOutputSchema = z.object({
-  id: z.string(),
-  projectId: z.string(),
-  name: z.string(),
-  description: z.string().nullable(),
-  isArchived: z.boolean(),
-  isActive: z.boolean(),
-  deactivatedAt: z.number().nullable(),
-  deactivatedBy: z.string().nullable(),
-  createdAt: z.number(),
-  updatedAt: z.number(),
-});
-
-export type CreateChannelInput = z.infer<typeof CreateChannelInputSchema>;
-export type CreateChannelOutput = z.infer<typeof CreateChannelOutputSchema>;
-
-export async function createChannel(input: CreateChannelInput): Promise<CreateChannelOutput> {
+/**
+ * Pure database function - only Drizzle types
+ * No validation, no business logic, just database operations
+ */
+export async function createChannel(data: InsertProjectChannel): Promise<SelectProjectChannel> {
   const db = getDatabase();
-  
-  const validatedInput = CreateChannelInputSchema.parse(input);
 
   // Usar transação síncrona conforme o padrão do service original
   const result = db.transaction((tx) => {
@@ -46,7 +24,7 @@ export async function createChannel(input: CreateChannelInput): Promise<CreateCh
       .from(projectsTable)
       .where(
         and(
-          eq(projectsTable.id, validatedInput.projectId),
+          eq(projectsTable.id, data.projectId),
           eq(projectsTable.isActive, true),
         ),
       )
@@ -61,11 +39,7 @@ export async function createChannel(input: CreateChannelInput): Promise<CreateCh
     // 2. Criar o channel
     const channelResults = tx
       .insert(projectChannelsTable)
-      .values({
-        projectId: validatedInput.projectId,
-        name: validatedInput.name,
-        description: validatedInput.description,
-      })
+      .values(data)
       .returning()
       .all();
 
@@ -77,5 +51,5 @@ export async function createChannel(input: CreateChannelInput): Promise<CreateCh
     return channel;
   });
 
-  return CreateChannelOutputSchema.parse(result);
+  return result;
 }

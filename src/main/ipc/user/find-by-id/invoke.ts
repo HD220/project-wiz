@@ -1,26 +1,49 @@
-import { 
-  getUserById,
-  type FindUserByIdInput,
-  type FindUserByIdOutput 
-} from "./model";
+import { z } from "zod";
+import { getUserById } from "./queries";
+import { UserSchema } from "@/shared/types";
 import { requireAuth } from "@/main/utils/session-registry";
 import { getLogger } from "@/shared/logger/config";
 
 const logger = getLogger("user.find-by-id.invoke");
 
-export default async function(input: FindUserByIdInput): Promise<FindUserByIdOutput> {
-  logger.debug("Finding user by ID", { userId: input.userId, includeInactive: input.includeInactive });
+// Input schema - campos necessários para busca
+const FindUserByIdInputSchema = z.object({
+  userId: z.string(),
+  includeInactive: z.boolean().default(false),
+});
 
-  // 1. Check authentication
+// Output schema
+const FindUserByIdOutputSchema = UserSchema.nullable();
+
+type FindUserByIdInput = z.infer<typeof FindUserByIdInputSchema>;
+type FindUserByIdOutput = z.infer<typeof FindUserByIdOutputSchema>;
+
+export default async function(input: FindUserByIdInput): Promise<FindUserByIdOutput> {
+  logger.debug("Finding user by ID");
+
+  // 1. Validate input
+  const validatedInput = FindUserByIdInputSchema.parse(input);
+
+  // 2. Check authentication
   const currentUser = requireAuth();
   
-  // 2. Execute core business logic
-  const result = await getUserById(input);
+  // 3. Query recebe dados e gerencia campos técnicos internamente
+  const dbUser = await getUserById(validatedInput.userId, validatedInput.includeInactive);
   
-  logger.debug("User find by ID result", { 
-    userId: input.userId, 
-    found: result !== null
-  });
+  // 4. Mapeamento: SelectUser → User (sem campos técnicos)
+  const apiUser = dbUser ? {
+    id: dbUser.id,
+    name: dbUser.name,
+    avatar: dbUser.avatar,
+    type: dbUser.type,
+    createdAt: new Date(dbUser.createdAt),
+    updatedAt: new Date(dbUser.updatedAt),
+  } : null;
+  
+  // 5. Validate output
+  const result = FindUserByIdOutputSchema.parse(apiUser);
+  
+  logger.debug("User find by ID result", { found: result !== null });
   
   return result;
 }

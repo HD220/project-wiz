@@ -1,4 +1,3 @@
-import { z } from "zod";
 import { eq, and } from "drizzle-orm";
 import { createDatabaseConnection } from "@/shared/database/config";
 import { usersTable } from "@/main/database/schemas/user.schema";
@@ -9,32 +8,19 @@ import { projectsTable } from "@/main/database/schemas/project.schema";
 
 const { getDatabase } = createDatabaseConnection(true);
 
-// Input validation schema
-export const SoftDeleteUserInputSchema = z.object({
-  userId: z.string().min(1, "User ID is required"),
-  deletedBy: z.string().min(1, "Deleted by user ID is required")
-});
-
-// Output validation schema
-export const SoftDeleteUserOutputSchema = z.object({
-  success: z.boolean(),
-  message: z.string(),
-});
-
-export type SoftDeleteUserInput = z.infer<typeof SoftDeleteUserInputSchema>;
-export type SoftDeleteUserOutput = z.infer<typeof SoftDeleteUserOutputSchema>;
-
-export async function softDeleteUser(input: SoftDeleteUserInput): Promise<SoftDeleteUserOutput> {
+/**
+ * Pure database function - only Drizzle types
+ * No validation, no business logic, just database operations
+ */
+export async function softDeleteUser(id: string, deletedBy: string): Promise<boolean> {
   const db = getDatabase();
-  
-  const validatedInput = SoftDeleteUserInputSchema.parse(input);
 
   return db.transaction((tx) => {
     // Verify user exists and is active
     const userResults = tx
       .select()
       .from(usersTable)
-      .where(and(eq(usersTable.id, validatedInput.userId), eq(usersTable.isActive, true)))
+      .where(and(eq(usersTable.id, id), eq(usersTable.isActive, true)))
       .limit(1)
       .all();
 
@@ -48,10 +34,10 @@ export async function softDeleteUser(input: SoftDeleteUserInput): Promise<SoftDe
       .set({
         isActive: false,
         deactivatedAt: new Date(),
-        deactivatedBy: validatedInput.deletedBy,
+        deactivatedBy: deletedBy,
         updatedAt: new Date(),
       })
-      .where(eq(usersTable.id, validatedInput.userId))
+      .where(eq(usersTable.id, id))
       .run();
 
     // 2. Cascade soft delete to owned agents
@@ -59,11 +45,11 @@ export async function softDeleteUser(input: SoftDeleteUserInput): Promise<SoftDe
       .set({
         isActive: false,
         deactivatedAt: new Date(),
-        deactivatedBy: validatedInput.deletedBy,
+        deactivatedBy: deletedBy,
         updatedAt: new Date(),
       })
       .where(
-        and(eq(agentsTable.ownerId, validatedInput.userId), eq(agentsTable.isActive, true)),
+        and(eq(agentsTable.ownerId, id), eq(agentsTable.isActive, true)),
       )
       .run();
 
@@ -72,12 +58,12 @@ export async function softDeleteUser(input: SoftDeleteUserInput): Promise<SoftDe
       .set({
         isActive: false,
         deactivatedAt: new Date(),
-        deactivatedBy: validatedInput.deletedBy,
+        deactivatedBy: deletedBy,
         updatedAt: new Date(),
       })
       .where(
         and(
-          eq(projectsTable.ownerId, validatedInput.userId),
+          eq(projectsTable.ownerId, id),
           eq(projectsTable.isActive, true),
         ),
       )
@@ -88,11 +74,11 @@ export async function softDeleteUser(input: SoftDeleteUserInput): Promise<SoftDe
       .set({
         isActive: false,
         deactivatedAt: new Date(),
-        deactivatedBy: validatedInput.deletedBy,
+        deactivatedBy: deletedBy,
       })
       .where(
         and(
-          eq(userSessionsTable.userId, validatedInput.userId),
+          eq(userSessionsTable.userId, id),
           eq(userSessionsTable.isActive, true),
         ),
       )
@@ -103,12 +89,12 @@ export async function softDeleteUser(input: SoftDeleteUserInput): Promise<SoftDe
       .set({
         isActive: false,
         deactivatedAt: new Date(),
-        deactivatedBy: validatedInput.deletedBy,
+        deactivatedBy: deletedBy,
         updatedAt: new Date(),
       })
       .where(
         and(
-          eq(dmParticipantsTable.participantId, validatedInput.userId),
+          eq(dmParticipantsTable.participantId, id),
           eq(dmParticipantsTable.isActive, true),
         ),
       )
@@ -117,9 +103,6 @@ export async function softDeleteUser(input: SoftDeleteUserInput): Promise<SoftDe
     // Note: Messages, memories, and other related entities will be handled
     // by their respective services through foreign key cascading
 
-    return SoftDeleteUserOutputSchema.parse({
-      success: true,
-      message: "User soft deleted successfully with cascading"
-    });
+    return true;
   });
 }

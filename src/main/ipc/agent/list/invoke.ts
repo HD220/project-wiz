@@ -1,34 +1,63 @@
-import { 
-  listAgents,
-  type ListAgentsInput,
-  type ListAgentsOutput 
-} from "./queries";
+import { z } from "zod";
+import { listAgents } from "./queries";
+import { AgentSchema } from "@/shared/types";
 import { requireAuth } from "@/main/utils/session-registry";
 import { getLogger } from "@/shared/logger/config";
 
 const logger = getLogger("agent.list.invoke");
 
-// Input type para o invoke (sem ownerId que é adicionado automaticamente)
-export type ListAgentsInvokeInput = Omit<NonNullable<ListAgentsInput>, "ownerId">;
+// Input schema - campos de filtro (sem ownerId que é adicionado automaticamente)
+const ListAgentsInputSchema = z.object({
+  status: z.enum(["active", "inactive", "busy"]).optional(),
+  search: z.string().optional(),
+  showInactive: z.boolean().optional().default(false),
+}).optional();
 
-export default async function(filters?: ListAgentsInvokeInput): Promise<ListAgentsOutput> {
-  logger.debug("Listing agents for user");
+// Output schema - array de Agent
+const ListAgentsOutputSchema = z.array(AgentSchema);
 
-  // 1. Check authentication (replicando a lógica do handler original)
+type ListAgentsInput = z.infer<typeof ListAgentsInputSchema>;
+type ListAgentsOutput = z.infer<typeof ListAgentsOutputSchema>;
+
+export default async function(input?: ListAgentsInput): Promise<ListAgentsOutput> {
+  logger.debug("Listing agents");
+
+  // 1. Validate input
+  const validatedInput = input ? ListAgentsInputSchema.parse(input) : {};
+
+  // 2. Check authentication
   const currentUser = requireAuth();
   
-  // 2. Add ownerId from current user
-  const agentFilters = filters ? {
-    ...filters,
-    ownerId: currentUser.id
-  } : {
-    ownerId: currentUser.id
-  };
+  // 3. Query recebe dados e gerencia campos técnicos internamente
+  const dbAgents = await listAgents({
+    ownerId: currentUser.id,
+    status: validatedInput.status,
+    search: validatedInput.search,
+    showInactive: validatedInput.showInactive,
+  });
   
-  // 3. Execute core business logic
-  const result = await listAgents(agentFilters);
+  // 4. Mapeamento: SelectAgent[] → Agent[] (sem campos técnicos)
+  const apiAgents = dbAgents.map(agent => ({
+    id: agent.id,
+    userId: agent.userId,
+    ownerId: agent.ownerId,
+    name: agent.name,
+    role: agent.role,
+    backstory: agent.backstory,
+    goal: agent.goal,
+    systemPrompt: agent.systemPrompt,
+    providerId: agent.providerId,
+    modelConfig: agent.modelConfig,
+    status: agent.status,
+    avatar: agent.avatar,
+    createdAt: new Date(agent.createdAt),
+    updatedAt: new Date(agent.updatedAt),
+  }));
   
-  logger.debug("Listed agents", { count: result.length, ownerId: currentUser.id });
+  // 5. Validate output
+  const result = ListAgentsOutputSchema.parse(apiAgents);
+  
+  logger.debug("Listed agents", { count: result.length });
   
   return result;
 }
@@ -36,7 +65,7 @@ export default async function(filters?: ListAgentsInvokeInput): Promise<ListAgen
 declare global {
   namespace WindowAPI {
     interface Agent {
-      list: (filters?: ListAgentsInvokeInput) => Promise<ListAgentsOutput>
+      list: (input?: ListAgentsInput) => Promise<ListAgentsOutput>
     }
   }
 }

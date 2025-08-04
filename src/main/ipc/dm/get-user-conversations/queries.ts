@@ -1,4 +1,3 @@
-import { z } from "zod";
 import { eq, and, inArray, isNull } from "drizzle-orm";
 import { createDatabaseConnection } from "@/shared/database/config";
 import { 
@@ -8,56 +7,14 @@ import {
   type SelectDMParticipant 
 } from "@/main/database/schemas/dm-conversation.schema";
 import { messagesTable } from "@/main/database/schemas/message.schema";
+import type { GetUserConversationsInput, GetUserConversationsOutput } from "@/shared/types/dm-conversation";
 
 const { getDatabase } = createDatabaseConnection(true);
-
-// Input validation schema
-export const GetUserConversationsInputSchema = z.object({
-  userId: z.string().min(1, "User ID is required"),
-  includeInactive: z.boolean().optional().default(false),
-  includeArchived: z.boolean().optional().default(false),
-  limit: z.number().optional(),
-  offset: z.number().optional(),
-});
-
-// Output validation schema
-export const GetUserConversationsOutputSchema = z.array(z.object({
-  id: z.string(),
-  name: z.string(),
-  description: z.string().nullable(),
-  isArchived: z.boolean(),
-  isActive: z.boolean(),
-  deactivatedAt: z.number().nullable(),
-  deactivatedBy: z.string().nullable(),
-  createdAt: z.number(),
-  updatedAt: z.number(),
-  participants: z.array(z.object({
-    id: z.string(),
-    dmConversationId: z.string(),
-    participantId: z.string(),
-    isActive: z.boolean(),
-    deactivatedAt: z.number().nullable(),
-    deactivatedBy: z.string().nullable(),
-    createdAt: z.number(),
-    updatedAt: z.number(),
-  })),
-  lastMessage: z.object({
-    id: z.string(),
-    content: z.string(),
-    authorId: z.string(),
-    createdAt: z.number(),
-    updatedAt: z.number(),
-  }).optional(),
-}));
-
-export type GetUserConversationsInput = z.infer<typeof GetUserConversationsInputSchema>;
-export type GetUserConversationsOutput = z.infer<typeof GetUserConversationsOutputSchema>;
 
 export async function getUserConversations(input: GetUserConversationsInput): Promise<GetUserConversationsOutput> {
   const db = getDatabase();
   
-  const validatedInput = GetUserConversationsInputSchema.parse(input);
-  const { userId, includeInactive, includeArchived } = validatedInput;
+  const { userId, includeInactive, includeArchived } = input;
 
   // 1. Buscar DM conversations onde o usuário é participante
   const participantConditions = [
@@ -167,5 +124,5 @@ export async function getUserConversations(input: GetUserConversationsInput): Pr
     };
   });
 
-  return GetUserConversationsOutputSchema.parse(result);
+  return result;
 }

@@ -1,4 +1,3 @@
-import { z } from "zod";
 import { eq, and } from "drizzle-orm";
 import { createDatabaseConnection } from "@/shared/database/config";
 import { usersTable } from "@/main/database/schemas/user.schema";
@@ -9,47 +8,36 @@ import { projectsTable } from "@/main/database/schemas/project.schema";
 
 const { getDatabase } = createDatabaseConnection(true);
 
-// Input validation schema
-export const GetUserStatsInputSchema = z.string().min(1, "User ID is required");
-
-// Output validation schema
-export const GetUserStatsOutputSchema = z.object({
-  ownedAgents: z.object({
-    active: z.number(),
-    inactive: z.number()
-  }),
-  ownedProjects: z.object({
-    active: z.number(), 
-    inactive: z.number()
-  }),
-  activeSessions: z.number(),
-  dmParticipations: z.object({
-    active: z.number(),
-    inactive: z.number()
-  })
-});
-
-export type GetUserStatsInput = z.infer<typeof GetUserStatsInputSchema>;
-export type GetUserStatsOutput = z.infer<typeof GetUserStatsOutputSchema>;
-
-export async function getUserStats(userId: GetUserStatsInput): Promise<GetUserStatsOutput> {
+export async function getUserStats(userId: string): Promise<{
+  ownedAgents: {
+    active: number;
+    inactive: number;
+  };
+  ownedProjects: {
+    active: number;
+    inactive: number;
+  };
+  activeSessions: number;
+  dmParticipations: {
+    active: number;
+    inactive: number;
+  };
+}> {
   const db = getDatabase();
-  
-  const validatedUserId = GetUserStatsInputSchema.parse(userId);
 
   // Count owned agents
   const ownedAgentsActive = await db
     .select({ count: agentsTable.id })
     .from(agentsTable)
     .where(
-      and(eq(agentsTable.ownerId, validatedUserId), eq(agentsTable.isActive, true)),
+      and(eq(agentsTable.ownerId, userId), eq(agentsTable.isActive, true)),
     );
 
   const ownedAgentsInactive = await db
     .select({ count: agentsTable.id })
     .from(agentsTable)
     .where(
-      and(eq(agentsTable.ownerId, validatedUserId), eq(agentsTable.isActive, false)),
+      and(eq(agentsTable.ownerId, userId), eq(agentsTable.isActive, false)),
     );
 
   // Count owned projects
@@ -58,7 +46,7 @@ export async function getUserStats(userId: GetUserStatsInput): Promise<GetUserSt
     .from(projectsTable)
     .where(
       and(
-        eq(projectsTable.ownerId, validatedUserId),
+        eq(projectsTable.ownerId, userId),
         eq(projectsTable.isActive, true),
       ),
     );
@@ -68,7 +56,7 @@ export async function getUserStats(userId: GetUserStatsInput): Promise<GetUserSt
     .from(projectsTable)
     .where(
       and(
-        eq(projectsTable.ownerId, validatedUserId),
+        eq(projectsTable.ownerId, userId),
         eq(projectsTable.isActive, false),
       ),
     );
@@ -79,7 +67,7 @@ export async function getUserStats(userId: GetUserStatsInput): Promise<GetUserSt
     .from(userSessionsTable)
     .where(
       and(
-        eq(userSessionsTable.userId, validatedUserId),
+        eq(userSessionsTable.userId, userId),
         eq(userSessionsTable.isActive, true),
       ),
     );
@@ -90,7 +78,7 @@ export async function getUserStats(userId: GetUserStatsInput): Promise<GetUserSt
     .from(dmParticipantsTable)
     .where(
       and(
-        eq(dmParticipantsTable.participantId, validatedUserId),
+        eq(dmParticipantsTable.participantId, userId),
         eq(dmParticipantsTable.isActive, true),
       ),
     );
@@ -100,12 +88,12 @@ export async function getUserStats(userId: GetUserStatsInput): Promise<GetUserSt
     .from(dmParticipantsTable)
     .where(
       and(
-        eq(dmParticipantsTable.participantId, validatedUserId),
+        eq(dmParticipantsTable.participantId, userId),
         eq(dmParticipantsTable.isActive, false),
       ),
     );
 
-  const stats = {
+  return {
     ownedAgents: {
       active: ownedAgentsActive.length,
       inactive: ownedAgentsInactive.length,
@@ -120,6 +108,4 @@ export async function getUserStats(userId: GetUserStatsInput): Promise<GetUserSt
       inactive: participationsInactive.length,
     },
   };
-
-  return GetUserStatsOutputSchema.parse(stats);
 }

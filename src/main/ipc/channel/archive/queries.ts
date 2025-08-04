@@ -1,32 +1,16 @@
-import { z } from "zod";
 import { eq, and, isNull } from "drizzle-orm";
 import { createDatabaseConnection } from "@/shared/database/config";
 import { 
   projectChannelsTable
 } from "@/main/database/schemas/project-channel.schema";
+import type { ArchiveChannelInput, ArchiveChannelOutput } from "@/shared/types/channel";
 
 const { getDatabase } = createDatabaseConnection(true);
-
-// Input validation schema
-export const ArchiveChannelInputSchema = z.object({
-  channelId: z.string().min(1, "Channel ID is required"),
-  archivedBy: z.string().min(1, "Archived by user ID is required"),
-});
-
-// Output validation schema
-export const ArchiveChannelOutputSchema = z.object({
-  success: z.boolean(),
-  message: z.string(),
-});
-
-export type ArchiveChannelInput = z.infer<typeof ArchiveChannelInputSchema>;
-export type ArchiveChannelOutput = z.infer<typeof ArchiveChannelOutputSchema>;
 
 export async function archiveChannel(input: ArchiveChannelInput): Promise<ArchiveChannelOutput> {
   const db = getDatabase();
   
-  const validatedInput = ArchiveChannelInputSchema.parse(input);
-  const { channelId, archivedBy } = validatedInput;
+  const { channelId, archivedBy } = input;
 
   // 1. Verificar se o channel existe e pode ser arquivado
   const [channel] = await db
@@ -60,8 +44,8 @@ export async function archiveChannel(input: ArchiveChannelInput): Promise<Archiv
     throw new Error("Failed to archive channel");
   }
 
-  return ArchiveChannelOutputSchema.parse({
+  return {
     success: true,
     message: "Channel archived successfully"
-  });
+  };
 }

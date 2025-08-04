@@ -1,9 +1,11 @@
 import { z } from "zod";
-import { 
-  getUserConversations,
+import { getUserConversations } from "./queries";
+import {
+  GetUserConversationsInputSchema,
+  GetUserConversationsOutputSchema,
   type GetUserConversationsInput,
   type GetUserConversationsOutput 
-} from "./queries";
+} from "@/shared/types/dm-conversation";
 import { requireAuth } from "@/main/utils/session-registry";
 import { getLogger } from "@/shared/logger/config";
 
@@ -15,21 +17,30 @@ export type GetUserConversationsInvokeInput = Omit<GetUserConversationsInput, "u
 export default async function(filters: GetUserConversationsInvokeInput = {}): Promise<GetUserConversationsOutput> {
   logger.debug("Getting user DM conversations", { filters });
 
-  // 1. Check authentication
+  // 1. Parse and validate input (optional fields)
+  const parsedFilters = z.object({
+    includeInactive: z.boolean().optional().default(false),
+    includeArchived: z.boolean().optional().default(false),
+    limit: z.number().optional(),
+    offset: z.number().optional(),
+  }).parse(filters);
+
+  // 2. Check authentication
   const currentUser = requireAuth();
   
-  // 2. Add userId from current user
-  const queryFilters = {
-    ...filters,
+  // 3. Add userId from current user
+  const queryFilters: GetUserConversationsInput = {
+    ...parsedFilters,
     userId: currentUser.id
   };
   
-  // 3. Execute core business logic (no event emission for queries)
+  // 4. Execute core business logic (no event emission for queries)
   const result = await getUserConversations(queryFilters);
   
   logger.debug("Retrieved user DM conversations", { count: result.length, userId: currentUser.id });
   
-  return result;
+  // 5. Parse and return output
+  return GetUserConversationsOutputSchema.parse(result);
 }
 
 declare global {

@@ -53,7 +53,7 @@ export function ProviderCard(props: ProviderCardProps) {
 
   // Delete provider mutation with inline messages
   const deleteProviderMutation = useApiMutation(
-    (id: string) => window.api.llmProviders.delete(id),
+    (id: string) => window.api.llmProvider.delete({ id }),
     {
       successMessage: "Provider deleted successfully",
       errorMessage: "Failed to delete provider",
@@ -65,7 +65,7 @@ export function ProviderCard(props: ProviderCardProps) {
   const setDefaultProviderMutation = useApiMutation<
     string,
     { message: string }
-  >((id: string) => window.api.llmProviders.setDefault(id), {
+  >((id: string) => window.api.llmProvider.setDefault(id), {
     successMessage: "Default provider updated",
     errorMessage: "Failed to update default provider",
   });

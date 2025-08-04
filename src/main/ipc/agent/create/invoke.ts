@@ -1,36 +1,68 @@
-import { 
-  createAgent,
-  type CreateAgentInput,
-  type CreateAgentOutput 
-} from "./queries";
+import { z } from "zod";
+import { createAgent } from "./queries";
+import { AgentSchema } from "@/shared/types";
 import { requireAuth } from "@/main/utils/session-registry";
 import { eventBus } from "@/shared/events/event-bus";
 import { getLogger } from "@/shared/logger/config";
 
 const logger = getLogger("agent.create.invoke");
 
-// Input type para o invoke (sem ownerId que é adicionado automaticamente)
-export type CreateAgentInvokeInput = Omit<CreateAgentInput, "ownerId">;
+const CreateAgentInputSchema = AgentSchema.pick({
+  name: true,
+  role: true,
+  backstory: true,
+  goal: true,
+  providerId: true,
+  modelConfig: true,
+  avatar: true,
+});
 
-export default async function(params: CreateAgentInvokeInput): Promise<CreateAgentOutput> {
-  logger.debug("Creating agent", { agentName: params.name });
+const CreateAgentOutputSchema = AgentSchema;
 
-  // 1. Check authentication (replicando a lógica do handler original)
+type CreateAgentInput = z.infer<typeof CreateAgentInputSchema>;
+type CreateAgentOutput = z.infer<typeof CreateAgentOutputSchema>;
+
+export default async function(input: CreateAgentInput): Promise<CreateAgentOutput> {
+  logger.debug("Creating agent", { 
+    agentName: input.name, 
+    role: input.role, 
+    providerId: input.providerId 
+  });
+
+  const validatedInput = CreateAgentInputSchema.parse(input);
   const currentUser = requireAuth();
   
-  // 2. Add ownerId from current user
-  const agentData = {
-    ...params,
+  const dbAgent = await createAgent({
+    ...validatedInput,
     ownerId: currentUser.id
+  });
+  
+  const apiAgent = {
+    id: dbAgent.id,
+    userId: dbAgent.userId,
+    ownerId: dbAgent.ownerId,
+    name: dbAgent.name,
+    role: dbAgent.role,
+    backstory: dbAgent.backstory,
+    goal: dbAgent.goal,
+    systemPrompt: dbAgent.systemPrompt,
+    providerId: dbAgent.providerId,
+    modelConfig: dbAgent.modelConfig,
+    status: dbAgent.status,
+    avatar: dbAgent.avatar,
+    createdAt: new Date(dbAgent.createdAt),
+    updatedAt: new Date(dbAgent.updatedAt),
   };
   
-  // 3. Execute core business logic
-  const result = await createAgent(agentData);
-  
-  // 4. Emit specific event for agent creation
+  const result = CreateAgentOutputSchema.parse(apiAgent);
   eventBus.emit("agent:created", { agentId: result.id });
   
-  logger.debug("Agent created", { agentId: result.id, agentName: result.name });
+  logger.debug("Agent created", { 
+    agentId: result.id, 
+    agentName: result.name, 
+    role: result.role, 
+    ownerId: result.ownerId 
+  });
   
   return result;
 }
@@ -38,7 +70,7 @@ export default async function(params: CreateAgentInvokeInput): Promise<CreateAge
 declare global {
   namespace WindowAPI {
     interface Agent {
-      create: (params: CreateAgentInvokeInput) => Promise<CreateAgentOutput>
+      create: (input: CreateAgentInput) => Promise<CreateAgentOutput>
     }
   }
 }

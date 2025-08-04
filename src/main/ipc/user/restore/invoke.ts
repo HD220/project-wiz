@@ -1,31 +1,70 @@
-import { 
-  restoreUser,
-  type RestoreUserInput,
-  type RestoreUserOutput 
-} from "./model";
+import { z } from "zod";
+import { restoreUser } from "./queries";
+import { UserSchema } from "@/shared/types";
 import { requireAuth } from "@/main/utils/session-registry";
 import { getLogger } from "@/shared/logger/config";
-import { eventBus } from "@/main/core/event-bus";
+import { eventBus } from "@/shared/events/event-bus";
 
 const logger = getLogger("user.restore.invoke");
 
-export default async function(userId: RestoreUserInput): Promise<RestoreUserOutput> {
-  logger.debug("Restoring user", { userId });
+// Input schema
+const RestoreUserInputSchema = z.string().min(1);
 
-  // 1. Check authentication
+// Output schema
+const RestoreUserOutputSchema = z.object({
+  success: z.boolean(),
+  user: UserSchema.nullable(),
+  message: z.string()
+});
+
+type RestoreUserInput = z.infer<typeof RestoreUserInputSchema>;
+type RestoreUserOutput = z.infer<typeof RestoreUserOutputSchema>;
+
+export default async function(input: RestoreUserInput): Promise<RestoreUserOutput> {
+  logger.debug("Restoring user");
+
+  // 1. Validate input
+  const validatedInput = RestoreUserInputSchema.parse(input);
+
+  // 2. Check authentication
   const currentUser = requireAuth();
   
-  // 2. Execute core business logic
-  const result = await restoreUser(userId);
+  // 3. Query recebe dados e gerencia campos técnicos internamente
+  const dbUser = await restoreUser(validatedInput);
   
-  logger.debug("User restored", { 
-    userId: result.id, 
-    name: result.name,
-    isActive: result.isActive
+  if (!dbUser) {
+    const result = RestoreUserOutputSchema.parse({
+      success: false,
+      user: null,
+      message: "User not found or not in soft deleted state"
+    });
+    return result;
+  }
+  
+  // 4. Mapeamento: SelectUser → User (sem campos técnicos)
+  const apiUser = {
+    id: dbUser.id,
+    name: dbUser.name,
+    avatar: dbUser.avatar,
+    type: dbUser.type,
+    createdAt: new Date(dbUser.createdAt),
+    updatedAt: new Date(dbUser.updatedAt),
+  };
+  
+  // 5. Validate output
+  const result = RestoreUserOutputSchema.parse({
+    success: true,
+    user: apiUser,
+    message: "User restored successfully"
   });
   
-  // 3. Emit specific event for restoration
-  eventBus.emit("user:restored", { userId: result.id });
+  logger.debug("User restored", { 
+    userId: result.user?.id, 
+    name: result.user?.name
+  });
+  
+  // 6. Emit specific event for restoration
+  eventBus.emit("user:restored", { userId: result.user!.id });
   
   return result;
 }
@@ -33,7 +72,7 @@ export default async function(userId: RestoreUserInput): Promise<RestoreUserOutp
 declare global {
   namespace WindowAPI {
     interface User {
-      restore: (userId: RestoreUserInput) => Promise<RestoreUserOutput>
+      restore: (input: RestoreUserInput) => Promise<RestoreUserOutput>
     }
   }
 }

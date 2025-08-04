@@ -1,4 +1,3 @@
-import { z } from "zod";
 import { eq } from "drizzle-orm";
 import { createDatabaseConnection } from "@/shared/database/config";
 import { llmProvidersTable } from "@/main/database/schemas/llm-provider.schema";
@@ -11,17 +10,6 @@ const validEncryptionKey = Buffer.from(
   "5ca95f9b8176faa6a2493fb069edeeae74b27044164b00862d100ba1d8ec57ec",
   "hex",
 );
-
-// Input validation schema
-export const GetDecryptedKeyInputSchema = z.string().min(1, "Provider ID is required");
-
-// Output validation schema
-export const GetDecryptedKeyOutputSchema = z.object({
-  apiKey: z.string(),
-});
-
-export type GetDecryptedKeyInput = z.infer<typeof GetDecryptedKeyInputSchema>;
-export type GetDecryptedKeyOutput = z.infer<typeof GetDecryptedKeyOutputSchema>;
 
 /**
  * Decrypt API key for secure storage (mesma lógica do LlmProviderService.decryptApiKey)
@@ -51,26 +39,28 @@ function decryptApiKey(encryptedData: string): string {
   }
 }
 
-export async function getDecryptedApiKey(providerId: GetDecryptedKeyInput): Promise<GetDecryptedKeyOutput> {
+/**
+ * Pure database function - only Drizzle types
+ * No validation, no business logic, just database operations
+ */
+export async function getDecryptedApiKey(providerId: string): Promise<{ apiKey: string }> {
   const db = getDatabase();
-  
-  const validatedProviderId = GetDecryptedKeyInputSchema.parse(providerId);
 
   // Find provider by ID (mesma lógica do LlmProviderService.getDecryptedApiKey)
   const [provider] = await db
     .select()
     .from(llmProvidersTable)
-    .where(eq(llmProvidersTable.id, validatedProviderId))
+    .where(eq(llmProvidersTable.id, providerId))
     .limit(1);
 
   if (!provider) {
-    throw new Error("Provider not found");
+    throw new Error(`LLM provider not found: ${providerId}`);
   }
 
   // Decrypt the API key
   const decryptedApiKey = decryptApiKey(provider.apiKey);
 
-  return GetDecryptedKeyOutputSchema.parse({
+  return {
     apiKey: decryptedApiKey
-  });
+  };
 }

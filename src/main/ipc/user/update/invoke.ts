@@ -1,29 +1,64 @@
-import { 
-  updateUser,
-  type UpdateUserInput,
-  type UpdateUserOutput 
-} from "./model";
+import { z } from "zod";
+import { updateUser } from "./queries";
+import { UserSchema } from "@/shared/types";
 import { requireAuth } from "@/main/utils/session-registry";
 import { getLogger } from "@/shared/logger/config";
-import { eventBus } from "@/main/core/event-bus";
+import { eventBus } from "@/shared/events/event-bus";
 
 const logger = getLogger("user.update.invoke");
+
+// Input schema - apenas campos de negócio + id
+const UpdateUserInputSchema = UserSchema.pick({
+  name: true,
+  avatar: true
+}).partial().extend({
+  id: z.string()
+});
+
+// Output schema
+const UpdateUserOutputSchema = UserSchema;
+
+type UpdateUserInput = z.infer<typeof UpdateUserInputSchema>;
+type UpdateUserOutput = z.infer<typeof UpdateUserOutputSchema>;
 
 export default async function(input: UpdateUserInput): Promise<UpdateUserOutput> {
   logger.debug("Updating user", { userId: input.id });
 
-  // 1. Check authentication
+  // 1. Validate input
+  const validatedInput = UpdateUserInputSchema.parse(input);
+
+  // 2. Check authentication
   const currentUser = requireAuth();
   
-  // 2. Execute core business logic
-  const result = await updateUser(input);
+  // 3. Extract id and prepare update data
+  const { id, ...updateData } = validatedInput;
+  
+  // 4. Query recebe dados separados
+  const dbUser = await updateUser(id, updateData);
+  
+  if (!dbUser) {
+    throw new Error("User not found, inactive, or update failed");
+  }
+  
+  // 5. Mapeamento: SelectUser → User (sem campos técnicos)
+  const apiUser = {
+    id: dbUser.id,
+    name: dbUser.name,
+    avatar: dbUser.avatar,
+    type: dbUser.type,
+    createdAt: new Date(dbUser.createdAt),
+    updatedAt: new Date(dbUser.updatedAt),
+  };
+  
+  // 6. Validate output
+  const result = UpdateUserOutputSchema.parse(apiUser);
   
   logger.debug("User updated", { 
     userId: result.id, 
     name: result.name
   });
   
-  // 3. Emit specific event for update
+  // 7. Emit specific event for update
   eventBus.emit("user:updated", { userId: result.id });
   
   return result;

@@ -1,9 +1,11 @@
 import { z } from "zod";
-import { 
-  findDMById,
+import { findDMById } from "./queries";
+import {
+  FindDMByIdInputSchema,
+  FindDMByIdOutputSchema,
   type FindDMByIdInput,
   type FindDMByIdOutput 
-} from "./queries";
+} from "@/shared/types/dm-conversation";
 import { requireAuth } from "@/main/utils/session-registry";
 import { getLogger } from "@/shared/logger/config";
 
@@ -12,15 +14,19 @@ const logger = getLogger("dm.find-by-id.invoke");
 export default async function(input: FindDMByIdInput): Promise<FindDMByIdOutput> {
   logger.debug("Finding DM by ID", { dmId: input.id });
 
-  // 1. Check authentication
+  // 1. Parse and validate input
+  const parsedInput = FindDMByIdInputSchema.parse(input);
+
+  // 2. Check authentication
   const currentUser = requireAuth();
   
-  // 2. Execute core business logic (no event emission for queries)
-  const result = await findDMById(input);
+  // 3. Execute core business logic (no event emission for queries)
+  const result = await findDMById(parsedInput);
   
   logger.debug("DM found", { found: !!result, dmId: input.id });
   
-  return result;
+  // 4. Parse and return output
+  return FindDMByIdOutputSchema.parse(result);
 }
 
 declare global {

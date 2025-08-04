@@ -1,41 +1,58 @@
 import { z } from "zod";
-import { 
-  sendChannelMessage,
-  type SendChannelMessageInput,
-  type SendChannelMessageOutput 
-} from "./queries";
+import { sendChannelMessage } from "./queries";
+import { MessageSchema } from "@/shared/types";
 import { requireAuth } from "@/main/utils/session-registry";
 import { getLogger } from "@/shared/logger/config";
-import { eventBus } from "@/shared/events/event-bus";
 
 const logger = getLogger("channel.send-message.invoke");
 
-// Input type para o invoke (sem authorId que é adicionado automaticamente)
-export type SendChannelMessageInvokeInput = Omit<SendChannelMessageInput, "authorId">;
+// Input schema - apenas campos de negócio (sourceType será fixo como "channel")
+const SendChannelMessageInputSchema = MessageSchema.pick({
+  sourceId: true,
+  content: true
+});
 
-export default async function(input: SendChannelMessageInvokeInput): Promise<SendChannelMessageOutput> {
-  logger.debug("Sending message to channel", { channelId: input.channelId });
+// Output schema
+const SendChannelMessageOutputSchema = MessageSchema;
 
-  // 1. Check authentication
+type SendChannelMessageInput = z.infer<typeof SendChannelMessageInputSchema>;
+type SendChannelMessageOutput = z.infer<typeof SendChannelMessageOutputSchema>;
+
+export default async function(input: SendChannelMessageInput): Promise<SendChannelMessageOutput> {
+  logger.debug("Sending message to channel", { channelId: input.sourceId });
+
+  // 1. Validate input
+  const validatedInput = SendChannelMessageInputSchema.parse(input);
+
+  // 2. Check authentication
   const currentUser = requireAuth();
   
-  // 2. Add authorId from current user
+  // 3. Query recebe dados e gerencia campos técnicos internamente
   const messageData = {
-    ...input,
-    authorId: currentUser.id
+    sourceType: "channel" as const,
+    sourceId: validatedInput.sourceId,
+    authorId: currentUser.id,
+    content: validatedInput.content
   };
   
-  // 3. Execute core business logic
-  const result = await sendChannelMessage(messageData);
+  const dbMessage = await sendChannelMessage(messageData);
   
-  // 4. Emit specific event for channel message sent
-  eventBus.emit("channel:message-sent", { 
-    channelId: input.channelId, 
-    messageId: result.id 
-  });
+  // 4. Mapeamento: SelectMessage → Message (sem campos técnicos)
+  const apiMessage = {
+    id: dbMessage.id,
+    sourceType: dbMessage.sourceType,
+    sourceId: dbMessage.sourceId,
+    authorId: dbMessage.authorId,
+    content: dbMessage.content,
+    createdAt: new Date(dbMessage.createdAt),
+    updatedAt: new Date(dbMessage.updatedAt),
+  };
+  
+  // 5. Validate output
+  const result = SendChannelMessageOutputSchema.parse(apiMessage);
   
   logger.debug("Message sent to channel", { 
-    channelId: input.channelId, 
+    channelId: input.sourceId, 
     messageId: result.id 
   });
   
@@ -45,7 +62,7 @@ export default async function(input: SendChannelMessageInvokeInput): Promise<Sen
 declare global {
   namespace WindowAPI {
     interface Channel {
-      sendMessage: (input: SendChannelMessageInvokeInput) => Promise<SendChannelMessageOutput>
+      sendMessage: (input: SendChannelMessageInput) => Promise<SendChannelMessageOutput>
     }
   }
 }

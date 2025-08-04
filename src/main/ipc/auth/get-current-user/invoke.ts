@@ -1,26 +1,30 @@
 import { z } from "zod";
 import { sessionRegistry } from "@/main/utils/session-registry";
+import { UserSchema } from "@/shared/types";
 
-// Output validation schema baseado em AuthenticatedUser (que é Omit<SelectUser, "passwordHash">)
-const GetCurrentUserOutputSchema = z.object({
-  id: z.string(),
-  name: z.string(),
-  avatar: z.string().nullable(),
-  type: z.enum(["human", "agent"]),
-  isActive: z.boolean(),
-  deactivatedAt: z.date().nullable(),
-  deactivatedBy: z.string().nullable(),
-  createdAt: z.date(),
-  updatedAt: z.date(),
-}).nullable();
+const GetCurrentUserOutputSchema = UserSchema.nullable();
 
 type GetCurrentUserOutput = z.infer<typeof GetCurrentUserOutputSchema>;
 
 export default async function(): Promise<GetCurrentUserOutput> {
   // Simply return from session registry cache - no database access needed
-  const currentUser = sessionRegistry.getCurrentUser();
+  const dbUser = sessionRegistry.getCurrentUser();
   
-  return GetCurrentUserOutputSchema.parse(currentUser);
+  if (!dbUser) {
+    return null;
+  }
+  
+  // Map to API format (sem campos técnicos)
+  const apiUser = {
+    id: dbUser.id,
+    name: dbUser.name,
+    avatar: dbUser.avatar,
+    type: dbUser.type,
+    createdAt: new Date(dbUser.createdAt),
+    updatedAt: new Date(dbUser.updatedAt),
+  };
+  
+  return GetCurrentUserOutputSchema.parse(apiUser);
 }
 
 declare global {

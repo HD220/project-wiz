@@ -1,4 +1,3 @@
-import { z } from "zod";
 import { eq, and, desc, sql, isNull, inArray } from "drizzle-orm";
 import { createDatabaseConnection } from "@/shared/database/config";
 import { 
@@ -6,45 +5,14 @@ import {
   type SelectProjectChannel 
 } from "@/main/database/schemas/project-channel.schema";
 import { messagesTable } from "@/main/database/schemas/message.schema";
+import type { GetProjectChannelsInput, GetProjectChannelsOutput } from "@/shared/types/channel";
 
 const { getDatabase } = createDatabaseConnection(true);
-
-// Input validation schema
-export const GetProjectChannelsInputSchema = z.object({
-  projectId: z.string().min(1, "Project ID is required"),
-  includeInactive: z.boolean().optional().default(false),
-  includeArchived: z.boolean().optional().default(false),
-});
-
-// Output validation schema (com última mensagem)
-export const GetProjectChannelsOutputSchema = z.array(z.object({
-  id: z.string(),
-  projectId: z.string(),
-  name: z.string(),
-  description: z.string().nullable(),
-  isArchived: z.boolean(),
-  isActive: z.boolean(),
-  deactivatedAt: z.number().nullable(),
-  deactivatedBy: z.string().nullable(),
-  createdAt: z.number(),
-  updatedAt: z.number(),
-  lastMessage: z.object({
-    id: z.string(),
-    content: z.string(),
-    authorId: z.string(),
-    createdAt: z.number(),
-    updatedAt: z.number(),
-  }).optional(),
-}));
-
-export type GetProjectChannelsInput = z.infer<typeof GetProjectChannelsInputSchema>;
-export type GetProjectChannelsOutput = z.infer<typeof GetProjectChannelsOutputSchema>;
 
 export async function getProjectChannels(input: GetProjectChannelsInput): Promise<GetProjectChannelsOutput> {
   const db = getDatabase();
   
-  const validatedInput = GetProjectChannelsInputSchema.parse(input);
-  const { projectId, includeInactive, includeArchived } = validatedInput;
+  const { projectId, includeInactive = false, includeArchived = false } = input;
 
   // 1. Buscar channels do projeto com filtros
   const channelConditions = [eq(projectChannelsTable.projectId, projectId)];
@@ -126,5 +94,5 @@ export async function getProjectChannels(input: GetProjectChannelsInput): Promis
     return new Date(bTime).getTime() - new Date(aTime).getTime();
   });
 
-  return GetProjectChannelsOutputSchema.parse(sortedResult);
+  return sortedResult;
 }

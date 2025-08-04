@@ -1,34 +1,58 @@
-import { 
-  listLlmProviders,
-  type ListLlmProvidersInput,
-  type ListLlmProvidersOutput 
-} from "./queries";
+import { z } from "zod";
+import { listLlmProviders } from "./queries";
+import { LlmProviderSchema } from "@/shared/types";
 import { requireAuth } from "@/main/utils/session-registry";
 import { getLogger } from "@/shared/logger/config";
 
 const logger = getLogger("llm-provider.list.invoke");
 
-// Input type for the invoke handler (without userId that is added automatically)
-export type ListLlmProvidersInvokeInput = Omit<ListLlmProvidersInput, "userId">;
+// Input schema - campos de filtro (sem userId que é adicionado automaticamente)
+const ListLlmProvidersInputSchema = z.object({
+  type: z.enum(["openai", "deepseek", "anthropic", "google", "custom"]).optional(),
+  search: z.string().optional(),
+  showInactive: z.boolean().optional().default(false),
+}).optional();
 
-export default async function(params: ListLlmProvidersInvokeInput = {}): Promise<ListLlmProvidersOutput> {
-  logger.debug("Listing LLM providers for user", { filters: params });
+// Output schema - array de LlmProvider (sem apiKey)
+const ListLlmProvidersOutputSchema = z.array(LlmProviderSchema);
 
-  // 1. Check authentication
+type ListLlmProvidersInput = z.infer<typeof ListLlmProvidersInputSchema>;
+type ListLlmProvidersOutput = z.infer<typeof ListLlmProvidersOutputSchema>;
+
+export default async function(input?: ListLlmProvidersInput): Promise<ListLlmProvidersOutput> {
+  logger.debug("Listing LLM providers");
+
+  // 1. Validate input
+  const validatedInput = input ? ListLlmProvidersInputSchema.parse(input) : {};
+
+  // 2. Check authentication
   const currentUser = requireAuth();
   
-  // 2. Add userId from current user
-  const filters = {
-    ...params,
-    userId: currentUser.id
-  };
+  // 3. Query recebe dados e gerencia campos técnicos internamente
+  const dbProviders = await listLlmProviders({
+    userId: currentUser.id,
+    type: validatedInput.type,
+    search: validatedInput.search,
+    showInactive: validatedInput.showInactive,
+  });
   
-  // 3. Execute core business logic
-  const result = await listLlmProviders(filters);
+  // 4. Mapeamento: SelectLlmProvider[] → LlmProvider[] (sem campos técnicos e sem apiKey)
+  const apiProviders = dbProviders.map(provider => ({
+    id: provider.id,
+    userId: provider.userId,
+    name: provider.name,
+    type: provider.type,
+    baseUrl: provider.baseUrl,
+    defaultModel: provider.defaultModel,
+    isDefault: provider.isDefault,
+    createdAt: new Date(provider.createdAt),
+    updatedAt: new Date(provider.updatedAt),
+  }));
   
-  logger.debug("Listed LLM providers", { count: result.length, userId: currentUser.id });
+  // 5. Validate output
+  const result = ListLlmProvidersOutputSchema.parse(apiProviders);
   
-  // Note: No event emission for queries/list operations
+  logger.debug("Listed LLM providers", { count: result.length });
   
   return result;
 }
@@ -36,7 +60,7 @@ export default async function(params: ListLlmProvidersInvokeInput = {}): Promise
 declare global {
   namespace WindowAPI {
     interface LlmProvider {
-      list: (filters?: ListLlmProvidersInvokeInput) => Promise<ListLlmProvidersOutput>
+      list: (input?: ListLlmProvidersInput) => Promise<ListLlmProvidersOutput>
     }
   }
 }

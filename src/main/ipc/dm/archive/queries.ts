@@ -1,32 +1,17 @@
-import { z } from "zod";
 import { eq, and, isNull } from "drizzle-orm";
 import { createDatabaseConnection } from "@/shared/database/config";
 import { 
-  dmConversationsTable
+  dmConversationsTable,
+  type SelectDMConversation
 } from "@/main/database/schemas/dm-conversation.schema";
+import type { ArchiveDMInput, ArchiveDMOutput } from "@/shared/types/dm-conversation";
 
 const { getDatabase } = createDatabaseConnection(true);
-
-// Input validation schema
-export const ArchiveDMInputSchema = z.object({
-  dmId: z.string().min(1, "DM ID is required"),
-  archivedBy: z.string().min(1, "Archived by user ID is required"),
-});
-
-// Output validation schema
-export const ArchiveDMOutputSchema = z.object({
-  success: z.boolean(),
-  message: z.string(),
-});
-
-export type ArchiveDMInput = z.infer<typeof ArchiveDMInputSchema>;
-export type ArchiveDMOutput = z.infer<typeof ArchiveDMOutputSchema>;
 
 export async function archiveDM(input: ArchiveDMInput): Promise<ArchiveDMOutput> {
   const db = getDatabase();
   
-  const validatedInput = ArchiveDMInputSchema.parse(input);
-  const { dmId, archivedBy } = validatedInput;
+  const { dmId, archivedBy } = input;
 
   // 1. Verificar se a DM conversation existe e pode ser arquivada
   const [dmConversation] = await db
@@ -62,8 +47,8 @@ export async function archiveDM(input: ArchiveDMInput): Promise<ArchiveDMOutput>
     throw new Error("Failed to archive DM conversation");
   }
 
-  return ArchiveDMOutputSchema.parse({
+  return {
     success: true,
     message: "DM conversation archived successfully"
-  });
+  };
 }

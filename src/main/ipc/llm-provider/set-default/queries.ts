@@ -1,4 +1,3 @@
-import { z } from "zod";
 import { eq } from "drizzle-orm";
 import { createDatabaseConnection } from "@/shared/database/config";
 import { 
@@ -7,42 +6,30 @@ import {
 
 const { getDatabase } = createDatabaseConnection(true);
 
-// Input validation schema
-export const SetDefaultProviderInputSchema = z.object({
-  providerId: z.string().min(1, "Provider ID is required"),
-  userId: z.string().min(1, "User ID is required"),
-});
-
-// Output validation schema
-export const SetDefaultProviderOutputSchema = z.object({
-  message: z.string(),
-});
-
-export type SetDefaultProviderInput = z.infer<typeof SetDefaultProviderInputSchema>;
-export type SetDefaultProviderOutput = z.infer<typeof SetDefaultProviderOutputSchema>;
-
-export async function setDefaultProvider(input: SetDefaultProviderInput): Promise<SetDefaultProviderOutput> {
+/**
+ * Pure database function - only Drizzle types
+ * No validation, no business logic, just database operations
+ */
+export async function setDefaultProvider(input: { providerId: string; userId: string }): Promise<{ message: string }> {
   const db = getDatabase();
-  
-  const validatedInput = SetDefaultProviderInputSchema.parse(input);
   
   // Primeiro, remover padrão de todos os outros providers deste usuário
   await db
     .update(llmProvidersTable)
     .set({ isDefault: false })
-    .where(eq(llmProvidersTable.userId, validatedInput.userId));
+    .where(eq(llmProvidersTable.userId, input.userId));
 
   // Então definir este provider como padrão
   const result = await db
     .update(llmProvidersTable)
     .set({ isDefault: true })
-    .where(eq(llmProvidersTable.id, validatedInput.providerId));
+    .where(eq(llmProvidersTable.id, input.providerId));
 
   if (result.changes === 0) {
     throw new Error("Provider not found");
   }
 
-  return SetDefaultProviderOutputSchema.parse({
+  return {
     message: "Provider set as default"
-  });
+  };
 }

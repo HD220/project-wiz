@@ -1,4 +1,3 @@
-import { z } from "zod";
 import { eq, and } from "drizzle-orm";
 import { createDatabaseConnection } from "@/shared/database/config";
 import { 
@@ -8,25 +7,12 @@ import {
 
 const { getDatabase } = createDatabaseConnection(true);
 
-// Input validation schema
-export const DeleteAgentInputSchema = z.object({
-  id: z.string().min(1, "Agent ID is required"),
-  deletedBy: z.string().min(1, "Deleted by user ID is required"),
-});
-
-// Output validation schema (retorna sucesso)
-export const DeleteAgentOutputSchema = z.object({
-  success: z.boolean(),
-  message: z.string(),
-});
-
-export type DeleteAgentInput = z.infer<typeof DeleteAgentInputSchema>;
-export type DeleteAgentOutput = z.infer<typeof DeleteAgentOutputSchema>;
-
-export async function deleteAgent(input: DeleteAgentInput): Promise<DeleteAgentOutput> {
+/**
+ * Pure database function - only Drizzle types
+ * No validation, no business logic, just database operations
+ */
+export async function deleteAgent(id: string, deletedBy: string): Promise<boolean> {
   const db = getDatabase();
-  
-  const validatedInput = DeleteAgentInputSchema.parse(input);
   
   // Usar transação síncrona conforme o padrão do AgentService original
   const success = db.transaction((tx) => {
@@ -34,7 +20,7 @@ export async function deleteAgent(input: DeleteAgentInput): Promise<DeleteAgentO
     const agents = tx
       .select()
       .from(agentsTable)
-      .where(and(eq(agentsTable.id, validatedInput.id), eq(agentsTable.isActive, true)))
+      .where(and(eq(agentsTable.id, id), eq(agentsTable.isActive, true)))
       .limit(1)
       .all();
 
@@ -48,17 +34,14 @@ export async function deleteAgent(input: DeleteAgentInput): Promise<DeleteAgentO
       .set({
         isActive: false,
         deactivatedAt: new Date(),
-        deactivatedBy: validatedInput.deletedBy,
+        deactivatedBy: deletedBy,
         updatedAt: new Date(),
       })
-      .where(eq(agentsTable.id, validatedInput.id))
+      .where(eq(agentsTable.id, id))
       .run();
 
     return true;
   });
 
-  return DeleteAgentOutputSchema.parse({
-    success,
-    message: "Agent deactivated successfully"
-  });
+  return success;
 }

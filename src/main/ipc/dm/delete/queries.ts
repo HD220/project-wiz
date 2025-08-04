@@ -1,34 +1,19 @@
-import { z } from "zod";
 import { eq, and } from "drizzle-orm";
 import { createDatabaseConnection } from "@/shared/database/config";
 import { 
   dmConversationsTable,
-  dmParticipantsTable
+  dmParticipantsTable,
+  type SelectDMConversation
 } from "@/main/database/schemas/dm-conversation.schema";
 import { messagesTable } from "@/main/database/schemas/message.schema";
+import type { DeleteDMInput, DeleteDMOutput } from "@/shared/types/dm-conversation";
 
 const { getDatabase } = createDatabaseConnection(true);
-
-// Input validation schema
-export const DeleteDMInputSchema = z.object({
-  dmId: z.string().min(1, "DM ID is required"),
-  deletedBy: z.string().min(1, "Deleted by user ID is required"),
-});
-
-// Output validation schema
-export const DeleteDMOutputSchema = z.object({
-  success: z.boolean(),
-  message: z.string(),
-});
-
-export type DeleteDMInput = z.infer<typeof DeleteDMInputSchema>;
-export type DeleteDMOutput = z.infer<typeof DeleteDMOutputSchema>;
 
 export async function deleteDM(input: DeleteDMInput): Promise<DeleteDMOutput> {
   const db = getDatabase();
   
-  const validatedInput = DeleteDMInputSchema.parse(input);
-  const { dmId, deletedBy } = validatedInput;
+  const { dmId, deletedBy } = input;
 
   // Soft delete da DM conversation (replicando dmConversationService.softDelete)
   const result = db.transaction((tx) => {
@@ -98,8 +83,8 @@ export async function deleteDM(input: DeleteDMInput): Promise<DeleteDMOutput> {
     return true;
   });
 
-  return DeleteDMOutputSchema.parse({
+  return {
     success: result,
     message: "DM conversation deleted successfully"
-  });
+  };
 }

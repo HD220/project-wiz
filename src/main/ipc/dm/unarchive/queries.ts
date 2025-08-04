@@ -1,28 +1,15 @@
-import { z } from "zod";
 import { eq, and } from "drizzle-orm";
 import { createDatabaseConnection } from "@/shared/database/config";
 import { 
-  dmConversationsTable
+  dmConversationsTable,
+  type SelectDMConversation
 } from "@/main/database/schemas/dm-conversation.schema";
+import type { UnarchiveDMInput, UnarchiveDMOutput } from "@/shared/types/dm-conversation";
 
 const { getDatabase } = createDatabaseConnection(true);
 
-// Input validation schema
-export const UnarchiveDMInputSchema = z.string().min(1, "DM ID is required");
-
-// Output validation schema
-export const UnarchiveDMOutputSchema = z.object({
-  success: z.boolean(),
-  message: z.string(),
-});
-
-export type UnarchiveDMInput = z.infer<typeof UnarchiveDMInputSchema>;
-export type UnarchiveDMOutput = z.infer<typeof UnarchiveDMOutputSchema>;
-
 export async function unarchiveDM(dmId: UnarchiveDMInput): Promise<UnarchiveDMOutput> {
   const db = getDatabase();
-  
-  const validatedDmId = UnarchiveDMInputSchema.parse(dmId);
 
   // 1. Verificar se a DM conversation existe e está arquivada
   const [dmConversation] = await db
@@ -30,7 +17,7 @@ export async function unarchiveDM(dmId: UnarchiveDMInput): Promise<UnarchiveDMOu
     .from(dmConversationsTable)
     .where(
       and(
-        eq(dmConversationsTable.id, validatedDmId),
+        eq(dmConversationsTable.id, dmId),
         eq(dmConversationsTable.isActive, true),
       ),
     )
@@ -52,15 +39,15 @@ export async function unarchiveDM(dmId: UnarchiveDMInput): Promise<UnarchiveDMOu
       archivedBy: null,
       updatedAt: new Date(),
     })
-    .where(eq(dmConversationsTable.id, validatedDmId))
+    .where(eq(dmConversationsTable.id, dmId))
     .returning();
 
   if (!updated) {
     throw new Error("Failed to unarchive DM conversation");
   }
 
-  return UnarchiveDMOutputSchema.parse({
+  return {
     success: true,
     message: "DM conversation unarchived successfully"
-  });
+  };
 }

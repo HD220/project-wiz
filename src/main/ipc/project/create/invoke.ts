@@ -1,33 +1,66 @@
-import { 
-  createProject,
-  type CreateProjectInput,
-  type CreateProjectOutput 
-} from "./queries";
+import { z } from "zod";
+import { createProject } from "./queries";
+import { ProjectSchema } from "@/shared/types";
 import { requireAuth } from "@/main/utils/session-registry";
 import { getLogger } from "@/shared/logger/config";
-import { eventBus } from "@/main/core/event-bus";
+import { eventBus } from "@/shared/events/event-bus";
 
 const logger = getLogger("project.create.invoke");
 
-export default async function(params: CreateProjectInput): Promise<CreateProjectOutput> {
-  logger.debug("Creating project", { name: params.name });
+// Input schema - apenas campos de negócio (sem ownerId que é adicionado automaticamente)
+const CreateProjectInputSchema = ProjectSchema.pick({
+  name: true,
+  description: true,
+  avatarUrl: true,
+  gitUrl: true,
+  branch: true,
+  localPath: true,
+  status: true,
+});
 
-  // 1. Check authentication (replicando a lógica do handler original)
+// Output schema
+const CreateProjectOutputSchema = ProjectSchema;
+
+type CreateProjectInput = z.infer<typeof CreateProjectInputSchema>;
+type CreateProjectOutput = z.infer<typeof CreateProjectOutputSchema>;
+
+export default async function(input: CreateProjectInput): Promise<CreateProjectOutput> {
+  logger.debug("Creating project");
+
+  // 1. Validate input
+  const validatedInput = CreateProjectInputSchema.parse(input);
+
+  // 2. Check authentication
   const currentUser = requireAuth();
   
-  // 2. Ensure ownerId is set to current user
-  const projectData = {
-    ...params,
-    ownerId: currentUser.id
+  // 3. Query recebe dados e gerencia campos técnicos internamente
+  const dbProject = await createProject({
+    ...validatedInput,
+    ownerId: currentUser.id,
+  });
+  
+  // 4. Mapeamento: SelectProject → Project (sem campos técnicos)
+  const apiProject = {
+    id: dbProject.id,
+    name: dbProject.name,
+    description: dbProject.description,
+    avatarUrl: dbProject.avatarUrl,
+    gitUrl: dbProject.gitUrl,
+    branch: dbProject.branch,
+    localPath: dbProject.localPath,
+    status: dbProject.status,
+    ownerId: dbProject.ownerId,
+    createdAt: new Date(dbProject.createdAt),
+    updatedAt: new Date(dbProject.updatedAt),
   };
   
-  // 3. Execute core business logic
-  const result = await createProject(projectData);
+  // 5. Validate output
+  const result = CreateProjectOutputSchema.parse(apiProject);
   
-  // 4. Emit specific event for project creation
+  // 6. Emit event
   eventBus.emit("project:created", { projectId: result.id });
   
-  logger.debug("Project created", { projectId: result.id, name: result.name });
+  logger.debug("Project created", { projectId: result.id });
   
   return result;
 }
@@ -35,7 +68,7 @@ export default async function(params: CreateProjectInput): Promise<CreateProject
 declare global {
   namespace WindowAPI {
     interface Project {
-      create: (params: CreateProjectInput) => Promise<CreateProjectOutput>
+      create: (input: CreateProjectInput) => Promise<CreateProjectOutput>
     }
   }
 }

@@ -1,4 +1,3 @@
-import { z } from "zod";
 import { eq, and } from "drizzle-orm";
 import { createDatabaseConnection } from "@/shared/database/config";
 import { 
@@ -7,46 +6,14 @@ import {
   type SelectDMConversation,
   type SelectDMParticipant 
 } from "@/main/database/schemas/dm-conversation.schema";
+import type { FindDMByIdInput, FindDMByIdOutput } from "@/shared/types/dm-conversation";
 
 const { getDatabase } = createDatabaseConnection(true);
-
-// Input validation schema
-export const FindDMByIdInputSchema = z.object({
-  id: z.string().min(1, "DM ID is required"),
-  includeInactive: z.boolean().optional().default(false),
-});
-
-// Output validation schema
-export const FindDMByIdOutputSchema = z.object({
-  id: z.string(),
-  name: z.string(),
-  description: z.string().nullable(),
-  isArchived: z.boolean(),
-  isActive: z.boolean(),
-  deactivatedAt: z.number().nullable(),
-  deactivatedBy: z.string().nullable(),
-  createdAt: z.number(),
-  updatedAt: z.number(),
-  participants: z.array(z.object({
-    id: z.string(),
-    dmConversationId: z.string(),
-    participantId: z.string(),
-    isActive: z.boolean(),
-    deactivatedAt: z.number().nullable(),
-    deactivatedBy: z.string().nullable(),
-    createdAt: z.number(),
-    updatedAt: z.number(),
-  })),
-}).nullable();
-
-export type FindDMByIdInput = z.infer<typeof FindDMByIdInputSchema>;
-export type FindDMByIdOutput = z.infer<typeof FindDMByIdOutputSchema>;
 
 export async function findDMById(input: FindDMByIdInput): Promise<FindDMByIdOutput> {
   const db = getDatabase();
   
-  const validatedInput = FindDMByIdInputSchema.parse(input);
-  const { id, includeInactive } = validatedInput;
+  const { id, includeInactive } = input;
 
   // 1. Buscar a DM conversation
   const conversationConditions = [eq(dmConversationsTable.id, id)];
@@ -84,5 +51,5 @@ export async function findDMById(input: FindDMByIdInput): Promise<FindDMByIdOutp
     participants,
   };
 
-  return FindDMByIdOutputSchema.parse(result);
+  return result;
 }

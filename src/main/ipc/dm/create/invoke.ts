@@ -1,34 +1,55 @@
 import { z } from "zod";
-import { 
-  createDM,
-  type CreateDMInput,
-  type CreateDMOutput 
-} from "./queries";
+import { createDM } from "./queries";
+import { DMConversationSchema } from "@/shared/types";
 import { requireAuth } from "@/main/utils/session-registry";
 import { getLogger } from "@/shared/logger/config";
 import { eventBus } from "@/shared/events/event-bus";
 
 const logger = getLogger("dm.create.invoke");
 
-// Input type para o invoke (sem currentUserId que é adicionado automaticamente)
-export type CreateDMInvokeInput = Omit<CreateDMInput, "currentUserId">;
+// Input schema - apenas campos de negócio (sem currentUserId que é adicionado automaticamente)
+const CreateDMInputSchema = DMConversationSchema.pick({
+  description: true,
+}).extend({
+  participantIds: z.array(z.string()).min(1, "At least one participant is required"),
+});
 
-export default async function(params: CreateDMInvokeInput): Promise<CreateDMOutput> {
-  logger.debug("Creating DM conversation", { participantCount: params.participantIds.length });
+// Output schema
+const CreateDMOutputSchema = DMConversationSchema;
 
-  // 1. Check authentication
+type CreateDMInput = z.infer<typeof CreateDMInputSchema>;
+type CreateDMOutput = z.infer<typeof CreateDMOutputSchema>;
+
+export default async function(input: CreateDMInput): Promise<CreateDMOutput> {
+  logger.debug("Creating DM conversation", { participantCount: input.participantIds.length });
+
+  // 1. Validate input
+  const validatedInput = CreateDMInputSchema.parse(input);
+
+  // 2. Check authentication
   const currentUser = requireAuth();
   
-  // 2. Add currentUserId from current user
-  const dmData = {
-    ...params,
+  // 3. Query recebe dados e gerencia campos técnicos internamente
+  const dbDMConversation = await createDM({
+    ...validatedInput,
     currentUserId: currentUser.id
+  });
+  
+  // 4. Mapeamento: SelectDMConversation → DMConversation (sem campos técnicos)
+  const apiDMConversation = {
+    id: dbDMConversation.id,
+    name: dbDMConversation.name,
+    description: dbDMConversation.description,
+    archivedAt: dbDMConversation.archivedAt ? new Date(dbDMConversation.archivedAt) : null,
+    archivedBy: dbDMConversation.archivedBy,
+    createdAt: new Date(dbDMConversation.createdAt),
+    updatedAt: new Date(dbDMConversation.updatedAt),
   };
   
-  // 3. Execute core business logic
-  const result = await createDM(dmData);
+  // 5. Validate output
+  const result = CreateDMOutputSchema.parse(apiDMConversation);
   
-  // 4. Emit specific event for this operation
+  // 6. Emit event
   eventBus.emit("dm:created", { dmId: result.id });
   
   logger.debug("DM conversation created", { dmId: result.id, name: result.name });
@@ -39,7 +60,7 @@ export default async function(params: CreateDMInvokeInput): Promise<CreateDMOutp
 declare global {
   namespace WindowAPI {
     interface Dm {
-      create: (params: CreateDMInvokeInput) => Promise<CreateDMOutput>
+      create: (input: CreateDMInput) => Promise<CreateDMOutput>
     }
   }
 }

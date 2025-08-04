@@ -1,31 +1,62 @@
-import { 
-  archiveProject,
-  type ArchiveProjectInput,
-  type ArchiveProjectOutput 
-} from "./queries";
+import { z } from "zod";
+
+import { requireAuth } from "@/main/utils/session-registry";
+
 import { getLogger } from "@/shared/logger/config";
-import { eventBus } from "@/main/core/event-bus";
+
+import { archiveProject } from "./queries";
 
 const logger = getLogger("project.archive.invoke");
 
-export default async function(id: ArchiveProjectInput): Promise<ArchiveProjectOutput> {
-  logger.debug("Archiving project", { projectId: id });
+// Input schema
+const ArchiveProjectInputSchema = z.object({
+  id: z.string(),
+});
 
-  // Execute core business logic
-  const result = await archiveProject(id);
-  
-  // Emit specific event for project archival
-  eventBus.emit("project:archived", { projectId: result.id });
-  
-  logger.debug("Project archived", { projectId: result.id, name: result.name });
-  
+// Output schema
+const ArchiveProjectOutputSchema = z.object({
+  success: z.boolean(),
+  message: z.string(),
+});
+
+type ArchiveProjectInput = z.infer<typeof ArchiveProjectInputSchema>;
+type ArchiveProjectOutput = z.infer<typeof ArchiveProjectOutputSchema>;
+
+export default async function (
+  input: ArchiveProjectInput,
+): Promise<ArchiveProjectOutput> {
+  logger.debug("Archiving project", { projectId: input.projectId });
+
+  // 1. Validate input
+  const validatedInput = ArchiveProjectInputSchema.parse(input);
+
+  // 2. Check authentication
+  const currentUser = requireAuth();
+
+  // 3. Query recebe dados e gerencia campos técnicos internamente
+  const dbProject = await archiveProject(validatedInput.id, currentUser.id);
+
+  // 4. Mapeamento: SelectProject → ArchiveProjectOutput
+  const apiResponse = {
+    success: true,
+    message: "Project archived successfully",
+  };
+
+  // 5. Validate output
+  const result = ArchiveProjectOutputSchema.parse(apiResponse);
+
+  logger.debug("Project archived", {
+    projectId: dbProject.id,
+    name: dbProject.name,
+  });
+
   return result;
 }
 
 declare global {
   namespace WindowAPI {
     interface Project {
-      archive: (id: ArchiveProjectInput) => Promise<ArchiveProjectOutput>
+      archive: (input: ArchiveProjectInput) => Promise<ArchiveProjectOutput>;
     }
   }
 }

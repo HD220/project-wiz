@@ -1,7 +1,6 @@
-import { z } from "zod";
 import bcrypt from "bcryptjs";
 import { createDatabaseConnection } from "@/shared/database/config";
-import { usersTable } from "@/main/database/schemas/user.schema";
+import { usersTable, type SelectUser } from "@/main/database/schemas/user.schema";
 import { accountsTable } from "@/main/database/schemas/auth.schema";
 import { userPreferencesTable } from "@/main/database/schemas/user-preferences.schema";
 import { userSessionsTable } from "@/main/database/schemas/user-sessions.schema";
@@ -9,37 +8,22 @@ import { eq } from "drizzle-orm";
 
 const { getDatabase } = createDatabaseConnection(true);
 
-// Input validation schema baseado em RegisterUserInput
-export const RegisterInputSchema = z.object({
-  username: z.string().min(3, "Username must be at least 3 characters long"),
-  name: z.string().min(2, "Name must be at least 2 characters long"),
-  avatar: z.string().optional(),
-  password: z.string().min(6, "Password must be at least 6 characters long"),
-});
-
-// Output validation schema baseado em AuthResult
-export const RegisterOutputSchema = z.object({
-  user: z.object({
-    id: z.string(),
-    name: z.string(),
-    avatar: z.string().nullable(),
-    type: z.enum(["human", "agent"]),
-    isActive: z.boolean(),
-    deactivatedAt: z.date().nullable(),
-    deactivatedBy: z.string().nullable(),
-    createdAt: z.date(),
-    updatedAt: z.date(),
-  }),
-  sessionToken: z.string(),
-});
-
-export type RegisterInput = z.infer<typeof RegisterInputSchema>;
-export type RegisterOutput = z.infer<typeof RegisterOutputSchema>;
-
-export async function validateRegisterData(params: RegisterInput): Promise<RegisterInput> {
-  return RegisterInputSchema.parse(params);
+export interface RegisterData {
+  username: string;
+  name: string;
+  avatar?: string;
+  password: string;
 }
 
+export interface RegisterResult {
+  user: SelectUser;
+  sessionToken: string;
+}
+
+/**
+ * Pure database function - only Drizzle types
+ * No validation, no business logic, just database operations
+ */
 export async function checkUsernameExists(username: string): Promise<boolean> {
   const db = getDatabase();
   const [existingAccount] = await db
@@ -51,54 +35,61 @@ export async function checkUsernameExists(username: string): Promise<boolean> {
   return !!existingAccount;
 }
 
-export async function createUserAccount(params: RegisterInput): Promise<RegisterOutput> {
+export async function createUserAccount(data: RegisterData): Promise<RegisterResult> {
   const db = getDatabase();
   
-  // 1. Create user
-  const [user] = await db
-    .insert(usersTable)
-    .values({
-      name: params.name,
-      avatar: params.avatar,
-      type: "human",
-    })
-    .returning();
+  // Usar transação síncrona conforme o padrão do AgentService original
+  return db.transaction((tx) => {
+    // 1. Create user
+    const users = tx
+      .insert(usersTable)
+      .values({
+        name: data.name,
+        avatar: data.avatar || null,
+        type: "human",
+      })
+      .returning()
+      .all();
 
-  if (!user) {
-    throw new Error("Failed to create user");
-  }
+    const user = users[0];
+    if (!user?.id) {
+      throw new Error("Failed to create user");
+    }
 
-  // 2. Create account with hashed password
-  const passwordHash = await bcrypt.hash(params.password, 12);
-  const [account] = await db
-    .insert(accountsTable)
-    .values({
+    // 2. Create account with hashed password
+    const passwordHash = bcrypt.hashSync(data.password, 12);
+    const accounts = tx
+      .insert(accountsTable)
+      .values({
+        userId: user.id,
+        username: data.username,
+        passwordHash,
+      })
+      .returning()
+      .all();
+
+    const account = accounts[0];
+    if (!account) {
+      throw new Error("Failed to create account");
+    }
+
+    // 3. Create preferences
+    tx.insert(userPreferencesTable).values({
       userId: user.id,
-      username: params.username,
-      passwordHash,
-    })
-    .returning();
+      theme: "system",
+    }).run();
 
-  if (!account) {
-    throw new Error("Failed to create account");
-  }
+    // 4. Create session token
+    const sessionToken = crypto.randomUUID();
+    const SESSION_DURATION_MS = 30 * 24 * 60 * 60 * 1000; // 30 days
+    const expiresAt = new Date(Date.now() + SESSION_DURATION_MS);
 
-  // 3. Create preferences
-  await db.insert(userPreferencesTable).values({
-    userId: user.id,
-    theme: "system",
+    tx.insert(userSessionsTable).values({
+      userId: user.id,
+      token: sessionToken,
+      expiresAt,
+    }).run();
+
+    return { user, sessionToken };
   });
-
-  // 4. Create session token
-  const sessionToken = crypto.randomUUID();
-  const SESSION_DURATION_MS = 30 * 24 * 60 * 60 * 1000; // 30 days
-  const expiresAt = new Date(Date.now() + SESSION_DURATION_MS);
-
-  await db.insert(userSessionsTable).values({
-    userId: user.id,
-    token: sessionToken,
-    expiresAt,
-  });
-
-  return RegisterOutputSchema.parse({ user, sessionToken });
 }

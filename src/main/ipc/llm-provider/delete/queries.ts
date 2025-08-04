@@ -1,34 +1,27 @@
-import { z } from "zod";
 import { eq } from "drizzle-orm";
-import { createDatabaseConnection } from "@/shared/database/config";
-import { 
-  llmProvidersTable 
-} from "@/main/database/schemas/llm-provider.schema";
+
 import { agentsTable } from "@/main/database/schemas/agent.schema";
+import { llmProvidersTable } from "@/main/database/schemas/llm-provider.schema";
+
+import { createDatabaseConnection } from "@/shared/database/config";
 
 const { getDatabase } = createDatabaseConnection(true);
 
-// Input validation schema
-export const DeleteLlmProviderInputSchema = z.string().min(1, "Provider ID is required");
-
-// Output validation schema
-export const DeleteLlmProviderOutputSchema = z.object({
-  message: z.string(),
-});
-
-export type DeleteLlmProviderInput = z.infer<typeof DeleteLlmProviderInputSchema>;
-export type DeleteLlmProviderOutput = z.infer<typeof DeleteLlmProviderOutputSchema>;
-
-export async function deleteLlmProvider(id: DeleteLlmProviderInput): Promise<DeleteLlmProviderOutput> {
+/**
+ * Pure database function - only Drizzle types
+ * No validation, no business logic, just database operations
+ */
+export async function deleteLlmProvider(
+  id: string,
+  _deletedBy: string,
+): Promise<boolean> {
   const db = getDatabase();
-  
-  const validatedId = DeleteLlmProviderInputSchema.parse(id);
-  
+
   // Primeiro verificar se algum agent está usando este provider
   const [agentUsingProvider] = await db
     .select({ id: agentsTable.id })
     .from(agentsTable)
-    .where(eq(agentsTable.providerId, validatedId))
+    .where(eq(agentsTable.providerId, id))
     .limit(1);
 
   if (agentUsingProvider) {
@@ -39,13 +32,11 @@ export async function deleteLlmProvider(id: DeleteLlmProviderInput): Promise<Del
 
   const result = await db
     .delete(llmProvidersTable)
-    .where(eq(llmProvidersTable.id, validatedId));
+    .where(eq(llmProvidersTable.id, id));
 
   if (result.changes === 0) {
     throw new Error("Provider not found");
   }
 
-  return DeleteLlmProviderOutputSchema.parse({
-    message: "Provider deleted successfully"
-  });
+  return true;
 }

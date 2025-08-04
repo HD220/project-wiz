@@ -1,21 +1,50 @@
-import { 
-  getAvailableUsers,
-  type ListAvailableUsersInput,
-  type ListAvailableUsersOutput 
-} from "./model";
+import { z } from "zod";
+import { getAvailableUsers } from "./queries";
+import { UserSchema } from "@/shared/types";
 import { requireAuth } from "@/main/utils/session-registry";
 import { getLogger } from "@/shared/logger/config";
 
 const logger = getLogger("user.list-available-users.invoke");
 
-export default async function(params?: ListAvailableUsersInput): Promise<ListAvailableUsersOutput> {
+// Input schema
+const ListAvailableUsersInputSchema = z.object({
+  currentUserId: z.string(),
+  type: z.enum(["human", "agent"]).optional(),
+});
+
+// Output schema
+const ListAvailableUsersOutputSchema = z.array(UserSchema);
+
+type ListAvailableUsersInput = z.infer<typeof ListAvailableUsersInputSchema>;
+type ListAvailableUsersOutput = z.infer<typeof ListAvailableUsersOutputSchema>;
+
+export default async function(input: ListAvailableUsersInput): Promise<ListAvailableUsersOutput> {
   logger.debug("Listing available users");
 
-  // 1. Check authentication (replicando a lógica do handler original)
+  // 1. Validate input
+  const validatedInput = ListAvailableUsersInputSchema.parse(input);
+
+  // 2. Check authentication
   const currentUser = requireAuth();
   
-  // 2. Execute core business logic
-  const result = await getAvailableUsers(currentUser.id, params);
+  // 3. Query database
+  const dbUsers = await getAvailableUsers(
+    validatedInput.currentUserId,
+    validatedInput.type ? { type: validatedInput.type } : undefined
+  );
+  
+  // 4. Mapping: SelectUser[] → User[] (without technical fields)
+  const apiUsers = dbUsers.map(dbUser => ({
+    id: dbUser.id,
+    name: dbUser.name,
+    avatar: dbUser.avatar,
+    type: dbUser.type,
+    createdAt: new Date(dbUser.createdAt),
+    updatedAt: new Date(dbUser.updatedAt),
+  }));
+  
+  // 5. Validate output
+  const result = ListAvailableUsersOutputSchema.parse(apiUsers);
   
   logger.debug("Listed available users", { count: result.length });
   
@@ -25,7 +54,7 @@ export default async function(params?: ListAvailableUsersInput): Promise<ListAva
 declare global {
   namespace WindowAPI {
     interface User {
-      listAvailableUsers: (params?: ListAvailableUsersInput) => Promise<ListAvailableUsersOutput>
+      listAvailableUsers: (input: ListAvailableUsersInput) => Promise<ListAvailableUsersOutput>
     }
   }
 }

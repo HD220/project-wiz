@@ -1,22 +1,30 @@
-import { 
-  getActiveAgentsCount,
-  type GetActiveCountOutput 
-} from "./queries";
+import { z } from "zod";
+import { getActiveAgentsCount } from "./queries";
 import { requireAuth } from "@/main/utils/session-registry";
 import { getLogger } from "@/shared/logger/config";
 
 const logger = getLogger("agent.get-active-count.invoke");
 
-export default async function(): Promise<GetActiveCountOutput> {
-  logger.debug("Getting active agents count for user");
+// Output schema
+const GetActiveCountOutputSchema = z.object({
+  count: z.number(),
+});
 
-  // 1. Check authentication (replicando a lógica do handler original)
+type GetActiveCountOutput = z.infer<typeof GetActiveCountOutputSchema>;
+
+export default async function(): Promise<GetActiveCountOutput> {
+  logger.debug("Getting active agents count");
+
+  // 1. Check authentication
   const currentUser = requireAuth();
   
-  // 2. Execute core business logic
-  const result = await getActiveAgentsCount({ ownerId: currentUser.id });
+  // 2. Query recebe dados e gerencia campos técnicos internamente
+  const count = await getActiveAgentsCount(currentUser.id);
   
-  logger.debug("Got active agents count", { count: result.count, ownerId: currentUser.id });
+  // 3. Validate output
+  const result = GetActiveCountOutputSchema.parse({ count });
+  
+  logger.debug("Got active agents count", { count: result.count });
   
   return result;
 }

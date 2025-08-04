@@ -1,40 +1,19 @@
-import { z } from "zod";
 import { eq, and } from "drizzle-orm";
 import { createDatabaseConnection } from "@/shared/database/config";
 import { usersTable, type SelectUser } from "@/main/database/schemas/user.schema";
 
 const { getDatabase } = createDatabaseConnection(true);
 
-// Input validation schema
-export const FindUserByIdInputSchema = z.object({
-  userId: z.string().min(1, "User ID is required"),
-  includeInactive: z.boolean().optional().default(false)
-});
-
-// Output validation schema (SelectUser nullable)
-export const FindUserByIdOutputSchema = z.object({
-  id: z.string(),
-  name: z.string(),
-  avatar: z.string().nullable(),
-  type: z.enum(["human", "agent"]),
-  isActive: z.boolean(),
-  deactivatedAt: z.date().nullable(),
-  deactivatedBy: z.string().nullable(),
-  createdAt: z.date(),
-  updatedAt: z.date(),
-}).nullable();
-
-export type FindUserByIdInput = z.infer<typeof FindUserByIdInputSchema>;
-export type FindUserByIdOutput = z.infer<typeof FindUserByIdOutputSchema>;
-
-export async function getUserById(input: FindUserByIdInput): Promise<FindUserByIdOutput> {
+/**
+ * Pure database function - only Drizzle types
+ * No validation, no business logic, just database operations
+ */
+export async function getUserById(userId: string, includeInactive: boolean = false): Promise<SelectUser | null> {
   const db = getDatabase();
-  
-  const validatedInput = FindUserByIdInputSchema.parse(input);
 
-  const conditions = [eq(usersTable.id, validatedInput.userId)];
+  const conditions = [eq(usersTable.id, userId)];
 
-  if (!validatedInput.includeInactive) {
+  if (!includeInactive) {
     conditions.push(eq(usersTable.isActive, true));
   }
 
@@ -44,9 +23,5 @@ export async function getUserById(input: FindUserByIdInput): Promise<FindUserByI
     .where(and(...conditions))
     .limit(1);
 
-  if (!user) {
-    return null;
-  }
-
-  return FindUserByIdOutputSchema.parse(user);
+  return user || null;
 }

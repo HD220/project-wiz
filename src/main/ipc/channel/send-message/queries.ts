@@ -1,50 +1,22 @@
-import { z } from "zod";
 import { createDatabaseConnection } from "@/shared/database/config";
-import { messagesTable, type SelectMessage } from "@/main/database/schemas/message.schema";
+import { messagesTable, type InsertMessage, type SelectMessage } from "@/main/database/schemas/message.schema";
 import { eventBus } from "@/shared/events/event-bus";
 import { getLogger } from "@/shared/logger/config";
 
 const { getDatabase } = createDatabaseConnection(true);
 const logger = getLogger("channel.send-message.model");
 
-// Input validation schema
-export const SendChannelMessageInputSchema = z.object({
-  channelId: z.string().min(1, "Channel ID is required"),
-  authorId: z.string().min(1, "Author ID is required"),
-  content: z.string().min(1, "Content is required")
-});
-
-// Output validation schema
-export const SendChannelMessageOutputSchema = z.object({
-  id: z.string(),
-  sourceType: z.string(),
-  sourceId: z.string(),
-  authorId: z.string(),
-  content: z.string(),
-  createdAt: z.date(),
-  updatedAt: z.date(),
-  isActive: z.boolean(),
-  deactivatedAt: z.date().nullable(),
-  deactivatedBy: z.string().nullable()
-});
-
-export type SendChannelMessageInput = z.infer<typeof SendChannelMessageInputSchema>;
-export type SendChannelMessageOutput = z.infer<typeof SendChannelMessageOutputSchema>;
-
-export async function sendChannelMessage(input: SendChannelMessageInput): Promise<SendChannelMessageOutput> {
+/**
+ * Pure database function - only Drizzle types
+ * No validation, no business logic, just database operations
+ */
+export async function sendChannelMessage(data: InsertMessage): Promise<SelectMessage> {
   const db = getDatabase();
-  
-  const validatedInput = SendChannelMessageInputSchema.parse(input);
 
   // 1. Send message to database
   const [message] = await db
     .insert(messagesTable)
-    .values({
-      sourceType: "channel",
-      sourceId: validatedInput.channelId,
-      authorId: validatedInput.authorId,
-      content: validatedInput.content
-    })
+    .values(data)
     .returning();
 
   if (!message) {
@@ -65,7 +37,7 @@ export async function sendChannelMessage(input: SendChannelMessageInput): Promis
       conversationType: "channel",
       authorId: message.authorId,
       content: message.content,
-      timestamp: message.createdAt
+      timestamp: new Date(message.createdAt)
     });
 
     logger.info("✅ User message event emitted successfully:", {
@@ -77,5 +49,5 @@ export async function sendChannelMessage(input: SendChannelMessageInput): Promis
     // Don't fail the message sending if event emission fails
   }
 
-  return SendChannelMessageOutputSchema.parse(message);
+  return message;
 }

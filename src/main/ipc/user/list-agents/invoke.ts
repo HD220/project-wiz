@@ -1,34 +1,54 @@
-import { 
-  getAgents,
-  type ListAgentsInput,
-  type ListAgentsOutput 
-} from "./model";
+import { z } from "zod";
+import { getAgents } from "./queries";
+import { UserSchema } from "@/shared/types";
 import { requireAuth } from "@/main/utils/session-registry";
 import { getLogger } from "@/shared/logger/config";
 
 const logger = getLogger("user.list-agents.invoke");
 
-export default async function(input: ListAgentsInput): Promise<ListAgentsOutput> {
-  logger.debug("Listing agent users", { includeInactive: input.includeInactive });
+const InputSchema = z.object({
+  ownerId: z.string().optional(),
+  showInactive: z.boolean().optional()
+}).optional();
+
+const OutputSchema = z.array(UserSchema);
+
+type Input = z.infer<typeof InputSchema>;
+type Output = z.infer<typeof OutputSchema>;
+
+export default async function(input: Input): Promise<Output> {
+  const validatedInput = InputSchema.parse(input);
+  
+  logger.debug("Listing agent users", { filters: validatedInput });
 
   // 1. Check authentication
   const currentUser = requireAuth();
   
   // 2. Execute core business logic
-  const result = await getAgents(input);
+  const users = await getAgents(validatedInput || {});
+  
+  // 3. Map to clean domain objects without technical fields
+  const result = users.map(user => ({
+    id: user.id,
+    name: user.name,
+    avatar: user.avatar,
+    type: user.type,
+    createdAt: new Date(user.createdAt),
+    updatedAt: new Date(user.updatedAt)
+  }));
   
   logger.debug("Agent users listed", { 
     userCount: result.length, 
-    includeInactive: input.includeInactive 
+    filters: validatedInput 
   });
   
-  return result;
+  return OutputSchema.parse(result);
 }
 
 declare global {
   namespace WindowAPI {
     interface User {
-      listAgents: (input: ListAgentsInput) => Promise<ListAgentsOutput>
+      listAgents: (input: Input) => Promise<Output>
     }
   }
 }
