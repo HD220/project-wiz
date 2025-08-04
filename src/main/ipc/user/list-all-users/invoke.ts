@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { getAllUsers } from "./queries";
 import { UserSchema } from "@/shared/types";
-import { requireAuth } from "@/main/utils/session-registry";
+import { requireAuth } from "@/main/services/session-registry";
 import { getLogger } from "@/shared/logger/config";
 
 const logger = getLogger("user.list-all-users.invoke");

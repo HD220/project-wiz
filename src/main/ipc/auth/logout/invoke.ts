@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { clearUserSessions } from "./queries";
 import { eventBus } from "@/shared/events/event-bus";
-import { sessionRegistry } from "@/main/utils/session-registry";
+import { sessionRegistry } from "@/main/services/session-registry";
 import { getLogger } from "@/shared/logger/config";
 
 const logger = getLogger("auth.logout");

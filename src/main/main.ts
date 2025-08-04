@@ -7,14 +7,14 @@ dotenv.config();
 import { app, BrowserWindow, ipcMain } from "electron";
 import squirrel from "electron-squirrel-startup";
 
-import { sessionRegistry } from "@/main/utils/session-registry";
-// import { QueueClient } from "@/main/features/queue-client/queue-client"; // Commented out - used only in test code
+import { sessionRegistry } from "@/main/services/session-registry";
+// import { QueueClient } from "@/shared/queue-client/queue-client"; // Commented out - used only in test code
 import { getLogger } from "@/shared/logger/config";
-import { startWorker, stopWorker } from "@/main/workers/worker-manager";
+import { startWorker, stopWorker } from "@/main/services/worker-manager";
 import { initializeEventBus, eventBus } from "@/shared/events/event-bus";
 // import { initializeAgenticWorkerHandler, agenticWorkerHandler } from "@/shared/worker/agentic-worker.handler"; // Removed - will be rewritten
 import { loadIpcHandlers } from "@/main/utils/ipc-loader";
-import { registerWindow } from "@/main/utils/window-registry";
+import { registerWindow } from "@/main/services/window-registry";
 
 declare const MAIN_WINDOW_VITE_DEV_SERVER_URL: string | undefined;
 declare const MAIN_WINDOW_VITE_NAME: string;

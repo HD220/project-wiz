@@ -6,7 +6,7 @@ import {
   type UnarchiveChannelInput,
   type UnarchiveChannelOutput 
 } from "@/shared/types/channel";
-import { requireAuth } from "@/main/utils/session-registry";
+import { requireAuth } from "@/main/services/session-registry";
 import { getLogger } from "@/shared/logger/config";
 import { eventBus } from "@/shared/events/event-bus";
 

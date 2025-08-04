@@ -38,7 +38,6 @@ export default async function(id: GetAgentWithProviderInput): Promise<GetAgentWi
     role: dbResult.role,
     backstory: dbResult.backstory,
     goal: dbResult.goal,
-    systemPrompt: dbResult.systemPrompt,
     providerId: dbResult.providerId,
     modelConfig: JSON.parse(dbResult.modelConfig),
     status: dbResult.status,

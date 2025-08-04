@@ -21,7 +21,6 @@ export interface SelectAgent {
   providerId: string;
   modelConfig: string; // JSON string
   status: AgentStatus;
-  systemPrompt: string;
 
   // Soft deletion fields
   isActive: boolean;

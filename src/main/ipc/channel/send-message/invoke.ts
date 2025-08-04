@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { sendChannelMessage } from "./queries";
 import { MessageSchema } from "@/shared/types";
-import { requireAuth } from "@/main/utils/session-registry";
+import { requireAuth } from "@/main/services/session-registry";
 import { getLogger } from "@/shared/logger/config";
 
 const logger = getLogger("channel.send-message.invoke");

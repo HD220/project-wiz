@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { createAgent } from "./queries";
 import { AgentSchema } from "@/shared/types";
-import { requireAuth } from "@/main/utils/session-registry";
+import { requireAuth } from "@/main/services/session-registry";
 import { eventBus } from "@/shared/events/event-bus";
 import { getLogger } from "@/shared/logger/config";
 
@@ -45,7 +45,6 @@ export default async function(input: CreateAgentInput): Promise<CreateAgentOutpu
     role: dbAgent.role,
     backstory: dbAgent.backstory,
     goal: dbAgent.goal,
-    systemPrompt: dbAgent.systemPrompt,
     providerId: dbAgent.providerId,
     modelConfig: dbAgent.modelConfig,
     status: dbAgent.status,

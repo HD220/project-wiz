@@ -10,7 +10,6 @@ export const AgentSchema = z.object({
   role: z.string(),
   backstory: z.string(),
   goal: z.string(),
-  systemPrompt: z.string(),
   avatar: z.string().nullable(),
   status: z.enum(["active", "inactive", "busy"]),
   modelConfig: z.record(z.unknown()),

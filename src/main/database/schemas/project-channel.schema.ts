@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { sqliteTable, text, integer, index } from "drizzle-orm/sqlite-core";
+import { sqliteTable, text, integer, index, primaryKey } from "drizzle-orm/sqlite-core";
 
 import { usersTable } from "./user.schema";
 
@@ -9,8 +9,10 @@ export const projectChannelsTable = sqliteTable(
   "project_channels",
   {
     id: text("id")
-      .primaryKey()
       .$defaultFn(() => crypto.randomUUID()),
+    ownerId: text("owner_id")
+      .notNull()
+      .references(() => usersTable.id, { onDelete: "cascade" }),
     projectId: text("project_id")
       .notNull()
       .references(() => projectsTable.id, { onDelete: "cascade" }),
@@ -34,7 +36,11 @@ export const projectChannelsTable = sqliteTable(
       .default(sql`CURRENT_TIMESTAMP`),
   },
   (table) => ({
+    // Composite primary key
+    pk: primaryKey({ columns: [table.ownerId, table.id] }),
+    
     // Performance indexes
+    ownerIdIdx: index("project_channels_owner_id_idx").on(table.ownerId),
     projectIdIdx: index("project_channels_project_id_idx").on(table.projectId),
     createdAtIdx: index("project_channels_created_at_idx").on(table.createdAt),
     archivedByIdx: index("project_channels_archived_by_idx").on(

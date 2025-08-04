@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { listLlmProviders } from "./queries";
 import { LlmProviderSchema } from "@/shared/types";
-import { requireAuth } from "@/main/utils/session-registry";
+import { requireAuth } from "@/main/services/session-registry";
 import { getLogger } from "@/shared/logger/config";
 
 const logger = getLogger("llm-provider.list.invoke");

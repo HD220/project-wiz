@@ -2,7 +2,7 @@ import { z } from "zod";
 import { checkUsernameExists, createUserAccount } from "./queries";
 import { UserSchema } from "@/shared/types";
 import { eventBus } from "@/shared/events/event-bus";
-import { sessionRegistry } from "@/main/utils/session-registry";
+import { sessionRegistry } from "@/main/services/session-registry";
 import { getLogger } from "@/shared/logger/config";
 
 const logger = getLogger("auth.register");

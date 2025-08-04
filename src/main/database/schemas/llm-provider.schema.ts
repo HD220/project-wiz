@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { sqliteTable, text, integer, index } from "drizzle-orm/sqlite-core";
+import { sqliteTable, text, integer, index, primaryKey } from "drizzle-orm/sqlite-core";
 
 import { usersTable } from "@/main/database/schemas/user.schema";
 
@@ -14,9 +14,8 @@ export const llmProvidersTable = sqliteTable(
   "llm_providers",
   {
     id: text("id")
-      .primaryKey()
       .$defaultFn(() => crypto.randomUUID()),
-    userId: text("user_id")
+    ownerId: text("owner_id")
       .notNull()
       .references(() => usersTable.id, { onDelete: "cascade" }),
     name: text("name").notNull(),
@@ -41,8 +40,11 @@ export const llmProvidersTable = sqliteTable(
       .default(sql`(strftime('%s', 'now'))`),
   },
   (table) => ({
+    // Composite primary key
+    pk: primaryKey({ columns: [table.ownerId, table.id] }),
+    
     // Performance indexes for foreign keys and frequently queried columns
-    userIdIdx: index("llm_providers_user_id_idx").on(table.userId),
+    ownerIdIdx: index("llm_providers_owner_id_idx").on(table.ownerId),
     typeIdx: index("llm_providers_type_idx").on(table.type),
     isDefaultIdx: index("llm_providers_is_default_idx").on(table.isDefault),
     isActiveIdx: index("llm_providers_is_active_idx").on(table.isActive),

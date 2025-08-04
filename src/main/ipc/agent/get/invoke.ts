@@ -35,7 +35,6 @@ export default async function(input: GetAgentInput): Promise<GetAgentOutput> {
     role: dbAgent.role,
     backstory: dbAgent.backstory,
     goal: dbAgent.goal,
-    systemPrompt: dbAgent.systemPrompt,
     providerId: dbAgent.providerId,
     modelConfig: dbAgent.modelConfig,
     status: dbAgent.status,

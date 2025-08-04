@@ -6,7 +6,7 @@ import {
   type UpdateThemeInput,
   type UpdateThemeOutput
 } from "@/shared/types/profile";
-import { requireAuth } from "@/main/utils/session-registry";
+import { requireAuth } from "@/main/services/session-registry";
 import { getLogger } from "@/shared/logger/config";
 import { eventBus } from "@/shared/events/event-bus";
 

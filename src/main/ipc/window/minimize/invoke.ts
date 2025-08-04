@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { getMainWindow } from "@/main/utils/window-registry";
+import { getMainWindow } from "@/main/services/window-registry";
 
 // Input validation schema (sem parâmetros)
 const MinimizeWindowInputSchema = z.void();

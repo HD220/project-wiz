@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { sqliteTable, text, integer, index } from "drizzle-orm/sqlite-core";
+import { sqliteTable, text, integer, index, primaryKey } from "drizzle-orm/sqlite-core";
 
 import { usersTable } from "./user.schema";
 
@@ -9,7 +9,6 @@ export const projectsTable = sqliteTable(
   "projects",
   {
     id: text("id")
-      .primaryKey()
       .$defaultFn(() => crypto.randomUUID()),
     name: text("name").notNull(),
     description: text("description"),
@@ -35,6 +34,9 @@ export const projectsTable = sqliteTable(
       .default(sql`(strftime('%s', 'now'))`),
   },
   (table) => ({
+    // Composite primary key
+    pk: primaryKey({ columns: [table.ownerId, table.id] }),
+    
     // Performance indexes for foreign keys
     ownerIdIdx: index("projects_owner_id_idx").on(table.ownerId),
     statusIdx: index("projects_status_idx").on(table.status),

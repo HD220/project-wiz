@@ -11,9 +11,6 @@ export const agentsTable = sqliteTable(
   {
     id: text("id")
       .primaryKey()
-      .$defaultFn(() => crypto.randomUUID()),
-    userId: text("user_id")
-      .notNull()
       .references(() => usersTable.id, { onDelete: "cascade" }),
     ownerId: text("owner_id").references(() => usersTable.id, {
       onDelete: "cascade",
@@ -25,7 +22,6 @@ export const agentsTable = sqliteTable(
     role: text("role").notNull(),
     backstory: text("backstory").notNull(),
     goal: text("goal").notNull(),
-    systemPrompt: text("system_prompt").notNull(),
     status: text("status").$type<AgentStatus>().notNull().default("inactive"),
     modelConfig: text("model_config").notNull(), // JSON string
 
@@ -43,7 +39,6 @@ export const agentsTable = sqliteTable(
   },
   (table) => ({
     // Performance indexes for foreign keys
-    userIdIdx: index("agents_user_id_idx").on(table.userId),
     ownerIdIdx: index("agents_owner_id_idx").on(table.ownerId),
     providerIdIdx: index("agents_provider_id_idx").on(table.providerId),
     statusIdx: index("agents_status_idx").on(table.status),

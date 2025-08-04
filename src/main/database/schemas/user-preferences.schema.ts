@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { sqliteTable, text, integer, index } from "drizzle-orm/sqlite-core";
+import { sqliteTable, text, integer, index, primaryKey } from "drizzle-orm/sqlite-core";
 
 import { usersTable } from "./user.schema";
 
@@ -9,9 +9,8 @@ export const userPreferencesTable = sqliteTable(
   "user_preferences",
   {
     id: text("id")
-      .primaryKey()
       .$defaultFn(() => crypto.randomUUID()),
-    userId: text("user_id")
+    ownerId: text("owner_id")
       .notNull()
       .references(() => usersTable.id, { onDelete: "cascade" }),
     theme: text("theme").$type<Theme>().notNull().default("system"),
@@ -23,8 +22,11 @@ export const userPreferencesTable = sqliteTable(
       .default(sql`CURRENT_TIMESTAMP`),
   },
   (table) => ({
+    // Composite primary key
+    pk: primaryKey({ columns: [table.ownerId, table.id] }),
+    
     // Performance indexes
-    userIdIdx: index("user_preferences_user_id_idx").on(table.userId),
+    ownerIdIdx: index("user_preferences_owner_id_idx").on(table.ownerId),
     themeIdx: index("user_preferences_theme_idx").on(table.theme),
   }),
 );

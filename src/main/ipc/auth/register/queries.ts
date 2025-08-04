@@ -1,7 +1,7 @@
 import bcrypt from "bcryptjs";
 import { createDatabaseConnection } from "@/shared/database/config";
 import { usersTable, type SelectUser } from "@/main/database/schemas/user.schema";
-import { accountsTable } from "@/main/database/schemas/auth.schema";
+import { accountsTable } from "@/main/database/schemas/account.schema";
 import { userPreferencesTable } from "@/main/database/schemas/user-preferences.schema";
 import { userSessionsTable } from "@/main/database/schemas/user-sessions.schema";
 import { eq } from "drizzle-orm";

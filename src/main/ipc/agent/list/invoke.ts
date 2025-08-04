@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { listAgents } from "./queries";
 import { AgentSchema } from "@/shared/types";
-import { requireAuth } from "@/main/utils/session-registry";
+import { requireAuth } from "@/main/services/session-registry";
 import { getLogger } from "@/shared/logger/config";
 
 const logger = getLogger("agent.list.invoke");
@@ -45,7 +45,6 @@ export default async function(input?: ListAgentsInput): Promise<ListAgentsOutput
     role: agent.role,
     backstory: agent.backstory,
     goal: agent.goal,
-    systemPrompt: agent.systemPrompt,
     providerId: agent.providerId,
     modelConfig: agent.modelConfig,
     status: agent.status,

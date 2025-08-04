@@ -1,7 +1,7 @@
 import { createDatabaseConnection } from "@/shared/database/config";
 import { usersTable } from "@/main/database/schemas/user.schema";
 import { userSessionsTable } from "@/main/database/schemas/user-sessions.schema";
-import { sessionRegistry } from "@/main/utils/session-registry";
+import { sessionRegistry } from "@/main/services/session-registry";
 import { eq, and, gt, desc } from "drizzle-orm";
 
 const { getDatabase } = createDatabaseConnection(true);

@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { sessionRegistry } from "@/main/utils/session-registry";
+import { sessionRegistry } from "@/main/services/session-registry";
 import { UserSchema } from "@/shared/types";
 
 const GetCurrentUserOutputSchema = UserSchema.nullable();

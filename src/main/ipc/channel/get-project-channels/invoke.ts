@@ -6,7 +6,7 @@ import {
   type GetProjectChannelsInput,
   type GetProjectChannelsOutput 
 } from "@/shared/types/channel";
-import { requireAuth } from "@/main/utils/session-registry";
+import { requireAuth } from "@/main/services/session-registry";
 import { getLogger } from "@/shared/logger/config";
 
 const logger = getLogger("channel.get-project-channels.invoke");

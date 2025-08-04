@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { requireAuth } from "@/main/utils/session-registry";
+import { requireAuth } from "@/main/services/session-registry";
 
 import { getLogger } from "@/shared/logger/config";
 

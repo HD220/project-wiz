@@ -32,7 +32,6 @@ export default async function(input: GetActiveForConversationInput): Promise<Get
     role: agent.role,
     backstory: agent.backstory,
     goal: agent.goal,
-    systemPrompt: agent.systemPrompt,
     providerId: agent.providerId,
     modelConfig: agent.modelConfig,
     status: agent.status,

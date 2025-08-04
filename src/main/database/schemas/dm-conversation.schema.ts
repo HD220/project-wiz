@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { sqliteTable, text, integer, index } from "drizzle-orm/sqlite-core";
+import { sqliteTable, text, integer, index, primaryKey } from "drizzle-orm/sqlite-core";
 
 import { usersTable } from "./user.schema";
 
@@ -7,8 +7,10 @@ export const dmConversationsTable = sqliteTable(
   "dm_conversations",
   {
     id: text("id")
-      .primaryKey()
       .$defaultFn(() => crypto.randomUUID()),
+    ownerId: text("owner_id")
+      .notNull()
+      .references(() => usersTable.id, { onDelete: "cascade" }),
     name: text("name"), // Auto-generated from participants
     description: text("description"),
 
@@ -29,7 +31,11 @@ export const dmConversationsTable = sqliteTable(
       .default(sql`CURRENT_TIMESTAMP`),
   },
   (table) => ({
+    // Composite primary key
+    pk: primaryKey({ columns: [table.ownerId, table.id] }),
+    
     // Performance indexes
+    ownerIdIdx: index("dm_conversations_owner_id_idx").on(table.ownerId),
     createdAtIdx: index("dm_conversations_created_at_idx").on(table.createdAt),
     archivedByIdx: index("dm_conversations_archived_by_idx").on(
       table.archivedBy,
@@ -59,8 +65,10 @@ export const dmParticipantsTable = sqliteTable(
   "dm_participants",
   {
     id: text("id")
-      .primaryKey()
       .$defaultFn(() => crypto.randomUUID()),
+    ownerId: text("owner_id")
+      .notNull()
+      .references(() => usersTable.id, { onDelete: "cascade" }),
     dmConversationId: text("dm_conversation_id")
       .notNull()
       .references(() => dmConversationsTable.id, { onDelete: "cascade" }),
@@ -81,7 +89,11 @@ export const dmParticipantsTable = sqliteTable(
       .default(sql`CURRENT_TIMESTAMP`),
   },
   (table) => ({
+    // Composite primary key
+    pk: primaryKey({ columns: [table.ownerId, table.id] }),
+    
     // Performance indexes
+    ownerIdIdx: index("dm_participants_owner_id_idx").on(table.ownerId),
     dmConversationIdIdx: index("dm_participants_dm_conversation_id_idx").on(
       table.dmConversationId,
     ),

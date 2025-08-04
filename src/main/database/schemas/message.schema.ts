@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { sqliteTable, text, integer, index } from "drizzle-orm/sqlite-core";
+import { sqliteTable, text, integer, index, primaryKey } from "drizzle-orm/sqlite-core";
 
 import { usersTable } from "./user.schema";
 
@@ -9,14 +9,13 @@ export const messagesTable = sqliteTable(
   "messages",
   {
     id: text("id")
-      .primaryKey()
       .$defaultFn(() => crypto.randomUUID()),
 
     // Polymorphic reference - can point to DM or Channel
     sourceType: text("source_type").$type<MessageSourceType>().notNull(),
     sourceId: text("source_id").notNull(), // dm_conversation_id or project_channel_id
 
-    authorId: text("author_id")
+    ownerId: text("owner_id")
       .notNull()
       .references(() => usersTable.id, { onDelete: "cascade" }),
     content: text("content").notNull(),
@@ -34,10 +33,13 @@ export const messagesTable = sqliteTable(
       .default(sql`(unixepoch() * 1000)`),
   },
   (table) => ({
+    // Composite primary key
+    pk: primaryKey({ columns: [table.ownerId, table.id] }),
+    
     // Performance indexes for foreign keys
+    ownerIdIdx: index("messages_owner_id_idx").on(table.ownerId),
     sourceTypeIdx: index("messages_source_type_idx").on(table.sourceType),
     sourceIdIdx: index("messages_source_id_idx").on(table.sourceId),
-    authorIdIdx: index("messages_author_id_idx").on(table.authorId),
     createdAtIdx: index("messages_created_at_idx").on(table.createdAt),
     deactivatedByIdx: index("messages_deactivated_by_idx").on(
       table.deactivatedBy,
@@ -69,8 +71,10 @@ export const llmMessagesTable = sqliteTable(
   "llm_messages",
   {
     id: text("id")
-      .primaryKey()
       .$defaultFn(() => crypto.randomUUID()),
+    ownerId: text("owner_id")
+      .notNull()
+      .references(() => usersTable.id, { onDelete: "cascade" }),
     messageId: text("message_id")
       .notNull()
       .references(() => messagesTable.id, { onDelete: "cascade" }),
@@ -92,7 +96,11 @@ export const llmMessagesTable = sqliteTable(
       .default(sql`(unixepoch() * 1000)`),
   },
   (table) => ({
+    // Composite primary key
+    pk: primaryKey({ columns: [table.ownerId, table.id] }),
+    
     // Performance indexes
+    ownerIdIdx: index("llm_messages_owner_id_idx").on(table.ownerId),
     messageIdIdx: index("llm_messages_message_id_idx").on(table.messageId),
     roleIdx: index("llm_messages_role_idx").on(table.role),
     createdAtIdx: index("llm_messages_created_at_idx").on(table.createdAt),

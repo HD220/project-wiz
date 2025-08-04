@@ -53,10 +53,7 @@ export async function createAgent(data: InsertAgent & { ownerId: string }): Prom
       throw new Error(`Failed to create user for agent "${data.name}"`);
     }
 
-    // 3. Gerar system prompt
-    const systemPrompt = `You are a ${data.role}. ${data.backstory}. Your current goal is ${data.goal}. Always be helpful, professional, and focus on best practices in your domain. Provide clear, actionable advice and maintain a collaborative approach when working with humans and other agents.`;
-
-    // 4. Criar o agent record usando InsertAgent type
+    // 3. Criar o agent record usando InsertAgent type
     const agentInsertData: InsertAgent = {
       userId: agentUser.id,
       ownerId: data.ownerId,
@@ -64,7 +61,6 @@ export async function createAgent(data: InsertAgent & { ownerId: string }): Prom
       role: data.role,
       backstory: data.backstory,
       goal: data.goal,
-      systemPrompt,
       providerId: data.providerId,
       modelConfig: data.modelConfig,
       status: "inactive", // Sempre começa como inactive
