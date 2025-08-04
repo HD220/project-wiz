@@ -20,9 +20,13 @@ declare global {
       channel: Channel;
       profile: Profile;
       window: Window;
+      event: Event;
 
       // General invoke method
       invoke: (channel: string, ...args: unknown[]) => Promise<{ success: boolean; data?: any; error?: string }>;
+
+      // Generic event listener for reactive stores
+      on: (channel: string, callback: (...args: any[]) => void) => () => void;
     }
   }
 }

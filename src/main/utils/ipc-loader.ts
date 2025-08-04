@@ -1,6 +1,5 @@
 import { ipcMain } from "electron";
 import { glob } from "glob";
-import { eventBus } from "@/shared/events/event-bus";
 import { getLogger } from "@/shared/logger/config";
 
 const logger = getLogger("ipc-loader");
@@ -88,49 +87,23 @@ export class IpcLoader {
 
       // Register the IPC handler with middleware
       ipcMain.handle(channel, async (event, data) => {
-        const startTime = Date.now();
-        
         try {
           logger.debug(`📥 IPC call: ${channel}`, { data });
           
-          const result = await mod.default(data);
-          const duration = Date.now() - startTime;
+          const result = await mod.default(data, event);
 
           logger.debug(`📤 IPC success: ${channel}`, { 
-            duration: `${duration}ms`,
             hasResult: !!result 
           });
-          
-          // Event-bus integration for reactive updates
-          if (this.shouldEmitCompletionEvent(channel)) {
-            eventBus.emit("conversation-updated", {
-              conversationId: data?.conversationId || "system",
-              conversationType: "dm",
-              updateType: "status-changed",
-              data: { channel, result, success: true },
-              timestamp: new Date(),
-            });
-          }
           
           return { success: true, data: result };
           
         } catch (error) {
-          const duration = Date.now() - startTime;
           const errorMessage = error instanceof Error ? error.message : String(error);
           
           logger.error(`❌ IPC error: ${channel}`, { 
             error: errorMessage,
-            duration: `${duration}ms`,
             data 
-          });
-
-          // Always emit error events for debugging and monitoring
-          eventBus.emit("conversation-updated", {
-            conversationId: data?.conversationId || "system",
-            conversationType: "dm", 
-            updateType: "status-changed",
-            data: { channel, error: errorMessage, success: false },
-            timestamp: new Date(),
           });
           
           return { success: false, error: errorMessage };
@@ -163,16 +136,8 @@ export class IpcLoader {
         return;
       }
 
-      // Register event listener on the global event bus
-      eventBus.on(channel as any, (data: any) => {
-        logger.debug(`📡 Event received: ${channel}`, { data });
-        
-        try {
-          mod.default(data);
-        } catch (error) {
-          logger.error(`❌ Listen handler error: ${channel}`, error);
-        }
-      });
+      // Listen handlers are no longer used in the new reactive system
+      logger.warn(`⚠️ Listen handler found but not registered: ${channel}. Use the new event system with event:register instead.`);
 
       this.registeredHandlers.add(channel);
       logger.info(`✅ Registered listener: ${channel}`);
@@ -182,18 +147,6 @@ export class IpcLoader {
     }
   }
 
-  /**
-   * Determine if completion events should be emitted for reactive updates
-   */
-  private shouldEmitCompletionEvent(channel: string): boolean {
-    return (
-      channel.startsWith("invoke:project:") ||
-      channel.startsWith("invoke:message:") ||
-      channel.includes(":create") ||
-      channel.includes(":update") ||
-      channel.includes(":delete")
-    );
-  }
 
   /**
    * Get registration stats for monitoring

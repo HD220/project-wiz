@@ -177,7 +177,20 @@ contextBridge.exposeInMainWorld("api", {
       ipcRenderer.invoke("invoke:window:close"),
   } satisfies WindowAPI.Window,
 
+  // Event system for reactive stores
+  event: {
+    register: (pattern: string) =>
+      ipcRenderer.invoke("invoke:event:register", pattern),
+  } satisfies WindowAPI.Event,
+
   // General invoke method
   invoke: (channel: string, ...args: unknown[]) =>
     ipcRenderer.invoke(channel, ...args),
+
+  // Generic event listener for reactive stores
+  on: (channel: string, callback: (...args: any[]) => void) => {
+    const subscription = (_: any, ...args: any[]) => callback(...args);
+    ipcRenderer.on(channel, subscription);
+    return () => ipcRenderer.removeListener(channel, subscription);
+  },
 } satisfies WindowAPI.API);
