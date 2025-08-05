@@ -1,10 +1,10 @@
 import { eq, and, gt, desc } from "drizzle-orm";
-import { createDatabaseConnection } from "@/shared/database/config";
-import { usersTable } from "@/main/database/schemas/user.schema";
-import { userSessionsTable } from "@/main/database/schemas/user-sessions.schema";
+import { createDatabaseConnection } from "@/shared/config/database";
+import { usersTable } from "@/main/schemas/user.schema";
+import { userSessionsTable } from "@/main/schemas/user-sessions.schema";
 import type { AuthenticatedUser } from "@/shared/types/user.types";
-import { getLogger } from "@/shared/logger/config";
-import { eventBus } from "@/shared/events/event-bus";
+import { getLogger } from "@/shared/services/logger/config";
+import { eventBus } from "@/shared/services/events/event-bus";
 
 const logger = getLogger("session-registry");
 const { getDatabase } = createDatabaseConnection(true);
