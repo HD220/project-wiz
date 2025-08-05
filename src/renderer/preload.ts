@@ -97,8 +97,6 @@ contextBridge.exposeInMainWorld("api", {
       ipcRenderer.invoke("invoke:agent:list", filters),
     get: (id) =>
       ipcRenderer.invoke("invoke:agent:get", id),
-    getByProvider: (id) =>
-      ipcRenderer.invoke("invoke:agent:get-by-provider", id),
     update: (input) =>
       ipcRenderer.invoke("invoke:agent:update", input),
     inactivate: (id) =>
@@ -107,8 +105,6 @@ contextBridge.exposeInMainWorld("api", {
       ipcRenderer.invoke("invoke:agent:activate", id),
     countActive: () =>
       ipcRenderer.invoke("invoke:agent:count-active"),
-    listForConversation: () =>
-      ipcRenderer.invoke("invoke:agent:list-for-conversation"),
   } satisfies WindowAPI.Agent,
 
   // DM Conversations API (new colocated handlers)

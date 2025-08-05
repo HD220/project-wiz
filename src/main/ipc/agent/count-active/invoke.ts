@@ -32,7 +32,7 @@ export default async function(): Promise<GetActiveCountOutput> {
 declare global {
   namespace WindowAPI {
     interface Agent {
-      getActiveCount: () => Promise<GetActiveCountOutput>
+      countActive: () => Promise<GetActiveCountOutput>
     }
   }
 }

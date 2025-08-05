@@ -50,7 +50,7 @@ export default async function(input: ListAllUsersInput): Promise<ListAllUsersOut
 declare global {
   namespace WindowAPI {
     interface User {
-      listAllUsers: (input: ListAllUsersInput) => Promise<ListAllUsersOutput>
+      list: (input: ListAllUsersInput) => Promise<ListAllUsersOutput>
     }
   }
 }

@@ -30,7 +30,7 @@ export default async function(): Promise<GetCurrentUserOutput> {
 declare global {
   namespace WindowAPI {
     interface Auth {
-      getCurrentUser: () => Promise<GetCurrentUserOutput>
+      getCurrent: () => Promise<GetCurrentUserOutput>
     }
   }
 }

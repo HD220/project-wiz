@@ -72,7 +72,7 @@ export default async function(input: RestoreUserInput): Promise<RestoreUserOutpu
 declare global {
   namespace WindowAPI {
     interface User {
-      restore: (input: RestoreUserInput) => Promise<RestoreUserOutput>
+      activate: (input: RestoreUserInput) => Promise<RestoreUserOutput>
     }
   }
 }

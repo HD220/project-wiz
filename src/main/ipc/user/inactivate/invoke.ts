@@ -55,7 +55,7 @@ export default async function(input: { id: string }): Promise<SoftDeleteUserOutp
 declare global {
   namespace WindowAPI {
     interface User {
-      softDelete: (input: { id: string }) => Promise<SoftDeleteUserOutput>
+      inactivate: (input: { id: string }) => Promise<SoftDeleteUserOutput>
     }
   }
 }

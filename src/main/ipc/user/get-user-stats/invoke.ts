@@ -52,7 +52,7 @@ export default async function(userId: z.infer<typeof Input>): Promise<z.infer<ty
 declare global {
   namespace WindowAPI {
     interface User {
-      getUserStats: (userId: z.infer<typeof Input>) => Promise<z.infer<typeof Output>>
+      getStats: (userId: z.infer<typeof Input>) => Promise<z.infer<typeof Output>>
     }
   }
 }

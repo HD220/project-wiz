@@ -51,7 +51,7 @@ export default async function(input: FindUserByIdInput): Promise<FindUserByIdOut
 declare global {
   namespace WindowAPI {
     interface User {
-      findById: (input: FindUserByIdInput) => Promise<FindUserByIdOutput>
+      get: (input: FindUserByIdInput) => Promise<FindUserByIdOutput>
     }
   }
 }
