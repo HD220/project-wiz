@@ -1,8 +1,8 @@
 import { z } from "zod";
-import { listAgents } from "./queries";
+import { listAgents, findUser } from "@/main/ipc/agent/queries";
 import { AgentSchema } from "@/shared/types";
 import { requireAuth } from "@/main/services/session-registry";
-import { getLogger } from "@/shared/logger/config";
+import { getLogger } from "@/shared/services/logger/config";
 
 const logger = getLogger("agent.list.invoke");
 
@@ -11,7 +11,7 @@ const ListAgentsInputSchema = z.object({
   status: z.enum(["active", "inactive", "busy"]).optional(),
   search: z.string().optional(),
   showInactive: z.boolean().optional().default(false),
-}).optional();
+}).default({});
 
 // Output schema - array de Agent
 const ListAgentsOutputSchema = z.array(AgentSchema);
@@ -36,22 +36,26 @@ export default async function(input?: ListAgentsInput): Promise<ListAgentsOutput
     showInactive: validatedInput.showInactive,
   });
   
-  // 4. Mapeamento: SelectAgent[] → Agent[] (sem campos técnicos)
-  const apiAgents = dbAgents.map(agent => ({
-    id: agent.id,
-    userId: agent.userId,
-    ownerId: agent.ownerId,
-    name: agent.name,
-    role: agent.role,
-    backstory: agent.backstory,
-    goal: agent.goal,
-    providerId: agent.providerId,
-    modelConfig: agent.modelConfig,
-    status: agent.status,
-    avatar: agent.avatar,
-    createdAt: new Date(agent.createdAt),
-    updatedAt: new Date(agent.updatedAt),
-  }));
+  // 4. Buscar avatars dos users para todos os agents
+  const apiAgents = await Promise.all(
+    dbAgents.map(async (agent) => {
+      const user = await findUser(agent.id);
+      return {
+        id: agent.id,
+        ownerId: agent.ownerId,
+        name: agent.name,
+        role: agent.role,
+        backstory: agent.backstory,
+        goal: agent.goal,
+        providerId: agent.providerId,
+        modelConfig: agent.modelConfig,
+        status: agent.status,
+        avatar: user?.avatar || null,
+        createdAt: new Date(agent.createdAt),
+        updatedAt: new Date(agent.updatedAt),
+      };
+    })
+  );
   
   // 5. Validate output
   const result = ListAgentsOutputSchema.parse(apiAgents);

@@ -1,15 +1,13 @@
 import { z } from "zod";
-import { getAgent } from "./queries";
+import { findAgent, findUser } from "@/main/ipc/agent/queries";
 import { AgentSchema } from "@/shared/types";
-import { getLogger } from "@/shared/logger/config";
+import { requireAuth } from "@/main/services/session-registry";
+import { getLogger } from "@/shared/services/logger/config";
 
 const logger = getLogger("agent.get.invoke");
 
-// Input schema - campos necessários para busca
-const GetAgentInputSchema = z.object({
-  id: z.string(),
-  includeInactive: z.boolean().default(false),
-});
+// Input schema - apenas ID do agent
+const GetAgentInputSchema = z.string().min(1);
 
 // Output schema
 const GetAgentOutputSchema = AgentSchema.nullable();
@@ -23,13 +21,22 @@ export default async function(input: GetAgentInput): Promise<GetAgentOutput> {
   // 1. Validate input
   const validatedInput = GetAgentInputSchema.parse(input);
 
-  // 2. Query recebe dados e gerencia campos técnicos internamente
-  const dbAgent = await getAgent(validatedInput.id, validatedInput.includeInactive);
+  // 2. Check authentication
+  const currentUser = requireAuth();
+
+  // 3. Find agent with ownership validation
+  const dbAgent = await findAgent(validatedInput, currentUser.id);
   
-  // 3. Mapeamento: SelectAgent → Agent (sem campos técnicos)
-  const apiAgent = dbAgent ? {
+  if (!dbAgent) {
+    return null;
+  }
+
+  // 4. Buscar avatar do user
+  const user = await findUser(dbAgent.id);
+
+  // 5. Mapeamento: SelectAgent → Agent (sem campos técnicos)
+  const apiAgent = {
     id: dbAgent.id,
-    userId: dbAgent.userId,
     ownerId: dbAgent.ownerId,
     name: dbAgent.name,
     role: dbAgent.role,
@@ -38,10 +45,10 @@ export default async function(input: GetAgentInput): Promise<GetAgentOutput> {
     providerId: dbAgent.providerId,
     modelConfig: dbAgent.modelConfig,
     status: dbAgent.status,
-    avatar: dbAgent.avatar,
+    avatar: user?.avatar || null,
     createdAt: new Date(dbAgent.createdAt),
     updatedAt: new Date(dbAgent.updatedAt),
-  } : null;
+  };
   
   // 4. Validate output
   const result = GetAgentOutputSchema.parse(apiAgent);

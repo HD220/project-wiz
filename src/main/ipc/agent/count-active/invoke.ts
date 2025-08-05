@@ -1,7 +1,7 @@
 import { z } from "zod";
-import { getActiveAgentsCount } from "./queries";
+import { getActiveAgentsCount } from "@/main/ipc/agent/queries";
 import { requireAuth } from "@/main/services/session-registry";
-import { getLogger } from "@/shared/logger/config";
+import { getLogger } from "@/shared/services/logger/config";
 
 const logger = getLogger("agent.get-active-count.invoke");
 

@@ -6,6 +6,7 @@ import { z } from "zod";
  */
 export const AgentSchema = z.object({
   id: z.string(),
+  ownerId: z.string(),
   name: z.string(),
   role: z.string(),
   backstory: z.string(),
@@ -13,7 +14,6 @@ export const AgentSchema = z.object({
   avatar: z.string().nullable(),
   status: z.enum(["active", "inactive", "busy"]),
   modelConfig: z.record(z.unknown()),
-  userId: z.string(),
   providerId: z.string(),
   createdAt: z.date(),
   updatedAt: z.date(),

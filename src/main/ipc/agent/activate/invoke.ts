@@ -1,9 +1,9 @@
 import { z } from "zod";
-import { restoreAgent } from "./queries";
+import { findAgent, updateAgent, findUser } from "@/main/ipc/agent/queries";
 import { AgentSchema } from "@/shared/types";
 import { requireAuth } from "@/main/services/session-registry";
-import { eventBus } from "@/shared/events/event-bus";
-import { getLogger } from "@/shared/logger/config";
+import { eventBus } from "@/shared/services/events/event-bus";
+import { getLogger } from "@/shared/services/logger/config";
 
 const logger = getLogger("agent.restore.invoke");
 
@@ -29,22 +29,32 @@ export default async function(input: RestoreAgentInput): Promise<RestoreAgentOut
   // 2. Check authentication
   const currentUser = requireAuth();
   
-  // 3. Execute database operation
-  const dbAgent = await restoreAgent(validatedInput);
+  // 3. Validar se existe e se o user tem autorização
+  const agentToRestore = await findAgent(validatedInput, currentUser.id);
+
+  if (!agentToRestore) {
+    throw new Error("Agent not found for current user session");
+  }
+
+  // 4. Atualizar o agent para ativo
+  const dbAgent = await updateAgent({
+    id: agentToRestore.id,
+    ownerId: agentToRestore.ownerId,
+    isActive: true,
+    deactivatedAt: null,
+    deactivatedBy: null,
+  });
   
   if (!dbAgent) {
-    const result = RestoreAgentOutputSchema.parse({
-      success: false,
-      agent: null,
-      message: "Agent not found or not in soft deleted state"
-    });
-    return result;
+    throw new Error("Failed to update agent");
   }
-  
-  // 4. Map to API format (sem campos técnicos)
+
+  // 5. Buscar avatar do user
+  const user = await findUser(dbAgent.id);
+
+  // 6. Map to API format (tipo do shared)
   const apiAgent = {
     id: dbAgent.id,
-    userId: dbAgent.userId,
     ownerId: dbAgent.ownerId,
     name: dbAgent.name,
     role: dbAgent.role,
@@ -53,7 +63,7 @@ export default async function(input: RestoreAgentInput): Promise<RestoreAgentOut
     providerId: dbAgent.providerId,
     modelConfig: dbAgent.modelConfig,
     status: dbAgent.status,
-    avatar: dbAgent.avatar,
+    avatar: user?.avatar || null,
     createdAt: new Date(dbAgent.createdAt),
     updatedAt: new Date(dbAgent.updatedAt),
   };

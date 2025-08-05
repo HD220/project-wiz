@@ -1,8 +1,8 @@
 import { z } from "zod";
-import { deleteAgent } from "./queries";
+import { findAgent, updateAgent } from "@/main/ipc/agent/queries";
 import { requireAuth } from "@/main/services/session-registry";
-import { eventBus } from "@/shared/events/event-bus";
-import { getLogger } from "@/shared/logger/config";
+import { eventBus } from "@/shared/services/events/event-bus";
+import { getLogger } from "@/shared/services/logger/config";
 
 const logger = getLogger("agent.delete.invoke");
 
@@ -29,12 +29,25 @@ export default async function(input: DeleteAgentInput): Promise<DeleteAgentOutpu
   // 2. Check authentication
   const currentUser = requireAuth();
   
-  // 3. Query recebe dados e gerencia campos técnicos internamente
-  const success = await deleteAgent(validatedInput.id, currentUser.id);
+  // 3. Validar se existe e se o user tem autorização
+  const agentToDeactivate = await findAgent(validatedInput.id, currentUser.id);
+
+  if (!agentToDeactivate) {
+    throw new Error("Agent not found for current user session");
+  }
+
+  // 4. Atualizar o agent para inativo
+  await updateAgent({
+    id: agentToDeactivate.id,
+    ownerId: agentToDeactivate.ownerId,
+    isActive: false,
+    deactivatedAt: new Date(),
+    deactivatedBy: currentUser.id,
+  });
   
-  // 4. Validate output
+  // 5. Validate output
   const result = DeleteAgentOutputSchema.parse({
-    success,
+    success: true,
     message: "Agent deactivated successfully"
   });
   

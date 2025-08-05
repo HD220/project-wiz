@@ -1,9 +1,9 @@
 import { z } from "zod";
-import { createAgent } from "./queries";
+import { createAgent, findUser } from "@/main/ipc/agent/queries";
 import { AgentSchema } from "@/shared/types";
 import { requireAuth } from "@/main/services/session-registry";
-import { eventBus } from "@/shared/events/event-bus";
-import { getLogger } from "@/shared/logger/config";
+import { eventBus } from "@/shared/services/events/event-bus";
+import { getLogger } from "@/shared/services/logger/config";
 
 const logger = getLogger("agent.create.invoke");
 
@@ -37,9 +37,11 @@ export default async function(input: CreateAgentInput): Promise<CreateAgentOutpu
     ownerId: currentUser.id
   });
   
+  // Buscar avatar do user
+  const user = await findUser(dbAgent.id);
+
   const apiAgent = {
     id: dbAgent.id,
-    userId: dbAgent.userId,
     ownerId: dbAgent.ownerId,
     name: dbAgent.name,
     role: dbAgent.role,
@@ -48,7 +50,7 @@ export default async function(input: CreateAgentInput): Promise<CreateAgentOutpu
     providerId: dbAgent.providerId,
     modelConfig: dbAgent.modelConfig,
     status: dbAgent.status,
-    avatar: dbAgent.avatar,
+    avatar: user?.avatar || null,
     createdAt: new Date(dbAgent.createdAt),
     updatedAt: new Date(dbAgent.updatedAt),
   };

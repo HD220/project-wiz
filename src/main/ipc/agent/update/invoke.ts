@@ -1,9 +1,9 @@
 import { z } from "zod";
-import { updateAgent } from "./queries";
+import { findAgent, updateAgent, findUser } from "@/main/ipc/agent/queries";
 import { AgentSchema } from "@/shared/types";
 import { requireAuth } from "@/main/services/session-registry";
-import { eventBus } from "@/shared/events/event-bus";
-import { getLogger } from "@/shared/logger/config";
+import { eventBus } from "@/shared/services/events/event-bus";
+import { getLogger } from "@/shared/services/logger/config";
 
 const logger = getLogger("agent.update.invoke");
 
@@ -37,23 +37,37 @@ export default async function(input: UpdateAgentInput): Promise<UpdateAgentOutpu
   // 2. Check authentication
   const currentUser = requireAuth();
   
-  // 3. Query recebe dados e gerencia campos técnicos internamente
+  // 3. Validar se existe e se o user tem autorização
+  const existingAgent = await findAgent(validatedInput.id, currentUser.id);
+
+  if (!existingAgent) {
+    throw new Error("Agent not found for current user session");
+  }
+  
+  // 4. Atualizar o agent
   const dbAgent = await updateAgent({
     id: validatedInput.id,
-    ...(validatedInput.name && { name: validatedInput.name }),
-    ...(validatedInput.role && { role: validatedInput.role }),
-    ...(validatedInput.backstory && { backstory: validatedInput.backstory }),
-    ...(validatedInput.goal && { goal: validatedInput.goal }),
-    ...(validatedInput.providerId && { providerId: validatedInput.providerId }),
-    ...(validatedInput.modelConfig && { modelConfig: validatedInput.modelConfig }),
-    ...(validatedInput.status && { status: validatedInput.status }),
-    ...(validatedInput.avatar !== undefined && { avatar: validatedInput.avatar })
+    ownerId: existingAgent.ownerId,
+    name: validatedInput.name,
+    role: validatedInput.role,
+    backstory: validatedInput.backstory,
+    goal: validatedInput.goal,
+    providerId: validatedInput.providerId,
+    modelConfig: validatedInput.modelConfig,
+    status: validatedInput.status,
+    avatar: validatedInput.avatar
   });
   
-  // 4. Mapeamento: SelectAgent → Agent (sem campos técnicos)
+  if (!dbAgent) {
+    throw new Error("Failed to update agent");
+  }
+
+  // 5. Buscar avatar do user
+  const user = await findUser(dbAgent.id);
+
+  // 6. Mapeamento: SelectAgent → Agent (sem campos técnicos)
   const apiAgent = {
     id: dbAgent.id,
-    userId: dbAgent.userId,
     ownerId: dbAgent.ownerId,
     name: dbAgent.name,
     role: dbAgent.role,
@@ -62,7 +76,7 @@ export default async function(input: UpdateAgentInput): Promise<UpdateAgentOutpu
     providerId: dbAgent.providerId,
     modelConfig: dbAgent.modelConfig,
     status: dbAgent.status,
-    avatar: dbAgent.avatar,
+    avatar: user?.avatar || null,
     createdAt: new Date(dbAgent.createdAt),
     updatedAt: new Date(dbAgent.updatedAt),
   };
