@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { getUserById } from "./queries";
+import { getUserById } from "@/main/ipc/auth/queries";
 import { UserSchema } from "@/shared/types";
 
 // Input schema

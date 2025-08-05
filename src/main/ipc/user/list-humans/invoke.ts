@@ -1,8 +1,8 @@
 import { z } from "zod";
-import { getHumans } from "./queries";
+import { getUsersByType } from "@/main/ipc/user/queries";
 import { UserSchema } from "@/shared/types";
 import { requireAuth } from "@/main/services/session-registry";
-import { getLogger } from "@/shared/logger/config";
+import { getLogger } from "@/shared/services/logger/config";
 
 const logger = getLogger("user.list-humans.invoke");
 
@@ -24,7 +24,7 @@ export default async function(input: Input): Promise<Output> {
   const currentUser = requireAuth();
   
   // 2. Execute core business logic
-  const users = await getHumans({ showInactive: validatedInput?.showInactive });
+  const users = await getUsersByType("human", validatedInput?.showInactive);
   
   // 3. Map to clean domain objects (removing technical fields)
   const result = users.map(user => ({

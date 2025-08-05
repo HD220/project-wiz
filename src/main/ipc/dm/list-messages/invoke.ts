@@ -1,8 +1,8 @@
 import { z } from "zod";
-import { getDMMessages } from "./queries";
+import { getDMMessages } from "@/main/ipc/dm/queries";
 import { MessageSchema } from "@/shared/types";
 import { requireAuth } from "@/main/services/session-registry";
-import { getLogger } from "@/shared/logger/config";
+import { getLogger } from "@/shared/services/logger/config";
 
 const logger = getLogger("dm.get-messages.invoke");
 

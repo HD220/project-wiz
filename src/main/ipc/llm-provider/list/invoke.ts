@@ -1,8 +1,8 @@
 import { z } from "zod";
-import { listLlmProviders } from "./queries";
+import { listLlmProviders } from "@/main/ipc/llm-provider/queries";
 import { LlmProviderSchema } from "@/shared/types";
 import { requireAuth } from "@/main/services/session-registry";
-import { getLogger } from "@/shared/logger/config";
+import { getLogger } from "@/shared/services/logger/config";
 
 const logger = getLogger("llm-provider.list.invoke");
 
@@ -28,18 +28,18 @@ export default async function(input?: ListLlmProvidersInput): Promise<ListLlmPro
   // 2. Check authentication
   const currentUser = requireAuth();
   
-  // 3. Query recebe dados e gerencia campos técnicos internamente
+  // 3. List providers with ownership validation
   const dbProviders = await listLlmProviders({
-    userId: currentUser.id,
+    ownerId: currentUser.id,
     type: validatedInput.type,
     search: validatedInput.search,
     showInactive: validatedInput.showInactive,
   });
   
-  // 4. Mapeamento: SelectLlmProvider[] → LlmProvider[] (sem campos técnicos e sem apiKey)
+  // 4. Map database results to shared types
   const apiProviders = dbProviders.map(provider => ({
     id: provider.id,
-    userId: provider.userId,
+    userId: provider.ownerId, // Map ownerId to userId for API consistency
     name: provider.name,
     type: provider.type,
     baseUrl: provider.baseUrl,

@@ -1,9 +1,9 @@
 import { z } from "zod";
-import { createChannel } from "./queries";
+import { createProjectChannel } from "@/main/ipc/channel/queries";
 import { ChannelSchema } from "@/shared/types";
 import { requireAuth } from "@/main/services/session-registry";
-import { getLogger } from "@/shared/logger/config";
-import { eventBus } from "@/shared/events/event-bus";
+import { getLogger } from "@/shared/services/logger/config";
+import { eventBus } from "@/shared/services/events/event-bus";
 
 const logger = getLogger("channel.create.invoke");
 
@@ -29,16 +29,21 @@ export default async function(input: CreateChannelInput): Promise<CreateChannelO
   // 2. Check authentication
   const currentUser = requireAuth();
   
-  // 3. Query recebe dados e gerencia campos técnicos internamente
-  const dbChannel = await createChannel(validatedInput);
+  // 3. Create channel with ownership validation
+  const dbChannel = await createProjectChannel({
+    ...validatedInput,
+    ownerId: currentUser.id,
+    isActive: true
+  });
   
-  // 4. Mapeamento: SelectProjectChannel → Channel (sem campos técnicos)
+  // 4. Map database result to shared type
   const apiChannel = {
     id: dbChannel.id,
     projectId: dbChannel.projectId,
     name: dbChannel.name,
     description: dbChannel.description,
-    isArchived: dbChannel.isArchived,
+    archivedAt: dbChannel.archivedAt ? new Date(dbChannel.archivedAt) : null,
+    archivedBy: dbChannel.archivedBy,
     createdAt: new Date(dbChannel.createdAt),
     updatedAt: new Date(dbChannel.updatedAt),
   };

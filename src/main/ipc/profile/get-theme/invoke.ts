@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { getTheme } from "./queries";
+import { getUserTheme } from "@/main/ipc/profile/queries";
 import {
   GetThemeInputSchema,
   GetThemeOutputSchema,
@@ -7,7 +7,7 @@ import {
   type GetThemeOutput 
 } from "@/shared/types/profile";
 import { requireAuth } from "@/main/services/session-registry";
-import { getLogger } from "@/shared/logger/config";
+import { getLogger } from "@/shared/services/logger/config";
 
 const logger = getLogger("profile.get-theme.controller");
 
@@ -20,8 +20,8 @@ export default async function(input: GetThemeInput): Promise<GetThemeOutput> {
   // 2. Check authentication
   const currentUser = requireAuth();
   
-  // 3. Execute core business logic using current user ID
-  const result = await getTheme(currentUser.id);
+  // 3. Get user theme with ownership validation
+  const result = await getUserTheme(currentUser.id);
   
   logger.debug("User theme retrieved", { theme: result.theme });
   

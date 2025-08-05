@@ -1,6 +1,6 @@
 import { IpcMainInvokeEvent } from "electron";
-import { eventBus } from "@/shared/events/event-bus";
-import { getLogger } from "@/shared/logger/config";
+import { eventBus } from "@/shared/services/events/event-bus";
+import { getLogger } from "@/shared/services/logger/config";
 
 const logger = getLogger("event.register.invoke");
 

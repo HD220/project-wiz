@@ -1,7 +1,7 @@
 import { z } from "zod";
-import { initializeSessionFromDatabase, getCurrentUserFromCache } from "./queries";
+import { initializeSessionFromDatabase, getCurrentUserFromCache } from "@/main/ipc/auth/queries";
 import { UserSchema } from "@/shared/types";
-import { getLogger } from "@/shared/logger/config";
+import { getLogger } from "@/shared/services/logger/config";
 
 const logger = getLogger("auth.get-active-session");
 

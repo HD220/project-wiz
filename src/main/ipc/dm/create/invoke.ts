@@ -1,9 +1,9 @@
 import { z } from "zod";
-import { createDM } from "./queries";
+import { createDMConversation } from "@/main/ipc/dm/queries";
 import { DMConversationSchema } from "@/shared/types";
 import { requireAuth } from "@/main/services/session-registry";
-import { getLogger } from "@/shared/logger/config";
-import { eventBus } from "@/shared/events/event-bus";
+import { getLogger } from "@/shared/services/logger/config";
+import { eventBus } from "@/shared/services/events/event-bus";
 
 const logger = getLogger("dm.create.invoke");
 

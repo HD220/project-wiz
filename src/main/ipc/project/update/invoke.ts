@@ -1,8 +1,9 @@
 import { z } from "zod";
-import { updateProject } from "./queries";
+import { updateProject } from "@/main/ipc/project/queries";
 import { ProjectSchema } from "@/shared/types";
-import { getLogger } from "@/shared/logger/config";
-import { eventBus } from "@/shared/events/event-bus";
+import { requireAuth } from "@/main/services/session-registry";
+import { getLogger } from "@/shared/services/logger/config";
+import { eventBus } from "@/shared/services/events/event-bus";
 
 const logger = getLogger("project.update.invoke");
 
@@ -31,17 +32,24 @@ export default async function(input: UpdateProjectInput): Promise<UpdateProjectO
   // 1. Validate input
   const validatedInput = UpdateProjectInputSchema.parse(input);
   
-  // 2. Separate id from update data
+  // 2. Require authentication
+  const currentUser = requireAuth();
+  
+  // 3. Separate id from update data
   const { id, ...updateData } = validatedInput;
   
-  // 3. Query executa update e retorna SelectProject
-  const dbProject = await updateProject(id, updateData);
+  // 4. Query executa update e retorna SelectProject with ownership validation
+  const dbProject = await updateProject({
+    id,
+    ownerId: currentUser.id,
+    ...updateData
+  });
   
   if (!dbProject) {
-    throw new Error("Project not found");
+    throw new Error("Project not found or access denied");
   }
   
-  // 4. Mapeamento: SelectProject → Project (sem campos técnicos)
+  // 5. Mapeamento: SelectProject → Project (sem campos técnicos)
   const apiProject = {
     id: dbProject.id,
     name: dbProject.name,
@@ -56,10 +64,10 @@ export default async function(input: UpdateProjectInput): Promise<UpdateProjectO
     updatedAt: new Date(dbProject.updatedAt),
   };
   
-  // 5. Validate output
+  // 6. Validate output
   const result = UpdateProjectOutputSchema.parse(apiProject);
   
-  // 6. Emit event
+  // 7. Emit event
   eventBus.emit("project:updated", { projectId: result.id });
   
   logger.debug("Project updated", { projectId: result.id, name: result.name });

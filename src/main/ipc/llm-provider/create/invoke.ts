@@ -1,9 +1,9 @@
 import { z } from "zod";
-import { createLlmProvider } from "./queries";
+import { createLlmProvider } from "@/main/ipc/llm-provider/queries";
 import { LlmProviderSchema } from "@/shared/types";
 import { requireAuth } from "@/main/services/session-registry";
-import { getLogger } from "@/shared/logger/config";
-import { eventBus } from "@/shared/events/event-bus";
+import { getLogger } from "@/shared/services/logger/config";
+import { eventBus } from "@/shared/services/events/event-bus";
 
 const logger = getLogger("llm-provider.create.invoke");
 
@@ -30,18 +30,18 @@ export default async function(input: CreateLlmProviderInput): Promise<CreateLlmP
   // 2. Check authentication
   const currentUser = requireAuth();
   
-  // 3. Query recebe dados e gerencia campos técnicos internamente
+  // 3. Create provider with ownership
   const dbProvider = await createLlmProvider({
     ...validatedInput,
-    userId: currentUser.id,
+    ownerId: currentUser.id,
     isDefault: false,
     isActive: true
   });
   
-  // 4. Mapeamento: SelectLlmProvider → LlmProvider (sem campos técnicos)
+  // 4. Map database result to shared type
   const apiProvider = {
     id: dbProvider.id,
-    userId: dbProvider.userId,
+    userId: dbProvider.ownerId, // Map ownerId to userId for API consistency
     name: dbProvider.name,
     type: dbProvider.type,
     baseUrl: dbProvider.baseUrl,

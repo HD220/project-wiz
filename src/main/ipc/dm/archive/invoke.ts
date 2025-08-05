@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { archiveDM } from "./queries";
+import { archiveDM } from "@/main/ipc/dm/queries";
 import { 
   ArchiveDMInputSchema,
   ArchiveDMOutputSchema,
@@ -7,8 +7,8 @@ import {
   type ArchiveDMOutput 
 } from "@/shared/types/dm-conversation";
 import { requireAuth } from "@/main/services/session-registry";
-import { getLogger } from "@/shared/logger/config";
-import { eventBus } from "@/shared/events/event-bus";
+import { getLogger } from "@/shared/services/logger/config";
+import { eventBus } from "@/shared/services/events/event-bus";
 
 const logger = getLogger("dm.archive.invoke");
 

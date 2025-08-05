@@ -1,8 +1,8 @@
 import { z } from "zod";
-import { getChannelMessages } from "./queries";
+import { getChannelMessages } from "@/main/ipc/channel/queries";
 import { MessageSchema } from "@/shared/types";
 import { requireAuth } from "@/main/services/session-registry";
-import { getLogger } from "@/shared/logger/config";
+import { getLogger } from "@/shared/services/logger/config";
 
 const logger = getLogger("channel.get-messages.invoke");
 
@@ -35,7 +35,7 @@ export default async function(input: GetChannelMessagesInput): Promise<GetChanne
     id: message.id,
     sourceType: message.sourceType as "channel",
     sourceId: message.sourceId,
-    authorId: message.authorId,
+    authorId: message.ownerId, // Map ownerId to authorId for API consistency
     content: message.content,
     createdAt: new Date(message.createdAt),
     updatedAt: new Date(message.updatedAt),

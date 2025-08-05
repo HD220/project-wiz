@@ -1,9 +1,9 @@
 import { z } from "zod";
-import { restoreUser } from "./queries";
+import { activateUser } from "@/main/ipc/user/queries";
 import { UserSchema } from "@/shared/types";
 import { requireAuth } from "@/main/services/session-registry";
-import { getLogger } from "@/shared/logger/config";
-import { eventBus } from "@/shared/events/event-bus";
+import { getLogger } from "@/shared/services/logger/config";
+import { eventBus } from "@/shared/services/events/event-bus";
 
 const logger = getLogger("user.restore.invoke");
 
@@ -30,7 +30,7 @@ export default async function(input: RestoreUserInput): Promise<RestoreUserOutpu
   const currentUser = requireAuth();
   
   // 3. Query recebe dados e gerencia campos técnicos internamente
-  const dbUser = await restoreUser(validatedInput);
+  const dbUser = await activateUser(validatedInput);
   
   if (!dbUser) {
     const result = RestoreUserOutputSchema.parse({

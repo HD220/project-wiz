@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { deleteDM } from "./queries";
+import { deleteDM } from "@/main/ipc/dm/queries";
 import {
   DeleteDMInputSchema,
   DeleteDMOutputSchema,
@@ -7,8 +7,8 @@ import {
   type DeleteDMOutput 
 } from "@/shared/types/dm-conversation";
 import { requireAuth } from "@/main/services/session-registry";
-import { getLogger } from "@/shared/logger/config";
-import { eventBus } from "@/shared/events/event-bus";
+import { getLogger } from "@/shared/services/logger/config";
+import { eventBus } from "@/shared/services/events/event-bus";
 
 const logger = getLogger("dm.delete.invoke");
 

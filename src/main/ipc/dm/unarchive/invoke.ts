@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { unarchiveDM } from "./queries";
+import { unarchiveDM } from "@/main/ipc/dm/queries";
 import {
   UnarchiveDMInputSchema,
   UnarchiveDMOutputSchema,
@@ -7,8 +7,8 @@ import {
   type UnarchiveDMOutput 
 } from "@/shared/types/dm-conversation";
 import { requireAuth } from "@/main/services/session-registry";
-import { getLogger } from "@/shared/logger/config";
-import { eventBus } from "@/shared/events/event-bus";
+import { getLogger } from "@/shared/services/logger/config";
+import { eventBus } from "@/shared/services/events/event-bus";
 
 const logger = getLogger("dm.unarchive.invoke");
 

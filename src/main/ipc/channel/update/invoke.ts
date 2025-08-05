@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { updateChannel } from "./queries";
+import { updateProjectChannel } from "@/main/ipc/channel/queries";
 import { 
   UpdateChannelInputSchema,
   UpdateChannelOutputSchema,
@@ -7,8 +7,8 @@ import {
   type UpdateChannelOutput 
 } from "@/shared/types/channel";
 import { requireAuth } from "@/main/services/session-registry";
-import { getLogger } from "@/shared/logger/config";
-import { eventBus } from "@/shared/events/event-bus";
+import { getLogger } from "@/shared/services/logger/config";
+import { eventBus } from "@/shared/services/events/event-bus";
 
 const logger = getLogger("channel.update.invoke");
 
@@ -21,15 +21,38 @@ export default async function(input: unknown): Promise<UpdateChannelOutput> {
   // 1. Check authentication (replicando a lógica do controller original)
   const currentUser = requireAuth();
   
-  // 2. Execute core business logic
-  const result = await updateChannel(validatedInput);
+  // 2. Update channel with ownership validation
+  const dbChannel = await updateProjectChannel({
+    id: validatedInput.channelId,
+    ownerId: currentUser.id,
+    name: validatedInput.name,
+    description: validatedInput.description
+  });
   
-  // 3. Emit specific event for channel update
+  if (!dbChannel) {
+    throw new Error(`Failed to update channel or access denied: ${validatedInput.channelId}`);
+  }
+  
+  // 3. Map database result to shared type
+  const result = {
+    id: dbChannel.id,
+    projectId: dbChannel.projectId,
+    name: dbChannel.name,
+    description: dbChannel.description,
+    isArchived: !!dbChannel.archivedAt,
+    isActive: dbChannel.isActive,
+    deactivatedAt: dbChannel.deactivatedAt,
+    deactivatedBy: dbChannel.deactivatedBy,
+    createdAt: dbChannel.createdAt,
+    updatedAt: dbChannel.updatedAt,
+  };
+  
+  // 4. Emit specific event for channel update
   eventBus.emit("channel:updated", { channelId: result.id });
   
   logger.debug("Channel updated", { channelId: result.id, channelName: result.name });
   
-  // Parse and return output
+  // 5. Validate and return output
   return UpdateChannelOutputSchema.parse(result);
 }
 

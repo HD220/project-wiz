@@ -1,8 +1,8 @@
 import { z } from "zod";
-import { softDeleteUser } from "./queries";
+import { softDeleteUser } from "@/main/ipc/user/queries";
 import { requireAuth } from "@/main/services/session-registry";
-import { getLogger } from "@/shared/logger/config";
-import { eventBus } from "@/shared/events/event-bus";
+import { getLogger } from "@/shared/services/logger/config";
+import { eventBus } from "@/shared/services/events/event-bus";
 
 const logger = getLogger("user.soft-delete.invoke");
 

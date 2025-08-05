@@ -1,7 +1,8 @@
 import { z } from "zod";
-import { getLlmProviderById } from "./queries";
+import { findLlmProvider } from "@/main/ipc/llm-provider/queries";
 import { LlmProviderSchema } from "@/shared/types";
-import { getLogger } from "@/shared/logger/config";
+import { requireAuth } from "@/main/services/session-registry";
+import { getLogger } from "@/shared/services/logger/config";
 
 const logger = getLogger("llm-provider.get-by-id.invoke");
 
@@ -20,13 +21,16 @@ export default async function(id: GetLlmProviderByIdInput): Promise<GetLlmProvid
   // 1. Validate input
   const validatedId = GetLlmProviderByIdInputSchema.parse(id);
 
-  // 2. Query recebe dados e gerencia campos técnicos internamente
-  const dbProvider = await getLlmProviderById(validatedId);
+  // 2. Check authentication and get current user
+  const currentUser = requireAuth();
+
+  // 3. Find provider with ownership validation
+  const dbProvider = await findLlmProvider(validatedId, currentUser.id);
   
-  // 3. Mapeamento: SelectLlmProvider → LlmProvider (sem campos técnicos como apiKey)
+  // 4. Map database result to shared type
   const apiProvider = dbProvider ? {
     id: dbProvider.id,
-    userId: dbProvider.userId,
+    userId: dbProvider.ownerId, // Map ownerId to userId for API consistency
     name: dbProvider.name,
     type: dbProvider.type,
     baseUrl: dbProvider.baseUrl,
@@ -36,7 +40,7 @@ export default async function(id: GetLlmProviderByIdInput): Promise<GetLlmProvid
     updatedAt: new Date(dbProvider.updatedAt),
   } : null;
   
-  // 4. Validate output
+  // 5. Validate output
   const result = GetLlmProviderByIdOutputSchema.parse(apiProvider);
   
   logger.debug("LLM provider found", { found: result !== null });
@@ -51,4 +55,3 @@ declare global {
     }
   }
 }
-EOF < /dev/null

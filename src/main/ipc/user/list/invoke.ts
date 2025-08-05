@@ -1,8 +1,8 @@
 import { z } from "zod";
-import { getAllUsers } from "./queries";
+import { listUsers } from "@/main/ipc/user/queries";
 import { UserSchema } from "@/shared/types";
 import { requireAuth } from "@/main/services/session-registry";
-import { getLogger } from "@/shared/logger/config";
+import { getLogger } from "@/shared/services/logger/config";
 
 const logger = getLogger("user.list-all-users.invoke");
 
@@ -27,7 +27,7 @@ export default async function(input: ListAllUsersInput): Promise<ListAllUsersOut
   const currentUser = requireAuth();
   
   // 3. Query recebe dados e gerencia campos técnicos internamente
-  const dbUsers = await getAllUsers(validatedInput.includeInactive);
+  const dbUsers = await listUsers({ includeInactive: validatedInput.includeInactive });
   
   // 4. Mapeamento: SelectUser[] → User[] (sem campos técnicos)
   const apiUsers = dbUsers.map(user => ({

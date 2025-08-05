@@ -1,62 +1,63 @@
 import { z } from "zod";
-
+import { inactivateLlmProvider } from "@/main/ipc/llm-provider/queries";
 import { requireAuth } from "@/main/services/session-registry";
+import { eventBus } from "@/shared/services/events/event-bus";
+import { getLogger } from "@/shared/services/logger/config";
 
-import { eventBus } from "@/shared/events/event-bus";
-import { getLogger } from "@/shared/logger/config";
-
-import { deleteLlmProvider } from "./queries";
-
-const logger = getLogger("llm-provider.delete.invoke");
+const logger = getLogger("llm-provider.inactivate.invoke");
 
 // Input schema - apenas ID do provider
-const DeleteLlmProviderInputSchema = z.object({
+const InactivateLlmProviderInputSchema = z.object({
   id: z.string(),
 });
 
 // Output schema - resultado da operação
-const DeleteLlmProviderOutputSchema = z.object({
+const InactivateLlmProviderOutputSchema = z.object({
   success: z.boolean(),
   message: z.string(),
 });
 
-type DeleteLlmProviderInput = z.infer<typeof DeleteLlmProviderInputSchema>;
-type DeleteLlmProviderOutput = z.infer<typeof DeleteLlmProviderOutputSchema>;
+type InactivateLlmProviderInput = z.infer<typeof InactivateLlmProviderInputSchema>;
+type InactivateLlmProviderOutput = z.infer<typeof InactivateLlmProviderOutputSchema>;
 
 export default async function (
-  input: DeleteLlmProviderInput,
-): Promise<DeleteLlmProviderOutput> {
-  logger.debug("Deleting LLM provider");
+  input: InactivateLlmProviderInput,
+): Promise<InactivateLlmProviderOutput> {
+  logger.debug("Inactivating LLM provider");
 
   // 1. Validate input
-  const validatedInput = DeleteLlmProviderInputSchema.parse(input);
+  const validatedInput = InactivateLlmProviderInputSchema.parse(input);
 
   // 2. Check authentication
   const currentUser = requireAuth();
 
-  // 3. Query recebe dados e gerencia campos técnicos internamente
-  const success = await deleteLlmProvider(validatedInput.id, currentUser.id);
+  // 3. Inactivate provider with ownership validation
+  const result = await inactivateLlmProvider(validatedInput.id, currentUser.id, currentUser.id);
+
+  const success = !!result;
 
   // 4. Validate output
-  const result = DeleteLlmProviderOutputSchema.parse({
+  const validatedResult = InactivateLlmProviderOutputSchema.parse({
     success,
-    message: "Provider deleted successfully",
+    message: success ? "Provider inactivated successfully" : "Failed to inactivate provider",
   });
 
   // 5. Emit event
-  eventBus.emit("llm-provider:deleted", { providerId: validatedInput.id });
+  if (success) {
+    eventBus.emit("llm-provider:inactivated", { providerId: validatedInput.id });
+  }
 
-  logger.debug("LLM provider deleted", { success: result.success });
+  logger.debug("LLM provider inactivated", { success: validatedResult.success });
 
-  return result;
+  return validatedResult;
 }
 
 declare global {
   namespace WindowAPI {
     interface LlmProvider {
-      delete: (
-        input: DeleteLlmProviderInput,
-      ) => Promise<DeleteLlmProviderOutput>;
+      inactivate: (
+        input: InactivateLlmProviderInput,
+      ) => Promise<InactivateLlmProviderOutput>;
     }
   }
 }

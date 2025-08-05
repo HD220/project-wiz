@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { deleteChannel } from "./queries";
+import { inactivateProjectChannel } from "@/main/ipc/channel/queries";
 import { 
   DeleteChannelInputSchema,
   DeleteChannelOutputSchema,
@@ -7,10 +7,10 @@ import {
   type DeleteChannelOutput 
 } from "@/shared/types/channel";
 import { requireAuth } from "@/main/services/session-registry";
-import { getLogger } from "@/shared/logger/config";
-import { eventBus } from "@/shared/events/event-bus";
+import { getLogger } from "@/shared/services/logger/config";
+import { eventBus } from "@/shared/services/events/event-bus";
 
-const logger = getLogger("channel.delete.invoke");
+const logger = getLogger("channel.inactivate.invoke");
 
 // Input type para o invoke (sem deletedBy que é adicionado automaticamente)
 export type DeleteChannelInvokeInput = Omit<DeleteChannelInput, "deletedBy">;
@@ -37,15 +37,27 @@ export default async function(input: unknown): Promise<DeleteChannelOutput> {
   
   const validatedDeleteData = DeleteChannelInputSchema.parse(deleteData);
   
-  // 3. Execute core business logic
-  const result = await deleteChannel(validatedDeleteData);
+  // 3. Inactivate channel with ownership validation
+  const dbChannel = await inactivateProjectChannel(
+    validatedInvokeInput.channelId,
+    currentUser.id,
+    currentUser.id
+  );
   
-  // 4. Emit specific event for channel deletion
-  eventBus.emit("channel:deleted", { channelId: validatedInvokeInput.channelId });
+  const success = !!dbChannel;
+  const result = {
+    success,
+    message: success ? "Channel inactivated successfully" : "Failed to inactivate channel or access denied"
+  };
   
-  logger.debug("Channel deleted", { channelId: validatedInvokeInput.channelId, success: result.success });
+  // 4. Emit specific event for channel inactivation
+  if (success) {
+    eventBus.emit("channel:inactivated", { channelId: validatedInvokeInput.channelId });
+  }
   
-  // Parse and return output
+  logger.debug("Channel inactivated", { channelId: validatedInvokeInput.channelId, success: result.success });
+  
+  // 5. Validate and return output
   return DeleteChannelOutputSchema.parse(result);
 }
 

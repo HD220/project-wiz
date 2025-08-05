@@ -1,8 +1,8 @@
 import { z } from "zod";
-import { sendChannelMessage } from "./queries";
+import { sendChannelMessage } from "@/main/ipc/channel/queries";
 import { MessageSchema } from "@/shared/types";
 import { requireAuth } from "@/main/services/session-registry";
-import { getLogger } from "@/shared/logger/config";
+import { getLogger } from "@/shared/services/logger/config";
 
 const logger = getLogger("channel.send-message.invoke");
 
@@ -27,22 +27,23 @@ export default async function(input: SendChannelMessageInput): Promise<SendChann
   // 2. Check authentication
   const currentUser = requireAuth();
   
-  // 3. Query recebe dados e gerencia campos técnicos internamente
+  // 3. Send message to channel
   const messageData = {
     sourceType: "channel" as const,
     sourceId: validatedInput.sourceId,
-    authorId: currentUser.id,
-    content: validatedInput.content
+    ownerId: currentUser.id, // Use ownerId for database consistency
+    content: validatedInput.content,
+    isActive: true
   };
   
   const dbMessage = await sendChannelMessage(messageData);
   
-  // 4. Mapeamento: SelectMessage → Message (sem campos técnicos)
+  // 4. Map database result to shared type
   const apiMessage = {
     id: dbMessage.id,
     sourceType: dbMessage.sourceType,
     sourceId: dbMessage.sourceId,
-    authorId: dbMessage.authorId,
+    authorId: dbMessage.ownerId, // Map ownerId to authorId for API consistency
     content: dbMessage.content,
     createdAt: new Date(dbMessage.createdAt),
     updatedAt: new Date(dbMessage.updatedAt),

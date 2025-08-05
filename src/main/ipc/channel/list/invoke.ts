@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { getProjectChannels } from "./queries";
+import { listProjectChannels } from "@/main/ipc/channel/queries";
 import { 
   GetProjectChannelsInputSchema,
   GetProjectChannelsOutputSchema,
@@ -7,7 +7,7 @@ import {
   type GetProjectChannelsOutput 
 } from "@/shared/types/channel";
 import { requireAuth } from "@/main/services/session-registry";
-import { getLogger } from "@/shared/logger/config";
+import { getLogger } from "@/shared/services/logger/config";
 
 const logger = getLogger("channel.get-project-channels.invoke");
 
@@ -20,14 +20,32 @@ export default async function(input: unknown): Promise<GetProjectChannelsOutput>
   // 1. Check authentication (replicando a lógica do controller original)
   const currentUser = requireAuth();
   
-  // 2. Execute core business logic
-  const result = await getProjectChannels(validatedInput);
+  // 2. List channels with ownership validation
+  const dbChannels = await listProjectChannels({
+    ...validatedInput,
+    ownerId: currentUser.id
+  });
+  
+  // 3. Map database results to shared types
+  const result = dbChannels.map(channel => ({
+    id: channel.id,
+    projectId: channel.projectId,
+    name: channel.name,
+    description: channel.description,
+    isArchived: !!channel.archivedAt,
+    isActive: channel.isActive,
+    deactivatedAt: channel.deactivatedAt,
+    deactivatedBy: channel.deactivatedBy,
+    createdAt: channel.createdAt,
+    updatedAt: channel.updatedAt,
+    lastMessage: channel.lastMessage
+  }));
   
   logger.debug("Retrieved project channels", { count: result.length, projectId: validatedInput.projectId });
   
   // Note: No event emission for GET operations
   
-  // Parse and return output
+  // 4. Validate and return output
   return GetProjectChannelsOutputSchema.parse(result);
 }
 

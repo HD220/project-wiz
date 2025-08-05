@@ -1,8 +1,8 @@
 import { z } from "zod";
-import { getUserByIdAndType } from "./queries";
+import { findUserByIdAndType } from "@/main/ipc/user/queries";
 import { UserSchema } from "@/shared/types";
 import { requireAuth } from "@/main/services/session-registry";
-import { getLogger } from "@/shared/logger/config";
+import { getLogger } from "@/shared/services/logger/config";
 
 const logger = getLogger("user.find-by-id-and-type.invoke");
 
@@ -33,7 +33,7 @@ export default async function(input: FindUserByIdAndTypeInput): Promise<FindUser
   const currentUser = requireAuth();
   
   // 3. Execute query
-  const dbResult = await getUserByIdAndType(validatedInput);
+  const dbResult = await findUserByIdAndType(validatedInput);
   
   // 4. Map SelectUser → User (remove technical fields)
   let apiResult = null;

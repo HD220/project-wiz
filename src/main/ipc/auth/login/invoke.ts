@@ -1,9 +1,9 @@
 import { z } from "zod";
-import { authenticateUser } from "./queries";
+import { authenticateUser } from "@/main/ipc/auth/queries";
 import { UserSchema } from "@/shared/types";
-import { eventBus } from "@/shared/events/event-bus";
+import { eventBus } from "@/shared/services/events/event-bus";
 import { sessionRegistry } from "@/main/services/session-registry";
-import { getLogger } from "@/shared/logger/config";
+import { getLogger } from "@/shared/services/logger/config";
 
 const logger = getLogger("auth.login");
 

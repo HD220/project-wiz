@@ -1,9 +1,9 @@
 import { z } from "zod";
-import { createProject } from "./queries";
+import { createProject } from "@/main/ipc/project/queries";
 import { ProjectSchema } from "@/shared/types";
 import { requireAuth } from "@/main/services/session-registry";
-import { getLogger } from "@/shared/logger/config";
-import { eventBus } from "@/shared/events/event-bus";
+import { getLogger } from "@/shared/services/logger/config";
+import { eventBus } from "@/shared/services/events/event-bus";
 
 const logger = getLogger("project.create.invoke");
 

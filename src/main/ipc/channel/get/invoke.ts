@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { findChannelById } from "./queries";
+import { findProjectChannel } from "@/main/ipc/channel/queries";
 import { 
   FindChannelByIdInputSchema,
   FindChannelByIdOutputSchema,
@@ -7,7 +7,7 @@ import {
   type FindChannelByIdOutput 
 } from "@/shared/types/channel";
 import { requireAuth } from "@/main/services/session-registry";
-import { getLogger } from "@/shared/logger/config";
+import { getLogger } from "@/shared/services/logger/config";
 
 const logger = getLogger("channel.find-by-id.invoke");
 
@@ -20,14 +20,28 @@ export default async function(input: unknown): Promise<FindChannelByIdOutput> {
   // 1. Check authentication (replicando a lógica do controller original)
   const currentUser = requireAuth();
   
-  // 2. Execute core business logic
-  const result = await findChannelById(validatedInput);
+  // 2. Find channel with ownership validation
+  const dbChannel = await findProjectChannel(validatedInput.id, currentUser.id);
+  
+  // 3. Map database result to shared type
+  const result = dbChannel ? {
+    id: dbChannel.id,
+    projectId: dbChannel.projectId,
+    name: dbChannel.name,
+    description: dbChannel.description,
+    isArchived: !!dbChannel.archivedAt,
+    isActive: dbChannel.isActive,
+    deactivatedAt: dbChannel.deactivatedAt,
+    deactivatedBy: dbChannel.deactivatedBy,
+    createdAt: dbChannel.createdAt,
+    updatedAt: dbChannel.updatedAt,
+  } : null;
   
   logger.debug("Channel found", { found: !!result, channelId: validatedInput.id });
   
   // Note: No event emission for GET operations
   
-  // Parse and return output
+  // 4. Validate and return output
   return FindChannelByIdOutputSchema.parse(result);
 }
 

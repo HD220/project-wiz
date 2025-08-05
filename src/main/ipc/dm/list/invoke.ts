@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { getUserConversations } from "./queries";
+import { getUserConversations } from "@/main/ipc/dm/queries";
 import {
   GetUserConversationsInputSchema,
   GetUserConversationsOutputSchema,
@@ -7,7 +7,7 @@ import {
   type GetUserConversationsOutput 
 } from "@/shared/types/dm-conversation";
 import { requireAuth } from "@/main/services/session-registry";
-import { getLogger } from "@/shared/logger/config";
+import { getLogger } from "@/shared/services/logger/config";
 
 const logger = getLogger("dm.get-user-conversations.invoke");
 

@@ -1,8 +1,8 @@
 import { z } from "zod";
-import { getUserById } from "./queries";
+import { findUser } from "@/main/ipc/user/queries";
 import { UserSchema } from "@/shared/types";
 import { requireAuth } from "@/main/services/session-registry";
-import { getLogger } from "@/shared/logger/config";
+import { getLogger } from "@/shared/services/logger/config";
 
 const logger = getLogger("user.find-by-id.invoke");
 
@@ -28,7 +28,7 @@ export default async function(input: FindUserByIdInput): Promise<FindUserByIdOut
   const currentUser = requireAuth();
   
   // 3. Query recebe dados e gerencia campos técnicos internamente
-  const dbUser = await getUserById(validatedInput.userId, validatedInput.includeInactive);
+  const dbUser = await findUser(validatedInput.userId, validatedInput.includeInactive);
   
   // 4. Mapeamento: SelectUser → User (sem campos técnicos)
   const apiUser = dbUser ? {

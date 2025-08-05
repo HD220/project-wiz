@@ -1,8 +1,8 @@
 import { z } from "zod";
-import { getDefaultProvider } from "./queries";
+import { getDefaultLlmProvider } from "@/main/ipc/llm-provider/queries";
 import { LlmProviderSchema } from "@/shared/types";
 import { requireAuth } from "@/main/services/session-registry";
-import { getLogger } from "@/shared/logger/config";
+import { getLogger } from "@/shared/services/logger/config";
 
 const logger = getLogger("llm-provider.get-default.invoke");
 
@@ -17,15 +17,15 @@ export default async function(): Promise<GetDefaultProviderOutput> {
   // 1. Check authentication
   const currentUser = requireAuth();
   
-  // 2. Execute query
-  const dbResult = await getDefaultProvider({ userId: currentUser.id });
+  // 2. Get default provider with ownership validation
+  const dbResult = await getDefaultLlmProvider(currentUser.id);
   
-  // 3. Map SelectLlmProvider → LlmProvider (remove technical fields)
+  // 3. Map database result to shared type
   let apiResult = null;
   if (dbResult) {
     apiResult = {
       id: dbResult.id,
-      userId: dbResult.userId,
+      userId: dbResult.ownerId, // Map ownerId to userId for API consistency
       name: dbResult.name,
       type: dbResult.type,
       baseUrl: dbResult.baseUrl,

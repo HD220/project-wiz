@@ -1,10 +1,7 @@
 import { z } from "zod";
-
 import { requireAuth } from "@/main/services/session-registry";
-
-import { getLogger } from "@/shared/logger/config";
-
-import { archiveProject } from "./queries";
+import { getLogger } from "@/shared/services/logger/config";
+import { archiveProject } from "@/main/ipc/project/queries";
 
 const logger = getLogger("project.archive.invoke");
 
@@ -25,7 +22,7 @@ type ArchiveProjectOutput = z.infer<typeof ArchiveProjectOutputSchema>;
 export default async function (
   input: ArchiveProjectInput,
 ): Promise<ArchiveProjectOutput> {
-  logger.debug("Archiving project", { projectId: input.projectId });
+  logger.debug("Archiving project", { projectId: input.id });
 
   // 1. Validate input
   const validatedInput = ArchiveProjectInputSchema.parse(input);
@@ -33,8 +30,8 @@ export default async function (
   // 2. Check authentication
   const currentUser = requireAuth();
 
-  // 3. Query recebe dados e gerencia campos técnicos internamente
-  const dbProject = await archiveProject(validatedInput.id, currentUser.id);
+  // 3. Archive project with ownership validation
+  const dbProject = await archiveProject(validatedInput.id, currentUser.id, currentUser.id);
 
   // 4. Mapeamento: SelectProject → ArchiveProjectOutput
   const apiResponse = {

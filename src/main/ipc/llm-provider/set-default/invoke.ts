@@ -1,8 +1,8 @@
 import { z } from "zod";
-import { setDefaultProvider } from "./queries";
+import { setDefaultLlmProvider } from "@/main/ipc/llm-provider/queries";
 import { requireAuth } from "@/main/services/session-registry";
-import { getLogger } from "@/shared/logger/config";
-import { eventBus } from "@/shared/events/event-bus";
+import { getLogger } from "@/shared/services/logger/config";
+import { eventBus } from "@/shared/services/events/event-bus";
 
 const logger = getLogger("llm-provider.set-default.invoke");
 
@@ -28,14 +28,13 @@ export default async function(input: SetDefaultProviderInput): Promise<SetDefaul
   // 2. Check authentication
   const currentUser = requireAuth();
   
-  // 3. Execute query
-  const dbResult = await setDefaultProvider({
-    ...validatedInput,
-    userId: currentUser.id
-  });
+  // 3. Set default provider with ownership validation
+  await setDefaultLlmProvider(validatedInput.providerId, currentUser.id);
   
-  // 4. Validate output
-  const result = SetDefaultProviderOutputSchema.parse(dbResult);
+  // 4. Create response
+  const result = SetDefaultProviderOutputSchema.parse({
+    message: "Provider set as default"
+  });
   
   logger.debug("Default LLM provider set", { providerId: input.providerId, userId: currentUser.id });
   

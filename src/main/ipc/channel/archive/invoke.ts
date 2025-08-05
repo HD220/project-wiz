@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { archiveChannel } from "./queries";
+import { archiveProjectChannel } from "@/main/ipc/channel/queries";
 import { 
   ArchiveChannelInputSchema,
   ArchiveChannelOutputSchema,
@@ -7,8 +7,8 @@ import {
   type ArchiveChannelOutput 
 } from "@/shared/types/channel";
 import { requireAuth } from "@/main/services/session-registry";
-import { getLogger } from "@/shared/logger/config";
-import { eventBus } from "@/shared/events/event-bus";
+import { getLogger } from "@/shared/services/logger/config";
+import { eventBus } from "@/shared/services/events/event-bus";
 
 const logger = getLogger("channel.archive.invoke");
 
@@ -37,15 +37,27 @@ export default async function(input: unknown): Promise<ArchiveChannelOutput> {
   
   const validatedArchiveData = ArchiveChannelInputSchema.parse(archiveData);
   
-  // 3. Execute core business logic
-  const result = await archiveChannel(validatedArchiveData);
+  // 3. Archive channel with ownership validation
+  const dbChannel = await archiveProjectChannel(
+    validatedInvokeInput.channelId,
+    currentUser.id,
+    currentUser.id
+  );
+  
+  const success = !!dbChannel;
+  const result = {
+    success,
+    message: success ? "Channel archived successfully" : "Failed to archive channel or access denied"
+  };
   
   // 4. Emit specific event for channel archive
-  eventBus.emit("channel:archived", { channelId: validatedInvokeInput.channelId });
+  if (success) {
+    eventBus.emit("channel:archived", { channelId: validatedInvokeInput.channelId });
+  }
   
   logger.debug("Channel archived", { channelId: validatedInvokeInput.channelId, success: result.success });
   
-  // Parse and return output
+  // 5. Validate and return output
   return ArchiveChannelOutputSchema.parse(result);
 }
 

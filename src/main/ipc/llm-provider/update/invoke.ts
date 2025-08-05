@@ -1,8 +1,9 @@
 import { z } from "zod";
-import { updateLlmProvider } from "./queries";
+import { updateLlmProvider } from "@/main/ipc/llm-provider/queries";
 import { LlmProviderSchema } from "@/shared/types";
-import { getLogger } from "@/shared/logger/config";
-import { eventBus } from "@/shared/events/event-bus";
+import { requireAuth } from "@/main/services/session-registry";
+import { getLogger } from "@/shared/services/logger/config";
+import { eventBus } from "@/shared/services/events/event-bus";
 
 const logger = getLogger("llm-provider.update.invoke");
 
@@ -24,22 +25,29 @@ type UpdateLlmProviderOutput = z.infer<typeof UpdateLlmProviderOutputSchema>;
 export default async function(input: UpdateLlmProviderInput): Promise<UpdateLlmProviderOutput> {
   logger.debug("Updating LLM provider", { providerId: input.id });
 
-  // Validar input
+  // 1. Validate input
   const validatedInput = UpdateLlmProviderInputSchema.parse(input);
+  
+  // 2. Check authentication
+  const currentUser = requireAuth();
   
   const { id, ...data } = validatedInput;
 
-  // Execute core business logic
-  const result = await updateLlmProvider(id, data);
+  // 3. Update provider with ownership validation
+  const result = await updateLlmProvider({
+    id,
+    ownerId: currentUser.id,
+    ...data
+  });
   
   if (!result) {
-    throw new Error(`Failed to update LLM provider: ${input.id}`);
+    throw new Error(`Failed to update LLM provider or access denied: ${input.id}`);
   }
 
-  // Mapear resultado removendo campos técnicos e convertendo timestamps
+  // 4. Map database result to shared type
   const mapped = {
     id: result.id,
-    userId: result.userId,
+    userId: result.ownerId, // Map ownerId to userId for API consistency
     name: result.name,
     type: result.type,
     baseUrl: result.baseUrl,
@@ -49,7 +57,7 @@ export default async function(input: UpdateLlmProviderInput): Promise<UpdateLlmP
     updatedAt: new Date(result.updatedAt),
   };
 
-  // Validar output
+  // 5. Validate output
   const validatedResult = UpdateLlmProviderOutputSchema.parse(mapped);
 
   // Emit event after validation

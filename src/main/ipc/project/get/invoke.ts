@@ -1,7 +1,8 @@
 import { z } from "zod";
-import { findProjectById } from "./queries";
+import { findProject } from "@/main/ipc/project/queries";
 import { ProjectSchema } from "@/shared/types";
-import { getLogger } from "@/shared/logger/config";
+import { requireAuth } from "@/main/services/session-registry";
+import { getLogger } from "@/shared/services/logger/config";
 
 const logger = getLogger("project.find-by-id.invoke");
 
@@ -14,10 +15,12 @@ export default async function(input: unknown): Promise<z.infer<typeof OutputSche
   
   logger.debug("Finding project by ID", { projectId: id });
 
-  const result = await findProjectById(id);
+  // Require authentication and validate ownership
+  const currentUser = requireAuth();
+  const result = await findProject(id, currentUser.id);
   
   if (!result) {
-    logger.debug("Project not found", { projectId: id });
+    logger.debug("Project not found or access denied", { projectId: id });
     return null;
   }
 

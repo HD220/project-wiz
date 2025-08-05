@@ -1,8 +1,8 @@
 import { z } from "zod";
-import { getAgents } from "./queries";
+import { listAgents } from "@/main/ipc/user/queries";
 import { UserSchema } from "@/shared/types";
 import { requireAuth } from "@/main/services/session-registry";
-import { getLogger } from "@/shared/logger/config";
+import { getLogger } from "@/shared/services/logger/config";
 
 const logger = getLogger("user.list-agents.invoke");
 
@@ -25,7 +25,7 @@ export default async function(input: Input): Promise<Output> {
   const currentUser = requireAuth();
   
   // 2. Execute core business logic
-  const users = await getAgents(validatedInput || {});
+  const users = await listAgents(validatedInput || {});
   
   // 3. Map to clean domain objects without technical fields
   const result = users.map(user => ({

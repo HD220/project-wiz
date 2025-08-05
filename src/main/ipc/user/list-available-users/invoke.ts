@@ -1,8 +1,8 @@
 import { z } from "zod";
-import { getAvailableUsers } from "./queries";
+import { listAvailableUsers } from "@/main/ipc/user/queries";
 import { UserSchema } from "@/shared/types";
 import { requireAuth } from "@/main/services/session-registry";
-import { getLogger } from "@/shared/logger/config";
+import { getLogger } from "@/shared/services/logger/config";
 
 const logger = getLogger("user.list-available-users.invoke");
 
@@ -28,7 +28,7 @@ export default async function(input: ListAvailableUsersInput): Promise<ListAvail
   const currentUser = requireAuth();
   
   // 3. Query database
-  const dbUsers = await getAvailableUsers(
+  const dbUsers = await listAvailableUsers(
     validatedInput.currentUserId,
     validatedInput.type ? { type: validatedInput.type } : undefined
   );

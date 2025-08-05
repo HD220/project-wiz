@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { findDMById } from "./queries";
+import { findDMById } from "@/main/ipc/dm/queries";
 import {
   FindDMByIdInputSchema,
   FindDMByIdOutputSchema,
@@ -7,7 +7,7 @@ import {
   type FindDMByIdOutput 
 } from "@/shared/types/dm-conversation";
 import { requireAuth } from "@/main/services/session-registry";
-import { getLogger } from "@/shared/logger/config";
+import { getLogger } from "@/shared/services/logger/config";
 
 const logger = getLogger("dm.find-by-id.invoke");
 
