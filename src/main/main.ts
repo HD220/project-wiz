@@ -10,7 +10,8 @@ import squirrel from "electron-squirrel-startup";
 import { sessionRegistry } from "@/main/services/session-registry";
 // import { QueueClient } from "@/shared/queue-client/queue-client"; // Commented out - used only in test code
 import { getLogger } from "@/shared/services/logger/config";
-// import { startWorker, stopWorker } from "@/main/services/worker-manager"; // Removed - worker disabled
+// Worker management disabled
+// import { startWorker, stopWorker } from "@/main/services/worker-manager";
 import { initializeEventBus, eventBus } from "@/shared/services/events/event-bus";
 // import { initializeAgenticWorkerHandler, agenticWorkerHandler } from "@/shared/worker/agentic-worker.handler"; // Removed - will be rewritten
 import { loadIpcHandlers, type HandlerRegistration } from "@/main/utils/ipc-loader";
@@ -184,17 +185,17 @@ function initializeJobResultHandler(): void {
 }
 
 /**
- * Initialize worker process
+ * Initialize worker process - DISABLED
  */
-async function initializeWorker(): Promise<void> {
-  try {
-    await startWorker();
-    logger.info("Worker process started successfully");
-  } catch (error) {
-    logger.error("Failed to start worker process:", error);
-    // Don't fail the app if worker fails to start - it can be started later
-  }
-}
+// async function initializeWorker(): Promise<void> {
+//   try {
+//     await startWorker();
+//     logger.info("Worker process started successfully");
+//   } catch (error) {
+//     logger.error("Failed to start worker process:", error);
+//     // Don't fail the app if worker fails to start - it can be started later
+//   }
+// }
 
 /**
  * Initialize startup job with API key from environment
