@@ -11,10 +11,10 @@ const logger = getLogger("llm-provider.create.invoke");
 const CreateLlmProviderInputSchema = LlmProviderSchema.pick({
   name: true,
   type: true,
-  baseUrl: true,
   defaultModel: true
 }).extend({
-  apiKey: z.string().min(1, "API key is required")
+  apiKey: z.string().min(1, "API key is required"),
+  baseUrl: z.string().nullable().optional()
 });
 
 const CreateLlmProviderOutputSchema = LlmProviderSchema;

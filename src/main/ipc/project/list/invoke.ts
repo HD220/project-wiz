@@ -11,7 +11,7 @@ const ListProjectsInputSchema = z.object({
   search: z.string().optional(),
   isActive: z.boolean().optional(),
   isArchived: z.boolean().optional(),
-});
+}).default({});
 const ListProjectsOutputSchema = z.array(ProjectSchema);
 
 const handler = createIPCHandler({
