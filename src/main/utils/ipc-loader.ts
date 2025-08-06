@@ -1,7 +1,8 @@
 import { ipcMain } from "electron";
 import { sync as globSync } from "glob";
-import { pathToFileURL } from "url";
+import { pathToFileURL, fileURLToPath } from "url";
 import { existsSync } from "fs";
+import path from "path";
 import { getLogger } from "@/shared/services/logger/config";
 
 const logger = getLogger("ipc-loader");
@@ -135,72 +136,84 @@ export class IpcLoader {
 
   /**
    * Check if we're in development or production mode
-   * Since Vite bundles everything into main.js, always use static imports
+   * Use dynamic path construction approach
    */
   private isDevelopmentMode(): boolean {
-    // Vite bundles everything into main.js, so we need static imports
-    return false;
+    // Try the new dynamic path construction approach
+    return true;
   }
 
   /**
-   * Load handlers dynamically using glob (development mode)
+   * Load handlers dynamically using path construction and import()
    */
   private async loadHandlersDynamically(): Promise<void> {
-    logger.info("🛠️ Loading handlers dynamically (development mode)");
+    logger.info("🛠️ Loading handlers dynamically using path construction");
 
-    // Look for compiled .js files in various possible locations
-    let invokeFiles: string[] = [];
-    let listenFiles: string[] = [];
+    const __dirname = path.dirname(fileURLToPath(import.meta.url));
+    logger.info(`📍 Current module directory: ${__dirname}`);
+
+    // Find all .ts source files to get the structure
+    const invokeFiles = globSync("src/main/ipc/**/invoke.ts", { absolute: true });
+    const listenFiles = globSync("src/main/ipc/**/listen.ts", { absolute: true });
     
-    const possiblePaths = [
-      ".vite/build/ipc/**/invoke.js",          // manualChunks structure
-      ".vite/build/main/ipc/**/invoke.js",     
-      ".vite/build/src/main/ipc/**/invoke.js", 
-      "dist/ipc/**/invoke.js",                 // manualChunks in dist
-      "dist/main/ipc/**/invoke.js",            
-      "dist/src/main/ipc/**/invoke.js"
-    ];
-    
-    for (const pattern of possiblePaths) {
-      invokeFiles = globSync(pattern, { absolute: true });
-      if (invokeFiles.length > 0) {
-        listenFiles = globSync(pattern.replace("invoke.js", "listen.js"), { absolute: true });
-        logger.info(`🔄 Found compiled files using pattern: ${pattern}`);
-        break;
+    logger.info(`📁 Found ${invokeFiles.length} invoke handlers, ${listenFiles.length} listen handlers`);
+
+    // Register invoke handlers using dynamic path construction
+    let successCount = 0;
+    for (const tsFile of invokeFiles) {
+      try {
+        // Convert source path to import path: src/main/ipc/agent/activate/invoke.ts -> ../ipc/agent/activate/invoke
+        const relativePath = tsFile
+          .replace(/.*\/src\/main\//, "") // Remove everything up to src/main/
+          .replace(/\.ts$/, "")           // Remove .ts extension
+          .replace(/\\/g, "/");           // Normalize path separators
+
+        const importPath = path.join(__dirname, "..", relativePath);
+        logger.debug(`🔗 Importing: ${importPath}`);
+
+        const channel = this.filePathToChannel(tsFile, "invoke");
+        await this.registerInvokeHandlerFromPath(importPath, channel);
+        successCount++;
+        
+      } catch (error) {
+        logger.warn(`⚠️ Failed to load handler ${tsFile}:`, error);
       }
     }
-    
-    // Fallback: if still no compiled files, debug what's available
-    if (invokeFiles.length === 0) {
-      logger.error("❌ No compiled IPC handler files found. Debugging build output...");
-      
-      // Debug: List what's actually in .vite/build/
-      const allBuildFiles = globSync(".vite/build/**/*.js", { absolute: true });
-      logger.info(`🔍 All .js files in build: ${allBuildFiles.length}`);
-      allBuildFiles.slice(0, 10).forEach(file => logger.info(`  - ${file}`));
-      
-      const tsFiles = globSync("src/main/ipc/**/invoke.ts", { absolute: true });
-      logger.info(`📁 Found ${tsFiles.length} .ts source files but they cannot be imported directly`);
-      return;
+
+    // Register listen handlers (if any)
+    for (const tsFile of listenFiles) {
+      try {
+        const relativePath = tsFile
+          .replace(/.*\/src\/main\//, "")
+          .replace(/\.ts$/, "")
+          .replace(/\\/g, "/");
+
+        const importPath = path.join(__dirname, "..", relativePath);
+        const channel = this.filePathToChannel(tsFile, "listen");
+        await this.registerListenHandlerFromPath(importPath, channel);
+        
+      } catch (error) {
+        logger.warn(`⚠️ Failed to load listen handler ${tsFile}:`, error);
+      }
     }
 
-    logger.info(`📁 Found ${invokeFiles.length} invoke handlers`);
-    logger.info(`📁 Found ${listenFiles.length} listen handlers`);
+    logger.info(`✅ Successfully loaded ${successCount}/${invokeFiles.length} invoke handlers`);
+  }
 
-    // Register invoke handlers
-    for (const file of invokeFiles) {
-      const channel = this.filePathToChannel(file, "invoke");
-      await this.registerInvokeHandler(file, channel);
-    }
+  /**
+   * Register invoke handler from constructed path
+   */
+  private async registerInvokeHandlerFromPath(importPath: string, channel: string): Promise<void> {
+    const mod = await import(importPath);
+    await this.registerStaticHandler(mod.default, channel);
+  }
 
-    // Register listen handlers  
-    for (const file of listenFiles) {
-      const channel = this.filePathToChannel(file, "listen");
-      await this.registerListenHandler(file, channel);
-    }
-
-    logger.info(`✅ Loaded ${invokeFiles.length} invoke handlers`);
-    logger.info(`✅ Loaded ${listenFiles.length} listen handlers`);
+  /**
+   * Register listen handler from constructed path
+   */
+  private async registerListenHandlerFromPath(importPath: string, channel: string): Promise<void> {
+    const mod = await import(importPath);
+    await this.registerStaticHandler(mod.default, channel);
   }
 
   /**
