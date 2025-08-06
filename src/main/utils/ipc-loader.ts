@@ -135,13 +135,12 @@ export class IpcLoader {
 
   /**
    * Check if we're in development or production mode
-   * Development has source files, production has compiled files
+   * Since Vite always bundles, we should always use static imports
    */
   private isDevelopmentMode(): boolean {
-    // Check if source files exist (development)
-    const hasSourceFiles = existsSync("src/main/ipc");
-    logger.info(`🔍 Development mode check: source files exist = ${hasSourceFiles}`);
-    return hasSourceFiles;
+    // Vite always bundles code, even in dev mode
+    // So we should always use static imports from the bundle
+    return false;
   }
 
   /**
