@@ -24,7 +24,7 @@ contextBridge.exposeInMainWorld("api", {
     isLoggedIn: () =>
       ipcRenderer.invoke("invoke:auth:check-login"),
     getUser: (userId) =>
-      ipcRenderer.invoke("invoke:auth:get-user", userId),
+      ipcRenderer.invoke("invoke:auth:get-user", { userId }),
     getActiveSession: () =>
       ipcRenderer.invoke("invoke:auth:get-session"),
   } satisfies WindowAPI.Auth,
@@ -48,11 +48,11 @@ contextBridge.exposeInMainWorld("api", {
     update: (input) =>
       ipcRenderer.invoke("invoke:user:update", input),
     inactivate: (userId) =>
-      ipcRenderer.invoke("invoke:user:inactivate", userId),
+      ipcRenderer.invoke("invoke:user:inactivate", { userId }),
     activate: (userId) =>
-      ipcRenderer.invoke("invoke:user:activate", userId),
+      ipcRenderer.invoke("invoke:user:activate", { userId }),
     getStats: (userId) =>
-      ipcRenderer.invoke("invoke:user:get-user-stats", userId),
+      ipcRenderer.invoke("invoke:user:get-user-stats", { userId }),
   } satisfies WindowAPI.User,
 
   // Projects API (new colocated handlers)  
@@ -60,13 +60,13 @@ contextBridge.exposeInMainWorld("api", {
     create: (input) =>
       ipcRenderer.invoke("invoke:project:create", input),
     get: (id) =>
-      ipcRenderer.invoke("invoke:project:get", id),
+      ipcRenderer.invoke("invoke:project:get", { projectId: id }),
     list: () => 
       ipcRenderer.invoke("invoke:project:list"),
     update: (input) =>
       ipcRenderer.invoke("invoke:project:update", input),
     archive: (id) =>
-      ipcRenderer.invoke("invoke:project:archive", id),
+      ipcRenderer.invoke("invoke:project:archive", { projectId: id }),
   } satisfies WindowAPI.Project,
 
   // LLM Providers API (new colocated handlers)
@@ -76,17 +76,17 @@ contextBridge.exposeInMainWorld("api", {
     list: (filters) =>
       ipcRenderer.invoke("invoke:llm-provider:list", filters),
     get: (id) =>
-      ipcRenderer.invoke("invoke:llm-provider:get", id),
+      ipcRenderer.invoke("invoke:llm-provider:get", { providerId: id }),
     update: (input) =>
       ipcRenderer.invoke("invoke:llm-provider:update", input),
     inactivate: (id) =>
-      ipcRenderer.invoke("invoke:llm-provider:inactivate", id),
+      ipcRenderer.invoke("invoke:llm-provider:inactivate", { id }),
     setDefault: (input) =>
       ipcRenderer.invoke("invoke:llm-provider:set-default", input),
     getDefault: () =>
       ipcRenderer.invoke("invoke:llm-provider:get-default"),
     getKey: (providerId) =>
-      ipcRenderer.invoke("invoke:llm-provider:get-key", providerId),
+      ipcRenderer.invoke("invoke:llm-provider:get-key", { providerId }),
   } satisfies WindowAPI.LlmProvider,
 
   // Agents API (new colocated handlers)
@@ -96,7 +96,7 @@ contextBridge.exposeInMainWorld("api", {
     list: (filters) =>
       ipcRenderer.invoke("invoke:agent:list", filters),
     get: (id) =>
-      ipcRenderer.invoke("invoke:agent:get", id),
+      ipcRenderer.invoke("invoke:agent:get", { agentId: id }),
     update: (input) =>
       ipcRenderer.invoke("invoke:agent:update", input),
     inactivate: (input) =>
@@ -114,11 +114,11 @@ contextBridge.exposeInMainWorld("api", {
     list: (options) =>
       ipcRenderer.invoke("invoke:dm:list", options),
     get: (dmId) =>
-      ipcRenderer.invoke("invoke:dm:get", dmId),
+      ipcRenderer.invoke("invoke:dm:get", { dmId }),
     archive: (input) =>
       ipcRenderer.invoke("invoke:dm:archive", input),
     unarchive: (channelId) =>
-      ipcRenderer.invoke("invoke:dm:unarchive", channelId),
+      ipcRenderer.invoke("invoke:dm:unarchive", { dmId: channelId }),
     sendMessage: (input) =>
       ipcRenderer.invoke("invoke:dm:send-message", input),
     listMessages: (input) =>
@@ -138,13 +138,13 @@ contextBridge.exposeInMainWorld("api", {
     list: (input) =>
       ipcRenderer.invoke("invoke:channel:list", input),
     get: (channelId) =>
-      ipcRenderer.invoke("invoke:channel:get", channelId),
+      ipcRenderer.invoke("invoke:channel:get", { channelId }),
     update: (input) =>
       ipcRenderer.invoke("invoke:channel:update", input),
     archive: (input) =>
       ipcRenderer.invoke("invoke:channel:archive", input),
     unarchive: (channelId) =>
-      ipcRenderer.invoke("invoke:channel:unarchive", channelId),
+      ipcRenderer.invoke("invoke:channel:unarchive", { channelId }),
     sendMessage: (input) =>
       ipcRenderer.invoke("invoke:channel:send-message", input),
     listMessages: (input) =>
