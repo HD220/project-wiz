@@ -6,13 +6,13 @@ export default defineConfig({
   plugins: [tsconfigPaths()],
   build: {
     rollupOptions: {
-      external: [
-        "better-sqlite3", 
-        "pino", 
-        "pino-pretty",
-        // Don't bundle IPC handlers - keep them external for dynamic import
-        /src\/main\/ipc\/.*/
-      ],
+      external: ["better-sqlite3", "pino", "pino-pretty"],
+      output: {
+        // Preserve module structure for IPC handlers
+        preserveModules: true,
+        preserveModulesRoot: "src",
+        entryFileNames: "[name].js",
+      }
     },
   },
   resolve: {
