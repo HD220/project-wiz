@@ -1,8 +1,8 @@
 import { z } from "zod";
 
 /**
- * Agent entity schema for public API
- * Clean domain type without technical fields
+ * Agent Domain Entity Schema
+ * Represents an AI agent in the system
  */
 export const AgentSchema = z.object({
   id: z.string(),
@@ -13,36 +13,17 @@ export const AgentSchema = z.object({
   goal: z.string(),
   avatar: z.string().nullable(),
   status: z.enum(["active", "inactive", "busy"]),
-  modelConfig: z.record(z.unknown()),
+  modelConfig: z.string(), // JSON string stored in database
   providerId: z.string(),
+  isActive: z.boolean(),
+  deactivatedAt: z.date().nullable(),
+  deactivatedBy: z.string().nullable(),
   createdAt: z.date(),
   updatedAt: z.date(),
 });
 
+// Export domain entity type
 export type Agent = z.infer<typeof AgentSchema>;
 
 // Agent status type alias for easier usage
 export type AgentStatus = Agent['status'];
-
-// Form data types for renderer
-export const ModelConfigSchema = z.object({
-  model: z.string(),
-  temperature: z.number(),
-  maxTokens: z.number(),
-  topP: z.number().optional(),
-});
-
-export type ModelConfig = z.infer<typeof ModelConfigSchema>;
-
-export const AgentFormDataSchema = z.object({
-  name: z.string(),
-  role: z.string(),
-  backstory: z.string(),
-  goal: z.string(),
-  providerId: z.string(),
-  modelConfig: ModelConfigSchema,
-  status: AgentSchema.shape.status,
-  avatar: z.string().optional(),
-});
-
-export type AgentFormData = z.infer<typeof AgentFormDataSchema>;
