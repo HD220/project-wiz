@@ -155,11 +155,12 @@ export class IpcLoader {
     let listenFiles: string[] = [];
     
     const possiblePaths = [
-      ".vite/build/main/ipc/**/invoke.js",     // preserveModules structure
+      ".vite/build/ipc/**/invoke.js",          // manualChunks structure
+      ".vite/build/main/ipc/**/invoke.js",     
       ".vite/build/src/main/ipc/**/invoke.js", 
-      "dist/main/ipc/**/invoke.js",            // preserveModules in dist
-      "dist/src/main/ipc/**/invoke.js", 
-      "out/main/ipc/**/invoke.js"
+      "dist/ipc/**/invoke.js",                 // manualChunks in dist
+      "dist/main/ipc/**/invoke.js",            
+      "dist/src/main/ipc/**/invoke.js"
     ];
     
     for (const pattern of possiblePaths) {
