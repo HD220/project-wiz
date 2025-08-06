@@ -2,7 +2,7 @@
 // Uses browser-compatible Pino setup without process.env dependencies
 
 import pino from "pino";
-import { getRendererLoggerConfig } from "../config/renderer";
+import { getRendererLoggerConfig } from "@/shared/config/renderer";
 import { Logger } from "./config";
 
 // Global logger instance - created once and reused

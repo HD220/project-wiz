@@ -4,7 +4,7 @@
 import { utilityProcess } from "electron";
 import path from "path";
 import { fileURLToPath } from "url";
-import { getLogger } from "@/shared/logger/config";
+import { getLogger } from "@/shared/services/logger/config";
 
 export interface WorkerConfig {
   maxRestarts?: number;

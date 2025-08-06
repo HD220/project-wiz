@@ -1,8 +1,10 @@
 import { and, eq, desc, asc } from "drizzle-orm";
-import { db } from "../database";
-import { jobsTable, type SelectJob } from "./job.model";
+import { createDatabaseConnection } from "@/shared/config/database";
+import { jobsTable, type SelectJob } from "@/worker/schemas/job.schema";
 import type { JobExecutionResult, ProcessorConfig, JobFunction } from "./job.types";
-import { getLogger } from "@/shared/logger/config";
+import { getLogger } from "@/shared/services/logger/config";
+
+const { getDatabase } = createDatabaseConnection(true);
 
 export class Worker {
   private running = false;

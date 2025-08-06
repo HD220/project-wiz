@@ -164,7 +164,7 @@ export async function clearUserSessions(): Promise<void> {
     .update(userSessionsTable)
     .set({
       isActive: false,
-      updatedAt: new Date(),
+      deactivatedAt: new Date(),
     })
     .where(eq(userSessionsTable.isActive, true));
 }

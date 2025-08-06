@@ -1,7 +1,7 @@
-import { generateText, type CoreMessage, type LanguageModelV1 } from "ai";
+import { generateText, type CoreMessage, type LanguageModel } from "ai";
 import { loadProvider } from "../llm/provider-load";
 import type { JobFunction, Job } from "../queue/job.types";
-import { getLogger } from "@/shared/logger/config";
+import { getLogger } from "@/shared/services/logger/config";
 
 export interface ResponseGeneratorJobData {
   agent: {

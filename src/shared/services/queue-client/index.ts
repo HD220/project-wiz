@@ -6,7 +6,7 @@
 import { EventEmitter } from "events";
 import { workerManager } from "@/main/services/worker-manager";
 import type { JobOptions, Job } from "@/worker/queue/job.types";
-import { getLogger } from "@/shared/logger/config";
+import { getLogger } from "@/shared/services/logger/config";
 
 // Queue event types
 export interface QueueEvents {

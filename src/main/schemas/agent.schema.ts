@@ -11,6 +11,7 @@ export const agentsTable = sqliteTable(
   {
     id: text("id")
       .primaryKey()
+      .$defaultFn(() => crypto.randomUUID())
       .references(() => usersTable.id, { onDelete: "cascade" }),
     ownerId: text("owner_id").references(() => usersTable.id, {
       onDelete: "cascade",

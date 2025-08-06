@@ -1,15 +1,17 @@
 import { EventEmitter } from "events";
-import { getLogger } from "@/shared/logger/config";
+import { getLogger } from "@/shared/services/logger/config";
 
 const logger = getLogger("event-bus");
 
 /**
- * Generic type-safe Event Bus extending Node.js EventEmitter
+ * Generic type-safe Event Bus using composition pattern
  * Provides centralized event coordination with flexible event types
  */
-export class EventBus<TEvents extends Record<string, any> = Record<string, any>> extends EventEmitter {
+export class EventBus<TEvents extends Record<string, any> = Record<string, any>> {
+  private emitter: EventEmitter;
+
   constructor() {
-    super();
+    this.emitter = new EventEmitter();
     logger.info("🔄 EventBus initialized");
   }
 
@@ -21,7 +23,7 @@ export class EventBus<TEvents extends Record<string, any> = Record<string, any>>
     data: TEvents[T]
   ): boolean {
     logger.debug(`📤 Emitting event: ${String(eventName)}`, data);
-    return super.emit(eventName as string, data);
+    return this.emitter.emit(eventName as string, data);
   }
 
   /**
@@ -32,7 +34,8 @@ export class EventBus<TEvents extends Record<string, any> = Record<string, any>>
     listener: (data: TEvents[T]) => void
   ): this {
     logger.debug(`👂 Registering listener for: ${String(eventName)}`);
-    return super.on(eventName as string, listener);
+    this.emitter.on(eventName as string, listener);
+    return this;
   }
 
   /**
@@ -43,7 +46,8 @@ export class EventBus<TEvents extends Record<string, any> = Record<string, any>>
     listener: (data: TEvents[T]) => void
   ): this {
     logger.debug(`👂 Registering one-time listener for: ${String(eventName)}`);
-    return super.once(eventName as string, listener);
+    this.emitter.once(eventName as string, listener);
+    return this;
   }
 
   /**
@@ -52,17 +56,19 @@ export class EventBus<TEvents extends Record<string, any> = Record<string, any>>
   removeAllListeners<T extends keyof TEvents>(eventName?: T): this {
     if (eventName) {
       logger.debug(`🗑️ Removing all listeners for: ${String(eventName)}`);
+      this.emitter.removeAllListeners(eventName as string);
     } else {
       logger.debug("🗑️ Removing all listeners");
+      this.emitter.removeAllListeners();
     }
-    return super.removeAllListeners(eventName as string);
+    return this;
   }
 
   /**
    * Get listener count for debugging
    */
   getEventListenerCount<T extends keyof TEvents>(eventName: T): number {
-    return this.listenerCount(eventName as string);
+    return this.emitter.listenerCount(eventName as string);
   }
 
   /**

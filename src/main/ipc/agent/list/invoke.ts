@@ -22,8 +22,8 @@ type ListAgentsOutput = z.infer<typeof ListAgentsOutputSchema>;
 export default async function(input?: ListAgentsInput): Promise<ListAgentsOutput> {
   logger.debug("Listing agents");
 
-  // 1. Validate input
-  const validatedInput = input ? ListAgentsInputSchema.parse(input) : {};
+  // 1. Validate input - usa schema default se input for undefined
+  const validatedInput = ListAgentsInputSchema.parse(input || {});
 
   // 2. Check authentication
   const currentUser = requireAuth();
@@ -48,7 +48,7 @@ export default async function(input?: ListAgentsInput): Promise<ListAgentsOutput
         backstory: agent.backstory,
         goal: agent.goal,
         providerId: agent.providerId,
-        modelConfig: agent.modelConfig,
+        modelConfig: JSON.parse(agent.modelConfig),
         status: agent.status,
         avatar: user?.avatar || null,
         createdAt: new Date(agent.createdAt),

@@ -3,10 +3,12 @@
  */
 
 import { eq, and, desc, asc } from "drizzle-orm";
-import { db } from "../database";
-import { jobsTable } from "./job.model";
+import { createDatabaseConnection } from "@/shared/config/database";
+import { jobsTable } from "@/worker/schemas/job.schema";
 import type { JobOptions } from "./job.types";
-import { getLogger } from "@/shared/logger/config";
+import { getLogger } from "@/shared/services/logger/config";
+
+const { getDatabase } = createDatabaseConnection(true);
 
 export class MessageHandler {
   private logger = getLogger("worker-message-handler");
@@ -65,7 +67,7 @@ export class MessageHandler {
         dependencyCount: jobValues.dependencyCount
       });
       
-      await db.insert(jobsTable).values(jobValues);
+      await getDatabase().insert(jobsTable).values(jobValues);
 
       this.logger.debug("🟢 [MessageHandler] Job inserted successfully into database");
       return { jobId };
@@ -76,7 +78,7 @@ export class MessageHandler {
   }
 
   private async getStats(queueName: string) {
-    const jobs = await db
+    const jobs = await getDatabase()
       .select({ status: jobsTable.status })
       .from(jobsTable)
       .where(eq(jobsTable.name, queueName));
@@ -88,7 +90,7 @@ export class MessageHandler {
   }
 
   private async getWaiting(queueName: string) {
-    const jobs = await db
+    const jobs = await getDatabase()
       .select()
       .from(jobsTable)
       .where(and(eq(jobsTable.name, queueName), eq(jobsTable.status, "waiting")))
@@ -103,7 +105,7 @@ export class MessageHandler {
   }
 
   private async getCompleted(queueName: string) {
-    const jobs = await db
+    const jobs = await getDatabase()
       .select()
       .from(jobsTable)
       .where(and(eq(jobsTable.name, queueName), eq(jobsTable.status, "completed")))
@@ -118,7 +120,7 @@ export class MessageHandler {
   }
 
   private async getFailed(queueName: string) {
-    const jobs = await db
+    const jobs = await getDatabase()
       .select()
       .from(jobsTable)
       .where(and(eq(jobsTable.name, queueName), eq(jobsTable.status, "failed")))

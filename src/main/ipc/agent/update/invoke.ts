@@ -44,7 +44,7 @@ export default async function(input: UpdateAgentInput): Promise<UpdateAgentOutpu
     throw new Error("Agent not found for current user session");
   }
   
-  // 4. Atualizar o agent
+  // 4. Atualizar o agent (sem avatar que está na tabela users)
   const dbAgent = await updateAgent({
     id: validatedInput.id,
     ownerId: existingAgent.ownerId,
@@ -53,9 +53,8 @@ export default async function(input: UpdateAgentInput): Promise<UpdateAgentOutpu
     backstory: validatedInput.backstory,
     goal: validatedInput.goal,
     providerId: validatedInput.providerId,
-    modelConfig: validatedInput.modelConfig,
+    modelConfig: validatedInput.modelConfig ? JSON.stringify(validatedInput.modelConfig) : undefined,
     status: validatedInput.status,
-    avatar: validatedInput.avatar
   });
   
   if (!dbAgent) {
@@ -74,7 +73,7 @@ export default async function(input: UpdateAgentInput): Promise<UpdateAgentOutpu
     backstory: dbAgent.backstory,
     goal: dbAgent.goal,
     providerId: dbAgent.providerId,
-    modelConfig: dbAgent.modelConfig,
+    modelConfig: JSON.parse(dbAgent.modelConfig),
     status: dbAgent.status,
     avatar: user?.avatar || null,
     createdAt: new Date(dbAgent.createdAt),

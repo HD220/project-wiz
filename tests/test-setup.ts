@@ -3,7 +3,7 @@ import path from "path";
 import { migrate } from "drizzle-orm/better-sqlite3/migrator";
 import { beforeAll as _beforeAll, beforeEach, afterAll } from "vitest";
 
-import { createDatabaseConnection } from "../src/shared/database/config";
+import { createDatabaseConnection } from "../src/shared/config/database";
 
 const { getDatabase } = createDatabaseConnection(false); // No logging for tests
 

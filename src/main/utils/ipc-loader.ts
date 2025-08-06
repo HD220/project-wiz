@@ -1,6 +1,6 @@
 import { ipcMain } from "electron";
 import { glob } from "glob";
-import { getLogger } from "@/shared/logger/config";
+import { getLogger } from "@/shared/services/logger/config";
 
 const logger = getLogger("ipc-loader");
 

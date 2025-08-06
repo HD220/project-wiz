@@ -86,7 +86,10 @@ export async function getActiveAgentsCount(ownerId: string): Promise<number> {
 /**
  * Criar agent com user associado
  */
-export async function createAgent(data: InsertAgent & { ownerId: string }): Promise<SelectAgent> {
+export async function createAgent(data: InsertAgent & { 
+  ownerId: string; 
+  avatar?: string | null; 
+}): Promise<SelectAgent> {
   const db = getDatabase();
   
   // Usar transação síncrona conforme o padrão do AgentService original
@@ -114,7 +117,7 @@ export async function createAgent(data: InsertAgent & { ownerId: string }): Prom
       .insert(usersTable)
       .values({
         name: data.name,
-        avatar: data.avatar || "",
+        avatar: data.avatar || null,
         type: "agent",
       })
       .returning()
@@ -127,14 +130,16 @@ export async function createAgent(data: InsertAgent & { ownerId: string }): Prom
 
     // 3. Criar o agent record usando InsertAgent type
     const agentInsertData: InsertAgent = {
-      userId: agentUser.id,
+      id: agentUser.id,
       ownerId: data.ownerId,
       name: data.name,
       role: data.role,
       backstory: data.backstory,
       goal: data.goal,
       providerId: data.providerId,
-      modelConfig: data.modelConfig,
+      modelConfig: typeof data.modelConfig === 'string' 
+        ? data.modelConfig 
+        : JSON.stringify(data.modelConfig),
       status: "inactive", // Sempre começa como inactive
     };
 

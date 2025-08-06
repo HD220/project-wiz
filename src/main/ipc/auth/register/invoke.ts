@@ -45,27 +45,30 @@ export default async function(input: RegisterInput): Promise<RegisterOutput> {
     // 3. Query recebe dados e gerencia campos técnicos internamente
     const dbResult = await createUserAccount(validatedInput);
     
-    // 4. Mapeamento inline: SelectUser → User (sem campos técnicos)
+    // 4. Usar dbResult.user diretamente - já é AuthenticatedUser (SelectUser)
+    const authenticatedUser = dbResult.user;
+    
+    // 5. Set session in registry (with proper expiry)
+    sessionRegistry.setSession(authenticatedUser, dbResult.sessionToken, new Date(Date.now() + 30 * 24 * 60 * 60 * 1000));
+    
+    // 6. Mapeamento: AuthenticatedUser → User (API clean type)
     const apiUser = {
-      id: dbResult.user.id,
-      name: dbResult.user.name,
-      avatar: dbResult.user.avatar,
-      type: dbResult.user.type,
-      createdAt: new Date(dbResult.user.createdAt),
-      updatedAt: new Date(dbResult.user.updatedAt),
+      id: authenticatedUser.id,
+      name: authenticatedUser.name,
+      avatar: authenticatedUser.avatar,
+      type: authenticatedUser.type,
+      createdAt: new Date(authenticatedUser.createdAt),
+      updatedAt: new Date(authenticatedUser.updatedAt),
     };
     
-    // 5. Validate output
+    // 7. Validate output
     const result = RegisterOutputSchema.parse({
       success: true,
       user: apiUser,
       token: dbResult.sessionToken,
     });
     
-    // 6. Set session in registry (with proper expiry)
-    sessionRegistry.setSession(result.user!, result.token!, new Date(Date.now() + 30 * 24 * 60 * 60 * 1000));
-    
-    // 7. Emit user registration event
+    // 8. Emit user registration event
     eventBus.emit("user:registered", {
       userId: result.user!.id,
       username: result.user!.name,

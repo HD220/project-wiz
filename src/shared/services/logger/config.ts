@@ -1,6 +1,6 @@
 import pino from "pino";
 
-import { getLoggerConfig } from "../config";
+import { getLoggerConfig } from "@/shared/config";
 
 // Global logger instance - created once and reused
 let globalLogger: pino.Logger | null = null;

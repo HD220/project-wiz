@@ -34,6 +34,7 @@ export default async function(input: CreateAgentInput): Promise<CreateAgentOutpu
   
   const dbAgent = await createAgent({
     ...validatedInput,
+    modelConfig: JSON.stringify(validatedInput.modelConfig),
     ownerId: currentUser.id
   });
   
@@ -48,7 +49,7 @@ export default async function(input: CreateAgentInput): Promise<CreateAgentOutpu
     backstory: dbAgent.backstory,
     goal: dbAgent.goal,
     providerId: dbAgent.providerId,
-    modelConfig: dbAgent.modelConfig,
+    modelConfig: JSON.parse(dbAgent.modelConfig),
     status: dbAgent.status,
     avatar: user?.avatar || null,
     createdAt: new Date(dbAgent.createdAt),

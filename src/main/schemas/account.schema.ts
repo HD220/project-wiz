@@ -7,8 +7,9 @@ export const accountsTable = sqliteTable(
   "accounts",
   {
     id: text("id")
+      .primaryKey()
       .$defaultFn(() => crypto.randomUUID()),
-    ownerId: text("owner_id")
+    userId: text("user_id")
       .notNull()
       .references(() => usersTable.id, { onDelete: "cascade" }),
     username: text("username").notNull().unique(),
@@ -21,11 +22,8 @@ export const accountsTable = sqliteTable(
       .default(sql`CURRENT_TIMESTAMP`),
   },
   (table) => ({
-    // Composite primary key
-    pk: primaryKey({ columns: [table.ownerId, table.id] }),
-    
     // Performance indexes
-    ownerIdIdx: index("accounts_owner_id_idx").on(table.ownerId),
+    userIdIdx: index("accounts_user_id_idx").on(table.userId),
     usernameIdx: index("accounts_username_idx").on(table.username),
   }),
 );

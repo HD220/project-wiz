@@ -30,20 +30,23 @@ export default async function(input: LoginInput): Promise<LoginOutput> {
   // 2. Query recebe dados e gerencia campos técnicos internamente
   const dbResult = await authenticateUser(validatedInput);
   
-  // 3. Mapeamento: SelectUser → User (sem campos técnicos)
-  const apiUser = {
-    id: dbResult.user.id,
-    name: dbResult.user.name,
-    avatar: dbResult.user.avatar,
-    type: dbResult.user.type,
-    createdAt: new Date(dbResult.user.createdAt),
-    updatedAt: new Date(dbResult.user.updatedAt),
-  };
+  // 3. Usar dbResult.user diretamente - já é AuthenticatedUser (SelectUser)
+  const authenticatedUser = dbResult.user;
   
   // 4. Set session in registry (with proper expiry)
-  sessionRegistry.setSession(apiUser, dbResult.sessionToken, new Date(Date.now() + 30 * 24 * 60 * 60 * 1000));
+  sessionRegistry.setSession(authenticatedUser, dbResult.sessionToken, new Date(Date.now() + 30 * 24 * 60 * 60 * 1000));
   
-  // 5. Prepare API response
+  // 5. Mapeamento: AuthenticatedUser → User (API clean type)
+  const apiUser = {
+    id: authenticatedUser.id,
+    name: authenticatedUser.name,
+    avatar: authenticatedUser.avatar,
+    type: authenticatedUser.type,
+    createdAt: new Date(authenticatedUser.createdAt),
+    updatedAt: new Date(authenticatedUser.updatedAt),
+  };
+  
+  // 6. Prepare API response
   const apiResponse = {
     success: true,
     user: apiUser,

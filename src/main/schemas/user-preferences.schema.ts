@@ -9,8 +9,9 @@ export const userPreferencesTable = sqliteTable(
   "user_preferences",
   {
     id: text("id")
+      .primaryKey()
       .$defaultFn(() => crypto.randomUUID()),
-    ownerId: text("owner_id")
+    userId: text("user_id")
       .notNull()
       .references(() => usersTable.id, { onDelete: "cascade" }),
     theme: text("theme").$type<Theme>().notNull().default("system"),
@@ -22,11 +23,8 @@ export const userPreferencesTable = sqliteTable(
       .default(sql`CURRENT_TIMESTAMP`),
   },
   (table) => ({
-    // Composite primary key
-    pk: primaryKey({ columns: [table.ownerId, table.id] }),
-    
     // Performance indexes
-    ownerIdIdx: index("user_preferences_owner_id_idx").on(table.ownerId),
+    userIdIdx: index("user_preferences_user_id_idx").on(table.userId),
     themeIdx: index("user_preferences_theme_idx").on(table.theme),
   }),
 );

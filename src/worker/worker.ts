@@ -2,7 +2,7 @@
 import { Worker } from "./queue/worker";
 import { responseGenerator } from "./processors/response-generator";
 import { MessageHandler } from "./queue/message-handler";
-import { getLogger } from "@/shared/logger/config";
+import { getLogger } from "@/shared/services/logger/config";
 
 const logger = getLogger("worker-main");
 

@@ -9,7 +9,7 @@ import squirrel from "electron-squirrel-startup";
 
 import { sessionRegistry } from "@/main/services/session-registry";
 // import { QueueClient } from "@/shared/queue-client/queue-client"; // Commented out - used only in test code
-import { getLogger } from "@/shared/logger/config";
+import { getLogger } from "@/shared/services/logger/config";
 import { startWorker, stopWorker } from "@/main/services/worker-manager";
 import { initializeEventBus, eventBus } from "@/shared/events/event-bus";
 // import { initializeAgenticWorkerHandler, agenticWorkerHandler } from "@/shared/worker/agentic-worker.handler"; // Removed - will be rewritten

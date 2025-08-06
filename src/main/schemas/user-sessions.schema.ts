@@ -7,8 +7,9 @@ export const userSessionsTable = sqliteTable(
   "user_sessions",
   {
     id: text("id")
+      .primaryKey()
       .$defaultFn(() => crypto.randomUUID()),
-    ownerId: text("owner_id")
+    userId: text("user_id")
       .notNull()
       .references(() => usersTable.id, { onDelete: "cascade" }),
     token: text("token").notNull().unique(),
@@ -24,11 +25,8 @@ export const userSessionsTable = sqliteTable(
     expiresAt: integer("expires_at", { mode: "timestamp_ms" }).notNull(),
   },
   (table) => ({
-    // Composite primary key
-    pk: primaryKey({ columns: [table.ownerId, table.id] }),
-    
     // Performance indexes
-    ownerIdIdx: index("user_sessions_owner_id_idx").on(table.ownerId),
+    userIdIdx: index("user_sessions_user_id_idx").on(table.userId),
     tokenIdx: index("user_sessions_token_idx").on(table.token),
     expiresAtIdx: index("user_sessions_expires_at_idx").on(table.expiresAt),
     deactivatedByIdx: index("user_sessions_deactivated_by_idx").on(

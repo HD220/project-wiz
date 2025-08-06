@@ -1,5 +1,5 @@
 import { BrowserWindow } from "electron";
-import { getLogger } from "@/shared/logger/config";
+import { getLogger } from "@/shared/services/logger/config";
 
 const logger = getLogger("window-registry");
 
