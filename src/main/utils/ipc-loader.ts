@@ -204,7 +204,9 @@ export class IpcLoader {
    * Register invoke handler from constructed path
    */
   private async registerInvokeHandlerFromPath(importPath: string, channel: string): Promise<void> {
-    const mod = await import(importPath);
+    // Convert Windows paths to file:// URLs for ESM import
+    const fileUrl = pathToFileURL(importPath).href;
+    const mod = await import(fileUrl);
     await this.registerStaticHandler(mod.default, channel);
   }
 
@@ -212,7 +214,9 @@ export class IpcLoader {
    * Register listen handler from constructed path
    */
   private async registerListenHandlerFromPath(importPath: string, channel: string): Promise<void> {
-    const mod = await import(importPath);
+    // Convert Windows paths to file:// URLs for ESM import
+    const fileUrl = pathToFileURL(importPath).href;
+    const mod = await import(fileUrl);
     await this.registerStaticHandler(mod.default, channel);
   }
 
