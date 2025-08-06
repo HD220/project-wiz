@@ -17,7 +17,7 @@ const GetProjectChannelsInputSchema = z.object({
 const GetProjectChannelsOutputSchema = z.array(ChannelSchema.extend({
   isArchived: z.boolean(),
   isActive: z.boolean(),
-  deactivatedAt: z.number().nullable(),
+  deactivatedAt: z.date().nullable(),
   deactivatedBy: z.string().nullable(),
   lastMessage: z.object({
     id: z.string(),

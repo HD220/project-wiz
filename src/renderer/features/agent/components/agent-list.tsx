@@ -37,7 +37,7 @@ export function AgentList(props: AgentListProps) {
 
   // Inline API mutations with proper error handling
   const deleteAgentMutation = useApiMutation(
-    (id: string) => window.api.agents.delete(id),
+    (id: string) => window.api.agent.inactivate({ agentId: id }),
     {
       successMessage: "Agent deleted successfully",
       errorMessage: "Failed to delete agent",
@@ -46,7 +46,7 @@ export function AgentList(props: AgentListProps) {
   );
 
   const restoreAgentMutation = useApiMutation(
-    (id: string) => window.api.agents.restore(id),
+    (id: string) => window.api.agent.activate({ agentId: id }),
     {
       successMessage: "Agent restored successfully",
       errorMessage: "Failed to restore agent",
@@ -56,7 +56,7 @@ export function AgentList(props: AgentListProps) {
 
   const toggleStatusMutation = useApiMutation(
     ({ id, status }: { id: string; status: AgentStatus }) =>
-      window.api.agents.updateStatus(id, status),
+      window.api.agent.update({ id, status }),
     {
       errorMessage: "Failed to update agent status",
     },

@@ -3,34 +3,34 @@
 // ===========================
 // Tipos diretos e simples para o frontend, sem re-exports desnecessários
 
-// Re-export main types diretos
+// Re-export shared types
 export type {
   SelectMessage,
   MessageSourceType,
   SendMessageInput,
-} from "@/main/features/message/message.types";
+} from "@/shared/types";
 
 export type {
   SelectDMConversation,
   DMConversationWithParticipants,
   DMConversationWithLastMessage,
   CreateDMConversationInput,
-} from "@/main/features/dm/dm-conversation.types";
+} from "@/shared/types";
 
 export type {
   SelectProjectChannel,
   ProjectChannelWithLastMessage,
   CreateProjectChannelInput,
-} from "@/main/features/project/project-channel.types";
+} from "@/shared/types";
 
-export type { AuthenticatedUser } from "@/main/features/user/user.types";
+export type { AuthenticatedUser } from "@/shared/types";
 
 // Note: Using import() syntax to avoid circular dependencies
 export interface UniversalChatProps {
   chatType: ChatType;
   sourceId: string; // dmId ou channelId
   messages: RendererMessage[];
-  currentUser: import("@/main/features/user/user.types").AuthenticatedUser;
+  currentUser: import("@/shared/types").AuthenticatedUser;
   availableUsers: unknown[];
   isArchived?: boolean;
   archivedAt?: Date | null;

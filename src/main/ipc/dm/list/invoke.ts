@@ -57,6 +57,7 @@ const handler = createIPCHandler({
       id: conversation.id,
       name: conversation.name,
       description: conversation.description,
+      isArchived: !!conversation.archivedAt,
       archivedAt: conversation.archivedAt ? new Date(conversation.archivedAt) : null,
       archivedBy: conversation.archivedBy,
       createdAt: new Date(conversation.createdAt),

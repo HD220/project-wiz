@@ -1,6 +1,6 @@
 import { Hash } from "lucide-react";
 
-import type { UserSummary } from "@/main/features/user/user.service";
+import type { UserSummary } from "@/shared/types";
 
 import {
   ProfileAvatar,

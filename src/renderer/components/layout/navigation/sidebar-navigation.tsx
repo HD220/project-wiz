@@ -1,6 +1,6 @@
 import { Hash, Bot } from "lucide-react";
 
-import type { UserSummary } from "@/main/features/user/user.service";
+import type { UserSummary } from "@/shared/types";
 
 import { NavigationItem } from "@/renderer/components/layout/navigation/navigation-item";
 import { ScrollArea } from "@/renderer/components/ui/scroll-area";

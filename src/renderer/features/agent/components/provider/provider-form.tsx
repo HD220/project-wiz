@@ -62,7 +62,7 @@ export function ProviderForm(props: ProviderFormProps) {
 
   // Standardized mutations with automatic error handling
   const createProviderMutation = useApiMutation(
-    (data: CreateProviderInput) => window.api.llmProviders.create(data),
+    (data: CreateProviderInput) => window.api.llmProvider.create(data),
     {
       successMessage: "Provider created successfully",
       errorMessage: "Failed to create provider",
@@ -72,7 +72,7 @@ export function ProviderForm(props: ProviderFormProps) {
 
   const updateProviderMutation = useApiMutation(
     ({ id, data }: { id: string; data: Partial<CreateProviderInput> }) =>
-      window.api.llmProviders.update(id, data),
+      window.api.llmProvider.update({ id, data }),
     {
       successMessage: "Provider updated successfully",
       errorMessage: "Failed to update provider",

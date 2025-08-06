@@ -9,7 +9,7 @@ import {
 import type {
   AuthenticatedUser,
   AuthResult,
-} from "@/main/features/auth/auth.types";
+} from "@/shared/types";
 
 export interface AuthContextType {
   isAuthenticated: boolean;
@@ -34,10 +34,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
   useEffect(() => {
     async function loadSession() {
       try {
-        const response = await window.api.auth.getActiveSession();
+        const response = await window.api.auth.getCurrent({});
 
         if (response.success && response.data) {
-          setUser(response.data.user);
+          setUser(response.data);
         }
       } catch (error) {
         // Session load failure is expected when user is not logged in
@@ -65,7 +65,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   const logout = async () => {
     try {
-      await window.api.auth.logout();
+      await window.api.auth.logout({});
     } finally {
       setUser(null);
     }

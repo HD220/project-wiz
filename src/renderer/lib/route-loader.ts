@@ -1,5 +1,5 @@
-import type { IpcResponse } from "../../main/types";
-import { getRendererLogger } from "@/shared/logger/renderer";
+import { getRendererLogger } from "@/shared/services/logger/renderer";
+import type { IPCResponse } from "@/shared/utils/create-ipc-handler";
 
 const logger = getRendererLogger("route-loader");
 
@@ -30,7 +30,7 @@ const logger = getRendererLogger("route-loader");
  * ```
  */
 export async function loadApiData<T>(
-  apiCall: () => Promise<IpcResponse<T>>,
+  apiCall: () => Promise<IPCResponse<T>>,
   errorMessage?: string,
 ): Promise<T> {
   const response = await apiCall();
@@ -39,97 +39,10 @@ export async function loadApiData<T>(
     throw new Error(response.error || errorMessage || "Failed to load data");
   }
 
-  if (response.data === undefined) {
-    throw new Error("API returned success but no data");
-  }
-
   return response.data;
 }
 
-/**
- * Load API data with optional fallback value (doesn't throw on failure)
- * Use this for non-critical data that shouldn't block route loading
- *
- * @param apiCall - Function that returns a Promise<IpcResponse<T>>
- * @param fallbackValue - Value to return if API call fails
- * @param errorMessage - Custom error message for logging
- * @returns Promise<T> - The data or fallback value
- *
- * @example
- * ```typescript
- * export const Route = createFileRoute("/dashboard")({
- *   loader: async () => {
- *     const [criticalData, optionalStats] = await Promise.all([
- *       loadApiData(() => window.api.users.getCurrent()), // Throws on failure
- *       loadApiDataWithFallback(
- *         () => window.api.stats.getUserStats(),
- *         { totalAgents: 0, totalConversations: 0 }, // Fallback
- *         "Failed to load user statistics"
- *       ),
- *     ]);
- *
- *     return { user: criticalData, stats: optionalStats };
- *   },
- * });
- * ```
- */
-export async function loadApiDataWithFallback<T>(
-  apiCall: () => Promise<IpcResponse<T>>,
-  fallbackValue: T,
-  errorMessage?: string,
-): Promise<T> {
-  try {
-    return await loadApiData(apiCall, errorMessage);
-  } catch (error) {
-    // Log the error but don't throw - return fallback instead
-    logger.warn(
-      `API call failed, using fallback: ${errorMessage || "Unknown error"}`,
-      error,
-    );
-    return fallbackValue;
-  }
-}
 
-/**
- * Load API data with conditional execution
- * Use this for data that should only be loaded under certain conditions
- *
- * @param condition - Whether to execute the API call
- * @param apiCall - Function that returns a Promise<IpcResponse<T>>
- * @param errorMessage - Custom error message for failures
- * @returns Promise<T | null> - The data if condition is true, null otherwise
- *
- * @example
- * ```typescript
- * export const Route = createFileRoute("/agents/$agentId/edit")({
- *   loader: async ({ params, context }) => {
- *     const agent = await loadApiData(
- *       () => window.api.agents.findById(params.agentId)
- *     );
- *
- *     // Only load provider details if agent has a provider
- *     const provider = await loadApiDataConditional(
- *       !!agent.providerId,
- *       () => window.api.llmProviders.getById(agent.providerId!),
- *       "Failed to load provider details"
- *     );
- *
- *     return { agent, provider };
- *   },
- * });
- * ```
- */
-export async function loadApiDataConditional<T>(
-  condition: boolean,
-  apiCall: () => Promise<IpcResponse<T>>,
-  errorMessage?: string,
-): Promise<T | null> {
-  if (!condition) {
-    return null;
-  }
-
-  return await loadApiData(apiCall, errorMessage);
-}
 
 /**
  * Load paginated API data with automatic parameter handling
@@ -165,7 +78,7 @@ export async function loadPaginatedApiData<T>(
     page: number,
     limit: number,
   ) => Promise<
-    IpcResponse<{
+    IPCResponse<{
       data: T[];
       total: number;
       page: number;

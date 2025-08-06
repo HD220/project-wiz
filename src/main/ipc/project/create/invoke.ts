@@ -1,4 +1,3 @@
-import { z } from "zod";
 import { createProject } from "@/main/ipc/project/queries";
 import { ProjectSchema } from "@/shared/types";
 import { requireAuth } from "@/main/services/session-registry";

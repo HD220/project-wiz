@@ -2,7 +2,7 @@ import { eq, and, gt, desc } from "drizzle-orm";
 import { createDatabaseConnection } from "@/shared/config/database";
 import { usersTable } from "@/main/schemas/user.schema";
 import { userSessionsTable } from "@/main/schemas/user-sessions.schema";
-import type { AuthenticatedUser } from "@/shared/types/user.types";
+import type { AuthenticatedUser } from "@/shared/types";
 import { getLogger } from "@/shared/services/logger/config";
 import { eventBus } from "@/shared/services/events/event-bus";
 

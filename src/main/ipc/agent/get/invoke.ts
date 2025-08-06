@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { findAgent, findUser } from "@/main/ipc/agent/queries";
+import { findAgent } from "@/main/ipc/agent/queries";
 import { AgentSchema } from "@/shared/types";
 import { requireAuth } from "@/main/services/session-registry";
 import { getLogger } from "@/shared/services/logger/config";
@@ -28,23 +28,31 @@ const handler = createIPCHandler({
       return null;
     }
 
-    // Buscar avatar do user
-    const user = await findUser(dbAgent.id);
-
-    // Mapeamento: SelectAgent → Agent (sem campos técnicos)
+    // Mapeamento completo (dados já vem do JOIN)
     const apiAgent = {
+      // Identity fields (users)
       id: dbAgent.id,
-      ownerId: dbAgent.ownerId,
       name: dbAgent.name,
+      avatar: dbAgent.avatar,
+      type: dbAgent.type,
+      
+      // State management (users)
+      isActive: dbAgent.isActive,
+      deactivatedAt: dbAgent.deactivatedAt ? new Date(dbAgent.deactivatedAt) : null,
+      deactivatedBy: dbAgent.deactivatedBy,
+      
+      // Timestamps (users)
+      createdAt: new Date(dbAgent.createdAt),
+      updatedAt: new Date(dbAgent.updatedAt),
+      
+      // Agent-specific fields (agents)
+      ownerId: dbAgent.ownerId,
       role: dbAgent.role,
       backstory: dbAgent.backstory,
       goal: dbAgent.goal,
       providerId: dbAgent.providerId,
-      modelConfig: dbAgent.modelConfig,
+      modelConfig: JSON.parse(dbAgent.modelConfig),
       status: dbAgent.status,
-      avatar: user?.avatar || null,
-      createdAt: new Date(dbAgent.createdAt),
-      updatedAt: new Date(dbAgent.updatedAt),
     };
     
     logger.debug("Agent get result", { found: apiAgent !== null });

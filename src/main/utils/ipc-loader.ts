@@ -1,5 +1,5 @@
 import { ipcMain } from "electron";
-import { glob } from "glob";
+import { sync as globSync } from "glob";
 import { getLogger } from "@/shared/services/logger/config";
 
 const logger = getLogger("ipc-loader");
@@ -19,12 +19,10 @@ export class IpcLoader {
     try {
       logger.info("🔍 Starting IPC handler auto-discovery...");
 
-      const invokeFiles = await glob("src/main/ipc/**/invoke.ts", { 
-        cwd: process.cwd(),
+      const invokeFiles = globSync("src/main/ipc/**/invoke.ts", { 
         absolute: true 
       });
-      const listenFiles = await glob("src/main/ipc/**/listen.ts", { 
-        cwd: process.cwd(),
+      const listenFiles = globSync("src/main/ipc/**/listen.ts", { 
         absolute: true 
       });
 

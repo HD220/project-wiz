@@ -8,6 +8,7 @@ export const projectChannelsTable = sqliteTable(
   "project_channels",
   {
     id: text("id")
+      .notNull()
       .$defaultFn(() => crypto.randomUUID()),
     ownerId: text("owner_id")
       .notNull()

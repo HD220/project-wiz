@@ -12,12 +12,7 @@ const GetChannelInputSchema = z.object({
   channelId: z.string().min(1, "Channel ID is required"),
 });
 
-const GetChannelOutputSchema = ChannelSchema.extend({
-  isArchived: z.boolean(),
-  isActive: z.boolean(),
-  deactivatedAt: z.number().nullable(),
-  deactivatedBy: z.string().nullable(),
-}).nullable();
+const GetChannelOutputSchema = ChannelSchema.nullable();
 
 const handler = createIPCHandler({
   inputSchema: GetChannelInputSchema,
@@ -32,7 +27,7 @@ const handler = createIPCHandler({
     
     // Map database result to API format
     const result = dbChannel ? {
-      id: dbChannel.id,
+      id: dbChannel.id!,
       projectId: dbChannel.projectId,
       name: dbChannel.name,
       description: dbChannel.description,
@@ -42,7 +37,7 @@ const handler = createIPCHandler({
       updatedAt: new Date(dbChannel.updatedAt),
       isArchived: !!dbChannel.archivedAt,
       isActive: dbChannel.isActive,
-      deactivatedAt: dbChannel.deactivatedAt,
+      deactivatedAt: dbChannel.deactivatedAt ? new Date(dbChannel.deactivatedAt) : null,
       deactivatedBy: dbChannel.deactivatedBy,
     } : null;
     

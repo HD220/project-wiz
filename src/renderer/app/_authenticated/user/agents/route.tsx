@@ -1,5 +1,7 @@
 import { createFileRoute, Outlet } from "@tanstack/react-router";
 
+import type { SelectAgent } from "@/renderer/features/agent/agent.types";
+
 import { AgentFiltersSchema } from "@/renderer/features/agent/agent.schema";
 import { AgentList } from "@/renderer/features/agent/components/agent-list";
 import { loadApiData } from "@/renderer/lib/route-loader";
@@ -24,7 +26,7 @@ export const Route = createFileRoute("/_authenticated/user/agents")({
   loader: async ({ deps }) => {
     // Load agents with proper filtering
     const agents = await loadApiData(
-      () => window.api.agents.list(deps.search),
+      () => window.api.agent.list(deps.search),
       "Failed to load agents",
     );
 

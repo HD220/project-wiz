@@ -31,7 +31,7 @@ function CreateAgentPage() {
     async function loadProviders() {
       try {
         const providersData = await loadApiData(
-          () => window.api.llmProviders.list(),
+          () => window.api.llmProvider.list(),
           "Failed to load providers",
         );
         setProviders(providersData as LlmProvider[]);
@@ -47,7 +47,7 @@ function CreateAgentPage() {
 
   // Agent creation mutation
   const createAgentMutation = useApiMutation(
-    (data: CreateAgentInput) => window.api.agents.create(data),
+    (data: CreateAgentInput) => window.api.agent.create(data),
     {
       successMessage: "Agent created successfully",
       errorMessage: "Failed to create agent",

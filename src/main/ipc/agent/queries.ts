@@ -2,66 +2,83 @@ import { eq, and, desc, like, or } from "drizzle-orm";
 import { createDatabaseConnection } from "@/shared/config/database";
 import { 
   agentsTable, 
-  type SelectAgent,
   type UpdateAgent,
-  type InsertAgent,
   type AgentStatus
 } from "@/main/schemas/agent.schema";
+import type { Agent } from "@/shared/types";
 import { llmProvidersTable } from "@/main/schemas/llm-provider.schema";
 import { usersTable } from "@/main/schemas/user.schema";
 
 const { getDatabase } = createDatabaseConnection(true);
 
 /**
- * Buscar agent por id e owner
+ * Buscar agent por id e owner (sempre JOIN com users)
  */
-export async function findAgent(agentId: string, ownerId: string): Promise<SelectAgent | null> {
+export async function findAgent(agentId: string, ownerId: string): Promise<Agent | null> {
   const db = getDatabase();
   
   const [agent] = await db
-    .select()
+    .select({
+      // Identity fields (users - authoritative)
+      id: usersTable.id,
+      name: usersTable.name,
+      avatar: usersTable.avatar,
+      type: usersTable.type,
+      
+      // State management (users - authoritative)
+      isActive: usersTable.isActive,
+      deactivatedAt: usersTable.deactivatedAt,
+      deactivatedBy: usersTable.deactivatedBy,
+      
+      // Timestamps (users - authoritative)
+      createdAt: usersTable.createdAt,
+      updatedAt: usersTable.updatedAt,
+      
+      // Agent-specific fields (agents table)
+      ownerId: agentsTable.ownerId,
+      role: agentsTable.role,
+      backstory: agentsTable.backstory,
+      goal: agentsTable.goal,
+      providerId: agentsTable.providerId,
+      modelConfig: agentsTable.modelConfig,
+      status: agentsTable.status,
+    })
     .from(agentsTable)
+    .innerJoin(usersTable, eq(agentsTable.id, usersTable.id))
     .where(and(
       eq(agentsTable.id, agentId),
-      eq(agentsTable.ownerId, ownerId)
+      eq(agentsTable.ownerId, ownerId),
+      eq(usersTable.isActive, true) // Only active users
     ))
     .limit(1);
 
-  return agent || null;
+  return agent as Agent | null;
 }
 
 /**
- * Update genérico do agent - WHERE pelas PKs
+ * Update agent e retorna dados completos (JOIN com users)
  */
-export async function updateAgent(data: UpdateAgent): Promise<SelectAgent | null> {
+export async function updateAgent(data: UpdateAgent & { ownerId: string }): Promise<Agent | null> {
   const db = getDatabase();
   
+  // Update na tabela agents
   const [updated] = await db
     .update(agentsTable)
     .set(data)
     .where(and(
       eq(agentsTable.id, data.id),
-      eq(agentsTable.ownerId, data.ownerId!)
+      eq(agentsTable.ownerId, data.ownerId)
     ))
-    .returning();
+    .returning({ id: agentsTable.id });
 
-  return updated || null;
+  if (!updated) {
+    return null;
+  }
+
+  // Buscar dados completos com JOIN
+  return await findAgent(updated.id, data.ownerId);
 }
 
-/**
- * Buscar user por ID
- */
-export async function findUser(userId: string): Promise<{ avatar: string | null } | null> {
-  const db = getDatabase();
-  
-  const [user] = await db
-    .select({ avatar: usersTable.avatar })
-    .from(usersTable)
-    .where(eq(usersTable.id, userId))
-    .limit(1);
-
-  return user || null;
-}
 
 /**
  * Contar agents ativos por owner
@@ -72,10 +89,11 @@ export async function getActiveAgentsCount(ownerId: string): Promise<number> {
   const result = await db
     .select({ count: agentsTable.id })
     .from(agentsTable)
+    .innerJoin(usersTable, eq(agentsTable.id, usersTable.id))
     .where(
       and(
         eq(agentsTable.ownerId, ownerId),
-        eq(agentsTable.isActive, true),
+        eq(usersTable.isActive, true),
         eq(agentsTable.status, "active"),
       ),
     );
@@ -86,14 +104,20 @@ export async function getActiveAgentsCount(ownerId: string): Promise<number> {
 /**
  * Criar agent com user associado
  */
-export async function createAgent(data: InsertAgent & { 
+export async function createAgent(data: { 
+  name: string;
+  role: string;
+  backstory: string;
+  goal: string;
+  providerId: string;
+  modelConfig: string | object;
   ownerId: string; 
   avatar?: string | null; 
-}): Promise<SelectAgent> {
+}): Promise<Agent> {
   const db = getDatabase();
   
   // Usar transação síncrona conforme o padrão do AgentService original
-  return db.transaction((tx) => {
+  return db.transaction((tx): Agent => {
     // 1. Verificar se o provider existe e está ativo
     const providers = tx
       .select()
@@ -128,25 +152,22 @@ export async function createAgent(data: InsertAgent & {
       throw new Error(`Failed to create user for agent "${data.name}"`);
     }
 
-    // 3. Criar o agent record usando InsertAgent type
-    const agentInsertData: InsertAgent = {
-      id: agentUser.id,
-      ownerId: data.ownerId,
-      name: data.name,
-      role: data.role,
-      backstory: data.backstory,
-      goal: data.goal,
-      providerId: data.providerId,
-      modelConfig: typeof data.modelConfig === 'string' 
-        ? data.modelConfig 
-        : JSON.stringify(data.modelConfig),
-      status: "inactive", // Sempre começa como inactive
-    };
-
+    // 3. Criar o agent record (só campos específicos)
     const agents = tx
       .insert(agentsTable)
-      .values(agentInsertData)
-      .returning()
+      .values({
+        id: agentUser.id,
+        ownerId: data.ownerId,
+        role: data.role,
+        backstory: data.backstory,
+        goal: data.goal,
+        providerId: data.providerId,
+        modelConfig: typeof data.modelConfig === 'string' 
+          ? data.modelConfig 
+          : JSON.stringify(data.modelConfig),
+        status: "inactive", // Sempre começa como inactive
+      })
+      .returning({ id: agentsTable.id })
       .all();
 
     const agent = agents[0];
@@ -154,7 +175,45 @@ export async function createAgent(data: InsertAgent & {
       throw new Error(`Failed to create agent "${data.name}" with role "${data.role}"`);
     }
 
-    return agent;
+    // 4. Retornar dados completos do agent criado
+    const completeAgents = tx
+      .select({
+        // Identity fields (users - authoritative)
+        id: usersTable.id,
+        name: usersTable.name,
+        avatar: usersTable.avatar,
+        type: usersTable.type,
+        
+        // State management (users - authoritative)
+        isActive: usersTable.isActive,
+        deactivatedAt: usersTable.deactivatedAt,
+        deactivatedBy: usersTable.deactivatedBy,
+        
+        // Timestamps (users - authoritative)
+        createdAt: usersTable.createdAt,
+        updatedAt: usersTable.updatedAt,
+        
+        // Agent-specific fields (agents table)
+        ownerId: agentsTable.ownerId,
+        role: agentsTable.role,
+        backstory: agentsTable.backstory,
+        goal: agentsTable.goal,
+        providerId: agentsTable.providerId,
+        modelConfig: agentsTable.modelConfig,
+        status: agentsTable.status,
+      })
+      .from(agentsTable)
+      .innerJoin(usersTable, eq(agentsTable.id, usersTable.id))
+      .where(eq(agentsTable.id, agent.id))
+      .limit(1)
+      .all();
+
+    const completeAgent = completeAgents[0];
+    if (!completeAgent) {
+      throw new Error(`Failed to retrieve created agent "${data.name}"`);
+    }
+
+    return completeAgent as Agent;
   });
 }
 
@@ -166,14 +225,14 @@ export async function listAgents(filters: {
   status?: AgentStatus;
   search?: string;
   showInactive?: boolean;
-}): Promise<SelectAgent[]> {
+}): Promise<Agent[]> {
   const db = getDatabase();
 
   const conditions = [eq(agentsTable.ownerId, filters.ownerId)];
 
   // Filter by active status unless explicitly including inactive
   if (!filters.showInactive) {
-    conditions.push(eq(agentsTable.isActive, true));
+    conditions.push(eq(usersTable.isActive, true));
   }
 
   // Add status filter
@@ -185,7 +244,7 @@ export async function listAgents(filters: {
   if (filters.search) {
     const searchTerm = `%${filters.search}%`;
     const searchCondition = or(
-      like(agentsTable.name, searchTerm),
+      like(usersTable.name, searchTerm),
       like(agentsTable.role, searchTerm),
     );
     if (searchCondition) {
@@ -194,12 +253,37 @@ export async function listAgents(filters: {
   }
 
   const agents = await db
-    .select()
+    .select({
+      // Identity fields (users - authoritative)
+      id: usersTable.id,
+      name: usersTable.name,
+      avatar: usersTable.avatar,
+      type: usersTable.type,
+      
+      // State management (users - authoritative)
+      isActive: usersTable.isActive,
+      deactivatedAt: usersTable.deactivatedAt,
+      deactivatedBy: usersTable.deactivatedBy,
+      
+      // Timestamps (users - authoritative)
+      createdAt: usersTable.createdAt,
+      updatedAt: usersTable.updatedAt,
+      
+      // Agent-specific fields (agents table)
+      ownerId: agentsTable.ownerId,
+      role: agentsTable.role,
+      backstory: agentsTable.backstory,
+      goal: agentsTable.goal,
+      providerId: agentsTable.providerId,
+      modelConfig: agentsTable.modelConfig,
+      status: agentsTable.status,
+    })
     .from(agentsTable)
+    .innerJoin(usersTable, eq(agentsTable.id, usersTable.id))
     .where(and(...conditions))
-    .orderBy(desc(agentsTable.createdAt));
+    .orderBy(desc(usersTable.createdAt));
 
-  return agents;
+  return agents as Agent[];
 }
 
 

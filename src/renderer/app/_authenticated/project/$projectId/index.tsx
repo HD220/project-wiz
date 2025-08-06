@@ -1,6 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 
+import type { Project } from "@/shared/types";
+
 import { ProjectView } from "@/renderer/components/app/server-view";
 import { ContentHeader } from "@/renderer/components/layout/content-header";
 import {
@@ -70,7 +72,7 @@ function ProjectPage() {
         {/* Main Project Content */}
         <ScrollArea className="flex-1">
           <main>
-            <ProjectView project={project} />
+            <ProjectView project={project || {} as Project} />
           </main>
         </ScrollArea>
 
@@ -94,7 +96,7 @@ function ProjectPage() {
 export const Route = createFileRoute("/_authenticated/project/$projectId/")({
   loader: async ({ params }) => {
     const project = await loadApiData(
-      () => window.api.projects.findById(params.projectId),
+      () => window.api.project.get(params.projectId),
       "Project not found",
     );
 

@@ -20,7 +20,8 @@ const handler = createIPCHandler({
   handler: async (input) => {
     logger.debug("Getting DM messages", { dmId: input.dmId });
 
-    const currentUser = requireAuth();
+    // Validate user authentication
+    requireAuth();
     
     // Get messages from DM conversation
     const dbMessages = await getDMMessages(input.dmId);

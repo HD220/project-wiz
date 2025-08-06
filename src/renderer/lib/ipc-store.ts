@@ -30,7 +30,7 @@ import { useSyncExternalStore } from "react";
  */
 export function createIpcStore<T>(
   pattern: string,
-  fetchFn: () => Promise<T>,
+  _fetchFn: () => Promise<T>,
   initial: T
 ) {
   let state = initial;
@@ -41,15 +41,15 @@ export function createIpcStore<T>(
   if (!isInitialized) {
     window.api.event.register(pattern);
     
-    // Listen for events that match the pattern
-    window.api.on(pattern, async () => {
-      try {
-        state = await fetchFn();
-        listeners.forEach((listener) => listener());
-      } catch (error) {
-        console.error(`Error refreshing store for pattern ${pattern}:`, error);
-      }
-    });
+    // TODO: Listen for events that match the pattern
+    // window.api.on(pattern, async () => {
+    //   try {
+    //     state = await fetchFn();
+    //     listeners.forEach((listener) => listener());
+    //   } catch (error) {
+    //     console.error(`Error refreshing store for pattern ${pattern}:`, error);
+    //   }
+    // });
     
     isInitialized = true;
   }

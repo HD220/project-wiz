@@ -25,6 +25,7 @@ const handler = createIPCHandler({
     
     // Update user preferences with ownership validation
     const result = await updateUserPreferences({
+      id: currentUser.id, // Use user id as preference id
       userId: currentUser.id,
       theme: input.theme,
     });

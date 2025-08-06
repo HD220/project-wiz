@@ -1,7 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { Plus, Settings } from "lucide-react";
 
-import type { SelectProject } from "@/main/features/project/project.types";
+import type { SelectProject } from "@/shared/types";
 
 import { CustomLink } from "@/renderer/components/custom-link";
 import { Avatar, AvatarFallback } from "@/renderer/components/ui/avatar";

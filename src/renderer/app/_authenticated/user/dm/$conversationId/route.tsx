@@ -492,7 +492,7 @@ export const Route = createFileRoute("/_authenticated/user/dm/$conversationId")(
             "Failed to load DM messages",
           ),
           loadApiData(
-            () => window.api.users.listAvailableUsers(),
+            () => window.api.user.listAvailableUsers(),
             "Failed to load available users",
           ),
           loadApiData(

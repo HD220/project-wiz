@@ -1,6 +1,6 @@
 import { createFileRoute, Outlet } from "@tanstack/react-router";
 
-import type { DMConversationWithLastMessage } from "@/main/features/dm/dm-conversation.types";
+import type { DMConversationWithLastMessage } from "@/shared/types";
 
 import { UserSidebar } from "@/renderer/components/app/user-sidebar";
 import type { ConversationWithLastMessage } from "@/renderer/types/chat.types";
@@ -34,11 +34,11 @@ export const Route = createFileRoute("/_authenticated/user")({
 
     // Load all DM conversations (including archived) - filtering handled in component
     const [conversationsResponse, availableUsersResponse] = await Promise.all([
-      window.api.dm.getUserConversations({
+      window.api.dm.list({
         includeArchived: true, // Always load all conversations
         includeInactive: false, // Always exclude inactive conversations
       }),
-      window.api.users.listAvailableUsers(),
+      window.api.user.list({}),
     ]);
 
     if (!conversationsResponse.success) {
@@ -77,7 +77,7 @@ export const Route = createFileRoute("/_authenticated/user")({
               deactivatedAt: null,
               deactivatedBy: null,
               createdAt: dm.lastMessage.createdAt,
-              updatedAt: dm.lastMessage.updatedAt,
+              updatedAt: dm.lastMessage.updatedAt || dm.lastMessage.createdAt,
               conversationId: dm.id,
               content: dm.lastMessage.content,
               authorId: dm.lastMessage.authorId,

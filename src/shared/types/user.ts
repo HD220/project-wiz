@@ -14,3 +14,35 @@ export const UserSchema = z.object({
 });
 
 export type User = z.infer<typeof UserSchema>;
+
+/**
+ * User summary for lists and references
+ */
+export const UserSummarySchema = UserSchema.pick({
+  id: true,
+  name: true,
+  avatar: true,
+  type: true
+});
+
+export type UserSummary = z.infer<typeof UserSummarySchema>;
+
+/**
+ * Authenticated user type with session info
+ */
+export const AuthenticatedUserSchema = UserSchema.extend({
+  // Add session-specific fields if needed
+  sessionId: z.string().optional(),
+});
+
+export type AuthenticatedUser = z.infer<typeof AuthenticatedUserSchema>;
+
+/**
+ * Auth result from login operations
+ */
+export const AuthResultSchema = z.object({
+  user: AuthenticatedUserSchema,
+  token: z.string().optional(), // JWT token if used
+});
+
+export type AuthResult = z.infer<typeof AuthResultSchema>;

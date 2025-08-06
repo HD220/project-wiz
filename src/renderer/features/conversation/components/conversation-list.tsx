@@ -8,7 +8,7 @@ import {
 } from "lucide-react";
 import { useState, useMemo } from "react";
 
-import type { UserSummary } from "@/main/features/user/user.service";
+import type { UserSummary } from "@/shared/types";
 
 import { CustomLink } from "@/renderer/components/custom-link";
 import { Button } from "@/renderer/components/ui/button";

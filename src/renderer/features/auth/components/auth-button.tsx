@@ -2,7 +2,7 @@ import { LogOut, User } from "lucide-react";
 
 import { Button } from "@/renderer/components/ui/button";
 import { useAuth } from "@/renderer/contexts/auth.context";
-import { getRendererLogger } from "@/shared/logger/renderer";
+import { getRendererLogger } from "@/shared/services/logger/renderer";
 
 const logger = getRendererLogger("auth-button");
 

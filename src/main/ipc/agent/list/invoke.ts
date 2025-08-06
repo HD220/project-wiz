@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { listAgents, findUser } from "@/main/ipc/agent/queries";
+import { listAgents } from "@/main/ipc/agent/queries";
 import { AgentSchema } from "@/shared/types";
 import { requireAuth } from "@/main/services/session-registry";
 import { getLogger } from "@/shared/services/logger/config";
@@ -26,31 +26,37 @@ const handler = createIPCHandler({
     // Query recebe dados e gerencia campos técnicos internamente
     const dbAgents = await listAgents({
       ownerId: currentUser.id,
-      status: input.status,
-      search: input.search,
-      showInactive: input.showInactive,
+      status: input?.status,
+      search: input?.search,
+      showInactive: input?.showInactive,
     });
     
-    // Buscar avatars dos users para todos os agents
-    const apiAgents = await Promise.all(
-      dbAgents.map(async (agent) => {
-        const user = await findUser(agent.id);
-        return {
-          id: agent.id,
-          ownerId: agent.ownerId,
-          name: agent.name,
-          role: agent.role,
-          backstory: agent.backstory,
-          goal: agent.goal,
-          providerId: agent.providerId,
-          modelConfig: JSON.parse(agent.modelConfig),
-          status: agent.status,
-          avatar: user?.avatar || null,
-          createdAt: new Date(agent.createdAt),
-          updatedAt: new Date(agent.updatedAt),
-        };
-      })
-    );
+    // Mapear agents (dados já vem completos do JOIN)
+    const apiAgents = dbAgents.map((agent) => ({
+      // Identity fields (users)
+      id: agent.id,
+      name: agent.name,
+      avatar: agent.avatar,
+      type: agent.type,
+      
+      // State management (users)
+      isActive: agent.isActive,
+      deactivatedAt: agent.deactivatedAt ? new Date(agent.deactivatedAt) : null,
+      deactivatedBy: agent.deactivatedBy,
+      
+      // Timestamps (users)
+      createdAt: new Date(agent.createdAt),
+      updatedAt: new Date(agent.updatedAt),
+      
+      // Agent-specific fields (agents)
+      ownerId: agent.ownerId,
+      role: agent.role,
+      backstory: agent.backstory,
+      goal: agent.goal,
+      providerId: agent.providerId,
+      modelConfig: JSON.parse(agent.modelConfig),
+      status: agent.status,
+    }));
     
     logger.debug("Listed agents", { count: apiAgents.length });
     

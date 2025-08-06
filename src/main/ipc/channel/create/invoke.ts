@@ -1,4 +1,3 @@
-import { z } from "zod";
 import { createProjectChannel } from "@/main/ipc/channel/queries";
 import { ChannelSchema } from "@/shared/types";
 import { requireAuth } from "@/main/services/session-registry";

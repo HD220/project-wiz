@@ -1,4 +1,3 @@
-import { z } from "zod";
 import { sendDMMessage } from "@/main/ipc/dm/queries";
 import { MessageSchema } from "@/shared/types";
 import { requireAuth } from "@/main/services/session-registry";

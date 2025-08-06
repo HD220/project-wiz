@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { findAgent, updateAgent, findUser } from "@/main/ipc/agent/queries";
+import { findAgent, updateAgent } from "@/main/ipc/agent/queries";
 import { AgentSchema } from "@/shared/types";
 import { requireAuth } from "@/main/services/session-registry";
 import { eventBus } from "@/shared/services/events/event-bus";
@@ -29,36 +29,42 @@ const handler = createIPCHandler({
       throw new Error("Agent not found for current user session");
     }
 
-    // Atualizar o agent para ativo
+    // Só atualizar status do agent (dados de user são mantidos)
     const dbAgent = await updateAgent({
       id: agentToRestore.id,
       ownerId: agentToRestore.ownerId,
-      isActive: true,
-      deactivatedAt: null,
-      deactivatedBy: null,
+      status: "active", // Reativar o agent
     });
     
     if (!dbAgent) {
       throw new Error("Failed to update agent");
     }
 
-    // Buscar avatar do user
-    const user = await findUser(dbAgent.id);
-
-    // Map to API format (tipo do shared)
+    // Map to API format (dados completos do JOIN)
     const apiAgent = {
+      // Identity fields (users)
       id: dbAgent.id,
-      ownerId: dbAgent.ownerId,
       name: dbAgent.name,
+      avatar: dbAgent.avatar,
+      type: dbAgent.type,
+      
+      // State management (users)
+      isActive: dbAgent.isActive,
+      deactivatedAt: dbAgent.deactivatedAt ? new Date(dbAgent.deactivatedAt) : null,
+      deactivatedBy: dbAgent.deactivatedBy,
+      
+      // Timestamps (users)
+      createdAt: new Date(dbAgent.createdAt),
+      updatedAt: new Date(dbAgent.updatedAt),
+      
+      // Agent-specific fields (agents)
+      ownerId: dbAgent.ownerId,
       role: dbAgent.role,
       backstory: dbAgent.backstory,
       goal: dbAgent.goal,
       providerId: dbAgent.providerId,
-      modelConfig: dbAgent.modelConfig,
+      modelConfig: JSON.parse(dbAgent.modelConfig),
       status: dbAgent.status,
-      avatar: user?.avatar || null,
-      createdAt: new Date(dbAgent.createdAt),
-      updatedAt: new Date(dbAgent.updatedAt),
     };
     
     // Emit event
@@ -75,7 +81,7 @@ export default handler;
 declare global {
   namespace WindowAPI {
     interface Agent {
-      restore: InferHandler<typeof handler>
+      activate: InferHandler<typeof handler>
     }
   }
 }

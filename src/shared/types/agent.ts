@@ -2,24 +2,32 @@ import { z } from "zod";
 
 /**
  * Agent Domain Entity Schema
- * Represents an AI agent in the system
+ * Complete agent representation (merge of users + agents tables)
  */
 export const AgentSchema = z.object({
+  // Identity fields (from users table - authoritative)
   id: z.string(),
-  ownerId: z.string(),
   name: z.string(),
-  role: z.string(),
-  backstory: z.string(),
-  goal: z.string(),
   avatar: z.string().nullable(),
-  status: z.enum(["active", "inactive", "busy"]),
-  modelConfig: z.string(), // JSON string stored in database
-  providerId: z.string(),
+  type: z.literal("agent"),
+  
+  // State management (from users table - authoritative) 
   isActive: z.boolean(),
   deactivatedAt: z.date().nullable(),
   deactivatedBy: z.string().nullable(),
+  
+  // Timestamps (from users table - authoritative)
   createdAt: z.date(),
   updatedAt: z.date(),
+  
+  // Agent-specific fields (from agents table)
+  ownerId: z.string(),
+  role: z.string(),
+  backstory: z.string(),
+  goal: z.string(),
+  providerId: z.string(),
+  modelConfig: z.any(), // JSON object parsed from database
+  status: z.enum(["active", "inactive", "busy"]),
 });
 
 // Export domain entity type

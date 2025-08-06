@@ -1,6 +1,6 @@
 import { Calendar, Folder, GitBranch, Settings } from "lucide-react";
 
-import type { SelectProject } from "@/main/features/project/project.types";
+import type { SelectProject } from "@/shared/types";
 
 import { Badge } from "@/renderer/components/ui/badge";
 import { Button } from "@/renderer/components/ui/button";

@@ -1,5 +1,4 @@
-import { z } from "zod";
-import { createAgent, findUser } from "@/main/ipc/agent/queries";
+import { createAgent } from "@/main/ipc/agent/queries";
 import { AgentSchema } from "@/shared/types";
 import { requireAuth } from "@/main/services/session-registry";
 import { eventBus } from "@/shared/services/events/event-bus";
@@ -38,22 +37,30 @@ const handler = createIPCHandler({
       ownerId: currentUser.id
     });
     
-    // Buscar avatar do user
-    const user = await findUser(dbAgent.id);
-
     const apiAgent = {
+      // Identity fields (users)
       id: dbAgent.id,
-      ownerId: dbAgent.ownerId,
       name: dbAgent.name,
+      avatar: dbAgent.avatar,
+      type: dbAgent.type,
+      
+      // State management (users)
+      isActive: dbAgent.isActive,
+      deactivatedAt: dbAgent.deactivatedAt ? new Date(dbAgent.deactivatedAt) : null,
+      deactivatedBy: dbAgent.deactivatedBy,
+      
+      // Timestamps (users)
+      createdAt: new Date(dbAgent.createdAt),
+      updatedAt: new Date(dbAgent.updatedAt),
+      
+      // Agent-specific fields (agents)
+      ownerId: dbAgent.ownerId,
       role: dbAgent.role,
       backstory: dbAgent.backstory,
       goal: dbAgent.goal,
       providerId: dbAgent.providerId,
       modelConfig: JSON.parse(dbAgent.modelConfig),
       status: dbAgent.status,
-      avatar: user?.avatar || null,
-      createdAt: new Date(dbAgent.createdAt),
-      updatedAt: new Date(dbAgent.updatedAt),
     };
     
     eventBus.emit("agent:created", { agentId: apiAgent.id });

@@ -20,7 +20,7 @@ const handler = createIPCHandler({
   handler: async (input) => {
     logger.debug("Getting channel messages", { channelId: input.channelId });
 
-    const currentUser = requireAuth();
+    requireAuth();
     
     // Get messages from channel
     const dbMessages = await getChannelMessages(input.channelId);

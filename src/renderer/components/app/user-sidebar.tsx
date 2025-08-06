@@ -1,4 +1,4 @@
-import type { UserSummary } from "@/main/features/user/user.service";
+import type { UserSummary } from "@/shared/types";
 
 import { SidebarUserArea } from "@/renderer/components/app/sidebar-user-area";
 import { SidebarHeader } from "@/renderer/components/layout/navigation/sidebar-header";

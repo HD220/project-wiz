@@ -1,7 +1,7 @@
-// Re-export main types for renderer
+// Re-export shared types for renderer
 export type {
   CreateProjectChannelInput,
   ProjectChannelWithLastMessage,
   ProjectChannelFilters,
   SelectProjectChannel,
-} from "@/main/features/project/project-channel.types";
+} from "@/shared/types";

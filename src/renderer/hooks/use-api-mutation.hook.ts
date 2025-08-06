@@ -2,7 +2,7 @@ import { useMutation, UseMutationResult } from "@tanstack/react-query";
 import { useRouter } from "@tanstack/react-router";
 import { toast } from "sonner";
 
-import type { IpcResponse } from "@/main/types";
+import type { IPCResponse } from "@/shared/utils/create-ipc-handler";
 
 export interface ApiMutationOptions<TReturn> {
   /** Success toast message */
@@ -46,9 +46,9 @@ export interface ApiMutationOptions<TReturn> {
  * ```
  */
 export function useApiMutation<TArgs, TReturn>(
-  mutationFn: (args: TArgs) => Promise<IpcResponse<TReturn>>,
+  mutationFn: (args: TArgs) => Promise<IPCResponse<TReturn>>,
   options: ApiMutationOptions<TReturn> = {},
-): UseMutationResult<IpcResponse<TReturn>, Error, TArgs> {
+): UseMutationResult<IPCResponse<TReturn>, Error, TArgs> {
   const router = useRouter();
 
   return useMutation({

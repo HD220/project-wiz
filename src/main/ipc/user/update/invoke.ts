@@ -23,7 +23,8 @@ const handler = createIPCHandler({
   handler: async (input) => {
     logger.debug("Updating user", { userId: input.id });
 
-    const currentUser = requireAuth();
+    // Validate user authentication
+    requireAuth();
     
     // Extract id and prepare update data
     const { id, ...updateData } = input;

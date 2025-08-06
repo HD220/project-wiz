@@ -32,7 +32,7 @@ export const Route = createFileRoute(
   loader: async ({ deps }) => {
     // Load providers with proper filtering
     const providers = await loadApiData(
-      () => window.api.llmProviders.list(deps.search),
+      () => window.api.llmProvider.list(deps.search),
       "Failed to load providers",
     );
 

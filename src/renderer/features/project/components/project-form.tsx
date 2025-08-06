@@ -3,7 +3,7 @@ import { FolderIcon, Github } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
-import type { InsertProject } from "@/main/features/project/project.types";
+import type { InsertProject } from "@/shared/types";
 
 import {
   Form,
@@ -102,13 +102,15 @@ export function ProjectForm(props: ProjectFormProps) {
 
   // Standardized mutation with automatic error handling
   const createProjectMutation = useApiMutation(
-    (data: InsertProject) => window.api.projects.create(data),
+    (data: InsertProject) => window.api.project.create(data),
     {
       successMessage: "Project created successfully",
       errorMessage: "Failed to create project",
       invalidateRouter: false, // Disable automatic invalidation to prevent double invalidation
       onSuccess: (project) => {
-        onSuccess?.(project.id);
+        if (project.id) {
+          onSuccess?.(project.id);
+        }
       },
     },
   );
@@ -182,13 +184,12 @@ export function ProjectForm(props: ProjectFormProps) {
     const projectData: InsertProject = {
       name: data.name.trim(),
       description: data.description?.trim() || null,
+      avatarUrl: null, // No avatar support in form yet
       localPath,
       ownerId: user.id,
       status: "active" as const,
-      ...(data.type === "github" && {
-        gitUrl: data.gitUrl?.trim() || null,
-        branch: data.branch?.trim() || "main",
-      }),
+      gitUrl: data.type === "github" ? (data.gitUrl?.trim() || null) : null,
+      branch: data.type === "github" ? (data.branch?.trim() || "main") : null,
     };
 
     createProjectMutation.mutate(projectData);

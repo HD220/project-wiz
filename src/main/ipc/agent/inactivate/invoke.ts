@@ -1,9 +1,12 @@
 import { z } from "zod";
-import { findAgent, updateAgent } from "@/main/ipc/agent/queries";
+import { findAgent } from "@/main/ipc/agent/queries";
 import { requireAuth } from "@/main/services/session-registry";
 import { eventBus } from "@/shared/services/events/event-bus";
 import { getLogger } from "@/shared/services/logger/config";
 import { createIPCHandler, InferHandler } from "@/shared/utils/create-ipc-handler";
+import { createDatabaseConnection } from "@/shared/config/database";
+import { usersTable } from "@/main/schemas/user.schema";
+import { eq } from "drizzle-orm";
 
 const logger = getLogger("agent.delete.invoke");
 
@@ -28,14 +31,18 @@ const handler = createIPCHandler({
       throw new Error("Agent not found for current user session");
     }
 
-    // Atualizar o agent para inativo
-    await updateAgent({
-      id: agentToDeactivate.id,
-      ownerId: agentToDeactivate.ownerId,
-      isActive: false,
-      deactivatedAt: new Date(),
-      deactivatedBy: currentUser.id,
-    });
+    // Atualizar user para inativo (soft delete)
+    const { getDatabase } = createDatabaseConnection(true);
+    const db = getDatabase();
+    
+    await db
+      .update(usersTable)
+      .set({
+        isActive: false,
+        deactivatedAt: new Date(),
+        deactivatedBy: currentUser.id,
+      })
+      .where(eq(usersTable.id, agentToDeactivate.id));
     
     // Emit event
     eventBus.emit("agent:deleted", { agentId: input.id });
@@ -51,7 +58,7 @@ export default handler;
 declare global {
   namespace WindowAPI {
     interface Agent {
-      delete: InferHandler<typeof handler>
+      inactivate: InferHandler<typeof handler>
     }
   }
 }

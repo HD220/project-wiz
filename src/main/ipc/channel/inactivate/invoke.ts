@@ -12,11 +12,7 @@ const InactivateChannelInputSchema = z.object({
   channelId: z.string().min(1, "Channel ID is required"),
 });
 
-const InactivateChannelOutputSchema = ChannelSchema.extend({
-  isActive: z.boolean(),
-  deactivatedAt: z.number().nullable(),
-  deactivatedBy: z.string().nullable(),
-});
+const InactivateChannelOutputSchema = ChannelSchema;
 
 const handler = createIPCHandler({
   inputSchema: InactivateChannelInputSchema,
@@ -39,7 +35,7 @@ const handler = createIPCHandler({
     
     // Mapeamento: SelectChannel → Channel (dados puros da entidade)
     const apiChannel = {
-      id: dbChannel.id,
+      id: dbChannel.id!,
       projectId: dbChannel.projectId,
       name: dbChannel.name,
       description: dbChannel.description,
@@ -48,7 +44,8 @@ const handler = createIPCHandler({
       createdAt: new Date(dbChannel.createdAt),
       updatedAt: new Date(dbChannel.updatedAt),
       isActive: dbChannel.isActive,
-      deactivatedAt: dbChannel.deactivatedAt,
+      isArchived: !!dbChannel.archivedAt,
+      deactivatedAt: dbChannel.deactivatedAt ? new Date(dbChannel.deactivatedAt) : null,
       deactivatedBy: dbChannel.deactivatedBy,
     };
     

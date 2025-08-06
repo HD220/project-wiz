@@ -27,7 +27,7 @@ export const Route = createFileRoute(
     const { providerId } = params;
 
     const provider = await loadApiData(
-      () => window.api.llmProviders.getById(providerId),
+      () => window.api.llmProvider.get(providerId),
       "Failed to load provider",
     );
 

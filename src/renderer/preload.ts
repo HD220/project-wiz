@@ -25,6 +25,8 @@ contextBridge.exposeInMainWorld("api", {
       ipcRenderer.invoke("invoke:auth:check-login"),
     getUser: (userId) =>
       ipcRenderer.invoke("invoke:auth:get-user", userId),
+    getActiveSession: () =>
+      ipcRenderer.invoke("invoke:auth:get-session"),
   } satisfies WindowAPI.Auth,
 
   // Users API (new colocated handlers)
@@ -97,10 +99,10 @@ contextBridge.exposeInMainWorld("api", {
       ipcRenderer.invoke("invoke:agent:get", id),
     update: (input) =>
       ipcRenderer.invoke("invoke:agent:update", input),
-    inactivate: (params: { agentId: string }) =>
-      ipcRenderer.invoke("invoke:agent:inactivate", params),
-    activate: (params: { agentId: string }) =>
-      ipcRenderer.invoke("invoke:agent:activate", params),
+    inactivate: (input) =>
+      ipcRenderer.invoke("invoke:agent:inactivate", input),
+    activate: (input) =>
+      ipcRenderer.invoke("invoke:agent:activate", input),
     countActive: () =>
       ipcRenderer.invoke("invoke:agent:count-active"),
   } satisfies WindowAPI.Agent,
@@ -173,18 +175,7 @@ contextBridge.exposeInMainWorld("api", {
 
   // Event system for reactive stores
   event: {
-    register: (pattern: string) =>
-      ipcRenderer.invoke("invoke:event:register", pattern),
+    register: (input) =>
+      ipcRenderer.invoke("invoke:event:register", input),
   } satisfies WindowAPI.Event,
-
-  // General invoke method
-  invoke: (channel: string, ...args: unknown[]) =>
-    ipcRenderer.invoke(channel, ...args),
-
-  // Generic event listener for reactive stores
-  on: (channel: string, callback: (...args: any[]) => void) => {
-    const subscription = (_: any, ...args: any[]) => callback(...args);
-    ipcRenderer.on(channel, subscription);
-    return () => ipcRenderer.removeListener(channel, subscription);
-  },
 } satisfies WindowAPI.API);

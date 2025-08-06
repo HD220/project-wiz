@@ -212,19 +212,21 @@ export async function getUserStats(userId: string): Promise<{
 }> {
   const db = getDatabase();
 
-  // Count owned agents
+  // Count owned agents (JOIN with users table for isActive field)
   const ownedAgentsActive = await db
     .select({ count: agentsTable.id })
     .from(agentsTable)
+    .innerJoin(usersTable, eq(agentsTable.id, usersTable.id))
     .where(
-      and(eq(agentsTable.ownerId, userId), eq(agentsTable.isActive, true)),
+      and(eq(agentsTable.ownerId, userId), eq(usersTable.isActive, true)),
     );
 
   const ownedAgentsInactive = await db
     .select({ count: agentsTable.id })
     .from(agentsTable)
+    .innerJoin(usersTable, eq(agentsTable.id, usersTable.id))
     .where(
-      and(eq(agentsTable.ownerId, userId), eq(agentsTable.isActive, false)),
+      and(eq(agentsTable.ownerId, userId), eq(usersTable.isActive, false)),
     );
 
   // Count owned projects
@@ -307,7 +309,7 @@ export async function softDeleteUser(userId: string, deactivatedBy: string): Pro
     .update(usersTable)
     .set({
       isActive: false,
-      deactivatedAt: Date.now(),
+      deactivatedAt: new Date(),
       deactivatedBy: deactivatedBy,
       updatedAt: new Date(),
     })

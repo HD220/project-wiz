@@ -17,7 +17,7 @@ const UpdateChannelInputSchema = z.object({
 const UpdateChannelOutputSchema = ChannelSchema.extend({
   isArchived: z.boolean(),
   isActive: z.boolean(),
-  deactivatedAt: z.number().nullable(),
+  deactivatedAt: z.date().nullable(),
   deactivatedBy: z.string().nullable(),
 });
 

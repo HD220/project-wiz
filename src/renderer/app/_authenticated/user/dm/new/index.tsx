@@ -3,7 +3,7 @@ import { Search, Check, MessageSquare } from "lucide-react";
 import { AlertCircle } from "lucide-react";
 import { useState } from "react";
 
-import type { UserSummary } from "@/main/features/user/user.service";
+import type { UserSummary, AuthenticatedUser } from "@/shared/types";
 
 import {
   StandardFormModal,
@@ -19,7 +19,6 @@ import { Alert, AlertDescription } from "@/renderer/components/ui/alert";
 import { Checkbox } from "@/renderer/components/ui/checkbox";
 import { Input } from "@/renderer/components/ui/input";
 import type { CreateConversationInput } from "@/renderer/features/conversation/types";
-import type { AuthenticatedUser } from "@/renderer/features/conversation/types";
 import {
   ProfileAvatar,
   ProfileAvatarImage,
@@ -260,7 +259,7 @@ export const Route = createFileRoute("/_authenticated/user/dm/new/")({
 
     // Load available users for conversation creation
     const users = await loadApiData(
-      () => window.api.users.listAvailableUsers(),
+      () => window.api.user.list({}),
       "Failed to load users",
     );
 
@@ -272,8 +271,8 @@ export const Route = createFileRoute("/_authenticated/user/dm/new/")({
         type: auth.user.type || "human",
         avatar: auth.user.avatar || null,
         isActive: auth.user.isActive !== false,
-        deactivatedAt: auth.user.deactivatedAt || null,
-        deactivatedBy: auth.user.deactivatedBy || null,
+        deactivatedAt: null,
+        deactivatedBy: null,
         createdAt: auth.user.createdAt || new Date(),
         updatedAt: auth.user.updatedAt || new Date(),
       } as AuthenticatedUser,

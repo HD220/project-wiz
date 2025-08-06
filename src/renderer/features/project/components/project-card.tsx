@@ -10,7 +10,7 @@ import {
 } from "lucide-react";
 import * as React from "react";
 
-import type { SelectProject } from "@/main/features/project/project.types";
+import type { SelectProject } from "@/shared/types";
 
 import {
   Avatar,

@@ -25,7 +25,7 @@ export function createIPCHandler<TInput, TOutput>(config: {
     } catch (error) {
       // 5. Wrapper de erro consistente
       if (error instanceof z.ZodError) {
-        return { success: false, error: `Validation: ${error.errors[0].message}` }
+        return { success: false, error: `Validation: ${error.errors[0]?.message || 'Invalid input'}` }
       }
       return { 
         success: false, 
@@ -39,3 +39,6 @@ export function createIPCHandler<TInput, TOutput>(config: {
 export type InferHandler<T> = T extends ReturnType<typeof createIPCHandler<infer I, infer O>>
   ? (input: I) => Promise<{ success: true; data: O } | { success: false; error: string }>
   : never
+
+// Generic IPC response type
+export type IPCResponse<T> = { success: true; data: T } | { success: false; error: string }

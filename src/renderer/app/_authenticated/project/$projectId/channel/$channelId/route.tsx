@@ -2,17 +2,14 @@ import { createFileRoute, Outlet } from "@tanstack/react-router";
 import { Send, Paperclip, Smile } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 
-import type { SelectMessage } from "@/main/features/message/message.types";
-import type { SelectProjectChannel } from "@/main/features/project/project-channel.types";
-import type { UserSummary } from "@/main/features/user/user.service";
-import type { AuthenticatedUser } from "@/main/features/user/user.types";
+import type { SelectMessage, SelectProjectChannel, UserSummary, AuthenticatedUser } from "@/shared/types";
 
 import {
   Chat,
   ChatMessages,
   ChatMessage,
   ChatInput,
-} from "@/renderer/components/chat-new";
+} from "@/renderer/components/chat";
 import { ContentHeader } from "@/renderer/components/layout/content-header";
 import {
   MemberSidebar,
@@ -21,7 +18,7 @@ import {
 import { Button } from "@/renderer/components/ui/button";
 import { Textarea } from "@/renderer/components/ui/textarea";
 import { loadApiData } from "@/renderer/lib/route-loader";
-import { getRendererLogger } from "@/shared/logger/renderer";
+import { getRendererLogger } from "@/shared/services/logger/renderer";
 
 const logger = getRendererLogger("channel-route");
 
@@ -87,8 +84,8 @@ function ChannelLayout() {
           <Chat
             keyFn={(message: any) => message.id} // eslint-disable-line @typescript-eslint/no-explicit-any -- Chat component uses generic interface
             value={messages || []}
-            onSend={async (input) => {
-              await window.api.channels.sendMessage(channelId, input);
+            onSend={async (input: any) => {
+              await window.api.channel.sendMessage({ channelId, input });
             }}
             className="bg-background"
           >
@@ -152,7 +149,7 @@ function ChannelLayout() {
                     key={message.id}
                     messageData={message}
                     messageIndex={index}
-                    render={(msg) => (
+                    render={(msg: any) => (
                       <div className="group relative flex gap-3 px-4 py-2 hover:bg-muted/30 transition-colors">
                         {/* Message content */}
                         <div className="flex-1">
@@ -169,7 +166,7 @@ function ChannelLayout() {
 
             <div className="border-t border-border/60 px-4 py-3">
               <ChatInput
-                render={(chatInput) => (
+                render={(chatInput: any) => (
                   <FunctionalChatInput
                     value={chatInput.value}
                     loading={chatInput.loading}
@@ -316,19 +313,19 @@ export const Route = createFileRoute(
       // Load multiple API calls in parallel with standardized error handling
       const [channel, messages, availableUsers, user] = await Promise.all([
         loadApiData(
-          () => window.api.channels.findById(channelId),
+          () => window.api.channel.get(channelId),
           "Failed to load channel",
         ),
         loadApiData(
-          () => window.api.channels.getMessages(channelId),
+          () => window.api.channel.listMessages(channelId),
           "Failed to load channel messages",
         ),
         loadApiData(
-          () => window.api.users.listAvailableUsers(),
+          () => window.api.user.list({}),
           "Failed to load available users",
         ),
         loadApiData(
-          () => window.api.auth.getCurrentUser(),
+          () => window.api.auth.getCurrent({}),
           "Failed to load current user",
         ),
       ]);

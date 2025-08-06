@@ -1,4 +1,3 @@
-import { z } from "zod";
 import { sendChannelMessage } from "@/main/ipc/channel/queries";
 import { MessageSchema } from "@/shared/types";
 import { requireAuth } from "@/main/services/session-registry";

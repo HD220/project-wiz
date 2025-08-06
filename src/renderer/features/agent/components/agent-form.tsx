@@ -3,7 +3,7 @@ import { Bot, Settings, User } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { UseFormReturn } from "react-hook-form";
 import { z } from "zod";
-import { getRendererLogger } from "@/shared/logger/renderer";
+import { getRendererLogger } from "@/shared/services/logger/renderer";
 
 const logger = getRendererLogger("agent-form");
 
@@ -33,7 +33,7 @@ import {
   SelectValue,
 } from "@/renderer/components/ui/select";
 import { Textarea } from "@/renderer/components/ui/textarea";
-import { AI_DEFAULTS } from "@/renderer/constants/ai-defaults";
+// import { AI_DEFAULTS } from "@/renderer/constants/ai-defaults"; // TODO: Create ai-defaults constants
 import { CreateAgentSchema } from "@/renderer/features/agent/agent.schema";
 import type {
   SelectAgent,
@@ -63,9 +63,9 @@ export function AgentForm(props: AgentFormProps) {
   // Inline default model configuration
   const defaultModelConfig: ModelConfig = {
     model: "gpt-4o",
-    temperature: AI_DEFAULTS.TEMPERATURE,
-    maxTokens: AI_DEFAULTS.MAX_TOKENS,
-    topP: AI_DEFAULTS.TOP_P,
+    temperature: 0.7,
+    maxTokens: 4096,
+    topP: 0.95,
   };
 
   const form = useForm<FormData>({
@@ -276,9 +276,9 @@ function AgentFormProvider(props: AgentFormProviderProps) {
 
   const defaultModelConfig: ModelConfig = {
     model: "gpt-4o",
-    temperature: AI_DEFAULTS.TEMPERATURE,
-    maxTokens: AI_DEFAULTS.MAX_TOKENS,
-    topP: AI_DEFAULTS.TOP_P,
+    temperature: 0.7,
+    maxTokens: 4096,
+    topP: 0.95,
   };
 
   // PERFORMANCE FIX: Parse modelConfig once per render instead of 4x

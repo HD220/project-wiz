@@ -4,7 +4,7 @@ import {
   useSearch,
 } from "@tanstack/react-router";
 
-import type { LlmProvider } from "@/main/features/llm-provider/llm-provider.types";
+import type { LlmProvider, Agent } from "@/shared/types";
 
 import {
   StandardFormModal,
@@ -16,10 +16,6 @@ import {
   StandardFormModalCancelButton,
   StandardFormModalSubmitButton,
 } from "@/renderer/components/form-modal";
-import type {
-  CreateAgentInput,
-  SelectAgent,
-} from "@/renderer/features/agent/agent.types";
 import { AgentForm } from "@/renderer/features/agent/components/agent-form";
 import { useApiMutation } from "@/renderer/hooks/use-api-mutation.hook";
 import { loadApiData } from "@/renderer/lib/route-loader";
@@ -35,7 +31,7 @@ function EditAgentPage() {
   // Standardized mutation with automatic error handling
   const updateAgentMutation = useApiMutation(
     (data: CreateAgentInput) =>
-      window.api.agents.update((agent as SelectAgent).id, data),
+      window.api.agent.update({ id: agent?.id || '', data }),
     {
       successMessage: "Agent updated successfully",
       errorMessage: "Failed to update agent",
@@ -66,7 +62,7 @@ function EditAgentPage() {
 
         <StandardFormModalBody>
           <AgentForm
-            initialData={agent as SelectAgent}
+            initialData={agent as Agent}
             providers={providers as LlmProvider[]}
             onSubmit={handleSubmit}
             onCancel={handleClose}
@@ -104,9 +100,9 @@ export const Route = createFileRoute(
 
     // Load multiple API calls in parallel with standardized error handling
     const [agent, providers] = await Promise.all([
-      loadApiData(() => window.api.agents.get(agentId), "Failed to load agent"),
+      loadApiData(() => window.api.agent.get(agentId), "Failed to load agent"),
       loadApiData(
-        () => window.api.llmProviders.list(),
+        () => window.api.llmProvider.list(),
         "Failed to load providers",
       ),
     ]);

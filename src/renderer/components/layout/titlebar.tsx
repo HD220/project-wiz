@@ -10,15 +10,15 @@ export function Titlebar(props: TitlebarProps) {
   const { title = "Project Wiz", className } = props;
 
   function handleMinimize() {
-    window.electronAPI?.window.minimize();
+    window.api.window.minimize({});
   }
 
   function handleMaximize() {
-    window.electronAPI?.window.toggleSize();
+    window.api.window.maximize({});
   }
 
   function handleClose() {
-    window.electronAPI?.window.close();
+    window.api.window.close({});
   }
 
   return (
