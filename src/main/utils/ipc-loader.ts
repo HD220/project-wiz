@@ -134,12 +134,11 @@ export class IpcLoader {
   }
 
   /**
-   * Check if we're running in development mode
-   * In production, source files don't exist and everything is bundled
+   * Always use production mode (static imports)
+   * This avoids file extension issues in packaged builds
    */
   private isDevelopmentMode(): boolean {
-    // Check if development source files exist
-    return existsSync("src/main/ipc") || existsSync("./src/main/ipc");
+    return false;
   }
 
   /**
