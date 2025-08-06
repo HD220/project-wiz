@@ -135,12 +135,13 @@ export class IpcLoader {
 
   /**
    * Check if we're in development or production mode
-   * Since Vite always bundles, we should always use static imports
+   * Now that IPC handlers are external, we can use dynamic discovery
    */
   private isDevelopmentMode(): boolean {
-    // Vite always bundles code, even in dev mode
-    // So we should always use static imports from the bundle
-    return false;
+    // Check if source files exist for dynamic discovery
+    const hasSourceFiles = existsSync("src/main/ipc");
+    logger.info(`🔍 Development mode check: source files exist = ${hasSourceFiles}`);
+    return hasSourceFiles;
   }
 
   /**
@@ -149,12 +150,16 @@ export class IpcLoader {
   private async loadHandlersDynamically(): Promise<void> {
     logger.info("🛠️ Loading handlers dynamically (development mode)");
 
-    const invokeFiles = globSync("src/main/ipc/**/invoke.ts", { 
-      absolute: true 
-    });
-    const listenFiles = globSync("src/main/ipc/**/listen.ts", { 
-      absolute: true 
-    });
+    // Try both .ts (source) and .js (compiled) files
+    let invokeFiles = globSync("src/main/ipc/**/invoke.ts", { absolute: true });
+    let listenFiles = globSync("src/main/ipc/**/listen.ts", { absolute: true });
+    
+    // If no .ts files found, look for compiled .js files
+    if (invokeFiles.length === 0) {
+      invokeFiles = globSync(".vite/build/src/main/ipc/**/invoke.js", { absolute: true });
+      listenFiles = globSync(".vite/build/src/main/ipc/**/listen.js", { absolute: true });
+      logger.info("🔄 Using compiled .js files from .vite/build/");
+    }
 
     logger.info(`📁 Found ${invokeFiles.length} invoke handlers`);
     logger.info(`📁 Found ${listenFiles.length} listen handlers`);
