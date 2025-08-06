@@ -1,5 +1,6 @@
 import { ipcMain } from "electron";
 import { sync as globSync } from "glob";
+import { pathToFileURL } from "url";
 import { getLogger } from "@/shared/services/logger/config";
 
 const logger = getLogger("ipc-loader");
@@ -69,8 +70,9 @@ export class IpcLoader {
    */
   private async registerInvokeHandler(file: string, channel: string): Promise<void> {
     try {
-      // Import the handler module
-      const mod = await import(file);
+      // Import the handler module - convert Windows paths to file:// URLs
+      const fileUrl = pathToFileURL(file).href;
+      const mod = await import(fileUrl);
       
       if (!mod.default || typeof mod.default !== "function") {
         logger.error(`❌ ${file} must export default function`);
@@ -113,7 +115,9 @@ export class IpcLoader {
    */
   private async registerListenHandler(file: string, channel: string): Promise<void> {
     try {
-      const mod = await import(file);
+      // Import the handler module - convert Windows paths to file:// URLs
+      const fileUrl = pathToFileURL(file).href;
+      const mod = await import(fileUrl);
       
       if (!mod.default || typeof mod.default !== "function") {
         logger.error(`❌ ${file} must export default function`);
