@@ -5,6 +5,7 @@ import { Button } from "@/renderer/components/ui/button";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogTitle,
   DialogTrigger,
 } from "@/renderer/components/ui/dialog";
@@ -80,14 +81,14 @@ function StandardFormModalHeader({
           {title}
         </DialogTitle>
       </div>
-      <p
+      <DialogDescription
         className={cn(
           "text-muted-foreground leading-relaxed transition-colors duration-200",
           "text-sm lg:text-base",
         )}
       >
         {description}
-      </p>
+      </DialogDescription>
     </div>
   );
 }
