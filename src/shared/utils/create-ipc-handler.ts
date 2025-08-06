@@ -1,11 +1,14 @@
 import { z } from 'zod'
 import { IpcMainInvokeEvent } from 'electron'
+import { getLogger } from '@/shared/services/logger/config'
 
 export function createIPCHandler<TInput, TOutput>(config: {
   inputSchema: z.ZodSchema<TInput>
   outputSchema: z.ZodSchema<TOutput>
   handler: (input: TInput, event: IpcMainInvokeEvent) => Promise<TOutput>
 }) {
+  const logger = getLogger('ipc-handler')
+  
   return async (
     data: unknown, 
     event: IpcMainInvokeEvent
@@ -23,10 +26,21 @@ export function createIPCHandler<TInput, TOutput>(config: {
       // 4. Wrapper de sucesso
       return { success: true, data: validatedOutput }
     } catch (error) {
-      // 5. Wrapper de erro consistente
+      // 5. Log do erro para debugging
       if (error instanceof z.ZodError) {
+        logger.error('IPC validation error', { 
+          errors: error.errors,
+          data: data 
+        })
         return { success: false, error: `Validation: ${error.errors[0]?.message || 'Invalid input'}` }
       }
+      
+      logger.error('IPC handler error', { 
+        error: error instanceof Error ? error.message : 'Unknown error',
+        stack: error instanceof Error ? error.stack : undefined,
+        data: data
+      })
+      
       return { 
         success: false, 
         error: error instanceof Error ? error.message : 'Unknown error' 

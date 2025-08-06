@@ -16,9 +16,9 @@ import { AgentForm } from "@/renderer/features/agent/components/agent-form";
 import type { LlmProvider, Agent } from "@/shared/types";
 import { useApiMutation } from "@/renderer/hooks/use-api-mutation.hook";
 import { loadApiData } from "@/renderer/lib/route-loader";
-import { getRendererLogger } from "@/shared/services/logger/renderer";
-
-const logger = getRendererLogger("agent-new");
+// Logger available if needed in the future
+// import { getRendererLogger } from "@/shared/services/logger/renderer";
+// const logger = getRendererLogger("agent-new");
 
 // Create agent input type derived from Agent
 type CreateAgentInput = Pick<Agent, 'name' | 'role' | 'backstory' | 'goal' | 'providerId' | 'modelConfig'>;
