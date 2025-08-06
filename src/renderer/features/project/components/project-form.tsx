@@ -3,7 +3,7 @@ import { FolderIcon, Github } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
-import type { InsertProject } from "@/shared/types";
+import { ProjectSchema } from "@/shared/types/project";
 
 import {
   Form,
@@ -77,6 +77,15 @@ const ProjectFormSchema = z
       path: ["gitUrl"],
     },
   );
+
+// Schema for creating projects - omit auto-generated fields
+const InsertProjectSchema = ProjectSchema.omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+type InsertProject = z.infer<typeof InsertProjectSchema>;
 
 type ProjectFormData = z.infer<typeof ProjectFormSchema>;
 
@@ -187,7 +196,8 @@ export function ProjectForm(props: ProjectFormProps) {
       avatarUrl: null, // No avatar support in form yet
       localPath,
       ownerId: user.id,
-      status: "active" as const,
+      isActive: true,
+      isArchived: false,
       gitUrl: data.type === "github" ? (data.gitUrl?.trim() || null) : null,
       branch: data.type === "github" ? (data.branch?.trim() || "main") : null,
     };

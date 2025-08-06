@@ -7,23 +7,29 @@ import { createIPCHandler, InferHandler } from "@/shared/utils/create-ipc-handle
 
 const logger = getLogger("project.list-all.invoke");
 
-const ListProjectsInputSchema = z.void();
+const ListProjectsInputSchema = z.object({
+  search: z.string().optional(),
+  isActive: z.boolean().optional(),
+  isArchived: z.boolean().optional(),
+});
 const ListProjectsOutputSchema = z.array(ProjectSchema);
 
 const handler = createIPCHandler({
   inputSchema: ListProjectsInputSchema,
   outputSchema: ListProjectsOutputSchema,
-  handler: async () => {
-    logger.debug("Listing all active projects");
+  handler: async (input) => {
+    logger.debug("Listing projects", input);
 
     // Require authentication and filter by ownership
     const currentUser = requireAuth();
     const projects = await listProjects({ 
       ownerId: currentUser.id,
-      status: "active"
+      search: input.search,
+      isActive: input.isActive,
+      isArchived: input.isArchived
     });
     
-    // Map to clean domain type (remove technical fields)
+    // Map database SelectProject to domain Project type
     const result = projects.map(project => ({
       id: project.id,
       name: project.name,
@@ -33,7 +39,8 @@ const handler = createIPCHandler({
       branch: project.branch,
       localPath: project.localPath,
       ownerId: project.ownerId,
-      status: project.status,
+      isActive: project.isActive,
+      isArchived: project.isArchived,
       createdAt: new Date(project.createdAt),
       updatedAt: new Date(project.updatedAt),
     }));

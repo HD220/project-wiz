@@ -2,7 +2,7 @@ import { createFileRoute, Outlet } from "@tanstack/react-router";
 import { Send, Paperclip, Smile } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 
-import type { SelectMessage, SelectProjectChannel, UserSummary, AuthenticatedUser } from "@/shared/types";
+import type { Message, Channel, User } from "@/shared/types";
 
 import {
   Chat,
@@ -23,10 +23,10 @@ import { getRendererLogger } from "@/shared/services/logger/renderer";
 const logger = getRendererLogger("channel-route");
 
 interface ChannelLoaderData {
-  channel: SelectProjectChannel;
-  messages: SelectMessage[];
-  availableUsers: UserSummary[];
-  user: AuthenticatedUser;
+  channel: Channel;
+  messages: Message[];
+  availableUsers: User[];
+  user: User;
 }
 
 function ChannelLayout() {
@@ -144,7 +144,7 @@ function ChannelLayout() {
                 }
 
                 // Render messages when they exist
-                return messages.map((message: SelectMessage, index: number) => (
+                return messages.map((message: Message, index: number) => (
                   <ChatMessage
                     key={message.id}
                     messageData={message}
@@ -154,7 +154,7 @@ function ChannelLayout() {
                         {/* Message content */}
                         <div className="flex-1">
                           <p className="text-sm">
-                            {(msg.data as SelectMessage).content}
+                            {msg.data.content}
                           </p>
                         </div>
                       </div>

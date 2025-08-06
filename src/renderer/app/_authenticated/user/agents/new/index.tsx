@@ -12,14 +12,16 @@ import {
   StandardFormModalCancelButton,
   StandardFormModalSubmitButton,
 } from "@/renderer/components/form-modal";
-import type { CreateAgentInput } from "@/renderer/features/agent/agent.types";
 import { AgentForm } from "@/renderer/features/agent/components/agent-form";
-import type { LlmProvider } from "@/renderer/features/agent/provider.types";
+import type { LlmProvider, Agent } from "@/shared/types";
 import { useApiMutation } from "@/renderer/hooks/use-api-mutation.hook";
 import { loadApiData } from "@/renderer/lib/route-loader";
-import { getRendererLogger } from "@/shared/logger/renderer";
+import { getLogger } from "@/shared/services/logger/config";
 
-const logger = getRendererLogger("agent-new");
+const logger = getLogger("agent-new");
+
+// Create agent input type derived from Agent
+type CreateAgentInput = Pick<Agent, 'name' | 'role' | 'backstory' | 'goal' | 'providerId' | 'modelConfig'>;
 
 function CreateAgentPage() {
   const navigate = useNavigate();
@@ -31,7 +33,7 @@ function CreateAgentPage() {
     async function loadProviders() {
       try {
         const providersData = await loadApiData(
-          () => window.api.llmProvider.list(),
+          () => window.api.llmProvider.list({}),
           "Failed to load providers",
         );
         setProviders(providersData as LlmProvider[]);

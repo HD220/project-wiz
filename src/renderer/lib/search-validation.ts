@@ -1,8 +1,5 @@
-import type { AgentStatus } from "@/renderer/features/agent/agent.types";
-import type { ProviderType } from "@/renderer/features/agent/provider.types";
-
 /**
- * Search validation utilities following INLINE-FIRST principles
+ * Generic search validation utilities following INLINE-FIRST principles
  * Simple, focused functions for common search validations
  */
 
@@ -20,37 +17,15 @@ export function validateSearchInput(value: string): string | undefined {
 }
 
 /**
- * Type-safe status filter validation
+ * Generic filter validation for select values
  * @param value Filter value from select
- * @returns Valid AgentStatus or undefined for "all"
+ * @param validValues Array of valid values
+ * @returns Valid value or undefined for "all"
  */
-export function validateStatusFilter(value: string): AgentStatus | undefined {
-  if (value === "all" || !value) return undefined;
-
-  const validStatuses: AgentStatus[] = ["active", "inactive", "busy"];
-  return validStatuses.includes(value as AgentStatus)
-    ? (value as AgentStatus)
-    : undefined;
-}
-
-/**
- * Type-safe provider type filter validation
- * @param value Filter value from select
- * @returns Valid provider type or undefined for "all"
- */
-export function validateProviderTypeFilter(
+export function validateSelectFilter<T extends string>(
   value: string,
-): ProviderType | undefined {
+  validValues: T[]
+): T | undefined {
   if (value === "all" || !value) return undefined;
-
-  const validTypes: ProviderType[] = [
-    "openai",
-    "anthropic",
-    "google",
-    "deepseek",
-    "custom",
-  ];
-  return validTypes.includes(value as ProviderType)
-    ? (value as ProviderType)
-    : undefined;
+  return validValues.includes(value as T) ? (value as T) : undefined;
 }

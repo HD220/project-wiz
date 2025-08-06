@@ -1,16 +1,16 @@
 import { Hash, Bot } from "lucide-react";
 
-import type { UserSummary } from "@/shared/types";
+import type { User } from "@/shared/types/user";
+import type { DMConversation } from "@/shared/types/dm-conversation";
 
 import { NavigationItem } from "@/renderer/components/layout/navigation/navigation-item";
 import { ScrollArea } from "@/renderer/components/ui/scroll-area";
 import { Separator } from "@/renderer/components/ui/separator";
 import { ConversationList } from "@/renderer/features/conversation/components/conversation-list";
-import type { ConversationWithLastMessage } from "@/renderer/types/chat.types";
 
 interface SidebarNavigationProps {
-  conversations: ConversationWithLastMessage[];
-  availableUsers: UserSummary[];
+  conversations: DMConversation[];
+  availableUsers: User[];
 }
 
 export function SidebarNavigation(props: SidebarNavigationProps) {

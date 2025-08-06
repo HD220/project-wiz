@@ -22,7 +22,7 @@ const handler = createIPCHandler({
     const currentUser = requireAuth();
 
     // Inactivate provider with ownership validation
-    const result = await inactivateLlmProvider(input.id, currentUser.id, currentUser.id);
+    const result = await inactivateLlmProvider(input.id, currentUser.id);
 
     if (!result) {
       throw new Error("Failed to inactivate provider or provider not found");

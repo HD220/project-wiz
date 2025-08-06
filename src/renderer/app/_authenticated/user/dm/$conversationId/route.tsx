@@ -2,20 +2,13 @@ import { createFileRoute, Outlet, useRouter } from "@tanstack/react-router";
 import { Send, Paperclip, Smile } from "lucide-react";
 import { useEffect, useState } from "react";
 
-import type { DMConversationWithParticipants } from "@/main/features/dm/dm-conversation.types";
-import type { SelectMessage } from "@/main/features/message/message.types";
-import type { UserSummary } from "@/main/features/user/user.service";
-import type { AuthenticatedUser } from "@/main/features/user/user.types";
-
-import {
-  Chat,
-  ChatMessages,
-  ChatMessage,
-  ChatInput,
-} from "@/renderer/components/chat-new";
+import type { DMConversation } from "@/shared/types/dm-conversation";
+import type { Message } from "@/shared/types/message";
+import type { User } from "@/shared/types/user";
 import { ContentHeader } from "@/renderer/components/layout/content-header";
 import { Button } from "@/renderer/components/ui/button";
 import { Textarea } from "@/renderer/components/ui/textarea";
+import { Chat, ChatMessages, ChatMessage, ChatInput } from "@/renderer/components/chat";
 import {
   ProfileAvatar,
   ProfileAvatarImage,
@@ -26,10 +19,11 @@ import { loadApiData } from "@/renderer/lib/route-loader";
 import { cn } from "@/renderer/lib/utils";
 
 interface DMLoaderData {
-  conversation: DMConversationWithParticipants;
-  messages: SelectMessage[];
-  availableUsers: UserSummary[];
-  user: AuthenticatedUser;
+  conversation: DMConversation;
+  messages: Message[];
+  availableUsers: User[];
+  user: User;
+  participants: User[];
 }
 
 function DMLayout() {
@@ -52,15 +46,12 @@ function DMLayout() {
     setSendingMessage(true);
 
     // Create optimistic message
-    const optimisticMessage: SelectMessage = {
+    const optimisticMessage: Message = {
       id: `temp-${Date.now()}`, // Temporary ID
       sourceType: "dm",
       sourceId: conversationId,
       authorId: user.id,
       content: input.trim(),
-      isActive: true,
-      deactivatedAt: null,
-      deactivatedBy: null,
       createdAt: new Date(),
       updatedAt: new Date(),
     };
@@ -70,7 +61,7 @@ function DMLayout() {
 
     try {
       // Send message to backend
-      await window.api.dm.sendMessage(conversationId, input.trim());
+      await window.api.dm.sendMessage({ sourceId: conversationId, content: input.trim() });
       
       // Invalidate router to refresh messages from backend
       router.invalidate();
@@ -93,8 +84,8 @@ function DMLayout() {
     );
   }
 
-  // Get conversation display info
-  const otherParticipants = getOtherParticipants(conversation, user.id, availableUsers);
+  const { participants } = Route.useLoaderData() as DMLoaderData;
+  const otherParticipants = getOtherParticipants(participants, user.id);
 
   const displayName = conversation.name || "Unknown DM";
   const description =
@@ -211,7 +202,7 @@ function DMLayout() {
                   group.authorId === user.id
                     ? { id: user.id, name: user.name, avatar: user.avatar }
                     : availableUsers.find(
-                        (u: any) => u.id === group.authorId,
+                        (u: User) => u.id === group.authorId,
                       ) || {
                         id: group.authorId,
                         name: "Unknown User",
@@ -241,7 +232,7 @@ function DMLayout() {
                         key={msg.id}
                         messageData={msg}
                         messageIndex={messageIndex}
-                        render={(message) => (
+                        render={(_message) => (
                           <div
                             className={cn(
                               "group relative flex gap-3 px-4 py-0.5 hover:bg-muted/30 transition-colors",
@@ -271,9 +262,7 @@ function DMLayout() {
                               ) : (
                                 <div className="flex justify-end items-start h-5 pt-0.5">
                                   <span className="text-xs text-muted-foreground/40 opacity-0 group-hover:opacity-100 transition-opacity font-mono">
-                                    {new Date(
-                                      (message.data as SelectMessage).createdAt,
-                                    ).toLocaleTimeString([], {
+                                    {new Date(msg.createdAt).toLocaleTimeString([], {
                                       hour: "2-digit",
                                       minute: "2-digit",
                                     })}
@@ -298,9 +287,7 @@ function DMLayout() {
                                     {author.name || "Unknown User"}
                                   </span>
                                   <span className="text-xs text-muted-foreground/60 font-mono">
-                                    {new Date(
-                                      (message.data as SelectMessage).createdAt,
-                                    ).toLocaleString([], {
+                                    {new Date(msg.createdAt).toLocaleString([], {
                                       month: "short",
                                       day: "numeric",
                                       hour: "2-digit",
@@ -319,7 +306,7 @@ function DMLayout() {
                                 )}
                               >
                                 <p className="whitespace-pre-wrap selection:bg-primary/20 m-0">
-                                  {(message.data as SelectMessage).content}
+                                  {msg.content}
                                 </p>
                               </div>
                             </div>
@@ -345,7 +332,7 @@ function DMLayout() {
               <ChatInput
                 render={(chatInput) => (
                   <FunctionalChatInput
-                    inputRef={chatInput.inputRef}
+                    inputRef={chatInput.inputRef as React.RefObject<HTMLTextAreaElement>}
                     value={chatInput.value}
                     loading={sendingMessage}
                     onValueChange={chatInput.setValue}
@@ -481,35 +468,48 @@ export const Route = createFileRoute("/_authenticated/user/dm/$conversationId")(
     loader: async ({ params }) => {
       const { conversationId } = params;
 
-      const [dmConversation, messages, availableUsers, user] =
-        await Promise.all([
-          loadApiData(
-            () => window.api.dm.findById(conversationId),
-            "Failed to load DM conversation",
-          ),
-          loadApiData(
-            () => window.api.dm.getMessages(conversationId),
-            "Failed to load DM messages",
-          ),
-          loadApiData(
-            () => window.api.user.listAvailableUsers(),
-            "Failed to load available users",
-          ),
-          loadApiData(
-            () => window.api.auth.getCurrentUser(),
-            "Failed to load current user",
-          ),
-        ]);
-
+      // Load data sequentially to handle dependencies properly
+      const conversations = await loadApiData(
+        () => window.api.dm.list({}),
+        "Failed to load DM conversations",
+      );
+      
+      const dmConversation = conversations.find(c => c.id === conversationId);
       if (!dmConversation) {
         throw new Error("DM conversation not found");
       }
+      
+      const currentUser = await loadApiData(
+        () => window.api.auth.getCurrent({}),
+        "Failed to load current user",
+      );
+      
+      if (!currentUser) {
+        throw new Error("No authenticated user");
+      }
+      
+      const [messages, availableUsers] = await Promise.all([
+        loadApiData(
+          () => window.api.dm.listMessages({ dmId: conversationId }),
+          "Failed to load DM messages",
+        ),
+        loadApiData(
+          () => window.api.user.listAvailableUsers({ currentUserId: currentUser.id }),
+          "Failed to load available users",
+        ),
+      ]);
 
+      // Get participants for this conversation from availableUsers
+      const participants = availableUsers.filter(user => 
+        dmConversation.participants?.some(p => p.participantId === user.id)
+      );
+      
       return {
         conversation: dmConversation,
         messages: messages || [],
         availableUsers,
-        user,
+        user: currentUser,
+        participants,
       };
     },
     component: DMLayout,

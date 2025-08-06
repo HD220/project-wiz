@@ -35,15 +35,17 @@ const handler = createIPCHandler({
       isActive: true
     });
     
-    // Mapeamento: SelectLlmProvider → LlmProvider (dados puros da entidade)
+    // Mapeamento: SelectLlmProvider → LlmProvider
     const apiProvider = {
       id: dbProvider.id,
-      userId: dbProvider.ownerId, // Map ownerId to userId for API consistency
+      ownerId: dbProvider.ownerId,
       name: dbProvider.name,
       type: dbProvider.type,
+      apiKey: dbProvider.apiKey,
       baseUrl: dbProvider.baseUrl,
       defaultModel: dbProvider.defaultModel,
       isDefault: dbProvider.isDefault,
+      isActive: dbProvider.isActive,
       createdAt: new Date(dbProvider.createdAt),
       updatedAt: new Date(dbProvider.updatedAt),
     };

@@ -15,7 +15,8 @@ const UpdateProjectInputSchema = ProjectSchema.pick({
   gitUrl: true,
   branch: true,
   localPath: true,
-  status: true,
+  isActive: true,
+  isArchived: true,
 }).partial().extend({
   id: z.string(),
 });
@@ -44,7 +45,7 @@ const handler = createIPCHandler({
       throw new Error("Project not found or access denied");
     }
     
-    // Mapeamento: SelectProject → Project (sem campos técnicos)
+    // Mapeamento: SelectProject → Project
     const apiProject = {
       id: dbProject.id,
       name: dbProject.name,
@@ -53,8 +54,9 @@ const handler = createIPCHandler({
       gitUrl: dbProject.gitUrl,
       branch: dbProject.branch,
       localPath: dbProject.localPath,
-      status: dbProject.status,
       ownerId: dbProject.ownerId,
+      isActive: dbProject.isActive,
+      isArchived: dbProject.isArchived,
       createdAt: new Date(dbProject.createdAt),
       updatedAt: new Date(dbProject.updatedAt),
     };

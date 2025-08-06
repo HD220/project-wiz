@@ -20,6 +20,9 @@ import { AgentForm } from "@/renderer/features/agent/components/agent-form";
 import { useApiMutation } from "@/renderer/hooks/use-api-mutation.hook";
 import { loadApiData } from "@/renderer/lib/route-loader";
 
+// Create agent input type derived from Agent
+type CreateAgentInput = Pick<Agent, 'name' | 'role' | 'backstory' | 'goal' | 'providerId' | 'modelConfig'>;
+
 function EditAgentPage() {
   const navigate = useNavigate();
   const loaderData = Route.useLoaderData();
@@ -102,7 +105,7 @@ export const Route = createFileRoute(
     const [agent, providers] = await Promise.all([
       loadApiData(() => window.api.agent.get(agentId), "Failed to load agent"),
       loadApiData(
-        () => window.api.llmProvider.list(),
+        () => window.api.llmProvider.list({}),
         "Failed to load providers",
       ),
     ]);

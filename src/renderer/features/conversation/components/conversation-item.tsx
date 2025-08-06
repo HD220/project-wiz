@@ -1,11 +1,9 @@
-import { User, Hash } from "lucide-react";
+import { User as UserIcon, Hash } from "lucide-react";
 
 import { Badge } from "@/renderer/components/ui/badge";
-import type {
-  ConversationWithParticipants,
-  AuthenticatedUser,
-} from "@/renderer/features/conversation/types";
-import type { SelectMessage } from "@/renderer/features/conversation/types";
+import type { DMConversation } from "@/shared/types/dm-conversation";
+import type { User } from "@/shared/types/user";
+import type { Message } from "@/shared/types/message";
 import {
   ProfileAvatar,
   ProfileAvatarImage,
@@ -15,9 +13,9 @@ import {
 import { cn, getTimeAgo } from "@/renderer/lib/utils";
 
 interface ConversationItemProps {
-  conversation: ConversationWithParticipants;
-  lastMessage?: SelectMessage | null;
-  otherParticipants: AuthenticatedUser[];
+  conversation: DMConversation;
+  lastMessage?: Message | null;
+  otherParticipants: User[];
   isSelected?: boolean;
   onClick: () => void;
   className?: string;
@@ -173,7 +171,7 @@ export function ConversationItem(props: ConversationItemProps) {
           {/* Group participants inline */}
           {isGroup && otherParticipants.length > 1 && (
             <div className="flex items-center gap-1 mt-1">
-              <User className="h-3 w-3 text-muted-foreground/70" />
+              <UserIcon className="h-3 w-3 text-muted-foreground/70" />
               <span className="text-xs text-muted-foreground/90 truncate">
                 {otherParticipants
                   .slice(0, 2)

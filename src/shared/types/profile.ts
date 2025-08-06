@@ -1,6 +1,8 @@
 import { z } from "zod";
 
-// Profile Domain Entity Schema
+/**
+ * Profile domain entity
+ */
 export const ProfileSchema = z.object({
   id: z.string(),
   userId: z.string(),
@@ -11,5 +13,4 @@ export const ProfileSchema = z.object({
   updatedAt: z.date()
 });
 
-// Export domain entity type
 export type Profile = z.infer<typeof ProfileSchema>;

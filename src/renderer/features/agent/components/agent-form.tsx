@@ -35,17 +35,32 @@ import {
 import { Textarea } from "@/renderer/components/ui/textarea";
 // import { AI_DEFAULTS } from "@/renderer/constants/ai-defaults"; // TODO: Create ai-defaults constants
 import { CreateAgentSchema } from "@/renderer/features/agent/agent.schema";
-import type {
-  SelectAgent,
-  CreateAgentInput,
-  ModelConfig,
-} from "@/renderer/features/agent/agent.types";
-import type { LlmProvider } from "@/renderer/features/agent/provider.types";
+// Remove imports - using shared types directly
+import type { Agent } from "@/shared/types/agent";
+import type { LlmProvider } from "@/shared/types/llm-provider";
+
+// Inline types for this component
+interface CreateAgentInput {
+  name: string;
+  role: string;
+  backstory: string;
+  goal: string;
+  providerId: string;
+  modelConfig: string;
+  avatar?: string;
+}
+
+interface ModelConfig {
+  model: string;
+  temperature: number;
+  maxTokens: number;
+  topP?: number;
+}
 
 type FormData = z.infer<typeof CreateAgentSchema>;
 
 interface AgentFormProps {
-  initialData?: SelectAgent | null;
+  initialData?: Agent | null;
   providers?: LlmProvider[];
   onSubmit: (data: CreateAgentInput) => void;
   onCancel?: () => void;

@@ -22,7 +22,7 @@ const handler = createIPCHandler({
     const currentUser = requireAuth();
 
     // Archive project with ownership validation
-    const dbProject = await archiveProject(input.projectId, currentUser.id, currentUser.id);
+    const dbProject = await archiveProject(input.projectId, currentUser.id);
 
     logger.debug("Project archived", {
       projectId: dbProject.id,

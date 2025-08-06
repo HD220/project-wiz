@@ -28,7 +28,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/renderer/components/ui/dropdown-menu";
-import type { LlmProvider } from "@/renderer/features/agent/provider.types";
+import type { LlmProvider } from "@/shared/types/llm-provider";
 import { useApiMutation } from "@/renderer/hooks/use-api-mutation.hook";
 import { cn } from "@/renderer/lib/utils";
 
@@ -53,7 +53,7 @@ export function ProviderCard(props: ProviderCardProps) {
 
   // Delete provider mutation with inline messages
   const deleteProviderMutation = useApiMutation(
-    (id: string) => window.api.llmProvider.delete(id),
+    (id: string) => window.api.llmProvider.inactivate(id),
     {
       successMessage: "Provider deleted successfully",
       errorMessage: "Failed to delete provider",

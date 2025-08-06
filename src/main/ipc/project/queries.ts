@@ -4,8 +4,7 @@ import {
   projectsTable, 
   type SelectProject,
   type UpdateProject,
-  type InsertProject,
-  type ProjectStatus
+  type InsertProject
 } from "@/main/schemas/project.schema";
 import { usersTable } from "@/main/schemas/user.schema";
 
@@ -103,8 +102,8 @@ export async function createProject(data: InsertProject & { ownerId: string }): 
 export async function listProjects(filters: { 
   ownerId: string; 
   search?: string; 
-  showInactive?: boolean;
-  status?: ProjectStatus;
+  isActive?: boolean;
+  isArchived?: boolean;
 }): Promise<SelectProject[]> {
   const db = getDatabase();
   
@@ -112,14 +111,14 @@ export async function listProjects(filters: {
     eq(projectsTable.ownerId, filters.ownerId)
   ];
 
-  // Filter by active status unless explicitly showing inactive
-  if (!filters.showInactive) {
-    conditions.push(eq(projectsTable.isActive, true));
+  // Filter by isActive if specified
+  if (filters.isActive !== undefined) {
+    conditions.push(eq(projectsTable.isActive, filters.isActive));
   }
 
-  // Filter by status if specified
-  if (filters.status) {
-    conditions.push(eq(projectsTable.status, filters.status));
+  // Filter by isArchived if specified
+  if (filters.isArchived !== undefined) {
+    conditions.push(eq(projectsTable.isArchived, filters.isArchived));
   }
 
   // Search filter
@@ -143,12 +142,11 @@ export async function listProjects(filters: {
 }
 
 /**
- * Archive project (soft delete pattern)
+ * Archive project
  */
 export async function archiveProject(
   projectId: string,
-  ownerId: string,
-  archivedBy: string
+  ownerId: string
 ): Promise<SelectProject> {
   const db = getDatabase();
 
@@ -161,10 +159,8 @@ export async function archiveProject(
   const [archivedProject] = await db
     .update(projectsTable)
     .set({ 
-      status: "archived",
-      updatedAt: new Date(),
-      deactivatedAt: new Date(),
-      deactivatedBy: archivedBy
+      isArchived: true,
+      updatedAt: new Date()
     })
     .where(and(
       eq(projectsTable.id, projectId),
@@ -184,8 +180,7 @@ export async function archiveProject(
  */
 export async function deleteProject(
   projectId: string,
-  ownerId: string,
-  deletedBy: string
+  ownerId: string
 ): Promise<void> {
   const db = getDatabase();
 
@@ -199,8 +194,6 @@ export async function deleteProject(
     .update(projectsTable)
     .set({
       isActive: false,
-      deactivatedAt: new Date(),
-      deactivatedBy: deletedBy,
       updatedAt: new Date()
     })
     .where(and(
@@ -224,22 +217,3 @@ export async function findUserAvatar(userId: string): Promise<{ avatar: string |
   return user || null;
 }
 
-/**
- * Count active projects for user
- */
-export async function getActiveProjectsCount(ownerId: string): Promise<number> {
-  const db = getDatabase();
-  
-  const result = await db
-    .select({ count: projectsTable.id })
-    .from(projectsTable)
-    .where(
-      and(
-        eq(projectsTable.ownerId, ownerId),
-        eq(projectsTable.isActive, true),
-        eq(projectsTable.status, "active")
-      )
-    );
-
-  return result.length;
-}

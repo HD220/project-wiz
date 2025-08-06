@@ -44,10 +44,19 @@ import {
   providerFormSchema,
   type ProviderFormData,
 } from "@/renderer/features/agent/provider-constants";
-import type {
-  CreateProviderInput,
-  LlmProvider,
-} from "@/renderer/features/agent/provider.types";
+import type { LlmProvider } from "@/shared/types/llm-provider";
+import type { ProviderType } from "@/main/schemas/llm-provider.schema";
+
+// Inline type for form
+interface CreateProviderInput {
+  name: string;
+  type: ProviderType;
+  apiKey: string;
+  baseUrl?: string;
+  defaultModel: string;
+  isDefault: boolean;
+  ownerId: string;
+}
 import { useApiMutation } from "@/renderer/hooks/use-api-mutation.hook";
 import { cn } from "@/renderer/lib/utils";
 
@@ -113,14 +122,14 @@ export function ProviderForm(props: ProviderFormProps) {
         id: provider.id,
         data: {
           ...data,
-          baseUrl: data.baseUrl || null,
+          baseUrl: data.baseUrl || undefined,
         },
       });
     } else {
       const createData = {
         ...data,
-        userId: user.id, // Still needed for provider creation
-        baseUrl: data.baseUrl || null,
+        ownerId: user.id, // Use ownerId for consistency
+        baseUrl: data.baseUrl || undefined,
       };
       createProviderMutation.mutate(createData);
     }

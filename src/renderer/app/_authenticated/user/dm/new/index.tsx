@@ -3,7 +3,6 @@ import { Search, Check, MessageSquare } from "lucide-react";
 import { AlertCircle } from "lucide-react";
 import { useState } from "react";
 
-import type { UserSummary, AuthenticatedUser } from "@/shared/types";
 
 import {
   StandardFormModal,
@@ -18,7 +17,12 @@ import {
 import { Alert, AlertDescription } from "@/renderer/components/ui/alert";
 import { Checkbox } from "@/renderer/components/ui/checkbox";
 import { Input } from "@/renderer/components/ui/input";
-import type { CreateConversationInput } from "@/renderer/features/conversation/types";
+// Inline type for form
+interface CreateConversationInput {
+  participantIds: string[];
+  name?: string;
+  description?: string;
+}
 import {
   ProfileAvatar,
   ProfileAvatarImage,
@@ -42,9 +46,9 @@ function CreateConversationPage() {
       successMessage: "Conversation created successfully",
       errorMessage: "Failed to create conversation",
       invalidateRouter: true,
-      onSuccess: (response: { data?: { id?: string } }) => {
-        if (response?.data?.id) {
-          handleSuccess(response.data.id);
+      onSuccess: (conversation) => {
+        if (conversation.id) {
+          handleSuccess(conversation.id);
         }
       },
     },
@@ -64,8 +68,8 @@ function CreateConversationPage() {
   }
 
   // Filter users based on search
-  const filteredUsers = (availableUsers as UserSummary[]).filter(
-    (user: UserSummary) =>
+  const filteredUsers = availableUsers.filter(
+    (user) =>
       user.name.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
@@ -150,7 +154,7 @@ function CreateConversationPage() {
             </div>
           ) : (
             <div className="space-y-2">
-              {filteredUsers.map((user: UserSummary) => {
+              {filteredUsers.map((user) => {
                 const isSelected = selectedUserIds.includes(user.id);
 
                 return (
@@ -270,12 +274,10 @@ export const Route = createFileRoute("/_authenticated/user/dm/new/")({
         name: auth.user.name || "Current User",
         type: auth.user.type || "human",
         avatar: auth.user.avatar || null,
-        isActive: auth.user.isActive !== false,
-        deactivatedAt: null,
         deactivatedBy: null,
         createdAt: auth.user.createdAt || new Date(),
         updatedAt: auth.user.updatedAt || new Date(),
-      } as AuthenticatedUser,
+      },
     };
   },
   component: CreateConversationPage,

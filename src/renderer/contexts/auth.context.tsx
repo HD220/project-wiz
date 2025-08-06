@@ -6,14 +6,11 @@ import {
   type ReactNode,
 } from "react";
 
-import type {
-  AuthenticatedUser,
-  AuthResult,
-} from "@/shared/types";
+import type { User } from "@/shared/types/user";
 
 export interface AuthContextType {
   isAuthenticated: boolean;
-  user: AuthenticatedUser | null;
+  user: User | null;
   login: (credentials: { username: string; password: string }) => Promise<void>;
   logout: () => Promise<void>;
   isLoading: boolean;
@@ -26,7 +23,7 @@ interface AuthProviderProps {
 }
 
 export function AuthProvider({ children }: AuthProviderProps) {
-  const [user, setUser] = useState<AuthenticatedUser | null>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   const isAuthenticated = !!user;
@@ -56,8 +53,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
     const response = await window.api.auth.login(credentials);
     if (response.success) {
-      const authResult = response.data as AuthResult;
-      setUser(authResult.user);
+      setUser(response.data.user);
     } else {
       throw new Error(response.error || "Login failed");
     }

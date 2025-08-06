@@ -10,7 +10,7 @@ import {
 } from "lucide-react";
 import * as React from "react";
 
-import type { SelectProject } from "@/shared/types";
+import type { Project } from "@/shared/types";
 
 import {
   Avatar,
@@ -39,25 +39,25 @@ import { cn, isValidAvatarUrl } from "@/renderer/lib/utils";
 
 // Base ProjectCard container component
 interface ProjectCardProps extends React.HTMLAttributes<HTMLDivElement> {
-  project: SelectProject;
+  project: Project;
   children?: React.ReactNode;
 }
 
 // ProjectCard Actions interface
 interface ProjectCardActionsProps extends React.HTMLAttributes<HTMLDivElement> {
-  project: SelectProject;
-  onArchive?: (project: SelectProject) => void;
-  onEdit?: (project: SelectProject) => void;
+  project: Project;
+  onArchive?: (project: Project) => void;
+  onEdit?: (project: Project) => void;
 }
 
 // Legacy interface for backward compatibility
 interface LegacyProjectCardProps {
-  project: SelectProject;
+  project: Project;
   variant?: "default" | "compact";
   className?: string;
   interactive?: boolean;
-  onArchive?: (project: SelectProject) => void;
-  onEdit?: (project: SelectProject) => void;
+  onArchive?: (project: Project) => void;
+  onEdit?: (project: Project) => void;
 }
 
 // Base ProjectCard component
@@ -82,7 +82,7 @@ export function ProjectCard({
 
 // ProjectCard Header with avatar and info
 interface ProjectCardHeaderProps extends React.HTMLAttributes<HTMLDivElement> {
-  project: SelectProject;
+  project: Project;
   children?: React.ReactNode;
 }
 
@@ -177,7 +177,7 @@ export function ProjectCardActions({
               className="text-orange-600 focus:text-orange-600"
             >
               <Archive className="mr-2 size-4" />
-              {project.status === "active" ? "Archive" : "Restore"}
+              {project.isActive && !project.isArchived ? "Archive" : "Restore"}
             </DropdownMenuItem>
           )}
         </DropdownMenuContent>
@@ -188,7 +188,7 @@ export function ProjectCardActions({
 
 // ProjectCard Content with metadata
 interface ProjectCardContentProps extends React.HTMLAttributes<HTMLDivElement> {
-  project: SelectProject;
+  project: Project;
 }
 
 export function ProjectCardContent({
@@ -233,7 +233,7 @@ export function ProjectCardContent({
 
 // ProjectCard Footer with status and date
 interface ProjectCardFooterProps extends React.HTMLAttributes<HTMLDivElement> {
-  project: SelectProject;
+  project: Project;
 }
 
 export function ProjectCardFooter({
@@ -258,10 +258,10 @@ export function ProjectCardFooter({
     >
       <div className="flex items-center justify-between w-full">
         <Badge
-          variant={project.status === "active" ? "default" : "secondary"}
+          variant={project.isActive && !project.isArchived ? "default" : "secondary"}
           className="border"
         >
-          {project.status === "active" ? "Active" : "Archived"}
+          {project.isActive && !project.isArchived ? "Active" : "Archived"}
         </Badge>
 
         <time
@@ -278,9 +278,9 @@ export function ProjectCardFooter({
 
 // Complete ProjectCard component with actions
 interface ProjectCardWithActionsProps {
-  project: SelectProject;
-  onArchive?: (project: SelectProject) => void;
-  onEdit?: (project: SelectProject) => void;
+  project: Project;
+  onArchive?: (project: Project) => void;
+  onEdit?: (project: Project) => void;
   className?: string;
 }
 
@@ -333,10 +333,10 @@ export function LegacyProjectCard(props: LegacyProjectCardProps) {
               </h3>
             </div>
             <Badge
-              variant={project.status === "active" ? "default" : "secondary"}
+              variant={project.isActive && !project.isArchived ? "default" : "secondary"}
               className="shrink-0 text-xs"
             >
-              {project.status === "active" ? "Active" : "Archived"}
+              {project.isActive && !project.isArchived ? "Active" : "Archived"}
             </Badge>
           </div>
         </CardHeader>

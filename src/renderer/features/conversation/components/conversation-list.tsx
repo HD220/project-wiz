@@ -8,7 +8,7 @@ import {
 } from "lucide-react";
 import { useState, useMemo } from "react";
 
-import type { UserSummary } from "@/shared/types";
+import type { User } from "@/shared/types/user";
 
 import { CustomLink } from "@/renderer/components/custom-link";
 import { Button } from "@/renderer/components/ui/button";
@@ -26,12 +26,19 @@ import { cn } from "@/renderer/lib/utils";
 
 import { ArchiveConversationDialog } from "./archive-conversation-dialog";
 
-import type { ConversationWithLastMessage } from "../types";
+import type { DMConversation } from "@/shared/types/dm-conversation";
+import type { Message } from "@/shared/types/message";
+
+// Local type that reflects what dm.list() API actually returns
+interface DMConversationWithLastMessage extends DMConversation {
+  lastMessage?: Message;
+  participants?: User[];
+}
 
 // Main ConversationList component
 interface ConversationListProps {
-  conversations: ConversationWithLastMessage[];
-  availableUsers: UserSummary[];
+  conversations: DMConversationWithLastMessage[];
+  availableUsers: User[];
 }
 
 export function ConversationList(props: ConversationListProps) {
@@ -210,12 +217,12 @@ function ConversationListEmpty(props: ConversationListEmptyProps) {
 }
 
 interface ConversationListItemProps {
-  conversation: ConversationWithLastMessage;
-  availableUsers?: UserSummary[];
+  conversation: DMConversationWithLastMessage;
+  availableUsers?: User[];
 }
 
 function ConversationListItem(props: ConversationListItemProps) {
-  const { conversation, availableUsers = [] } = props;
+  const { conversation } = props;
   const queryClient = useQueryClient();
   const [showArchiveDialog, setShowArchiveDialog] = useState(false);
   const { user } = useAuth();
@@ -296,7 +303,10 @@ function ConversationListItem(props: ConversationListItemProps) {
         {/* Avatar - smaller Discord style with space for overlapped groups */}
         <div className="relative flex-shrink-0">
           {createConversationAvatar(
-            getOtherParticipants(conversation, user?.id || "", availableUsers),
+            getOtherParticipants(
+              conversation.participants || [],
+              user?.id || ""
+            ),
             "sm"
           )}
         </div>

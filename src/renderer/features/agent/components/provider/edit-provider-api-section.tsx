@@ -21,7 +21,7 @@ import {
   PROVIDER_CONFIGS,
   type ProviderFormData,
 } from "@/renderer/features/agent/provider-constants";
-import type { ProviderType } from "@/renderer/features/agent/provider.types";
+import type { ProviderType } from "@/main/schemas/llm-provider.schema";
 
 interface EditProviderApiSectionProps {
   form: UseFormReturn<ProviderFormData>;

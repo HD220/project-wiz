@@ -9,35 +9,23 @@ import {
 } from "@/renderer/components/ui/collapsible";
 import { ScrollArea } from "@/renderer/components/ui/scroll-area";
 import { Separator } from "@/renderer/components/ui/separator";
-import type { SelectAgent } from "@/renderer/features/agent/agent.types";
-import type { SelectProject } from "@/renderer/features/project/project.types";
+import type { Agent } from "@/shared/types/agent";
+import type { Project } from "@/shared/types/project";
+import type { Channel } from "@/shared/types/channel";
 import { cn } from "@/renderer/lib/utils";
-import type { SelectConversation } from "@/renderer/types/chat.types";
-
-interface Channel {
-  id: string;
-  name: string;
-  type: "text" | "voice";
-  hasNotification?: boolean;
-}
 
 interface ProjectSidebarProps {
-  project: SelectProject;
-  conversations?: SelectConversation[];
-  agents?: SelectAgent[];
+  project: Project;
+  conversations?: Channel[];
+  agents?: Agent[];
   className?: string;
 }
 
 export function ProjectSidebar(props: ProjectSidebarProps) {
   const { project, conversations = [], className } = props;
 
-  // Transform conversations into channels format
-  const channels: Channel[] = conversations.map((conversation) => ({
-    id: conversation.id,
-    name: conversation.name || "Unnamed conversation",
-    type: "text" as const,
-    hasNotification: false, // TODO: Add notification logic from conversation data
-  }));
+  // Use conversations directly as channels
+  const channels: Channel[] = conversations;
 
   return (
     <aside
@@ -151,7 +139,7 @@ export function ProjectSidebar(props: ProjectSidebarProps) {
                           <span className="truncate flex-1 text-left">
                             {channel.name}
                           </span>
-                          {channel.hasNotification && !isActive && (
+                          {false && !isActive && (
                             <div
                               className="ml-2 w-2 h-2 bg-destructive rounded-full flex-shrink-0"
                               aria-label="Unread messages"

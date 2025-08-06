@@ -1,7 +1,5 @@
 import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
 
-import type { Project } from "@/shared/types";
-
 import { RootSidebar } from "@/renderer/components/app/root-sidebar";
 import { loadApiData } from "@/renderer/lib/route-loader";
 
@@ -10,7 +8,7 @@ function AuthenticatedLayout() {
 
   return (
     <div className="h-full w-full flex">
-      <RootSidebar projects={projects as Project[]} />
+      <RootSidebar projects={projects} />
       <div className="flex-1 flex">
         <Outlet />
       </div>
@@ -32,7 +30,10 @@ export const Route = createFileRoute("/_authenticated")({
   loader: async () => {
     try {
       const projects = await loadApiData(
-        () => window.api.project.list({}),
+        () => window.api.project.list({
+          isActive: true,
+          isArchived: false
+        }),
         "Failed to load projects",
       );
       return { projects };

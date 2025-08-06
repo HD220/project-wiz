@@ -22,17 +22,19 @@ const handler = createIPCHandler({
     // Get default provider with ownership validation
     const dbResult = await getDefaultLlmProvider(currentUser.id);
     
-    // Mapeamento: SelectLlmProvider → LlmProvider (dados puros da entidade)
+    // Mapeamento: SelectLlmProvider → LlmProvider
     let apiResult = null;
     if (dbResult) {
       apiResult = {
         id: dbResult.id,
-        userId: dbResult.ownerId, // Map ownerId to userId for API consistency
+        ownerId: dbResult.ownerId,
         name: dbResult.name,
         type: dbResult.type,
+        apiKey: dbResult.apiKey,
         baseUrl: dbResult.baseUrl,
         defaultModel: dbResult.defaultModel,
         isDefault: dbResult.isDefault,
+        isActive: dbResult.isActive,
         createdAt: new Date(dbResult.createdAt),
         updatedAt: new Date(dbResult.updatedAt),
       };

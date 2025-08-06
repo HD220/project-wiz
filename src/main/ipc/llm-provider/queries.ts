@@ -279,7 +279,7 @@ export async function getDecryptedApiKey(providerId: string, ownerId: string): P
 /**
  * Soft delete LLM provider with ownership validation and dependency check
  */
-export async function inactivateLlmProvider(id: string, ownerId: string, deactivatedBy: string): Promise<SelectLlmProvider | null> {
+export async function inactivateLlmProvider(id: string, ownerId: string): Promise<SelectLlmProvider | null> {
   const db = getDatabase();
 
   // First verify ownership
@@ -305,8 +305,6 @@ export async function inactivateLlmProvider(id: string, ownerId: string, deactiv
     .update(llmProvidersTable)
     .set({
       isActive: false,
-      deactivatedAt: new Date(),
-      deactivatedBy,
       updatedAt: sql`(strftime('%s', 'now'))`,
     })
     .where(

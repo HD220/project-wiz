@@ -7,21 +7,18 @@ import { CustomLink } from "@/renderer/components/custom-link";
 import { SearchFilterBar } from "@/renderer/components/search-filter-bar";
 import { Button } from "@/renderer/components/ui/button";
 import { ScrollArea } from "@/renderer/components/ui/scroll-area";
-import type {
-  SelectAgent,
-  AgentStatus,
-} from "@/renderer/features/agent/agent.types";
+import type { Agent } from "@/shared/types/agent";
 import { AgentListItem } from "@/renderer/features/agent/components/agent-card";
 import { AgentDeleteDialog } from "@/renderer/features/agent/components/agent-delete-dialog";
 import { useApiMutation } from "@/renderer/hooks/use-api-mutation.hook";
 import {
   validateSearchInput,
-  validateStatusFilter,
+  validateSelectFilter,
 } from "@/renderer/lib/search-validation";
 import { cn } from "@/renderer/lib/utils";
 
 interface AgentListProps {
-  agents: SelectAgent[];
+  agents: Agent[];
   showInactive?: boolean;
 }
 
@@ -33,7 +30,7 @@ export function AgentList(props: AgentListProps) {
   const navigate = useNavigate();
 
   // Local state for UI interactions only
-  const [agentToDelete, setAgentToDelete] = useState<SelectAgent | null>(null);
+  const [agentToDelete, setAgentToDelete] = useState<Agent | null>(null);
 
   // Inline API mutations with proper error handling
   const deleteAgentMutation = useApiMutation(
@@ -55,7 +52,7 @@ export function AgentList(props: AgentListProps) {
   );
 
   const toggleStatusMutation = useApiMutation(
-    ({ id, status }: { id: string; status: AgentStatus }) =>
+    ({ id, status }: { id: string; status: Agent['status'] }) =>
       window.api.agent.update({ id, status }),
     {
       errorMessage: "Failed to update agent status",
@@ -63,7 +60,7 @@ export function AgentList(props: AgentListProps) {
   );
 
   // Inline action handlers following INLINE-FIRST principles
-  function handleDelete(agent: SelectAgent) {
+  function handleDelete(agent: Agent) {
     setAgentToDelete(agent);
   }
 
@@ -73,8 +70,8 @@ export function AgentList(props: AgentListProps) {
     setAgentToDelete(null);
   }
 
-  function handleToggleStatus(agent: SelectAgent) {
-    const newStatus: AgentStatus =
+  function handleToggleStatus(agent: Agent) {
+    const newStatus: Agent['status'] =
       agent.status === "active" ? "inactive" : "active";
     toggleStatusMutation.mutate({ id: agent.id, status: newStatus });
 
@@ -89,7 +86,7 @@ export function AgentList(props: AgentListProps) {
       to: "/user/agents",
       search: {
         ...search,
-        status: validateStatusFilter(value),
+        status: validateSelectFilter(value, ["active", "inactive", "busy"]),
       },
     });
   }
@@ -265,7 +262,7 @@ export function AgentList(props: AgentListProps) {
                 {filteredAgents.map((agent) => (
                   <AgentListItem
                     key={agent.id}
-                    agent={{ ...agent, avatar: undefined }}
+                    agent={{ ...agent, avatar: agent.avatar || null }}
                     onDelete={() => handleDelete(agent)}
                     onToggleStatus={() => handleToggleStatus(agent)}
                     isLoading={

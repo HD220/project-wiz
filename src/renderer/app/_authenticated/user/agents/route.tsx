@@ -1,7 +1,5 @@
 import { createFileRoute, Outlet } from "@tanstack/react-router";
 
-import type { SelectAgent } from "@/renderer/features/agent/agent.types";
-
 import { AgentFiltersSchema } from "@/renderer/features/agent/agent.schema";
 import { AgentList } from "@/renderer/features/agent/components/agent-list";
 import { loadApiData } from "@/renderer/lib/route-loader";

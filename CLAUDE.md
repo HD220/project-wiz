@@ -139,6 +139,11 @@ Data loading follows TanStack Router patterns with helper functions:
 - Group imports: external, internal, types, styles
 - Avoid circular dependencies (enforced by ESLint boundaries)
 
+### Type Conversion
+- Do not use type conversions like `as any`, `as unknown`, or `as Type`
+- Seek to understand the origin of the data and use the correct type
+- Type conversions should only be used in exceptional cases
+
 ## Testing
 - **Vitest** for unit and integration tests
 - Test files alongside source with `.test.ts` extension

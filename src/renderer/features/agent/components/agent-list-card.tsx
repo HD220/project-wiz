@@ -17,7 +17,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/renderer/components/ui/dropdown-menu";
-import type { SelectAgent } from "@/renderer/features/agent/agent.types";
+import type { Agent } from "@/shared/types/agent";
 import {
   ProfileAvatar,
   ProfileAvatarImage,
@@ -26,10 +26,10 @@ import {
 import { cn } from "@/renderer/lib/utils";
 
 interface AgentListCardProps {
-  agent: SelectAgent;
-  onDelete?: (agent: SelectAgent) => void;
-  onRestore?: (agent: SelectAgent) => void;
-  onToggleStatus?: (agent: SelectAgent) => void;
+  agent: Agent;
+  onDelete?: (agent: Agent) => void;
+  onRestore?: (agent: Agent) => void;
+  onToggleStatus?: (agent: Agent) => void;
 }
 
 export function AgentListCard(props: AgentListCardProps) {

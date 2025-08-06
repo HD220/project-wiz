@@ -19,7 +19,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/renderer/components/ui/dropdown-menu";
-import type { AgentWithAvatar } from "@/renderer/features/agent/agent.types";
+import type { Agent } from "@/shared/types/agent";
 import { AgentStatus } from "@/renderer/features/agent/components/agent-status";
 import {
   ProfileAvatar,
@@ -30,9 +30,9 @@ import { cn } from "@/renderer/lib/utils";
 
 // Main AgentCard component with INLINE-FIRST approach
 interface AgentCardProps {
-  agent: AgentWithAvatar;
-  onDelete?: (agent: AgentWithAvatar) => void;
-  onToggleStatus?: (agent: AgentWithAvatar) => void;
+  agent: Agent;
+  onDelete?: (agent: Agent) => void;
+  onToggleStatus?: (agent: Agent) => void;
   className?: string;
 }
 
@@ -204,9 +204,9 @@ export function AgentCard({
 
 // Horizontal list item component following provider card style
 interface AgentListItemProps {
-  agent: AgentWithAvatar;
-  onDelete?: (agent: AgentWithAvatar) => void;
-  onToggleStatus?: (agent: AgentWithAvatar) => void;
+  agent: Agent;
+  onDelete?: (agent: Agent) => void;
+  onToggleStatus?: (agent: Agent) => void;
   isLoading?: boolean;
 }
 

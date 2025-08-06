@@ -40,15 +40,17 @@ const handler = createIPCHandler({
       throw new Error(`Failed to update LLM provider or access denied: ${input.id}`);
     }
 
-    // Mapeamento: SelectLlmProvider → LlmProvider (dados puros da entidade)
+    // Mapeamento: SelectLlmProvider → LlmProvider
     const apiProvider = {
       id: result.id,
-      userId: result.ownerId, // Map ownerId to userId for API consistency
+      ownerId: result.ownerId,
       name: result.name,
       type: result.type,
+      apiKey: result.apiKey,
       baseUrl: result.baseUrl,
       defaultModel: result.defaultModel,
       isDefault: result.isDefault,
+      isActive: result.isActive,
       createdAt: new Date(result.createdAt),
       updatedAt: new Date(result.updatedAt),
     };

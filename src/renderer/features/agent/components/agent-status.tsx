@@ -1,9 +1,9 @@
 import { Badge } from "@/renderer/components/ui/badge";
-import type { AgentStatus } from "@/renderer/features/agent/agent.types";
 import { cn } from "@/renderer/lib/utils";
+import type { Agent } from "@/shared/types/agent";
 
 interface AgentStatusProps {
-  status: AgentStatus;
+  status: Agent['status'];
   size?: "sm" | "md" | "lg";
   showDot?: boolean;
   className?: string;
@@ -16,7 +16,7 @@ export function AgentStatus({
   className,
 }: AgentStatusProps) {
   // Inline status variant mapping
-  const getVariant = (status: AgentStatus) => {
+  const getVariant = (status: Agent['status']) => {
     switch (status) {
       case "active":
         return "default";
@@ -42,7 +42,7 @@ export function AgentStatus({
   };
 
   // Inline dot color mapping
-  const getDotColor = (status: AgentStatus) => {
+  const getDotColor = (status: Agent['status']) => {
     switch (status) {
       case "active":
         return "bg-emerald-500 dark:bg-emerald-400";
@@ -68,7 +68,7 @@ export function AgentStatus({
   };
 
   // Inline status label mapping
-  const getStatusLabel = (status: AgentStatus) => {
+  const getStatusLabel = (status: Agent['status']) => {
     switch (status) {
       case "active":
         return "Active";

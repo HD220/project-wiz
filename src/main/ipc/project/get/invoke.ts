@@ -28,7 +28,7 @@ const handler = createIPCHandler({
       return null;
     }
 
-    // Map database result to public schema (remove technical fields)
+    // Map database result to public schema
     const publicProject = {
       id: result.id,
       name: result.name,
@@ -38,7 +38,8 @@ const handler = createIPCHandler({
       branch: result.branch,
       localPath: result.localPath,
       ownerId: result.ownerId,
-      status: result.status,
+      isActive: result.isActive,
+      isArchived: result.isArchived,
       createdAt: new Date(result.createdAt),
       updatedAt: new Date(result.updatedAt),
     };

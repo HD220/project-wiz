@@ -1,9 +1,6 @@
 import { createFileRoute, Outlet } from "@tanstack/react-router";
 
-import type { DMConversationWithLastMessage } from "@/shared/types";
-
 import { UserSidebar } from "@/renderer/components/app/user-sidebar";
-import type { ConversationWithLastMessage } from "@/renderer/types/chat.types";
 
 function UserLayout() {
   const { conversations, availableUsers } = Route.useLoaderData();
@@ -53,12 +50,11 @@ export const Route = createFileRoute("/_authenticated/user")({
       );
     }
 
-    const dmConversations = (conversationsResponse.data ||
-      []) as DMConversationWithLastMessage[];
+    const dmConversations = conversationsResponse.data || [];
     const availableUsers = availableUsersResponse.data || [];
 
     // Transform DM conversations to universal format
-    const conversations: ConversationWithLastMessage[] = dmConversations.map(
+    const conversations = dmConversations.map(
       (dm) => ({
         ...dm,
         type: "dm" as const,

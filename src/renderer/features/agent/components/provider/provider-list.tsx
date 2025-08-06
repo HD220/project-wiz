@@ -6,10 +6,10 @@ import { Button } from "@/renderer/components/ui/button";
 import { ScrollArea } from "@/renderer/components/ui/scroll-area";
 import { EmptyState } from "@/renderer/features/agent/components/provider/empty-state";
 import { ProviderCard } from "@/renderer/features/agent/components/provider/provider-card";
-import type { LlmProvider } from "@/renderer/features/agent/provider.types";
+import type { LlmProvider } from "@/shared/types/llm-provider";
 import {
   validateSearchInput,
-  validateProviderTypeFilter,
+  validateSelectFilter,
 } from "@/renderer/lib/search-validation";
 
 import { SearchFilterBar } from "@/components/search-filter-bar";
@@ -34,7 +34,7 @@ export function ProviderList(props: ProviderListProps) {
       to: "/user/settings/llm-providers",
       search: {
         ...search,
-        type: validateProviderTypeFilter(value),
+        type: validateSelectFilter(value, ["openai", "anthropic", "google", "deepseek", "custom"]),
       },
     });
   }

@@ -2,7 +2,7 @@ import { eq, and, gt, desc } from "drizzle-orm";
 import { createDatabaseConnection } from "@/shared/config/database";
 import { usersTable } from "@/main/schemas/user.schema";
 import { userSessionsTable } from "@/main/schemas/user-sessions.schema";
-import type { AuthenticatedUser } from "@/shared/types";
+import type { User } from "@/shared/types/user";
 import { getLogger } from "@/shared/services/logger/config";
 import { eventBus } from "@/shared/services/events/event-bus";
 
@@ -10,13 +10,13 @@ const logger = getLogger("session-registry");
 const { getDatabase } = createDatabaseConnection(true);
 
 export interface SessionData {
-  user: AuthenticatedUser;
+  user: User;
   token: string;
   expiresAt: Date;
 }
 
 export interface LoginResult {
-  user: AuthenticatedUser;
+  user: User;
   sessionToken: string;
 }
 
@@ -30,7 +30,7 @@ export class SessionRegistry {
   /**
    * Get current authenticated user (null if not logged in)
    */
-  getCurrentUser(): AuthenticatedUser | null {
+  getCurrentUser(): User | null {
     if (!this.currentSession) {
       return null;
     }
@@ -63,7 +63,7 @@ export class SessionRegistry {
   /**
    * Set current session (called after login/register success)
    */
-  setSession(user: AuthenticatedUser, token: string, expiresAt: Date): void {
+  setSession(user: User, token: string, expiresAt: Date): void {
     const previousUser = this.currentSession?.user;
     
     this.currentSession = {
@@ -100,7 +100,7 @@ export class SessionRegistry {
    * Load session from database (app initialization)
    * Finds the most recent active session for humans only
    */
-  async loadFromDatabase(): Promise<AuthenticatedUser | null> {
+  async loadFromDatabase(): Promise<User | null> {
     try {
       const db = getDatabase();
 
@@ -192,7 +192,7 @@ export class SessionRegistry {
   /**
    * Require authenticated user - throws if not logged in
    */
-  requireAuth(): AuthenticatedUser {
+  requireAuth(): User {
     const user = this.getCurrentUser();
     if (!user) {
       throw new Error("User not authenticated");
