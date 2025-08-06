@@ -3,12 +3,7 @@ import { Hash, Settings } from "lucide-react";
 import type { Project } from "@/shared/types/project";
 import type { Channel } from "@/shared/types/channel";
 
-import { MenuItem } from "@/renderer/components/molecules/menu-item";
-import { IconButton } from "@/renderer/components/molecules/icon-button";
-import { Sidebar, SidebarHeader, SidebarContent, SidebarSection } from "@/renderer/components/organisms/sidebar";
-import { List, ListEmpty } from "@/renderer/components/organisms/list";
-import { Text } from "@/renderer/components/atoms/text";
-import { Icon } from "@/renderer/components/atoms/icon";
+import { Sidebar, SidebarHeader, SidebarContent, SidebarSection } from "@/renderer/components/ui/sidebar";
 
 interface ProjectSidebarProps {
   project: SelectProject;

@@ -2,8 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { ArrowRight, Bot, Folder, Sparkles } from "lucide-react";
 
 import { Badge } from "@/renderer/components/atoms/badge";
-import { Button } from "@/renderer/components/atoms/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/renderer/components/molecules/card";
+import { Button } from "@/renderer/components/ui/button";
 
 export function GettingStartedSection() {
   return (

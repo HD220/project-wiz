@@ -1,5 +1,4 @@
 import { Badge } from "@/renderer/components/atoms/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/renderer/components/molecules/card";
 
 export function SystemStatus() {
   return (

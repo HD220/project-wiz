@@ -1,8 +1,6 @@
 import { Activity } from "lucide-react";
 
 import { ActivityItem } from "@/renderer/components/app/activity-item";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/renderer/components/molecules/card";
-import { Text } from "@/renderer/components/atoms/text";
 
 export function RecentActivity() {
   return (

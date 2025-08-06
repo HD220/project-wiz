@@ -2,11 +2,8 @@ import { Hash, Bot, Archive } from "lucide-react";
 
 
 
-import { MenuItem } from "@/renderer/components/molecules/menu-item";
-import { Sidebar, SidebarContent, SidebarSection } from "@/renderer/components/organisms/sidebar";
-import { Button } from "@/renderer/components/atoms/button";
-import { Icon } from "@/renderer/components/atoms/icon";
-import { Text } from "@/renderer/components/atoms/text";
+import { Sidebar, SidebarContent, SidebarSection } from "@/renderer/components/ui/sidebar";
+import { Button } from "@/renderer/components/ui/button";
 import { ConversationList } from "@/renderer/features/conversation/components/conversation-list";
 
 interface UserSidebarProps {

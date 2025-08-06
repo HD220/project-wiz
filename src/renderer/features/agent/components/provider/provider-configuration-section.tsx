@@ -12,14 +12,14 @@ import {
   FormLabel,
   FormMessage,
 } from "@/renderer/components/atoms/form";
-import { Input } from "@/renderer/components/atoms/input";
+import { Input } from "@/renderer/components/ui/input";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/renderer/components/atoms/select";
+} from "@/renderer/components/ui/select";
 import { PROVIDER_CONFIGS } from "@/renderer/features/agent/provider-constants";
 import { Settings } from "lucide-react"; // Assuming Lucide icon
 import { useFormContext } from "react-hook-form";

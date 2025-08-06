@@ -1,7 +1,5 @@
 import { MessageCircle } from "lucide-react";
-import { Button } from "@/renderer/components/atoms/button";
-import { Icon } from "@/renderer/components/atoms/icon";
-import { Text } from "@/renderer/components/atoms/text";
+import { Button } from "@/renderer/components/ui/button";
 
 interface ConversationWelcomeMessageProps {
   displayName: string;

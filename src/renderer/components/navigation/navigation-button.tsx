@@ -1,12 +1,11 @@
 import { forwardRef } from "react";
-import { LinkProps } from "@tanstack/react-router";
+import { Link, LinkProps } from "@tanstack/react-router";
 import { LucideIcon } from "lucide-react";
 
-import { Button } from "@/renderer/components/atoms/button";
+import { Button, buttonVariants } from "@/renderer/components/ui/button";
 import { cn } from "@/renderer/lib/utils";
 
 import type { VariantProps } from "class-variance-authority";
-import { buttonVariants } from "@/renderer/components/atoms/button";
 
 // Base NavigationButton Component
 interface NavigationButtonProps

@@ -6,7 +6,7 @@ import type { UserSummary } from "@/main/features/user/user.service";
 
 import * as StandardFormModal from "@/renderer/components/form-modal";
 import { Alert, AlertDescription } from "@/renderer/components/ui/alert";
-import { Checkbox } from "@/renderer/components/atoms/checkbox";
+import { Checkbox } from "@/renderer/components/ui/checkbox";
 import { Input } from "@/renderer/components/ui/input";
 import type { CreateConversationInput } from "@/renderer/features/conversation/types";
 import type { AuthenticatedUser } from "@/main/features/user/user.types";

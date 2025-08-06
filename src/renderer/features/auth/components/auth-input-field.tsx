@@ -2,8 +2,8 @@ import * as React from "react";
 import { useState } from "react";
 import { Eye, EyeOff } from "lucide-react";
 
-import { Button } from "@/renderer/components/atoms/button";
-import { Input } from "@/renderer/components/atoms/input";
+import { Button } from "@/renderer/components/ui/button";
+import { Input } from "@/renderer/components/ui/input";
 import { cn } from "@/renderer/lib/utils";
 
 import type { AuthFieldConfig } from "@/renderer/features/auth/utils/auth.utils";

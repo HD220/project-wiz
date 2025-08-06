@@ -9,7 +9,7 @@ const { getDatabase } = createDatabaseConnection(true);
 export class Worker {
   private running = false;
   private config: ProcessorConfig = {
-    pollInterval: 100, // 100ms for responsive processing
+    pollInterval: 500, // 500ms to reduce database load
     maxConcurrentJobs: 1, // Sequential processing
     retryDelay: 1000, // 1 second retry delay
   };

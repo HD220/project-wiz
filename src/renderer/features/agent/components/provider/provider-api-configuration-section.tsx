@@ -13,7 +13,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/renderer/components/atoms/form";
-import { Input } from "@/renderer/components/atoms/input";
+import { Input } from "@/renderer/components/ui/input";
 import { PROVIDER_CONFIGS } from "@/renderer/features/agent/provider-constants";
 import { Key } from "lucide-react"; // Assuming Lucide icon
 import { useFormContext } from "react-hook-form";

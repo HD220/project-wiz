@@ -1,7 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { Folder, MessageSquare, Settings, Zap } from "lucide-react";
 
-import { Card, CardContent } from "@/renderer/components/molecules/card";
 
 export function QuickActionsGrid() {
   return (

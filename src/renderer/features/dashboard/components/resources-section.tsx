@@ -1,7 +1,6 @@
 import { BookOpen, MessageSquare, Users } from "lucide-react";
 
-import { Button } from "@/renderer/components/atoms/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/renderer/components/molecules/card";
+import { Button } from "@/renderer/components/ui/button";
 
 export function ResourcesSection() {
   return (

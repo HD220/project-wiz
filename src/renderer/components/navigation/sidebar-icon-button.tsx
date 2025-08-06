@@ -2,7 +2,7 @@ import { forwardRef } from "react";
 import { Link, LinkProps } from "@tanstack/react-router";
 import { LucideIcon } from "lucide-react";
 
-import { Button } from "@/renderer/components/atoms/button";
+import { Button } from "@/renderer/components/ui/button";
 import {
   Tooltip,
   TooltipContent,

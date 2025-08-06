@@ -1,6 +1,5 @@
 import { Bot, Folder, MessageSquare, TrendingUp } from "lucide-react";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/renderer/components/molecules/card";
 
 export function QuickStats() {
   return (

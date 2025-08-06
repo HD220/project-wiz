@@ -12,7 +12,7 @@ import {
   FormItem,
   FormLabel,
 } from "@/renderer/components/atoms/form";
-import { Checkbox } from "@/renderer/components/atoms/checkbox";
+import { Checkbox } from "@/renderer/components/ui/checkbox";
 import { AlertCircle, CheckCircle2, Shield } from "lucide-react"; // Assuming Lucide icons
 import { useFormContext } from "react-hook-form";
 import { LlmProviderFormSchema } from "../../agent.schema";

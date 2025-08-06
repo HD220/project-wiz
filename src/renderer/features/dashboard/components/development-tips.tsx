@@ -1,4 +1,3 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/renderer/components/molecules/card";
 
 export function DevelopmentTips() {
   return (
