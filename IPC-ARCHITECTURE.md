@@ -67,37 +67,45 @@ main/ipc/
 ### Exemplo Básico
 
 ```typescript
-// main/ipc/user/create/invoke.ts
+// main/ipc/agent/create/invoke.ts
 import { z } from 'zod'
 import { createIPCHandler, InferHandler } from '../../../shared/utils/create-ipc-handler'
-import { createUser } from '../queries'
+import { createAgent } from '../queries'
 import { requireAuth } from '../../../shared/services/session-registry'
 import { eventBus } from '../../../shared/services/events/event-bus'
 
-const CreateUserInputSchema = z.object({
+const CreateAgentInputSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
-  email: z.string().email("Invalid email format"),
-  username: z.string().min(3, "Username must be at least 3 characters")
+  role: z.string().min(5, "Role must be at least 5 characters"),
+  goal: z.string().min(10, "Goal must be at least 10 characters"),
+  providerId: z.string()
 })
 
-const CreateUserOutputSchema = z.object({
+const CreateAgentOutputSchema = z.object({
   id: z.string(),
   name: z.string(),
-  email: z.string(),
+  role: z.string(),
+  goal: z.string(),
+  status: z.string(),
   createdAt: z.date()
 })
 
 const handler = createIPCHandler({
-  inputSchema: CreateUserInputSchema,
-  outputSchema: CreateUserOutputSchema,
+  inputSchema: CreateAgentInputSchema,
+  outputSchema: CreateAgentOutputSchema,
   handler: async (input) => {
+    // Aqui SIM faz sentido validar auth - usuário logado criando agent
     const currentUser = requireAuth()
-    const user = await createUser(input)
+    
+    const agent = await createAgent({
+      ...input,
+      ownerId: currentUser.id
+    })
     
     // Evento "pós" ação
-    eventBus.emit('user:created', { userId: user.id })
+    eventBus.emit('agent:created', { agentId: agent.id })
     
-    return user
+    return agent
   }
 })
 
@@ -106,7 +114,7 @@ export default handler
 // Module augmentation com type helper
 declare global {
   namespace WindowAPI {
-    interface User {
+    interface Agent {
       create: InferHandler<typeof handler>
     }
   }
@@ -116,27 +124,45 @@ declare global {
 ### Handler com Event-Bus
 
 ```typescript
-// main/ipc/project/sync/invoke.ts
-import { syncProject } from '../queries'
+// main/ipc/agent/activate/invoke.ts
+import { z } from 'zod'
+import { updateAgent, findAgent } from '../queries'
 import { requireAuth } from '../../../shared/services/session-registry'
 import { eventBus } from '../../../shared/services/events/event-bus'
 
+const ActivateAgentInputSchema = z.object({
+  agentId: z.string()
+})
+
+const ActivateAgentOutputSchema = z.object({
+  id: z.string(),
+  status: z.string(),
+  updatedAt: z.date()
+})
+
 const handler = createIPCHandler({
-  inputSchema: SyncProjectInputSchema,
-  outputSchema: SyncProjectOutputSchema,
+  inputSchema: ActivateAgentInputSchema,
+  outputSchema: ActivateAgentOutputSchema,
   handler: async (input) => {
     const currentUser = requireAuth()
     
-    try {
-      const result = await syncProject(input)
-      // Evento "pós" - sync foi completado
-      eventBus.emit('project:synced', { projectId: result.id })
-      return result
-    } catch (error) {
-      // Evento "pós" - sync falhou
-      eventBus.emit('project:sync-failed', { projectId: input.projectId, error: error.message })
-      throw error
+    // Verificar se agent existe e pertence ao usuário
+    const agent = await findAgent(input.agentId, currentUser.id)
+    if (!agent) {
+      throw new Error('Agent not found')
     }
+    
+    // Ativar o agent
+    const updatedAgent = await updateAgent({
+      id: input.agentId,
+      ownerId: currentUser.id,
+      status: 'active'
+    })
+    
+    // Evento "pós" - agent foi ativado
+    eventBus.emit('agent:activated', { agentId: updatedAgent.id })
+    
+    return updatedAgent
   }
 })
 ```
