@@ -10,7 +10,7 @@ import squirrel from "electron-squirrel-startup";
 import { sessionRegistry } from "@/main/services/session-registry";
 // import { QueueClient } from "@/shared/queue-client/queue-client"; // Commented out - used only in test code
 import { getLogger } from "@/shared/services/logger/config";
-import { startWorker, stopWorker } from "@/main/services/worker-manager";
+// import { startWorker, stopWorker } from "@/main/services/worker-manager"; // Removed - worker disabled
 import { initializeEventBus, eventBus } from "@/shared/services/events/event-bus";
 // import { initializeAgenticWorkerHandler, agenticWorkerHandler } from "@/shared/worker/agentic-worker.handler"; // Removed - will be rewritten
 import { loadIpcHandlers, type HandlerRegistration } from "@/main/utils/ipc-loader";
@@ -373,7 +373,7 @@ app.whenReady().then(async () => {
   await initializeSessionManager();
   await setupAllIpcHandlers();
   initializeJobResultHandler();
-  await initializeWorker();
+  // await initializeWorker(); // Removed - worker disabled
   createMainWindow();
   setupMacOSHandlers();
 });
@@ -394,8 +394,8 @@ app.on("before-quit", async () => {
   try {
     // agenticWorkerHandler.shutdown(); // Removed - will be rewritten
     eventBus.shutdown();
-    await stopWorker();
-    logger.info("AgenticWorkerHandler, EventBus and Worker stopped successfully");
+    // await stopWorker(); // Removed - worker disabled
+    logger.info("AgenticWorkerHandler and EventBus stopped successfully");
   } catch (error) {
     logger.error("Error stopping services:", error);
   }
