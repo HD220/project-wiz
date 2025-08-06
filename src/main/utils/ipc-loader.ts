@@ -134,11 +134,14 @@ export class IpcLoader {
   }
 
   /**
-   * Always use production mode (static imports)
-   * This avoids file extension issues in packaged builds
+   * Check if we're in development or production mode
+   * Development has source files, production has compiled files
    */
   private isDevelopmentMode(): boolean {
-    return false;
+    // Check if source files exist (development)
+    const hasSourceFiles = existsSync("src/main/ipc");
+    logger.info(`🔍 Development mode check: source files exist = ${hasSourceFiles}`);
+    return hasSourceFiles;
   }
 
   /**
@@ -174,24 +177,26 @@ export class IpcLoader {
   }
 
   /**
-   * Load handlers using static imports (production mode)
+   * Load handlers using bundled discovery (production mode)
    */
   private async loadHandlersStatically(): Promise<void> {
-    logger.info("📦 Loading handlers statically (production mode)");
+    logger.info("📦 Loading handlers from bundled code (production mode)");
 
-    // Load invoke handlers
+    // In production, all handlers are bundled into the main.js file
+    // We need to register them using the pre-defined list since we can't scan files
     let invokeCount = 0;
     for (const handler of PRODUCTION_HANDLERS.invoke) {
       try {
+        // Use dynamic import with the bundled paths
         const mod = await import(handler.path);
         await this.registerStaticHandler(mod.default, handler.channel);
         invokeCount++;
       } catch (error) {
-        logger.error(`❌ Failed to load static handler ${handler.path}:`, error);
+        logger.warn(`⚠️ Handler ${handler.path} not found in bundle, skipping`);
       }
     }
 
-    logger.info(`✅ Loaded ${invokeCount} invoke handlers`);
+    logger.info(`✅ Loaded ${invokeCount} invoke handlers from bundle`);
     logger.info(`✅ No listen handlers (using new event system)`);
   }
 
