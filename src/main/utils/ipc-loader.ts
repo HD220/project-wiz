@@ -150,15 +150,32 @@ export class IpcLoader {
   private async loadHandlersDynamically(): Promise<void> {
     logger.info("🛠️ Loading handlers dynamically (development mode)");
 
-    // Try both .ts (source) and .js (compiled) files
-    let invokeFiles = globSync("src/main/ipc/**/invoke.ts", { absolute: true });
-    let listenFiles = globSync("src/main/ipc/**/listen.ts", { absolute: true });
+    // Look for compiled .js files in various possible locations
+    let invokeFiles: string[] = [];
+    let listenFiles: string[] = [];
     
-    // If no .ts files found, look for compiled .js files
+    const possiblePaths = [
+      ".vite/build/src/main/ipc/**/invoke.js",
+      "dist/src/main/ipc/**/invoke.js", 
+      "out/src/main/ipc/**/invoke.js",
+      ".vite/build/main/ipc/**/invoke.js"
+    ];
+    
+    for (const pattern of possiblePaths) {
+      invokeFiles = globSync(pattern, { absolute: true });
+      if (invokeFiles.length > 0) {
+        listenFiles = globSync(pattern.replace("invoke.js", "listen.js"), { absolute: true });
+        logger.info(`🔄 Found compiled files using pattern: ${pattern}`);
+        break;
+      }
+    }
+    
+    // Fallback: if still no compiled files, we have a problem
     if (invokeFiles.length === 0) {
-      invokeFiles = globSync(".vite/build/src/main/ipc/**/invoke.js", { absolute: true });
-      listenFiles = globSync(".vite/build/src/main/ipc/**/listen.js", { absolute: true });
-      logger.info("🔄 Using compiled .js files from .vite/build/");
+      logger.error("❌ No compiled IPC handler files found. Check Vite build output.");
+      const tsFiles = globSync("src/main/ipc/**/invoke.ts", { absolute: true });
+      logger.info(`📁 Found ${tsFiles.length} .ts source files but they cannot be imported directly`);
+      return;
     }
 
     logger.info(`📁 Found ${invokeFiles.length} invoke handlers`);
