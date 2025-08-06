@@ -16,9 +16,7 @@ import { AgentForm } from "@/renderer/features/agent/components/agent-form";
 import type { LlmProvider, Agent } from "@/shared/types";
 import { useApiMutation } from "@/renderer/hooks/use-api-mutation.hook";
 import { loadApiData } from "@/renderer/lib/route-loader";
-import { getLogger } from "@/shared/services/logger/config";
-
-const logger = getLogger("agent-new");
+// Removed logger import - not available in renderer process
 
 // Create agent input type derived from Agent
 type CreateAgentInput = Pick<Agent, 'name' | 'role' | 'backstory' | 'goal' | 'providerId' | 'modelConfig'>;
@@ -38,7 +36,7 @@ function CreateAgentPage() {
         );
         setProviders(providersData as LlmProvider[]);
       } catch (error) {
-        logger.error("Error loading providers:", error);
+        console.error("Error loading providers:", error);
       } finally {
         setIsLoadingProviders(false);
       }
