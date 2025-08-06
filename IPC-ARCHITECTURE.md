@@ -18,7 +18,7 @@ export function createIPCHandler<TInput, TOutput>(config: {
   outputSchema: z.ZodSchema<TOutput>
   handler: (input: TInput, event: IpcMainInvokeEvent) => Promise<TOutput>
 }) {
-  return async (data: unknown, event: IpcMainInvokeEvent): Promise<TOutput> => {
+  return async (data: unknown, event: IpcMainInvokeEvent): Promise<TOutput | string> => {
     try {
       // 1. Parse e validação do input
       const parsedInput = config.inputSchema.parse(data)
@@ -29,11 +29,11 @@ export function createIPCHandler<TInput, TOutput>(config: {
       // 3. Parse e validação do output
       return config.outputSchema.parse(result)
     } catch (error) {
-      // Error mapping consistente para Zod
+      // Error mapping consistente - sempre retorna string
       if (error instanceof z.ZodError) {
-        throw new Error(`Validation: ${error.errors[0].message}`)
+        return `Validation: ${error.errors[0].message}`
       }
-      throw error
+      return error instanceof Error ? error.message : 'Unknown error'
     }
   }
 }
@@ -70,7 +70,9 @@ main/ipc/
 // main/ipc/user/create/invoke.ts
 import { z } from 'zod'
 import { createIPCHandler, InferHandler } from '../../../shared/utils/create-ipc-handler'
-import { createUser } from '../../../features/user/user.service'
+import { createUser } from '../queries'
+import { requireAuth } from '../../../shared/services/session-registry'
+import { eventBus } from '../../../shared/services/events/event-bus'
 
 const CreateUserInputSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
@@ -89,7 +91,13 @@ const handler = createIPCHandler({
   inputSchema: CreateUserInputSchema,
   outputSchema: CreateUserOutputSchema,
   handler: async (input) => {
-    return await createUser(input)
+    const currentUser = requireAuth()
+    const user = await createUser(input)
+    
+    // Evento "pós" ação
+    eventBus.emit('user:created', { userId: user.id })
+    
+    return user
   }
 })
 
@@ -109,60 +117,37 @@ declare global {
 
 ```typescript
 // main/ipc/project/sync/invoke.ts
-import { eventBus } from '../../../bus/event-bus'
+import { syncProject } from '../queries'
+import { requireAuth } from '../../../shared/services/session-registry'
+import { eventBus } from '../../../shared/services/events/event-bus'
 
 const handler = createIPCHandler({
   inputSchema: SyncProjectInputSchema,
   outputSchema: SyncProjectOutputSchema,
   handler: async (input) => {
-    eventBus.emit('project:sync:start', { input, timestamp: Date.now() })
+    const currentUser = requireAuth()
     
     try {
-      const result = await syncProjectFiles(input)
-      eventBus.emit('project:sync:success', { input, output: result })
+      const result = await syncProject(input)
+      // Evento "pós" - sync foi completado
+      eventBus.emit('project:synced', { projectId: result.id })
       return result
     } catch (error) {
-      eventBus.emit('project:sync:error', { input, error: error.message })
+      // Evento "pós" - sync falhou
+      eventBus.emit('project:sync-failed', { projectId: input.projectId, error: error.message })
       throw error
     }
   }
 })
 ```
 
-## Schemas de Segurança
-
-```typescript
-// shared/schemas/security-schemas.ts
-import { z } from 'zod'
-
-const BLOCKED_PATTERNS = [
-  /rm\s+-rf?\s+\//,     // rm -rf /
-  /sudo\s+/,           // sudo commands
-  /\.\.\//,            // path traversal
-  /\/etc\//,           // system directories
-]
-
-const ALLOWED_COMMANDS = [
-  'npm run', 'npm install', 'git status', 'git add', 'git commit',
-  'ls', 'cat', 'echo', 'mkdir', 'touch', 'cp', 'mv'
-]
-
-export const SafeBashCommandSchema = z.string()
-  .refine(cmd => !BLOCKED_PATTERNS.some(pattern => pattern.test(cmd)), 
-    { message: "Comando contém padrão perigoso" })
-  .refine(cmd => ALLOWED_COMMANDS.some(allowed => cmd.startsWith(allowed)),
-    { message: "Comando não permitido" })
-
-export const SafeFilePathSchema = z.string()
-  .refine(path => !path.includes('../') && !path.startsWith('/'),
-    { message: "Path inseguro" })
-```
-
 ## Preload Implementation
 
 ```typescript
 // renderer/preload.ts
-contextBridge.exposeInMainWorld("api", {
+import type { WindowAPI } from './window'
+
+const api: WindowAPI = {
   auth: {
     login: (params) => ipcRenderer.invoke("invoke:auth:login", params),
     register: (params) => ipcRenderer.invoke("invoke:auth:register", params),
@@ -177,21 +162,25 @@ contextBridge.exposeInMainWorld("api", {
   agent: {
     execute: (params) => ipcRenderer.invoke("invoke:agent:execute", params),
   }
-})
+}
+
+contextBridge.exposeInMainWorld("api", api)
 ```
 
 ## Window Types
 
 ```typescript
 // renderer/window.d.ts
+export interface WindowAPI {
+  auth: WindowAPI.Auth
+  user: WindowAPI.User  
+  project: WindowAPI.Project
+  agent: WindowAPI.Agent
+}
+
 declare global {
   interface Window {
-    api: {
-      auth: WindowAPI.Auth
-      user: WindowAPI.User  
-      project: WindowAPI.Project
-      agent: WindowAPI.Agent
-    }
+    api: WindowAPI
   }
 }
 ```
@@ -212,13 +201,18 @@ if (response.success) {
   console.error('Error:', response.error) // "Validation: Invalid email format"
 }
 
-// Execução de agente com security schemas
+// Execução de agente
 const execution = await window.api.agent.execute({
   agentId: 'agent-123',
   taskType: 'bash',
-  command: 'npm run build', // ✓ Validado
+  command: 'npm run build',
   workdir: '/project/path'
 })
+
+// Events emitidos após ações:
+// - user:created, user:updated, user:inactivated
+// - agent:executed, agent:activated, agent:deactivated  
+// - project:synced, project:sync-failed
 ```
 
 ## Migration Guide
@@ -254,7 +248,6 @@ export default createIPCHandler({
 ✅ **Type Safety**: Inferência automática e validação Zod  
 ✅ **Error Handling**: Mensagens consistentes para erros de validação  
 ✅ **Compatibilidade**: Zero breaking changes com sistema existente  
-✅ **Segurança**: Schemas especializados para validação  
 ✅ **DX**: Type helpers simplificados para melhor developer experience  
 
 ---
