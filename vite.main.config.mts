@@ -7,19 +7,6 @@ export default defineConfig({
   build: {
     rollupOptions: {
       external: ["better-sqlite3", "pino", "pino-pretty"],
-      output: {
-        // Use manual chunks to separate IPC handlers
-        manualChunks: (id) => {
-          if (id.includes('src/main/ipc/')) {
-            // Create separate chunks for each IPC handler
-            const match = id.match(/src\/main\/ipc\/(.+)\/invoke\.ts$/);
-            if (match) {
-              return `ipc/${match[1]}/invoke`;
-            }
-          }
-          return null;
-        }
-      }
     },
   },
   resolve: {

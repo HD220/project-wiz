@@ -135,13 +135,11 @@ export class IpcLoader {
 
   /**
    * Check if we're in development or production mode
-   * Now that IPC handlers are external, we can use dynamic discovery
+   * Since Vite bundles everything into main.js, always use static imports
    */
   private isDevelopmentMode(): boolean {
-    // Check if source files exist for dynamic discovery
-    const hasSourceFiles = existsSync("src/main/ipc");
-    logger.info(`🔍 Development mode check: source files exist = ${hasSourceFiles}`);
-    return hasSourceFiles;
+    // Vite bundles everything into main.js, so we need static imports
+    return false;
   }
 
   /**
