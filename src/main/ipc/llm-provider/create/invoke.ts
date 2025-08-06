@@ -11,7 +11,9 @@ const logger = getLogger("llm-provider.create.invoke");
 const CreateLlmProviderInputSchema = LlmProviderSchema.pick({
   name: true,
   type: true,
-  defaultModel: true
+  defaultModel: true,
+  isDefault: true,
+  isActive: true
 }).extend({
   apiKey: z.string().min(1, "API key is required"),
   baseUrl: z.string().nullable().optional()
@@ -31,8 +33,8 @@ const handler = createIPCHandler({
     const dbProvider = await createLlmProvider({
       ...input,
       ownerId: currentUser.id,
-      isDefault: false,
-      isActive: true
+      isDefault: input.isDefault ?? false,
+      isActive: input.isActive ?? true
     });
     
     // Mapeamento: SelectLlmProvider → LlmProvider

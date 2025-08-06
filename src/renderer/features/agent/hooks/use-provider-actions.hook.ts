@@ -12,7 +12,7 @@ export function useProviderActions() {
   );
 
   const setDefaultProviderMutation = useApiMutation(
-    (id: string) => window.api.llmProviders.setDefault(id),
+    (id: string) => window.api.llmProviders.setDefault({ providerId: id }),
     {
       successMessage: "Default provider updated",
       errorMessage: "Failed to update default provider",

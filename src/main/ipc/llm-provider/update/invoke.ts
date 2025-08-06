@@ -11,7 +11,10 @@ const logger = getLogger("llm-provider.update.invoke");
 const UpdateLlmProviderInputSchema = LlmProviderSchema.pick({ 
   name: true, 
   type: true, 
-  baseUrl: true 
+  baseUrl: true,
+  defaultModel: true,
+  isDefault: true,
+  isActive: true
 }).partial().extend({ 
   id: z.string().min(1, "Provider ID is required"),
   apiKey: z.string().optional()

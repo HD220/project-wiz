@@ -63,7 +63,7 @@ export function ProviderCard(props: ProviderCardProps) {
 
   // Custom mutation for setting default (no userId parameter needed now)
   const setDefaultProviderMutation = useApiMutation(
-    (id: string) => window.api.llmProvider.setDefault(id), {
+    (id: string) => window.api.llmProvider.setDefault({ providerId: id }), {
     successMessage: "Default provider updated",
     errorMessage: "Failed to update default provider",
   });
