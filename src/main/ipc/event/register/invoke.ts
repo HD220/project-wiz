@@ -1,4 +1,3 @@
-import { IpcMainInvokeEvent } from "electron";
 import { eventBus } from "@/shared/services/events/event-bus";
 import { getLogger } from "@/shared/services/logger/config";
 

@@ -7,6 +7,7 @@ export const dmConversationsTable = sqliteTable(
   "dm_conversations",
   {
     id: text("id")
+      .notNull()
       .$defaultFn(() => crypto.randomUUID()),
     ownerId: text("owner_id")
       .notNull()
@@ -65,6 +66,7 @@ export const dmParticipantsTable = sqliteTable(
   "dm_participants",
   {
     id: text("id")
+      .notNull()
       .$defaultFn(() => crypto.randomUUID()),
     ownerId: text("owner_id")
       .notNull()

@@ -156,7 +156,7 @@ export async function listProjectChannels(filters: {
   }
 
   // 2. Get latest messages for each channel
-  const channelIds = channels.map((channel) => channel.id);
+  const channelIds = channels.map((channel) => channel.id).filter((id): id is string => id !== null);
 
   const messageConditions = [
     inArray(messagesTable.sourceId, channelIds),
@@ -226,9 +226,8 @@ export async function archiveProjectChannel(id: string, ownerId: string, archive
   const [channel] = await db
     .update(projectChannelsTable)
     .set({
-      archivedAt: Date.now(),
+      archivedAt: new Date(),
       archivedBy,
-      updatedAt: sql`(strftime('%s', 'now'))`
     })
     .where(
       and(
@@ -275,9 +274,8 @@ export async function inactivateProjectChannel(id: string, ownerId: string, deac
     .update(projectChannelsTable)
     .set({
       isActive: false,
-      deactivatedAt: Date.now(),
+      deactivatedAt: new Date(),
       deactivatedBy,
-      updatedAt: sql`(strftime('%s', 'now'))`
     })
     .where(
       and(
@@ -291,9 +289,9 @@ export async function inactivateProjectChannel(id: string, ownerId: string, deac
 }
 
 /**
- * Get messages for a channel with optional limit
+ * Get messages for a channel
  */
-export async function getChannelMessages(channelId: string, options?: { limit?: number }): Promise<SelectMessage[]> {
+export async function getChannelMessages(channelId: string): Promise<SelectMessage[]> {
   const db = getDatabase();
 
   const conditions = [
@@ -302,17 +300,12 @@ export async function getChannelMessages(channelId: string, options?: { limit?: 
     eq(messagesTable.isActive, true)
   ];
 
-  let query = db
+  const messages = await db
     .select()
     .from(messagesTable)
     .where(and(...conditions))
     .orderBy(asc(messagesTable.createdAt));
-
-  if (options?.limit) {
-    query = query.limit(options.limit);
-  }
-
-  const messages = await query;
+    
   return messages;
 }
 

@@ -9,6 +9,7 @@ export const messagesTable = sqliteTable(
   "messages",
   {
     id: text("id")
+      .notNull()
       .$defaultFn(() => crypto.randomUUID()),
 
     // Polymorphic reference - can point to DM or Channel

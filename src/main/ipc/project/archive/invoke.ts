@@ -2,17 +2,17 @@ import { z } from "zod";
 import { requireAuth } from "@/main/services/session-registry";
 import { getLogger } from "@/shared/services/logger/config";
 import { archiveProject } from "@/main/ipc/project/queries";
+import { eventBus } from "@/shared/services/events/event-bus";
 
 const logger = getLogger("project.archive.invoke");
 
-// Input schema - simplified to just project ID
-const ArchiveProjectInputSchema = z.string().min(1);
+// Input schema - object wrapper para consistência
+const ArchiveProjectInputSchema = z.object({
+  projectId: z.string().min(1, "Project ID is required"),
+});
 
 // Output schema
-const ArchiveProjectOutputSchema = z.object({
-  success: z.boolean(),
-  message: z.string(),
-});
+const ArchiveProjectOutputSchema = z.void();
 
 type ArchiveProjectInput = z.infer<typeof ArchiveProjectInputSchema>;
 type ArchiveProjectOutput = z.infer<typeof ArchiveProjectOutputSchema>;
@@ -20,38 +20,32 @@ type ArchiveProjectOutput = z.infer<typeof ArchiveProjectOutputSchema>;
 export default async function (
   input: ArchiveProjectInput,
 ): Promise<ArchiveProjectOutput> {
-  logger.debug("Archiving project", { projectId: input });
+  logger.debug("Archiving project", { projectId: input.projectId });
 
   // 1. Validate input
-  const validatedProjectId = ArchiveProjectInputSchema.parse(input);
+  const validatedInput = ArchiveProjectInputSchema.parse(input);
 
   // 2. Check authentication
   const currentUser = requireAuth();
 
   // 3. Archive project with ownership validation
-  const dbProject = await archiveProject(validatedProjectId, currentUser.id, currentUser.id);
-
-  // 4. Mapeamento: SelectProject → ArchiveProjectOutput
-  const apiResponse = {
-    success: true,
-    message: "Project archived successfully",
-  };
-
-  // 5. Validate output
-  const result = ArchiveProjectOutputSchema.parse(apiResponse);
+  const dbProject = await archiveProject(validatedInput.projectId, currentUser.id, currentUser.id);
 
   logger.debug("Project archived", {
     projectId: dbProject.id,
     name: dbProject.name,
   });
 
-  return result;
+  // 4. Emit specific event for project archive
+  eventBus.emit("project:archived", { projectId: dbProject.id });
+
+  return undefined;
 }
 
 declare global {
   namespace WindowAPI {
     interface Project {
-      archive: (id: string) => Promise<ArchiveProjectOutput>;
+      archive: (input: ArchiveProjectInput) => Promise<ArchiveProjectOutput>;
     }
   }
 }

@@ -7,20 +7,22 @@ import { getLogger } from "@/shared/services/logger/config";
 const logger = getLogger("project.find-by-id.invoke");
 
 // Input/Output schemas
-const InputSchema = z.string().min(1);
+const InputSchema = z.object({
+  projectId: z.string().min(1, "Project ID is required"),
+});
 const OutputSchema = ProjectSchema.nullable();
 
-export default async function(input: unknown): Promise<z.infer<typeof OutputSchema>> {
-  const id = InputSchema.parse(input);
+export default async function(input: z.infer<typeof InputSchema>): Promise<z.infer<typeof OutputSchema>> {
+  const validatedInput = InputSchema.parse(input);
   
-  logger.debug("Finding project by ID", { projectId: id });
+  logger.debug("Finding project by ID", { projectId: validatedInput.projectId });
 
   // Require authentication and validate ownership
   const currentUser = requireAuth();
-  const result = await findProject(id, currentUser.id);
+  const result = await findProject(validatedInput.projectId, currentUser.id);
   
   if (!result) {
-    logger.debug("Project not found or access denied", { projectId: id });
+    logger.debug("Project not found or access denied", { projectId: validatedInput.projectId });
     return null;
   }
 
@@ -39,7 +41,7 @@ export default async function(input: unknown): Promise<z.infer<typeof OutputSche
     updatedAt: new Date(result.updatedAt),
   };
   
-  logger.debug("Project found", { projectId: id });
+  logger.debug("Project found", { projectId: validatedInput.projectId });
   
   return OutputSchema.parse(publicProject);
 }
@@ -47,7 +49,7 @@ export default async function(input: unknown): Promise<z.infer<typeof OutputSche
 declare global {
   namespace WindowAPI {
     interface Project {
-      get: (id: string) => Promise<z.infer<typeof ProjectSchema> | null>
+      get: (input: z.infer<typeof InputSchema>) => Promise<z.infer<typeof ProjectSchema> | null>
     }
   }
 }

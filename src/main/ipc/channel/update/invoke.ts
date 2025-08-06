@@ -1,27 +1,40 @@
 import { z } from "zod";
 import { updateProjectChannel } from "@/main/ipc/channel/queries";
-import { 
-  UpdateChannelInputSchema,
-  UpdateChannelOutputSchema,
-  type UpdateChannelInput,
-  type UpdateChannelOutput 
-} from "@/shared/types/channel";
+import { ChannelSchema } from "@/shared/types/channel";
 import { requireAuth } from "@/main/services/session-registry";
 import { getLogger } from "@/shared/services/logger/config";
 import { eventBus } from "@/shared/services/events/event-bus";
 
 const logger = getLogger("channel.update.invoke");
 
-export default async function(input: unknown): Promise<UpdateChannelOutput> {
-  // Parse and validate input
+// Input schema
+const UpdateChannelInputSchema = z.object({
+  channelId: z.string().min(1, "Channel ID is required"),
+  name: z.string().min(1, "Channel name is required").optional(),
+  description: z.string().optional(),
+});
+
+// Output schema - extende ChannelSchema com campos adicionais
+const UpdateChannelOutputSchema = ChannelSchema.extend({
+  isArchived: z.boolean(),
+  isActive: z.boolean(),
+  deactivatedAt: z.number().nullable(),
+  deactivatedBy: z.string().nullable(),
+});
+
+type UpdateChannelInput = z.infer<typeof UpdateChannelInputSchema>;
+type UpdateChannelOutput = z.infer<typeof UpdateChannelOutputSchema>;
+
+export default async function(input: UpdateChannelInput): Promise<UpdateChannelOutput> {
+  logger.debug("Updating channel", { channelId: input.channelId });
+
+  // 1. Validate input
   const validatedInput = UpdateChannelInputSchema.parse(input);
   
-  logger.debug("Updating channel", { channelId: validatedInput.channelId });
-
-  // 1. Check authentication (replicando a lógica do controller original)
+  // 2. Check authentication
   const currentUser = requireAuth();
   
-  // 2. Update channel with ownership validation
+  // 3. Update channel with ownership validation
   const dbChannel = await updateProjectChannel({
     id: validatedInput.channelId,
     ownerId: currentUser.id,
@@ -33,27 +46,31 @@ export default async function(input: unknown): Promise<UpdateChannelOutput> {
     throw new Error(`Failed to update channel or access denied: ${validatedInput.channelId}`);
   }
   
-  // 3. Map database result to shared type
+  // 4. Map database result to API format
   const result = {
     id: dbChannel.id,
     projectId: dbChannel.projectId,
     name: dbChannel.name,
     description: dbChannel.description,
+    archivedAt: dbChannel.archivedAt ? new Date(dbChannel.archivedAt) : null,
+    archivedBy: dbChannel.archivedBy,
+    createdAt: new Date(dbChannel.createdAt),
+    updatedAt: new Date(dbChannel.updatedAt),
     isArchived: !!dbChannel.archivedAt,
     isActive: dbChannel.isActive,
     deactivatedAt: dbChannel.deactivatedAt,
     deactivatedBy: dbChannel.deactivatedBy,
-    createdAt: dbChannel.createdAt,
-    updatedAt: dbChannel.updatedAt,
   };
   
-  // 4. Emit specific event for channel update
-  eventBus.emit("channel:updated", { channelId: result.id });
+  // 5. Validate output
+  const validResult = UpdateChannelOutputSchema.parse(result);
   
-  logger.debug("Channel updated", { channelId: result.id, channelName: result.name });
+  logger.debug("Channel updated", { channelId: validResult.id, channelName: validResult.name });
   
-  // 5. Validate and return output
-  return UpdateChannelOutputSchema.parse(result);
+  // 6. Emit specific event for channel update
+  eventBus.emit("channel:updated", { channelId: validResult.id });
+  
+  return validResult;
 }
 
 declare global {

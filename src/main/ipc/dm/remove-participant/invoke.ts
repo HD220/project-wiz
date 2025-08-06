@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { removeParticipant } from "@/main/ipc/dm/queries";
+import { removeDMParticipant } from "@/main/ipc/dm/queries";
 import { requireAuth } from "@/main/services/session-registry";
 import { getLogger } from "@/shared/services/logger/config";
 import { eventBus } from "@/shared/services/events/event-bus";
@@ -12,11 +12,8 @@ const RemoveParticipantInputSchema = z.object({
   participantId: z.string().min(1, "Participant ID is required"),
 });
 
-// Output schema
-const RemoveParticipantOutputSchema = z.object({
-  success: z.boolean(),
-  message: z.string(),
-});
+// Output schema - void para operações de remoção
+const RemoveParticipantOutputSchema = z.void();
 
 type RemoveParticipantInput = z.infer<typeof RemoveParticipantInputSchema>;
 type RemoveParticipantOutput = z.infer<typeof RemoveParticipantOutputSchema>;
@@ -31,20 +28,22 @@ export default async function(input: RemoveParticipantInput): Promise<RemovePart
   const currentUser = requireAuth();
   
   // 3. Execute query
-  const dbResult = await removeParticipant({
-    ...validatedInput,
-    removedBy: currentUser.id
-  });
+  const success = await removeDMParticipant(
+    validatedInput.dmId,
+    validatedInput.participantId,
+    currentUser.id
+  );
   
-  // 4. Validate output
-  const result = RemoveParticipantOutputSchema.parse(dbResult);
+  if (!success) {
+    throw new Error("Failed to remove participant from DM");
+  }
   
-  // 5. Emit specific event for this operation
+  logger.debug("Participant removed from DM", { dmId: input.dmId, participantId: input.participantId });
+  
+  // 4. Emit specific event for this operation
   eventBus.emit("dm:participant-removed", { dmId: input.dmId, participantId: input.participantId });
   
-  logger.debug("Participant removed from DM", { dmId: input.dmId, participantId: input.participantId, success: result.success });
-  
-  return result;
+  return undefined;
 }
 
 declare global {

@@ -1,19 +1,12 @@
 import { z } from "zod";
 import { getMainWindow } from "@/main/services/window-registry";
 
-// Input validation schema (sem parâmetros)
-const CloseWindowInputSchema = z.void();
-
 // Output validation schema
-const CloseWindowOutputSchema = z.object({
-  success: z.boolean(),
-  message: z.string()
-});
+const CloseWindowOutputSchema = z.void();
 
-type CloseWindowInput = z.infer<typeof CloseWindowInputSchema>;
 type CloseWindowOutput = z.infer<typeof CloseWindowOutputSchema>;
 
-export default async function(input: CloseWindowInput): Promise<CloseWindowOutput> {
+export default async function(): Promise<CloseWindowOutput> {
   const mainWindow = getMainWindow();
   
   if (!mainWindow) {
@@ -21,11 +14,7 @@ export default async function(input: CloseWindowInput): Promise<CloseWindowOutpu
   }
 
   mainWindow.close();
-
-  return CloseWindowOutputSchema.parse({
-    success: true,
-    message: "Window closed successfully"
-  });
+  return undefined;
 }
 
 declare global {

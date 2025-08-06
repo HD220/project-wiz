@@ -40,7 +40,9 @@ function decryptApiKey(encryptedData: string): string {
 }
 
 // Input schema
-const GetDecryptedKeyInputSchema = z.string().min(1, "Provider ID is required");
+const GetDecryptedKeyInputSchema = z.object({
+  providerId: z.string().min(1, "Provider ID is required"),
+});
 
 // Output schema
 const GetDecryptedKeyOutputSchema = z.object({
@@ -50,21 +52,21 @@ const GetDecryptedKeyOutputSchema = z.object({
 type GetDecryptedKeyInput = z.infer<typeof GetDecryptedKeyInputSchema>;
 type GetDecryptedKeyOutput = z.infer<typeof GetDecryptedKeyOutputSchema>;
 
-export default async function(providerId: GetDecryptedKeyInput): Promise<GetDecryptedKeyOutput> {
-  logger.debug("Getting decrypted API key", { providerId });
+export default async function(input: GetDecryptedKeyInput): Promise<GetDecryptedKeyOutput> {
+  logger.debug("Getting decrypted API key", { providerId: input.providerId });
 
   // 1. Validate input
-  const validatedProviderId = GetDecryptedKeyInputSchema.parse(providerId);
+  const validatedInput = GetDecryptedKeyInputSchema.parse(input);
 
   // IMPORTANT: This handler does NOT have authentication because it is used internally
   // by the system to make calls to LLM APIs. If it had authentication,
   // agents and workers would not be able to access decrypted keys.
   
   // 2. Find provider without ownership validation (for system use)
-  const provider = await findLlmProviderById(validatedProviderId);
+  const provider = await findLlmProviderById(validatedInput.providerId);
   
   if (!provider) {
-    throw new Error(`LLM provider not found: ${validatedProviderId}`);
+    throw new Error(`LLM provider not found: ${validatedInput.providerId}`);
   }
 
   // 3. Decrypt the API key
@@ -75,7 +77,7 @@ export default async function(providerId: GetDecryptedKeyInput): Promise<GetDecr
     apiKey: decryptedApiKey
   });
   
-  logger.debug("Decrypted API key retrieved successfully", { providerId });
+  logger.debug("Decrypted API key retrieved successfully", { providerId: validatedInput.providerId });
   
   // Note: No event emission for internal queries
   
@@ -85,7 +87,7 @@ export default async function(providerId: GetDecryptedKeyInput): Promise<GetDecr
 declare global {
   namespace WindowAPI {
     interface LlmProvider {
-      getKey: (providerId: GetDecryptedKeyInput) => Promise<GetDecryptedKeyOutput>
+      getKey: (input: GetDecryptedKeyInput) => Promise<GetDecryptedKeyOutput>
     }
   }
 }

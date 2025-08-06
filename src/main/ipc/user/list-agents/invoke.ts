@@ -22,7 +22,7 @@ export default async function(input: Input): Promise<Output> {
   logger.debug("Listing agent users", { filters: validatedInput });
 
   // 1. Check authentication
-  const currentUser = requireAuth();
+  requireAuth();
   
   // 2. Execute core business logic
   const users = await listAgents(validatedInput || {});

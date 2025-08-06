@@ -25,7 +25,7 @@ export default async function(input: FindUserByIdInput): Promise<FindUserByIdOut
   const validatedInput = FindUserByIdInputSchema.parse(input);
 
   // 2. Check authentication
-  const currentUser = requireAuth();
+  requireAuth();
   
   // 3. Query recebe dados e gerencia campos técnicos internamente
   const dbUser = await findUser(validatedInput.userId, validatedInput.includeInactive);

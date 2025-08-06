@@ -7,21 +7,19 @@ import { getLogger } from "@/shared/services/logger/config";
 
 const logger = getLogger("agent.restore.invoke");
 
-// Input schema
-const RestoreAgentInputSchema = z.string().min(1);
+// Input schema - object wrapper para consistência
+const RestoreAgentInputSchema = z.object({
+  agentId: z.string().min(1, "Agent ID is required"),
+});
 
 // Output schema
-const RestoreAgentOutputSchema = z.object({
-  success: z.boolean(),
-  agent: AgentSchema.nullable(),
-  message: z.string(),
-});
+const RestoreAgentOutputSchema = AgentSchema;
 
 type RestoreAgentInput = z.infer<typeof RestoreAgentInputSchema>;
 type RestoreAgentOutput = z.infer<typeof RestoreAgentOutputSchema>;
 
 export default async function(input: RestoreAgentInput): Promise<RestoreAgentOutput> {
-  logger.debug("Restoring agent");
+  logger.debug("Restoring agent", { agentId: input.agentId });
 
   // 1. Validate input
   const validatedInput = RestoreAgentInputSchema.parse(input);
@@ -30,7 +28,7 @@ export default async function(input: RestoreAgentInput): Promise<RestoreAgentOut
   const currentUser = requireAuth();
   
   // 3. Validar se existe e se o user tem autorização
-  const agentToRestore = await findAgent(validatedInput, currentUser.id);
+  const agentToRestore = await findAgent(validatedInput.agentId, currentUser.id);
 
   if (!agentToRestore) {
     throw new Error("Agent not found for current user session");
@@ -69,16 +67,12 @@ export default async function(input: RestoreAgentInput): Promise<RestoreAgentOut
   };
   
   // 5. Validate output
-  const result = RestoreAgentOutputSchema.parse({
-    success: true,
-    agent: apiAgent,
-    message: "Agent restored successfully"
-  });
+  const result = RestoreAgentOutputSchema.parse(apiAgent);
   
   // 6. Emit event
-  eventBus.emit("agent:restored", { agentId: result.agent!.id });
+  eventBus.emit("agent:restored", { agentId: result.id });
   
-  logger.debug("Agent restored", { success: result.success });
+  logger.debug("Agent restored", { agentId: result.id });
   
   return result;
 }

@@ -1,4 +1,4 @@
-import { eq, and, inArray, isNull, desc, sql, asc } from "drizzle-orm";
+import { eq, and, inArray, isNull, sql, asc } from "drizzle-orm";
 import { createDatabaseConnection } from "@/shared/config/database";
 import {
   dmConversationsTable,
@@ -134,7 +134,7 @@ export async function createDMConversation(data: InsertDMConversation & {
       .all();
 
     const [dmConversation] = dmConversationResults;
-    if (!dmConversation) {
+    if (!dmConversation || !dmConversation.id) {
       throw new Error("Failed to create DM conversation");
     }
 
@@ -279,8 +279,8 @@ export async function listUserDMConversations(filters: {
         id: lastMessage.id,
         content: lastMessage.content,
         authorId: lastMessage.authorId,
-        createdAt: lastMessage.createdAt,
-        updatedAt: lastMessage.updatedAt,
+        createdAt: typeof lastMessage.createdAt === 'number' ? lastMessage.createdAt : lastMessage.createdAt.getTime(),
+        updatedAt: typeof lastMessage.updatedAt === 'number' ? lastMessage.updatedAt : lastMessage.updatedAt.getTime(),
       } : undefined,
     };
   });
@@ -297,9 +297,8 @@ export async function archiveDMConversation(id: string, ownerId: string, archive
   const [conversation] = await db
     .update(dmConversationsTable)
     .set({
-      archivedAt: Date.now(),
+      archivedAt: new Date(),
       archivedBy,
-      updatedAt: sql`(strftime('%s', 'now'))`
     })
     .where(
       and(
@@ -346,9 +345,8 @@ export async function inactivateDMConversation(id: string, ownerId: string, deac
     .update(dmConversationsTable)
     .set({
       isActive: false,
-      deactivatedAt: Date.now(),
+      deactivatedAt: new Date(),
       deactivatedBy,
-      updatedAt: sql`(strftime('%s', 'now'))`
     })
     .where(
       and(
@@ -389,9 +387,8 @@ export async function removeDMParticipant(conversationId: string, participantId:
     .update(dmParticipantsTable)
     .set({
       isActive: false,
-      deactivatedAt: Date.now(),
+      deactivatedAt: new Date(),
       deactivatedBy: ownerId,
-      updatedAt: sql`(strftime('%s', 'now'))`
     })
     .where(
       and(
@@ -423,7 +420,8 @@ export async function getDMMessages(conversationId: string, options?: { limit?: 
     .orderBy(asc(messagesTable.createdAt));
 
   if (options?.limit) {
-    query = query.limit(options.limit);
+    const messages = await query.limit(options.limit);
+    return messages;
   }
 
   const messages = await query;

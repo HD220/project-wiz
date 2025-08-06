@@ -1,6 +1,6 @@
-import { eq, and, ne, count } from "drizzle-orm";
+import { eq, and, ne } from "drizzle-orm";
 import { createDatabaseConnection } from "@/shared/config/database";
-import { usersTable, type SelectUser, type InsertUser, type UpdateUser } from "@/main/schemas/user.schema";
+import { usersTable, type SelectUser, type InsertUser } from "@/main/schemas/user.schema";
 import { agentsTable } from "@/main/schemas/agent.schema";
 import { userSessionsTable } from "@/main/schemas/user-sessions.schema";
 import { dmParticipantsTable } from "@/main/schemas/dm-conversation.schema";
@@ -83,7 +83,7 @@ export async function updateUser(userId: string, data: Partial<InsertUser>): Pro
 
   const updateData = {
     ...data,
-    updatedAt: Date.now(),
+    updatedAt: new Date(),
   };
 
   const [updatedUser] = await db
@@ -152,42 +152,23 @@ export async function listAvailableUsers(
 ): Promise<SelectUser[]> {
   const db = getDatabase();
 
-  // Base conditions for active status only
-  const userActiveCondition = [eq(usersTable.isActive, true)];
-  const agentActiveCondition = [eq(agentsTable.isActive, true)];
+  const conditions = [
+    eq(usersTable.isActive, true),
+    ne(usersTable.id, currentUserId), // Excluir o usuário atual
+  ];
 
-  // Part 1: My agents (JOIN with agents table)
-  const myAgents = db
+  // Se for filtro por tipo, adiciona a condição
+  if (filters?.type) {
+    conditions.push(eq(usersTable.type, filters.type));
+  }
+
+  const users = await db
     .select()
     .from(usersTable)
-    .innerJoin(agentsTable, eq(usersTable.id, agentsTable.userId))
-    .where(
-      and(
-        eq(agentsTable.ownerId, currentUserId),
-        ...userActiveCondition,
-        ...agentActiveCondition,
-        filters?.type ? eq(usersTable.type, filters.type) : undefined,
-      ),
-    );
+    .where(and(...conditions))
+    .orderBy(usersTable.name);
 
-  // Part 2: Other humans (excluding myself)
-  const otherHumans = db
-    .select()
-    .from(usersTable)
-    .where(
-      and(
-        eq(usersTable.type, "human"),
-        ne(usersTable.id, currentUserId),
-        ...userActiveCondition,
-        filters?.type ? eq(usersTable.type, filters.type) : undefined,
-      ),
-    );
-
-  // UNION ALL: combine both queries
-  const combinedQuery = myAgents.unionAll(otherHumans);
-  const result = await combinedQuery.orderBy(usersTable.name);
-
-  return result.map(row => row.users);
+  return users;
 }
 
 /**
@@ -328,7 +309,7 @@ export async function softDeleteUser(userId: string, deactivatedBy: string): Pro
       isActive: false,
       deactivatedAt: Date.now(),
       deactivatedBy: deactivatedBy,
-      updatedAt: Date.now(),
+      updatedAt: new Date(),
     })
     .where(and(eq(usersTable.id, userId), eq(usersTable.isActive, true)))
     .returning();
@@ -348,7 +329,7 @@ export async function activateUser(userId: string): Promise<SelectUser | null> {
       isActive: true,
       deactivatedAt: null,
       deactivatedBy: null,
-      updatedAt: Date.now(),
+      updatedAt: new Date(),
     })
     .where(eq(usersTable.id, userId))
     .returning();

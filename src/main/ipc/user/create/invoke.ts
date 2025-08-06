@@ -27,7 +27,7 @@ export default async function(input: CreateUserInput): Promise<CreateUserOutput>
   const validatedInput = CreateUserInputSchema.parse(input);
 
   // 2. Check authentication
-  const currentUser = requireAuth();
+  requireAuth();
   
   // 3. Query recebe dados e gerencia campos técnicos internamente
   const dbUser = await createUser(validatedInput);

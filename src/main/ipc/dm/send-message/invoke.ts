@@ -32,7 +32,7 @@ export default async function(input: SendDMMessageInput): Promise<SendDMMessageO
   const dbMessage = await sendDMMessage({
     sourceType: "dm",
     sourceId: validatedInput.sourceId,
-    authorId: currentUser.id,
+    ownerId: currentUser.id,
     content: validatedInput.content,
   });
   
@@ -41,7 +41,7 @@ export default async function(input: SendDMMessageInput): Promise<SendDMMessageO
     id: dbMessage.id,
     sourceType: dbMessage.sourceType,
     sourceId: dbMessage.sourceId,
-    authorId: dbMessage.authorId,
+    authorId: dbMessage.ownerId, // Map ownerId to authorId for API consistency
     content: dbMessage.content,
     createdAt: new Date(dbMessage.createdAt),
     updatedAt: new Date(dbMessage.updatedAt),

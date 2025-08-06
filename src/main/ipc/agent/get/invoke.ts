@@ -6,8 +6,10 @@ import { getLogger } from "@/shared/services/logger/config";
 
 const logger = getLogger("agent.get.invoke");
 
-// Input schema - apenas ID do agent
-const GetAgentInputSchema = z.string().min(1);
+// Input schema - object wrapper para consistência
+const GetAgentInputSchema = z.object({
+  agentId: z.string().min(1, "Agent ID is required"),
+});
 
 // Output schema
 const GetAgentOutputSchema = AgentSchema.nullable();
@@ -16,7 +18,7 @@ type GetAgentInput = z.infer<typeof GetAgentInputSchema>;
 type GetAgentOutput = z.infer<typeof GetAgentOutputSchema>;
 
 export default async function(input: GetAgentInput): Promise<GetAgentOutput> {
-  logger.debug("Getting agent");
+  logger.debug("Getting agent", { agentId: input.agentId });
 
   // 1. Validate input
   const validatedInput = GetAgentInputSchema.parse(input);
@@ -25,7 +27,7 @@ export default async function(input: GetAgentInput): Promise<GetAgentOutput> {
   const currentUser = requireAuth();
 
   // 3. Find agent with ownership validation
-  const dbAgent = await findAgent(validatedInput, currentUser.id);
+  const dbAgent = await findAgent(validatedInput.agentId, currentUser.id);
   
   if (!dbAgent) {
     return null;

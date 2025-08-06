@@ -1,43 +1,66 @@
 import { z } from "zod";
-import { unarchiveDM } from "@/main/ipc/dm/queries";
-import {
-  UnarchiveDMInputSchema,
-  UnarchiveDMOutputSchema,
-  type UnarchiveDMInput,
-  type UnarchiveDMOutput 
-} from "@/shared/types/dm-conversation";
+import { unarchiveDMConversation } from "@/main/ipc/dm/queries";
+import { DMConversationSchema } from "@/shared/types/dm-conversation";
 import { requireAuth } from "@/main/services/session-registry";
 import { getLogger } from "@/shared/services/logger/config";
 import { eventBus } from "@/shared/services/events/event-bus";
 
 const logger = getLogger("dm.unarchive.invoke");
 
-export default async function(dmId: UnarchiveDMInput): Promise<UnarchiveDMOutput> {
-  logger.debug("Unarchiving DM conversation", { dmId });
+// Input schema
+const UnarchiveDMInputSchema = z.object({
+  dmId: z.string().min(1, "DM ID is required"),
+});
 
-  // 1. Parse and validate input
-  const parsedDmId = UnarchiveDMInputSchema.parse(dmId);
+// Output schema
+const UnarchiveDMOutputSchema = DMConversationSchema.extend({
+  archivedAt: z.date().nullable(),
+  archivedBy: z.string().nullable(),
+});
+
+type UnarchiveDMInput = z.infer<typeof UnarchiveDMInputSchema>;
+type UnarchiveDMOutput = z.infer<typeof UnarchiveDMOutputSchema>;
+
+export default async function(input: UnarchiveDMInput): Promise<UnarchiveDMOutput> {
+  logger.debug("Unarchiving DM conversation", { dmId: input.dmId });
+
+  // 1. Validate input
+  const validatedInput = UnarchiveDMInputSchema.parse(input);
 
   // 2. Check authentication
   const currentUser = requireAuth();
   
-  // 3. Execute core business logic
-  const result = await unarchiveDM(parsedDmId);
+  // 3. Execute query with ownership validation
+  const dbConversation = await unarchiveDMConversation(validatedInput.dmId, currentUser.id);
   
-  // 4. Emit specific event for this operation
-  eventBus.emit("dm:unarchived", { dmId });
+  if (!dbConversation) {
+    throw new Error("DM conversation not found or access denied");
+  }
   
-  logger.debug("DM conversation unarchived", { dmId, success: result.success });
+  // 4. Map database result to API format
+  const apiConversation = {
+    id: dbConversation.id,
+    name: dbConversation.name,
+    description: dbConversation.description,
+    archivedAt: dbConversation.archivedAt ? new Date(dbConversation.archivedAt) : null,
+    archivedBy: dbConversation.archivedBy,
+    createdAt: new Date(dbConversation.createdAt),
+    updatedAt: new Date(dbConversation.updatedAt),
+  };
   
-  // 5. Parse and return output
-  return UnarchiveDMOutputSchema.parse(result);
+  // 5. Emit event
+  eventBus.emit("dm:unarchived", { dmId: validatedInput.dmId });
+  
+  logger.debug("DM conversation unarchived", { dmId: validatedInput.dmId });
+  
+  // 6. Validate and return output
+  return UnarchiveDMOutputSchema.parse(apiConversation);
 }
 
 declare global {
   namespace WindowAPI {
     interface Dm {
-      unarchive: (dmId: UnarchiveDMInput) => Promise<UnarchiveDMOutput>
+      unarchive: (input: UnarchiveDMInput) => Promise<UnarchiveDMOutput>
     }
   }
 }
-EOF < /dev/null

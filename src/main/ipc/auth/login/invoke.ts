@@ -13,9 +13,8 @@ const LoginInputSchema = z.object({
 });
 
 const LoginOutputSchema = z.object({
-  success: z.boolean(),
-  user: UserSchema.nullable(),
-  token: z.string().optional(),
+  user: UserSchema,
+  token: z.string(),
 });
 
 type LoginInput = z.infer<typeof LoginInputSchema>;
@@ -48,7 +47,6 @@ export default async function(input: LoginInput): Promise<LoginOutput> {
   
   // 6. Prepare API response
   const apiResponse = {
-    success: true,
     user: apiUser,
     token: dbResult.sessionToken,
   };
@@ -58,13 +56,13 @@ export default async function(input: LoginInput): Promise<LoginOutput> {
   
   // 7. Emit user login event
   eventBus.emit("user:logged-in", {
-    userId: result.user!.id,
-    username: result.user!.name,
+    userId: result.user.id,
+    username: result.user.name,
     timestamp: new Date(),
   });
   
   logger.info("User authenticated successfully", { 
-    userId: result.user!.id, 
+    userId: result.user.id, 
     username: input.username 
   });
   

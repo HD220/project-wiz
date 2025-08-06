@@ -1,53 +1,72 @@
 import { z } from "zod";
-import { deleteDM } from "@/main/ipc/dm/queries";
-import {
-  DeleteDMInputSchema,
-  DeleteDMOutputSchema,
-  type DeleteDMInput,
-  type DeleteDMOutput 
-} from "@/shared/types/dm-conversation";
+import { inactivateDMConversation } from "@/main/ipc/dm/queries";
+import { DMConversationSchema } from "@/shared/types/dm-conversation";
 import { requireAuth } from "@/main/services/session-registry";
 import { getLogger } from "@/shared/services/logger/config";
 import { eventBus } from "@/shared/services/events/event-bus";
 
-const logger = getLogger("dm.delete.invoke");
+const logger = getLogger("dm.inactivate.invoke");
 
-// Input type para o invoke (sem deletedBy que é adicionado automaticamente)
-export type DeleteDMInvokeInput = Omit<DeleteDMInput, "deletedBy">;
+// Input schema - apenas o dmId (deactivatedBy vem do currentUser)
+const InactivateDMInputSchema = z.object({
+  dmId: z.string().min(1, "DM ID is required"),
+});
 
-export default async function(input: DeleteDMInvokeInput): Promise<DeleteDMOutput> {
-  logger.debug("Deleting DM conversation", { dmId: input.dmId });
+// Output schema - extende DMConversationSchema com campos de inativação
+const InactivateDMOutputSchema = DMConversationSchema.extend({
+  isActive: z.boolean(),
+  deactivatedAt: z.date().nullable(),
+  deactivatedBy: z.string().nullable(),
+});
 
-  // 1. Parse and validate input
-  const parsedInput = z.object({
-    dmId: z.string().min(1, "DM ID is required")
-  }).parse(input);
+type InactivateDMInput = z.infer<typeof InactivateDMInputSchema>;
+type InactivateDMOutput = z.infer<typeof InactivateDMOutputSchema>;
+
+export default async function(input: InactivateDMInput): Promise<InactivateDMOutput> {
+  logger.debug("Inactivating DM conversation", { dmId: input.dmId });
+
+  // 1. Validate input
+  const validatedInput = InactivateDMInputSchema.parse(input);
 
   // 2. Check authentication
   const currentUser = requireAuth();
   
-  // 3. Add deletedBy from current user
-  const deleteData: DeleteDMInput = {
-    ...parsedInput,
-    deletedBy: currentUser.id
+  // 3. Inactivate DM conversation with ownership validation
+  const dbConversation = await inactivateDMConversation(validatedInput.dmId, currentUser.id, currentUser.id);
+  
+  if (!dbConversation) {
+    throw new Error("Failed to inactivate DM conversation or access denied");
+  }
+  
+  // 4. Map to API format
+  const apiConversation = {
+    id: dbConversation.id!,
+    name: dbConversation.name,
+    description: dbConversation.description,
+    archivedAt: dbConversation.archivedAt,
+    archivedBy: dbConversation.archivedBy,
+    createdAt: dbConversation.createdAt,
+    updatedAt: dbConversation.updatedAt,
+    isActive: dbConversation.isActive,
+    deactivatedAt: dbConversation.deactivatedAt,
+    deactivatedBy: dbConversation.deactivatedBy,
   };
   
-  // 4. Execute core business logic
-  const result = await deleteDM(deleteData);
+  // 5. Validate output
+  const result = InactivateDMOutputSchema.parse(apiConversation);
   
-  // 5. Emit specific event for this operation
-  eventBus.emit("dm:deleted", { dmId: input.dmId });
+  logger.debug("DM conversation inactivated", { dmId: result.id });
   
-  logger.debug("DM conversation deleted", { dmId: input.dmId, success: result.success });
+  // 6. Emit event
+  eventBus.emit("dm:inactivated", { dmId: result.id });
   
-  // 6. Parse and return output
-  return DeleteDMOutputSchema.parse(result);
+  return result;
 }
 
 declare global {
   namespace WindowAPI {
     interface Dm {
-      inactivate: (input: DeleteDMInvokeInput) => Promise<DeleteDMOutput>
+      inactivate: (input: InactivateDMInput) => Promise<InactivateDMOutput>
     }
   }
 }

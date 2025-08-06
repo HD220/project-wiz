@@ -132,8 +132,7 @@ export async function createLlmProvider(data: InsertLlmProvider): Promise<Select
 export async function updateLlmProvider(data: UpdateLlmProvider & { ownerId: string }): Promise<SelectLlmProvider | null> {
   const db = getDatabase();
   
-  const updates = { ...data };
-  delete updates.ownerId; // Remove ownerId from updates
+  const { ownerId, ...updates } = data; // Remove ownerId from updates using destructuring
   
   // If updating API key, encrypt it
   if (updates.apiKey) {
@@ -306,7 +305,7 @@ export async function inactivateLlmProvider(id: string, ownerId: string, deactiv
     .update(llmProvidersTable)
     .set({
       isActive: false,
-      deactivatedAt: Date.now(),
+      deactivatedAt: new Date(),
       deactivatedBy,
       updatedAt: sql`(strftime('%s', 'now'))`,
     })

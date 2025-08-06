@@ -37,7 +37,7 @@ export const responseGenerator: JobFunction<ResponseGeneratorJobData, string> = 
   
   try {
     const result = await generateText({
-      model: providerInstance as LanguageModelV1,
+      model: providerInstance as LanguageModel,
       system: systemPrompt,
       messages: messages
     });

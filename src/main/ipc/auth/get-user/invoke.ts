@@ -2,8 +2,10 @@ import { z } from "zod";
 import { getUserById } from "@/main/ipc/auth/queries";
 import { UserSchema } from "@/shared/types";
 
-// Input schema
-const GetUserByIdInputSchema = z.string().min(1);
+// Input schema - object wrapper para consistência
+const GetUserByIdInputSchema = z.object({
+  userId: z.string().min(1, "User ID is required"),
+});
 
 // Output schema
 const GetUserByIdOutputSchema = UserSchema.nullable();
@@ -13,10 +15,10 @@ type GetUserByIdOutput = z.infer<typeof GetUserByIdOutputSchema>;
 
 export default async function(input: GetUserByIdInput): Promise<GetUserByIdOutput> {
   // 1. Validate input
-  const validatedUserId = GetUserByIdInputSchema.parse(input);
+  const validatedInput = GetUserByIdInputSchema.parse(input);
   
   // 2. Query database
-  const dbUser = await getUserById(validatedUserId);
+  const dbUser = await getUserById(validatedInput.userId);
   
   // 3. Mapeamento: SelectUser → User (sem campos técnicos)
   const apiUser = dbUser ? {

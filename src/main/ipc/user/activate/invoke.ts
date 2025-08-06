@@ -5,43 +5,36 @@ import { requireAuth } from "@/main/services/session-registry";
 import { getLogger } from "@/shared/services/logger/config";
 import { eventBus } from "@/shared/services/events/event-bus";
 
-const logger = getLogger("user.restore.invoke");
+const logger = getLogger("user.activate.invoke");
 
-// Input schema
-const RestoreUserInputSchema = z.string().min(1);
-
-// Output schema
-const RestoreUserOutputSchema = z.object({
-  success: z.boolean(),
-  user: UserSchema.nullable(),
-  message: z.string()
+// Input schema - apenas userId
+const ActivateUserInputSchema = z.object({
+  userId: z.string().min(1, "User ID is required"),
 });
 
-type RestoreUserInput = z.infer<typeof RestoreUserInputSchema>;
-type RestoreUserOutput = z.infer<typeof RestoreUserOutputSchema>;
+// Output schema - estende UserSchema
+const ActivateUserOutputSchema = UserSchema;
 
-export default async function(input: RestoreUserInput): Promise<RestoreUserOutput> {
-  logger.debug("Restoring user");
+type ActivateUserInput = z.infer<typeof ActivateUserInputSchema>;
+type ActivateUserOutput = z.infer<typeof ActivateUserOutputSchema>;
+
+export default async function(input: ActivateUserInput): Promise<ActivateUserOutput> {
+  logger.debug("Activating user", { userId: input.userId });
 
   // 1. Validate input
-  const validatedInput = RestoreUserInputSchema.parse(input);
+  const validatedInput = ActivateUserInputSchema.parse(input);
 
   // 2. Check authentication
   const currentUser = requireAuth();
   
-  // 3. Query recebe dados e gerencia campos técnicos internamente
-  const dbUser = await activateUser(validatedInput);
+  // 3. Execute query
+  const dbUser = await activateUser(validatedInput.userId);
   
   if (!dbUser) {
-    const result = RestoreUserOutputSchema.parse({
-      success: false,
-      user: null,
-      message: "User not found or not in soft deleted state"
-    });
-    return result;
+    throw new Error("User not found or cannot be activated");
   }
   
-  // 4. Mapeamento: SelectUser → User (sem campos técnicos)
+  // 4. Map database result to API format
   const apiUser = {
     id: dbUser.id,
     name: dbUser.name,
@@ -51,28 +44,19 @@ export default async function(input: RestoreUserInput): Promise<RestoreUserOutpu
     updatedAt: new Date(dbUser.updatedAt),
   };
   
-  // 5. Validate output
-  const result = RestoreUserOutputSchema.parse({
-    success: true,
-    user: apiUser,
-    message: "User restored successfully"
-  });
+  logger.debug("User activated", { userId: apiUser.id });
   
-  logger.debug("User restored", { 
-    userId: result.user?.id, 
-    name: result.user?.name
-  });
+  // 5. Emit event
+  eventBus.emit("user:activated", { userId: apiUser.id, activatedBy: currentUser.id });
   
-  // 6. Emit specific event for restoration
-  eventBus.emit("user:restored", { userId: result.user!.id });
-  
-  return result;
+  // 6. Return result
+  return apiUser;
 }
 
 declare global {
   namespace WindowAPI {
     interface User {
-      activate: (input: RestoreUserInput) => Promise<RestoreUserOutput>
+      activate: (input: ActivateUserInput) => Promise<ActivateUserOutput>
     }
   }
 }

@@ -19,7 +19,7 @@ export async function getUserTheme(ownerId: string): Promise<{ theme: Theme }> {
   const [preferences] = await db
     .select({ theme: userPreferencesTable.theme })
     .from(userPreferencesTable)
-    .where(eq(userPreferencesTable.ownerId, ownerId))
+    .where(eq(userPreferencesTable.userId, ownerId))
     .limit(1);
 
   const theme = preferences?.theme ?? "system";
@@ -36,7 +36,7 @@ export async function findUserPreferences(ownerId: string): Promise<SelectUserPr
   const [preferences] = await db
     .select()
     .from(userPreferencesTable)
-    .where(eq(userPreferencesTable.ownerId, ownerId))
+    .where(eq(userPreferencesTable.userId, ownerId))
     .limit(1);
 
   return preferences || null;
@@ -63,16 +63,16 @@ export async function createUserPreferences(data: InsertUserPreferences): Promis
 /**
  * Update user preferences with ownership validation
  */
-export async function updateUserPreferences(data: UpdateUserPreferences & { ownerId: string }): Promise<SelectUserPreferences | null> {
+export async function updateUserPreferences(data: UpdateUserPreferences & { userId: string }): Promise<SelectUserPreferences | null> {
   const db = getDatabase();
   
-  const { id, ownerId, ...updates } = data;
+  const { userId, ...updates } = data;
 
   const [preferences] = await db
     .update(userPreferencesTable)
     .set(updates)
     .where(
-      eq(userPreferencesTable.ownerId, ownerId)
+      eq(userPreferencesTable.userId, userId)
     )
     .returning();
 

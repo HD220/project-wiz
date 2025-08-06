@@ -25,7 +25,7 @@ export default async function(input: ListAvailableUsersInput): Promise<ListAvail
   const validatedInput = ListAvailableUsersInputSchema.parse(input);
 
   // 2. Check authentication
-  const currentUser = requireAuth();
+  requireAuth();
   
   // 3. Query database
   const dbUsers = await listAvailableUsers(

@@ -1,19 +1,12 @@
 import { z } from "zod";
 import { getMainWindow } from "@/main/services/window-registry";
 
-// Input validation schema (sem parâmetros)
-const MinimizeWindowInputSchema = z.void();
-
 // Output validation schema
-const MinimizeWindowOutputSchema = z.object({
-  success: z.boolean(),
-  message: z.string()
-});
+const MinimizeWindowOutputSchema = z.void();
 
-type MinimizeWindowInput = z.infer<typeof MinimizeWindowInputSchema>;
 type MinimizeWindowOutput = z.infer<typeof MinimizeWindowOutputSchema>;
 
-export default async function(input: MinimizeWindowInput): Promise<MinimizeWindowOutput> {
+export default async function(): Promise<MinimizeWindowOutput> {
   const mainWindow = getMainWindow();
   
   if (!mainWindow) {
@@ -21,11 +14,7 @@ export default async function(input: MinimizeWindowInput): Promise<MinimizeWindo
   }
 
   mainWindow.minimize();
-
-  return MinimizeWindowOutputSchema.parse({
-    success: true,
-    message: "Window minimized successfully"
-  });
+  return undefined;
 }
 
 declare global {

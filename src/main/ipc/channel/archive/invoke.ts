@@ -1,70 +1,73 @@
 import { z } from "zod";
 import { archiveProjectChannel } from "@/main/ipc/channel/queries";
-import { 
-  ArchiveChannelInputSchema,
-  ArchiveChannelOutputSchema,
-  type ArchiveChannelInput,
-  type ArchiveChannelOutput 
-} from "@/shared/types/channel";
+import { ChannelSchema } from "@/shared/types/channel";
 import { requireAuth } from "@/main/services/session-registry";
 import { getLogger } from "@/shared/services/logger/config";
 import { eventBus } from "@/shared/services/events/event-bus";
 
 const logger = getLogger("channel.archive.invoke");
 
-// Input type para o invoke (sem archivedBy que é adicionado automaticamente)
-export type ArchiveChannelInvokeInput = Omit<ArchiveChannelInput, "archivedBy">;
-
-// Schema for the invoke input (without archivedBy)
-const ArchiveChannelInvokeInputSchema = z.object({
+// Input schema - apenas o channelId (archivedBy vem do currentUser)
+const ArchiveChannelInputSchema = z.object({
   channelId: z.string().min(1, "Channel ID is required"),
 });
 
-export default async function(input: unknown): Promise<ArchiveChannelOutput> {
-  // Parse and validate input
-  const validatedInvokeInput = ArchiveChannelInvokeInputSchema.parse(input);
-  
-  logger.debug("Archiving channel", { channelId: validatedInvokeInput.channelId });
+// Output schema - extende ChannelSchema com campos de arquivamento
+const ArchiveChannelOutputSchema = ChannelSchema.extend({
+  archivedAt: z.date().nullable(),
+  archivedBy: z.string().nullable(),
+});
 
-  // 1. Check authentication (replicando a lógica do controller original)
+type ArchiveChannelInput = z.infer<typeof ArchiveChannelInputSchema>;
+type ArchiveChannelOutput = z.infer<typeof ArchiveChannelOutputSchema>;
+
+export default async function(input: ArchiveChannelInput): Promise<ArchiveChannelOutput> {
+  logger.debug("Archiving channel", { channelId: input.channelId });
+
+  // 1. Validate input
+  const validatedInput = ArchiveChannelInputSchema.parse(input);
+  
+  // 2. Check authentication
   const currentUser = requireAuth();
-  
-  // 2. Add archivedBy from current user and validate full input
-  const archiveData = {
-    ...validatedInvokeInput,
-    archivedBy: currentUser.id
-  };
-  
-  const validatedArchiveData = ArchiveChannelInputSchema.parse(archiveData);
   
   // 3. Archive channel with ownership validation
   const dbChannel = await archiveProjectChannel(
-    validatedInvokeInput.channelId,
+    validatedInput.channelId,
     currentUser.id,
     currentUser.id
   );
   
-  const success = !!dbChannel;
-  const result = {
-    success,
-    message: success ? "Channel archived successfully" : "Failed to archive channel or access denied"
-  };
-  
-  // 4. Emit specific event for channel archive
-  if (success) {
-    eventBus.emit("channel:archived", { channelId: validatedInvokeInput.channelId });
+  if (!dbChannel) {
+    throw new Error("Failed to archive channel or access denied");
   }
   
-  logger.debug("Channel archived", { channelId: validatedInvokeInput.channelId, success: result.success });
+  // 4. Mapeamento: SelectChannel → Channel (dados puros da entidade)
+  const apiChannel = {
+    id: dbChannel.id,
+    projectId: dbChannel.projectId,
+    name: dbChannel.name,
+    description: dbChannel.description,
+    archivedAt: dbChannel.archivedAt ? new Date(dbChannel.archivedAt) : null,
+    archivedBy: dbChannel.archivedBy,
+    createdAt: new Date(dbChannel.createdAt),
+    updatedAt: new Date(dbChannel.updatedAt),
+  };
   
-  // 5. Validate and return output
-  return ArchiveChannelOutputSchema.parse(result);
+  // 5. Validate output
+  const result = ArchiveChannelOutputSchema.parse(apiChannel);
+  
+  logger.debug("Channel archived", { channelId: result.id });
+  
+  // 6. Emit specific event for channel archive
+  eventBus.emit("channel:archived", { channelId: result.id });
+  
+  return result;
 }
 
 declare global {
   namespace WindowAPI {
     interface Channel {
-      archive: (input: ArchiveChannelInvokeInput) => Promise<ArchiveChannelOutput>
+      archive: (input: ArchiveChannelInput) => Promise<ArchiveChannelOutput>
     }
   }
 }

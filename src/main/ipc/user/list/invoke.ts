@@ -24,7 +24,7 @@ export default async function(input: ListAllUsersInput): Promise<ListAllUsersOut
   const validatedInput = ListAllUsersInputSchema.parse(input);
 
   // 2. Check authentication  
-  const currentUser = requireAuth();
+  requireAuth();
   
   // 3. Query recebe dados e gerencia campos técnicos internamente
   const dbUsers = await listUsers({ includeInactive: validatedInput.includeInactive });

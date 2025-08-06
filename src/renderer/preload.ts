@@ -19,8 +19,6 @@ contextBridge.exposeInMainWorld("api", {
       ipcRenderer.invoke("invoke:auth:login", credentials),
     getCurrent: () =>
       ipcRenderer.invoke("invoke:auth:get-current"),
-    getSession: () =>
-      ipcRenderer.invoke("invoke:auth:get-session"),
     logout: () => 
       ipcRenderer.invoke("invoke:auth:logout"),
     isLoggedIn: () =>
@@ -99,10 +97,10 @@ contextBridge.exposeInMainWorld("api", {
       ipcRenderer.invoke("invoke:agent:get", id),
     update: (input) =>
       ipcRenderer.invoke("invoke:agent:update", input),
-    inactivate: (id) =>
-      ipcRenderer.invoke("invoke:agent:inactivate", id),
-    activate: (id) =>
-      ipcRenderer.invoke("invoke:agent:activate", id),
+    inactivate: (params: { agentId: string }) =>
+      ipcRenderer.invoke("invoke:agent:inactivate", params),
+    activate: (params: { agentId: string }) =>
+      ipcRenderer.invoke("invoke:agent:activate", params),
     countActive: () =>
       ipcRenderer.invoke("invoke:agent:count-active"),
   } satisfies WindowAPI.Agent,

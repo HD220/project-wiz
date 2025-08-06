@@ -30,7 +30,7 @@ export default async function(input: FindUserByIdAndTypeInput): Promise<FindUser
   const validatedInput = FindUserByIdAndTypeInputSchema.parse(input);
 
   // 2. Check authentication
-  const currentUser = requireAuth();
+  requireAuth();
   
   // 3. Execute query
   const dbResult = await findUserByIdAndType(validatedInput);

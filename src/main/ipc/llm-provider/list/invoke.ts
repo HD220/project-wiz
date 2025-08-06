@@ -23,7 +23,7 @@ export default async function(filters?: ListLlmProvidersInput): Promise<ListLlmP
   logger.debug("Listing LLM providers");
 
   // 1. Validate input
-  const validatedInput = filters ? ListLlmProvidersInputSchema.parse(filters) : {};
+  const validatedInput = filters ? ListLlmProvidersInputSchema.parse(filters) : { showInactive: false };
 
   // 2. Check authentication
   const currentUser = requireAuth();
@@ -31,9 +31,9 @@ export default async function(filters?: ListLlmProvidersInput): Promise<ListLlmP
   // 3. List providers with ownership validation
   const dbProviders = await listLlmProviders({
     ownerId: currentUser.id,
-    type: validatedInput.type,
-    search: validatedInput.search,
-    showInactive: validatedInput.showInactive,
+    type: validatedInput?.type,
+    search: validatedInput?.search,
+    showInactive: validatedInput?.showInactive ?? false,
   });
   
   // 4. Map database results to shared types

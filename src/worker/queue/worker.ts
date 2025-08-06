@@ -52,7 +52,7 @@ export class Worker {
   }
 
   private async getNextJob(): Promise<SelectJob | null> {
-    const now = Date.now();
+    const db = getDatabase();
     
     // Get waiting jobs or delayed jobs that are ready to be processed
     const job = await db
@@ -70,7 +70,7 @@ export class Worker {
       .get();
 
     // Job is already filtered to be "waiting" status, so just return it
-    return job;
+    return job || null;
   }
 
   private async processJob(job: SelectJob): Promise<void> {
@@ -119,6 +119,7 @@ export class Worker {
 
 
   private async markJobActive(jobId: string): Promise<void> {
+    const db = getDatabase();
     await db
       .update(jobsTable)
       .set({
@@ -129,6 +130,7 @@ export class Worker {
   }
 
   private async markJobCompleted(jobId: string, result: JobExecutionResult, _duration: number): Promise<void> {
+    const db = getDatabase();
     await db
       .update(jobsTable)
       .set({
@@ -144,6 +146,7 @@ export class Worker {
   }
 
   private async markJobFailed(jobId: string, error: Error, _duration: number): Promise<void> {
+    const db = getDatabase();
     // First, get the current job to check retry attempts
     const job = await db
       .select()
@@ -194,6 +197,7 @@ export class Worker {
   }
 
   private async updateDependentJobs(completedJobId: string): Promise<void> {
+    const db = getDatabase();
     // Find all jobs that depend on this completed job
     const dependentJobs = await db
       .select()

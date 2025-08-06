@@ -12,10 +12,7 @@ const DeleteAgentInputSchema = z.object({
 });
 
 // Output schema - resultado da operação
-const DeleteAgentOutputSchema = z.object({
-  success: z.boolean(),
-  message: z.string(),
-});
+const DeleteAgentOutputSchema = z.void();
 
 type DeleteAgentInput = z.infer<typeof DeleteAgentInputSchema>;
 type DeleteAgentOutput = z.infer<typeof DeleteAgentOutputSchema>;
@@ -45,18 +42,10 @@ export default async function(input: DeleteAgentInput): Promise<DeleteAgentOutpu
     deactivatedBy: currentUser.id,
   });
   
-  // 5. Validate output
-  const result = DeleteAgentOutputSchema.parse({
-    success: true,
-    message: "Agent deactivated successfully"
-  });
-  
   // 5. Emit event
   eventBus.emit("agent:deleted", { agentId: validatedInput.id });
   
-  logger.debug("Agent deleted", { success: result.success });
-  
-  return result;
+  logger.debug("Agent deleted", { agentId: validatedInput.id });
 }
 
 declare global {

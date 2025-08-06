@@ -13,14 +13,11 @@ export class SharedDrizzleLogger implements Logger {
   private logger = getLogger("database");
 
   logQuery(query: string, params: unknown[]): void {
-    this.logger.debug(
-      {
-        query,
-        params,
-        type: "query",
-      },
-      "Database query executed",
-    );
+    this.logger.debug("Database query executed", {
+      query,
+      params,
+      type: "query",
+    });
   }
 }
 

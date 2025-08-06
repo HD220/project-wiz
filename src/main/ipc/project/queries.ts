@@ -124,12 +124,13 @@ export async function listProjects(filters: {
 
   // Search filter
   if (filters.search) {
-    conditions.push(
-      or(
-        like(projectsTable.name, `%${filters.search}%`),
-        like(projectsTable.description, `%${filters.search}%`)
-      )
+    const searchCondition = or(
+      like(projectsTable.name, `%${filters.search}%`),
+      like(projectsTable.description, `%${filters.search}%`)
     );
+    if (searchCondition) {
+      conditions.push(searchCondition);
+    }
   }
 
   const projects = await db

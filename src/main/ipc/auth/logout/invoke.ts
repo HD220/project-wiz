@@ -6,10 +6,8 @@ import { getLogger } from "@/shared/services/logger/config";
 
 const logger = getLogger("auth.logout");
 
-// Output schema baseado no return original: { message: "Logged out successfully" }
-const LogoutOutputSchema = z.object({
-  message: z.string(),
-});
+// Output schema - void para operações de logout
+const LogoutOutputSchema = z.void();
 
 export type LogoutOutput = z.infer<typeof LogoutOutputSchema>;
 
@@ -29,9 +27,7 @@ export default async function(): Promise<LogoutOutput> {
   
   logger.info("User logged out successfully");
   
-  return LogoutOutputSchema.parse({ 
-    message: "Logged out successfully" 
-  });
+  return undefined;
 }
 
 declare global {

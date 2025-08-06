@@ -1,21 +1,27 @@
 import { z } from "zod";
 import { getUserTheme } from "@/main/ipc/profile/queries";
-import {
-  GetThemeInputSchema,
-  GetThemeOutputSchema,
-  type GetThemeInput,
-  type GetThemeOutput 
-} from "@/shared/types/profile";
 import { requireAuth } from "@/main/services/session-registry";
 import { getLogger } from "@/shared/services/logger/config";
+import { eventBus } from "@/shared/services/events/event-bus";
 
-const logger = getLogger("profile.get-theme.controller");
+const logger = getLogger("profile.get-theme.invoke");
+
+// Input schema - void (sem parâmetros)
+const GetThemeInputSchema = z.void();
+
+// Output schema - theme type
+const GetThemeOutputSchema = z.object({
+  theme: z.enum(["light", "dark", "system"]),
+});
+
+type GetThemeInput = z.infer<typeof GetThemeInputSchema>;
+type GetThemeOutput = z.infer<typeof GetThemeOutputSchema>;
 
 export default async function(input: GetThemeInput): Promise<GetThemeOutput> {
   logger.debug("Getting user theme");
 
-  // 1. Parse and validate input (void input)
-  const parsedInput = GetThemeInputSchema.parse(input);
+  // 1. Validate input
+  GetThemeInputSchema.parse(input);
 
   // 2. Check authentication
   const currentUser = requireAuth();
@@ -25,8 +31,11 @@ export default async function(input: GetThemeInput): Promise<GetThemeOutput> {
   
   logger.debug("User theme retrieved", { theme: result.theme });
   
-  // 4. Parse and return output
-  return GetThemeOutputSchema.parse(result);
+  // 4. Emit event
+  eventBus.emit("profile:theme-retrieved", { userId: currentUser.id, theme: result.theme });
+  
+  // 5. Return result
+  return result;
 }
 
 declare global {

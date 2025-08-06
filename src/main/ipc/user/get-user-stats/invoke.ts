@@ -5,7 +5,9 @@ import { getLogger } from "@/shared/services/logger/config";
 
 const logger = getLogger("user.get-user-stats.invoke");
 
-const Input = z.string().min(1);
+const Input = z.object({
+  userId: z.string().min(1, "User ID is required"),
+});
 const Output = z.object({
   ownedAgents: z.object({
     active: z.number(),
@@ -22,23 +24,23 @@ const Output = z.object({
   })
 });
 
-export default async function(userId: z.infer<typeof Input>): Promise<z.infer<typeof Output>> {
-  logger.debug("Getting user stats", { userId });
+export default async function(input: z.infer<typeof Input>): Promise<z.infer<typeof Output>> {
+  logger.debug("Getting user stats", { userId: input.userId });
 
   // 1. Validate input
-  const validatedInput = Input.parse(userId);
+  const validatedInput = Input.parse(input);
 
   // 2. Check authentication
-  const currentUser = requireAuth();
+  requireAuth();
   
   // 3. Execute core business logic
-  const result = await getUserStats(validatedInput);
+  const result = await getUserStats(validatedInput.userId);
   
   // 4. Validate output
   const validatedOutput = Output.parse(result);
   
   logger.debug("User stats retrieved", { 
-    userId, 
+    userId: validatedInput.userId, 
     ownedAgentsActive: validatedOutput.ownedAgents.active,
     ownedProjectsActive: validatedOutput.ownedProjects.active,
     activeSessions: validatedOutput.activeSessions
@@ -52,7 +54,7 @@ export default async function(userId: z.infer<typeof Input>): Promise<z.infer<ty
 declare global {
   namespace WindowAPI {
     interface User {
-      getStats: (userId: z.infer<typeof Input>) => Promise<z.infer<typeof Output>>
+      getStats: (input: z.infer<typeof Input>) => Promise<z.infer<typeof Output>>
     }
   }
 }

@@ -1,70 +1,77 @@
 import { z } from "zod";
 import { inactivateProjectChannel } from "@/main/ipc/channel/queries";
-import { 
-  DeleteChannelInputSchema,
-  DeleteChannelOutputSchema,
-  type DeleteChannelInput,
-  type DeleteChannelOutput 
-} from "@/shared/types/channel";
+import { ChannelSchema } from "@/shared/types/channel";
 import { requireAuth } from "@/main/services/session-registry";
 import { getLogger } from "@/shared/services/logger/config";
 import { eventBus } from "@/shared/services/events/event-bus";
 
 const logger = getLogger("channel.inactivate.invoke");
 
-// Input type para o invoke (sem deletedBy que é adicionado automaticamente)
-export type DeleteChannelInvokeInput = Omit<DeleteChannelInput, "deletedBy">;
-
-// Schema for the invoke input (without deletedBy)
-const DeleteChannelInvokeInputSchema = z.object({
+// Input schema - apenas o channelId (deletedBy vem do currentUser)
+const InactivateChannelInputSchema = z.object({
   channelId: z.string().min(1, "Channel ID is required"),
 });
 
-export default async function(input: unknown): Promise<DeleteChannelOutput> {
-  // Parse and validate input
-  const validatedInvokeInput = DeleteChannelInvokeInputSchema.parse(input);
-  
-  logger.debug("Deleting channel", { channelId: validatedInvokeInput.channelId });
+// Output schema - extende ChannelSchema com campos de inativação
+const InactivateChannelOutputSchema = ChannelSchema.extend({
+  isActive: z.boolean(),
+  deactivatedAt: z.number().nullable(),
+  deactivatedBy: z.string().nullable(),
+});
 
-  // 1. Check authentication
+type InactivateChannelInput = z.infer<typeof InactivateChannelInputSchema>;
+type InactivateChannelOutput = z.infer<typeof InactivateChannelOutputSchema>;
+
+export default async function(input: InactivateChannelInput): Promise<InactivateChannelOutput> {
+  logger.debug("Inactivating channel", { channelId: input.channelId });
+
+  // 1. Validate input
+  const validatedInput = InactivateChannelInputSchema.parse(input);
+  
+  // 2. Check authentication
   const currentUser = requireAuth();
-  
-  // 2. Add deletedBy from current user and validate full input
-  const deleteData = {
-    ...validatedInvokeInput,
-    deletedBy: currentUser.id
-  };
-  
-  const validatedDeleteData = DeleteChannelInputSchema.parse(deleteData);
   
   // 3. Inactivate channel with ownership validation
   const dbChannel = await inactivateProjectChannel(
-    validatedInvokeInput.channelId,
+    validatedInput.channelId,
     currentUser.id,
     currentUser.id
   );
   
-  const success = !!dbChannel;
-  const result = {
-    success,
-    message: success ? "Channel inactivated successfully" : "Failed to inactivate channel or access denied"
-  };
-  
-  // 4. Emit specific event for channel inactivation
-  if (success) {
-    eventBus.emit("channel:inactivated", { channelId: validatedInvokeInput.channelId });
+  if (!dbChannel) {
+    throw new Error("Failed to inactivate channel or access denied");
   }
   
-  logger.debug("Channel inactivated", { channelId: validatedInvokeInput.channelId, success: result.success });
+  // 4. Mapeamento: SelectChannel → Channel (dados puros da entidade)
+  const apiChannel = {
+    id: dbChannel.id,
+    projectId: dbChannel.projectId,
+    name: dbChannel.name,
+    description: dbChannel.description,
+    archivedAt: dbChannel.archivedAt ? new Date(dbChannel.archivedAt) : null,
+    archivedBy: dbChannel.archivedBy,
+    createdAt: new Date(dbChannel.createdAt),
+    updatedAt: new Date(dbChannel.updatedAt),
+    isActive: dbChannel.isActive,
+    deactivatedAt: dbChannel.deactivatedAt,
+    deactivatedBy: dbChannel.deactivatedBy,
+  };
   
-  // 5. Validate and return output
-  return DeleteChannelOutputSchema.parse(result);
+  // 5. Validate output
+  const result = InactivateChannelOutputSchema.parse(apiChannel);
+  
+  logger.debug("Channel inactivated", { channelId: result.id });
+  
+  // 6. Emit specific event for channel inactivation
+  eventBus.emit("channel:inactivated", { channelId: result.id });
+  
+  return result;
 }
 
 declare global {
   namespace WindowAPI {
     interface Channel {
-      inactivate: (input: DeleteChannelInvokeInput) => Promise<DeleteChannelOutput>
+      inactivate: (input: InactivateChannelInput) => Promise<InactivateChannelOutput>
     }
   }
 }

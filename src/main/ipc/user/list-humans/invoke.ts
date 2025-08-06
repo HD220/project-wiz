@@ -21,7 +21,7 @@ export default async function(input: Input): Promise<Output> {
   logger.debug("Listing human users", { showInactive: validatedInput?.showInactive });
 
   // 1. Check authentication
-  const currentUser = requireAuth();
+  requireAuth();
   
   // 2. Execute core business logic
   const users = await getUsersByType("human", validatedInput?.showInactive);

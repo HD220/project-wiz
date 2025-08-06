@@ -1,39 +1,66 @@
 import { z } from "zod";
-import { findDMById } from "@/main/ipc/dm/queries";
-import {
-  GetDMInputSchema,
-  GetDMOutputSchema,
-  type GetDMInput,
-  type GetDMOutput 
-} from "@/shared/types/dm-conversation";
+import { findDMConversation } from "@/main/ipc/dm/queries";
+import { DMConversationSchema } from "@/shared/types/dm-conversation";
 import { requireAuth } from "@/main/services/session-registry";
 import { getLogger } from "@/shared/services/logger/config";
+import { eventBus } from "@/shared/services/events/event-bus";
 
 const logger = getLogger("dm.get.invoke");
 
-export default async function(dmId: GetDMInput): Promise<GetDMOutput> {
-  logger.debug("Getting DM by ID", { dmId });
+// Input schema - object wrapper para consistência
+const GetDMInputSchema = z.object({
+  dmId: z.string().min(1, "DM ID is required"),
+});
 
-  // 1. Parse and validate input
-  const parsedDmId = GetDMInputSchema.parse(dmId);
+// Output schema - extende DMConversationSchema com campos adicionais
+const GetDMOutputSchema = DMConversationSchema.extend({
+  isActive: z.boolean(),
+  deactivatedAt: z.date().nullable(),
+  deactivatedBy: z.string().nullable(),
+}).nullable();
+
+type GetDMInput = z.infer<typeof GetDMInputSchema>;
+type GetDMOutput = z.infer<typeof GetDMOutputSchema>;
+
+export default async function(input: GetDMInput): Promise<GetDMOutput> {
+  logger.debug("Getting DM by ID", { dmId: input.dmId });
+
+  // 1. Validate input
+  const validatedInput = GetDMInputSchema.parse(input);
 
   // 2. Check authentication
   const currentUser = requireAuth();
   
-  // 3. Execute core business logic (no event emission for queries)
-  // Convert simple string to query object for existing function
-  const result = await findDMById({ id: parsedDmId, includeInactive: false });
+  // 3. Find DM conversation with ownership validation
+  const dbConversation = await findDMConversation(validatedInput.dmId, currentUser.id);
   
-  logger.debug("DM found", { found: !!result, dmId: parsedDmId });
+  // 4. Map to API format
+  const result = dbConversation ? {
+    id: dbConversation.id!,
+    name: dbConversation.name,
+    description: dbConversation.description,
+    archivedAt: dbConversation.archivedAt,
+    archivedBy: dbConversation.archivedBy,
+    createdAt: dbConversation.createdAt,
+    updatedAt: dbConversation.updatedAt,
+    isActive: dbConversation.isActive,
+    deactivatedAt: dbConversation.deactivatedAt,
+    deactivatedBy: dbConversation.deactivatedBy,
+  } : null;
   
-  // 4. Parse and return output
+  logger.debug("DM found", { found: !!result, dmId: validatedInput.dmId });
+  
+  // 5. Emit event
+  eventBus.emit("dm:get", { dmId: validatedInput.dmId, found: !!result });
+  
+  // 6. Validate and return output
   return GetDMOutputSchema.parse(result);
 }
 
 declare global {
   namespace WindowAPI {
     interface Dm {
-      get: (dmId: GetDMInput) => Promise<GetDMOutput>
+      get: (input: GetDMInput) => Promise<GetDMOutput>
     }
   }
 }

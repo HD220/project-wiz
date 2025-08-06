@@ -3,13 +3,13 @@ import { getChannelMessages } from "@/main/ipc/channel/queries";
 import { MessageSchema } from "@/shared/types";
 import { requireAuth } from "@/main/services/session-registry";
 import { getLogger } from "@/shared/services/logger/config";
+import { eventBus } from "@/shared/services/events/event-bus";
 
 const logger = getLogger("channel.get-messages.invoke");
 
 // Input schema
 const GetChannelMessagesInputSchema = z.object({
   channelId: z.string(),
-  limit: z.number().optional()
 });
 
 // Output schema - array de Message
@@ -25,10 +25,10 @@ export default async function(input: GetChannelMessagesInput): Promise<GetChanne
   const validatedInput = GetChannelMessagesInputSchema.parse(input);
 
   // 2. Check authentication
-  const currentUser = requireAuth();
+  requireAuth();
   
   // 3. Query recebe dados e gerencia campos técnicos internamente
-  const dbMessages = await getChannelMessages(validatedInput.channelId, { limit: validatedInput.limit });
+  const dbMessages = await getChannelMessages(validatedInput.channelId);
   
   // 4. Mapeamento: SelectMessage[] → Message[] (sem campos técnicos)
   const apiMessages = dbMessages.map(message => ({
@@ -48,6 +48,9 @@ export default async function(input: GetChannelMessagesInput): Promise<GetChanne
     channelId: validatedInput.channelId, 
     messageCount: result.length 
   });
+  
+  // 6. Emit event
+  eventBus.emit("channel:list-messages", { channelId: validatedInput.channelId, messageCount: result.length });
   
   return result;
 }

@@ -11,10 +11,8 @@ const SetDefaultProviderInputSchema = z.object({
   providerId: z.string().min(1, "Provider ID is required"),
 });
 
-// Output schema
-const SetDefaultProviderOutputSchema = z.object({
-  message: z.string(),
-});
+// Output schema - void para operações de configuração
+const SetDefaultProviderOutputSchema = z.void();
 
 type SetDefaultProviderInput = z.infer<typeof SetDefaultProviderInputSchema>;
 type SetDefaultProviderOutput = z.infer<typeof SetDefaultProviderOutputSchema>;
@@ -31,17 +29,12 @@ export default async function(input: SetDefaultProviderInput): Promise<SetDefaul
   // 3. Set default provider with ownership validation
   await setDefaultLlmProvider(validatedInput.providerId, currentUser.id);
   
-  // 4. Create response
-  const result = SetDefaultProviderOutputSchema.parse({
-    message: "Provider set as default"
-  });
-  
   logger.debug("Default LLM provider set", { providerId: input.providerId, userId: currentUser.id });
   
-  // 5. Emit specific event
+  // 4. Emit specific event
   eventBus.emit("llm-provider:default-changed", { providerId: input.providerId });
   
-  return result;
+  return undefined;
 }
 
 declare global {

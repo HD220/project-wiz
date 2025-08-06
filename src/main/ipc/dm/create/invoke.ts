@@ -31,7 +31,9 @@ export default async function(input: CreateDMInput): Promise<CreateDMOutput> {
   
   // 3. Query recebe dados e gerencia campos técnicos internamente
   const dbDMConversation = await createDMConversation({
-    ...validatedInput,
+    ownerId: currentUser.id,
+    description: validatedInput.description,
+    participantIds: validatedInput.participantIds,
     currentUserId: currentUser.id
   });
   
