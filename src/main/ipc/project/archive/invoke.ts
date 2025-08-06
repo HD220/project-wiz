@@ -3,49 +3,45 @@ import { requireAuth } from "@/main/services/session-registry";
 import { getLogger } from "@/shared/services/logger/config";
 import { archiveProject } from "@/main/ipc/project/queries";
 import { eventBus } from "@/shared/services/events/event-bus";
+import { createIPCHandler, InferHandler } from "@/shared/utils/create-ipc-handler";
 
 const logger = getLogger("project.archive.invoke");
 
-// Input schema - object wrapper para consistência
 const ArchiveProjectInputSchema = z.object({
   projectId: z.string().min(1, "Project ID is required"),
 });
 
-// Output schema
 const ArchiveProjectOutputSchema = z.void();
 
-type ArchiveProjectInput = z.infer<typeof ArchiveProjectInputSchema>;
-type ArchiveProjectOutput = z.infer<typeof ArchiveProjectOutputSchema>;
+const handler = createIPCHandler({
+  inputSchema: ArchiveProjectInputSchema,
+  outputSchema: ArchiveProjectOutputSchema,
+  handler: async (input) => {
+    logger.debug("Archiving project", { projectId: input.projectId });
 
-export default async function (
-  input: ArchiveProjectInput,
-): Promise<ArchiveProjectOutput> {
-  logger.debug("Archiving project", { projectId: input.projectId });
+    const currentUser = requireAuth();
 
-  // 1. Validate input
-  const validatedInput = ArchiveProjectInputSchema.parse(input);
+    // Archive project with ownership validation
+    const dbProject = await archiveProject(input.projectId, currentUser.id, currentUser.id);
 
-  // 2. Check authentication
-  const currentUser = requireAuth();
+    logger.debug("Project archived", {
+      projectId: dbProject.id,
+      name: dbProject.name,
+    });
 
-  // 3. Archive project with ownership validation
-  const dbProject = await archiveProject(validatedInput.projectId, currentUser.id, currentUser.id);
+    // Emit specific event for project archive
+    eventBus.emit("project:archived", { projectId: dbProject.id });
 
-  logger.debug("Project archived", {
-    projectId: dbProject.id,
-    name: dbProject.name,
-  });
+    return undefined;
+  }
+});
 
-  // 4. Emit specific event for project archive
-  eventBus.emit("project:archived", { projectId: dbProject.id });
-
-  return undefined;
-}
+export default handler;
 
 declare global {
   namespace WindowAPI {
     interface Project {
-      archive: (input: ArchiveProjectInput) => Promise<ArchiveProjectOutput>;
+      archive: InferHandler<typeof handler>;
     }
   }
 }

@@ -3,67 +3,62 @@ import { sendChannelMessage } from "@/main/ipc/channel/queries";
 import { MessageSchema } from "@/shared/types";
 import { requireAuth } from "@/main/services/session-registry";
 import { getLogger } from "@/shared/services/logger/config";
+import { createIPCHandler, InferHandler } from "@/shared/utils/create-ipc-handler";
 
 const logger = getLogger("channel.send-message.invoke");
 
-// Input schema - apenas campos de negócio (sourceType será fixo como "channel")
 const SendChannelMessageInputSchema = MessageSchema.pick({
   sourceId: true,
   content: true
 });
 
-// Output schema
 const SendChannelMessageOutputSchema = MessageSchema;
 
-type SendChannelMessageInput = z.infer<typeof SendChannelMessageInputSchema>;
-type SendChannelMessageOutput = z.infer<typeof SendChannelMessageOutputSchema>;
+const handler = createIPCHandler({
+  inputSchema: SendChannelMessageInputSchema,
+  outputSchema: SendChannelMessageOutputSchema,
+  handler: async (input) => {
+    logger.debug("Sending message to channel", { channelId: input.sourceId });
 
-export default async function(input: SendChannelMessageInput): Promise<SendChannelMessageOutput> {
-  logger.debug("Sending message to channel", { channelId: input.sourceId });
+    const currentUser = requireAuth();
+    
+    // Send message to channel
+    const messageData = {
+      sourceType: "channel" as const,
+      sourceId: input.sourceId,
+      ownerId: currentUser.id, // Use ownerId for database consistency
+      content: input.content,
+      isActive: true
+    };
+    
+    const dbMessage = await sendChannelMessage(messageData);
+    
+    // Map database result to shared type
+    const apiMessage = {
+      id: dbMessage.id,
+      sourceType: dbMessage.sourceType,
+      sourceId: dbMessage.sourceId,
+      authorId: dbMessage.ownerId, // Map ownerId to authorId for API consistency
+      content: dbMessage.content,
+      createdAt: new Date(dbMessage.createdAt),
+      updatedAt: new Date(dbMessage.updatedAt),
+    };
+    
+    logger.debug("Message sent to channel", { 
+      channelId: input.sourceId, 
+      messageId: apiMessage.id 
+    });
+    
+    return apiMessage;
+  }
+});
 
-  // 1. Validate input
-  const validatedInput = SendChannelMessageInputSchema.parse(input);
-
-  // 2. Check authentication
-  const currentUser = requireAuth();
-  
-  // 3. Send message to channel
-  const messageData = {
-    sourceType: "channel" as const,
-    sourceId: validatedInput.sourceId,
-    ownerId: currentUser.id, // Use ownerId for database consistency
-    content: validatedInput.content,
-    isActive: true
-  };
-  
-  const dbMessage = await sendChannelMessage(messageData);
-  
-  // 4. Map database result to shared type
-  const apiMessage = {
-    id: dbMessage.id,
-    sourceType: dbMessage.sourceType,
-    sourceId: dbMessage.sourceId,
-    authorId: dbMessage.ownerId, // Map ownerId to authorId for API consistency
-    content: dbMessage.content,
-    createdAt: new Date(dbMessage.createdAt),
-    updatedAt: new Date(dbMessage.updatedAt),
-  };
-  
-  // 5. Validate output
-  const result = SendChannelMessageOutputSchema.parse(apiMessage);
-  
-  logger.debug("Message sent to channel", { 
-    channelId: input.sourceId, 
-    messageId: result.id 
-  });
-  
-  return result;
-}
+export default handler;
 
 declare global {
   namespace WindowAPI {
     interface Channel {
-      sendMessage: (input: SendChannelMessageInput) => Promise<SendChannelMessageOutput>
+      sendMessage: InferHandler<typeof handler>
     }
   }
 }

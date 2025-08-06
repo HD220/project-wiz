@@ -87,27 +87,19 @@ export class IpcLoader {
 
       // Register the IPC handler with middleware
       ipcMain.handle(channel, async (event, data) => {
-        try {
-          logger.debug(`📥 IPC call: ${channel}`, { data });
-          
-          const result = await mod.default(data, event);
+        logger.debug(`📥 IPC call: ${channel}`, { data });
+        
+        // Handler already handles all validation, errors, and wrapper format
+        // No try-catch needed - createIPCHandler guarantees it never throws
+        const result = await mod.default(data, event);
 
-          logger.debug(`📤 IPC success: ${channel}`, { 
-            hasResult: !!result 
-          });
-          
-          return { success: true, data: result };
-          
-        } catch (error) {
-          const errorMessage = error instanceof Error ? error.message : String(error);
-          
-          logger.error(`❌ IPC error: ${channel}`, { 
-            error: errorMessage,
-            data 
-          });
-          
-          return { success: false, error: errorMessage };
-        }
+        logger.debug(`📤 IPC result: ${channel}`, { 
+          success: result?.success,
+          hasData: !!result?.data,
+          hasError: !!result?.error
+        });
+        
+        return result;
       });
 
       this.registeredHandlers.add(channel);

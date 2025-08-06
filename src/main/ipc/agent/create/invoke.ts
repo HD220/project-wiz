@@ -4,6 +4,7 @@ import { AgentSchema } from "@/shared/types";
 import { requireAuth } from "@/main/services/session-registry";
 import { eventBus } from "@/shared/services/events/event-bus";
 import { getLogger } from "@/shared/services/logger/config";
+import { createIPCHandler, InferHandler } from "@/shared/utils/create-ipc-handler";
 
 const logger = getLogger("agent.create.invoke");
 
@@ -19,60 +20,61 @@ const CreateAgentInputSchema = AgentSchema.pick({
 
 const CreateAgentOutputSchema = AgentSchema;
 
-type CreateAgentInput = z.infer<typeof CreateAgentInputSchema>;
-type CreateAgentOutput = z.infer<typeof CreateAgentOutputSchema>;
+const handler = createIPCHandler({
+  inputSchema: CreateAgentInputSchema,
+  outputSchema: CreateAgentOutputSchema,
+  handler: async (input) => {
+    logger.debug("Creating agent", { 
+      agentName: input.name, 
+      role: input.role, 
+      providerId: input.providerId 
+    });
 
-export default async function(input: CreateAgentInput): Promise<CreateAgentOutput> {
-  logger.debug("Creating agent", { 
-    agentName: input.name, 
-    role: input.role, 
-    providerId: input.providerId 
-  });
+    const currentUser = requireAuth();
+    
+    const dbAgent = await createAgent({
+      ...input,
+      modelConfig: JSON.stringify(input.modelConfig),
+      ownerId: currentUser.id
+    });
+    
+    // Buscar avatar do user
+    const user = await findUser(dbAgent.id);
 
-  const validatedInput = CreateAgentInputSchema.parse(input);
-  const currentUser = requireAuth();
-  
-  const dbAgent = await createAgent({
-    ...validatedInput,
-    modelConfig: JSON.stringify(validatedInput.modelConfig),
-    ownerId: currentUser.id
-  });
-  
-  // Buscar avatar do user
-  const user = await findUser(dbAgent.id);
+    const apiAgent = {
+      id: dbAgent.id,
+      ownerId: dbAgent.ownerId,
+      name: dbAgent.name,
+      role: dbAgent.role,
+      backstory: dbAgent.backstory,
+      goal: dbAgent.goal,
+      providerId: dbAgent.providerId,
+      modelConfig: JSON.parse(dbAgent.modelConfig),
+      status: dbAgent.status,
+      avatar: user?.avatar || null,
+      createdAt: new Date(dbAgent.createdAt),
+      updatedAt: new Date(dbAgent.updatedAt),
+    };
+    
+    eventBus.emit("agent:created", { agentId: apiAgent.id });
+    
+    logger.debug("Agent created", { 
+      agentId: apiAgent.id, 
+      agentName: apiAgent.name, 
+      role: apiAgent.role, 
+      ownerId: apiAgent.ownerId 
+    });
+    
+    return apiAgent;
+  }
+});
 
-  const apiAgent = {
-    id: dbAgent.id,
-    ownerId: dbAgent.ownerId,
-    name: dbAgent.name,
-    role: dbAgent.role,
-    backstory: dbAgent.backstory,
-    goal: dbAgent.goal,
-    providerId: dbAgent.providerId,
-    modelConfig: JSON.parse(dbAgent.modelConfig),
-    status: dbAgent.status,
-    avatar: user?.avatar || null,
-    createdAt: new Date(dbAgent.createdAt),
-    updatedAt: new Date(dbAgent.updatedAt),
-  };
-  
-  const result = CreateAgentOutputSchema.parse(apiAgent);
-  eventBus.emit("agent:created", { agentId: result.id });
-  
-  logger.debug("Agent created", { 
-    agentId: result.id, 
-    agentName: result.name, 
-    role: result.role, 
-    ownerId: result.ownerId 
-  });
-  
-  return result;
-}
+export default handler;
 
 declare global {
   namespace WindowAPI {
     interface Agent {
-      create: (input: CreateAgentInput) => Promise<CreateAgentOutput>
+      create: InferHandler<typeof handler>
     }
   }
 }

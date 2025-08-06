@@ -3,53 +3,58 @@ import { findProject } from "@/main/ipc/project/queries";
 import { ProjectSchema } from "@/shared/types";
 import { requireAuth } from "@/main/services/session-registry";
 import { getLogger } from "@/shared/services/logger/config";
+import { createIPCHandler, InferHandler } from "@/shared/utils/create-ipc-handler";
 
 const logger = getLogger("project.find-by-id.invoke");
 
-// Input/Output schemas
-const InputSchema = z.object({
+const GetProjectInputSchema = z.object({
   projectId: z.string().min(1, "Project ID is required"),
 });
-const OutputSchema = ProjectSchema.nullable();
 
-export default async function(input: z.infer<typeof InputSchema>): Promise<z.infer<typeof OutputSchema>> {
-  const validatedInput = InputSchema.parse(input);
-  
-  logger.debug("Finding project by ID", { projectId: validatedInput.projectId });
+const GetProjectOutputSchema = ProjectSchema.nullable();
 
-  // Require authentication and validate ownership
-  const currentUser = requireAuth();
-  const result = await findProject(validatedInput.projectId, currentUser.id);
-  
-  if (!result) {
-    logger.debug("Project not found or access denied", { projectId: validatedInput.projectId });
-    return null;
+const handler = createIPCHandler({
+  inputSchema: GetProjectInputSchema,
+  outputSchema: GetProjectOutputSchema,
+  handler: async (input) => {
+    logger.debug("Finding project by ID", { projectId: input.projectId });
+
+    // Require authentication and validate ownership
+    const currentUser = requireAuth();
+    const result = await findProject(input.projectId, currentUser.id);
+    
+    if (!result) {
+      logger.debug("Project not found or access denied", { projectId: input.projectId });
+      return null;
+    }
+
+    // Map database result to public schema (remove technical fields)
+    const publicProject = {
+      id: result.id,
+      name: result.name,
+      description: result.description,
+      avatarUrl: result.avatarUrl,
+      gitUrl: result.gitUrl,
+      branch: result.branch,
+      localPath: result.localPath,
+      ownerId: result.ownerId,
+      status: result.status,
+      createdAt: new Date(result.createdAt),
+      updatedAt: new Date(result.updatedAt),
+    };
+    
+    logger.debug("Project found", { projectId: input.projectId });
+    
+    return publicProject;
   }
+});
 
-  // Map database result to public schema (remove technical fields)
-  const publicProject = {
-    id: result.id,
-    name: result.name,
-    description: result.description,
-    avatarUrl: result.avatarUrl,
-    gitUrl: result.gitUrl,
-    branch: result.branch,
-    localPath: result.localPath,
-    ownerId: result.ownerId,
-    status: result.status,
-    createdAt: new Date(result.createdAt),
-    updatedAt: new Date(result.updatedAt),
-  };
-  
-  logger.debug("Project found", { projectId: validatedInput.projectId });
-  
-  return OutputSchema.parse(publicProject);
-}
+export default handler;
 
 declare global {
   namespace WindowAPI {
     interface Project {
-      get: (input: z.infer<typeof InputSchema>) => Promise<z.infer<typeof ProjectSchema> | null>
+      get: InferHandler<typeof handler>
     }
   }
 }

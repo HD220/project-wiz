@@ -4,16 +4,15 @@ import { DMConversationSchema } from "@/shared/types/dm-conversation";
 import { requireAuth } from "@/main/services/session-registry";
 import { getLogger } from "@/shared/services/logger/config";
 import { eventBus } from "@/shared/services/events/event-bus";
+import { createIPCHandler, InferHandler } from "@/shared/utils/create-ipc-handler";
 
 const logger = getLogger("dm.list.invoke");
 
-// Input schema - campos opcionais
 const ListDMConversationsInputSchema = z.object({
   includeInactive: z.boolean().optional().default(false),
   includeArchived: z.boolean().optional().default(false),
-});
+}).optional().default({});
 
-// Output schema - array de conversations with participants and lastMessage
 const ListDMConversationsOutputSchema = z.array(DMConversationSchema.extend({
   isActive: z.boolean(),
   deactivatedAt: z.date().nullable(),
@@ -38,64 +37,62 @@ const ListDMConversationsOutputSchema = z.array(DMConversationSchema.extend({
   }).optional(),
 }));
 
-type ListDMConversationsInput = z.infer<typeof ListDMConversationsInputSchema>;
-type ListDMConversationsOutput = z.infer<typeof ListDMConversationsOutputSchema>;
+const handler = createIPCHandler({
+  inputSchema: ListDMConversationsInputSchema,
+  outputSchema: ListDMConversationsOutputSchema,
+  handler: async (filters = {}) => {
+    logger.debug("Getting user DM conversations", { filters });
 
-export default async function(filters: ListDMConversationsInput = { includeInactive: false, includeArchived: false }): Promise<ListDMConversationsOutput> {
-  logger.debug("Getting user DM conversations", { filters });
+    const currentUser = requireAuth();
+    
+    // Execute query with ownership validation
+    const dbConversations = await listUserDMConversations({
+      ownerId: currentUser.id,
+      includeInactive: filters.includeInactive || false,
+      includeArchived: filters.includeArchived || false,
+    });
+    
+    // Map database result to API format
+    const apiConversations = dbConversations.map(conversation => ({
+      id: conversation.id,
+      name: conversation.name,
+      description: conversation.description,
+      archivedAt: conversation.archivedAt ? new Date(conversation.archivedAt) : null,
+      archivedBy: conversation.archivedBy,
+      createdAt: new Date(conversation.createdAt),
+      updatedAt: new Date(conversation.updatedAt),
+      isActive: conversation.isActive,
+      deactivatedAt: conversation.deactivatedAt ? new Date(conversation.deactivatedAt) : null,
+      deactivatedBy: conversation.deactivatedBy,
+      participants: conversation.participants.map(participant => ({
+        id: participant.id,
+        ownerId: participant.ownerId,
+        dmConversationId: participant.dmConversationId,
+        participantId: participant.participantId,
+        isActive: participant.isActive,
+        deactivatedAt: participant.deactivatedAt ? new Date(participant.deactivatedAt) : null,
+        deactivatedBy: participant.deactivatedBy,
+        createdAt: new Date(participant.createdAt),
+        updatedAt: new Date(participant.updatedAt),
+      })),
+      lastMessage: conversation.lastMessage,
+    }));
+    
+    logger.debug("Retrieved user DM conversations", { count: apiConversations.length, ownerId: currentUser.id });
+    
+    // Emit event
+    eventBus.emit("dm:list", { ownerId: currentUser.id, conversationCount: apiConversations.length });
+    
+    return apiConversations;
+  }
+});
 
-  // 1. Validate input
-  const validatedFilters = ListDMConversationsInputSchema.parse(filters);
-
-  // 2. Check authentication
-  const currentUser = requireAuth();
-  
-  // 3. Execute query with ownership validation
-  const dbConversations = await listUserDMConversations({
-    ownerId: currentUser.id,
-    includeInactive: validatedFilters.includeInactive,
-    includeArchived: validatedFilters.includeArchived,
-  });
-  
-  // 4. Map database result to API format
-  const apiConversations = dbConversations.map(conversation => ({
-    id: conversation.id,
-    name: conversation.name,
-    description: conversation.description,
-    archivedAt: conversation.archivedAt ? new Date(conversation.archivedAt) : null,
-    archivedBy: conversation.archivedBy,
-    createdAt: new Date(conversation.createdAt),
-    updatedAt: new Date(conversation.updatedAt),
-    isActive: conversation.isActive,
-    deactivatedAt: conversation.deactivatedAt ? new Date(conversation.deactivatedAt) : null,
-    deactivatedBy: conversation.deactivatedBy,
-    participants: conversation.participants.map(participant => ({
-      id: participant.id,
-      ownerId: participant.ownerId,
-      dmConversationId: participant.dmConversationId,
-      participantId: participant.participantId,
-      isActive: participant.isActive,
-      deactivatedAt: participant.deactivatedAt ? new Date(participant.deactivatedAt) : null,
-      deactivatedBy: participant.deactivatedBy,
-      createdAt: new Date(participant.createdAt),
-      updatedAt: new Date(participant.updatedAt),
-    })),
-    lastMessage: conversation.lastMessage,
-  }));
-  
-  logger.debug("Retrieved user DM conversations", { count: apiConversations.length, ownerId: currentUser.id });
-  
-  // 5. Emit event
-  eventBus.emit("dm:list", { ownerId: currentUser.id, conversationCount: apiConversations.length });
-  
-  // 6. Validate and return output
-  return ListDMConversationsOutputSchema.parse(apiConversations);
-}
+export default handler;
 
 declare global {
   namespace WindowAPI {
     interface Dm {
-      list: (options?: ListDMConversationsInput) => Promise<ListDMConversationsOutput>
+      list: InferHandler<typeof handler>
     }
   }
 }

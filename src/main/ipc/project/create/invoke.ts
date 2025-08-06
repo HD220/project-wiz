@@ -4,10 +4,10 @@ import { ProjectSchema } from "@/shared/types";
 import { requireAuth } from "@/main/services/session-registry";
 import { getLogger } from "@/shared/services/logger/config";
 import { eventBus } from "@/shared/services/events/event-bus";
+import { createIPCHandler, InferHandler } from "@/shared/utils/create-ipc-handler";
 
 const logger = getLogger("project.create.invoke");
 
-// Input schema - apenas campos de negócio (sem ownerId que é adicionado automaticamente)
 const CreateProjectInputSchema = ProjectSchema.pick({
   name: true,
   description: true,
@@ -18,57 +18,52 @@ const CreateProjectInputSchema = ProjectSchema.pick({
   status: true,
 });
 
-// Output schema
 const CreateProjectOutputSchema = ProjectSchema;
 
-type CreateProjectInput = z.infer<typeof CreateProjectInputSchema>;
-type CreateProjectOutput = z.infer<typeof CreateProjectOutputSchema>;
+const handler = createIPCHandler({
+  inputSchema: CreateProjectInputSchema,
+  outputSchema: CreateProjectOutputSchema,
+  handler: async (input) => {
+    logger.debug("Creating project");
 
-export default async function(input: CreateProjectInput): Promise<CreateProjectOutput> {
-  logger.debug("Creating project");
+    const currentUser = requireAuth();
+    
+    // Query recebe dados e gerencia campos técnicos internamente
+    const dbProject = await createProject({
+      ...input,
+      ownerId: currentUser.id,
+    });
+    
+    // Mapeamento: SelectProject → Project (sem campos técnicos)
+    const apiProject = {
+      id: dbProject.id,
+      name: dbProject.name,
+      description: dbProject.description,
+      avatarUrl: dbProject.avatarUrl,
+      gitUrl: dbProject.gitUrl,
+      branch: dbProject.branch,
+      localPath: dbProject.localPath,
+      status: dbProject.status,
+      ownerId: dbProject.ownerId,
+      createdAt: new Date(dbProject.createdAt),
+      updatedAt: new Date(dbProject.updatedAt),
+    };
+    
+    // Emit event
+    eventBus.emit("project:created", { projectId: apiProject.id });
+    
+    logger.debug("Project created", { projectId: apiProject.id });
+    
+    return apiProject;
+  }
+});
 
-  // 1. Validate input
-  const validatedInput = CreateProjectInputSchema.parse(input);
-
-  // 2. Check authentication
-  const currentUser = requireAuth();
-  
-  // 3. Query recebe dados e gerencia campos técnicos internamente
-  const dbProject = await createProject({
-    ...validatedInput,
-    ownerId: currentUser.id,
-  });
-  
-  // 4. Mapeamento: SelectProject → Project (sem campos técnicos)
-  const apiProject = {
-    id: dbProject.id,
-    name: dbProject.name,
-    description: dbProject.description,
-    avatarUrl: dbProject.avatarUrl,
-    gitUrl: dbProject.gitUrl,
-    branch: dbProject.branch,
-    localPath: dbProject.localPath,
-    status: dbProject.status,
-    ownerId: dbProject.ownerId,
-    createdAt: new Date(dbProject.createdAt),
-    updatedAt: new Date(dbProject.updatedAt),
-  };
-  
-  // 5. Validate output
-  const result = CreateProjectOutputSchema.parse(apiProject);
-  
-  // 6. Emit event
-  eventBus.emit("project:created", { projectId: result.id });
-  
-  logger.debug("Project created", { projectId: result.id });
-  
-  return result;
-}
+export default handler;
 
 declare global {
   namespace WindowAPI {
     interface Project {
-      create: (input: CreateProjectInput) => Promise<CreateProjectOutput>
+      create: InferHandler<typeof handler>
     }
   }
 }

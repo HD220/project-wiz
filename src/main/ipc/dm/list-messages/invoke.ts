@@ -4,58 +4,53 @@ import { MessageSchema } from "@/shared/types";
 import { requireAuth } from "@/main/services/session-registry";
 import { getLogger } from "@/shared/services/logger/config";
 import { eventBus } from "@/shared/services/events/event-bus";
+import { createIPCHandler, InferHandler } from "@/shared/utils/create-ipc-handler";
 
-const logger = getLogger("dm.get-messages.invoke");
+const logger = getLogger("dm.list-messages.invoke");
 
-// Input schema
-const GetDMMessagesInputSchema = z.object({
-  dmId: z.string(),
+const ListDMMessagesInputSchema = z.object({
+  dmId: z.string().min(1, "DM ID is required"),
 });
 
-// Output schema - array de Message
-const GetDMMessagesOutputSchema = z.array(MessageSchema);
+const ListDMMessagesOutputSchema = z.array(MessageSchema);
 
-type GetDMMessagesInput = z.infer<typeof GetDMMessagesInputSchema>;
-type GetDMMessagesOutput = z.infer<typeof GetDMMessagesOutputSchema>;
+const handler = createIPCHandler({
+  inputSchema: ListDMMessagesInputSchema,
+  outputSchema: ListDMMessagesOutputSchema,
+  handler: async (input) => {
+    logger.debug("Getting DM messages", { dmId: input.dmId });
 
-export default async function(input: GetDMMessagesInput): Promise<GetDMMessagesOutput> {
-  logger.debug("Getting DM messages", { dmId: input.dmId });
+    const currentUser = requireAuth();
+    
+    // Get messages from DM conversation
+    const dbMessages = await getDMMessages(input.dmId);
+    
+    // Mapeamento: SelectMessage[] → Message[] (dados puros da entidade)
+    const apiMessages = dbMessages.map(message => ({
+      id: message.id,
+      sourceType: message.sourceType,
+      sourceId: message.sourceId,
+      authorId: message.ownerId, // Map ownerId to authorId for API consistency       
+      content: message.content,
+      createdAt: new Date(message.createdAt),
+      updatedAt: new Date(message.updatedAt),
+    }));
+    
+    logger.debug("Retrieved DM messages", { count: apiMessages.length, dmId: input.dmId });
+    
+    // Emit event
+    eventBus.emit("dm:list-messages", { dmId: input.dmId, messageCount: apiMessages.length });
+    
+    return apiMessages;
+  }
+});
 
-  // 1. Validate input
-  const validatedInput = GetDMMessagesInputSchema.parse(input);
-
-  // 2. Check authentication
-  requireAuth();
-  
-  // 3. Query recebe dados e gerencia campos técnicos internamente
-  const dbMessages = await getDMMessages(validatedInput.dmId);
-  
-  // 4. Mapeamento: SelectMessage[] → Message[] (sem campos técnicos)
-  const apiMessages = dbMessages.map(message => ({
-    id: message.id,
-    sourceType: message.sourceType,
-    sourceId: message.sourceId,
-    authorId: message.ownerId, // Map ownerId to authorId for API consistency       
-    content: message.content,
-    createdAt: new Date(message.createdAt),
-    updatedAt: new Date(message.updatedAt),
-  }));
-  
-  // 5. Validate output
-  const result = GetDMMessagesOutputSchema.parse(apiMessages);
-  
-  logger.debug("Retrieved DM messages", { count: result.length, dmId: input.dmId });
-  
-  // 6. Emit event
-  eventBus.emit("dm:list-messages", { dmId: validatedInput.dmId, messageCount: result.length });
-  
-  return result;
-}
+export default handler;
 
 declare global {
   namespace WindowAPI {
     interface Dm {
-      listMessages: (input: GetDMMessagesInput) => Promise<GetDMMessagesOutput>
+      listMessages: InferHandler<typeof handler>
     }
   }
 }

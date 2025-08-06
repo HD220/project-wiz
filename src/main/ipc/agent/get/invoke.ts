@@ -3,67 +3,62 @@ import { findAgent, findUser } from "@/main/ipc/agent/queries";
 import { AgentSchema } from "@/shared/types";
 import { requireAuth } from "@/main/services/session-registry";
 import { getLogger } from "@/shared/services/logger/config";
+import { createIPCHandler, InferHandler } from "@/shared/utils/create-ipc-handler";
 
 const logger = getLogger("agent.get.invoke");
 
-// Input schema - object wrapper para consistência
 const GetAgentInputSchema = z.object({
   agentId: z.string().min(1, "Agent ID is required"),
 });
 
-// Output schema
 const GetAgentOutputSchema = AgentSchema.nullable();
 
-type GetAgentInput = z.infer<typeof GetAgentInputSchema>;
-type GetAgentOutput = z.infer<typeof GetAgentOutputSchema>;
+const handler = createIPCHandler({
+  inputSchema: GetAgentInputSchema,
+  outputSchema: GetAgentOutputSchema,
+  handler: async (input) => {
+    logger.debug("Getting agent", { agentId: input.agentId });
 
-export default async function(input: GetAgentInput): Promise<GetAgentOutput> {
-  logger.debug("Getting agent", { agentId: input.agentId });
+    const currentUser = requireAuth();
 
-  // 1. Validate input
-  const validatedInput = GetAgentInputSchema.parse(input);
+    // Find agent with ownership validation
+    const dbAgent = await findAgent(input.agentId, currentUser.id);
+    
+    if (!dbAgent) {
+      return null;
+    }
 
-  // 2. Check authentication
-  const currentUser = requireAuth();
+    // Buscar avatar do user
+    const user = await findUser(dbAgent.id);
 
-  // 3. Find agent with ownership validation
-  const dbAgent = await findAgent(validatedInput.agentId, currentUser.id);
-  
-  if (!dbAgent) {
-    return null;
+    // Mapeamento: SelectAgent → Agent (sem campos técnicos)
+    const apiAgent = {
+      id: dbAgent.id,
+      ownerId: dbAgent.ownerId,
+      name: dbAgent.name,
+      role: dbAgent.role,
+      backstory: dbAgent.backstory,
+      goal: dbAgent.goal,
+      providerId: dbAgent.providerId,
+      modelConfig: dbAgent.modelConfig,
+      status: dbAgent.status,
+      avatar: user?.avatar || null,
+      createdAt: new Date(dbAgent.createdAt),
+      updatedAt: new Date(dbAgent.updatedAt),
+    };
+    
+    logger.debug("Agent get result", { found: apiAgent !== null });
+    
+    return apiAgent;
   }
+});
 
-  // 4. Buscar avatar do user
-  const user = await findUser(dbAgent.id);
-
-  // 5. Mapeamento: SelectAgent → Agent (sem campos técnicos)
-  const apiAgent = {
-    id: dbAgent.id,
-    ownerId: dbAgent.ownerId,
-    name: dbAgent.name,
-    role: dbAgent.role,
-    backstory: dbAgent.backstory,
-    goal: dbAgent.goal,
-    providerId: dbAgent.providerId,
-    modelConfig: dbAgent.modelConfig,
-    status: dbAgent.status,
-    avatar: user?.avatar || null,
-    createdAt: new Date(dbAgent.createdAt),
-    updatedAt: new Date(dbAgent.updatedAt),
-  };
-  
-  // 4. Validate output
-  const result = GetAgentOutputSchema.parse(apiAgent);
-  
-  logger.debug("Agent get result", { found: result !== null });
-  
-  return result;
-}
+export default handler;
 
 declare global {
   namespace WindowAPI {
     interface Agent {
-      get: (input: GetAgentInput) => Promise<GetAgentOutput>
+      get: InferHandler<typeof handler>
     }
   }
 }

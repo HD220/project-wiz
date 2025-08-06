@@ -2,46 +2,51 @@ import { z } from "zod";
 import { initializeSessionFromDatabase, getCurrentUserFromCache } from "@/main/ipc/auth/queries";
 import { UserSchema } from "@/shared/types";
 import { getLogger } from "@/shared/services/logger/config";
+import { createIPCHandler, InferHandler } from "@/shared/utils/create-ipc-handler";
 
 const logger = getLogger("auth.get-active-session");
 
-// Output schema usando shared schema
+const GetActiveSessionInputSchema = z.void();
 const GetActiveSessionOutputSchema = z.object({
   user: UserSchema
 }).nullable();
 
-export type GetActiveSessionOutput = z.infer<typeof GetActiveSessionOutputSchema>;
+const handler = createIPCHandler({
+  inputSchema: GetActiveSessionInputSchema,
+  outputSchema: GetActiveSessionOutputSchema,
+  handler: async () => {
+    logger.debug("Getting active session");
 
-export default async function(): Promise<GetActiveSessionOutput> {
-  logger.debug("Getting active session");
-
-  // 1. Initialize session from database if not already loaded (side effect)
-  await initializeSessionFromDatabase();
-  
-  // 2. Get current user from cache
-  const dbUser = getCurrentUserFromCache();
-  
-  if (!dbUser) {
-    return null;
+    // 1. Initialize session from database if not already loaded (side effect)
+    await initializeSessionFromDatabase();
+    
+    // 2. Get current user from cache
+    const dbUser = getCurrentUserFromCache();
+    
+    if (!dbUser) {
+      return null;
+    }
+    
+    // 3. Map to API format (sem campos técnicos)
+    const apiUser = {
+      id: dbUser.id,
+      name: dbUser.name,
+      avatar: dbUser.avatar,
+      type: dbUser.type,
+      createdAt: new Date(dbUser.createdAt),
+      updatedAt: new Date(dbUser.updatedAt),
+    };
+    
+    return { user: apiUser };
   }
-  
-  // 3. Map to API format (sem campos técnicos)
-  const apiUser = {
-    id: dbUser.id,
-    name: dbUser.name,
-    avatar: dbUser.avatar,
-    type: dbUser.type,
-    createdAt: new Date(dbUser.createdAt),
-    updatedAt: new Date(dbUser.updatedAt),
-  };
-  
-  return GetActiveSessionOutputSchema.parse({ user: apiUser });
-}
+});
+
+export default handler;
 
 declare global {
   namespace WindowAPI {
     interface Auth {
-      getActiveSession: () => Promise<GetActiveSessionOutput>
+      getActiveSession: InferHandler<typeof handler>
     }
   }
 }

@@ -2,37 +2,37 @@ import { z } from "zod";
 import { getActiveAgentsCount } from "@/main/ipc/agent/queries";
 import { requireAuth } from "@/main/services/session-registry";
 import { getLogger } from "@/shared/services/logger/config";
+import { createIPCHandler, InferHandler } from "@/shared/utils/create-ipc-handler";
 
 const logger = getLogger("agent.get-active-count.invoke");
 
-// Output schema
+const GetActiveCountInputSchema = z.void();
 const GetActiveCountOutputSchema = z.object({
   count: z.number(),
 });
 
-type GetActiveCountOutput = z.infer<typeof GetActiveCountOutputSchema>;
+const handler = createIPCHandler({
+  inputSchema: GetActiveCountInputSchema,
+  outputSchema: GetActiveCountOutputSchema,
+  handler: async () => {
+    logger.debug("Getting active agents count");
 
-export default async function(): Promise<GetActiveCountOutput> {
-  logger.debug("Getting active agents count");
+    const currentUser = requireAuth();
+    
+    const count = await getActiveAgentsCount(currentUser.id);
+    
+    logger.debug("Got active agents count", { count });
+    
+    return { count };
+  }
+});
 
-  // 1. Check authentication
-  const currentUser = requireAuth();
-  
-  // 2. Query recebe dados e gerencia campos técnicos internamente
-  const count = await getActiveAgentsCount(currentUser.id);
-  
-  // 3. Validate output
-  const result = GetActiveCountOutputSchema.parse({ count });
-  
-  logger.debug("Got active agents count", { count: result.count });
-  
-  return result;
-}
+export default handler;
 
 declare global {
   namespace WindowAPI {
     interface Agent {
-      countActive: () => Promise<GetActiveCountOutput>
+      countActive: InferHandler<typeof handler>
     }
   }
 }

@@ -1,24 +1,29 @@
 import { z } from "zod";
 import { sessionRegistry } from "@/main/services/session-registry";
+import { createIPCHandler, InferHandler } from "@/shared/utils/create-ipc-handler";
 
-// Output validation schema
+const IsLoggedInInputSchema = z.void();
 const IsLoggedInOutputSchema = z.object({
   isLoggedIn: z.boolean(),
 });
 
-type IsLoggedInOutput = z.infer<typeof IsLoggedInOutputSchema>;
+const handler = createIPCHandler({
+  inputSchema: IsLoggedInInputSchema,
+  outputSchema: IsLoggedInOutputSchema,
+  handler: async () => {
+    // Use session registry directly - no database access needed
+    const isLoggedIn = sessionRegistry.isLoggedIn();
+    
+    return { isLoggedIn };
+  }
+});
 
-export default async function(): Promise<IsLoggedInOutput> {
-  // Use session registry directly - no database access needed
-  const isLoggedIn = sessionRegistry.isLoggedIn();
-  
-  return IsLoggedInOutputSchema.parse({ isLoggedIn });
-}
+export default handler;
 
 declare global {
   namespace WindowAPI {
     interface Auth {
-      isLoggedIn: () => Promise<IsLoggedInOutput>
+      isLoggedIn: InferHandler<typeof handler>
     }
   }
 }

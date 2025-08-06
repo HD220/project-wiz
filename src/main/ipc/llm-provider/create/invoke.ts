@@ -4,6 +4,7 @@ import { LlmProviderSchema } from "@/shared/types";
 import { requireAuth } from "@/main/services/session-registry";
 import { getLogger } from "@/shared/services/logger/config";
 import { eventBus } from "@/shared/services/events/event-bus";
+import { createIPCHandler, InferHandler } from "@/shared/utils/create-ipc-handler";
 
 const logger = getLogger("llm-provider.create.invoke");
 
@@ -18,58 +19,54 @@ const CreateLlmProviderInputSchema = LlmProviderSchema.pick({
 
 const CreateLlmProviderOutputSchema = LlmProviderSchema;
 
-type CreateLlmProviderInput = z.infer<typeof CreateLlmProviderInputSchema>;
-type CreateLlmProviderOutput = z.infer<typeof CreateLlmProviderOutputSchema>;
+const handler = createIPCHandler({
+  inputSchema: CreateLlmProviderInputSchema,
+  outputSchema: CreateLlmProviderOutputSchema,
+  handler: async (input) => {
+    logger.debug("Creating LLM provider", { providerName: input.name, type: input.type });
 
-export default async function(input: CreateLlmProviderInput): Promise<CreateLlmProviderOutput> {
-  logger.debug("Creating LLM provider", { providerName: input.name, type: input.type });
+    const currentUser = requireAuth();
+    
+    // Create provider with ownership
+    const dbProvider = await createLlmProvider({
+      ...input,
+      ownerId: currentUser.id,
+      isDefault: false,
+      isActive: true
+    });
+    
+    // Mapeamento: SelectLlmProvider → LlmProvider (dados puros da entidade)
+    const apiProvider = {
+      id: dbProvider.id,
+      userId: dbProvider.ownerId, // Map ownerId to userId for API consistency
+      name: dbProvider.name,
+      type: dbProvider.type,
+      baseUrl: dbProvider.baseUrl,
+      defaultModel: dbProvider.defaultModel,
+      isDefault: dbProvider.isDefault,
+      createdAt: new Date(dbProvider.createdAt),
+      updatedAt: new Date(dbProvider.updatedAt),
+    };
+    
+    logger.debug("LLM provider created", { 
+      providerId: apiProvider.id, 
+      providerName: apiProvider.name,
+      type: apiProvider.type
+    });
+    
+    // Emit specific event for creation
+    eventBus.emit("llm-provider:created", { providerId: apiProvider.id });
+    
+    return apiProvider;
+  }
+});
 
-  // 1. Validate input
-  const validatedInput = CreateLlmProviderInputSchema.parse(input);
-
-  // 2. Check authentication
-  const currentUser = requireAuth();
-  
-  // 3. Create provider with ownership
-  const dbProvider = await createLlmProvider({
-    ...validatedInput,
-    ownerId: currentUser.id,
-    isDefault: false,
-    isActive: true
-  });
-  
-  // 4. Map database result to shared type
-  const apiProvider = {
-    id: dbProvider.id,
-    userId: dbProvider.ownerId, // Map ownerId to userId for API consistency
-    name: dbProvider.name,
-    type: dbProvider.type,
-    baseUrl: dbProvider.baseUrl,
-    defaultModel: dbProvider.defaultModel,
-    isDefault: dbProvider.isDefault,
-    createdAt: new Date(dbProvider.createdAt),
-    updatedAt: new Date(dbProvider.updatedAt),
-  };
-  
-  // 5. Validate output
-  const result = CreateLlmProviderOutputSchema.parse(apiProvider);
-  
-  logger.debug("LLM provider created", { 
-    providerId: result.id, 
-    providerName: result.name,
-    type: result.type
-  });
-  
-  // 6. Emit specific event for creation
-  eventBus.emit("llm-provider:created", { providerId: result.id });
-  
-  return result;
-}
+export default handler;
 
 declare global {
   namespace WindowAPI {
     interface LlmProvider {
-      create: (input: CreateLlmProviderInput) => Promise<CreateLlmProviderOutput>
+      create: InferHandler<typeof handler>
     }
   }
 }

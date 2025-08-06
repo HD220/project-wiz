@@ -3,54 +3,49 @@ import { listUsers } from "@/main/ipc/user/queries";
 import { UserSchema } from "@/shared/types";
 import { requireAuth } from "@/main/services/session-registry";
 import { getLogger } from "@/shared/services/logger/config";
+import { createIPCHandler, InferHandler } from "@/shared/utils/create-ipc-handler";
 
 const logger = getLogger("user.list-all-users.invoke");
 
-// Input schema - campos necessários para filtro
 const ListAllUsersInputSchema = z.object({
   includeInactive: z.boolean().optional().default(false)
 });
 
-// Output schema - array de User
 const ListAllUsersOutputSchema = z.array(UserSchema);
 
-type ListAllUsersInput = z.infer<typeof ListAllUsersInputSchema>;
-type ListAllUsersOutput = z.infer<typeof ListAllUsersOutputSchema>;
+const handler = createIPCHandler({
+  inputSchema: ListAllUsersInputSchema,
+  outputSchema: ListAllUsersOutputSchema,
+  handler: async (input) => {
+    logger.debug("Listing all users");
 
-export default async function(input: ListAllUsersInput): Promise<ListAllUsersOutput> {
-  logger.debug("Listing all users");
+    requireAuth();
+    
+    // Query recebe dados e gerencia campos técnicos internamente
+    const dbUsers = await listUsers({ includeInactive: input.includeInactive });
+    
+    // Mapeamento: SelectUser[] → User[] (sem campos técnicos)
+    const apiUsers = dbUsers.map(user => ({
+      id: user.id,
+      name: user.name,
+      avatar: user.avatar,
+      type: user.type,
+      createdAt: new Date(user.createdAt),
+      updatedAt: new Date(user.updatedAt),
+    }));
+    
+    logger.debug("All users listed", { userCount: apiUsers.length });
+    
+    return apiUsers;
+  }
+});
 
-  // 1. Validate input
-  const validatedInput = ListAllUsersInputSchema.parse(input);
-
-  // 2. Check authentication  
-  requireAuth();
-  
-  // 3. Query recebe dados e gerencia campos técnicos internamente
-  const dbUsers = await listUsers({ includeInactive: validatedInput.includeInactive });
-  
-  // 4. Mapeamento: SelectUser[] → User[] (sem campos técnicos)
-  const apiUsers = dbUsers.map(user => ({
-    id: user.id,
-    name: user.name,
-    avatar: user.avatar,
-    type: user.type,
-    createdAt: new Date(user.createdAt),
-    updatedAt: new Date(user.updatedAt),
-  }));
-  
-  // 5. Validate output
-  const result = ListAllUsersOutputSchema.parse(apiUsers);
-  
-  logger.debug("All users listed", { userCount: result.length });
-  
-  return result;
-}
+export default handler;
 
 declare global {
   namespace WindowAPI {
     interface User {
-      list: (input: ListAllUsersInput) => Promise<ListAllUsersOutput>
+      list: InferHandler<typeof handler>
     }
   }
 }

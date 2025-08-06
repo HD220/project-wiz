@@ -4,61 +4,56 @@ import { MessageSchema } from "@/shared/types";
 import { requireAuth } from "@/main/services/session-registry";
 import { getLogger } from "@/shared/services/logger/config";
 import { eventBus } from "@/shared/services/events/event-bus";
+import { createIPCHandler, InferHandler } from "@/shared/utils/create-ipc-handler";
 
-const logger = getLogger("channel.get-messages.invoke");
+const logger = getLogger("channel.list-messages.invoke");
 
-// Input schema
-const GetChannelMessagesInputSchema = z.object({
-  channelId: z.string(),
+const ListChannelMessagesInputSchema = z.object({
+  channelId: z.string().min(1, "Channel ID is required"),
 });
 
-// Output schema - array de Message
-const GetChannelMessagesOutputSchema = z.array(MessageSchema);
+const ListChannelMessagesOutputSchema = z.array(MessageSchema);
 
-type GetChannelMessagesInput = z.infer<typeof GetChannelMessagesInputSchema>;
-type GetChannelMessagesOutput = z.infer<typeof GetChannelMessagesOutputSchema>;
+const handler = createIPCHandler({
+  inputSchema: ListChannelMessagesInputSchema,
+  outputSchema: ListChannelMessagesOutputSchema,
+  handler: async (input) => {
+    logger.debug("Getting channel messages", { channelId: input.channelId });
 
-export default async function(input: GetChannelMessagesInput): Promise<GetChannelMessagesOutput> {
-  logger.debug("Getting channel messages", { channelId: input.channelId });
+    const currentUser = requireAuth();
+    
+    // Get messages from channel
+    const dbMessages = await getChannelMessages(input.channelId);
+    
+    // Mapeamento: SelectMessage[] → Message[] (dados puros da entidade)
+    const apiMessages = dbMessages.map(message => ({
+      id: message.id,
+      sourceType: message.sourceType as "channel",
+      sourceId: message.sourceId,
+      authorId: message.ownerId, // Map ownerId to authorId for API consistency
+      content: message.content,
+      createdAt: new Date(message.createdAt),
+      updatedAt: new Date(message.updatedAt),
+    }));
+    
+    logger.debug("Channel messages retrieved", { 
+      channelId: input.channelId, 
+      messageCount: apiMessages.length 
+    });
+    
+    // Emit event
+    eventBus.emit("channel:list-messages", { channelId: input.channelId, messageCount: apiMessages.length });
+    
+    return apiMessages;
+  }
+});
 
-  // 1. Validate input
-  const validatedInput = GetChannelMessagesInputSchema.parse(input);
-
-  // 2. Check authentication
-  requireAuth();
-  
-  // 3. Query recebe dados e gerencia campos técnicos internamente
-  const dbMessages = await getChannelMessages(validatedInput.channelId);
-  
-  // 4. Mapeamento: SelectMessage[] → Message[] (sem campos técnicos)
-  const apiMessages = dbMessages.map(message => ({
-    id: message.id,
-    sourceType: message.sourceType as "channel",
-    sourceId: message.sourceId,
-    authorId: message.ownerId, // Map ownerId to authorId for API consistency
-    content: message.content,
-    createdAt: new Date(message.createdAt),
-    updatedAt: new Date(message.updatedAt),
-  }));
-  
-  // 5. Validate output
-  const result = GetChannelMessagesOutputSchema.parse(apiMessages);
-  
-  logger.debug("Channel messages retrieved", { 
-    channelId: validatedInput.channelId, 
-    messageCount: result.length 
-  });
-  
-  // 6. Emit event
-  eventBus.emit("channel:list-messages", { channelId: validatedInput.channelId, messageCount: result.length });
-  
-  return result;
-}
+export default handler;
 
 declare global {
   namespace WindowAPI {
     interface Channel {
-      listMessages: (input: GetChannelMessagesInput) => Promise<GetChannelMessagesOutput>
+      listMessages: InferHandler<typeof handler>
     }
   }
 }

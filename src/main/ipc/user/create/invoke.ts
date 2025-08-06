@@ -4,63 +4,58 @@ import { UserSchema } from "@/shared/types";
 import { requireAuth } from "@/main/services/session-registry";
 import { getLogger } from "@/shared/services/logger/config";
 import { eventBus } from "@/shared/services/events/event-bus";
+import { createIPCHandler, InferHandler } from "@/shared/utils/create-ipc-handler";
 
 const logger = getLogger("user.create.invoke");
 
-// Input schema - apenas campos de negócio
 const CreateUserInputSchema = UserSchema.pick({
   name: true,
   avatar: true,
   type: true
 });
 
-// Output schema
 const CreateUserOutputSchema = UserSchema;
 
-type CreateUserInput = z.infer<typeof CreateUserInputSchema>;
-type CreateUserOutput = z.infer<typeof CreateUserOutputSchema>;
+const handler = createIPCHandler({
+  inputSchema: CreateUserInputSchema,
+  outputSchema: CreateUserOutputSchema,
+  handler: async (input) => {
+    logger.debug("Creating user", { userName: input.name, userType: input.type });
 
-export default async function(input: CreateUserInput): Promise<CreateUserOutput> {
-  logger.debug("Creating user", { userName: input.name, userType: input.type });
+    requireAuth();
+    
+    // Query recebe dados e gerencia campos técnicos internamente
+    const dbUser = await createUser(input);
+    
+    // Mapeamento: SelectUser → User (sem campos técnicos)
+    const apiUser = {
+      id: dbUser.id,
+      name: dbUser.name,
+      avatar: dbUser.avatar,
+      type: dbUser.type,
+      createdAt: new Date(dbUser.createdAt),
+      updatedAt: new Date(dbUser.updatedAt),
+    };
+    
+    logger.debug("User created", { 
+      userId: apiUser.id, 
+      name: apiUser.name,
+      type: apiUser.type
+    });
+    
+    // Emit specific event for creation
+    eventBus.emit("user:created", { userId: apiUser.id, type: apiUser.type });
+    
+    return apiUser;
+  }
+});
 
-  // 1. Validate input
-  const validatedInput = CreateUserInputSchema.parse(input);
-
-  // 2. Check authentication
-  requireAuth();
-  
-  // 3. Query recebe dados e gerencia campos técnicos internamente
-  const dbUser = await createUser(validatedInput);
-  
-  // 4. Mapeamento: SelectUser → User (sem campos técnicos)
-  const apiUser = {
-    id: dbUser.id,
-    name: dbUser.name,
-    avatar: dbUser.avatar,
-    type: dbUser.type,
-    createdAt: new Date(dbUser.createdAt),
-    updatedAt: new Date(dbUser.updatedAt),
-  };
-  
-  // 5. Validate output
-  const result = CreateUserOutputSchema.parse(apiUser);
-  
-  logger.debug("User created", { 
-    userId: result.id, 
-    name: result.name,
-    type: result.type
-  });
-  
-  // 6. Emit specific event for creation
-  eventBus.emit("user:created", { userId: result.id, type: result.type });
-  
-  return result;
-}
+export default handler;
 
 declare global {
   namespace WindowAPI {
     interface User {
-      create: (input: CreateUserInput) => Promise<CreateUserOutput>
+      create: InferHandler<typeof handler>
     }
   }
 }

@@ -4,67 +4,62 @@ import { MessageSchema } from "@/shared/types";
 import { requireAuth } from "@/main/services/session-registry";
 import { getLogger } from "@/shared/services/logger/config";
 import { eventBus } from "@/shared/services/events/event-bus";
+import { createIPCHandler, InferHandler } from "@/shared/utils/create-ipc-handler";
 
 const logger = getLogger("dm.send-message.invoke");
 
-// Input schema - apenas campos de negócio
 const SendDMMessageInputSchema = MessageSchema.pick({
   sourceId: true,
   content: true
 });
 
-// Output schema
 const SendDMMessageOutputSchema = MessageSchema;
 
-type SendDMMessageInput = z.infer<typeof SendDMMessageInputSchema>;
-type SendDMMessageOutput = z.infer<typeof SendDMMessageOutputSchema>;
+const handler = createIPCHandler({
+  inputSchema: SendDMMessageInputSchema,
+  outputSchema: SendDMMessageOutputSchema,
+  handler: async (input) => {
+    logger.debug("Sending message to DM", { sourceId: input.sourceId, contentLength: input.content.length });
 
-export default async function(input: SendDMMessageInput): Promise<SendDMMessageOutput> {
-  logger.debug("Sending message to DM", { sourceId: input.sourceId, contentLength: input.content.length });
+    const currentUser = requireAuth();
+    
+    // Send message to DM conversation
+    const dbMessage = await sendDMMessage({
+      sourceType: "dm",
+      sourceId: input.sourceId,
+      ownerId: currentUser.id,
+      content: input.content,
+    });
+    
+    // Mapeamento: SelectMessage → Message (dados puros da entidade)
+    const apiMessage = {
+      id: dbMessage.id,
+      sourceType: dbMessage.sourceType,
+      sourceId: dbMessage.sourceId,
+      authorId: dbMessage.ownerId, // Map ownerId to authorId for API consistency
+      content: dbMessage.content,
+      createdAt: new Date(dbMessage.createdAt),
+      updatedAt: new Date(dbMessage.updatedAt),
+    };
+    
+    logger.debug("Message sent to DM", { 
+      messageId: apiMessage.id, 
+      sourceId: apiMessage.sourceId 
+    });
+    
+    // Emit specific event for this operation
+    eventBus.emit("dm:message-sent", { messageId: apiMessage.id, sourceId: apiMessage.sourceId });
+    
+    return apiMessage;
+  }
+});
 
-  // 1. Validate input
-  const validatedInput = SendDMMessageInputSchema.parse(input);
-
-  // 2. Check authentication
-  const currentUser = requireAuth();
-  
-  // 3. Query recebe dados e gerencia campos técnicos internamente
-  const dbMessage = await sendDMMessage({
-    sourceType: "dm",
-    sourceId: validatedInput.sourceId,
-    ownerId: currentUser.id,
-    content: validatedInput.content,
-  });
-  
-  // 4. Mapeamento: SelectMessage → Message (sem campos técnicos)
-  const apiMessage = {
-    id: dbMessage.id,
-    sourceType: dbMessage.sourceType,
-    sourceId: dbMessage.sourceId,
-    authorId: dbMessage.ownerId, // Map ownerId to authorId for API consistency
-    content: dbMessage.content,
-    createdAt: new Date(dbMessage.createdAt),
-    updatedAt: new Date(dbMessage.updatedAt),
-  };
-  
-  // 5. Validate output
-  const result = SendDMMessageOutputSchema.parse(apiMessage);
-  
-  logger.debug("Message sent to DM", { 
-    messageId: result.id, 
-    sourceId: result.sourceId 
-  });
-  
-  // 6. Emit specific event for this operation
-  eventBus.emit("dm:message-sent", { messageId: result.id, sourceId: result.sourceId });
-  
-  return result;
-}
+export default handler;
 
 declare global {
   namespace WindowAPI {
     interface Dm {
-      sendMessage: (input: SendDMMessageInput) => Promise<SendDMMessageOutput>
+      sendMessage: InferHandler<typeof handler>
     }
   }
 }

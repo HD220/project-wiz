@@ -1,26 +1,31 @@
 import { z } from "zod";
 import { getMainWindow } from "@/main/services/window-registry";
+import { createIPCHandler, InferHandler } from "@/shared/utils/create-ipc-handler";
 
-// Output validation schema
+const MinimizeWindowInputSchema = z.void();
 const MinimizeWindowOutputSchema = z.void();
 
-type MinimizeWindowOutput = z.infer<typeof MinimizeWindowOutputSchema>;
+const handler = createIPCHandler({
+  inputSchema: MinimizeWindowInputSchema,
+  outputSchema: MinimizeWindowOutputSchema,
+  handler: async () => {
+    const mainWindow = getMainWindow();
+    
+    if (!mainWindow) {
+      throw new Error("No main window found");
+    }
 
-export default async function(): Promise<MinimizeWindowOutput> {
-  const mainWindow = getMainWindow();
-  
-  if (!mainWindow) {
-    throw new Error("No main window found");
+    mainWindow.minimize();
+    return undefined;
   }
+});
 
-  mainWindow.minimize();
-  return undefined;
-}
+export default handler;
 
 declare global {
   namespace WindowAPI {
     interface Window {
-      minimize: () => Promise<MinimizeWindowOutput>
+      minimize: InferHandler<typeof handler>
     }
   }
 }
