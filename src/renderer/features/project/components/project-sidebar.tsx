@@ -1,7 +1,7 @@
 import { Hash, Settings } from "lucide-react";
 
-import type { SelectProject } from "@/renderer/features/project/project.types";
-import type { SelectConversation } from "@/renderer/types/chat.types";
+import type { Project } from "@/shared/types/project";
+import type { Channel } from "@/shared/types/channel";
 
 import { MenuItem } from "@/renderer/components/molecules/menu-item";
 import { IconButton } from "@/renderer/components/molecules/icon-button";

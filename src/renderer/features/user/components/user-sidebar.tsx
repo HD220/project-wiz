@@ -1,7 +1,6 @@
 import { Hash, Bot, Archive } from "lucide-react";
 
 
-import type { ConversationWithLastMessage } from "@/renderer/types/chat.types";
 
 import { MenuItem } from "@/renderer/components/molecules/menu-item";
 import { Sidebar, SidebarContent, SidebarSection } from "@/renderer/components/organisms/sidebar";

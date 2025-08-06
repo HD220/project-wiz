@@ -1,4 +1,35 @@
-import { ChatState, ChatAction } from "./chat.types";
+// Chat state and action types
+export type ChatState = {
+  messages: unknown[];
+  loading: boolean;
+  typing: boolean;
+  history: string[];
+  historyIndex: number;
+  autoScroll: boolean;
+  pendingMessages: Set<string | number>;
+};
+
+export type ChatAction =
+  | { type: "ADD_MESSAGE"; payload: unknown }
+  | {
+      type: "UPDATE_MESSAGE";
+      payload: {
+        id: string | number;
+        updates: Record<string, unknown>;
+      };
+    }
+  | {
+      type: "REMOVE_MESSAGE";
+      payload: {
+        id: string | number;
+        };
+    }
+  | { type: "SET_MESSAGES"; payload: unknown[] }
+  | { type: "SET_PROPERTY"; payload: { key: keyof ChatState; value: any } }
+  | { type: "ADD_PENDING"; payload: string | number }
+  | { type: "REMOVE_PENDING"; payload: string | number }
+  | { type: "CLEAR"; payload?: undefined }
+  | { type: "NAVIGATE_HISTORY"; payload: "up" | "down" };
 
 // Factory function para reducer com keyFn via closure
 export function createChatReducer(

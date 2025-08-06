@@ -1,5 +1,15 @@
 import { Action, redirect } from "@tanstack/react-router";
-import { CreateProviderInput } from "@/renderer/features/agent/provider.types";
+import { LlmProviderSchema } from "@/shared/types/llm-provider";
+import { z } from "zod";
+
+// Schema for creating providers - omit auto-generated fields
+const CreateProviderSchema = LlmProviderSchema.omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+type CreateProviderInput = z.infer<typeof CreateProviderSchema>;
 
 export const createProviderAction = new Action({
   fn: async ({ context, params, form }) => {
@@ -12,11 +22,11 @@ export const createProviderAction = new Action({
 
     const createData: CreateProviderInput = {
       ...form,
-      userId: user.id,
+      ownerId: user.id,
       baseUrl: form.baseUrl || null,
     };
 
-    await window.api.llmProviders.create(createData);
+    await window.api.llmProvider.create(createData);
 
     queryClient.invalidateQueries({ queryKey: ["llmProviders"] });
 

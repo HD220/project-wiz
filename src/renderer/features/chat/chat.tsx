@@ -4,7 +4,8 @@ import * as React from "react";
 import { ScrollArea } from "@/renderer/components/atoms/scroll-area";
 import { cn } from "@/renderer/lib/utils";
 
-import { ChatState, ChatActions, ChatRefs, ChatAction, ChatContextValue } from "./chat.types";
+import { ChatState, ChatAction } from "./chat.reducer";
+import { ChatActions, ChatRefs, ChatContextValue } from "./chat.context";
 import { createChatReducer } from "./chat.reducer";
 import { ChatContext, useChatContext } from "./chat.context";
 import { ChatMessages, ChatMessage, ChatInput, ChatStatus } from "./chat.components";

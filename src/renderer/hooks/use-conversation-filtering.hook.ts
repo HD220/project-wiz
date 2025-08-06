@@ -1,7 +1,11 @@
 import { useMemo } from "react";
-import type { ConversationWithLastMessage } from "@/renderer/types/chat.types";
 
-export function useConversationFiltering(conversations: ConversationWithLastMessage[], showArchived: boolean) {
+// Generic conversation type with archive capability
+interface ConversationWithArchive {
+  archivedAt: Date | null;
+}
+
+export function useConversationFiltering<T extends ConversationWithArchive>(conversations: T[], showArchived: boolean) {
   const activeConversations = useMemo(() => conversations.filter(conv => !conv.archivedAt), [conversations]);
   const archivedConversations = useMemo(() => conversations.filter(conv => conv.archivedAt), [conversations]);
   

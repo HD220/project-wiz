@@ -2,7 +2,15 @@ import * as React from "react";
 import { cn } from "@/renderer/lib/utils";
 import { ScrollArea } from "@/renderer/components/atoms/scroll-area";
 import { useChatContext } from "./chat.context";
-import { ChatStatusUI, ChatStatusStats, ChatStatusControl, ChatStatusHistory } from "./chat.types";
+// Status utility types
+type ChatStatusUI = { loading: boolean; typing: boolean };
+type ChatStatusStats = {
+  messageCount: number;
+  hasMessages: boolean;
+  pendingCount: number;
+};
+type ChatStatusControl = { autoScroll: boolean };
+type ChatStatusHistory = { index: number; length: number };
 
 interface ChatMessagesProps extends React.ComponentProps<"div"> {
   children: React.ReactNode;

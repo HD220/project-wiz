@@ -1,5 +1,16 @@
 import { Action, redirect } from "@tanstack/react-router";
-import { CreateProviderInput } from "@/renderer/features/agent/provider.types";
+import { LlmProviderSchema } from "@/shared/types/llm-provider";
+import { z } from "zod";
+
+// Schema for updating providers - omit auto-generated and immutable fields
+const UpdateProviderSchema = LlmProviderSchema.omit({
+  id: true,
+  ownerId: true,
+  createdAt: true,
+  updatedAt: true,
+}).partial();
+
+type UpdateProviderInput = z.infer<typeof UpdateProviderSchema>;
 
 export const updateProviderAction = new Action({
   fn: async ({ context, params, form }) => {
@@ -11,12 +22,12 @@ export const updateProviderAction = new Action({
       throw new Error("User not authenticated");
     }
 
-    const updateData: Partial<CreateProviderInput> = {
+    const updateData: UpdateProviderInput = {
       ...form,
       baseUrl: form.baseUrl || null,
     };
 
-    await window.api.llmProviders.update(providerId, updateData);
+    await window.api.llmProvider.update(providerId, updateData);
 
     queryClient.invalidateQueries({ queryKey: ["llmProviders"] });
 
