@@ -158,21 +158,20 @@ export class IpcLoader {
     
     logger.info(`📁 Found ${invokeFiles.length} invoke handlers, ${listenFiles.length} listen handlers`);
 
-    // Register invoke handlers using dynamic path construction
+    // Register invoke handlers using @/ alias imports from bundle
     let successCount = 0;
     for (const tsFile of invokeFiles) {
       try {
-        // Convert source path to import path: src/main/ipc/agent/activate/invoke.ts -> ../ipc/agent/activate/invoke
-        const relativePath = tsFile
-          .replace(/.*\/src\/main\//, "") // Remove everything up to src/main/
+        // Convert source path to @/ alias import: src/main/ipc/agent/activate/invoke.ts -> @/main/ipc/agent/activate/invoke
+        const aliasPath = tsFile
+          .replace(/.*\/src\//, "@/")     // Convert to @/ alias
           .replace(/\.ts$/, "")           // Remove .ts extension
           .replace(/\\/g, "/");           // Normalize path separators
 
-        const importPath = path.join(__dirname, "..", relativePath);
-        logger.debug(`🔗 Importing: ${importPath}`);
+        logger.debug(`🔗 Importing from bundle: ${aliasPath}`);
 
         const channel = this.filePathToChannel(tsFile, "invoke");
-        await this.registerInvokeHandlerFromPath(importPath, channel);
+        await this.registerInvokeHandlerFromAlias(aliasPath, channel);
         successCount++;
         
       } catch (error) {
@@ -183,14 +182,13 @@ export class IpcLoader {
     // Register listen handlers (if any)
     for (const tsFile of listenFiles) {
       try {
-        const relativePath = tsFile
-          .replace(/.*\/src\/main\//, "")
+        const aliasPath = tsFile
+          .replace(/.*\/src\//, "@/")
           .replace(/\.ts$/, "")
           .replace(/\\/g, "/");
 
-        const importPath = path.join(__dirname, "..", relativePath);
         const channel = this.filePathToChannel(tsFile, "listen");
-        await this.registerListenHandlerFromPath(importPath, channel);
+        await this.registerListenHandlerFromAlias(aliasPath, channel);
         
       } catch (error) {
         logger.warn(`⚠️ Failed to load listen handler ${tsFile}:`, error);
@@ -201,22 +199,18 @@ export class IpcLoader {
   }
 
   /**
-   * Register invoke handler from constructed path
+   * Register handler from @/ alias path (bundled)
    */
-  private async registerInvokeHandlerFromPath(importPath: string, channel: string): Promise<void> {
-    // Convert Windows paths to file:// URLs for ESM import
-    const fileUrl = pathToFileURL(importPath).href;
-    const mod = await import(fileUrl);
+  private async registerInvokeHandlerFromAlias(aliasPath: string, channel: string): Promise<void> {
+    const mod = await import(aliasPath);
     await this.registerStaticHandler(mod.default, channel);
   }
 
   /**
-   * Register listen handler from constructed path
+   * Register listen handler from @/ alias path (bundled)
    */
-  private async registerListenHandlerFromPath(importPath: string, channel: string): Promise<void> {
-    // Convert Windows paths to file:// URLs for ESM import
-    const fileUrl = pathToFileURL(importPath).href;
-    const mod = await import(fileUrl);
+  private async registerListenHandlerFromAlias(aliasPath: string, channel: string): Promise<void> {
+    const mod = await import(aliasPath);
     await this.registerStaticHandler(mod.default, channel);
   }
 
