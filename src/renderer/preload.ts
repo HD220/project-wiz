@@ -47,8 +47,8 @@ contextBridge.exposeInMainWorld("api", {
       ipcRenderer.invoke("invoke:user:create", input),
     update: (input) =>
       ipcRenderer.invoke("invoke:user:update", input),
-    inactivate: (input) =>
-      ipcRenderer.invoke("invoke:user:inactivate", input),
+    inactivate: (userId) =>
+      ipcRenderer.invoke("invoke:user:inactivate", userId),
     activate: (userId) =>
       ipcRenderer.invoke("invoke:user:activate", userId),
     getStats: (userId) =>
@@ -155,8 +155,8 @@ contextBridge.exposeInMainWorld("api", {
 
   // Profile API (new colocated handlers)
   profile: {
-    getTheme: (userId) =>
-      ipcRenderer.invoke("invoke:profile:get-theme", userId),
+    getTheme: () =>
+      ipcRenderer.invoke("invoke:profile:get-theme"),
     update: (input) =>
       ipcRenderer.invoke("invoke:profile:update", input),
   } satisfies WindowAPI.Profile,

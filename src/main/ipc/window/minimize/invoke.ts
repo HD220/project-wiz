@@ -31,7 +31,7 @@ export default async function(input: MinimizeWindowInput): Promise<MinimizeWindo
 declare global {
   namespace WindowAPI {
     interface Window {
-      minimize: (input: MinimizeWindowInput) => Promise<MinimizeWindowOutput>
+      minimize: () => Promise<MinimizeWindowOutput>
     }
   }
 }

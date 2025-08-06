@@ -46,7 +46,7 @@ export default async function(filters: GetUserConversationsInvokeInput = {}): Pr
 declare global {
   namespace WindowAPI {
     interface Dm {
-      getUserConversations: (filters?: GetUserConversationsInvokeInput) => Promise<GetUserConversationsOutput>
+      list: (options?: GetUserConversationsInvokeInput) => Promise<GetUserConversationsOutput>
     }
   }
 }

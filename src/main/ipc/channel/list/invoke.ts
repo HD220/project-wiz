@@ -52,7 +52,7 @@ export default async function(input: unknown): Promise<GetProjectChannelsOutput>
 declare global {
   namespace WindowAPI {
     interface Channel {
-      getProjectChannels: (input: GetProjectChannelsInput) => Promise<GetProjectChannelsOutput>
+      list: (input: GetProjectChannelsInput) => Promise<GetProjectChannelsOutput>
     }
   }
 }

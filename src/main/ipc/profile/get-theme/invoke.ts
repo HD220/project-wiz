@@ -32,7 +32,7 @@ export default async function(input: GetThemeInput): Promise<GetThemeOutput> {
 declare global {
   namespace WindowAPI {
     interface Profile {
-      getTheme: (input: GetThemeInput) => Promise<GetThemeOutput>
+      getTheme: () => Promise<GetThemeOutput>
     }
   }
 }

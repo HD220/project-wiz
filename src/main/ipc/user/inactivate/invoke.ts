@@ -6,11 +6,8 @@ import { eventBus } from "@/shared/services/events/event-bus";
 
 const logger = getLogger("user.soft-delete.invoke");
 
-// Input schema
-const SoftDeleteUserInputSchema = z.object({
-  id: z.string(),
-  deletedBy: z.string()
-});
+// Input schema - simplified to just user ID
+const SoftDeleteUserInputSchema = z.string().min(1);
 
 // Output schema
 const SoftDeleteUserOutputSchema = z.object({
@@ -21,17 +18,17 @@ const SoftDeleteUserOutputSchema = z.object({
 type SoftDeleteUserInput = z.infer<typeof SoftDeleteUserInputSchema>;
 type SoftDeleteUserOutput = z.infer<typeof SoftDeleteUserOutputSchema>;
 
-export default async function(input: { id: string }): Promise<SoftDeleteUserOutput> {
-  logger.debug("Soft deleting user", { userId: input.id });
+export default async function(input: SoftDeleteUserInput): Promise<SoftDeleteUserOutput> {
+  logger.debug("Soft deleting user", { userId: input });
 
   // 1. Validate input
-  const validatedInput = z.object({ id: z.string() }).parse(input);
+  const validatedUserId = SoftDeleteUserInputSchema.parse(input);
 
   // 2. Check authentication
   const currentUser = requireAuth();
   
   // 3. Execute core business logic
-  const success = await softDeleteUser(validatedInput.id, currentUser.id);
+  const success = await softDeleteUser(validatedUserId, currentUser.id);
   
   // 4. Mapeamento inline
   const apiResult = {
@@ -42,11 +39,11 @@ export default async function(input: { id: string }): Promise<SoftDeleteUserOutp
   // 5. Validate output
   const result = SoftDeleteUserOutputSchema.parse(apiResult);
   
-  logger.debug("User soft deleted", { userId: input.id, success: result.success });
+  logger.debug("User soft deleted", { userId: validatedUserId, success: result.success });
   
   // 6. Emit specific event for deletion
   if (result.success) {
-    eventBus.emit("user:deleted", { userId: input.id });
+    eventBus.emit("user:deleted", { userId: validatedUserId });
   }
   
   return result;
@@ -55,7 +52,7 @@ export default async function(input: { id: string }): Promise<SoftDeleteUserOutp
 declare global {
   namespace WindowAPI {
     interface User {
-      inactivate: (input: { id: string }) => Promise<SoftDeleteUserOutput>
+      inactivate: (userId: string) => Promise<SoftDeleteUserOutput>
     }
   }
 }

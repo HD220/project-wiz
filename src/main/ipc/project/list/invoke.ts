@@ -43,7 +43,7 @@ export default async function(): Promise<Output> {
 declare global {
   namespace WindowAPI {
     interface Project {
-      listAll: () => Promise<Output>
+      list: () => Promise<Output>
     }
   }
 }

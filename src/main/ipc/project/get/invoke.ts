@@ -47,7 +47,7 @@ export default async function(input: unknown): Promise<z.infer<typeof OutputSche
 declare global {
   namespace WindowAPI {
     interface Project {
-      findById: (id: string) => Promise<z.infer<typeof ProjectSchema> | null>
+      get: (id: string) => Promise<z.infer<typeof ProjectSchema> | null>
     }
   }
 }

@@ -1,38 +1,39 @@
 import { z } from "zod";
 import { findDMById } from "@/main/ipc/dm/queries";
 import {
-  FindDMByIdInputSchema,
-  FindDMByIdOutputSchema,
-  type FindDMByIdInput,
-  type FindDMByIdOutput 
+  GetDMInputSchema,
+  GetDMOutputSchema,
+  type GetDMInput,
+  type GetDMOutput 
 } from "@/shared/types/dm-conversation";
 import { requireAuth } from "@/main/services/session-registry";
 import { getLogger } from "@/shared/services/logger/config";
 
-const logger = getLogger("dm.find-by-id.invoke");
+const logger = getLogger("dm.get.invoke");
 
-export default async function(input: FindDMByIdInput): Promise<FindDMByIdOutput> {
-  logger.debug("Finding DM by ID", { dmId: input.id });
+export default async function(dmId: GetDMInput): Promise<GetDMOutput> {
+  logger.debug("Getting DM by ID", { dmId });
 
   // 1. Parse and validate input
-  const parsedInput = FindDMByIdInputSchema.parse(input);
+  const parsedDmId = GetDMInputSchema.parse(dmId);
 
   // 2. Check authentication
   const currentUser = requireAuth();
   
   // 3. Execute core business logic (no event emission for queries)
-  const result = await findDMById(parsedInput);
+  // Convert simple string to query object for existing function
+  const result = await findDMById({ id: parsedDmId, includeInactive: false });
   
-  logger.debug("DM found", { found: !!result, dmId: input.id });
+  logger.debug("DM found", { found: !!result, dmId: parsedDmId });
   
   // 4. Parse and return output
-  return FindDMByIdOutputSchema.parse(result);
+  return GetDMOutputSchema.parse(result);
 }
 
 declare global {
   namespace WindowAPI {
     interface Dm {
-      findById: (input: FindDMByIdInput) => Promise<FindDMByIdOutput>
+      get: (dmId: GetDMInput) => Promise<GetDMOutput>
     }
   }
 }

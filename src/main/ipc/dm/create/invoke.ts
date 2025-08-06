@@ -30,7 +30,7 @@ export default async function(input: CreateDMInput): Promise<CreateDMOutput> {
   const currentUser = requireAuth();
   
   // 3. Query recebe dados e gerencia campos técnicos internamente
-  const dbDMConversation = await createDM({
+  const dbDMConversation = await createDMConversation({
     ...validatedInput,
     currentUserId: currentUser.id
   });

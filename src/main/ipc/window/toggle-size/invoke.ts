@@ -41,7 +41,7 @@ export default async function(input: ToggleSizeWindowInput): Promise<ToggleSizeW
 declare global {
   namespace WindowAPI {
     interface Window {
-      toggleSize: (input: ToggleSizeWindowInput) => Promise<ToggleSizeWindowOutput>
+      toggle: () => Promise<ToggleSizeWindowOutput>
     }
   }
 }

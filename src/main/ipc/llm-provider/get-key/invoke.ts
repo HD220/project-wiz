@@ -85,7 +85,7 @@ export default async function(providerId: GetDecryptedKeyInput): Promise<GetDecr
 declare global {
   namespace WindowAPI {
     interface LlmProvider {
-      getDecryptedKey: (providerId: GetDecryptedKeyInput) => Promise<GetDecryptedKeyOutput>
+      getKey: (providerId: GetDecryptedKeyInput) => Promise<GetDecryptedKeyOutput>
     }
   }
 }

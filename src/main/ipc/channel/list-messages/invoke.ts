@@ -55,7 +55,7 @@ export default async function(input: GetChannelMessagesInput): Promise<GetChanne
 declare global {
   namespace WindowAPI {
     interface Channel {
-      getMessages: (input: GetChannelMessagesInput) => Promise<GetChannelMessagesOutput>
+      listMessages: (input: GetChannelMessagesInput) => Promise<GetChannelMessagesOutput>
     }
   }
 }

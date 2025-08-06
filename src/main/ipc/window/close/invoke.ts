@@ -31,7 +31,7 @@ export default async function(input: CloseWindowInput): Promise<CloseWindowOutpu
 declare global {
   namespace WindowAPI {
     interface Window {
-      close: (input: CloseWindowInput) => Promise<CloseWindowOutput>
+      close: () => Promise<CloseWindowOutput>
     }
   }
 }

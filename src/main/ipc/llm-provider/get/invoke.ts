@@ -51,7 +51,7 @@ export default async function(id: GetLlmProviderByIdInput): Promise<GetLlmProvid
 declare global {
   namespace WindowAPI {
     interface LlmProvider {
-      getById: (id: GetLlmProviderByIdInput) => Promise<GetLlmProviderByIdOutput>
+      get: (id: GetLlmProviderByIdInput) => Promise<GetLlmProviderByIdOutput>
     }
   }
 }

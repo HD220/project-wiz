@@ -6,10 +6,8 @@ import { getLogger } from "@/shared/services/logger/config";
 
 const logger = getLogger("llm-provider.inactivate.invoke");
 
-// Input schema - apenas ID do provider
-const InactivateLlmProviderInputSchema = z.object({
-  id: z.string(),
-});
+// Input schema - simple ID string
+const InactivateLlmProviderInputSchema = z.string().min(1);
 
 // Output schema - resultado da operação
 const InactivateLlmProviderOutputSchema = z.object({
@@ -21,18 +19,18 @@ type InactivateLlmProviderInput = z.infer<typeof InactivateLlmProviderInputSchem
 type InactivateLlmProviderOutput = z.infer<typeof InactivateLlmProviderOutputSchema>;
 
 export default async function (
-  input: InactivateLlmProviderInput,
+  id: InactivateLlmProviderInput,
 ): Promise<InactivateLlmProviderOutput> {
   logger.debug("Inactivating LLM provider");
 
   // 1. Validate input
-  const validatedInput = InactivateLlmProviderInputSchema.parse(input);
+  const validatedId = InactivateLlmProviderInputSchema.parse(id);
 
   // 2. Check authentication
   const currentUser = requireAuth();
 
   // 3. Inactivate provider with ownership validation
-  const result = await inactivateLlmProvider(validatedInput.id, currentUser.id, currentUser.id);
+  const result = await inactivateLlmProvider(validatedId, currentUser.id, currentUser.id);
 
   const success = !!result;
 
@@ -44,7 +42,7 @@ export default async function (
 
   // 5. Emit event
   if (success) {
-    eventBus.emit("llm-provider:inactivated", { providerId: validatedInput.id });
+    eventBus.emit("llm-provider:inactivated", { providerId: validatedId });
   }
 
   logger.debug("LLM provider inactivated", { success: validatedResult.success });
@@ -56,7 +54,7 @@ declare global {
   namespace WindowAPI {
     interface LlmProvider {
       inactivate: (
-        input: InactivateLlmProviderInput,
+        id: InactivateLlmProviderInput,
       ) => Promise<InactivateLlmProviderOutput>;
     }
   }

@@ -28,7 +28,23 @@ export const ArchiveChannelOutputSchema = z.object({
   message: z.string(),
 });
 
-// Find Channel By ID Schemas
+// Get Channel Schemas (simple string ID)
+export const GetChannelInputSchema = z.string().min(1, "Channel ID is required");
+
+export const GetChannelOutputSchema = z.object({
+  id: z.string(),
+  projectId: z.string(),
+  name: z.string(),
+  description: z.string().nullable(),
+  isArchived: z.boolean(),
+  isActive: z.boolean(),
+  deactivatedAt: z.number().nullable(),
+  deactivatedBy: z.string().nullable(),
+  createdAt: z.number(),
+  updatedAt: z.number(),
+}).nullable();
+
+// Find Channel By ID Schemas (for complex queries with options)
 export const FindChannelByIdInputSchema = z.object({
   id: z.string().min(1, "Channel ID is required"),
   includeInactive: z.boolean().optional().default(false),
@@ -116,6 +132,8 @@ export const UnarchiveChannelOutputSchema = z.object({
 // Export types
 export type ArchiveChannelInput = z.infer<typeof ArchiveChannelInputSchema>;
 export type ArchiveChannelOutput = z.infer<typeof ArchiveChannelOutputSchema>;
+export type GetChannelInput = z.infer<typeof GetChannelInputSchema>;
+export type GetChannelOutput = z.infer<typeof GetChannelOutputSchema>;
 export type FindChannelByIdInput = z.infer<typeof FindChannelByIdInputSchema>;
 export type FindChannelByIdOutput = z.infer<typeof FindChannelByIdOutputSchema>;
 export type UpdateChannelInput = z.infer<typeof UpdateChannelInputSchema>;

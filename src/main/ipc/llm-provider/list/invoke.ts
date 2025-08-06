@@ -19,11 +19,11 @@ const ListLlmProvidersOutputSchema = z.array(LlmProviderSchema);
 type ListLlmProvidersInput = z.infer<typeof ListLlmProvidersInputSchema>;
 type ListLlmProvidersOutput = z.infer<typeof ListLlmProvidersOutputSchema>;
 
-export default async function(input?: ListLlmProvidersInput): Promise<ListLlmProvidersOutput> {
+export default async function(filters?: ListLlmProvidersInput): Promise<ListLlmProvidersOutput> {
   logger.debug("Listing LLM providers");
 
   // 1. Validate input
-  const validatedInput = input ? ListLlmProvidersInputSchema.parse(input) : {};
+  const validatedInput = filters ? ListLlmProvidersInputSchema.parse(filters) : {};
 
   // 2. Check authentication
   const currentUser = requireAuth();
@@ -60,7 +60,7 @@ export default async function(input?: ListLlmProvidersInput): Promise<ListLlmPro
 declare global {
   namespace WindowAPI {
     interface LlmProvider {
-      list: (input?: ListLlmProvidersInput) => Promise<ListLlmProvidersOutput>
+      list: (filters?: ListLlmProvidersInput) => Promise<ListLlmProvidersOutput>
     }
   }
 }

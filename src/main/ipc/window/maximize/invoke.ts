@@ -31,7 +31,7 @@ export default async function(input: MaximizeWindowInput): Promise<MaximizeWindo
 declare global {
   namespace WindowAPI {
     interface Window {
-      maximize: (input: MaximizeWindowInput) => Promise<MaximizeWindowOutput>
+      maximize: () => Promise<MaximizeWindowOutput>
     }
   }
 }

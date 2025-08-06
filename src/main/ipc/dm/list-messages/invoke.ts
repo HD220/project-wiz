@@ -54,7 +54,7 @@ export default async function(input: GetDMMessagesInput): Promise<GetDMMessagesO
 declare global {
   namespace WindowAPI {
     interface Dm {
-      getMessages: (input: GetDMMessagesInput) => Promise<GetDMMessagesOutput>
+      listMessages: (input: GetDMMessagesInput) => Promise<GetDMMessagesOutput>
     }
   }
 }

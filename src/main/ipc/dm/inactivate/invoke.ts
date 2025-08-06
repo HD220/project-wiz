@@ -47,7 +47,7 @@ export default async function(input: DeleteDMInvokeInput): Promise<DeleteDMOutpu
 declare global {
   namespace WindowAPI {
     interface Dm {
-      delete: (input: DeleteDMInvokeInput) => Promise<DeleteDMOutput>
+      inactivate: (input: DeleteDMInvokeInput) => Promise<DeleteDMOutput>
     }
   }
 }

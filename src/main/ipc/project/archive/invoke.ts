@@ -5,10 +5,8 @@ import { archiveProject } from "@/main/ipc/project/queries";
 
 const logger = getLogger("project.archive.invoke");
 
-// Input schema
-const ArchiveProjectInputSchema = z.object({
-  id: z.string(),
-});
+// Input schema - simplified to just project ID
+const ArchiveProjectInputSchema = z.string().min(1);
 
 // Output schema
 const ArchiveProjectOutputSchema = z.object({
@@ -22,16 +20,16 @@ type ArchiveProjectOutput = z.infer<typeof ArchiveProjectOutputSchema>;
 export default async function (
   input: ArchiveProjectInput,
 ): Promise<ArchiveProjectOutput> {
-  logger.debug("Archiving project", { projectId: input.id });
+  logger.debug("Archiving project", { projectId: input });
 
   // 1. Validate input
-  const validatedInput = ArchiveProjectInputSchema.parse(input);
+  const validatedProjectId = ArchiveProjectInputSchema.parse(input);
 
   // 2. Check authentication
   const currentUser = requireAuth();
 
   // 3. Archive project with ownership validation
-  const dbProject = await archiveProject(validatedInput.id, currentUser.id, currentUser.id);
+  const dbProject = await archiveProject(validatedProjectId, currentUser.id, currentUser.id);
 
   // 4. Mapeamento: SelectProject → ArchiveProjectOutput
   const apiResponse = {
@@ -53,7 +51,7 @@ export default async function (
 declare global {
   namespace WindowAPI {
     interface Project {
-      archive: (input: ArchiveProjectInput) => Promise<ArchiveProjectOutput>;
+      archive: (id: string) => Promise<ArchiveProjectOutput>;
     }
   }
 }

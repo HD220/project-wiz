@@ -64,7 +64,7 @@ export default async function(input: unknown): Promise<DeleteChannelOutput> {
 declare global {
   namespace WindowAPI {
     interface Channel {
-      delete: (input: DeleteChannelInvokeInput) => Promise<DeleteChannelOutput>
+      inactivate: (input: DeleteChannelInvokeInput) => Promise<DeleteChannelOutput>
     }
   }
 }
