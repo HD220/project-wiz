@@ -6,7 +6,13 @@ export default defineConfig({
   plugins: [tsconfigPaths()],
   build: {
     rollupOptions: {
-      external: ["better-sqlite3", "pino", "pino-pretty"],
+      external: [
+        "better-sqlite3", 
+        "pino", 
+        "pino-pretty",
+        // Don't bundle IPC handlers - keep them external for dynamic import
+        /src\/main\/ipc\/.*/
+      ],
     },
   },
   resolve: {
