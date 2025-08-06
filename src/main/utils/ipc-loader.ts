@@ -172,9 +172,15 @@ export class IpcLoader {
       }
     }
     
-    // Fallback: if still no compiled files, we have a problem
+    // Fallback: if still no compiled files, debug what's available
     if (invokeFiles.length === 0) {
-      logger.error("❌ No compiled IPC handler files found. Check Vite build output.");
+      logger.error("❌ No compiled IPC handler files found. Debugging build output...");
+      
+      // Debug: List what's actually in .vite/build/
+      const allBuildFiles = globSync(".vite/build/**/*.js", { absolute: true });
+      logger.info(`🔍 All .js files in build: ${allBuildFiles.length}`);
+      allBuildFiles.slice(0, 10).forEach(file => logger.info(`  - ${file}`));
+      
       const tsFiles = globSync("src/main/ipc/**/invoke.ts", { absolute: true });
       logger.info(`📁 Found ${tsFiles.length} .ts source files but they cannot be imported directly`);
       return;
