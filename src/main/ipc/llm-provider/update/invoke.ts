@@ -8,16 +8,18 @@ import { createIPCHandler, InferHandler } from "@/shared/utils/create-ipc-handle
 
 const logger = getLogger("llm-provider.update.invoke");
 
-const UpdateLlmProviderInputSchema = LlmProviderSchema.pick({ 
-  name: true, 
-  type: true, 
-  baseUrl: true,
-  defaultModel: true,
-  isDefault: true,
-  isActive: true
-}).partial().extend({ 
+const UpdateLlmProviderInputSchema = z.object({
   id: z.string().min(1, "Provider ID is required"),
-  apiKey: z.string().optional()
+  data: LlmProviderSchema.pick({ 
+    name: true, 
+    type: true, 
+    baseUrl: true,
+    defaultModel: true,
+    isDefault: true,
+    isActive: true
+  }).partial().extend({
+    apiKey: z.string().optional()
+  })
 });
 
 const UpdateLlmProviderOutputSchema = LlmProviderSchema;
@@ -30,7 +32,7 @@ const handler = createIPCHandler({
 
     const currentUser = requireAuth();
     
-    const { id, ...data } = input;
+    const { id, data } = input;
 
     // Update provider with ownership validation
     const result = await updateLlmProvider({

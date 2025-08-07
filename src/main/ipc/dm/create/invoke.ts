@@ -8,9 +8,7 @@ import { createIPCHandler, InferHandler } from "@/shared/utils/create-ipc-handle
 
 const logger = getLogger("dm.create.invoke");
 
-const CreateDMInputSchema = DMConversationSchema.pick({
-  description: true,
-}).extend({
+const CreateDMInputSchema = z.object({
   participantIds: z.array(z.string()).min(1, "At least one participant is required"),
 });
 
@@ -27,7 +25,7 @@ const handler = createIPCHandler({
     // Create DM conversation with participants
     const dbDMConversation = await createDMConversation({
       ownerId: currentUser.id,
-      description: input.description,
+      description: null, // Auto-generated, no user input needed
       participantIds: input.participantIds,
       currentUserId: currentUser.id
     });
