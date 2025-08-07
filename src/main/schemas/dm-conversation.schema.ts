@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { sqliteTable, text, integer, index, primaryKey } from "drizzle-orm/sqlite-core";
+import { sqliteTable, text, integer, index, primaryKey, foreignKey } from "drizzle-orm/sqlite-core";
 
 import { usersTable } from "@/main/schemas/user.schema";
 
@@ -72,8 +72,7 @@ export const dmParticipantsTable = sqliteTable(
       .notNull()
       .references(() => usersTable.id, { onDelete: "cascade" }),
     dmConversationId: text("dm_conversation_id")
-      .notNull()
-      .references(() => dmConversationsTable.id, { onDelete: "cascade" }),
+      .notNull(),
     participantId: text("participant_id")
       .notNull()
       .references(() => usersTable.id, { onDelete: "cascade" }),
@@ -93,6 +92,12 @@ export const dmParticipantsTable = sqliteTable(
   (table) => ({
     // Composite primary key
     pk: primaryKey({ columns: [table.ownerId, table.id] }),
+    
+    // Foreign key composta para dm_conversations
+    dmConversationFk: foreignKey({
+      columns: [table.ownerId, table.dmConversationId],
+      foreignColumns: [dmConversationsTable.ownerId, dmConversationsTable.id],
+    }),
     
     // Performance indexes
     ownerIdIdx: index("dm_participants_owner_id_idx").on(table.ownerId),
