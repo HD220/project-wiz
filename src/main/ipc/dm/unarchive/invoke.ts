@@ -12,10 +12,7 @@ const UnarchiveDMInputSchema = z.object({
   dmId: z.string().min(1, "DM ID is required"),
 });
 
-const UnarchiveDMOutputSchema = DMConversationSchema.extend({
-  archivedAt: z.date().nullable(),
-  archivedBy: z.string().nullable(),
-});
+const UnarchiveDMOutputSchema = z.void();
 
 const handler = createIPCHandler({
   inputSchema: UnarchiveDMInputSchema,
@@ -26,29 +23,19 @@ const handler = createIPCHandler({
     const currentUser = requireAuth();
     
     // Execute query with ownership validation
-    const dbConversation = await unarchiveDMConversation(input.dmId, currentUser.id);
+    const dbConversation = await unarchiveDMConversation({
+      ownerId: currentUser.id,
+      id: input.dmId
+    });
     
     if (!dbConversation) {
       throw new Error("DM conversation not found or access denied");
     }
     
-    // Mapeamento: SelectDMConversation → DMConversation (dados puros da entidade)
-    const apiConversation = {
-      id: dbConversation.id,
-      name: dbConversation.name,
-      description: dbConversation.description,
-      archivedAt: dbConversation.archivedAt ? new Date(dbConversation.archivedAt) : null,
-      archivedBy: dbConversation.archivedBy,
-      createdAt: new Date(dbConversation.createdAt),
-      updatedAt: new Date(dbConversation.updatedAt),
-    };
-    
     logger.debug("DM conversation unarchived", { dmId: input.dmId });
     
     // Emit event
     eventBus.emit("dm:unarchived", { dmId: input.dmId });
-    
-    return apiConversation;
   }
 });
 

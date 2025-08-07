@@ -93,9 +93,9 @@ export async function findDMConversationById(id: string): Promise<SelectDMConver
 /**
  * Create new DM conversation with participants
  */
-export async function createDMConversation(data: InsertDMConversation & { 
-  participantIds: string[]; 
-  currentUserId: string 
+export async function createDMConversation(data: { 
+  ownerId: string;
+  participantIds: string[];
 }): Promise<SelectDMConversation> {
   const db = getDatabase();
   
@@ -118,7 +118,7 @@ export async function createDMConversation(data: InsertDMConversation & {
 
   const conversationName = await generateDMTitle(
     data.participantIds,
-    data.currentUserId,
+    data.ownerId,
   );
 
   // Use synchronous transaction pattern for better-sqlite3
@@ -127,7 +127,7 @@ export async function createDMConversation(data: InsertDMConversation & {
     const dmConversationResults = tx
       .insert(dmConversationsTable)
       .values({
-        ...data,
+        ownerId: data.ownerId,
         name: conversationName,
       })
       .returning()
@@ -291,19 +291,18 @@ export async function listUserDMConversations(filters: {
 /**
  * Archive DM conversation with ownership validation
  */
-export async function archiveDMConversation(id: string, ownerId: string, archivedBy: string): Promise<SelectDMConversation | null> {
+export async function archiveDMConversation(data: { ownerId: string; id: string }): Promise<SelectDMConversation | null> {
   const db = getDatabase();
 
   const [conversation] = await db
     .update(dmConversationsTable)
     .set({
       archivedAt: new Date(),
-      archivedBy,
     })
     .where(
       and(
-        eq(dmConversationsTable.id, id),
-        eq(dmConversationsTable.ownerId, ownerId)
+        eq(dmConversationsTable.id, data.id),
+        eq(dmConversationsTable.ownerId, data.ownerId)
       )
     )
     .returning();
@@ -314,20 +313,19 @@ export async function archiveDMConversation(id: string, ownerId: string, archive
 /**
  * Unarchive DM conversation with ownership validation
  */
-export async function unarchiveDMConversation(id: string, ownerId: string): Promise<SelectDMConversation | null> {
+export async function unarchiveDMConversation(data: { ownerId: string; id: string }): Promise<SelectDMConversation | null> {
   const db = getDatabase();
 
   const [conversation] = await db
     .update(dmConversationsTable)
     .set({
       archivedAt: null,
-      archivedBy: null,
       updatedAt: sql`(strftime('%s', 'now'))`
     })
     .where(
       and(
-        eq(dmConversationsTable.id, id),
-        eq(dmConversationsTable.ownerId, ownerId)
+        eq(dmConversationsTable.id, data.id),
+        eq(dmConversationsTable.ownerId, data.ownerId)
       )
     )
     .returning();
@@ -338,7 +336,7 @@ export async function unarchiveDMConversation(id: string, ownerId: string): Prom
 /**
  * Soft delete DM conversation with ownership validation
  */
-export async function inactivateDMConversation(id: string, ownerId: string, deactivatedBy: string): Promise<SelectDMConversation | null> {
+export async function inactivateDMConversation(id: string, ownerId: string): Promise<SelectDMConversation | null> {
   const db = getDatabase();
 
   const [conversation] = await db
@@ -346,7 +344,6 @@ export async function inactivateDMConversation(id: string, ownerId: string, deac
     .set({
       isActive: false,
       deactivatedAt: new Date(),
-      deactivatedBy,
     })
     .where(
       and(
@@ -388,7 +385,6 @@ export async function removeDMParticipant(conversationId: string, participantId:
     .set({
       isActive: false,
       deactivatedAt: new Date(),
-      deactivatedBy: ownerId,
     })
     .where(
       and(
@@ -431,13 +427,23 @@ export async function getDMMessages(conversationId: string, options?: { limit?: 
 /**
  * Send message to DM conversation
  */
-export async function sendDMMessage(data: InsertMessage): Promise<SelectMessage> {
+export async function sendDMMessage(data: {
+  authorId: string;
+  sourceType: "dm";
+  sourceId: string;
+  content: string;
+}): Promise<SelectMessage> {
   const db = getDatabase();
 
   // 1. Send message to database
   const [message] = await db
     .insert(messagesTable)
-    .values(data)
+    .values({
+      sourceType: data.sourceType,
+      sourceId: data.sourceId,
+      ownerId: data.authorId,
+      content: data.content,
+    })
     .returning();
 
   if (!message) {

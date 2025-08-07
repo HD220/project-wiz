@@ -17,12 +17,10 @@ export const dmConversationsTable = sqliteTable(
 
     // Archiving fields - separate from soft deletion
     archivedAt: integer("archived_at", { mode: "timestamp_ms" }),
-    archivedBy: text("archived_by").references(() => usersTable.id),
 
     // Soft deletion fields
     isActive: integer("is_active", { mode: "boolean" }).notNull().default(true),
     deactivatedAt: integer("deactivated_at", { mode: "timestamp_ms" }),
-    deactivatedBy: text("deactivated_by").references(() => usersTable.id),
 
     createdAt: integer("created_at", { mode: "timestamp_ms" })
       .notNull()
@@ -38,12 +36,6 @@ export const dmConversationsTable = sqliteTable(
     // Performance indexes
     ownerIdIdx: index("dm_conversations_owner_id_idx").on(table.ownerId),
     createdAtIdx: index("dm_conversations_created_at_idx").on(table.createdAt),
-    archivedByIdx: index("dm_conversations_archived_by_idx").on(
-      table.archivedBy,
-    ),
-    deactivatedByIdx: index("dm_conversations_deactivated_by_idx").on(
-      table.deactivatedBy,
-    ),
 
     // Soft deletion indexes
     isActiveIdx: index("dm_conversations_is_active_idx").on(table.isActive),
@@ -80,7 +72,6 @@ export const dmParticipantsTable = sqliteTable(
     // Soft deletion fields
     isActive: integer("is_active", { mode: "boolean" }).notNull().default(true),
     deactivatedAt: integer("deactivated_at", { mode: "timestamp_ms" }),
-    deactivatedBy: text("deactivated_by").references(() => usersTable.id),
 
     createdAt: integer("created_at", { mode: "timestamp_ms" })
       .notNull()
@@ -106,9 +97,6 @@ export const dmParticipantsTable = sqliteTable(
     ),
     participantIdIdx: index("dm_participants_participant_id_idx").on(
       table.participantId,
-    ),
-    deactivatedByIdx: index("dm_participants_deactivated_by_idx").on(
-      table.deactivatedBy,
     ),
 
     // Soft deletion indexes

@@ -1,3 +1,4 @@
+import { z } from "zod";
 import { sendDMMessage } from "@/main/ipc/dm/queries";
 import { MessageSchema } from "@/shared/types";
 import { requireAuth } from "@/main/services/session-registry";
@@ -7,9 +8,9 @@ import { createIPCHandler, InferHandler } from "@/shared/utils/create-ipc-handle
 
 const logger = getLogger("dm.send-message.invoke");
 
-const SendDMMessageInputSchema = MessageSchema.pick({
-  sourceId: true,
-  content: true
+const SendDMMessageInputSchema = z.object({
+  dmId: z.string().min(1, "DM ID is required"),
+  content: z.string().min(1, "Content is required"),
 });
 
 const SendDMMessageOutputSchema = MessageSchema;
@@ -18,15 +19,15 @@ const handler = createIPCHandler({
   inputSchema: SendDMMessageInputSchema,
   outputSchema: SendDMMessageOutputSchema,
   handler: async (input) => {
-    logger.debug("Sending message to DM", { sourceId: input.sourceId, contentLength: input.content.length });
+    logger.debug("Sending message to DM", { dmId: input.dmId, contentLength: input.content.length });
 
     const currentUser = requireAuth();
     
     // Send message to DM conversation
     const dbMessage = await sendDMMessage({
+      authorId: currentUser.id,
       sourceType: "dm",
-      sourceId: input.sourceId,
-      ownerId: currentUser.id,
+      sourceId: input.dmId,
       content: input.content,
     });
     

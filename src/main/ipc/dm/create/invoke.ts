@@ -12,7 +12,11 @@ const CreateDMInputSchema = z.object({
   participantIds: z.array(z.string()).min(1, "At least one participant is required"),
 });
 
-const CreateDMOutputSchema = DMConversationSchema;
+const CreateDMOutputSchema = z.object({
+  id: z.string(),
+  name: z.string().nullable(),
+  description: z.string().nullable(),
+});
 
 const handler = createIPCHandler({
   inputSchema: CreateDMInputSchema,
@@ -25,20 +29,14 @@ const handler = createIPCHandler({
     // Create DM conversation with participants
     const dbDMConversation = await createDMConversation({
       ownerId: currentUser.id,
-      description: null, // Auto-generated, no user input needed
-      participantIds: input.participantIds,
-      currentUserId: currentUser.id
+      participantIds: input.participantIds
     });
     
-    // Mapeamento: SelectDMConversation → DMConversation (dados puros da entidade)
+    // Mapeamento simplificado: apenas id, name, description
     const apiDMConversation = {
       id: dbDMConversation.id,
       name: dbDMConversation.name,
       description: dbDMConversation.description,
-      archivedAt: dbDMConversation.archivedAt ? new Date(dbDMConversation.archivedAt) : null,
-      archivedBy: dbDMConversation.archivedBy,
-      createdAt: new Date(dbDMConversation.createdAt),
-      updatedAt: new Date(dbDMConversation.updatedAt),
     };
     
     logger.debug("DM conversation created", { dmId: apiDMConversation.id, name: apiDMConversation.name });

@@ -61,7 +61,7 @@ function DMLayout() {
 
     try {
       // Send message to backend
-      await window.api.dm.sendMessage({ sourceId: conversationId, content: input.trim() });
+      await window.api.dm.sendMessage({ dmId: conversationId, content: input.trim() });
       
       // Invalidate router to refresh messages from backend
       router.invalidate();

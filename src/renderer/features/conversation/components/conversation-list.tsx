@@ -229,7 +229,7 @@ function ConversationListItem(props: ConversationListItemProps) {
 
   // Archive conversation mutation
   const archiveMutation = useApiMutation(
-    () => window.api.dm.archive(conversation.id),
+    () => window.api.dm.archive({ dmId: conversation.id }),
     {
       successMessage: "Conversation archived",
       errorMessage: "Failed to archive conversation",

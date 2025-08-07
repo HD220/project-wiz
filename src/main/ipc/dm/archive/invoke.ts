@@ -12,9 +12,10 @@ const ArchiveDMInputSchema = z.object({
   dmId: z.string().min(1, "DM ID is required"),
 });
 
-const ArchiveDMOutputSchema = DMConversationSchema.extend({
-  archivedAt: z.date().nullable(),
-  archivedBy: z.string().nullable(),
+const ArchiveDMOutputSchema = z.object({
+  id: z.string(),
+  name: z.string().nullable(),
+  description: z.string().nullable(),
 });
 
 const handler = createIPCHandler({
@@ -26,21 +27,20 @@ const handler = createIPCHandler({
     const currentUser = requireAuth();
     
     // Archive DM conversation with ownership validation
-    const dbConversation = await archiveDMConversation(input.dmId, currentUser.id, currentUser.id);
+    const dbConversation = await archiveDMConversation({
+      ownerId: currentUser.id,
+      id: input.dmId
+    });
     
     if (!dbConversation) {
       throw new Error("Failed to archive DM conversation or access denied");
     }
     
-    // Mapeamento: SelectDMConversation → DMConversation (dados puros da entidade)
+    // Mapeamento simplificado: apenas id, name, description
     const apiConversation = {
       id: dbConversation.id!,
       name: dbConversation.name,
       description: dbConversation.description,
-      archivedAt: dbConversation.archivedAt,
-      archivedBy: dbConversation.archivedBy,
-      createdAt: dbConversation.createdAt,
-      updatedAt: dbConversation.updatedAt,
     };
     
     logger.debug("DM conversation archived", { dmId: apiConversation.id });
