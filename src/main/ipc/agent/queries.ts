@@ -56,27 +56,44 @@ export async function findAgent(agentId: string, ownerId: string): Promise<Agent
 }
 
 /**
- * Update agent e retorna dados completos (JOIN com users)
+ * Update agent with user fields and return complete data
  */
-export async function updateAgent(data: UpdateAgent & { ownerId: string }): Promise<Agent | null> {
+export async function updateAgent(data: UpdateAgent & { 
+  ownerId: string;
+  name?: string;
+  avatar?: string;
+}): Promise<Agent | null> {
   const db = getDatabase();
   
-  // Update na tabela agents
-  const [updated] = await db
-    .update(agentsTable)
-    .set(data)
-    .where(and(
-      eq(agentsTable.id, data.id),
-      eq(agentsTable.ownerId, data.ownerId)
-    ))
-    .returning({ id: agentsTable.id });
+  // Extract user fields
+  const { name, avatar, ownerId, ...agentFields } = data;
+  
+  // Update user table if there are user fields
+  if (name !== undefined || avatar !== undefined) {
+    await db
+      .update(usersTable)
+      .set({ name, avatar })
+      .where(eq(usersTable.id, data.id));
+  }
+  
+  // Update agent table
+  if (Object.keys(agentFields).length > 0) {
+    const [updated] = await db
+      .update(agentsTable)
+      .set(agentFields)
+      .where(and(
+        eq(agentsTable.id, data.id),
+        eq(agentsTable.ownerId, ownerId)
+      ))
+      .returning({ id: agentsTable.id });
 
-  if (!updated) {
-    return null;
+    if (!updated) {
+      return null;
+    }
   }
 
-  // Buscar dados completos com JOIN
-  return await findAgent(updated.id, data.ownerId);
+  // Return complete data with JOIN
+  return await findAgent(data.id, ownerId);
 }
 
 
