@@ -40,7 +40,7 @@ const handler = createIPCHandler({
       localPath: project.localPath,
       ownerId: project.ownerId,
       isActive: project.isActive,
-      isArchived: project.isArchived,
+      isArchived: !!project.archivedAt,
       createdAt: new Date(project.createdAt),
       updatedAt: new Date(project.updatedAt),
     }));

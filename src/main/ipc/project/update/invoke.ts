@@ -32,13 +32,19 @@ const handler = createIPCHandler({
     const currentUser = requireAuth();
     
     // Separate id from update data
-    const { id, ...updateData } = input;
+    const { id, isArchived, ...updateData } = input;
+    
+    // Convert isArchived boolean to archivedAt timestamp
+    const dbUpdateData: any = { ...updateData };
+    if (isArchived !== undefined) {
+      dbUpdateData.archivedAt = isArchived ? new Date() : null;
+    }
     
     // Query executa update e retorna SelectProject with ownership validation
     const dbProject = await updateProject({
       id,
       ownerId: currentUser.id,
-      ...updateData
+      ...dbUpdateData
     });
     
     if (!dbProject) {
@@ -56,7 +62,7 @@ const handler = createIPCHandler({
       localPath: dbProject.localPath,
       ownerId: dbProject.ownerId,
       isActive: dbProject.isActive,
-      isArchived: dbProject.isArchived,
+      isArchived: !!dbProject.archivedAt,
       createdAt: new Date(dbProject.createdAt),
       updatedAt: new Date(dbProject.updatedAt),
     };

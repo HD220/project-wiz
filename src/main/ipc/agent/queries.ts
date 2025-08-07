@@ -1,4 +1,4 @@
-import { eq, and, desc, like, or } from "drizzle-orm";
+import { eq, and, desc, like, or, isNull } from "drizzle-orm";
 import { createDatabaseConnection } from "@/shared/config/database";
 import { 
   agentsTable, 
@@ -48,7 +48,7 @@ export async function findAgent(agentId: string, ownerId: string): Promise<Agent
     .where(and(
       eq(agentsTable.id, agentId),
       eq(agentsTable.ownerId, ownerId),
-      eq(usersTable.isActive, true) // Only active users
+      isNull(usersTable.deactivatedAt) // Only active users
     ))
     .limit(1);
 
@@ -110,7 +110,7 @@ export async function getActiveAgentsCount(ownerId: string): Promise<number> {
     .where(
       and(
         eq(agentsTable.ownerId, ownerId),
-        eq(usersTable.isActive, true),
+        isNull(usersTable.deactivatedAt),
         eq(agentsTable.status, "active"),
       ),
     );
@@ -142,7 +142,7 @@ export async function createAgent(data: {
       .where(
         and(
           eq(llmProvidersTable.id, data.providerId),
-          eq(llmProvidersTable.isActive, true),
+          isNull(llmProvidersTable.deactivatedAt),
         ),
       )
       .limit(1)
@@ -249,7 +249,7 @@ export async function listAgents(filters: {
 
   // Filter by active status unless explicitly including inactive
   if (!filters.showInactive) {
-    conditions.push(eq(usersTable.isActive, true));
+    conditions.push(isNull(usersTable.deactivatedAt));
   }
 
   // Add status filter

@@ -1,5 +1,5 @@
 import bcrypt from "bcryptjs";
-import { eq, and, gt, desc } from "drizzle-orm";
+import { eq, and, gt, desc, isNull } from "drizzle-orm";
 import { createDatabaseConnection } from "@/shared/config/database";
 import { usersTable, type SelectUser } from "@/main/schemas/user.schema";
 import { accountsTable } from "@/main/schemas/account.schema";
@@ -48,7 +48,7 @@ export async function initializeSessionFromDatabase(): Promise<void> {
     .from(userSessionsTable)
     .where(
       and(
-        eq(userSessionsTable.isActive, true),
+        isNull(userSessionsTable.deactivatedAt),
         gt(userSessionsTable.expiresAt, new Date()) // Not expired
       )
     )
@@ -66,7 +66,7 @@ export async function initializeSessionFromDatabase(): Promise<void> {
     .where(
       and(
         eq(usersTable.id, session.userId),
-        eq(usersTable.isActive, true)
+        isNull(usersTable.deactivatedAt)
       )
     )
     .limit(1);
@@ -95,7 +95,7 @@ export async function getUserById(userId: string): Promise<SelectUser | null> {
     .where(
       and(
         eq(usersTable.id, userId),
-        eq(usersTable.isActive, true)
+        isNull(usersTable.deactivatedAt)
       )
     )
     .limit(1);
@@ -121,7 +121,7 @@ export async function authenticateUser(data: LoginData): Promise<AuthResult> {
       and(
         eq(accountsTable.username, data.username),
         eq(usersTable.type, "human"), // Only humans can login
-        eq(usersTable.isActive, true)
+        isNull(usersTable.deactivatedAt)
       )
     )
     .limit(1);
@@ -163,10 +163,9 @@ export async function clearUserSessions(): Promise<void> {
   await db
     .update(userSessionsTable)
     .set({
-      isActive: false,
       deactivatedAt: new Date(),
     })
-    .where(eq(userSessionsTable.isActive, true));
+    .where(isNull(userSessionsTable.deactivatedAt));
 }
 
 /**

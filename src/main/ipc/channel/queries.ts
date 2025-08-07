@@ -64,7 +64,7 @@ export async function createProjectChannel(data: InsertProjectChannel): Promise<
         and(
           eq(projectsTable.id, data.projectId),
           eq(projectsTable.ownerId, data.ownerId),
-          eq(projectsTable.isActive, true),
+          isNull(projectsTable.deactivatedAt),
         ),
       )
       .limit(1)
@@ -138,7 +138,7 @@ export async function listProjectChannels(filters: {
   ];
 
   if (!includeInactive) {
-    channelConditions.push(eq(projectChannelsTable.isActive, true));
+    channelConditions.push(isNull(projectChannelsTable.deactivatedAt));
   }
 
   if (!includeArchived) {
@@ -164,7 +164,7 @@ export async function listProjectChannels(filters: {
   ];
 
   if (!includeInactive) {
-    messageConditions.push(eq(messagesTable.isActive, true));
+    messageConditions.push(isNull(messagesTable.deactivatedAt));
   }
 
   const latestMessages = await db
@@ -273,7 +273,6 @@ export async function inactivateProjectChannel(id: string, ownerId: string, deac
   const [channel] = await db
     .update(projectChannelsTable)
     .set({
-      isActive: false,
       deactivatedAt: new Date(),
       deactivatedBy,
     })
@@ -297,7 +296,7 @@ export async function getChannelMessages(channelId: string): Promise<SelectMessa
   const conditions = [
     eq(messagesTable.sourceType, "channel"),
     eq(messagesTable.sourceId, channelId),
-    eq(messagesTable.isActive, true)
+    isNull(messagesTable.deactivatedAt)
   ];
 
   const messages = await db

@@ -12,7 +12,7 @@ export const LlmProviderSchema = z.object({
   baseUrl: z.string().nullable(),
   defaultModel: z.string(),
   isDefault: z.boolean(),
-  isActive: z.boolean(),
+  deactivatedAt: z.date().nullable(),
   createdAt: z.date(),
   updatedAt: z.date(),
 });

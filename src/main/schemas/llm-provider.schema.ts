@@ -28,8 +28,8 @@ export const llmProvidersTable = sqliteTable(
       .notNull()
       .default(false),
 
-    // State flag
-    isActive: integer("is_active", { mode: "boolean" }).notNull().default(true),
+    // Soft deletion
+    deactivatedAt: integer("deactivated_at", { mode: "timestamp_ms" }),
 
     createdAt: integer("created_at", { mode: "timestamp_ms" })
       .notNull()
@@ -43,11 +43,7 @@ export const llmProvidersTable = sqliteTable(
     ownerIdIdx: index("llm_providers_owner_id_idx").on(table.ownerId),
     typeIdx: index("llm_providers_type_idx").on(table.type),
     isDefaultIdx: index("llm_providers_is_default_idx").on(table.isDefault),
-    isActiveIdx: index("llm_providers_is_active_idx").on(table.isActive),
-    isActiveCreatedAtIdx: index("llm_providers_is_active_created_at_idx").on(
-      table.isActive,
-      table.createdAt,
-    ),
+    deactivatedAtIdx: index("llm_providers_deactivated_at_idx").on(table.deactivatedAt),
   }),
 );
 

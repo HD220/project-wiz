@@ -1,4 +1,4 @@
-import { eq, and, gt, desc } from "drizzle-orm";
+import { eq, and, gt, desc, isNull } from "drizzle-orm";
 import { createDatabaseConnection } from "@/shared/config/database";
 import { usersTable } from "@/main/schemas/user.schema";
 import { userSessionsTable } from "@/main/schemas/user-sessions.schema";
@@ -114,10 +114,10 @@ export class SessionRegistry {
         .innerJoin(usersTable, eq(userSessionsTable.userId, usersTable.id))
         .where(
           and(
-            eq(userSessionsTable.isActive, true),
+            isNull(userSessionsTable.deactivatedAt),
             gt(userSessionsTable.expiresAt, new Date()),
             eq(usersTable.type, "human"),
-            eq(usersTable.isActive, true)
+            isNull(usersTable.deactivatedAt)
           ),
         )
         .orderBy(desc(userSessionsTable.createdAt))
@@ -170,7 +170,7 @@ export class SessionRegistry {
         .where(
           and(
             eq(userSessionsTable.token, this.currentSession.token),
-            eq(userSessionsTable.isActive, true),
+            isNull(userSessionsTable.deactivatedAt),
             gt(userSessionsTable.expiresAt, new Date())
           )
         )

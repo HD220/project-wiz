@@ -12,8 +12,7 @@ export const ProjectSchema = z.object({
   branch: z.string().nullable(),
   localPath: z.string(),
   ownerId: z.string(),
-  isActive: z.boolean(),
-  isArchived: z.boolean(),
+  deactivatedAt: z.date().nullable(),
   createdAt: z.date(),
   updatedAt: z.date(),
 });

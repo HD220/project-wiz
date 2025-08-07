@@ -1,5 +1,5 @@
 import * as crypto from "crypto";
-import { eq, and, desc, like, sql } from "drizzle-orm";
+import { eq, and, desc, like, sql, isNull } from "drizzle-orm";
 import { createDatabaseConnection } from "@/shared/config/database";
 import { 
   llmProvidersTable, 
@@ -179,7 +179,7 @@ export async function listLlmProviders(filters: {
 
   // Apply active/inactive filter
   if (!filters.showInactive) {
-    conditions.push(eq(llmProvidersTable.isActive, true));
+    conditions.push(isNull(llmProvidersTable.deactivatedAt));
   }
 
   // Apply type filter
@@ -215,7 +215,7 @@ export async function getDefaultLlmProvider(ownerId: string): Promise<SelectLlmP
       and(
         eq(llmProvidersTable.ownerId, ownerId),
         eq(llmProvidersTable.isDefault, true),
-        eq(llmProvidersTable.isActive, true),
+        isNull(llmProvidersTable.deactivatedAt),
       ),
     )
     .limit(1);
@@ -304,7 +304,7 @@ export async function inactivateLlmProvider(id: string, ownerId: string): Promis
   const [updatedProvider] = await db
     .update(llmProvidersTable)
     .set({
-      isActive: false,
+      deactivatedAt: new Date(),
       updatedAt: sql`(strftime('%s', 'now'))`,
     })
     .where(

@@ -142,8 +142,7 @@ export async function createDMConversation(data: {
     const participantValues = data.participantIds.map((participantId) => ({
       ownerId: data.ownerId,
       dmConversationId: dmConversation.id,
-      participantId,
-      isActive: true
+      participantId
     }));
 
     tx
@@ -183,7 +182,7 @@ export async function listUserDMConversations(filters: {
   ];
 
   if (!includeInactive) {
-    participantConditions.push(eq(dmParticipantsTable.isActive, true));
+    participantConditions.push(isNull(dmParticipantsTable.deactivatedAt));
   }
 
   const userDMConversations = await db
@@ -207,7 +206,7 @@ export async function listUserDMConversations(filters: {
   ];
 
   if (!includeInactive) {
-    conversationConditions.push(eq(dmConversationsTable.isActive, true));
+    conversationConditions.push(isNull(dmConversationsTable.deactivatedAt));
   }
 
   if (!includeArchived) {
@@ -225,7 +224,7 @@ export async function listUserDMConversations(filters: {
   ];
 
   if (!includeInactive) {
-    participantQueryConditions.push(eq(dmParticipantsTable.isActive, true));
+    participantQueryConditions.push(isNull(dmParticipantsTable.deactivatedAt));
   }
 
   const allParticipants = await db
@@ -240,7 +239,7 @@ export async function listUserDMConversations(filters: {
   ];
 
   if (!includeInactive) {
-    messageConditions.push(eq(messagesTable.isActive, true));
+    messageConditions.push(isNull(messagesTable.deactivatedAt));
   }
 
   const latestMessages = await db
@@ -342,7 +341,6 @@ export async function inactivateDMConversation(id: string, ownerId: string): Pro
   const [conversation] = await db
     .update(dmConversationsTable)
     .set({
-      isActive: false,
       deactivatedAt: new Date(),
     })
     .where(
@@ -383,7 +381,6 @@ export async function removeDMParticipant(conversationId: string, participantId:
   const result = await db
     .update(dmParticipantsTable)
     .set({
-      isActive: false,
       deactivatedAt: new Date(),
     })
     .where(
@@ -406,7 +403,7 @@ export async function getDMMessages(conversationId: string, options?: { limit?: 
   const conditions = [
     eq(messagesTable.sourceType, "dm"),
     eq(messagesTable.sourceId, conversationId),
-    eq(messagesTable.isActive, true)
+    isNull(messagesTable.deactivatedAt)
   ];
 
   let query = db

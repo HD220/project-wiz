@@ -1,4 +1,4 @@
-import { eq, and, desc, like, or } from "drizzle-orm";
+import { eq, and, desc, like, or, isNull, sql } from "drizzle-orm";
 import { createDatabaseConnection } from "@/shared/config/database";
 import { 
   projectsTable, 
@@ -22,7 +22,7 @@ export async function findProject(projectId: string, ownerId: string): Promise<S
     .where(and(
       eq(projectsTable.id, projectId),
       eq(projectsTable.ownerId, ownerId),
-      eq(projectsTable.isActive, true)
+      isNull(projectsTable.deactivatedAt)
     ))
     .limit(1);
 
@@ -40,7 +40,7 @@ export async function findProjectById(projectId: string): Promise<SelectProject 
     .from(projectsTable)
     .where(and(
       eq(projectsTable.id, projectId),
-      eq(projectsTable.isActive, true)
+      isNull(projectsTable.deactivatedAt)
     ))
     .limit(1);
 
@@ -66,7 +66,7 @@ export async function updateProject(data: UpdateProject): Promise<SelectProject 
     .where(and(
       eq(projectsTable.id, data.id),
       eq(projectsTable.ownerId, data.ownerId),
-      eq(projectsTable.isActive, true)
+      isNull(projectsTable.deactivatedAt)
     ))
     .returning();
 
@@ -83,7 +83,6 @@ export async function createProject(data: InsertProject & { ownerId: string }): 
     .insert(projectsTable)
     .values({
       ...data,
-      isActive: true,
       createdAt: new Date(),
       updatedAt: new Date()
     })
@@ -113,12 +112,22 @@ export async function listProjects(filters: {
 
   // Filter by isActive if specified
   if (filters.isActive !== undefined) {
-    conditions.push(eq(projectsTable.isActive, filters.isActive));
+    if (filters.isActive) {
+      conditions.push(isNull(projectsTable.deactivatedAt));
+    } else {
+      conditions.push(eq(projectsTable.isActive, false));
+    }
   }
 
   // Filter by isArchived if specified
   if (filters.isArchived !== undefined) {
-    conditions.push(eq(projectsTable.isArchived, filters.isArchived));
+    if (filters.isArchived) {
+      // Show only archived projects (archivedAt is not null)
+      conditions.push(sql`${projectsTable.archivedAt} IS NOT NULL`);
+    } else {
+      // Show only non-archived projects (archivedAt is null)
+      conditions.push(isNull(projectsTable.archivedAt));
+    }
   }
 
   // Search filter
@@ -159,7 +168,7 @@ export async function archiveProject(
   const [archivedProject] = await db
     .update(projectsTable)
     .set({ 
-      isArchived: true,
+      archivedAt: new Date(),
       updatedAt: new Date()
     })
     .where(and(
@@ -173,6 +182,40 @@ export async function archiveProject(
   }
 
   return archivedProject;
+}
+
+/**
+ * Unarchive project
+ */
+export async function unarchiveProject(
+  projectId: string,
+  ownerId: string
+): Promise<SelectProject> {
+  const db = getDatabase();
+
+  // First check if project exists and user owns it
+  const existingProject = await findProject(projectId, ownerId);
+  if (!existingProject) {
+    throw new Error("Project not found or access denied");
+  }
+
+  const [unarchivedProject] = await db
+    .update(projectsTable)
+    .set({ 
+      archivedAt: null,
+      updatedAt: new Date()
+    })
+    .where(and(
+      eq(projectsTable.id, projectId),
+      eq(projectsTable.ownerId, ownerId)
+    ))
+    .returning();
+
+  if (!unarchivedProject) {
+    throw new Error("Failed to unarchive project");
+  }
+
+  return unarchivedProject;
 }
 
 /**
@@ -193,7 +236,7 @@ export async function deleteProject(
   await db
     .update(projectsTable)
     .set({
-      isActive: false,
+      deactivatedAt: new Date(),
       updatedAt: new Date()
     })
     .where(and(

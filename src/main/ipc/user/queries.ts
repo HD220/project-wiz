@@ -1,4 +1,4 @@
-import { eq, and, ne } from "drizzle-orm";
+import { eq, and, ne, isNull } from "drizzle-orm";
 import { createDatabaseConnection } from "@/shared/config/database";
 import { usersTable, type SelectUser, type InsertUser } from "@/main/schemas/user.schema";
 import { agentsTable } from "@/main/schemas/agent.schema";
@@ -35,7 +35,7 @@ export async function findUser(userId: string, includeInactive: boolean = false)
   const conditions = [eq(usersTable.id, userId)];
 
   if (!includeInactive) {
-    conditions.push(eq(usersTable.isActive, true));
+    conditions.push(isNull(usersTable.deactivatedAt));
   }
 
   const [user] = await db
@@ -63,7 +63,7 @@ export async function findUserByIdAndType(input: {
   ];
 
   if (!input.includeInactive) {
-    conditions.push(eq(usersTable.isActive, true));
+    conditions.push(isNull(usersTable.deactivatedAt));
   }
 
   const [user] = await db
@@ -89,7 +89,7 @@ export async function updateUser(userId: string, data: Partial<InsertUser>): Pro
   const [updatedUser] = await db
     .update(usersTable)
     .set(updateData)
-    .where(and(eq(usersTable.id, userId), eq(usersTable.isActive, true)))
+    .where(and(eq(usersTable.id, userId), isNull(usersTable.deactivatedAt)))
     .returning();
 
   return updatedUser || null;
@@ -104,7 +104,7 @@ export async function listUsers(filters: { includeInactive?: boolean; type?: "hu
   const conditions = [];
 
   if (!filters.includeInactive) {
-    conditions.push(eq(usersTable.isActive, true));
+    conditions.push(isNull(usersTable.deactivatedAt));
   }
 
   if (filters.type) {
@@ -131,7 +131,7 @@ export async function getUsersByType(type: "human" | "agent", includeInactive: b
   const conditions = [eq(usersTable.type, type)];
 
   if (!includeInactive) {
-    conditions.push(eq(usersTable.isActive, true));
+    conditions.push(isNull(usersTable.deactivatedAt));
   }
 
   const users = await db
@@ -153,7 +153,7 @@ export async function listAvailableUsers(
   const db = getDatabase();
 
   const conditions = [
-    eq(usersTable.isActive, true),
+    isNull(usersTable.deactivatedAt),
     ne(usersTable.id, currentUserId), // Excluir o usuário atual
   ];
 
@@ -180,7 +180,7 @@ export async function listAgents(filters: { ownerId?: string; showInactive?: boo
   const conditions = [eq(usersTable.type, "agent")];
 
   if (!filters.showInactive) {
-    conditions.push(eq(usersTable.isActive, true));
+    conditions.push(isNull(usersTable.deactivatedAt));
   }
 
   const users = await db
@@ -218,7 +218,7 @@ export async function getUserStats(userId: string): Promise<{
     .from(agentsTable)
     .innerJoin(usersTable, eq(agentsTable.id, usersTable.id))
     .where(
-      and(eq(agentsTable.ownerId, userId), eq(usersTable.isActive, true)),
+      and(eq(agentsTable.ownerId, userId), isNull(usersTable.deactivatedAt)),
     );
 
   const ownedAgentsInactive = await db
@@ -236,7 +236,7 @@ export async function getUserStats(userId: string): Promise<{
     .where(
       and(
         eq(projectsTable.ownerId, userId),
-        eq(projectsTable.isActive, true),
+        isNull(projectsTable.deactivatedAt),
       ),
     );
 
@@ -257,7 +257,7 @@ export async function getUserStats(userId: string): Promise<{
     .where(
       and(
         eq(userSessionsTable.userId, userId),
-        eq(userSessionsTable.isActive, true),
+        isNull(userSessionsTable.deactivatedAt),
       ),
     );
 
@@ -268,7 +268,7 @@ export async function getUserStats(userId: string): Promise<{
     .where(
       and(
         eq(dmParticipantsTable.participantId, userId),
-        eq(dmParticipantsTable.isActive, true),
+        isNull(dmParticipantsTable.deactivatedAt),
       ),
     );
 
@@ -308,12 +308,11 @@ export async function softDeleteUser(userId: string, deactivatedBy: string): Pro
   const [updatedUser] = await db
     .update(usersTable)
     .set({
-      isActive: false,
       deactivatedAt: new Date(),
       deactivatedBy: deactivatedBy,
       updatedAt: new Date(),
     })
-    .where(and(eq(usersTable.id, userId), eq(usersTable.isActive, true)))
+    .where(and(eq(usersTable.id, userId), isNull(usersTable.deactivatedAt)))
     .returning();
 
   return !!updatedUser;
@@ -328,7 +327,6 @@ export async function activateUser(userId: string): Promise<SelectUser | null> {
   const [updatedUser] = await db
     .update(usersTable)
     .set({
-      isActive: true,
       deactivatedAt: null,
       deactivatedBy: null,
       updatedAt: new Date(),

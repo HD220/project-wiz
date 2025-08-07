@@ -43,7 +43,7 @@ const handler = createIPCHandler({
       localPath: dbProject.localPath,
       ownerId: dbProject.ownerId,
       isActive: dbProject.isActive,
-      isArchived: dbProject.isArchived,
+      isArchived: !!dbProject.archivedAt,
       createdAt: new Date(dbProject.createdAt),
       updatedAt: new Date(dbProject.updatedAt),
     };

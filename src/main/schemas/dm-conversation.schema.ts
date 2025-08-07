@@ -19,7 +19,6 @@ export const dmConversationsTable = sqliteTable(
     archivedAt: integer("archived_at", { mode: "timestamp_ms" }),
 
     // Soft deletion fields
-    isActive: integer("is_active", { mode: "boolean" }).notNull().default(true),
     deactivatedAt: integer("deactivated_at", { mode: "timestamp_ms" }),
 
     createdAt: integer("created_at", { mode: "timestamp_ms" })
@@ -38,19 +37,16 @@ export const dmConversationsTable = sqliteTable(
     createdAtIdx: index("dm_conversations_created_at_idx").on(table.createdAt),
 
     // Soft deletion indexes
-    isActiveIdx: index("dm_conversations_is_active_idx").on(table.isActive),
-    isActiveCreatedAtIdx: index("dm_conversations_is_active_created_at_idx").on(
-      table.isActive,
-      table.createdAt,
-    ),
+    deactivatedAtIdx: index("dm_conversations_deactivated_at_idx").on(table.deactivatedAt),
 
     // Archiving indexes
     archivedAtIdx: index("dm_conversations_archived_at_idx").on(
       table.archivedAt,
     ),
-    isActiveArchivedAtIdx: index(
-      "dm_conversations_is_active_archived_at_idx",
-    ).on(table.isActive, table.archivedAt),
+    // Combined archiving index
+    deactivatedArchivedAtIdx: index(
+      "dm_conversations_deactivated_archived_at_idx",
+    ).on(table.deactivatedAt, table.archivedAt),
   }),
 );
 
@@ -70,7 +66,6 @@ export const dmParticipantsTable = sqliteTable(
       .references(() => usersTable.id, { onDelete: "cascade" }),
 
     // Soft deletion fields
-    isActive: integer("is_active", { mode: "boolean" }).notNull().default(true),
     deactivatedAt: integer("deactivated_at", { mode: "timestamp_ms" }),
 
     createdAt: integer("created_at", { mode: "timestamp_ms" })
@@ -100,11 +95,7 @@ export const dmParticipantsTable = sqliteTable(
     ),
 
     // Soft deletion indexes
-    isActiveIdx: index("dm_participants_is_active_idx").on(table.isActive),
-    isActiveCreatedAtIdx: index("dm_participants_is_active_created_at_idx").on(
-      table.isActive,
-      table.createdAt,
-    ),
+    deactivatedAtIdx: index("dm_participants_deactivated_at_idx").on(table.deactivatedAt),
 
     // Composite index for unique participant in DM
     dmParticipantIdx: index("dm_participants_dm_participant_idx").on(
