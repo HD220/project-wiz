@@ -1,9 +1,14 @@
 import { z } from "zod";
+
 import { inactivateLlmProvider } from "@/main/ipc/llm-provider/queries";
 import { requireAuth } from "@/main/services/session-registry";
+
 import { eventBus } from "@/shared/services/events/event-bus";
 import { getLogger } from "@/shared/services/logger/config";
-import { createIPCHandler, InferHandler } from "@/shared/utils/create-ipc-handler";
+import {
+  createIPCHandler,
+  InferHandler,
+} from "@/shared/utils/create-ipc-handler";
 
 const logger = getLogger("llm-provider.inactivate.invoke");
 
@@ -34,7 +39,7 @@ const handler = createIPCHandler({
     eventBus.emit("llm-provider:inactivated", { providerId: input.id });
 
     return undefined;
-  }
+  },
 });
 
 export default handler;
@@ -42,7 +47,7 @@ export default handler;
 declare global {
   namespace WindowAPI {
     interface LlmProvider {
-      inactivate: InferHandler<typeof handler>
+      inactivate: InferHandler<typeof handler>;
     }
   }
 }

@@ -4,8 +4,6 @@ import {
   useSearch,
 } from "@tanstack/react-router";
 
-import type { LlmProvider, Agent } from "@/shared/types";
-
 import {
   StandardFormModal,
   StandardFormModalContent,
@@ -20,8 +18,13 @@ import { AgentForm } from "@/renderer/features/agent/components/agent-form";
 import { useApiMutation } from "@/renderer/hooks/use-api-mutation.hook";
 import { loadApiData } from "@/renderer/lib/route-loader";
 
+import type { LlmProvider, Agent } from "@/shared/types";
+
 // Create agent input type derived from Agent
-type CreateAgentInput = Pick<Agent, 'name' | 'role' | 'backstory' | 'goal' | 'providerId' | 'modelConfig'>;
+type CreateAgentInput = Pick<
+  Agent,
+  "name" | "role" | "backstory" | "goal" | "providerId" | "modelConfig"
+>;
 
 function EditAgentPage() {
   const navigate = useNavigate();
@@ -34,7 +37,7 @@ function EditAgentPage() {
   // Standardized mutation with automatic error handling
   const updateAgentMutation = useApiMutation(
     (data: CreateAgentInput) =>
-      window.api.agent.update({ id: agent?.id || '', data }),
+      window.api.agent.update({ id: agent?.id || "", data }),
     {
       successMessage: "Agent updated successfully",
       errorMessage: "Failed to update agent",

@@ -1,14 +1,7 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { useNavigate, useLocation, Link } from "@tanstack/react-router";
-import {
-  MessageCircle,
-  Archive,
-  Plus,
-  MoreHorizontal,
-} from "lucide-react";
+import { MessageCircle, Archive, Plus, MoreHorizontal } from "lucide-react";
 import { useState, useMemo } from "react";
-
-import type { User } from "@/shared/types/user";
 
 import { CustomLink } from "@/renderer/components/custom-link";
 import { Button } from "@/renderer/components/ui/button";
@@ -20,14 +13,18 @@ import {
 } from "@/renderer/components/ui/dropdown-menu";
 import { Switch } from "@/renderer/components/ui/switch";
 import { useAuth } from "@/renderer/contexts/auth.context";
-import { getOtherParticipants, createConversationAvatar } from "@/renderer/features/conversation/utils/conversation-avatar.utils";
+import {
+  getOtherParticipants,
+  createConversationAvatar,
+} from "@/renderer/features/conversation/utils/conversation-avatar.utils";
 import { useApiMutation } from "@/renderer/hooks/use-api-mutation.hook";
 import { cn } from "@/renderer/lib/utils";
 
-import { ArchiveConversationDialog } from "./archive-conversation-dialog";
-
 import type { DMConversation } from "@/shared/types/dm-conversation";
 import type { Message } from "@/shared/types/message";
+import type { User } from "@/shared/types/user";
+
+import { ArchiveConversationDialog } from "./archive-conversation-dialog";
 
 // Local type that reflects what dm.list() API actually returns
 interface DMConversationWithLastMessage extends DMConversation {
@@ -305,9 +302,9 @@ function ConversationListItem(props: ConversationListItemProps) {
           {createConversationAvatar(
             getOtherParticipants(
               conversation.participants || [],
-              user?.id || ""
+              user?.id || "",
             ),
-            "sm"
+            "sm",
           )}
         </div>
 

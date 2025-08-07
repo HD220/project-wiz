@@ -2,8 +2,6 @@ import { createFileRoute, Outlet } from "@tanstack/react-router";
 import { Send, Paperclip, Smile } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 
-import type { Message, Channel, User } from "@/shared/types";
-
 import {
   Chat,
   ChatMessages,
@@ -18,7 +16,9 @@ import {
 import { Button } from "@/renderer/components/ui/button";
 import { Textarea } from "@/renderer/components/ui/textarea";
 import { loadApiData } from "@/renderer/lib/route-loader";
+
 import { getRendererLogger } from "@/shared/services/logger/renderer";
+import type { Message, Channel, User } from "@/shared/types";
 
 const logger = getRendererLogger("channel-route");
 
@@ -153,9 +153,7 @@ function ChannelLayout() {
                       <div className="group relative flex gap-3 px-4 py-2 hover:bg-muted/30 transition-colors">
                         {/* Message content */}
                         <div className="flex-1">
-                          <p className="text-sm">
-                            {msg.data.content}
-                          </p>
+                          <p className="text-sm">{msg.data.content}</p>
                         </div>
                       </div>
                     )}

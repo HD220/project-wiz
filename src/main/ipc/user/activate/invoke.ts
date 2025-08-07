@@ -1,10 +1,15 @@
 import { z } from "zod";
+
 import { activateUser } from "@/main/ipc/user/queries";
-import { UserSchema } from "@/shared/types";
 import { requireAuth } from "@/main/services/session-registry";
-import { getLogger } from "@/shared/services/logger/config";
+
 import { eventBus } from "@/shared/services/events/event-bus";
-import { createIPCHandler, InferHandler } from "@/shared/utils/create-ipc-handler";
+import { getLogger } from "@/shared/services/logger/config";
+import { UserSchema } from "@/shared/types";
+import {
+  createIPCHandler,
+  InferHandler,
+} from "@/shared/utils/create-ipc-handler";
 
 const logger = getLogger("user.activate.invoke");
 
@@ -21,14 +26,14 @@ const handler = createIPCHandler({
     logger.debug("Activating user", { userId: input.userId });
 
     const currentUser = requireAuth();
-    
+
     // Execute query
     const dbUser = await activateUser(input.userId);
-    
+
     if (!dbUser) {
       throw new Error("User not found or cannot be activated");
     }
-    
+
     // Map database result to API format
     const apiUser = {
       id: dbUser.id,
@@ -38,14 +43,17 @@ const handler = createIPCHandler({
       createdAt: new Date(dbUser.createdAt),
       updatedAt: new Date(dbUser.updatedAt),
     };
-    
+
     logger.debug("User activated", { userId: apiUser.id });
-    
+
     // Emit event
-    eventBus.emit("user:activated", { userId: apiUser.id, activatedBy: currentUser.id });
-    
+    eventBus.emit("user:activated", {
+      userId: apiUser.id,
+      activatedBy: currentUser.id,
+    });
+
     return apiUser;
-  }
+  },
 });
 
 export default handler;
@@ -53,7 +61,7 @@ export default handler;
 declare global {
   namespace WindowAPI {
     interface User {
-      activate: InferHandler<typeof handler>
+      activate: InferHandler<typeof handler>;
     }
   }
 }

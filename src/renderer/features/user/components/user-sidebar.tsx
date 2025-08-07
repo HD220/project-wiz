@@ -1,80 +1,94 @@
 import { Hash, Bot, Archive } from "lucide-react";
 
-
-
-import { Sidebar, SidebarContent, SidebarSection } from "@/renderer/components/ui/sidebar";
 import { Button } from "@/renderer/components/ui/button";
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarGroup,
+  SidebarGroupLabel,
+  SidebarMenu,
+  SidebarMenuItem,
+  SidebarMenuButton,
+} from "@/renderer/components/ui/sidebar";
 import { ConversationList } from "@/renderer/features/conversation/components/conversation-list";
 
+import type { DMConversation } from "@/shared/types/dm-conversation";
+import type { Message } from "@/shared/types/message";
+import type { User } from "@/shared/types/user";
+
+// Define types locally since they're not available from imports
+interface DMConversationWithLastMessage extends DMConversation {
+  lastMessage?: Message;
+  participants?: User[];
+}
+
 interface UserSidebarProps {
-  conversations: ConversationWithLastMessage[];
-  availableUsers: UserSummary[];
+  conversations: DMConversationWithLastMessage[];
+  availableUsers: User[];
   showArchived?: boolean;
   onToggleArchived?: (show: boolean) => void;
 }
 
-export function UserSidebar({ 
-  conversations, 
+export function UserSidebar({
+  conversations,
+  availableUsers,
   showArchived = false,
-  onToggleArchived 
+  onToggleArchived,
 }: UserSidebarProps) {
-  
   return (
-    <Sidebar 
-      width="wide"
-      role="navigation"
-      aria-label="User navigation"
-    >
+    <Sidebar>
       <SidebarContent>
         {/* Navigation */}
-        <SidebarSection>
-          <MenuItem
-            to="/user"
-            icon={Hash}
-            label="Dashboard"
-            variant="sidebar"
-          />
-          
-          <MenuItem
-            to="/user/agents"
-            icon={Bot}
-            label="Agents"
-            variant="sidebar"
-          />
-        </SidebarSection>
+        <SidebarGroup>
+          <SidebarGroupLabel>Navigation</SidebarGroupLabel>
+          <SidebarMenu>
+            <SidebarMenuItem>
+              <SidebarMenuButton asChild>
+                <a href="/user">
+                  <Hash className="h-4 w-4" />
+                  <span>Dashboard</span>
+                </a>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+
+            <SidebarMenuItem>
+              <SidebarMenuButton asChild>
+                <a href="/user/agents">
+                  <Bot className="h-4 w-4" />
+                  <span>Agents</span>
+                </a>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          </SidebarMenu>
+        </SidebarGroup>
 
         {/* Archive Toggle */}
-        <SidebarSection>
+        <SidebarGroup>
           <Button
             variant="ghost"
             size="sm"
-            className="w-full justify-start h-8 px-2 bg-sidebar-accent/20 hover:bg-sidebar-accent/30 transition-colors"
+            className="w-full justify-start h-8 px-2"
             onClick={() => onToggleArchived?.(!showArchived)}
           >
-            <Icon 
-              icon={Archive} 
-              size="sm" 
-              color="secondary" 
-              className="mr-3" 
-            />
-            <Text size="sm" color="secondary" className="flex-1">
-              Show Archived
-            </Text>
-            
+            <Archive className="h-4 w-4 mr-2" />
+            <span className="flex-1">Show Archived</span>
+
             {/* Simple toggle indicator */}
-            <div className={`w-3 h-3 rounded-full transition-colors ${
-              showArchived ? 'bg-primary' : 'bg-gray-300'
-            }`} />
+            <div
+              className={`w-3 h-3 rounded-full transition-colors ${
+                showArchived ? "bg-primary" : "bg-gray-300"
+              }`}
+            />
           </Button>
-        </SidebarSection>
+        </SidebarGroup>
 
         {/* Conversations */}
-        <SidebarSection>
+        <SidebarGroup>
           <ConversationList
             conversations={conversations}
-            showArchived={showArchived}
+            availableUsers={availableUsers}
           />
-        </SidebarSection>
+        </SidebarGroup>
       </SidebarContent>
     </Sidebar>
   );

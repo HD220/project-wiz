@@ -1,22 +1,32 @@
+import { AlertCircle, CheckCircle2, Shield } from "lucide-react"; // Assuming Lucide icons
+import { useFormContext } from "react-hook-form";
+
+import { LlmProviderSchema } from "@/shared/types/llm-provider";
+
+import { z } from "zod";
+
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/renderer/components/molecules/card";
+} from "@/renderer/components/ui/card";
+import { Checkbox } from "@/renderer/components/ui/checkbox";
 import {
   FormControl,
   FormDescription,
   FormField,
   FormItem,
   FormLabel,
-} from "@/renderer/components/atoms/form";
-import { Checkbox } from "@/renderer/components/ui/checkbox";
-import { AlertCircle, CheckCircle2, Shield } from "lucide-react"; // Assuming Lucide icons
-import { useFormContext } from "react-hook-form";
-import { LlmProviderFormSchema } from "../../agent.schema";
-import { z } from "zod";
+} from "@/renderer/components/ui/form";
+
+// Schema for form input
+const LlmProviderFormSchema = LlmProviderSchema.omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
 import { cn } from "@/renderer/lib/utils";
 
 export function ProviderSettingsSection() {
@@ -72,33 +82,38 @@ export function ProviderSettingsSection() {
 
           <FormField
             control={form.control}
-            name="isActive"
-            render={({ field }) => (
-              <FormItem
-                className={cn(
-                  "flex flex-row items-center justify-between rounded-lg border p-[var(--spacing-component-md)] transition-colors",
-                  "bg-background/30 border-border/60 hover:bg-background/50",
-                  field.value && "bg-chart-2/5 border-chart-2/20",
-                )}
-              >
-                <div className="space-y-[var(--spacing-component-xs)]">
-                  <FormLabel className="text-sm font-semibold flex items-center gap-[var(--spacing-component-sm)]">
-                    <AlertCircle className="size-4 text-chart-2" />
-                    Active Provider
-                  </FormLabel>
-                  <FormDescription className="text-xs text-muted-foreground">
-                    Enable this provider for use in agents
-                  </FormDescription>
-                </div>
-                <FormControl>
-                  <Checkbox
-                    checked={field.value}
-                    onCheckedChange={field.onChange}
-                    className="data-[state=checked]:bg-chart-2 data-[state=checked]:border-chart-2"
-                  />
-                </FormControl>
-              </FormItem>
-            )}
+            name="deactivatedAt"
+            render={({ field }) => {
+              const isActive = !field.value;
+              return (
+                <FormItem
+                  className={cn(
+                    "flex flex-row items-center justify-between rounded-lg border p-[var(--spacing-component-md)] transition-colors",
+                    "bg-background/30 border-border/60 hover:bg-background/50",
+                    isActive && "bg-chart-2/5 border-chart-2/20",
+                  )}
+                >
+                  <div className="space-y-[var(--spacing-component-xs)]">
+                    <FormLabel className="text-sm font-semibold flex items-center gap-[var(--spacing-component-sm)]">
+                      <AlertCircle className="size-4 text-chart-2" />
+                      Active Provider
+                    </FormLabel>
+                    <FormDescription className="text-xs text-muted-foreground">
+                      Enable this provider for use in agents
+                    </FormDescription>
+                  </div>
+                  <FormControl>
+                    <Checkbox
+                      checked={isActive}
+                      onCheckedChange={(checked) =>
+                        field.onChange(checked ? null : new Date())
+                      }
+                      className="data-[state=checked]:bg-chart-2 data-[state=checked]:border-chart-2"
+                    />
+                  </FormControl>
+                </FormItem>
+              );
+            }}
           />
         </div>
       </CardContent>

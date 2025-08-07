@@ -7,7 +7,6 @@ import { CustomLink } from "@/renderer/components/custom-link";
 import { SearchFilterBar } from "@/renderer/components/search-filter-bar";
 import { Button } from "@/renderer/components/ui/button";
 import { ScrollArea } from "@/renderer/components/ui/scroll-area";
-import type { Agent } from "@/shared/types/agent";
 import { AgentListItem } from "@/renderer/features/agent/components/agent-card";
 import { AgentDeleteDialog } from "@/renderer/features/agent/components/agent-delete-dialog";
 import { useApiMutation } from "@/renderer/hooks/use-api-mutation.hook";
@@ -16,6 +15,8 @@ import {
   validateSelectFilter,
 } from "@/renderer/lib/search-validation";
 import { cn } from "@/renderer/lib/utils";
+
+import type { Agent } from "@/shared/types/agent";
 
 interface AgentListProps {
   agents: Agent[];
@@ -52,7 +53,7 @@ export function AgentList(props: AgentListProps) {
   );
 
   const toggleStatusMutation = useApiMutation(
-    ({ id, status }: { id: string; status: Agent['status'] }) =>
+    ({ id, status }: { id: string; status: Agent["status"] }) =>
       window.api.agent.update({ id, status }),
     {
       errorMessage: "Failed to update agent status",
@@ -71,7 +72,7 @@ export function AgentList(props: AgentListProps) {
   }
 
   function handleToggleStatus(agent: Agent) {
-    const newStatus: Agent['status'] =
+    const newStatus: Agent["status"] =
       agent.status === "active" ? "inactive" : "active";
     toggleStatusMutation.mutate({ id: agent.id, status: newStatus });
 
@@ -122,8 +123,8 @@ export function AgentList(props: AgentListProps) {
   // Inline filter checking and agent categorization following INLINE-FIRST principles
   const hasFilters = !!(search.status || search.search || search.showInactive);
   const filteredAgents = agents; // Backend already handles filtering
-  const activeAgents = agents.filter((agent) => agent.isActive);
-  const inactiveAgents = agents.filter((agent) => !agent.isActive);
+  const activeAgents = agents.filter((agent) => !agent.deactivatedAt);
+  const inactiveAgents = agents.filter((agent) => !!agent.deactivatedAt);
 
   // Inline statistics calculation for UI display
   const agentStats = {

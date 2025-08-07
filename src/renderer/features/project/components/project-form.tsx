@@ -3,8 +3,6 @@ import { FolderIcon, Github } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
-import { ProjectSchema } from "@/shared/types/project";
-
 import {
   Form,
   FormControl,
@@ -29,6 +27,8 @@ import { Textarea } from "@/renderer/components/ui/textarea";
 import { useAuth } from "@/renderer/contexts/auth.context";
 import { useApiMutation } from "@/renderer/hooks/use-api-mutation.hook";
 import { cn } from "@/renderer/lib/utils";
+
+import { ProjectSchema } from "@/shared/types/project";
 
 const ProjectFormSchema = z
   .object({
@@ -196,10 +196,10 @@ export function ProjectForm(props: ProjectFormProps) {
       avatarUrl: null, // No avatar support in form yet
       localPath,
       ownerId: user.id,
-      isActive: true,
-      isArchived: false,
-      gitUrl: data.type === "github" ? (data.gitUrl?.trim() || null) : null,
-      branch: data.type === "github" ? (data.branch?.trim() || "main") : null,
+      deactivatedAt: null,
+      archivedAt: null,
+      gitUrl: data.type === "github" ? data.gitUrl?.trim() || null : null,
+      branch: data.type === "github" ? data.branch?.trim() || "main" : null,
     };
 
     createProjectMutation.mutate(projectData);

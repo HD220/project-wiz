@@ -1,9 +1,13 @@
 import { createProject } from "@/main/ipc/project/queries";
-import { ProjectSchema } from "@/shared/types";
 import { requireAuth } from "@/main/services/session-registry";
-import { getLogger } from "@/shared/services/logger/config";
+
 import { eventBus } from "@/shared/services/events/event-bus";
-import { createIPCHandler, InferHandler } from "@/shared/utils/create-ipc-handler";
+import { getLogger } from "@/shared/services/logger/config";
+import { ProjectSchema } from "@/shared/types";
+import {
+  createIPCHandler,
+  InferHandler,
+} from "@/shared/utils/create-ipc-handler";
 
 const logger = getLogger("project.create.invoke");
 
@@ -25,13 +29,13 @@ const handler = createIPCHandler({
     logger.debug("Creating project");
 
     const currentUser = requireAuth();
-    
+
     // Query recebe dados e gerencia campos técnicos internamente
     const dbProject = await createProject({
       ...input,
       ownerId: currentUser.id,
     });
-    
+
     // Mapeamento: SelectProject → Project
     const apiProject = {
       id: dbProject.id,
@@ -42,19 +46,20 @@ const handler = createIPCHandler({
       branch: dbProject.branch,
       localPath: dbProject.localPath,
       ownerId: dbProject.ownerId,
-      isActive: !dbProject.deactivatedAt,
-      isArchived: !!dbProject.archivedAt,
+      deactivatedAt: dbProject.deactivatedAt
+        ? new Date(dbProject.deactivatedAt)
+        : null,
       createdAt: new Date(dbProject.createdAt),
       updatedAt: new Date(dbProject.updatedAt),
     };
-    
+
     // Emit event
     eventBus.emit("project:created", { projectId: apiProject.id });
-    
+
     logger.debug("Project created", { projectId: apiProject.id });
-    
+
     return apiProject;
-  }
+  },
 });
 
 export default handler;
@@ -62,7 +67,7 @@ export default handler;
 declare global {
   namespace WindowAPI {
     interface Project {
-      create: InferHandler<typeof handler>
+      create: InferHandler<typeof handler>;
     }
   }
 }

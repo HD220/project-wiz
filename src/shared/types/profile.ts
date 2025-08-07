@@ -10,7 +10,7 @@ export const ProfileSchema = z.object({
   language: z.string().optional(),
   timezone: z.string().optional(),
   createdAt: z.date(),
-  updatedAt: z.date()
+  updatedAt: z.date(),
 });
 
 export type Profile = z.infer<typeof ProfileSchema>;

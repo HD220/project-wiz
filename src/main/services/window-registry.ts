@@ -1,4 +1,5 @@
 import { BrowserWindow } from "electron";
+
 import { getLogger } from "@/shared/services/logger/config";
 
 const logger = getLogger("window-registry");
@@ -32,7 +33,7 @@ export class WindowRegistry {
    */
   get(name: string): BrowserWindow | null {
     const window = this.windows.get(name);
-    
+
     if (!window) {
       return null;
     }
@@ -91,7 +92,7 @@ export class WindowRegistry {
    */
   getStats(): { total: number; active: number; names: string[] } {
     const activeWindows = Array.from(this.windows.entries()).filter(
-      ([, window]) => !window.isDestroyed()
+      ([, window]) => !window.isDestroyed(),
     );
 
     return {
@@ -106,9 +107,7 @@ export class WindowRegistry {
 export const windowRegistry = new WindowRegistry();
 
 // Convenience exports
-export const registerWindow = (name: string, window: BrowserWindow) => 
+export const registerWindow = (name: string, window: BrowserWindow) =>
   windowRegistry.register(name, window);
-export const getWindow = (name: string) => 
-  windowRegistry.get(name);
-export const getMainWindow = () => 
-  windowRegistry.getMainWindow();
+export const getWindow = (name: string) => windowRegistry.get(name);
+export const getMainWindow = () => windowRegistry.getMainWindow();

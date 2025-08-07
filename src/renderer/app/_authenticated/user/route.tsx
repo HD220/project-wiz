@@ -54,36 +54,33 @@ export const Route = createFileRoute("/_authenticated/user")({
     const availableUsers = availableUsersResponse.data || [];
 
     // Transform DM conversations to universal format
-    const conversations = dmConversations.map(
-      (dm) => ({
-        ...dm,
-        type: "dm" as const,
-        title: dm.name,
-        isArchived: dm.archivedAt !== null,
-        participants: dm.participants?.map((p) => ({
-          id: p.id,
-          conversationId: p.dmConversationId,
-          userId: p.participantId,
-          joinedAt: p.createdAt,
-        })),
-        lastMessage: dm.lastMessage
-          ? {
-              id: dm.lastMessage.id,
-              isActive: true,
-              deactivatedAt: null,
-              deactivatedBy: null,
-              createdAt: dm.lastMessage.createdAt,
-              updatedAt: dm.lastMessage.updatedAt || dm.lastMessage.createdAt,
-              conversationId: dm.id,
-              content: dm.lastMessage.content,
-              authorId: dm.lastMessage.authorId,
-              senderId: dm.lastMessage.authorId,
-              senderType: "user" as const,
-              metadata: null,
-            }
-          : undefined,
-      }),
-    );
+    const conversations = dmConversations.map((dm) => ({
+      ...dm,
+      type: "dm" as const,
+      title: dm.name,
+      isArchived: dm.archivedAt !== null,
+      participants: dm.participants?.map((p) => ({
+        id: p.id,
+        conversationId: p.dmConversationId,
+        userId: p.participantId,
+        joinedAt: p.createdAt,
+      })),
+      lastMessage: dm.lastMessage
+        ? {
+            id: dm.lastMessage.id,
+            isActive: true,
+            deactivatedAt: null,
+            createdAt: dm.lastMessage.createdAt,
+            updatedAt: dm.lastMessage.updatedAt || dm.lastMessage.createdAt,
+            conversationId: dm.id,
+            content: dm.lastMessage.content,
+            authorId: dm.lastMessage.authorId,
+            senderId: dm.lastMessage.authorId,
+            senderType: "user" as const,
+            metadata: null,
+          }
+        : undefined,
+    }));
 
     return {
       conversations,

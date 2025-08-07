@@ -1,9 +1,14 @@
 import { z } from "zod";
+
 import { getDefaultLlmProvider } from "@/main/ipc/llm-provider/queries";
-import { LlmProviderSchema } from "@/shared/types";
 import { requireAuth } from "@/main/services/session-registry";
+
 import { getLogger } from "@/shared/services/logger/config";
-import { createIPCHandler, InferHandler } from "@/shared/utils/create-ipc-handler";
+import { LlmProviderSchema } from "@/shared/types";
+import {
+  createIPCHandler,
+  InferHandler,
+} from "@/shared/utils/create-ipc-handler";
 
 const logger = getLogger("llm-provider.get-default.invoke");
 
@@ -18,10 +23,10 @@ const handler = createIPCHandler({
     logger.debug("Getting default LLM provider for user");
 
     const currentUser = requireAuth();
-    
+
     // Get default provider with ownership validation
     const dbResult = await getDefaultLlmProvider(currentUser.id);
-    
+
     // Mapeamento: SelectLlmProvider → LlmProvider
     let apiResult = null;
     if (dbResult) {
@@ -34,16 +39,21 @@ const handler = createIPCHandler({
         baseUrl: dbResult.baseUrl,
         defaultModel: dbResult.defaultModel,
         isDefault: dbResult.isDefault,
-        isActive: dbResult.isActive,
+        deactivatedAt: dbResult.deactivatedAt
+          ? new Date(dbResult.deactivatedAt)
+          : null,
         createdAt: new Date(dbResult.createdAt),
         updatedAt: new Date(dbResult.updatedAt),
       };
     }
-    
-    logger.debug("Default LLM provider retrieved", { found: !!apiResult, userId: currentUser.id });
-    
+
+    logger.debug("Default LLM provider retrieved", {
+      found: !!apiResult,
+      userId: currentUser.id,
+    });
+
     return apiResult;
-  }
+  },
 });
 
 export default handler;
@@ -51,7 +61,7 @@ export default handler;
 declare global {
   namespace WindowAPI {
     interface LlmProvider {
-      getDefault: InferHandler<typeof handler>
+      getDefault: InferHandler<typeof handler>;
     }
   }
 }

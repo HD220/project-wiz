@@ -1,8 +1,10 @@
 import { useState, useEffect } from "react";
-import { loadApiData } from "@/renderer/lib/route-loader";
-import type { UserSummary } from "@/main/features/user/user.service";
-import type { SelectAgent } from "@/main/features/agent/agent.types";
+
 import type { Member } from "@/renderer/components/members/member-sidebar";
+import type { UserSummary } from "@/renderer/features/user/hooks/use-user-selection.hook";
+import { loadApiData } from "@/renderer/lib/route-loader";
+
+import type { Agent } from "@/shared/types";
 
 export function useProjectMembers(projectId: string) {
   const [members, setMembers] = useState<Member[]>([]);
@@ -16,11 +18,11 @@ export function useProjectMembers(projectId: string) {
       try {
         const [users, agents] = await Promise.all([
           loadApiData(
-            () => window.api.users.listAvailableUsers(),
+            () => window.api.user.listAvailableUsers({ projectId }),
             "Failed to load users",
           ),
           loadApiData(
-            () => window.api.agents.list(),
+            () => window.api.agent.list({ projectId }),
             "Failed to load agents",
           ),
         ]);
@@ -41,14 +43,14 @@ export function useProjectMembers(projectId: string) {
         });
 
         // Add agents
-        agents.forEach((agent: SelectAgent) => {
+        agents.forEach((agent: Agent) => {
           combinedMembers.push({
             id: agent.id,
             name: agent.name,
             username: agent.name.toLowerCase().replace(/\s+/g, ""),
             status: agent.status === "active" ? "online" : "offline", // Map agent status
             role: "member",
-            avatarUrl: agent.avatarUrl || undefined,
+            avatarUrl: agent.avatar || undefined,
             type: "agent",
           });
         });

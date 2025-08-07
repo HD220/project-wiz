@@ -300,108 +300,126 @@ function Chat({
     };
 
   // Actions simplificadas usando helper centralizado - memoized for performance
-  const actions = React.useMemo(() => ({
-    addMessage: createAction(
-      "ADD_MESSAGE",
-      (message: unknown) => message,
-      (msgs, message: unknown) => [...msgs, message],
-    ),
+  const actions = React.useMemo(
+    () => ({
+      addMessage: createAction(
+        "ADD_MESSAGE",
+        (message: unknown) => message,
+        (msgs, message: unknown) => [...msgs, message],
+      ),
 
-    updateMessage: createAction(
-      "UPDATE_MESSAGE",
-      (id: string | number, updates: Record<string, unknown>) => ({
-        id,
-        updates,
-      }),
-      (msgs, id: string | number, updates: Record<string, unknown>) => {
-        return msgs.map((msg) => {
-          const msgId = keyFn(msg, msgs.indexOf(msg));
-          return msgId === id
-            ? { ...(msg as Record<string, unknown>), ...updates }
-            : msg;
-        });
+      updateMessage: createAction(
+        "UPDATE_MESSAGE",
+        (id: string | number, updates: Record<string, unknown>) => ({
+          id,
+          updates,
+        }),
+        (msgs, id: string | number, updates: Record<string, unknown>) => {
+          return msgs.map((msg) => {
+            const msgId = keyFn(msg, msgs.indexOf(msg));
+            return msgId === id
+              ? { ...(msg as Record<string, unknown>), ...updates }
+              : msg;
+          });
+        },
+        (ctx, id: string | number, updates: Record<string, unknown>) => {
+          onMessageUpdate?.(id, updates, ctx);
+        },
+      ),
+
+      removeMessage: createAction(
+        "REMOVE_MESSAGE",
+        (id: string | number) => ({ id }),
+        (msgs, id: string | number) => {
+          return msgs.filter((msg) => {
+            const msgId = keyFn(msg, msgs.indexOf(msg));
+            return msgId !== id;
+          });
+        },
+        (ctx, id: string | number) => {
+          onMessageRemove?.(id, ctx);
+        },
+      ),
+
+      setMessages: createAction(
+        "SET_MESSAGES",
+        (messagesOrFn: unknown[] | ((prev: unknown[]) => unknown[])) => {
+          return typeof messagesOrFn === "function"
+            ? messagesOrFn(messages)
+            : messagesOrFn;
+        },
+        (msgs, messagesOrFn: unknown[] | ((prev: unknown[]) => unknown[])) => {
+          return typeof messagesOrFn === "function"
+            ? messagesOrFn(msgs)
+            : messagesOrFn;
+        },
+      ),
+
+      setLoading: (loading: boolean) =>
+        dispatch({
+          type: "SET_PROPERTY",
+          payload: { key: "loading", value: loading },
+        }),
+      setTyping: (typing: boolean) =>
+        dispatch({
+          type: "SET_PROPERTY",
+          payload: { key: "typing", value: typing },
+        }),
+      setAutoScroll: (autoScroll: boolean) =>
+        dispatch({
+          type: "SET_PROPERTY",
+          payload: { key: "autoScroll", value: autoScroll },
+        }),
+
+      addPendingMessage: (id: string | number) =>
+        dispatch({ type: "ADD_PENDING", payload: id }),
+      removePendingMessage: (id: string | number) =>
+        dispatch({ type: "REMOVE_PENDING", payload: id }),
+
+      send: (input: string) => {
+        if (onSend && input && input.trim() && !state.loading && !disabled) {
+          // contextValue will be defined below
+          onSend(input.trim(), contextValue);
+        }
       },
-      (ctx, id: string | number, updates: Record<string, unknown>) => {
-        onMessageUpdate?.(id, updates, ctx);
-      },
-    ),
 
-    removeMessage: createAction(
-      "REMOVE_MESSAGE",
-      (id: string | number) => ({ id }),
-      (msgs, id: string | number) => {
-        return msgs.filter((msg) => {
-          const msgId = keyFn(msg, msgs.indexOf(msg));
-          return msgId !== id;
-        });
-      },
-      (ctx, id: string | number) => {
-        onMessageRemove?.(id, ctx);
-      },
-    ),
+      clear: createAction(
+        "CLEAR",
+        () => undefined,
+        () => [],
+        (ctx) => onClear?.(ctx),
+      ),
 
-    setMessages: createAction(
-      "SET_MESSAGES",
-      (messagesOrFn: unknown[] | ((prev: unknown[]) => unknown[])) => {
-        return typeof messagesOrFn === "function"
-          ? messagesOrFn(messages)
-          : messagesOrFn;
-      },
-      (msgs, messagesOrFn: unknown[] | ((prev: unknown[]) => unknown[])) => {
-        return typeof messagesOrFn === "function"
-          ? messagesOrFn(msgs)
-          : messagesOrFn;
-      },
-    ),
-
-    setLoading: (loading: boolean) =>
-      dispatch({
-        type: "SET_PROPERTY",
-        payload: { key: "loading", value: loading },
-      }),
-    setTyping: (typing: boolean) =>
-      dispatch({
-        type: "SET_PROPERTY",
-        payload: { key: "typing", value: typing },
-      }),
-    setAutoScroll: (autoScroll: boolean) =>
-      dispatch({
-        type: "SET_PROPERTY",
-        payload: { key: "autoScroll", value: autoScroll },
-      }),
-
-    addPendingMessage: (id: string | number) =>
-      dispatch({ type: "ADD_PENDING", payload: id }),
-    removePendingMessage: (id: string | number) =>
-      dispatch({ type: "REMOVE_PENDING", payload: id }),
-
-    send: (input: string) => {
-      if (onSend && input && input.trim() && !state.loading && !disabled) {
-        // contextValue will be defined below
-        onSend(input.trim(), contextValue);
-      }
-    },
-
-    clear: createAction(
-      "CLEAR",
-      () => undefined,
-      () => [],
-      (ctx) => onClear?.(ctx),
-    ),
-
-    isPending: (id: string | number) => state.pendingMessages.has(id),
-    navigateHistory: (direction: "up" | "down") =>
-      dispatch({ type: "NAVIGATE_HISTORY", payload: direction }),
-    scrollToBottom,
-  }), [messages, keyFn, onValueChange, onMessageUpdate, onMessageRemove, onClear, onSend, state.loading, disabled, state.pendingMessages, scrollToBottom]);
+      isPending: (id: string | number) => state.pendingMessages.has(id),
+      navigateHistory: (direction: "up" | "down") =>
+        dispatch({ type: "NAVIGATE_HISTORY", payload: direction }),
+      scrollToBottom,
+    }),
+    [
+      messages,
+      keyFn,
+      onValueChange,
+      onMessageUpdate,
+      onMessageRemove,
+      onClear,
+      onSend,
+      state.loading,
+      disabled,
+      state.pendingMessages,
+      scrollToBottom,
+    ],
+  );
 
   // Context construction simplificada - memoized for stability
-  const contextValue: ChatContextValue = React.useMemo(() => ({
-    state: { ...state, messages },
-    actions,
-    refs: { messagesRef, inputRef },
-    keyFn,
-  }), [state, messages, actions, keyFn]);
+  const contextValue: ChatContextValue = React.useMemo(
+    () => ({
+      state: { ...state, messages },
+      actions,
+      refs: { messagesRef, inputRef },
+      keyFn,
+    }),
+    [state, messages, actions, keyFn],
+  );
 
   // Auto scroll when messages change
   React.useEffect(() => {
@@ -436,7 +454,7 @@ interface ChatMessagesProps extends React.ComponentProps<"div"> {
 function ChatMessages({ className, children, ...props }: ChatMessagesProps) {
   const context = useChatContext();
   const { refs, actions, state } = context;
-  
+
   const containerRef = React.useRef<HTMLDivElement>(null);
   const scrollViewportRef = React.useRef<HTMLDivElement | null>(null);
 
@@ -444,13 +462,17 @@ function ChatMessages({ className, children, ...props }: ChatMessagesProps) {
   React.useEffect(() => {
     if (containerRef.current) {
       // Find the viewport element inside ScrollArea using querySelector
-      const viewport = containerRef.current.querySelector('[data-slot="scroll-area-viewport"]') as HTMLDivElement;
+      const viewport = containerRef.current.querySelector(
+        '[data-slot="scroll-area-viewport"]',
+      ) as HTMLDivElement;
       if (viewport) {
         scrollViewportRef.current = viewport;
-        
+
         // Update the chat context ref to point to viewport for scrolling
         if (refs.messagesRef) {
-          (refs.messagesRef as React.MutableRefObject<HTMLDivElement | null>).current = viewport;
+          (
+            refs.messagesRef as React.MutableRefObject<HTMLDivElement | null>
+          ).current = viewport;
         }
       }
     }
@@ -472,12 +494,16 @@ function ChatMessages({ className, children, ...props }: ChatMessagesProps) {
       }
     };
 
-    viewport.addEventListener('scroll', handleScroll);
-    return () => viewport.removeEventListener('scroll', handleScroll);
+    viewport.addEventListener("scroll", handleScroll);
+    return () => viewport.removeEventListener("scroll", handleScroll);
   }, [state.autoScroll, actions]);
 
   return (
-    <div ref={containerRef} className={cn("flex-1 min-h-0", className)} {...props}>
+    <div
+      ref={containerRef}
+      className={cn("flex-1 min-h-0", className)}
+      {...props}
+    >
       <ScrollArea className="h-full">
         <div
           data-slot="chat-messages-container"
@@ -546,7 +572,7 @@ interface ChatInputProps {
     send: () => void;
     navigateHistory: (direction: "up" | "down") => void;
     clear: () => void;
-    // Ref específica (apenas inputRef) 
+    // Ref específica (apenas inputRef)
     inputRef: React.RefObject<HTMLInputElement | HTMLTextAreaElement | null>;
   }) => React.ReactNode;
 }
@@ -554,7 +580,7 @@ interface ChatInputProps {
 function ChatInput({ render }: ChatInputProps) {
   const context = useChatContext();
   const { state, actions, refs } = context;
-  
+
   // LOCAL input state - this eliminates the lag!
   const [inputValue, setInputValue] = React.useState("");
 
@@ -564,12 +590,13 @@ function ChatInput({ render }: ChatInputProps) {
       direction === "up"
         ? Math.min(state.historyIndex + 1, state.history.length - 1)
         : Math.max(state.historyIndex - 1, -1);
-    
+
     actions.navigateHistory(direction);
-    
+
     // Update local input with history value
     if (newIndex >= 0) {
-      const historyValue = state.history[state.history.length - 1 - newIndex] || "";
+      const historyValue =
+        state.history[state.history.length - 1 - newIndex] || "";
       setInputValue(historyValue);
     } else {
       setInputValue("");

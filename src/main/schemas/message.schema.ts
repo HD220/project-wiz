@@ -1,5 +1,11 @@
 import { sql } from "drizzle-orm";
-import { sqliteTable, text, integer, index, primaryKey } from "drizzle-orm/sqlite-core";
+import {
+  sqliteTable,
+  text,
+  integer,
+  index,
+  primaryKey,
+} from "drizzle-orm/sqlite-core";
 
 import { usersTable } from "@/main/schemas/user.schema";
 
@@ -34,7 +40,7 @@ export const messagesTable = sqliteTable(
   (table) => ({
     // Composite primary key
     pk: primaryKey({ columns: [table.ownerId, table.id] }),
-    
+
     // Performance indexes for foreign keys
     ownerIdIdx: index("messages_owner_id_idx").on(table.ownerId),
     sourceTypeIdx: index("messages_source_type_idx").on(table.sourceType),
@@ -42,7 +48,9 @@ export const messagesTable = sqliteTable(
     createdAtIdx: index("messages_created_at_idx").on(table.createdAt),
 
     // Soft deletion indexes
-    deactivatedAtIdx: index("messages_deactivated_at_idx").on(table.deactivatedAt),
+    deactivatedAtIdx: index("messages_deactivated_at_idx").on(
+      table.deactivatedAt,
+    ),
 
     // Query optimization indexes
     sourceTimeIdx: index("messages_source_time_idx").on(
@@ -62,8 +70,7 @@ export const messagesTable = sqliteTable(
 export const llmMessagesTable = sqliteTable(
   "llm_messages",
   {
-    id: text("id")
-      .$defaultFn(() => crypto.randomUUID()),
+    id: text("id").$defaultFn(() => crypto.randomUUID()),
     ownerId: text("owner_id")
       .notNull()
       .references(() => usersTable.id, { onDelete: "cascade" }),
@@ -88,7 +95,7 @@ export const llmMessagesTable = sqliteTable(
   (table) => ({
     // Composite primary key
     pk: primaryKey({ columns: [table.ownerId, table.id] }),
-    
+
     // Performance indexes
     ownerIdIdx: index("llm_messages_owner_id_idx").on(table.ownerId),
     messageIdIdx: index("llm_messages_message_id_idx").on(table.messageId),
@@ -96,7 +103,9 @@ export const llmMessagesTable = sqliteTable(
     createdAtIdx: index("llm_messages_created_at_idx").on(table.createdAt),
 
     // Soft deletion indexes
-    deactivatedAtIdx: index("llm_messages_deactivated_at_idx").on(table.deactivatedAt),
+    deactivatedAtIdx: index("llm_messages_deactivated_at_idx").on(
+      table.deactivatedAt,
+    ),
   }),
 );
 

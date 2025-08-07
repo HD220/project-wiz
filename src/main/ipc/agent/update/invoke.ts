@@ -1,10 +1,15 @@
 import { z } from "zod";
+
 import { updateAgent } from "@/main/ipc/agent/queries";
-import { AgentSchema } from "@/shared/types";
 import { requireAuth } from "@/main/services/session-registry";
+
 import { eventBus } from "@/shared/services/events/event-bus";
 import { getLogger } from "@/shared/services/logger/config";
-import { createIPCHandler, InferHandler } from "@/shared/utils/create-ipc-handler";
+import { AgentSchema } from "@/shared/types";
+import {
+  createIPCHandler,
+  InferHandler,
+} from "@/shared/utils/create-ipc-handler";
 
 const logger = getLogger("agent.update.invoke");
 
@@ -18,8 +23,8 @@ const UpdateAgentInputSchema = z.object({
     providerId: true,
     modelConfig: true,
     status: true,
-    avatar: true
-  }).partial()
+    avatar: true,
+  }).partial(),
 });
 
 const UpdateAgentOutputSchema = AgentSchema;
@@ -32,18 +37,18 @@ const handler = createIPCHandler({
 
     const currentUser = requireAuth();
     const { id, data } = input;
-    
+
     // Convert avatar null to undefined for database compatibility
     const updateData = {
       ...data,
-      avatar: data.avatar === null ? undefined : data.avatar
+      avatar: data.avatar === null ? undefined : data.avatar,
     };
-    
+
     // Update agent using queries function
     const updatedAgent = await updateAgent({
       id,
       ownerId: currentUser.id,
-      ...updateData
+      ...updateData,
     });
 
     if (!updatedAgent) {
@@ -54,23 +59,25 @@ const handler = createIPCHandler({
     const apiAgent = {
       ...updatedAgent,
       isActive: !updatedAgent.deactivatedAt,
-      deactivatedAt: updatedAgent.deactivatedAt ? new Date(updatedAgent.deactivatedAt) : null,
+      deactivatedAt: updatedAgent.deactivatedAt
+        ? new Date(updatedAgent.deactivatedAt)
+        : null,
       modelConfig: JSON.parse(updatedAgent.modelConfig),
       createdAt: new Date(updatedAgent.createdAt),
       updatedAt: new Date(updatedAgent.updatedAt),
     };
-    
-    logger.debug("Agent updated", { 
-      agentId: apiAgent.id, 
+
+    logger.debug("Agent updated", {
+      agentId: apiAgent.id,
       agentName: apiAgent.name,
-      status: apiAgent.status
+      status: apiAgent.status,
     });
-    
+
     // Emit specific event for update
     eventBus.emit("agent:updated", { agentId: apiAgent.id });
-    
+
     return apiAgent;
-  }
+  },
 });
 
 export default handler;
@@ -78,7 +85,7 @@ export default handler;
 declare global {
   namespace WindowAPI {
     interface Agent {
-      update: InferHandler<typeof handler>
+      update: InferHandler<typeof handler>;
     }
   }
 }

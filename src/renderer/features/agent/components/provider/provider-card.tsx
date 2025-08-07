@@ -28,9 +28,10 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/renderer/components/ui/dropdown-menu";
-import type { LlmProvider } from "@/shared/types/llm-provider";
 import { useApiMutation } from "@/renderer/hooks/use-api-mutation.hook";
 import { cn } from "@/renderer/lib/utils";
+
+import type { LlmProvider } from "@/shared/types/llm-provider";
 
 const getProviderLabel = (type: string): string => {
   const labels: Record<string, string> = {
@@ -63,10 +64,12 @@ export function ProviderCard(props: ProviderCardProps) {
 
   // Custom mutation for setting default (no userId parameter needed now)
   const setDefaultProviderMutation = useApiMutation(
-    (id: string) => window.api.llmProvider.setDefault({ providerId: id }), {
-    successMessage: "Default provider updated",
-    errorMessage: "Failed to update default provider",
-  });
+    (id: string) => window.api.llmProvider.setDefault({ providerId: id }),
+    {
+      successMessage: "Default provider updated",
+      errorMessage: "Failed to update default provider",
+    },
+  );
 
   const isLoading =
     deleteProviderMutation.isPending || setDefaultProviderMutation.isPending;
@@ -130,15 +133,15 @@ export function ProviderCard(props: ProviderCardProps) {
         {/* Status Badge */}
         <div className="shrink-0">
           <Badge
-            variant={provider.isActive ? "default" : "secondary"}
+            variant={!provider.deactivatedAt ? "default" : "secondary"}
             className={cn(
               "h-5 px-[var(--spacing-component-sm)] text-xs",
-              provider.isActive
+              !provider.deactivatedAt
                 ? "bg-green-500/10 text-green-600 border-green-500/20"
                 : "bg-gray-500/10 text-gray-600 border-gray-500/20",
             )}
           >
-            {provider.isActive ? "Active" : "Inactive"}
+            {!provider.deactivatedAt ? "Active" : "Inactive"}
           </Badge>
         </div>
 

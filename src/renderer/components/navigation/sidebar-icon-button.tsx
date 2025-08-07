@@ -1,6 +1,6 @@
-import { forwardRef } from "react";
 import { Link, LinkProps } from "@tanstack/react-router";
 import { LucideIcon } from "lucide-react";
+import { forwardRef } from "react";
 
 import { Button } from "@/renderer/components/ui/button";
 import {
@@ -21,7 +21,7 @@ interface SidebarIconButtonProps extends Omit<LinkProps, "className"> {
   showActiveIndicator?: boolean;
 }
 
-const SidebarIconButton = forwardRef<HTMLAnchorElement, SidebarIconButtonProps>(
+const SidebarIconButton = forwardRef<HTMLButtonElement, SidebarIconButtonProps>(
   (props, ref) => {
     const {
       icon: IconComponent,

@@ -43,7 +43,9 @@ export const llmProvidersTable = sqliteTable(
     ownerIdIdx: index("llm_providers_owner_id_idx").on(table.ownerId),
     typeIdx: index("llm_providers_type_idx").on(table.type),
     isDefaultIdx: index("llm_providers_is_default_idx").on(table.isDefault),
-    deactivatedAtIdx: index("llm_providers_deactivated_at_idx").on(table.deactivatedAt),
+    deactivatedAtIdx: index("llm_providers_deactivated_at_idx").on(
+      table.deactivatedAt,
+    ),
   }),
 );
 

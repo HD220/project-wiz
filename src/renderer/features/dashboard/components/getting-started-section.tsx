@@ -1,8 +1,15 @@
 import { Link } from "@tanstack/react-router";
 import { ArrowRight, Bot, Folder, Sparkles } from "lucide-react";
 
-import { Badge } from "@/renderer/components/atoms/badge";
+import { Badge } from "@/renderer/components/ui/badge";
 import { Button } from "@/renderer/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/renderer/components/ui/card";
 
 export function GettingStartedSection() {
   return (
@@ -27,9 +34,7 @@ export function GettingStartedSection() {
                 <Bot className="size-3 text-primary" />
               </div>
               <div className="min-w-0 flex-1">
-                <h4 className="text-sm font-medium mb-1">
-                  AI Agents
-                </h4>
+                <h4 className="text-sm font-medium mb-1">AI Agents</h4>
                 <p className="text-xs text-muted-foreground mb-2">
                   Create intelligent assistants for development tasks
                 </p>
@@ -54,9 +59,7 @@ export function GettingStartedSection() {
                 <Folder className="size-3 text-blue-600" />
               </div>
               <div className="min-w-0 flex-1">
-                <h4 className="text-sm font-medium mb-1">
-                  Project Hub
-                </h4>
+                <h4 className="text-sm font-medium mb-1">Project Hub</h4>
                 <p className="text-xs text-muted-foreground mb-2">
                   Organize and manage development projects
                 </p>

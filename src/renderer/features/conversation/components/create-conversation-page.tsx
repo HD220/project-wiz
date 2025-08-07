@@ -2,23 +2,23 @@ import { useNavigate } from "@tanstack/react-router";
 import { Search, Check, MessageSquare } from "lucide-react";
 import { AlertCircle } from "lucide-react";
 
-import type { UserSummary } from "@/main/features/user/user.service";
-
 import * as StandardFormModal from "@/renderer/components/form-modal";
 import { Alert, AlertDescription } from "@/renderer/components/ui/alert";
 import { Checkbox } from "@/renderer/components/ui/checkbox";
 import { Input } from "@/renderer/components/ui/input";
-import type { CreateConversationInput } from "@/renderer/features/conversation/types";
-import type { AuthenticatedUser } from "@/main/features/user/user.types";
+import type {
+  CreateConversationInput,
+  AuthenticatedUser,
+} from "@/renderer/features/conversation/types";
 import {
   ProfileAvatar,
   ProfileAvatarImage,
   ProfileAvatarStatus,
 } from "@/renderer/features/user/components/profile-avatar";
-import { useApiMutation } from "@/renderer/hooks/use-api-mutation.hook";
-import { loadApiData } from "@/renderer/lib/route-loader";
-import { cn } from "@/renderer/lib/utils";
+import type { UserSummary } from "@/renderer/features/user/hooks/use-user-selection.hook";
 import { useUserSelection } from "@/renderer/features/user/hooks/use-user-selection.hook";
+import { useApiMutation } from "@/renderer/hooks/use-api-mutation.hook";
+import { cn } from "@/renderer/lib/utils";
 
 interface CreateConversationPageProps {
   availableUsers: UserSummary[];
@@ -32,16 +32,13 @@ export function CreateConversationPage({
   const navigate = useNavigate();
   const {
     searchTerm,
-    setSearchTerm,
-    selectedUserIds,
-    setSelectedUserIds,
-    error,
-    setError,
     filteredUsers,
     handleSearchChange,
     handleUserToggle,
     validateSelection,
     selectedCount,
+    selectedUserIds,
+    error,
   } = useUserSelection(availableUsers);
 
   // Mutation for creating conversation
@@ -51,9 +48,10 @@ export function CreateConversationPage({
       successMessage: "Conversation created successfully",
       errorMessage: "Failed to create conversation",
       invalidateRouter: true,
-      onSuccess: (response: { data?: { id?: string } }) => {
-        if (response?.data?.id) {
-          handleSuccess(response.data.id);
+      onSuccess: (response) => {
+        // Response will have the conversation data
+        if (response && typeof response === "object" && "id" in response) {
+          handleSuccess(response.id as string);
         }
       },
     },

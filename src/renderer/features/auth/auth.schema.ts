@@ -74,3 +74,83 @@ export function getDefaultValues(mode: AuthMode): AuthFormData {
     confirmPassword: "",
   };
 }
+
+// Field configuration for forms
+export interface AuthFieldConfig {
+  name: string; // Changed to string to support all form field names
+  label: string;
+  type: "text" | "password";
+  placeholder: string;
+}
+
+export function getFieldsConfig(mode: AuthMode): AuthFieldConfig[] {
+  if (mode === "login") {
+    return [
+      {
+        name: "username",
+        label: "Username",
+        type: "text",
+        placeholder: "Enter your username",
+      },
+      {
+        name: "password",
+        label: "Password",
+        type: "password",
+        placeholder: "Enter your password",
+      },
+    ];
+  }
+
+  return [
+    {
+      name: "name",
+      label: "Full Name",
+      type: "text",
+      placeholder: "Enter your full name",
+    },
+    {
+      name: "username",
+      label: "Username",
+      type: "text",
+      placeholder: "Choose a username",
+    },
+    {
+      name: "password",
+      label: "Password",
+      type: "password",
+      placeholder: "Create a password",
+    },
+    {
+      name: "confirmPassword",
+      label: "Confirm Password",
+      type: "password",
+      placeholder: "Confirm your password",
+    },
+  ];
+}
+
+// UI content configuration
+export interface AuthUIContent {
+  title: string;
+  submitButtonText: string;
+  switchModeText: string;
+  switchModeLink: string;
+}
+
+export function getUIContent(mode: AuthMode): AuthUIContent {
+  if (mode === "login") {
+    return {
+      title: "Welcome back",
+      submitButtonText: "Sign In",
+      switchModeText: "Don't have an account?",
+      switchModeLink: "Sign up",
+    };
+  }
+
+  return {
+    title: "Create your account",
+    submitButtonText: "Sign Up",
+    switchModeText: "Already have an account?",
+    switchModeLink: "Sign in",
+  };
+}

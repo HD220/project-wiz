@@ -10,8 +10,6 @@ import {
 } from "lucide-react";
 import * as React from "react";
 
-import type { Project } from "@/shared/types";
-
 import {
   Avatar,
   AvatarFallback,
@@ -36,6 +34,8 @@ import {
   DropdownMenuTrigger,
 } from "@/renderer/components/ui/dropdown-menu";
 import { cn, isValidAvatarUrl } from "@/renderer/lib/utils";
+
+import type { Project } from "@/shared/types";
 
 // Base ProjectCard container component
 interface ProjectCardProps extends React.HTMLAttributes<HTMLDivElement> {
@@ -177,7 +177,9 @@ export function ProjectCardActions({
               className="text-orange-600 focus:text-orange-600"
             >
               <Archive className="mr-2 size-4" />
-              {project.isActive && !project.isArchived ? "Archive" : "Restore"}
+              {!project.deactivatedAt && !project.archivedAt
+                ? "Archive"
+                : "Restore"}
             </DropdownMenuItem>
           )}
         </DropdownMenuContent>
@@ -258,10 +260,16 @@ export function ProjectCardFooter({
     >
       <div className="flex items-center justify-between w-full">
         <Badge
-          variant={project.isActive && !project.isArchived ? "default" : "secondary"}
+          variant={
+            !project.deactivatedAt && !project.archivedAt
+              ? "default"
+              : "secondary"
+          }
           className="border"
         >
-          {project.isActive && !project.isArchived ? "Active" : "Archived"}
+          {!project.deactivatedAt && !project.archivedAt
+            ? "Active"
+            : "Archived"}
         </Badge>
 
         <time
@@ -333,10 +341,16 @@ export function LegacyProjectCard(props: LegacyProjectCardProps) {
               </h3>
             </div>
             <Badge
-              variant={project.isActive && !project.isArchived ? "default" : "secondary"}
+              variant={
+                !project.deactivatedAt && !project.archivedAt
+                  ? "default"
+                  : "secondary"
+              }
               className="shrink-0 text-xs"
             >
-              {project.isActive && !project.isArchived ? "Active" : "Archived"}
+              {!project.deactivatedAt && !project.archivedAt
+                ? "Active"
+                : "Archived"}
             </Badge>
           </div>
         </CardHeader>

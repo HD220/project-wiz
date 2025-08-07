@@ -21,4 +21,3 @@ export const AgentSchema = z.object({
 });
 
 export type Agent = z.infer<typeof AgentSchema>;
-

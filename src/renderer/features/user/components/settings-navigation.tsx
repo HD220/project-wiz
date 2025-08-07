@@ -1,6 +1,5 @@
 import { useNavigate, useLocation } from "@tanstack/react-router";
 import { Settings, Bot } from "lucide-react";
-import * as React from "react";
 
 import { cn } from "@/renderer/lib/utils";
 

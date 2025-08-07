@@ -3,7 +3,6 @@ import { Bot, Settings, User } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { UseFormReturn } from "react-hook-form";
 import { z } from "zod";
-import { getRendererLogger } from "@/shared/services/logger/renderer";
 
 const logger = getRendererLogger("agent-form");
 
@@ -35,6 +34,8 @@ import {
 import { Textarea } from "@/renderer/components/ui/textarea";
 // import { AI_DEFAULTS } from "@/renderer/constants/ai-defaults"; // TODO: Create ai-defaults constants
 import { CreateAgentSchema } from "@/renderer/features/agent/agent.schema";
+
+import { getRendererLogger } from "@/shared/services/logger/renderer";
 // Remove imports - using shared types directly
 import type { Agent } from "@/shared/types/agent";
 import type { LlmProvider } from "@/shared/types/llm-provider";
@@ -287,7 +288,9 @@ interface AgentFormProviderProps {
 function AgentFormProvider(props: AgentFormProviderProps) {
   const { form, providers } = props;
 
-  const activeProviders = providers.filter((provider) => provider.isActive);
+  const activeProviders = providers.filter(
+    (provider) => !provider.deactivatedAt,
+  );
 
   const defaultModelConfig: ModelConfig = {
     model: "gpt-4o",

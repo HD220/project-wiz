@@ -1,4 +1,5 @@
 import { ipcMain } from "electron";
+
 import { getLogger } from "@/shared/services/logger/config";
 
 const logger = getLogger("ipc-loader");
@@ -30,8 +31,9 @@ export class IpcLoader {
         }
       }
 
-      logger.info(`✅ Successfully registered ${successCount}/${handlers.length} IPC handlers`);
-
+      logger.info(
+        `✅ Successfully registered ${successCount}/${handlers.length} IPC handlers`,
+      );
     } catch (error) {
       logger.error("❌ Failed to load IPC handlers:", error);
       throw error;
@@ -41,7 +43,10 @@ export class IpcLoader {
   /**
    * Register a single handler
    */
-  private async registerHandler(handlerFunction: Function, channel: string): Promise<boolean> {
+  private async registerHandler(
+    handlerFunction: Function,
+    channel: string,
+  ): Promise<boolean> {
     try {
       if (!handlerFunction || typeof handlerFunction !== "function") {
         logger.error(`❌ Invalid handler function for ${channel}`);
@@ -57,22 +62,21 @@ export class IpcLoader {
       // Register the IPC handler
       ipcMain.handle(channel, async (event, data) => {
         logger.debug(`📥 IPC call: ${channel}`, { data });
-        
+
         const result = await handlerFunction(data, event);
 
-        logger.debug(`📤 IPC result: ${channel}`, { 
+        logger.debug(`📤 IPC result: ${channel}`, {
           success: result?.success,
           hasData: !!result?.data,
-          hasError: !!result?.error
+          hasError: !!result?.error,
         });
-        
+
         return result;
       });
 
       this.registeredHandlers.add(channel);
       logger.info(`✅ Registered: ${channel}`);
       return true;
-      
     } catch (error) {
       logger.error(`❌ Failed to register handler ${channel}:`, error);
       return false;
@@ -102,7 +106,9 @@ export class IpcLoader {
 export const ipcLoader = new IpcLoader();
 
 // Convenience export function
-export async function loadIpcHandlers(handlers: HandlerRegistration[]): Promise<void> {
+export async function loadIpcHandlers(
+  handlers: HandlerRegistration[],
+): Promise<void> {
   return ipcLoader.loadIpcHandlers(handlers);
 }
 

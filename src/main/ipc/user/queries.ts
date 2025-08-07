@@ -1,10 +1,16 @@
 import { eq, and, ne, isNull, isNotNull } from "drizzle-orm";
-import { createDatabaseConnection } from "@/shared/config/database";
-import { usersTable, type SelectUser, type InsertUser } from "@/main/schemas/user.schema";
+
 import { agentsTable } from "@/main/schemas/agent.schema";
-import { userSessionsTable } from "@/main/schemas/user-sessions.schema";
 import { dmParticipantsTable } from "@/main/schemas/dm-conversation.schema";
 import { projectsTable } from "@/main/schemas/project.schema";
+import { userSessionsTable } from "@/main/schemas/user-sessions.schema";
+import {
+  usersTable,
+  type SelectUser,
+  type InsertUser,
+} from "@/main/schemas/user.schema";
+
+import { createDatabaseConnection } from "@/shared/config/database";
 
 const { getDatabase } = createDatabaseConnection(true);
 
@@ -14,10 +20,7 @@ const { getDatabase } = createDatabaseConnection(true);
 export async function createUser(data: InsertUser): Promise<SelectUser> {
   const db = getDatabase();
 
-  const [user] = await db
-    .insert(usersTable)
-    .values(data)
-    .returning();
+  const [user] = await db.insert(usersTable).values(data).returning();
 
   if (!user) {
     throw new Error("Failed to create user");
@@ -29,7 +32,10 @@ export async function createUser(data: InsertUser): Promise<SelectUser> {
 /**
  * Find user by ID with optional inactive inclusion
  */
-export async function findUser(userId: string, includeInactive: boolean = false): Promise<SelectUser | null> {
+export async function findUser(
+  userId: string,
+  includeInactive: boolean = false,
+): Promise<SelectUser | null> {
   const db = getDatabase();
 
   const conditions = [eq(usersTable.id, userId)];
@@ -50,16 +56,16 @@ export async function findUser(userId: string, includeInactive: boolean = false)
 /**
  * Find user by ID and type
  */
-export async function findUserByIdAndType(input: { 
-  userId: string; 
-  type: "human" | "agent"; 
-  includeInactive?: boolean 
+export async function findUserByIdAndType(input: {
+  userId: string;
+  type: "human" | "agent";
+  includeInactive?: boolean;
 }): Promise<SelectUser | null> {
   const db = getDatabase();
 
   const conditions = [
-    eq(usersTable.id, input.userId), 
-    eq(usersTable.type, input.type)
+    eq(usersTable.id, input.userId),
+    eq(usersTable.type, input.type),
   ];
 
   if (!input.includeInactive) {
@@ -78,7 +84,10 @@ export async function findUserByIdAndType(input: {
 /**
  * Update user by ID
  */
-export async function updateUser(userId: string, data: Partial<InsertUser>): Promise<SelectUser | null> {
+export async function updateUser(
+  userId: string,
+  data: Partial<InsertUser>,
+): Promise<SelectUser | null> {
   const db = getDatabase();
 
   const updateData = {
@@ -98,7 +107,9 @@ export async function updateUser(userId: string, data: Partial<InsertUser>): Pro
 /**
  * List all users with filters
  */
-export async function listUsers(filters: { includeInactive?: boolean; type?: "human" | "agent" } = {}): Promise<SelectUser[]> {
+export async function listUsers(
+  filters: { includeInactive?: boolean; type?: "human" | "agent" } = {},
+): Promise<SelectUser[]> {
   const db = getDatabase();
 
   const conditions = [];
@@ -125,7 +136,10 @@ export async function listUsers(filters: { includeInactive?: boolean; type?: "hu
 /**
  * Get users by type (humans or agents)
  */
-export async function getUsersByType(type: "human" | "agent", includeInactive: boolean = false): Promise<SelectUser[]> {
+export async function getUsersByType(
+  type: "human" | "agent",
+  includeInactive: boolean = false,
+): Promise<SelectUser[]> {
   const db = getDatabase();
 
   const conditions = [eq(usersTable.type, type)];
@@ -148,7 +162,7 @@ export async function getUsersByType(type: "human" | "agent", includeInactive: b
  */
 export async function listAvailableUsers(
   currentUserId: string,
-  filters?: { type?: "human" | "agent" }
+  filters?: { type?: "human" | "agent" },
 ): Promise<SelectUser[]> {
   const db = getDatabase();
 
@@ -174,7 +188,9 @@ export async function listAvailableUsers(
 /**
  * Get agents with optional filters
  */
-export async function listAgents(filters: { ownerId?: string; showInactive?: boolean } = {}): Promise<SelectUser[]> {
+export async function listAgents(
+  filters: { ownerId?: string; showInactive?: boolean } = {},
+): Promise<SelectUser[]> {
   const db = getDatabase();
 
   const conditions = [eq(usersTable.type, "agent")];
@@ -302,7 +318,7 @@ export async function getUserStats(userId: string): Promise<{
 /**
  * Soft delete user (inactivate)
  */
-export async function softDeleteUser(userId: string, deactivatedBy: string): Promise<boolean> {
+export async function softDeleteUser(userId: string): Promise<boolean> {
   const db = getDatabase();
 
   const [updatedUser] = await db

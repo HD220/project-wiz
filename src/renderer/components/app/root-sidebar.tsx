@@ -1,8 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { Plus, Settings } from "lucide-react";
 
-import type { Project } from "@/shared/types";
-
 import { CustomLink } from "@/renderer/components/custom-link";
 import { Avatar, AvatarFallback } from "@/renderer/components/ui/avatar";
 import { Button } from "@/renderer/components/ui/button";
@@ -16,6 +14,8 @@ import {
 } from "@/renderer/components/ui/tooltip";
 import { useAuth } from "@/renderer/contexts/auth.context";
 import { cn } from "@/renderer/lib/utils";
+
+import type { Project } from "@/shared/types";
 
 interface RootSidebarProps {
   projects: Project[];

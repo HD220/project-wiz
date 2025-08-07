@@ -24,8 +24,26 @@ export function validateSearchInput(value: string): string | undefined {
  */
 export function validateSelectFilter<T extends string>(
   value: string,
-  validValues: T[]
+  validValues: T[],
 ): T | undefined {
   if (value === "all" || !value) return undefined;
   return validValues.includes(value as T) ? (value as T) : undefined;
+}
+
+/**
+ * Validates provider type filter values
+ * @param value Provider type filter value
+ * @returns Valid provider type or undefined for "all"
+ */
+export function validateProviderTypeFilter(
+  value: string,
+): "openai" | "deepseek" | "anthropic" | "google" | "custom" | undefined {
+  const validProviderTypes: (
+    | "openai"
+    | "deepseek"
+    | "anthropic"
+    | "google"
+    | "custom"
+  )[] = ["openai", "deepseek", "anthropic", "google", "custom"];
+  return validateSelectFilter(value, validProviderTypes);
 }

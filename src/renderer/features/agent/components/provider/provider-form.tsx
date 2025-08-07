@@ -2,6 +2,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Settings, Key, Shield, CheckCircle2, AlertCircle } from "lucide-react";
 import { useForm } from "react-hook-form";
 
+import type { ProviderType } from "@/main/schemas/llm-provider.schema";
+
 import {
   StandardFormModal,
   StandardFormModalContent,
@@ -44,8 +46,8 @@ import {
   providerFormSchema,
   type ProviderFormData,
 } from "@/renderer/features/agent/provider-constants";
+
 import type { LlmProvider } from "@/shared/types/llm-provider";
-import type { ProviderType } from "@/main/schemas/llm-provider.schema";
 
 // Inline type for form
 interface CreateProviderInput {
@@ -105,7 +107,7 @@ export function ProviderForm(props: ProviderFormProps) {
         provider?.defaultModel ||
         PROVIDER_CONFIGS[provider?.type || "openai"].defaultModel,
       isDefault: provider?.isDefault || false,
-      isActive: provider?.isActive ?? true,
+      isActive: !provider?.deactivatedAt,
     },
   });
 

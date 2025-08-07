@@ -1,4 +1,11 @@
-import { Badge } from "@/renderer/components/atoms/badge";
+import { Badge } from "@/renderer/components/ui/badge";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/renderer/components/ui/card";
 
 export function SystemStatus() {
   return (
@@ -12,19 +19,13 @@ export function SystemStatus() {
       <CardContent className="space-y-3">
         <div className="flex items-center justify-between p-2 rounded-md bg-green-500/10">
           <span className="text-sm">API Status</span>
-          <Badge
-            variant="outline"
-            className="bg-green-500/20 text-green-700"
-          >
+          <Badge variant="outline" className="bg-green-500/20 text-green-700">
             Online
           </Badge>
         </div>
         <div className="flex items-center justify-between p-2 rounded-md bg-blue-500/10">
           <span className="text-sm">AI Models</span>
-          <Badge
-            variant="outline"
-            className="bg-blue-500/20 text-blue-700"
-          >
+          <Badge variant="outline" className="bg-blue-500/20 text-blue-700">
             Available
           </Badge>
         </div>

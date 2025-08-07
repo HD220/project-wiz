@@ -1,8 +1,11 @@
-import { useMemo } from "react";
 import { useNavigate, useSearch } from "@tanstack/react-router";
+import { useMemo } from "react";
 
 import type { LlmProvider } from "@/renderer/features/agent/provider.types";
-import { validateSearchInput, validateProviderTypeFilter } from "@/renderer/lib/search-validation";
+import {
+  validateSearchInput,
+  validateProviderTypeFilter,
+} from "@/renderer/lib/search-validation";
 
 export function useProviderList(providers: LlmProvider[]) {
   const search = useSearch({
@@ -52,8 +55,8 @@ export function useProviderList(providers: LlmProvider[]) {
   }, [search.type, search.search, search.showInactive]);
 
   const filteredProviders = providers; // Backend already handles filtering
-  const activeProviders = providers.filter((p) => p.isActive);
-  const inactiveProviders = providers.filter((p) => !p.isActive);
+  const activeProviders = providers.filter((p) => !p.deactivatedAt);
+  const inactiveProviders = providers.filter((p) => p.deactivatedAt);
   const defaultProvider = providers.find((p) => p.isDefault);
 
   const providerStats = useMemo(() => {

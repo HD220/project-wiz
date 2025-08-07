@@ -1,11 +1,11 @@
-import { useEffect, useState } from "react";
 import { useRouter } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
 
-import type { DMConversationWithParticipants } from "@/main/features/dm/dm-conversation.types";
-import type { SelectMessage } from "@/main/features/message/message.types";
-import type { AuthenticatedUser } from "@/main/features/user/user.types";
-
-import { loadApiData } from "@/renderer/lib/route-loader";
+import type {
+  DMConversationWithParticipants,
+  SelectMessage,
+  AuthenticatedUser,
+} from "@/renderer/features/conversation/types";
 
 interface UseDmConversationProps {
   conversationId: string;
@@ -40,9 +40,6 @@ export function useDmConversation({
       sourceId: conversationId,
       authorId: currentUser.id,
       content: input.trim(),
-      isActive: true,
-      deactivatedAt: null,
-      deactivatedBy: null,
       createdAt: new Date(),
       updatedAt: new Date(),
     };
@@ -50,7 +47,10 @@ export function useDmConversation({
     setOptimisticMessages((prev) => [...prev, optimisticMessage]);
 
     try {
-      await window.api.dm.sendMessage({ dmId: conversationId, content: input.trim() });
+      await window.api.dm.sendMessage({
+        dmId: conversationId,
+        content: input.trim(),
+      });
       router.invalidate(); // Invalidate to refetch messages from backend
     } catch (error) {
       setOptimisticMessages((prev) =>

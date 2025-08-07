@@ -1,29 +1,36 @@
 import { eq, and, desc, like, or, isNull, sql } from "drizzle-orm";
-import { createDatabaseConnection } from "@/shared/config/database";
-import { 
-  projectsTable, 
+
+import {
+  projectsTable,
   type SelectProject,
   type UpdateProject,
-  type InsertProject
+  type InsertProject,
 } from "@/main/schemas/project.schema";
 import { usersTable } from "@/main/schemas/user.schema";
+
+import { createDatabaseConnection } from "@/shared/config/database";
 
 const { getDatabase } = createDatabaseConnection(true);
 
 /**
  * Find project by id and owner (with ownership validation)
  */
-export async function findProject(projectId: string, ownerId: string): Promise<SelectProject | null> {
+export async function findProject(
+  projectId: string,
+  ownerId: string,
+): Promise<SelectProject | null> {
   const db = getDatabase();
-  
+
   const [project] = await db
     .select()
     .from(projectsTable)
-    .where(and(
-      eq(projectsTable.id, projectId),
-      eq(projectsTable.ownerId, ownerId),
-      isNull(projectsTable.deactivatedAt)
-    ))
+    .where(
+      and(
+        eq(projectsTable.id, projectId),
+        eq(projectsTable.ownerId, ownerId),
+        isNull(projectsTable.deactivatedAt),
+      ),
+    )
     .limit(1);
 
   return project || null;
@@ -32,16 +39,17 @@ export async function findProject(projectId: string, ownerId: string): Promise<S
 /**
  * Find project by id without ownership validation (for admin operations)
  */
-export async function findProjectById(projectId: string): Promise<SelectProject | null> {
+export async function findProjectById(
+  projectId: string,
+): Promise<SelectProject | null> {
   const db = getDatabase();
-  
+
   const [project] = await db
     .select()
     .from(projectsTable)
-    .where(and(
-      eq(projectsTable.id, projectId),
-      isNull(projectsTable.deactivatedAt)
-    ))
+    .where(
+      and(eq(projectsTable.id, projectId), isNull(projectsTable.deactivatedAt)),
+    )
     .limit(1);
 
   return project || null;
@@ -50,24 +58,28 @@ export async function findProjectById(projectId: string): Promise<SelectProject 
 /**
  * Generic update project - WHERE by PKs
  */
-export async function updateProject(data: UpdateProject): Promise<SelectProject | null> {
+export async function updateProject(
+  data: UpdateProject,
+): Promise<SelectProject | null> {
   const db = getDatabase();
-  
+
   if (!data.id || !data.ownerId) {
     throw new Error("Project id and ownerId are required for update");
   }
-  
+
   const [updated] = await db
     .update(projectsTable)
     .set({
       ...data,
-      updatedAt: new Date()
+      updatedAt: new Date(),
     })
-    .where(and(
-      eq(projectsTable.id, data.id),
-      eq(projectsTable.ownerId, data.ownerId),
-      isNull(projectsTable.deactivatedAt)
-    ))
+    .where(
+      and(
+        eq(projectsTable.id, data.id),
+        eq(projectsTable.ownerId, data.ownerId),
+        isNull(projectsTable.deactivatedAt),
+      ),
+    )
     .returning();
 
   return updated || null;
@@ -76,15 +88,17 @@ export async function updateProject(data: UpdateProject): Promise<SelectProject 
 /**
  * Create project
  */
-export async function createProject(data: InsertProject & { ownerId: string }): Promise<SelectProject> {
+export async function createProject(
+  data: InsertProject & { ownerId: string },
+): Promise<SelectProject> {
   const db = getDatabase();
-  
+
   const [newProject] = await db
     .insert(projectsTable)
     .values({
       ...data,
       createdAt: new Date(),
-      updatedAt: new Date()
+      updatedAt: new Date(),
     })
     .returning();
 
@@ -98,24 +112,22 @@ export async function createProject(data: InsertProject & { ownerId: string }): 
 /**
  * List projects with filters
  */
-export async function listProjects(filters: { 
-  ownerId: string; 
-  search?: string; 
+export async function listProjects(filters: {
+  ownerId: string;
+  search?: string;
   isActive?: boolean;
   isArchived?: boolean;
 }): Promise<SelectProject[]> {
   const db = getDatabase();
-  
-  const conditions = [
-    eq(projectsTable.ownerId, filters.ownerId)
-  ];
+
+  const conditions = [eq(projectsTable.ownerId, filters.ownerId)];
 
   // Filter by isActive if specified
   if (filters.isActive !== undefined) {
     if (filters.isActive) {
       conditions.push(isNull(projectsTable.deactivatedAt));
     } else {
-      conditions.push(eq(projectsTable.isActive, false));
+      conditions.push(sql`${projectsTable.deactivatedAt} IS NOT NULL`);
     }
   }
 
@@ -134,7 +146,7 @@ export async function listProjects(filters: {
   if (filters.search) {
     const searchCondition = or(
       like(projectsTable.name, `%${filters.search}%`),
-      like(projectsTable.description, `%${filters.search}%`)
+      like(projectsTable.description, `%${filters.search}%`),
     );
     if (searchCondition) {
       conditions.push(searchCondition);
@@ -155,7 +167,7 @@ export async function listProjects(filters: {
  */
 export async function archiveProject(
   projectId: string,
-  ownerId: string
+  ownerId: string,
 ): Promise<SelectProject> {
   const db = getDatabase();
 
@@ -167,14 +179,13 @@ export async function archiveProject(
 
   const [archivedProject] = await db
     .update(projectsTable)
-    .set({ 
-      archivedAt: new Date(),
-      updatedAt: new Date()
+    .set({
+      deactivatedAt: new Date(),
+      updatedAt: new Date(),
     })
-    .where(and(
-      eq(projectsTable.id, projectId),
-      eq(projectsTable.ownerId, ownerId)
-    ))
+    .where(
+      and(eq(projectsTable.id, projectId), eq(projectsTable.ownerId, ownerId)),
+    )
     .returning();
 
   if (!archivedProject) {
@@ -189,7 +200,7 @@ export async function archiveProject(
  */
 export async function unarchiveProject(
   projectId: string,
-  ownerId: string
+  ownerId: string,
 ): Promise<SelectProject> {
   const db = getDatabase();
 
@@ -201,14 +212,13 @@ export async function unarchiveProject(
 
   const [unarchivedProject] = await db
     .update(projectsTable)
-    .set({ 
-      archivedAt: null,
-      updatedAt: new Date()
+    .set({
+      deactivatedAt: null,
+      updatedAt: new Date(),
     })
-    .where(and(
-      eq(projectsTable.id, projectId),
-      eq(projectsTable.ownerId, ownerId)
-    ))
+    .where(
+      and(eq(projectsTable.id, projectId), eq(projectsTable.ownerId, ownerId)),
+    )
     .returning();
 
   if (!unarchivedProject) {
@@ -223,7 +233,7 @@ export async function unarchiveProject(
  */
 export async function deleteProject(
   projectId: string,
-  ownerId: string
+  ownerId: string,
 ): Promise<void> {
   const db = getDatabase();
 
@@ -237,20 +247,21 @@ export async function deleteProject(
     .update(projectsTable)
     .set({
       deactivatedAt: new Date(),
-      updatedAt: new Date()
+      updatedAt: new Date(),
     })
-    .where(and(
-      eq(projectsTable.id, projectId),
-      eq(projectsTable.ownerId, ownerId)
-    ));
+    .where(
+      and(eq(projectsTable.id, projectId), eq(projectsTable.ownerId, ownerId)),
+    );
 }
 
 /**
  * Find user avatar for project display
  */
-export async function findUserAvatar(userId: string): Promise<{ avatar: string | null } | null> {
+export async function findUserAvatar(
+  userId: string,
+): Promise<{ avatar: string | null } | null> {
   const db = getDatabase();
-  
+
   const [user] = await db
     .select({ avatar: usersTable.avatar })
     .from(usersTable)
@@ -259,4 +270,3 @@ export async function findUserAvatar(userId: string): Promise<{ avatar: string |
 
   return user || null;
 }
-

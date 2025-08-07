@@ -1,8 +1,9 @@
 // Worker process entry point for autonomous LLM job processing
-import { Worker } from "./queue/worker";
+import { getLogger } from "@/shared/services/logger/config";
+
 import { responseGenerator } from "./processors/response-generator";
 import { MessageHandler } from "./queue/message-handler";
-import { getLogger } from "@/shared/services/logger/config";
+import { Worker } from "./queue/worker";
 
 const logger = getLogger("worker-main");
 
@@ -11,7 +12,7 @@ logger.info("🔄 Process info:", {
   pid: process.pid,
   argv: process.argv,
   isConnectedToParent: !!process.send,
-  parentProcess: process.ppid
+  parentProcess: process.ppid,
 });
 
 const processor = new Worker("llm-jobs", responseGenerator);
@@ -20,7 +21,7 @@ const messageHandler = new MessageHandler();
 async function main() {
   try {
     logger.info("🚀 LLM Worker initialized");
-    
+
     // Start job processing loop
     await processor.start();
   } catch (error) {
@@ -32,24 +33,36 @@ async function main() {
 // Handle messages from main process via parentPort
 if (process.parentPort) {
   logger.info("🔄 parentPort available, setting up IPC");
-  
+
   process.parentPort.on("message", async (event) => {
     const message = event.data;
     logger.debug("🔴 [WORKER] Received message via parentPort:", message);
-    
+
     try {
       logger.debug("🔴 [WORKER] Processing message with messageHandler");
       const result = await messageHandler.handleMessage(message);
-      logger.debug("🔴 [WORKER] Message processed successfully, result:", result);
-      
+      logger.debug(
+        "🔴 [WORKER] Message processed successfully, result:",
+        result,
+      );
+
       const response = { success: true, result };
-      logger.debug("🔴 [WORKER] Sending response back via parentPort:", response);
+      logger.debug(
+        "🔴 [WORKER] Sending response back via parentPort:",
+        response,
+      );
       process.parentPort?.postMessage(response);
     } catch (error) {
       logger.error("🔴 [WORKER] Error processing message:", error);
-      
-      const response = { success: false, error: error instanceof Error ? error.message : String(error) };
-      logger.debug("🔴 [WORKER] Sending error response back via parentPort:", response);
+
+      const response = {
+        success: false,
+        error: error instanceof Error ? error.message : String(error),
+      };
+      logger.debug(
+        "🔴 [WORKER] Sending error response back via parentPort:",
+        response,
+      );
       process.parentPort?.postMessage(response);
     }
   });

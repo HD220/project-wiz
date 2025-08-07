@@ -1,5 +1,5 @@
-import { useState } from "react";
 import { useTheme } from "next-themes";
+import { useState } from "react";
 
 export function useAppearanceSettings() {
   const { theme, setTheme, resolvedTheme } = useTheme();
@@ -48,17 +48,22 @@ export function useAppearanceSettings() {
     setTheme: handleThemeChange,
     resolvedTheme,
     isHighContrast,
-    setIsHighContrast: (value: boolean) => handleSwitchChange(setIsHighContrast, value),
+    setIsHighContrast: (value: boolean) =>
+      handleSwitchChange(setIsHighContrast, value),
     isReducedMotion,
-    setIsReducedMotion: (value: boolean) => handleSwitchChange(setIsReducedMotion, value),
+    setIsReducedMotion: (value: boolean) =>
+      handleSwitchChange(setIsReducedMotion, value),
     isCompactMode,
-    setIsCompactMode: (value: boolean) => handleSwitchChange(setIsCompactMode, value),
+    setIsCompactMode: (value: boolean) =>
+      handleSwitchChange(setIsCompactMode, value),
     zoomLevel,
     setZoomLevel: handleZoomChange,
     hardwareAcceleration,
-    setHardwareAcceleration: (value: boolean) => handleSwitchChange(setHardwareAcceleration, value),
+    setHardwareAcceleration: (value: boolean) =>
+      handleSwitchChange(setHardwareAcceleration, value),
     smoothScrolling,
-    setSmoothScrolling: (value: boolean) => handleSwitchChange(setSmoothScrolling, value),
+    setSmoothScrolling: (value: boolean) =>
+      handleSwitchChange(setSmoothScrolling, value),
     error,
   };
 }

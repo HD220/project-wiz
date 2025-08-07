@@ -2,21 +2,30 @@ import { createFileRoute, Outlet, useRouter } from "@tanstack/react-router";
 import { Send, Paperclip, Smile } from "lucide-react";
 import { useEffect, useState } from "react";
 
-import type { DMConversation } from "@/shared/types/dm-conversation";
-import type { Message } from "@/shared/types/message";
-import type { User } from "@/shared/types/user";
+import {
+  Chat,
+  ChatMessages,
+  ChatMessage,
+  ChatInput,
+} from "@/renderer/components/chat";
 import { ContentHeader } from "@/renderer/components/layout/content-header";
 import { Button } from "@/renderer/components/ui/button";
 import { Textarea } from "@/renderer/components/ui/textarea";
-import { Chat, ChatMessages, ChatMessage, ChatInput } from "@/renderer/components/chat";
+import {
+  getOtherParticipants,
+  createConversationAvatar,
+} from "@/renderer/features/conversation/utils/conversation-avatar.utils";
 import {
   ProfileAvatar,
   ProfileAvatarImage,
   ProfileAvatarStatus,
 } from "@/renderer/features/user/components/profile-avatar";
-import { getOtherParticipants, createConversationAvatar } from "@/renderer/features/conversation/utils/conversation-avatar.utils";
 import { loadApiData } from "@/renderer/lib/route-loader";
 import { cn } from "@/renderer/lib/utils";
+
+import type { DMConversation } from "@/shared/types/dm-conversation";
+import type { Message } from "@/shared/types/message";
+import type { User } from "@/shared/types/user";
 
 interface DMLoaderData {
   conversation: DMConversation;
@@ -57,18 +66,21 @@ function DMLayout() {
     };
 
     // Add optimistic message immediately
-    setOptimisticMessages(prev => [...prev, optimisticMessage]);
+    setOptimisticMessages((prev) => [...prev, optimisticMessage]);
 
     try {
       // Send message to backend
-      await window.api.dm.sendMessage({ dmId: conversationId, content: input.trim() });
-      
+      await window.api.dm.sendMessage({
+        dmId: conversationId,
+        content: input.trim(),
+      });
+
       // Invalidate router to refresh messages from backend
       router.invalidate();
     } catch (error) {
       // Remove optimistic message on error
-      setOptimisticMessages(prev => 
-        prev.filter(msg => msg.id !== optimisticMessage.id)
+      setOptimisticMessages((prev) =>
+        prev.filter((msg) => msg.id !== optimisticMessage.id),
       );
       console.error("Failed to send message:", error);
     } finally {
@@ -262,10 +274,13 @@ function DMLayout() {
                               ) : (
                                 <div className="flex justify-end items-start h-5 pt-0.5">
                                   <span className="text-xs text-muted-foreground/40 opacity-0 group-hover:opacity-100 transition-opacity font-mono">
-                                    {new Date(msg.createdAt).toLocaleTimeString([], {
-                                      hour: "2-digit",
-                                      minute: "2-digit",
-                                    })}
+                                    {new Date(msg.createdAt).toLocaleTimeString(
+                                      [],
+                                      {
+                                        hour: "2-digit",
+                                        minute: "2-digit",
+                                      },
+                                    )}
                                   </span>
                                 </div>
                               )}
@@ -287,12 +302,15 @@ function DMLayout() {
                                     {author.name || "Unknown User"}
                                   </span>
                                   <span className="text-xs text-muted-foreground/60 font-mono">
-                                    {new Date(msg.createdAt).toLocaleString([], {
-                                      month: "short",
-                                      day: "numeric",
-                                      hour: "2-digit",
-                                      minute: "2-digit",
-                                    })}
+                                    {new Date(msg.createdAt).toLocaleString(
+                                      [],
+                                      {
+                                        month: "short",
+                                        day: "numeric",
+                                        hour: "2-digit",
+                                        minute: "2-digit",
+                                      },
+                                    )}
                                   </span>
                                 </div>
                               )}
@@ -332,7 +350,9 @@ function DMLayout() {
               <ChatInput
                 render={(chatInput) => (
                   <FunctionalChatInput
-                    inputRef={chatInput.inputRef as React.RefObject<HTMLTextAreaElement>}
+                    inputRef={
+                      chatInput.inputRef as React.RefObject<HTMLTextAreaElement>
+                    }
                     value={chatInput.value}
                     loading={sendingMessage}
                     onValueChange={chatInput.setValue}
@@ -473,37 +493,40 @@ export const Route = createFileRoute("/_authenticated/user/dm/$conversationId")(
         () => window.api.dm.list({}),
         "Failed to load DM conversations",
       );
-      
-      const dmConversation = conversations.find(c => c.id === conversationId);
+
+      const dmConversation = conversations.find((c) => c.id === conversationId);
       if (!dmConversation) {
         throw new Error("DM conversation not found");
       }
-      
+
       const currentUser = await loadApiData(
         () => window.api.auth.getCurrent({}),
         "Failed to load current user",
       );
-      
+
       if (!currentUser) {
         throw new Error("No authenticated user");
       }
-      
+
       const [messages, availableUsers] = await Promise.all([
         loadApiData(
           () => window.api.dm.listMessages({ dmId: conversationId }),
           "Failed to load DM messages",
         ),
         loadApiData(
-          () => window.api.user.listAvailableUsers({ currentUserId: currentUser.id }),
+          () =>
+            window.api.user.listAvailableUsers({
+              currentUserId: currentUser.id,
+            }),
           "Failed to load available users",
         ),
       ]);
 
       // Get participants for this conversation from availableUsers
-      const participants = availableUsers.filter(user => 
-        dmConversation.participants?.some(p => p.participantId === user.id)
+      const participants = availableUsers.filter((user) =>
+        dmConversation.participants?.some((p) => p.participantId === user.id),
       );
-      
+
       return {
         conversation: dmConversation,
         messages: messages || [],

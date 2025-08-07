@@ -4,9 +4,12 @@
  */
 
 import { EventEmitter } from "events";
+
 import { workerManager } from "@/main/services/worker-manager";
-import type { JobOptions, Job } from "@/worker/queue/job.types";
+
 import { getLogger } from "@/shared/services/logger/config";
+
+import type { JobOptions, Job } from "@/worker/queue/job.types";
 
 // Queue event types
 export interface QueueEvents {
@@ -38,7 +41,10 @@ export class QueueClient extends EventEmitter {
   private queueName: string;
   private logger = getLogger("queue-client");
   private pollingInterval: NodeJS.Timeout | null = null;
-  private trackedJobs = new Map<string, { status: string; lastChecked: number }>();
+  private trackedJobs = new Map<
+    string,
+    { status: string; lastChecked: number }
+  >();
   private isPolling = false;
 
   constructor(queueName: string) {
@@ -59,22 +65,29 @@ export class QueueClient extends EventEmitter {
 
     this.logger.debug(`[QueueClient] Sending add job message:`, { message });
     const result = await this.sendMessage(message);
-    
+
     // Start tracking this job
     if (result.jobId) {
       this.trackedJobs.set(result.jobId, {
         status: "waiting",
-        lastChecked: Date.now()
+        lastChecked: Date.now(),
       });
-      
+
       // Start polling if not already running
       this.startPolling();
     }
-    
+
     return result;
   }
 
-  async getJobCounts(): Promise<{ waiting: number; active: number; completed: number; failed: number; delayed: number; paused: number }> {
+  async getJobCounts(): Promise<{
+    waiting: number;
+    active: number;
+    completed: number;
+    failed: number;
+    delayed: number;
+    paused: number;
+  }> {
     const message = {
       action: "getStats",
       queueName: this.queueName,
@@ -115,10 +128,10 @@ export class QueueClient extends EventEmitter {
    */
   private setupWorkerCommunication(): void {
     this.logger.debug("🔧 Setting up worker communication with polling");
-    
+
     // The polling will be started when jobs are added
     // and stopped when no jobs are being tracked
-    
+
     this.logger.info("✅ Worker communication setup complete (polling-based)");
   }
 
@@ -132,7 +145,7 @@ export class QueueClient extends EventEmitter {
 
     this.isPolling = true;
     this.pollingInterval = setInterval(() => {
-      this.checkJobStatuses().catch(error => {
+      this.checkJobStatuses().catch((error) => {
         this.logger.error("❌ Error during job status polling:", error);
       });
     }, 1000); // Poll every second
@@ -165,20 +178,20 @@ export class QueueClient extends EventEmitter {
       // Get completed jobs
       const completed = await this.getCompleted();
       const failed = await this.getFailed();
-      
+
       // Check each tracked job
       const jobsToRemove: string[] = [];
-      
+
       for (const [jobId, trackedJob] of this.trackedJobs) {
         // Check if job is completed
-        const completedJob = completed.find(job => job.id === jobId);
+        const completedJob = completed.find((job) => job.id === jobId);
         if (completedJob) {
           if (trackedJob.status !== "completed") {
             this.emit("job-completed", {
               jobId,
               queueName: this.queueName,
               result: (completedJob as any).result || "Job completed",
-              timestamp: new Date()
+              timestamp: new Date(),
             });
           }
           jobsToRemove.push(jobId);
@@ -186,7 +199,7 @@ export class QueueClient extends EventEmitter {
         }
 
         // Check if job has failed
-        const failedJob = failed.find(job => job.id === jobId);
+        const failedJob = failed.find((job) => job.id === jobId);
         if (failedJob) {
           if (trackedJob.status !== "failed") {
             this.emit("job-failed", {
@@ -194,7 +207,7 @@ export class QueueClient extends EventEmitter {
               queueName: this.queueName,
               error: (failedJob as any).error || "Unknown error",
               attempts: 1, // Could get actual attempts from job data
-              timestamp: new Date()
+              timestamp: new Date(),
             });
           }
           jobsToRemove.push(jobId);
@@ -204,12 +217,12 @@ export class QueueClient extends EventEmitter {
         // Update tracked job timestamp
         this.trackedJobs.set(jobId, {
           ...trackedJob,
-          lastChecked: Date.now()
+          lastChecked: Date.now(),
         });
       }
 
       // Remove completed/failed jobs from tracking
-      jobsToRemove.forEach(jobId => {
+      jobsToRemove.forEach((jobId) => {
         this.trackedJobs.delete(jobId);
       });
 
@@ -217,7 +230,6 @@ export class QueueClient extends EventEmitter {
       if (this.trackedJobs.size === 0) {
         this.stopPolling();
       }
-
     } catch (error) {
       this.logger.error("❌ Error checking job statuses:", error);
     }
@@ -228,7 +240,7 @@ export class QueueClient extends EventEmitter {
    */
   emit<T extends QueueEventName>(
     eventName: T,
-    data: QueueEventData<T>
+    data: QueueEventData<T>,
   ): boolean {
     this.logger.debug(`📤 Emitting queue event: ${eventName}`, data);
     return super.emit(eventName, data);
@@ -239,15 +251,16 @@ export class QueueClient extends EventEmitter {
    */
   on<T extends QueueEventName>(
     eventName: T,
-    listener: (data: QueueEventData<T>) => void
+    listener: (data: QueueEventData<T>) => void,
   ): this {
     this.logger.debug(`👂 Registering listener for queue event: ${eventName}`);
     return super.on(eventName, listener);
   }
 
-
   private async sendMessage(message: any): Promise<any> {
-    this.logger.debug(`[QueueClient] Calling workerManager.sendMessageWithResponse`);
+    this.logger.debug(
+      `[QueueClient] Calling workerManager.sendMessageWithResponse`,
+    );
     try {
       const result = await workerManager.sendMessageWithResponse(message);
       this.logger.debug(`[QueueClient] Got response from worker:`, result);
@@ -263,16 +276,16 @@ export class QueueClient extends EventEmitter {
    */
   public shutdown(): void {
     this.logger.info("🛑 QueueClient shutting down");
-    
+
     // Stop polling
     this.stopPolling();
-    
+
     // Clear tracked jobs
     this.trackedJobs.clear();
-    
+
     // Remove all event listeners
     this.removeAllListeners();
-    
+
     this.logger.info("✅ QueueClient shutdown complete");
   }
 }

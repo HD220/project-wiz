@@ -1,7 +1,5 @@
 import { Hash } from "lucide-react";
 
-import type { User } from "@/shared/types/user";
-
 import {
   ProfileAvatar,
   ProfileAvatarImage,
@@ -9,14 +7,16 @@ import {
   ProfileAvatarCounter,
 } from "@/renderer/features/user/components/profile-avatar";
 
+import type { User } from "@/shared/types/user";
+
 /**
  * Get other participants in a conversation (excluding current user)
  */
 export function getOtherParticipants(
   participants: User[],
-  currentUserId: string
+  currentUserId: string,
 ): User[] {
-  return participants.filter(participant => participant.id !== currentUserId);
+  return participants.filter((participant) => participant.id !== currentUserId);
 }
 
 /**
@@ -24,15 +24,13 @@ export function getOtherParticipants(
  */
 export function createConversationAvatar(
   otherParticipants: User[],
-  size: "sm" | "md" | "lg" = "sm"
+  size: "sm" | "md" | "lg" = "sm",
 ) {
   // If no other participants, show fallback
   if (otherParticipants.length === 0) {
     return (
       <ProfileAvatar size={size}>
-        <ProfileAvatarImage
-          fallbackIcon={<Hash className="w-1/2 h-1/2" />}
-        />
+        <ProfileAvatarImage fallbackIcon={<Hash className="w-1/2 h-1/2" />} />
       </ProfileAvatar>
     );
   }
@@ -43,18 +41,13 @@ export function createConversationAvatar(
     if (!participant) {
       return (
         <ProfileAvatar size={size}>
-          <ProfileAvatarImage
-            fallbackIcon={<Hash className="w-1/2 h-1/2" />}
-          />
+          <ProfileAvatarImage fallbackIcon={<Hash className="w-1/2 h-1/2" />} />
         </ProfileAvatar>
       );
     }
     return (
       <ProfileAvatar size={size}>
-        <ProfileAvatarImage
-          src={participant.avatar}
-          name={participant.name}
-        />
+        <ProfileAvatarImage src={participant.avatar} name={participant.name} />
         <ProfileAvatarStatus id={participant.id} size={size} />
       </ProfileAvatar>
     );
@@ -67,9 +60,7 @@ export function createConversationAvatar(
   if (!firstParticipant) {
     return (
       <ProfileAvatar size={size}>
-        <ProfileAvatarImage
-          fallbackIcon={<Hash className="w-1/2 h-1/2" />}
-        />
+        <ProfileAvatarImage fallbackIcon={<Hash className="w-1/2 h-1/2" />} />
       </ProfileAvatar>
     );
   }

@@ -22,7 +22,7 @@ export type ChatAction =
       type: "REMOVE_MESSAGE";
       payload: {
         id: string | number;
-        };
+      };
     }
   | { type: "SET_MESSAGES"; payload: unknown[] }
   | { type: "SET_PROPERTY"; payload: { key: keyof ChatState; value: any } }

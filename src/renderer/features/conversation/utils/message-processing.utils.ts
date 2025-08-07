@@ -1,4 +1,4 @@
-import type { SelectMessage } from "@/main/features/message/message.types";
+import type { SelectMessage } from "@/renderer/features/conversation/types";
 
 export interface MessageGroup {
   authorId: string;

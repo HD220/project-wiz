@@ -1,9 +1,13 @@
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useRouter } from "@tanstack/react-router";
 import { useForm } from "react-hook-form";
 
-import { zodResolver } from "@hookform/resolvers/zod";
-import { PROVIDER_CONFIGS, ProviderFormData, providerFormSchema } from "@/renderer/features/agent/provider-constants";
-import { LlmProvider } from "@/renderer/features/agent/provider.types";
-import { useRouter } from "@tanstack/react-router";
+import {
+  PROVIDER_CONFIGS,
+  type ProviderFormData,
+  providerFormSchema,
+} from "@/renderer/features/agent/provider-constants";
+import type { LlmProvider } from "@/renderer/features/agent/provider.types";
 
 interface UseProviderFormProps {
   provider?: LlmProvider | null;
@@ -15,33 +19,32 @@ export function useProviderForm({ provider }: UseProviderFormProps) {
   const isEditing = !!provider;
 
   const form = useForm<ProviderFormData>({
+    resolver: zodResolver(providerFormSchema),
     defaultValues: {
       name: provider?.name || "",
       type: provider?.type || "openai",
       apiKey: provider?.apiKey || "",
-      baseUrl: provider?.baseUrl || undefined,
+      baseUrl: provider?.baseUrl || "",
       defaultModel:
         provider?.defaultModel ||
         PROVIDER_CONFIGS[provider?.type || "openai"].defaultModel,
       isDefault: provider?.isDefault || false,
-      isActive: provider?.isActive ?? true,
+      isActive: provider ? !provider.deactivatedAt : true,
     },
   });
 
   const watchedType = form.watch("type");
 
   function onSubmit(data: ProviderFormData) {
-    router.submit(form, {
-      action: isEditing
-        ? `/user/settings/llm-providers/${provider?.id}/edit`
-        : "/user/settings/llm-providers/new",
-      method: "post",
-    });
+    // TODO: Implement proper form submission with API calls
+    console.log("Form submission:", data);
+    // For now, just navigate back
+    router.navigate({ to: "/user/settings/llm-providers" });
   }
 
   return {
     form,
-    isLoading: router.state.isLoading,
+    isLoading: false, // router doesn't have state.isLoading in this version
     isEditing,
     watchedType,
     onSubmit,

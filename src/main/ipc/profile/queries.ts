@@ -1,12 +1,14 @@
 import { eq } from "drizzle-orm";
-import { createDatabaseConnection } from "@/shared/config/database";
+
 import {
   userPreferencesTable,
   type Theme,
   type SelectUserPreferences,
   type InsertUserPreferences,
-  type UpdateUserPreferences
+  type UpdateUserPreferences,
 } from "@/main/schemas/user-preferences.schema";
+
+import { createDatabaseConnection } from "@/shared/config/database";
 
 const { getDatabase } = createDatabaseConnection(true);
 
@@ -30,9 +32,11 @@ export async function getUserTheme(ownerId: string): Promise<{ theme: Theme }> {
 /**
  * Find user preferences by owner ID
  */
-export async function findUserPreferences(ownerId: string): Promise<SelectUserPreferences | null> {
+export async function findUserPreferences(
+  ownerId: string,
+): Promise<SelectUserPreferences | null> {
   const db = getDatabase();
-  
+
   const [preferences] = await db
     .select()
     .from(userPreferencesTable)
@@ -45,9 +49,11 @@ export async function findUserPreferences(ownerId: string): Promise<SelectUserPr
 /**
  * Create user preferences
  */
-export async function createUserPreferences(data: InsertUserPreferences): Promise<SelectUserPreferences> {
+export async function createUserPreferences(
+  data: InsertUserPreferences,
+): Promise<SelectUserPreferences> {
   const db = getDatabase();
-  
+
   const [preferences] = await db
     .insert(userPreferencesTable)
     .values(data)
@@ -63,17 +69,17 @@ export async function createUserPreferences(data: InsertUserPreferences): Promis
 /**
  * Update user preferences with ownership validation
  */
-export async function updateUserPreferences(data: UpdateUserPreferences & { userId: string }): Promise<SelectUserPreferences | null> {
+export async function updateUserPreferences(
+  data: UpdateUserPreferences & { userId: string },
+): Promise<SelectUserPreferences | null> {
   const db = getDatabase();
-  
+
   const { userId, ...updates } = data;
 
   const [preferences] = await db
     .update(userPreferencesTable)
     .set(updates)
-    .where(
-      eq(userPreferencesTable.userId, userId)
-    )
+    .where(eq(userPreferencesTable.userId, userId))
     .returning();
 
   return preferences || null;

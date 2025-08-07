@@ -1,10 +1,15 @@
 import { z } from "zod";
+
 import { sendDMMessage } from "@/main/ipc/dm/queries";
-import { MessageSchema } from "@/shared/types";
 import { requireAuth } from "@/main/services/session-registry";
-import { getLogger } from "@/shared/services/logger/config";
+
 import { eventBus } from "@/shared/services/events/event-bus";
-import { createIPCHandler, InferHandler } from "@/shared/utils/create-ipc-handler";
+import { getLogger } from "@/shared/services/logger/config";
+import { MessageSchema } from "@/shared/types";
+import {
+  createIPCHandler,
+  InferHandler,
+} from "@/shared/utils/create-ipc-handler";
 
 const logger = getLogger("dm.send-message.invoke");
 
@@ -19,10 +24,13 @@ const handler = createIPCHandler({
   inputSchema: SendDMMessageInputSchema,
   outputSchema: SendDMMessageOutputSchema,
   handler: async (input) => {
-    logger.debug("Sending message to DM", { dmId: input.dmId, contentLength: input.content.length });
+    logger.debug("Sending message to DM", {
+      dmId: input.dmId,
+      contentLength: input.content.length,
+    });
 
     const currentUser = requireAuth();
-    
+
     // Send message to DM conversation
     const dbMessage = await sendDMMessage({
       authorId: currentUser.id,
@@ -30,7 +38,7 @@ const handler = createIPCHandler({
       sourceId: input.dmId,
       content: input.content,
     });
-    
+
     // Mapeamento: SelectMessage → Message (dados puros da entidade)
     const apiMessage = {
       id: dbMessage.id,
@@ -41,17 +49,20 @@ const handler = createIPCHandler({
       createdAt: new Date(dbMessage.createdAt),
       updatedAt: new Date(dbMessage.updatedAt),
     };
-    
-    logger.debug("Message sent to DM", { 
-      messageId: apiMessage.id, 
-      sourceId: apiMessage.sourceId 
+
+    logger.debug("Message sent to DM", {
+      messageId: apiMessage.id,
+      sourceId: apiMessage.sourceId,
     });
-    
+
     // Emit specific event for this operation
-    eventBus.emit("dm:message-sent", { messageId: apiMessage.id, sourceId: apiMessage.sourceId });
-    
+    eventBus.emit("dm:message-sent", {
+      messageId: apiMessage.id,
+      sourceId: apiMessage.sourceId,
+    });
+
     return apiMessage;
-  }
+  },
 });
 
 export default handler;
@@ -59,7 +70,7 @@ export default handler;
 declare global {
   namespace WindowAPI {
     interface Dm {
-      sendMessage: InferHandler<typeof handler>
+      sendMessage: InferHandler<typeof handler>;
     }
   }
 }

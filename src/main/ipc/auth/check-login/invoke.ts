@@ -1,6 +1,11 @@
 import { z } from "zod";
+
 import { sessionRegistry } from "@/main/services/session-registry";
-import { createIPCHandler, InferHandler } from "@/shared/utils/create-ipc-handler";
+
+import {
+  createIPCHandler,
+  InferHandler,
+} from "@/shared/utils/create-ipc-handler";
 
 const IsLoggedInInputSchema = z.void();
 const IsLoggedInOutputSchema = z.object({
@@ -13,9 +18,9 @@ const handler = createIPCHandler({
   handler: async () => {
     // Use session registry directly - no database access needed
     const isLoggedIn = sessionRegistry.isLoggedIn();
-    
+
     return { isLoggedIn };
-  }
+  },
 });
 
 export default handler;
@@ -23,7 +28,7 @@ export default handler;
 declare global {
   namespace WindowAPI {
     interface Auth {
-      isLoggedIn: InferHandler<typeof handler>
+      isLoggedIn: InferHandler<typeof handler>;
     }
   }
 }

@@ -1,6 +1,6 @@
-import type { AgentWithAvatar } from "@/renderer/features/agent/agent.types";
+import type { Agent } from "@/renderer/features/agent/agent.types";
 
-export function getAgentModelName(agent: AgentWithAvatar): string {
+export function getAgentModelName(agent: Agent): string {
   if (!agent.modelConfig) return "Unknown Model";
 
   try {

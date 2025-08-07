@@ -30,10 +30,11 @@ export const Route = createFileRoute("/_authenticated")({
   loader: async () => {
     try {
       const projects = await loadApiData(
-        () => window.api.project.list({
-          isActive: true,
-          isArchived: false
-        }),
+        () =>
+          window.api.project.list({
+            isActive: true,
+            isArchived: false,
+          }),
         "Failed to load projects",
       );
       return { projects };

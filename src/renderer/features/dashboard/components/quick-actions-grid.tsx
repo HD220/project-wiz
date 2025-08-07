@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { Folder, MessageSquare, Settings, Zap } from "lucide-react";
 
+import { Card, CardContent } from "@/renderer/components/ui/card";
 
 export function QuickActionsGrid() {
   return (
@@ -13,9 +14,7 @@ export function QuickActionsGrid() {
                 <Zap className="size-3 text-primary" />
               </div>
               <div className="min-w-0">
-                <p className="text-sm font-medium truncate">
-                  Quick Start
-                </p>
+                <p className="text-sm font-medium truncate">Quick Start</p>
                 <p className="text-xs text-muted-foreground">
                   Create your first agent
                 </p>
@@ -51,12 +50,8 @@ export function QuickActionsGrid() {
                 <MessageSquare className="size-3 text-green-600" />
               </div>
               <div className="min-w-0">
-                <p className="text-sm font-medium truncate">
-                  Conversations
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  Chat with AI
-                </p>
+                <p className="text-sm font-medium truncate">Conversations</p>
+                <p className="text-xs text-muted-foreground">Chat with AI</p>
               </div>
             </div>
           </CardContent>

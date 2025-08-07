@@ -1,9 +1,14 @@
 import { z } from "zod";
+
 import { updateUserPreferences } from "@/main/ipc/profile/queries";
 import { requireAuth } from "@/main/services/session-registry";
-import { getLogger } from "@/shared/services/logger/config";
+
 import { eventBus } from "@/shared/services/events/event-bus";
-import { createIPCHandler, InferHandler } from "@/shared/utils/create-ipc-handler";
+import { getLogger } from "@/shared/services/logger/config";
+import {
+  createIPCHandler,
+  InferHandler,
+} from "@/shared/utils/create-ipc-handler";
 
 const logger = getLogger("profile.update.invoke");
 
@@ -22,7 +27,7 @@ const handler = createIPCHandler({
     logger.debug("Updating user profile preferences", { theme: input.theme });
 
     const currentUser = requireAuth();
-    
+
     // Update user preferences with ownership validation
     const result = await updateUserPreferences({
       id: currentUser.id, // Use user id as preference id
@@ -33,14 +38,17 @@ const handler = createIPCHandler({
     if (!result) {
       throw new Error("Failed to update user preferences");
     }
-    
+
     logger.debug("User profile preferences updated", { theme: result.theme });
-    
+
     // Emit event
-    eventBus.emit("profile:theme-updated", { userId: currentUser.id, theme: result.theme });
-    
+    eventBus.emit("profile:theme-updated", {
+      userId: currentUser.id,
+      theme: result.theme,
+    });
+
     return { theme: result.theme };
-  }
+  },
 });
 
 export default handler;
@@ -48,7 +56,7 @@ export default handler;
 declare global {
   namespace WindowAPI {
     interface Profile {
-      update: InferHandler<typeof handler>
+      update: InferHandler<typeof handler>;
     }
   }
 }

@@ -1,9 +1,11 @@
 // Simple worker manager using utilityProcess.fork for job processing
 // Based on final architecture decision - single worker with automatic restart
 
-import { utilityProcess } from "electron";
 import path from "path";
 import { fileURLToPath } from "url";
+
+import { utilityProcess } from "electron";
+
 import { getLogger } from "@/shared/services/logger/config";
 
 export interface WorkerConfig {
@@ -83,9 +85,9 @@ export class WorkerManager {
       // Path to the built worker file - same pattern as preload
       const currentDir = path.dirname(fileURLToPath(import.meta.url));
       const workerPath = path.join(currentDir, "worker.js");
-      
+
       this.logger.info(`🔧 Spawning worker from: ${workerPath}`);
-      
+
       this.worker = utilityProcess.fork(workerPath, [], {
         serviceName: "job-worker",
         stdio: "pipe", // Capture stdout/stderr
@@ -94,7 +96,9 @@ export class WorkerManager {
       // Set up event handlers
       this.setupWorkerEventHandlers();
 
-      this.logger.info(`✅ Worker spawned successfully (PID: ${this.worker.pid})`);
+      this.logger.info(
+        `✅ Worker spawned successfully (PID: ${this.worker.pid})`,
+      );
     } catch (error) {
       this.logger.error("💥 Failed to spawn worker:", error);
       throw error;
@@ -112,8 +116,10 @@ export class WorkerManager {
       // Auto-restart if still running and within restart limits
       if (this.running && this.restartCount < this.config.maxRestarts) {
         this.restartCount++;
-        this.logger.info(`🔄 Auto-restarting worker (attempt ${this.restartCount}/${this.config.maxRestarts})`);
-        
+        this.logger.info(
+          `🔄 Auto-restarting worker (attempt ${this.restartCount}/${this.config.maxRestarts})`,
+        );
+
         setTimeout(() => {
           if (this.running) {
             this.spawnWorker().catch((error) => {
@@ -123,7 +129,9 @@ export class WorkerManager {
           }
         }, this.config.restartDelay);
       } else if (this.restartCount >= this.config.maxRestarts) {
-        this.logger.error(`💥 Worker restart limit reached (${this.config.maxRestarts}). Stopping.`);
+        this.logger.error(
+          `💥 Worker restart limit reached (${this.config.maxRestarts}). Stopping.`,
+        );
         this.running = false;
       }
     });
@@ -152,14 +160,17 @@ export class WorkerManager {
   }
 
   private delay(ms: number): Promise<void> {
-    return new Promise(resolve => setTimeout(resolve, ms));
+    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 
   // Send message and get response
-  async sendMessageWithResponse(message: any, timeoutMs: number = 30000): Promise<any> {
+  async sendMessageWithResponse(
+    message: any,
+    timeoutMs: number = 30000,
+  ): Promise<any> {
     return new Promise((resolve, reject) => {
       this.logger.info(`[WorkerManager] Sending message to worker:`, message);
-      
+
       if (!this.worker) {
         this.logger.error(`[WorkerManager] Worker not running`);
         reject(new Error("Worker not running"));
@@ -168,20 +179,25 @@ export class WorkerManager {
 
       const messageId = Date.now().toString();
       this.logger.info(`[WorkerManager] Generated messageId: ${messageId}`);
-      
+
       // Set up timeout
       const timeout = setTimeout(() => {
-        this.logger.error(`[WorkerManager] Message timeout for messageId: ${messageId}`);
+        this.logger.error(
+          `[WorkerManager] Message timeout for messageId: ${messageId}`,
+        );
         this.messageCallbacks.delete(messageId);
         reject(new Error("Message timeout"));
       }, timeoutMs);
 
       // Set up response handler
       this.messageCallbacks.set(messageId, (response: any) => {
-        this.logger.info(`[WorkerManager] Received response for messageId ${messageId}:`, response);
+        this.logger.info(
+          `[WorkerManager] Received response for messageId ${messageId}:`,
+          response,
+        );
         clearTimeout(timeout);
         this.messageCallbacks.delete(messageId);
-        
+
         if (response.success) {
           resolve(response.result);
         } else {

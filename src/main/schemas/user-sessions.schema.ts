@@ -28,7 +28,9 @@ export const userSessionsTable = sqliteTable(
     tokenIdx: index("user_sessions_token_idx").on(table.token),
     expiresAtIdx: index("user_sessions_expires_at_idx").on(table.expiresAt),
     // Soft deletion indexes
-    deactivatedAtIdx: index("user_sessions_deactivated_at_idx").on(table.deactivatedAt),
+    deactivatedAtIdx: index("user_sessions_deactivated_at_idx").on(
+      table.deactivatedAt,
+    ),
   }),
 );
 

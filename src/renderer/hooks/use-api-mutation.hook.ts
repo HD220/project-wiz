@@ -33,7 +33,7 @@ export interface ApiMutationOptions<TReturn> {
  * @example
  * ```typescript
  * const createAgent = useApiMutation(
- *   (data: CreateAgentInput) => window.api.agents.create(data),
+ *   (data: CreateAgentInput) => window.api.agent.create(data),
  *   {
  *     successMessage: "Agent created successfully",
  *     errorMessage: "Failed to create agent",

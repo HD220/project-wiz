@@ -27,7 +27,7 @@ export class SharedDrizzleLogger implements Logger {
  */
 export function createSqliteInstance(): Database.Database {
   const config = getDatabaseConfig();
-  
+
   // Initialize SQLite database
   const sqlite = new Database(config.dbPath);
 
@@ -53,8 +53,8 @@ export function createDrizzleInstance(
   enableDrizzleLogging: boolean = true,
 ) {
   const sqliteInstance = sqlite || createSqliteInstance();
-  
-  const options = enableDrizzleLogging 
+
+  const options = enableDrizzleLogging
     ? { logger: new SharedDrizzleLogger() }
     : {};
 

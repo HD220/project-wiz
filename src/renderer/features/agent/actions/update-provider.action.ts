@@ -1,6 +1,7 @@
-import { Action, redirect } from "@tanstack/react-router";
-import { LlmProviderSchema } from "@/shared/types/llm-provider";
+import { redirect } from "@tanstack/react-router";
 import { z } from "zod";
+
+import { LlmProviderSchema } from "@/shared/types/llm-provider";
 
 // Schema for updating providers - omit auto-generated and immutable fields
 const UpdateProviderSchema = LlmProviderSchema.omit({
@@ -12,25 +13,27 @@ const UpdateProviderSchema = LlmProviderSchema.omit({
 
 type UpdateProviderInput = z.infer<typeof UpdateProviderSchema>;
 
-export const updateProviderAction = new Action({
-  fn: async ({ context, params, form }) => {
-    const { queryClient } = context;
-    const { user } = context.auth;
-    const providerId = params.providerId as string;
+export async function updateProviderAction(
+  context: any,
+  params: any,
+  form: any,
+) {
+  const { queryClient } = context;
+  const { user } = context.auth;
+  const providerId = params.providerId as string;
 
-    if (!user?.id) {
-      throw new Error("User not authenticated");
-    }
+  if (!user?.id) {
+    throw new Error("User not authenticated");
+  }
 
-    const updateData: UpdateProviderInput = {
-      ...form,
-      baseUrl: form.baseUrl || null,
-    };
+  const updateData: UpdateProviderInput = {
+    ...form,
+    baseUrl: form.baseUrl || null,
+  };
 
-    await window.api.llmProvider.update(providerId, updateData);
+  await window.api.llmProvider.update({ id: providerId, ...updateData });
 
-    queryClient.invalidateQueries({ queryKey: ["llmProviders"] });
+  queryClient.invalidateQueries({ queryKey: ["llmProviders"] });
 
-    return redirect({ to: "/user/settings/llm-providers" });
-  },
-});
+  return redirect({ to: "/user/settings/llm-providers" });
+}

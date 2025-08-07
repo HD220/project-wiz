@@ -17,13 +17,14 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/renderer/components/ui/dropdown-menu";
-import type { Agent } from "@/shared/types/agent";
 import {
   ProfileAvatar,
   ProfileAvatarImage,
   ProfileAvatarStatus,
 } from "@/renderer/features/user/components/profile-avatar";
 import { cn } from "@/renderer/lib/utils";
+
+import type { Agent } from "@/shared/types/agent";
 
 interface AgentListCardProps {
   agent: Agent;
@@ -65,7 +66,7 @@ export function AgentListCard(props: AgentListCardProps) {
         "gap-[var(--spacing-component-md)] px-[var(--spacing-component-md)] py-[var(--spacing-component-sm)]",
         "hover:bg-accent/50 cursor-pointer",
         // Inactive state styling
-        !agent.isActive && "opacity-60",
+        !!agent.deactivatedAt && "opacity-60",
       )}
     >
       {/* Avatar with status indicator */}
@@ -85,14 +86,16 @@ export function AgentListCard(props: AgentListCardProps) {
           <span
             className={cn(
               "text-sm font-medium truncate",
-              agent.isActive ? "text-foreground" : "text-muted-foreground",
+              !agent.deactivatedAt
+                ? "text-foreground"
+                : "text-muted-foreground",
             )}
           >
             {agent.name}
           </span>
 
           {/* Compact status badge */}
-          {agent.isActive && (
+          {!agent.deactivatedAt && (
             <Badge
               variant="secondary"
               className={cn(
@@ -110,7 +113,7 @@ export function AgentListCard(props: AgentListCardProps) {
           )}
 
           {/* Inactive indicator */}
-          {!agent.isActive && (
+          {!!agent.deactivatedAt && (
             <Badge
               variant="outline"
               className="h-4 px-[var(--spacing-component-sm)] text-xs"
@@ -146,7 +149,7 @@ export function AgentListCard(props: AgentListCardProps) {
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-40">
-            {agent.isActive ? (
+            {!agent.deactivatedAt ? (
               // Actions for active agents
               <>
                 <DropdownMenuItem asChild>

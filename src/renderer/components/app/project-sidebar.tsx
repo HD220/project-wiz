@@ -9,10 +9,11 @@ import {
 } from "@/renderer/components/ui/collapsible";
 import { ScrollArea } from "@/renderer/components/ui/scroll-area";
 import { Separator } from "@/renderer/components/ui/separator";
-import type { Agent } from "@/shared/types/agent";
-import type { Project } from "@/shared/types/project";
-import type { Channel } from "@/shared/types/channel";
 import { cn } from "@/renderer/lib/utils";
+
+import type { Agent } from "@/shared/types/agent";
+import type { Channel } from "@/shared/types/channel";
+import type { Project } from "@/shared/types/project";
 
 interface ProjectSidebarProps {
   project: Project;

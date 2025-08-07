@@ -1,5 +1,3 @@
-import * as React from "react";
-
 export function MinimizeIcon() {
   return (
     <svg className="h-4 w-4" viewBox="0 0 16 16" fill="currentColor">

@@ -19,7 +19,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/renderer/components/ui/dropdown-menu";
-import type { Agent } from "@/shared/types/agent";
 import { AgentStatus } from "@/renderer/features/agent/components/agent-status";
 import {
   ProfileAvatar,
@@ -27,6 +26,8 @@ import {
   ProfileAvatarStatus,
 } from "@/renderer/features/user/components/profile-avatar";
 import { cn } from "@/renderer/lib/utils";
+
+import type { Agent } from "@/shared/types/agent";
 
 // Main AgentCard component with INLINE-FIRST approach
 interface AgentCardProps {
@@ -290,15 +291,15 @@ export function AgentListItem({
       {/* Status Badge */}
       <div className="shrink-0">
         <Badge
-          variant={agent.isActive ? "default" : "secondary"}
+          variant={!agent.deactivatedAt ? "default" : "secondary"}
           className={cn(
             "h-5 px-[var(--spacing-component-sm)] text-xs",
-            agent.isActive
+            !agent.deactivatedAt
               ? "bg-green-500/10 text-green-600 border-green-500/20"
               : "bg-gray-500/10 text-gray-600 border-gray-500/20",
           )}
         >
-          {agent.isActive ? "Active" : "Inactive"}
+          {!agent.deactivatedAt ? "Active" : "Inactive"}
         </Badge>
       </div>
 

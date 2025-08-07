@@ -1,10 +1,14 @@
+import { Key } from "lucide-react"; // Assuming Lucide icon
+import { useFormContext } from "react-hook-form";
+import { z } from "zod";
+
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/renderer/components/molecules/card";
+} from "@/renderer/components/ui/card";
 import {
   FormControl,
   FormDescription,
@@ -12,13 +16,18 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/renderer/components/atoms/form";
+} from "@/renderer/components/ui/form";
 import { Input } from "@/renderer/components/ui/input";
 import { PROVIDER_CONFIGS } from "@/renderer/features/agent/provider-constants";
-import { Key } from "lucide-react"; // Assuming Lucide icon
-import { useFormContext } from "react-hook-form";
-import { LlmProviderFormSchema } from "../../agent.schema";
-import { z } from "zod";
+
+import { LlmProviderSchema } from "@/shared/types/llm-provider";
+
+// Schema for form input
+const LlmProviderFormSchema = LlmProviderSchema.omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
 
 interface ProviderApiConfigurationSectionProps {
   watchedType: string;
@@ -70,9 +79,8 @@ export function ProviderApiConfigurationSection({
           )}
         />
 
-        {PROVIDER_CONFIGS[
-          watchedType as keyof typeof PROVIDER_CONFIGS
-        ]?.requiresBaseUrl && (
+        {PROVIDER_CONFIGS[watchedType as keyof typeof PROVIDER_CONFIGS]
+          ?.requiresBaseUrl && (
           <FormField
             control={form.control}
             name="baseUrl"
@@ -87,6 +95,7 @@ export function ProviderApiConfigurationSection({
                     placeholder="https://api.example.com/v1"
                     className="bg-background/50 border-border/60 focus:border-primary/50 transition-colors font-mono"
                     {...field}
+                    value={field.value || ""}
                   />
                 </FormControl>
                 <FormDescription className="text-xs text-muted-foreground">

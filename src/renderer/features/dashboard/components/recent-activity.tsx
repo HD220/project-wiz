@@ -1,6 +1,13 @@
 import { Activity } from "lucide-react";
 
 import { ActivityItem } from "@/renderer/components/app/activity-item";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/renderer/components/ui/card";
 
 export function RecentActivity() {
   return (
@@ -34,9 +41,9 @@ export function RecentActivity() {
           variant="info"
         />
         <div className="pt-2 border-t border-border/50">
-          <Text size="xs" color="muted-foreground" align="center">
+          <div className="text-xs text-muted-foreground text-center">
             Create agents and projects to see more activity
-          </Text>
+          </div>
         </div>
       </CardContent>
     </Card>

@@ -27,7 +27,11 @@ export class Logger {
   debug(message: string, ...data: any[]): void {
     if (data.length === 0) {
       this.pinoLogger.debug(message);
-    } else if (data.length === 1 && typeof data[0] === 'object' && data[0] !== null) {
+    } else if (
+      data.length === 1 &&
+      typeof data[0] === "object" &&
+      data[0] !== null
+    ) {
       this.pinoLogger.debug(data[0], message);
     } else {
       this.pinoLogger.debug({ data }, message);
@@ -42,7 +46,11 @@ export class Logger {
   info(message: string, ...data: any[]): void {
     if (data.length === 0) {
       this.pinoLogger.info(message);
-    } else if (data.length === 1 && typeof data[0] === 'object' && data[0] !== null) {
+    } else if (
+      data.length === 1 &&
+      typeof data[0] === "object" &&
+      data[0] !== null
+    ) {
       this.pinoLogger.info(data[0], message);
     } else {
       this.pinoLogger.info({ data }, message);
@@ -57,7 +65,11 @@ export class Logger {
   warn(message: string, ...data: any[]): void {
     if (data.length === 0) {
       this.pinoLogger.warn(message);
-    } else if (data.length === 1 && typeof data[0] === 'object' && data[0] !== null) {
+    } else if (
+      data.length === 1 &&
+      typeof data[0] === "object" &&
+      data[0] !== null
+    ) {
       this.pinoLogger.warn(data[0], message);
     } else {
       this.pinoLogger.warn({ data }, message);
@@ -72,7 +84,11 @@ export class Logger {
   error(message: string, ...data: any[]): void {
     if (data.length === 0) {
       this.pinoLogger.error(message);
-    } else if (data.length === 1 && typeof data[0] === 'object' && data[0] !== null) {
+    } else if (
+      data.length === 1 &&
+      typeof data[0] === "object" &&
+      data[0] !== null
+    ) {
       this.pinoLogger.error(data[0], message);
     } else {
       this.pinoLogger.error({ data }, message);

@@ -1,6 +1,7 @@
-import { Action, redirect } from "@tanstack/react-router";
-import { LlmProviderSchema } from "@/shared/types/llm-provider";
+import { redirect } from "@tanstack/react-router";
 import { z } from "zod";
+
+import { LlmProviderSchema } from "@/shared/types/llm-provider";
 
 // Schema for creating providers - omit auto-generated fields
 const CreateProviderSchema = LlmProviderSchema.omit({
@@ -11,25 +12,23 @@ const CreateProviderSchema = LlmProviderSchema.omit({
 
 type CreateProviderInput = z.infer<typeof CreateProviderSchema>;
 
-export const createProviderAction = new Action({
-  fn: async ({ context, params, form }) => {
-    const { queryClient } = context;
-    const { user } = context.auth;
+export async function createProviderAction(context: any, form: any) {
+  const { queryClient } = context;
+  const { user } = context.auth;
 
-    if (!user?.id) {
-      throw new Error("User not authenticated");
-    }
+  if (!user?.id) {
+    throw new Error("User not authenticated");
+  }
 
-    const createData: CreateProviderInput = {
-      ...form,
-      ownerId: user.id,
-      baseUrl: form.baseUrl || null,
-    };
+  const createData: CreateProviderInput = {
+    ...form,
+    ownerId: user.id,
+    baseUrl: form.baseUrl || null,
+  };
 
-    await window.api.llmProvider.create(createData);
+  await window.api.llmProvider.create(createData);
 
-    queryClient.invalidateQueries({ queryKey: ["llmProviders"] });
+  queryClient.invalidateQueries({ queryKey: ["llmProviders"] });
 
-    return redirect({ to: "/user/settings/llm-providers" });
-  },
-});
+  return redirect({ to: "/user/settings/llm-providers" });
+}

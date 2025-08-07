@@ -9,36 +9,40 @@ export const jobsTable = sqliteTable(
     id: text("id")
       .primaryKey()
       .$defaultFn(() => crypto.randomUUID()),
-    
+
     // Job identification
     name: text("name").notNull(), // Job type identifier (e.g., "process_message", "analyze_code")
-    
+
     // Job content (BullMQ-style data)
     data: text("data").notNull(), // JSON string with job description and parameters
     opts: text("opts"), // JSON string with job options (delay, attempts, etc.)
-    
+
     // Priority and status
     priority: integer("priority").notNull().default(0), // Higher number = higher priority
     status: text("status")
-      .$type<"waiting" | "active" | "completed" | "failed" | "delayed" | "paused">()
+      .$type<
+        "waiting" | "active" | "completed" | "failed" | "delayed" | "paused"
+      >()
       .notNull()
       .default("waiting"),
-    
+
     // Processing information
     progress: integer("progress").notNull().default(0), // 0-100 progress percentage
     attempts: integer("attempts").notNull().default(0),
     maxAttempts: integer("max_attempts").notNull().default(3),
     delay: integer("delay").notNull().default(0), // Delay in milliseconds
-    
+
     // Dependencies (BullMQ-style) - ONLY foreign key relationship
-    parentJobId: text("parent_job_id").references((): any => jobsTable.id, { onDelete: "set null" }),
+    parentJobId: text("parent_job_id").references((): any => jobsTable.id, {
+      onDelete: "set null",
+    }),
     dependencyCount: integer("dependency_count").notNull().default(0), // Number of dependencies remaining
-    
+
     // Results
     result: text("result"), // JSON string with job result
     failureReason: text("failure_reason"),
     stacktrace: text("stacktrace"),
-    
+
     // Timestamps (using unixepoch with subsec for high precision)
     createdAt: integer("created_at", { mode: "timestamp_ms" })
       .notNull()
@@ -62,7 +66,7 @@ export const jobsTable = sqliteTable(
       table.delay,
       table.createdAt,
     ),
-    
+
     // Additional performance indexes
     statusIdx: index("llm_jobs_status_idx").on(table.status),
     nameIdx: index("llm_jobs_name_idx").on(table.name),
@@ -76,7 +80,13 @@ export type InsertJob = typeof jobsTable.$inferInsert;
 export type UpdateJob = Partial<InsertJob> & { id: string };
 
 // Type-safe job status literals
-export type JobStatus = "waiting" | "active" | "completed" | "failed" | "delayed" | "paused";
+export type JobStatus =
+  | "waiting"
+  | "active"
+  | "completed"
+  | "failed"
+  | "delayed"
+  | "paused";
 
 // Job data interfaces for type safety
 export interface JobData {

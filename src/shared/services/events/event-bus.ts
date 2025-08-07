@@ -1,4 +1,5 @@
 import { EventEmitter } from "events";
+
 import { getLogger } from "@/shared/services/logger/config";
 
 const logger = getLogger("event-bus");
@@ -7,7 +8,9 @@ const logger = getLogger("event-bus");
  * Generic type-safe Event Bus using composition pattern
  * Provides centralized event coordination with flexible event types
  */
-export class EventBus<TEvents extends Record<string, any> = Record<string, any>> {
+export class EventBus<
+  TEvents extends Record<string, any> = Record<string, any>,
+> {
   private emitter: EventEmitter;
 
   constructor() {
@@ -18,10 +21,7 @@ export class EventBus<TEvents extends Record<string, any> = Record<string, any>>
   /**
    * Type-safe event emission
    */
-  emit<T extends keyof TEvents>(
-    eventName: T,
-    data: TEvents[T]
-  ): boolean {
+  emit<T extends keyof TEvents>(eventName: T, data: TEvents[T]): boolean {
     logger.debug(`📤 Emitting event: ${String(eventName)}`, data);
     return this.emitter.emit(eventName as string, data);
   }
@@ -31,7 +31,7 @@ export class EventBus<TEvents extends Record<string, any> = Record<string, any>>
    */
   on<T extends keyof TEvents>(
     eventName: T,
-    listener: (data: TEvents[T]) => void
+    listener: (data: TEvents[T]) => void,
   ): this {
     logger.debug(`👂 Registering listener for: ${String(eventName)}`);
     this.emitter.on(eventName as string, listener);
@@ -43,7 +43,7 @@ export class EventBus<TEvents extends Record<string, any> = Record<string, any>>
    */
   once<T extends keyof TEvents>(
     eventName: T,
-    listener: (data: TEvents[T]) => void
+    listener: (data: TEvents[T]) => void,
   ): this {
     logger.debug(`👂 Registering one-time listener for: ${String(eventName)}`);
     this.emitter.once(eventName as string, listener);
@@ -90,6 +90,8 @@ export function initializeEventBus(): EventBus {
 }
 
 // Helper function to create typed event bus instances
-export function createEventBus<TEvents extends Record<string, any>>(): EventBus<TEvents> {
+export function createEventBus<
+  TEvents extends Record<string, any>,
+>(): EventBus<TEvents> {
   return new EventBus<TEvents>();
 }

@@ -1,10 +1,15 @@
 import { z } from "zod";
+
 import { archiveProjectChannel } from "@/main/ipc/channel/queries";
-import { ChannelSchema } from "@/shared/types/channel";
 import { requireAuth } from "@/main/services/session-registry";
-import { getLogger } from "@/shared/services/logger/config";
+
 import { eventBus } from "@/shared/services/events/event-bus";
-import { createIPCHandler, InferHandler } from "@/shared/utils/create-ipc-handler";
+import { getLogger } from "@/shared/services/logger/config";
+import { ChannelSchema } from "@/shared/types/channel";
+import {
+  createIPCHandler,
+  InferHandler,
+} from "@/shared/utils/create-ipc-handler";
 
 const logger = getLogger("channel.archive.invoke");
 
@@ -14,7 +19,6 @@ const ArchiveChannelInputSchema = z.object({
 
 const ArchiveChannelOutputSchema = ChannelSchema.extend({
   archivedAt: z.date().nullable(),
-  archivedBy: z.string().nullable(),
 });
 
 const handler = createIPCHandler({
@@ -24,17 +28,17 @@ const handler = createIPCHandler({
     logger.debug("Archiving channel", { channelId: input.channelId });
 
     const currentUser = requireAuth();
-    
+
     // Archive channel with ownership validation
     const dbChannel = await archiveProjectChannel(
       input.channelId,
-      currentUser.id
+      currentUser.id,
     );
-    
+
     if (!dbChannel) {
       throw new Error("Failed to archive channel or access denied");
     }
-    
+
     // Mapeamento: SelectChannel → Channel (dados puros da entidade)
     const apiChannel = {
       id: dbChannel.id,
@@ -42,19 +46,18 @@ const handler = createIPCHandler({
       name: dbChannel.name,
       description: dbChannel.description,
       archivedAt: dbChannel.archivedAt ? new Date(dbChannel.archivedAt) : null,
-      archivedBy: currentUser.id,
       createdAt: new Date(dbChannel.createdAt),
       updatedAt: new Date(dbChannel.updatedAt),
       deactivatedAt: null,
     };
-    
+
     logger.debug("Channel archived", { channelId: apiChannel.id });
-    
+
     // Emit specific event for channel archive
     eventBus.emit("channel:archived", { channelId: apiChannel.id });
-    
+
     return apiChannel;
-  }
+  },
 });
 
 export default handler;
@@ -62,7 +65,7 @@ export default handler;
 declare global {
   namespace WindowAPI {
     interface Channel {
-      archive: InferHandler<typeof handler>
+      archive: InferHandler<typeof handler>;
     }
   }
 }

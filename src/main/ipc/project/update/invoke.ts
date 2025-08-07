@@ -1,10 +1,15 @@
 import { z } from "zod";
+
 import { updateProject } from "@/main/ipc/project/queries";
-import { ProjectSchema } from "@/shared/types";
 import { requireAuth } from "@/main/services/session-registry";
-import { getLogger } from "@/shared/services/logger/config";
+
 import { eventBus } from "@/shared/services/events/event-bus";
-import { createIPCHandler, InferHandler } from "@/shared/utils/create-ipc-handler";
+import { getLogger } from "@/shared/services/logger/config";
+import { ProjectSchema } from "@/shared/types";
+import {
+  createIPCHandler,
+  InferHandler,
+} from "@/shared/utils/create-ipc-handler";
 
 const logger = getLogger("project.update.invoke");
 
@@ -15,11 +20,12 @@ const UpdateProjectInputSchema = ProjectSchema.pick({
   gitUrl: true,
   branch: true,
   localPath: true,
-  isActive: true,
-  isArchived: true,
-}).partial().extend({
-  id: z.string(),
-});
+  deactivatedAt: true,
+})
+  .partial()
+  .extend({
+    id: z.string(),
+  });
 
 const UpdateProjectOutputSchema = ProjectSchema;
 
@@ -28,29 +34,23 @@ const handler = createIPCHandler({
   outputSchema: UpdateProjectOutputSchema,
   handler: async (input) => {
     logger.debug("Updating project", { projectId: input.id });
-  
+
     const currentUser = requireAuth();
-    
+
     // Separate id from update data
-    const { id, isArchived, ...updateData } = input;
-    
-    // Convert isArchived boolean to archivedAt timestamp
-    const dbUpdateData: any = { ...updateData };
-    if (isArchived !== undefined) {
-      dbUpdateData.archivedAt = isArchived ? new Date() : null;
-    }
-    
+    const { id, ...updateData } = input;
+
     // Query executa update e retorna SelectProject with ownership validation
     const dbProject = await updateProject({
       id,
       ownerId: currentUser.id,
-      ...dbUpdateData
+      ...updateData,
     });
-    
+
     if (!dbProject) {
       throw new Error("Project not found or access denied");
     }
-    
+
     // Mapeamento: SelectProject → Project
     const apiProject = {
       id: dbProject.id,
@@ -61,19 +61,23 @@ const handler = createIPCHandler({
       branch: dbProject.branch,
       localPath: dbProject.localPath,
       ownerId: dbProject.ownerId,
-      isActive: !dbProject.deactivatedAt,
-      isArchived: !!dbProject.archivedAt,
+      deactivatedAt: dbProject.deactivatedAt
+        ? new Date(dbProject.deactivatedAt)
+        : null,
       createdAt: new Date(dbProject.createdAt),
       updatedAt: new Date(dbProject.updatedAt),
     };
-    
+
     // Emit event
     eventBus.emit("project:updated", { projectId: apiProject.id });
-    
-    logger.debug("Project updated", { projectId: apiProject.id, name: apiProject.name });
-    
+
+    logger.debug("Project updated", {
+      projectId: apiProject.id,
+      name: apiProject.name,
+    });
+
     return apiProject;
-  }
+  },
 });
 
 export default handler;
@@ -81,7 +85,7 @@ export default handler;
 declare global {
   namespace WindowAPI {
     interface Project {
-      update: InferHandler<typeof handler>
+      update: InferHandler<typeof handler>;
     }
   }
 }

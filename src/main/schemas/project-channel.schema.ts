@@ -1,8 +1,14 @@
 import { sql } from "drizzle-orm";
-import { sqliteTable, text, integer, index, primaryKey } from "drizzle-orm/sqlite-core";
+import {
+  sqliteTable,
+  text,
+  integer,
+  index,
+  primaryKey,
+} from "drizzle-orm/sqlite-core";
 
-import { usersTable } from "@/main/schemas/user.schema";
 import { projectsTable } from "@/main/schemas/project.schema";
+import { usersTable } from "@/main/schemas/user.schema";
 
 export const projectChannelsTable = sqliteTable(
   "project_channels",
@@ -35,13 +41,15 @@ export const projectChannelsTable = sqliteTable(
   (table) => ({
     // Composite primary key
     pk: primaryKey({ columns: [table.ownerId, table.id] }),
-    
+
     // Performance indexes
     ownerIdIdx: index("project_channels_owner_id_idx").on(table.ownerId),
     projectIdIdx: index("project_channels_project_id_idx").on(table.projectId),
     createdAtIdx: index("project_channels_created_at_idx").on(table.createdAt),
     // Soft deletion indexes
-    deactivatedAtIdx: index("project_channels_deactivated_at_idx").on(table.deactivatedAt),
+    deactivatedAtIdx: index("project_channels_deactivated_at_idx").on(
+      table.deactivatedAt,
+    ),
 
     // Archiving indexes
     archivedAtIdx: index("project_channels_archived_at_idx").on(

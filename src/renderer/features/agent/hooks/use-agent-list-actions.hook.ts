@@ -1,54 +1,48 @@
+import type { SelectAgent } from "@/renderer/features/agent/agent.types";
 import { useApiMutation } from "@/renderer/hooks/use-api-mutation.hook";
-import type { SelectAgent, AgentStatus } from "@/main/features/agent/agent.types";
 
 export function useAgentListActions() {
-  const deleteAgentMutation = useApiMutation(
-    (agentId: string) => window.api.agents.delete(agentId),
+  const inactivateAgentMutation = useApiMutation(
+    (agentId: string) => window.api.agent.inactivate({ id: agentId }),
     {
-      successMessage: "Agent deleted successfully",
-      errorMessage: "Failed to delete agent",
+      successMessage: "Agent inactivated successfully",
+      errorMessage: "Failed to inactivate agent",
       invalidateRouter: true,
     },
   );
 
-  const restoreAgentMutation = useApiMutation(
-    (agentId: string) => window.api.agents.restore(agentId),
+  const activateAgentMutation = useApiMutation(
+    (agentId: string) => window.api.agent.activate({ id: agentId }),
     {
-      successMessage: "Agent restored successfully",
-      errorMessage: "Failed to restore agent",
+      successMessage: "Agent activated successfully",
+      errorMessage: "Failed to activate agent",
       invalidateRouter: true,
     },
   );
 
-  const toggleAgentStatusMutation = useApiMutation(
-    ({ agentId, status }: { agentId: string; status: AgentStatus }) =>
-      window.api.agents.updateStatus(agentId, status),
-    {
-      successMessage: "Agent status updated successfully",
-      errorMessage: "Failed to update agent status",
-      invalidateRouter: true,
-    },
-  );
-
-  const handleDelete = (agent: SelectAgent) => {
-    deleteAgentMutation.mutate(agent.id);
+  const handleInactivate = (agent: SelectAgent) => {
+    inactivateAgentMutation.mutate(agent.id);
   };
 
-  const handleRestore = (agent: SelectAgent) => {
-    restoreAgentMutation.mutate(agent.id);
+  const handleActivate = (agent: SelectAgent) => {
+    activateAgentMutation.mutate(agent.id);
   };
 
   const handleToggleStatus = (agent: SelectAgent) => {
-    const newStatus = agent.status === "active" ? "inactive" : "active";
-    toggleAgentStatusMutation.mutate({ agentId: agent.id, status: newStatus });
+    if (agent.status === "active") {
+      inactivateAgentMutation.mutate(agent.id);
+    } else {
+      activateAgentMutation.mutate(agent.id);
+    }
   };
 
   return {
-    handleDelete,
-    handleRestore,
+    handleInactivate,
+    handleActivate,
     handleToggleStatus,
-    isDeleting: deleteAgentMutation.isPending,
-    isRestoring: restoreAgentMutation.isPending,
-    isTogglingStatus: toggleAgentStatusMutation.isPending,
+    isInactivating: inactivateAgentMutation.isPending,
+    isActivating: activateAgentMutation.isPending,
+    isTogglingStatus:
+      inactivateAgentMutation.isPending || activateAgentMutation.isPending,
   };
 }

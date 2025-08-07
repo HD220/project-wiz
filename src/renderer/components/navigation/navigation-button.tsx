@@ -1,6 +1,6 @@
-import { forwardRef } from "react";
 import { Link, LinkProps } from "@tanstack/react-router";
 import { LucideIcon } from "lucide-react";
+import { forwardRef } from "react";
 
 import { Button, buttonVariants } from "@/renderer/components/ui/button";
 import { cn } from "@/renderer/lib/utils";
@@ -20,7 +20,7 @@ interface NavigationButtonProps
   role?: string;
 }
 
-const NavigationButton = forwardRef<HTMLAnchorElement, NavigationButtonProps>(
+const NavigationButton = forwardRef<HTMLButtonElement, NavigationButtonProps>(
   (props, ref) => {
     const {
       icon: IconComponent,

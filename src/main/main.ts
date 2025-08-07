@@ -7,14 +7,10 @@ dotenv.config();
 import { app, BrowserWindow } from "electron";
 import squirrel from "electron-squirrel-startup";
 
-import { sessionRegistry } from "@/main/services/session-registry";
 // import { QueueClient } from "@/shared/queue-client/queue-client"; // Commented out - used only in test code
-import { getLogger } from "@/shared/services/logger/config";
 // Worker management disabled
 // import { startWorker, stopWorker } from "@/main/services/worker-manager";
-import { initializeEventBus, eventBus } from "@/shared/services/events/event-bus";
 // import { initializeAgenticWorkerHandler, agenticWorkerHandler } from "@/shared/worker/agentic-worker.handler"; // Removed - will be rewritten
-import { loadIpcHandlers, type HandlerRegistration } from "@/main/utils/ipc-loader";
 
 // Import all IPC handlers
 import agentActivateHandler from "@/main/ipc/agent/activate/invoke";
@@ -24,7 +20,6 @@ import agentGetHandler from "@/main/ipc/agent/get/invoke";
 import agentInactivateHandler from "@/main/ipc/agent/inactivate/invoke";
 import agentListHandler from "@/main/ipc/agent/list/invoke";
 import agentUpdateHandler from "@/main/ipc/agent/update/invoke";
-
 import authCheckLoginHandler from "@/main/ipc/auth/check-login/invoke";
 import authGetCurrentHandler from "@/main/ipc/auth/get-current/invoke";
 import authGetSessionHandler from "@/main/ipc/auth/get-session/invoke";
@@ -32,7 +27,6 @@ import authGetUserHandler from "@/main/ipc/auth/get-user/invoke";
 import authLoginHandler from "@/main/ipc/auth/login/invoke";
 import authLogoutHandler from "@/main/ipc/auth/logout/invoke";
 import authRegisterHandler from "@/main/ipc/auth/register/invoke";
-
 import channelArchiveHandler from "@/main/ipc/channel/archive/invoke";
 import channelCreateHandler from "@/main/ipc/channel/create/invoke";
 import channelGetHandler from "@/main/ipc/channel/get/invoke";
@@ -42,7 +36,6 @@ import channelListMessagesHandler from "@/main/ipc/channel/list-messages/invoke"
 import channelSendMessageHandler from "@/main/ipc/channel/send-message/invoke";
 import channelUnarchiveHandler from "@/main/ipc/channel/unarchive/invoke";
 import channelUpdateHandler from "@/main/ipc/channel/update/invoke";
-
 import dmAddParticipantHandler from "@/main/ipc/dm/add-participant/invoke";
 import dmArchiveHandler from "@/main/ipc/dm/archive/invoke";
 import dmCreateHandler from "@/main/ipc/dm/create/invoke";
@@ -53,9 +46,7 @@ import dmListMessagesHandler from "@/main/ipc/dm/list-messages/invoke";
 import dmRemoveParticipantHandler from "@/main/ipc/dm/remove-participant/invoke";
 import dmSendMessageHandler from "@/main/ipc/dm/send-message/invoke";
 import dmUnarchiveHandler from "@/main/ipc/dm/unarchive/invoke";
-
 import eventRegisterHandler from "@/main/ipc/event/register/invoke";
-
 import llmProviderCreateHandler from "@/main/ipc/llm-provider/create/invoke";
 import llmProviderGetHandler from "@/main/ipc/llm-provider/get/invoke";
 import llmProviderGetDefaultHandler from "@/main/ipc/llm-provider/get-default/invoke";
@@ -64,16 +55,13 @@ import llmProviderInactivateHandler from "@/main/ipc/llm-provider/inactivate/inv
 import llmProviderListHandler from "@/main/ipc/llm-provider/list/invoke";
 import llmProviderSetDefaultHandler from "@/main/ipc/llm-provider/set-default/invoke";
 import llmProviderUpdateHandler from "@/main/ipc/llm-provider/update/invoke";
-
 import profileGetThemeHandler from "@/main/ipc/profile/get-theme/invoke";
 import profileUpdateHandler from "@/main/ipc/profile/update/invoke";
-
 import projectArchiveHandler from "@/main/ipc/project/archive/invoke";
 import projectCreateHandler from "@/main/ipc/project/create/invoke";
 import projectGetHandler from "@/main/ipc/project/get/invoke";
 import projectListHandler from "@/main/ipc/project/list/invoke";
 import projectUpdateHandler from "@/main/ipc/project/update/invoke";
-
 import userActivateHandler from "@/main/ipc/user/activate/invoke";
 import userCreateHandler from "@/main/ipc/user/create/invoke";
 import userGetHandler from "@/main/ipc/user/get/invoke";
@@ -85,12 +73,22 @@ import userListAgentsHandler from "@/main/ipc/user/list-agents/invoke";
 import userListAvailableUsersHandler from "@/main/ipc/user/list-available-users/invoke";
 import userListHumansHandler from "@/main/ipc/user/list-humans/invoke";
 import userUpdateHandler from "@/main/ipc/user/update/invoke";
-
 import windowCloseHandler from "@/main/ipc/window/close/invoke";
 import windowMaximizeHandler from "@/main/ipc/window/maximize/invoke";
 import windowMinimizeHandler from "@/main/ipc/window/minimize/invoke";
 import windowToggleSizeHandler from "@/main/ipc/window/toggle-size/invoke";
+import { sessionRegistry } from "@/main/services/session-registry";
 import { registerWindow } from "@/main/services/window-registry";
+import {
+  loadIpcHandlers,
+  type HandlerRegistration,
+} from "@/main/utils/ipc-loader";
+
+import {
+  initializeEventBus,
+  eventBus,
+} from "@/shared/services/events/event-bus";
+import { getLogger } from "@/shared/services/logger/config";
 
 declare const MAIN_WINDOW_VITE_DEV_SERVER_URL: string | undefined;
 declare const MAIN_WINDOW_VITE_NAME: string;
@@ -142,7 +140,7 @@ function createMainWindow(): void {
   mainWindow.once("ready-to-show", async () => {
     logger.info("Main window ready to show");
     mainWindow?.show();
-    
+
     // Initialize job creation after window is ready
     // if (mainWindow) {
     //   await initializeStartupJob();
@@ -210,10 +208,10 @@ function initializeJobResultHandler(): void {
 //     }
 
 //     logger.info("Starting startup job creation process");
-    
+
 //     const queueClient = new QueueClient("llm-jobs");
 //     logger.info("QueueClient created for llm-jobs queue");
-    
+
 //     const jobData = {
 //       agent: {
 //         name: "StartupAgent",
@@ -228,14 +226,14 @@ function initializeJobResultHandler(): void {
 //       model: "deepseek-chat",
 //       apiKey: apiKey
 //     };
-    
+
 //     const jobOptions = {
 //       priority: 1,
 //       attempts: 3
 //     };
-    
+
 //     logger.info("About to send job to worker", { jobData, jobOptions });
-    
+
 //     const jobResult = await queueClient.add(jobData, jobOptions);
 
 //     logger.info(`Startup job created successfully with ID: ${jobResult.jobId}`);
@@ -264,7 +262,7 @@ async function setupAllIpcHandlers(): Promise<void> {
     { handler: agentInactivateHandler, channel: "invoke:agent:inactivate" },
     { handler: agentListHandler, channel: "invoke:agent:list" },
     { handler: agentUpdateHandler, channel: "invoke:agent:update" },
-    
+
     // Auth handlers
     { handler: authCheckLoginHandler, channel: "invoke:auth:check-login" },
     { handler: authGetCurrentHandler, channel: "invoke:auth:get-current" },
@@ -273,18 +271,24 @@ async function setupAllIpcHandlers(): Promise<void> {
     { handler: authLoginHandler, channel: "invoke:auth:login" },
     { handler: authLogoutHandler, channel: "invoke:auth:logout" },
     { handler: authRegisterHandler, channel: "invoke:auth:register" },
-    
+
     // Channel handlers
     { handler: channelArchiveHandler, channel: "invoke:channel:archive" },
     { handler: channelCreateHandler, channel: "invoke:channel:create" },
     { handler: channelGetHandler, channel: "invoke:channel:get" },
     { handler: channelInactivateHandler, channel: "invoke:channel:inactivate" },
     { handler: channelListHandler, channel: "invoke:channel:list" },
-    { handler: channelListMessagesHandler, channel: "invoke:channel:list-messages" },
-    { handler: channelSendMessageHandler, channel: "invoke:channel:send-message" },
+    {
+      handler: channelListMessagesHandler,
+      channel: "invoke:channel:list-messages",
+    },
+    {
+      handler: channelSendMessageHandler,
+      channel: "invoke:channel:send-message",
+    },
     { handler: channelUnarchiveHandler, channel: "invoke:channel:unarchive" },
     { handler: channelUpdateHandler, channel: "invoke:channel:update" },
-    
+
     // DM handlers
     { handler: dmAddParticipantHandler, channel: "invoke:dm:add-participant" },
     { handler: dmArchiveHandler, channel: "invoke:dm:archive" },
@@ -293,34 +297,55 @@ async function setupAllIpcHandlers(): Promise<void> {
     { handler: dmInactivateHandler, channel: "invoke:dm:inactivate" },
     { handler: dmListHandler, channel: "invoke:dm:list" },
     { handler: dmListMessagesHandler, channel: "invoke:dm:list-messages" },
-    { handler: dmRemoveParticipantHandler, channel: "invoke:dm:remove-participant" },
+    {
+      handler: dmRemoveParticipantHandler,
+      channel: "invoke:dm:remove-participant",
+    },
     { handler: dmSendMessageHandler, channel: "invoke:dm:send-message" },
     { handler: dmUnarchiveHandler, channel: "invoke:dm:unarchive" },
-    
+
     // Event handlers
     { handler: eventRegisterHandler, channel: "invoke:event:register" },
-    
+
     // LLM Provider handlers
-    { handler: llmProviderCreateHandler, channel: "invoke:llm-provider:create" },
+    {
+      handler: llmProviderCreateHandler,
+      channel: "invoke:llm-provider:create",
+    },
     { handler: llmProviderGetHandler, channel: "invoke:llm-provider:get" },
-    { handler: llmProviderGetDefaultHandler, channel: "invoke:llm-provider:get-default" },
-    { handler: llmProviderGetKeyHandler, channel: "invoke:llm-provider:get-key" },
-    { handler: llmProviderInactivateHandler, channel: "invoke:llm-provider:inactivate" },
+    {
+      handler: llmProviderGetDefaultHandler,
+      channel: "invoke:llm-provider:get-default",
+    },
+    {
+      handler: llmProviderGetKeyHandler,
+      channel: "invoke:llm-provider:get-key",
+    },
+    {
+      handler: llmProviderInactivateHandler,
+      channel: "invoke:llm-provider:inactivate",
+    },
     { handler: llmProviderListHandler, channel: "invoke:llm-provider:list" },
-    { handler: llmProviderSetDefaultHandler, channel: "invoke:llm-provider:set-default" },
-    { handler: llmProviderUpdateHandler, channel: "invoke:llm-provider:update" },
-    
+    {
+      handler: llmProviderSetDefaultHandler,
+      channel: "invoke:llm-provider:set-default",
+    },
+    {
+      handler: llmProviderUpdateHandler,
+      channel: "invoke:llm-provider:update",
+    },
+
     // Profile handlers
     { handler: profileGetThemeHandler, channel: "invoke:profile:get-theme" },
     { handler: profileUpdateHandler, channel: "invoke:profile:update" },
-    
+
     // Project handlers
     { handler: projectArchiveHandler, channel: "invoke:project:archive" },
     { handler: projectCreateHandler, channel: "invoke:project:create" },
     { handler: projectGetHandler, channel: "invoke:project:get" },
     { handler: projectListHandler, channel: "invoke:project:list" },
     { handler: projectUpdateHandler, channel: "invoke:project:update" },
-    
+
     // User handlers
     { handler: userActivateHandler, channel: "invoke:user:activate" },
     { handler: userCreateHandler, channel: "invoke:user:create" },
@@ -330,10 +355,13 @@ async function setupAllIpcHandlers(): Promise<void> {
     { handler: userInactivateHandler, channel: "invoke:user:inactivate" },
     { handler: userListHandler, channel: "invoke:user:list" },
     { handler: userListAgentsHandler, channel: "invoke:user:list-agents" },
-    { handler: userListAvailableUsersHandler, channel: "invoke:user:list-available-users" },
+    {
+      handler: userListAvailableUsersHandler,
+      channel: "invoke:user:list-available-users",
+    },
     { handler: userListHumansHandler, channel: "invoke:user:list-humans" },
     { handler: userUpdateHandler, channel: "invoke:user:update" },
-    
+
     // Window handlers
     { handler: windowCloseHandler, channel: "invoke:window:close" },
     { handler: windowMaximizeHandler, channel: "invoke:window:maximize" },
@@ -391,7 +419,7 @@ app.on("window-all-closed", () => {
 // Cleanup job result handler and worker on app quit
 app.on("before-quit", async () => {
   logger.info("App is quitting, cleaning up services");
-  
+
   try {
     // agenticWorkerHandler.shutdown(); // Removed - will be rewritten
     eventBus.shutdown();
@@ -426,6 +454,5 @@ process.on("uncaughtException", (error) => {
 process.on("unhandledRejection", (reason, promise) => {
   logger.error("Unhandled rejection at:", promise, "reason:", reason);
 });
-
 
 logger.info("Main process initialized");

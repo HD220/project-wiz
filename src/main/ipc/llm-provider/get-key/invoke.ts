@@ -1,8 +1,14 @@
-import { z } from "zod";
-import { findLlmProviderById } from "@/main/ipc/llm-provider/queries";
-import { getLogger } from "@/shared/services/logger/config";
-import { createIPCHandler, InferHandler } from "@/shared/utils/create-ipc-handler";
 import * as crypto from "crypto";
+
+import { z } from "zod";
+
+import { findLlmProviderById } from "@/main/ipc/llm-provider/queries";
+
+import { getLogger } from "@/shared/services/logger/config";
+import {
+  createIPCHandler,
+  InferHandler,
+} from "@/shared/utils/create-ipc-handler";
 
 const logger = getLogger("llm-provider.get-key.invoke");
 
@@ -57,23 +63,25 @@ const handler = createIPCHandler({
     // IMPORTANT: This handler does NOT have authentication because it is used internally
     // by the system to make calls to LLM APIs. If it had authentication,
     // agents and workers would not be able to access decrypted keys.
-    
+
     // Find provider without ownership validation (for system use)
     const provider = await findLlmProviderById(input.providerId);
-    
+
     if (!provider) {
       throw new Error(`LLM provider not found: ${input.providerId}`);
     }
 
     // Decrypt the API key
     const decryptedApiKey = decryptApiKey(provider.apiKey);
-    
-    logger.debug("Decrypted API key retrieved successfully", { providerId: input.providerId });
-    
+
+    logger.debug("Decrypted API key retrieved successfully", {
+      providerId: input.providerId,
+    });
+
     return {
-      apiKey: decryptedApiKey
+      apiKey: decryptedApiKey,
     };
-  }
+  },
 });
 
 export default handler;
@@ -81,7 +89,7 @@ export default handler;
 declare global {
   namespace WindowAPI {
     interface LlmProvider {
-      getKey: InferHandler<typeof handler>
+      getKey: InferHandler<typeof handler>;
     }
   }
 }

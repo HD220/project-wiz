@@ -1,10 +1,15 @@
 import { z } from "zod";
+
 import { findDMConversation } from "@/main/ipc/dm/queries";
-import { DMConversationSchema } from "@/shared/types/dm-conversation";
 import { requireAuth } from "@/main/services/session-registry";
-import { getLogger } from "@/shared/services/logger/config";
+
 import { eventBus } from "@/shared/services/events/event-bus";
-import { createIPCHandler, InferHandler } from "@/shared/utils/create-ipc-handler";
+import { getLogger } from "@/shared/services/logger/config";
+import { DMConversationSchema } from "@/shared/types/dm-conversation";
+import {
+  createIPCHandler,
+  InferHandler,
+} from "@/shared/utils/create-ipc-handler";
 
 const logger = getLogger("dm.get.invoke");
 
@@ -15,7 +20,6 @@ const GetDMInputSchema = z.object({
 const GetDMOutputSchema = DMConversationSchema.extend({
   isActive: z.boolean(),
   deactivatedAt: z.date().nullable(),
-  deactivatedBy: z.string().nullable(),
 }).nullable();
 
 const handler = createIPCHandler({
@@ -25,31 +29,33 @@ const handler = createIPCHandler({
     logger.debug("Getting DM by ID", { dmId: input.dmId });
 
     const currentUser = requireAuth();
-    
+
     // Find DM conversation with ownership validation
     const dbConversation = await findDMConversation(input.dmId, currentUser.id);
-    
+
     // Map to API format
-    const result = dbConversation ? {
-      id: dbConversation.id!,
-      name: dbConversation.name,
-      description: dbConversation.description,
-      archivedAt: dbConversation.archivedAt,
-      archivedBy: dbConversation.archivedBy,
-      createdAt: dbConversation.createdAt,
-      updatedAt: dbConversation.updatedAt,
-      isActive: !dbConversation.deactivatedAt,
-      deactivatedAt: dbConversation.deactivatedAt ? new Date(dbConversation.deactivatedAt) : null,
-      deactivatedBy: null,
-    } : null;
-    
+    const result = dbConversation
+      ? {
+          id: dbConversation.id!,
+          name: dbConversation.name,
+          description: dbConversation.description,
+          archivedAt: dbConversation.archivedAt,
+          createdAt: dbConversation.createdAt,
+          updatedAt: dbConversation.updatedAt,
+          isActive: !dbConversation.deactivatedAt,
+          deactivatedAt: dbConversation.deactivatedAt
+            ? new Date(dbConversation.deactivatedAt)
+            : null,
+        }
+      : null;
+
     logger.debug("DM found", { found: !!result, dmId: input.dmId });
-    
+
     // Emit event
     eventBus.emit("dm:get", { dmId: input.dmId, found: !!result });
-    
+
     return result;
-  }
+  },
 });
 
 export default handler;
@@ -57,7 +63,7 @@ export default handler;
 declare global {
   namespace WindowAPI {
     interface Dm {
-      get: InferHandler<typeof handler>
+      get: InferHandler<typeof handler>;
     }
   }
 }

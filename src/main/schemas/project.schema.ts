@@ -19,7 +19,8 @@ export const projectsTable = sqliteTable(
       .notNull()
       .references(() => usersTable.id, { onDelete: "cascade" }),
 
-    // Soft deletion
+    // Archiving and soft deletion
+    archivedAt: integer("archived_at", { mode: "timestamp_ms" }),
     deactivatedAt: integer("deactivated_at", { mode: "timestamp_ms" }),
 
     createdAt: integer("created_at", { mode: "timestamp_ms" })
@@ -33,8 +34,11 @@ export const projectsTable = sqliteTable(
     // Performance indexes for foreign keys
     ownerIdIdx: index("projects_owner_id_idx").on(table.ownerId),
 
-    // Soft deletion indexes
-    deactivatedAtIdx: index("projects_deactivated_at_idx").on(table.deactivatedAt),
+    // Archiving and soft deletion indexes
+    archivedAtIdx: index("projects_archived_at_idx").on(table.archivedAt),
+    deactivatedAtIdx: index("projects_deactivated_at_idx").on(
+      table.deactivatedAt,
+    ),
   }),
 );
 

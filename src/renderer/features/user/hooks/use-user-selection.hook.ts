@@ -1,5 +1,11 @@
 import { useState, useMemo } from "react";
-import type { UserSummary } from "@/main/features/user/user.service";
+// Define UserSummary type locally
+export interface UserSummary {
+  id: string;
+  name: string;
+  avatar: string | null;
+  type: "human" | "agent";
+}
 
 export function useUserSelection(initialUsers: UserSummary[]) {
   const [searchTerm, setSearchTerm] = useState("");
@@ -21,7 +27,9 @@ export function useUserSelection(initialUsers: UserSummary[]) {
 
   const handleUserToggle = (userId: string) => {
     setSelectedUserIds((prev) =>
-      prev.includes(userId) ? prev.filter((id) => id !== userId) : [...prev, userId],
+      prev.includes(userId)
+        ? prev.filter((id) => id !== userId)
+        : [...prev, userId],
     );
     setError(null);
   };

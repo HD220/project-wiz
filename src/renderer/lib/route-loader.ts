@@ -18,7 +18,7 @@ import type { IPCResponse } from "@/shared/utils/create-ipc-handler";
  * export const Route = createFileRoute("/agents/$agentId")({
  *   loader: async ({ params }) => {
  *     const agent = await loadApiData(
- *       () => window.api.agents.findById(params.agentId),
+ *       () => window.api.agent.findById(params.agentId),
  *       "Agent not found"
  *     );
  *     return { agent };
@@ -39,8 +39,6 @@ export async function loadApiData<T>(
   return response.data;
 }
 
-
-
 /**
  * Load paginated API data with automatic parameter handling
  * Use this for routes that handle list data with pagination
@@ -59,7 +57,7 @@ export async function loadApiData<T>(
  *   }),
  *   loader: async ({ search }) => {
  *     return await loadPaginatedApiData(
- *       (page, limit) => window.api.agents.list({
+ *       (page, limit) => window.api.agent.list({
  *         page,
  *         limit,
  *         status: search.status

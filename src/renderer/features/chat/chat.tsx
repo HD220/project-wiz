@@ -1,15 +1,11 @@
 import { cva, type VariantProps } from "class-variance-authority";
 import * as React from "react";
 
-import { ScrollArea } from "@/renderer/components/atoms/scroll-area";
 import { cn } from "@/renderer/lib/utils";
 
+import { ChatContext, type ChatContextValue } from "./chat.context";
 import { ChatState, ChatAction } from "./chat.reducer";
-import { ChatActions, ChatRefs, ChatContextValue } from "./chat.context";
 import { createChatReducer } from "./chat.reducer";
-import { ChatContext, useChatContext } from "./chat.context";
-import { ChatMessages, ChatMessage, ChatInput, ChatStatus } from "./chat.components";
-import { useChatInputState, useChatActions, useChatStatus, useChatRefs } from "./chat.hooks";
 
 const chatVariants = cva("flex h-full flex-col bg-background text-foreground", {
   variants: {
@@ -126,108 +122,126 @@ function Chat({
     };
 
   // Actions simplificadas usando helper centralizado - memoized for performance
-  const actions = React.useMemo(() => ({
-    addMessage: createAction(
-      "ADD_MESSAGE",
-      (message: unknown) => message,
-      (msgs, message: unknown) => [...msgs, message],
-    ),
+  const actions = React.useMemo(
+    () => ({
+      addMessage: createAction(
+        "ADD_MESSAGE",
+        (message: unknown) => message,
+        (msgs, message: unknown) => [...msgs, message],
+      ),
 
-    updateMessage: createAction(
-      "UPDATE_MESSAGE",
-      (id: string | number, updates: Record<string, unknown>) => ({
-        id,
-        updates,
-      }),
-      (msgs, id: string | number, updates: Record<string, unknown>) => {
-        return msgs.map((msg) => {
-          const msgId = keyFn(msg, msgs.indexOf(msg));
-          return msgId === id
-            ? { ...(msg as Record<string, unknown>), ...updates }
-            : msg;
-        });
+      updateMessage: createAction(
+        "UPDATE_MESSAGE",
+        (id: string | number, updates: Record<string, unknown>) => ({
+          id,
+          updates,
+        }),
+        (msgs, id: string | number, updates: Record<string, unknown>) => {
+          return msgs.map((msg) => {
+            const msgId = keyFn(msg, msgs.indexOf(msg));
+            return msgId === id
+              ? { ...(msg as Record<string, unknown>), ...updates }
+              : msg;
+          });
+        },
+        (ctx, id: string | number, updates: Record<string, unknown>) => {
+          onMessageUpdate?.(id, updates, ctx);
+        },
+      ),
+
+      removeMessage: createAction(
+        "REMOVE_MESSAGE",
+        (id: string | number) => ({ id }),
+        (msgs, id: string | number) => {
+          return msgs.filter((msg) => {
+            const msgId = keyFn(msg, msgs.indexOf(msg));
+            return msgId !== id;
+          });
+        },
+        (ctx, id: string | number) => {
+          onMessageRemove?.(id, ctx);
+        },
+      ),
+
+      setMessages: createAction(
+        "SET_MESSAGES",
+        (messagesOrFn: unknown[] | ((prev: unknown[]) => unknown[])) => {
+          return typeof messagesOrFn === "function"
+            ? messagesOrFn(messages)
+            : messagesOrFn;
+        },
+        (msgs, messagesOrFn: unknown[] | ((prev: unknown[]) => unknown[])) => {
+          return typeof messagesOrFn === "function"
+            ? messagesOrFn(msgs)
+            : messagesOrFn;
+        },
+      ),
+
+      setLoading: (loading: boolean) =>
+        dispatch({
+          type: "SET_PROPERTY",
+          payload: { key: "loading", value: loading },
+        }),
+      setTyping: (typing: boolean) =>
+        dispatch({
+          type: "SET_PROPERTY",
+          payload: { key: "typing", value: typing },
+        }),
+      setAutoScroll: (autoScroll: boolean) =>
+        dispatch({
+          type: "SET_PROPERTY",
+          payload: { key: "autoScroll", value: autoScroll },
+        }),
+
+      addPendingMessage: (id: string | number) =>
+        dispatch({ type: "ADD_PENDING", payload: id }),
+      removePendingMessage: (id: string | number) =>
+        dispatch({ type: "REMOVE_PENDING", payload: id }),
+
+      send: (input: string) => {
+        if (onSend && input && input.trim() && !state.loading && !disabled) {
+          // contextValue will be defined below
+          onSend(input.trim(), contextValue);
+        }
       },
-      (ctx, id: string | number, updates: Record<string, unknown>) => {
-        onMessageUpdate?.(id, updates, ctx);
-      },
-    ),
 
-    removeMessage: createAction(
-      "REMOVE_MESSAGE",
-      (id: string | number) => ({ id }),
-      (msgs, id: string | number) => {
-        return msgs.filter((msg) => {
-          const msgId = keyFn(msg, msgs.indexOf(msg));
-          return msgId !== id;
-        });
-      },
-      (ctx, id: string | number) => {
-        onMessageRemove?.(id, ctx);
-      },
-    ),
+      clear: createAction(
+        "CLEAR",
+        () => undefined,
+        () => [],
+        (ctx) => onClear?.(ctx),
+      ),
 
-    setMessages: createAction(
-      "SET_MESSAGES",
-      (messagesOrFn: unknown[] | ((prev: unknown[]) => unknown[])) => {
-        return typeof messagesOrFn === "function"
-          ? messagesOrFn(messages)
-          : messagesOrFn;
-      },
-      (msgs, messagesOrFn: unknown[] | ((prev: unknown[]) => unknown[])) => {
-        return typeof messagesOrFn === "function"
-          ? messagesOrFn(msgs)
-          : messagesOrFn;
-      },
-    ),
-
-    setLoading: (loading: boolean) =>
-      dispatch({
-        type: "SET_PROPERTY",
-        payload: { key: "loading", value: loading },
-      }),
-    setTyping: (typing: boolean) =>
-      dispatch({
-        type: "SET_PROPERTY",
-        payload: { key: "typing", value: typing },
-      }),
-    setAutoScroll: (autoScroll: boolean) =>
-      dispatch({
-        type: "SET_PROPERTY",
-        payload: { key: "autoScroll", value: autoScroll },
-      }),
-
-    addPendingMessage: (id: string | number) =>
-      dispatch({ type: "ADD_PENDING", payload: id }),
-    removePendingMessage: (id: string | number) =>
-      dispatch({ type: "REMOVE_PENDING", payload: id }),
-
-    send: (input: string) => {
-      if (onSend && input && input.trim() && !state.loading && !disabled) {
-        // contextValue will be defined below
-        onSend(input.trim(), contextValue);
-      }
-    },
-
-    clear: createAction(
-      "CLEAR",
-      () => undefined,
-      () => [],
-      (ctx) => onClear?.(ctx),
-    ),
-
-    isPending: (id: string | number) => state.pendingMessages.has(id),
-    navigateHistory: (direction: "up" | "down") =>
-      dispatch({ type: "NAVIGATE_HISTORY", payload: direction }),
-    scrollToBottom,
-  }), [messages, keyFn, onValueChange, onMessageUpdate, onMessageRemove, onClear, onSend, state.loading, disabled, state.pendingMessages, scrollToBottom]);
+      isPending: (id: string | number) => state.pendingMessages.has(id),
+      navigateHistory: (direction: "up" | "down") =>
+        dispatch({ type: "NAVIGATE_HISTORY", payload: direction }),
+      scrollToBottom,
+    }),
+    [
+      messages,
+      keyFn,
+      onValueChange,
+      onMessageUpdate,
+      onMessageRemove,
+      onClear,
+      onSend,
+      state.loading,
+      disabled,
+      state.pendingMessages,
+      scrollToBottom,
+    ],
+  );
 
   // Context construction simplificada - memoized for stability
-  const contextValue: ChatContextValue = React.useMemo(() => ({
-    state: { ...state, messages },
-    actions,
-    refs: { messagesRef, inputRef },
-    keyFn,
-  }), [state, messages, actions, keyFn]);
+  const contextValue: ChatContextValue = React.useMemo(
+    () => ({
+      state: { ...state, messages },
+      actions,
+      refs: { messagesRef, inputRef },
+      keyFn,
+    }),
+    [state, messages, actions, keyFn],
+  );
 
   // Auto scroll when messages change
   React.useEffect(() => {
@@ -255,9 +269,4 @@ function Chat({
   );
 }
 
-
-
-export {
-  Chat,
-  chatVariants,
-};
+export { Chat, chatVariants };

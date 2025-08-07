@@ -1,4 +1,4 @@
-import { LogIn, UserPlus, User, Lock, Eye, EyeOff, AlertCircle, AtSign } from "lucide-react";
+import { LogIn, UserPlus, User, Lock, AtSign } from "lucide-react";
 import * as React from "react";
 
 import type { AuthMode } from "@/renderer/features/auth/auth.schema";

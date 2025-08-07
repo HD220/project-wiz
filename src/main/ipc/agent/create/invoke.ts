@@ -1,9 +1,13 @@
 import { createAgent } from "@/main/ipc/agent/queries";
-import { AgentSchema } from "@/shared/types";
 import { requireAuth } from "@/main/services/session-registry";
+
 import { eventBus } from "@/shared/services/events/event-bus";
 import { getLogger } from "@/shared/services/logger/config";
-import { createIPCHandler, InferHandler } from "@/shared/utils/create-ipc-handler";
+import { AgentSchema } from "@/shared/types";
+import {
+  createIPCHandler,
+  InferHandler,
+} from "@/shared/utils/create-ipc-handler";
 
 const logger = getLogger("agent.create.invoke");
 
@@ -23,35 +27,37 @@ const handler = createIPCHandler({
   inputSchema: CreateAgentInputSchema,
   outputSchema: CreateAgentOutputSchema,
   handler: async (input) => {
-    logger.debug("Creating agent", { 
-      agentName: input.name, 
-      role: input.role, 
-      providerId: input.providerId 
+    logger.debug("Creating agent", {
+      agentName: input.name,
+      role: input.role,
+      providerId: input.providerId,
     });
 
     const currentUser = requireAuth();
-    
+
     const dbAgent = await createAgent({
       ...input,
       modelConfig: JSON.stringify(input.modelConfig),
-      ownerId: currentUser.id
+      ownerId: currentUser.id,
     });
-    
+
     const apiAgent = {
       // Identity fields (users)
       id: dbAgent.id,
       name: dbAgent.name,
       avatar: dbAgent.avatar,
       type: dbAgent.type,
-      
+
       // State management (users)
       isActive: !dbAgent.deactivatedAt,
-      deactivatedAt: dbAgent.deactivatedAt ? new Date(dbAgent.deactivatedAt) : null,
-      
+      deactivatedAt: dbAgent.deactivatedAt
+        ? new Date(dbAgent.deactivatedAt)
+        : null,
+
       // Timestamps (users)
       createdAt: new Date(dbAgent.createdAt),
       updatedAt: new Date(dbAgent.updatedAt),
-      
+
       // Agent-specific fields (agents)
       ownerId: dbAgent.ownerId,
       role: dbAgent.role,
@@ -61,18 +67,18 @@ const handler = createIPCHandler({
       modelConfig: JSON.parse(dbAgent.modelConfig),
       status: dbAgent.status,
     };
-    
+
     eventBus.emit("agent:created", { agentId: apiAgent.id });
-    
-    logger.debug("Agent created", { 
-      agentId: apiAgent.id, 
-      agentName: apiAgent.name, 
-      role: apiAgent.role, 
-      ownerId: apiAgent.ownerId 
+
+    logger.debug("Agent created", {
+      agentId: apiAgent.id,
+      agentName: apiAgent.name,
+      role: apiAgent.role,
+      ownerId: apiAgent.ownerId,
     });
-    
+
     return apiAgent;
-  }
+  },
 });
 
 export default handler;
@@ -80,7 +86,7 @@ export default handler;
 declare global {
   namespace WindowAPI {
     interface Agent {
-      create: InferHandler<typeof handler>
+      create: InferHandler<typeof handler>;
     }
   }
 }

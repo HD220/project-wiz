@@ -1,5 +1,5 @@
-import { forwardRef } from "react";
 import { cva, type VariantProps } from "class-variance-authority";
+import { forwardRef } from "react";
 
 import { cn } from "@/renderer/lib/utils";
 
@@ -75,35 +75,36 @@ interface ActivityStatusIndicatorProps
   showRing?: boolean;
 }
 
-const ActivityStatusIndicator = forwardRef<HTMLDivElement, ActivityStatusIndicatorProps>(
-  (props, ref) => {
-    const {
-      status,
-      size = "md",
-      style = "badge",
-      className,
-      showRing = true,
-      ...restProps
-    } = props;
+const ActivityStatusIndicator = forwardRef<
+  HTMLDivElement,
+  ActivityStatusIndicatorProps
+>((props, ref) => {
+  const {
+    status,
+    size = "md",
+    style = "badge",
+    className,
+    showRing = true,
+    ...restProps
+  } = props;
 
-    const config = activityStatusConfigs[status];
+  const config = activityStatusConfigs[status];
 
-    return (
-      <div
-        ref={ref}
-        className={cn(
-          activityStatusIndicatorVariants({ size, style }),
-          config.indicator,
-          showRing && config.ring,
-          className,
-        )}
-        role="status"
-        aria-label={`Status: ${config.label}`}
-        {...restProps}
-      />
-    );
-  },
-);
+  return (
+    <div
+      ref={ref}
+      className={cn(
+        activityStatusIndicatorVariants({ size, style }),
+        config.indicator,
+        showRing && config.ring,
+        className,
+      )}
+      role="status"
+      aria-label={`Status: ${config.label}`}
+      {...restProps}
+    />
+  );
+});
 
 ActivityStatusIndicator.displayName = "ActivityStatusIndicator";
 

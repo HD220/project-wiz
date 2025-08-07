@@ -1,22 +1,28 @@
-import { Hash, Settings } from "lucide-react";
+import type { Project } from "@/shared/types";
+// import type { Channel } from "@/shared/types/channel";
 
-import type { Project } from "@/shared/types/project";
-import type { Channel } from "@/shared/types/channel";
-
-import { Sidebar, SidebarHeader, SidebarContent, SidebarSection } from "@/renderer/components/ui/sidebar";
+// import { Sidebar, SidebarHeader, SidebarContent, SidebarSection } from "@/renderer/components/ui/sidebar";
 
 interface ProjectSidebarProps {
-  project: SelectProject;
-  conversations?: SelectConversation[];
+  project: Project; // SelectProject;
+  conversations?: any[]; // SelectConversation[];
   className?: string;
 }
 
-export function ProjectSidebar({ 
-  project, 
-  conversations = [], 
-  className 
+// TODO: Fix component imports and types
+export function ProjectSidebar({
+  project,
+  conversations = [],
+  className,
 }: ProjectSidebarProps) {
-  
+  return (
+    <div className={className}>
+      <p>Project Sidebar for {project.name} - Under Construction</p>
+      <p>Conversations: {conversations.length}</p>
+    </div>
+  );
+
+  /* TODO: Uncomment when components are fixed
   // Transform conversations into channels
   const channels = conversations.map((conversation) => ({
     id: conversation.id,
@@ -31,7 +37,7 @@ export function ProjectSidebar({
       role="complementary"
       aria-label={`${project.name} navigation`}
     >
-      {/* Project Header */}
+      {/* Project Header */ /*}
       <SidebarHeader
         title={project.name}
         actions={
@@ -45,7 +51,7 @@ export function ProjectSidebar({
       />
 
       <SidebarContent>
-        {/* Dashboard */}
+        {/* Dashboard */ /*}
         <SidebarSection>
           <MenuItem
             to="/project/$projectId"
@@ -56,7 +62,7 @@ export function ProjectSidebar({
           />
         </SidebarSection>
 
-        {/* Text Channels */}
+        {/* Text Channels */ /*}
         <SidebarSection title="Text Channels">
           {channels.length > 0 ? (
             <List spacing="sm">
@@ -86,4 +92,5 @@ export function ProjectSidebar({
       </SidebarContent>
     </Sidebar>
   );
+  */
 }

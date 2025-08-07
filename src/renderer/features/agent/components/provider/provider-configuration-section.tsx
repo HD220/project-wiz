@@ -1,17 +1,21 @@
+import { Settings } from "lucide-react"; // Assuming Lucide icon
+import { useFormContext } from "react-hook-form";
+import { z } from "zod";
+
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/renderer/components/molecules/card";
+} from "@/renderer/components/ui/card";
 import {
   FormControl,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/renderer/components/atoms/form";
+} from "@/renderer/components/ui/form";
 import { Input } from "@/renderer/components/ui/input";
 import {
   Select,
@@ -21,19 +25,22 @@ import {
   SelectValue,
 } from "@/renderer/components/ui/select";
 import { PROVIDER_CONFIGS } from "@/renderer/features/agent/provider-constants";
-import { Settings } from "lucide-react"; // Assuming Lucide icon
-import { useFormContext } from "react-hook-form";
-import { LlmProviderFormSchema } from "../../agent.schema";
-import { z } from "zod";
+
+import { LlmProviderSchema } from "@/shared/types/llm-provider";
+
+// Schema for form input
+const LlmProviderFormSchema = LlmProviderSchema.omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
 
 interface ProviderConfigurationSectionProps {
   isEditing: boolean;
-  watchedType: string;
 }
 
 export function ProviderConfigurationSection({
   isEditing,
-  watchedType,
 }: ProviderConfigurationSectionProps) {
   const form = useFormContext<z.infer<typeof LlmProviderFormSchema>>();
 
@@ -75,7 +82,11 @@ export function ProviderConfigurationSection({
                   </FormControl>
                   <SelectContent className="bg-card/95 backdrop-blur-sm border border-border/60">
                     {Object.entries(PROVIDER_CONFIGS).map(([key, config]) => (
-                      <SelectItem key={key} value={key} className="focus:bg-accent/50">
+                      <SelectItem
+                        key={key}
+                        value={key}
+                        className="focus:bg-accent/50"
+                      >
                         {config.label}
                       </SelectItem>
                     ))}

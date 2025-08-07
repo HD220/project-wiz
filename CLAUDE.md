@@ -149,3 +149,7 @@ Data loading follows TanStack Router patterns with helper functions:
 - Test files alongside source with `.test.ts` extension
 - Mock IPC calls in renderer tests
 - Use `vitest-mock-extended` for complex mocks
+
+## Development Notes
+- Always execute `npm run type-check` normally without any additional arguments, do not use `npx tsx`
+```

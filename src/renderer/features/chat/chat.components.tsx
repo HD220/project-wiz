@@ -1,6 +1,8 @@
 import * as React from "react";
+
+import { ScrollArea } from "@/renderer/components/ui/scroll-area";
 import { cn } from "@/renderer/lib/utils";
-import { ScrollArea } from "@/renderer/components/atoms/scroll-area";
+
 import { useChatContext } from "./chat.context";
 // Status utility types
 type ChatStatusUI = { loading: boolean; typing: boolean };
@@ -16,10 +18,14 @@ interface ChatMessagesProps extends React.ComponentProps<"div"> {
   children: React.ReactNode;
 }
 
-export function ChatMessages({ className, children, ...props }: ChatMessagesProps) {
+export function ChatMessages({
+  className,
+  children,
+  ...props
+}: ChatMessagesProps) {
   const context = useChatContext();
   const { refs, actions, state } = context;
-  
+
   const containerRef = React.useRef<HTMLDivElement>(null);
   const scrollViewportRef = React.useRef<HTMLDivElement | null>(null);
 
@@ -27,13 +33,17 @@ export function ChatMessages({ className, children, ...props }: ChatMessagesProp
   React.useEffect(() => {
     if (containerRef.current) {
       // Find the viewport element inside ScrollArea using querySelector
-      const viewport = containerRef.current.querySelector('[data-slot="scroll-area-viewport"]') as HTMLDivElement;
+      const viewport = containerRef.current.querySelector(
+        '[data-slot="scroll-area-viewport"]',
+      ) as HTMLDivElement;
       if (viewport) {
         scrollViewportRef.current = viewport;
-        
+
         // Update the chat context ref to point to viewport for scrolling
         if (refs.messagesRef) {
-          (refs.messagesRef as React.MutableRefObject<HTMLDivElement | null>).current = viewport;
+          (
+            refs.messagesRef as React.MutableRefObject<HTMLDivElement | null>
+          ).current = viewport;
         }
       }
     }
@@ -55,12 +65,16 @@ export function ChatMessages({ className, children, ...props }: ChatMessagesProp
       }
     };
 
-    viewport.addEventListener('scroll', handleScroll);
-    return () => viewport.removeEventListener('scroll', handleScroll);
+    viewport.addEventListener("scroll", handleScroll);
+    return () => viewport.removeEventListener("scroll", handleScroll);
   }, [state.autoScroll, actions]);
 
   return (
-    <div ref={containerRef} className={cn("flex-1 min-h-0", className)} {...props}>
+    <div
+      ref={containerRef}
+      className={cn("flex-1 min-h-0", className)}
+      {...props}
+    >
       <ScrollArea className="h-full">
         <div
           data-slot="chat-messages-container"
@@ -93,7 +107,11 @@ interface ChatMessageProps {
   }) => React.ReactNode;
 }
 
-export function ChatMessage({ messageData, messageIndex, render }: ChatMessageProps) {
+export function ChatMessage({
+  messageData,
+  messageIndex,
+  render,
+}: ChatMessageProps) {
   const context = useChatContext();
   const { state, actions, keyFn } = context;
 
@@ -129,7 +147,7 @@ interface ChatInputProps {
     send: () => void;
     navigateHistory: (direction: "up" | "down") => void;
     clear: () => void;
-    // Ref específica (apenas inputRef) 
+    // Ref específica (apenas inputRef)
     inputRef: React.RefObject<HTMLInputElement | HTMLTextAreaElement | null>;
   }) => React.ReactNode;
 }
@@ -137,7 +155,7 @@ interface ChatInputProps {
 export function ChatInput({ render }: ChatInputProps) {
   const context = useChatContext();
   const { state, actions, refs } = context;
-  
+
   // LOCAL input state - this eliminates the lag!
   const [inputValue, setInputValue] = React.useState("");
 
@@ -147,12 +165,13 @@ export function ChatInput({ render }: ChatInputProps) {
       direction === "up"
         ? Math.min(state.historyIndex + 1, state.history.length - 1)
         : Math.max(state.historyIndex - 1, -1);
-    
+
     actions.navigateHistory(direction);
-    
+
     // Update local input with history value
     if (newIndex >= 0) {
-      const historyValue = state.history[state.history.length - 1 - newIndex] || "";
+      const historyValue =
+        state.history[state.history.length - 1 - newIndex] || "";
       setInputValue(historyValue);
     } else {
       setInputValue("");

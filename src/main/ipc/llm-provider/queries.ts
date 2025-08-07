@@ -1,14 +1,17 @@
 import * as crypto from "crypto";
+
 import { eq, and, desc, like, sql, isNull } from "drizzle-orm";
-import { createDatabaseConnection } from "@/shared/config/database";
-import { 
-  llmProvidersTable, 
-  type SelectLlmProvider, 
+
+import { agentsTable } from "@/main/schemas/agent.schema";
+import {
+  llmProvidersTable,
+  type SelectLlmProvider,
   type InsertLlmProvider,
   type UpdateLlmProvider,
-  type ProviderType
+  type ProviderType,
 } from "@/main/schemas/llm-provider.schema";
-import { agentsTable } from "@/main/schemas/agent.schema";
+
+import { createDatabaseConnection } from "@/shared/config/database";
 
 const { getDatabase } = createDatabaseConnection(true);
 
@@ -70,17 +73,17 @@ function decryptApiKey(encryptedData: string): string {
 /**
  * Find LLM provider by ID with ownership validation
  */
-export async function findLlmProvider(id: string, ownerId: string): Promise<SelectLlmProvider | null> {
+export async function findLlmProvider(
+  id: string,
+  ownerId: string,
+): Promise<SelectLlmProvider | null> {
   const db = getDatabase();
-  
+
   const [provider] = await db
     .select()
     .from(llmProvidersTable)
     .where(
-      and(
-        eq(llmProvidersTable.id, id),
-        eq(llmProvidersTable.ownerId, ownerId)
-      )
+      and(eq(llmProvidersTable.id, id), eq(llmProvidersTable.ownerId, ownerId)),
     )
     .limit(1);
 
@@ -90,9 +93,11 @@ export async function findLlmProvider(id: string, ownerId: string): Promise<Sele
 /**
  * Find LLM provider by ID without ownership validation (for system operations)
  */
-export async function findLlmProviderById(id: string): Promise<SelectLlmProvider | null> {
+export async function findLlmProviderById(
+  id: string,
+): Promise<SelectLlmProvider | null> {
   const db = getDatabase();
-  
+
   const [provider] = await db
     .select()
     .from(llmProvidersTable)
@@ -105,12 +110,14 @@ export async function findLlmProviderById(id: string): Promise<SelectLlmProvider
 /**
  * Create new LLM provider with encrypted API key
  */
-export async function createLlmProvider(data: InsertLlmProvider): Promise<SelectLlmProvider> {
+export async function createLlmProvider(
+  data: InsertLlmProvider,
+): Promise<SelectLlmProvider> {
   const db = getDatabase();
-  
+
   // Encrypt API key before storing
   const encryptedApiKey = encryptApiKey(data.apiKey);
-  
+
   const [provider] = await db
     .insert(llmProvidersTable)
     .values({
@@ -120,7 +127,9 @@ export async function createLlmProvider(data: InsertLlmProvider): Promise<Select
     .returning();
 
   if (!provider) {
-    throw new Error(`Failed to create LLM provider "${data.name}" of type "${data.type}"`);
+    throw new Error(
+      `Failed to create LLM provider "${data.name}" of type "${data.type}"`,
+    );
   }
 
   return provider;
@@ -129,11 +138,13 @@ export async function createLlmProvider(data: InsertLlmProvider): Promise<Select
 /**
  * Update LLM provider with ownership validation
  */
-export async function updateLlmProvider(data: UpdateLlmProvider & { ownerId: string }): Promise<SelectLlmProvider | null> {
+export async function updateLlmProvider(
+  data: UpdateLlmProvider & { ownerId: string },
+): Promise<SelectLlmProvider | null> {
   const db = getDatabase();
-  
+
   const { ownerId, ...updates } = data; // Remove ownerId from updates using destructuring
-  
+
   // If updating API key, encrypt it
   if (updates.apiKey) {
     updates.apiKey = encryptApiKey(updates.apiKey);
@@ -156,8 +167,8 @@ export async function updateLlmProvider(data: UpdateLlmProvider & { ownerId: str
     .where(
       and(
         eq(llmProvidersTable.id, data.id),
-        eq(llmProvidersTable.ownerId, data.ownerId)
-      )
+        eq(llmProvidersTable.ownerId, data.ownerId),
+      ),
     )
     .returning();
 
@@ -174,7 +185,7 @@ export async function listLlmProviders(filters: {
   showInactive?: boolean;
 }): Promise<SelectLlmProvider[]> {
   const db = getDatabase();
-  
+
   const conditions = [eq(llmProvidersTable.ownerId, filters.ownerId)];
 
   // Apply active/inactive filter
@@ -205,9 +216,11 @@ export async function listLlmProviders(filters: {
 /**
  * Get default LLM provider for user
  */
-export async function getDefaultLlmProvider(ownerId: string): Promise<SelectLlmProvider | null> {
+export async function getDefaultLlmProvider(
+  ownerId: string,
+): Promise<SelectLlmProvider | null> {
   const db = getDatabase();
-  
+
   const [provider] = await db
     .select()
     .from(llmProvidersTable)
@@ -226,9 +239,12 @@ export async function getDefaultLlmProvider(ownerId: string): Promise<SelectLlmP
 /**
  * Set LLM provider as default for user
  */
-export async function setDefaultLlmProvider(providerId: string, ownerId: string): Promise<void> {
+export async function setDefaultLlmProvider(
+  providerId: string,
+  ownerId: string,
+): Promise<void> {
   const db = getDatabase();
-  
+
   // First, remove default from all other providers for this user
   await db
     .update(llmProvidersTable)
@@ -242,8 +258,8 @@ export async function setDefaultLlmProvider(providerId: string, ownerId: string)
     .where(
       and(
         eq(llmProvidersTable.id, providerId),
-        eq(llmProvidersTable.ownerId, ownerId)
-      )
+        eq(llmProvidersTable.ownerId, ownerId),
+      ),
     );
 
   if (result.changes === 0) {
@@ -254,7 +270,10 @@ export async function setDefaultLlmProvider(providerId: string, ownerId: string)
 /**
  * Get decrypted API key for LLM provider with ownership validation
  */
-export async function getDecryptedApiKey(providerId: string, ownerId: string): Promise<string> {
+export async function getDecryptedApiKey(
+  providerId: string,
+  ownerId: string,
+): Promise<string> {
   const db = getDatabase();
 
   const [provider] = await db
@@ -263,8 +282,8 @@ export async function getDecryptedApiKey(providerId: string, ownerId: string): P
     .where(
       and(
         eq(llmProvidersTable.id, providerId),
-        eq(llmProvidersTable.ownerId, ownerId)
-      )
+        eq(llmProvidersTable.ownerId, ownerId),
+      ),
     )
     .limit(1);
 
@@ -279,7 +298,10 @@ export async function getDecryptedApiKey(providerId: string, ownerId: string): P
 /**
  * Soft delete LLM provider with ownership validation and dependency check
  */
-export async function inactivateLlmProvider(id: string, ownerId: string): Promise<SelectLlmProvider | null> {
+export async function inactivateLlmProvider(
+  id: string,
+  ownerId: string,
+): Promise<SelectLlmProvider | null> {
   const db = getDatabase();
 
   // First verify ownership
@@ -297,7 +319,7 @@ export async function inactivateLlmProvider(id: string, ownerId: string): Promis
 
   if (agentUsingProvider) {
     throw new Error(
-      "Cannot deactivate provider: It is currently being used by one or more agents. Please delete or reassign the agents first."
+      "Cannot deactivate provider: It is currently being used by one or more agents. Please delete or reassign the agents first.",
     );
   }
 
@@ -308,10 +330,7 @@ export async function inactivateLlmProvider(id: string, ownerId: string): Promis
       updatedAt: sql`(strftime('%s', 'now'))`,
     })
     .where(
-      and(
-        eq(llmProvidersTable.id, id),
-        eq(llmProvidersTable.ownerId, ownerId)
-      )
+      and(eq(llmProvidersTable.id, id), eq(llmProvidersTable.ownerId, ownerId)),
     )
     .returning();
 
@@ -321,7 +340,10 @@ export async function inactivateLlmProvider(id: string, ownerId: string): Promis
 /**
  * Hard delete LLM provider (for testing or admin operations)
  */
-export async function deleteLlmProvider(id: string, ownerId: string): Promise<boolean> {
+export async function deleteLlmProvider(
+  id: string,
+  ownerId: string,
+): Promise<boolean> {
   const db = getDatabase();
 
   // First verify ownership
@@ -339,17 +361,14 @@ export async function deleteLlmProvider(id: string, ownerId: string): Promise<bo
 
   if (agentUsingProvider) {
     throw new Error(
-      "Cannot delete provider: It is currently being used by one or more agents. Please delete or reassign the agents first."
+      "Cannot delete provider: It is currently being used by one or more agents. Please delete or reassign the agents first.",
     );
   }
 
   const result = await db
     .delete(llmProvidersTable)
     .where(
-      and(
-        eq(llmProvidersTable.id, id),
-        eq(llmProvidersTable.ownerId, ownerId)
-      )
+      and(eq(llmProvidersTable.id, id), eq(llmProvidersTable.ownerId, ownerId)),
     );
 
   return result.changes > 0;

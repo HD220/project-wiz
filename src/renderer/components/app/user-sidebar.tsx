@@ -1,11 +1,11 @@
-import type { User } from "@/shared/types/user";
-
 import { SidebarUserArea } from "@/renderer/components/app/sidebar-user-area";
 import { SidebarHeader } from "@/renderer/components/layout/navigation/sidebar-header";
 import { SidebarNavigation } from "@/renderer/components/layout/navigation/sidebar-navigation";
 import { ScrollArea } from "@/renderer/components/ui/scroll-area";
 import { cn } from "@/renderer/lib/utils";
+
 import type { DMConversation } from "@/shared/types/dm-conversation";
+import type { User } from "@/shared/types/user";
 
 interface UserSidebarProps {
   conversations: DMConversation[];

@@ -1,5 +1,12 @@
 import { sql } from "drizzle-orm";
-import { sqliteTable, text, integer, index, primaryKey, foreignKey } from "drizzle-orm/sqlite-core";
+import {
+  sqliteTable,
+  text,
+  integer,
+  index,
+  primaryKey,
+  foreignKey,
+} from "drizzle-orm/sqlite-core";
 
 import { usersTable } from "@/main/schemas/user.schema";
 
@@ -31,13 +38,15 @@ export const dmConversationsTable = sqliteTable(
   (table) => ({
     // Composite primary key
     pk: primaryKey({ columns: [table.ownerId, table.id] }),
-    
+
     // Performance indexes
     ownerIdIdx: index("dm_conversations_owner_id_idx").on(table.ownerId),
     createdAtIdx: index("dm_conversations_created_at_idx").on(table.createdAt),
 
     // Soft deletion indexes
-    deactivatedAtIdx: index("dm_conversations_deactivated_at_idx").on(table.deactivatedAt),
+    deactivatedAtIdx: index("dm_conversations_deactivated_at_idx").on(
+      table.deactivatedAt,
+    ),
 
     // Archiving indexes
     archivedAtIdx: index("dm_conversations_archived_at_idx").on(
@@ -59,8 +68,7 @@ export const dmParticipantsTable = sqliteTable(
     ownerId: text("owner_id")
       .notNull()
       .references(() => usersTable.id, { onDelete: "cascade" }),
-    dmConversationId: text("dm_conversation_id")
-      .notNull(),
+    dmConversationId: text("dm_conversation_id").notNull(),
     participantId: text("participant_id")
       .notNull()
       .references(() => usersTable.id, { onDelete: "cascade" }),
@@ -78,13 +86,13 @@ export const dmParticipantsTable = sqliteTable(
   (table) => ({
     // Composite primary key
     pk: primaryKey({ columns: [table.ownerId, table.id] }),
-    
+
     // Foreign key composta para dm_conversations
     dmConversationFk: foreignKey({
       columns: [table.ownerId, table.dmConversationId],
       foreignColumns: [dmConversationsTable.ownerId, dmConversationsTable.id],
     }),
-    
+
     // Performance indexes
     ownerIdIdx: index("dm_participants_owner_id_idx").on(table.ownerId),
     dmConversationIdIdx: index("dm_participants_dm_conversation_id_idx").on(
@@ -95,7 +103,9 @@ export const dmParticipantsTable = sqliteTable(
     ),
 
     // Soft deletion indexes
-    deactivatedAtIdx: index("dm_participants_deactivated_at_idx").on(table.deactivatedAt),
+    deactivatedAtIdx: index("dm_participants_deactivated_at_idx").on(
+      table.deactivatedAt,
+    ),
 
     // Composite index for unique participant in DM
     dmParticipantIdx: index("dm_participants_dm_participant_idx").on(

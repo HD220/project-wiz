@@ -13,6 +13,7 @@ export const ProjectSchema = z.object({
   localPath: z.string(),
   ownerId: z.string(),
   deactivatedAt: z.date().nullable(),
+  archivedAt: z.date().nullable(),
   createdAt: z.date(),
   updatedAt: z.date(),
 });

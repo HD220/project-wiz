@@ -1,13 +1,14 @@
 import { useNavigate } from "@tanstack/react-router";
 
-import type { SelectProject } from "@/main/features/project/project.types";
 import { useApiMutation } from "@/renderer/hooks/use-api-mutation.hook";
+
+import type { Project } from "@/shared/types";
 
 export function useProjectActions() {
   const navigate = useNavigate();
 
   const archiveProjectMutation = useApiMutation(
-    (projectId: string) => window.api.projects.archive(projectId),
+    (projectId: string) => window.api.project.archive(projectId),
     {
       successMessage: "Project archived successfully",
       errorMessage: "Failed to archive project",
@@ -15,13 +16,14 @@ export function useProjectActions() {
     },
   );
 
-  const handleArchive = (project: SelectProject) => {
+  const handleArchive = (project: Project) => {
     archiveProjectMutation.mutate(project.id);
   };
 
-  const handleEdit = (project: SelectProject) => {
+  const handleEdit = (project: Project) => {
+    // TODO: Add edit route when available
     navigate({
-      to: "/project/$projectId/edit",
+      to: "/project/$projectId",
       params: { projectId: project.id },
     });
   };

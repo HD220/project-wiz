@@ -1,9 +1,14 @@
 import { z } from "zod";
+
 import { findAgent } from "@/main/ipc/agent/queries";
-import { AgentSchema } from "@/shared/types";
 import { requireAuth } from "@/main/services/session-registry";
+
 import { getLogger } from "@/shared/services/logger/config";
-import { createIPCHandler, InferHandler } from "@/shared/utils/create-ipc-handler";
+import { AgentSchema } from "@/shared/types";
+import {
+  createIPCHandler,
+  InferHandler,
+} from "@/shared/utils/create-ipc-handler";
 
 const logger = getLogger("agent.get.invoke");
 
@@ -23,7 +28,7 @@ const handler = createIPCHandler({
 
     // Find agent with ownership validation
     const dbAgent = await findAgent(input.agentId, currentUser.id);
-    
+
     if (!dbAgent) {
       return null;
     }
@@ -35,15 +40,17 @@ const handler = createIPCHandler({
       name: dbAgent.name,
       avatar: dbAgent.avatar,
       type: dbAgent.type,
-      
+
       // State management (users)
       isActive: !dbAgent.deactivatedAt,
-      deactivatedAt: dbAgent.deactivatedAt ? new Date(dbAgent.deactivatedAt) : null,
-      
+      deactivatedAt: dbAgent.deactivatedAt
+        ? new Date(dbAgent.deactivatedAt)
+        : null,
+
       // Timestamps (users)
       createdAt: new Date(dbAgent.createdAt),
       updatedAt: new Date(dbAgent.updatedAt),
-      
+
       // Agent-specific fields (agents)
       ownerId: dbAgent.ownerId,
       role: dbAgent.role,
@@ -53,11 +60,11 @@ const handler = createIPCHandler({
       modelConfig: JSON.parse(dbAgent.modelConfig),
       status: dbAgent.status,
     };
-    
+
     logger.debug("Agent get result", { found: apiAgent !== null });
-    
+
     return apiAgent;
-  }
+  },
 });
 
 export default handler;
@@ -65,7 +72,7 @@ export default handler;
 declare global {
   namespace WindowAPI {
     interface Agent {
-      get: InferHandler<typeof handler>
+      get: InferHandler<typeof handler>;
     }
   }
 }

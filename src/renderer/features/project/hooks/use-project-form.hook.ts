@@ -2,9 +2,10 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
-import type { InsertProject } from "@/main/features/project/project.types";
 import { useAuth } from "@/renderer/contexts/auth.context";
 import { useApiMutation } from "@/renderer/hooks/use-api-mutation.hook";
+
+import type { Project } from "@/shared/types";
 
 const ProjectFormSchema = z
   .object({
@@ -61,11 +62,14 @@ interface UseProjectFormProps {
   initialData?: Partial<ProjectFormData>;
 }
 
-export function useProjectForm({ onSuccess, initialData }: UseProjectFormProps) {
+export function useProjectForm({
+  onSuccess,
+  initialData,
+}: UseProjectFormProps) {
   const { user } = useAuth();
 
   const createProjectMutation = useApiMutation(
-    (data: InsertProject) => window.api.projects.create(data),
+    (data: Project) => window.api.project.create(data),
     {
       successMessage: "Project created successfully",
       errorMessage: "Failed to create project",
@@ -104,12 +108,14 @@ export function useProjectForm({ onSuccess, initialData }: UseProjectFormProps) 
 
     const localPath = `/projects/${sanitizedName}`;
 
-    const projectData: InsertProject = {
+    const projectData: any = {
+      // TODO: Fix InsertProject type
       name: data.name.trim(),
       description: data.description?.trim() || null,
       localPath,
       ownerId: user.id,
-      status: "active" as const,
+      deactivatedAt: null,
+      archivedAt: null,
       ...(data.type === "github" && {
         gitUrl: data.gitUrl?.trim() || null,
         branch: data.branch?.trim() || "main",

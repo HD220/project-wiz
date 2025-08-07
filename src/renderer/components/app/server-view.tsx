@@ -1,7 +1,5 @@
 import { Calendar, Folder, GitBranch, Settings } from "lucide-react";
 
-import type { Project } from "@/shared/types";
-
 import { Badge } from "@/renderer/components/ui/badge";
 import { Button } from "@/renderer/components/ui/button";
 import {
@@ -12,6 +10,8 @@ import {
   CardTitle,
 } from "@/renderer/components/ui/card";
 import { Separator } from "@/renderer/components/ui/separator";
+
+import type { Project } from "@/shared/types";
 
 interface ProjectViewProps {
   project: Project;
@@ -37,11 +37,9 @@ export function ProjectView(props: ProjectViewProps) {
               </div>
               <div className="flex items-center space-x-[var(--spacing-component-sm)]">
                 <Badge
-                  variant={
-                    project.isActive && !project.isArchived ? "default" : "secondary"
-                  }
+                  variant={!project.deactivatedAt ? "default" : "secondary"}
                 >
-                  {project.isActive && !project.isArchived ? "Active" : "Archived"}
+                  {!project.deactivatedAt ? "Active" : "Deactivated"}
                 </Badge>
                 <Button variant="outline" size="sm">
                   <Settings className="h-4 w-4 mr-2" />

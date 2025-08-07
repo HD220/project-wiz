@@ -1,9 +1,6 @@
 import { User as UserIcon, Hash } from "lucide-react";
 
 import { Badge } from "@/renderer/components/ui/badge";
-import type { DMConversation } from "@/shared/types/dm-conversation";
-import type { User } from "@/shared/types/user";
-import type { Message } from "@/shared/types/message";
 import {
   ProfileAvatar,
   ProfileAvatarImage,
@@ -11,6 +8,10 @@ import {
   ProfileAvatarCounter,
 } from "@/renderer/features/user/components/profile-avatar";
 import { cn, getTimeAgo } from "@/renderer/lib/utils";
+
+import type { DMConversation } from "@/shared/types/dm-conversation";
+import type { Message } from "@/shared/types/message";
+import type { User } from "@/shared/types/user";
 
 interface ConversationItemProps {
   conversation: DMConversation;

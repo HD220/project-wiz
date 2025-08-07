@@ -1,8 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 
-import type { Project } from "@/shared/types";
-
 import { ProjectView } from "@/renderer/components/app/server-view";
 import { ContentHeader } from "@/renderer/components/layout/content-header";
 import {
@@ -11,6 +9,8 @@ import {
 } from "@/renderer/components/members/member-sidebar";
 import { ScrollArea } from "@/renderer/components/ui/scroll-area";
 import { loadApiData } from "@/renderer/lib/route-loader";
+
+import type { Project } from "@/shared/types";
 
 function ProjectPage() {
   const { project } = Route.useLoaderData();
@@ -72,7 +72,7 @@ function ProjectPage() {
         {/* Main Project Content */}
         <ScrollArea className="flex-1">
           <main>
-            <ProjectView project={project || {} as Project} />
+            <ProjectView project={project || ({} as Project)} />
           </main>
         </ScrollArea>
 

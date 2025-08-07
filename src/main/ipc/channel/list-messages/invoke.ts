@@ -1,10 +1,15 @@
 import { z } from "zod";
+
 import { getChannelMessages } from "@/main/ipc/channel/queries";
-import { MessageSchema } from "@/shared/types";
 import { requireAuth } from "@/main/services/session-registry";
-import { getLogger } from "@/shared/services/logger/config";
+
 import { eventBus } from "@/shared/services/events/event-bus";
-import { createIPCHandler, InferHandler } from "@/shared/utils/create-ipc-handler";
+import { getLogger } from "@/shared/services/logger/config";
+import { MessageSchema } from "@/shared/types";
+import {
+  createIPCHandler,
+  InferHandler,
+} from "@/shared/utils/create-ipc-handler";
 
 const logger = getLogger("channel.list-messages.invoke");
 
@@ -21,12 +26,12 @@ const handler = createIPCHandler({
     logger.debug("Getting channel messages", { channelId: input.channelId });
 
     requireAuth();
-    
+
     // Get messages from channel
     const dbMessages = await getChannelMessages(input.channelId);
-    
+
     // Mapeamento: SelectMessage[] → Message[] (dados puros da entidade)
-    const apiMessages = dbMessages.map(message => ({
+    const apiMessages = dbMessages.map((message) => ({
       id: message.id,
       sourceType: message.sourceType as "channel",
       sourceId: message.sourceId,
@@ -35,17 +40,20 @@ const handler = createIPCHandler({
       createdAt: new Date(message.createdAt),
       updatedAt: new Date(message.updatedAt),
     }));
-    
-    logger.debug("Channel messages retrieved", { 
-      channelId: input.channelId, 
-      messageCount: apiMessages.length 
+
+    logger.debug("Channel messages retrieved", {
+      channelId: input.channelId,
+      messageCount: apiMessages.length,
     });
-    
+
     // Emit event
-    eventBus.emit("channel:list-messages", { channelId: input.channelId, messageCount: apiMessages.length });
-    
+    eventBus.emit("channel:list-messages", {
+      channelId: input.channelId,
+      messageCount: apiMessages.length,
+    });
+
     return apiMessages;
-  }
+  },
 });
 
 export default handler;
@@ -53,7 +61,7 @@ export default handler;
 declare global {
   namespace WindowAPI {
     interface Channel {
-      listMessages: InferHandler<typeof handler>
+      listMessages: InferHandler<typeof handler>;
     }
   }
 }

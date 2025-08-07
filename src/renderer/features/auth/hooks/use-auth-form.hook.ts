@@ -1,6 +1,6 @@
-import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter, useLocation } from "@tanstack/react-router";
+import { useForm } from "react-hook-form";
 
 import { useAuth } from "@/renderer/contexts/auth.context";
 import {
@@ -10,6 +10,8 @@ import {
   RegisterFormData,
   getAuthSchema,
   getDefaultValues,
+  getFieldsConfig,
+  getUIContent,
 } from "@/renderer/features/auth/auth.schema";
 
 interface UseAuthFormProps {

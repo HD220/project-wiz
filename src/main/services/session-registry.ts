@@ -1,10 +1,12 @@
 import { eq, and, gt, desc, isNull } from "drizzle-orm";
-import { createDatabaseConnection } from "@/shared/config/database";
-import { usersTable } from "@/main/schemas/user.schema";
+
 import { userSessionsTable } from "@/main/schemas/user-sessions.schema";
-import type { User } from "@/shared/types/user";
-import { getLogger } from "@/shared/services/logger/config";
+import { usersTable } from "@/main/schemas/user.schema";
+
+import { createDatabaseConnection } from "@/shared/config/database";
 import { eventBus } from "@/shared/services/events/event-bus";
+import { getLogger } from "@/shared/services/logger/config";
+import type { User } from "@/shared/types/user";
 
 const logger = getLogger("session-registry");
 const { getDatabase } = createDatabaseConnection(true);
@@ -65,7 +67,7 @@ export class SessionRegistry {
    */
   setSession(user: User, token: string, expiresAt: Date): void {
     const previousUser = this.currentSession?.user;
-    
+
     this.currentSession = {
       user,
       token,
@@ -78,7 +80,10 @@ export class SessionRegistry {
     if (!previousUser) {
       eventBus.emit("session:login", { user, token, expiresAt });
     } else if (previousUser.id !== user.id) {
-      eventBus.emit("session:user-change", { previous: previousUser, current: user });
+      eventBus.emit("session:user-change", {
+        previous: previousUser,
+        current: user,
+      });
     }
   }
 
@@ -117,7 +122,7 @@ export class SessionRegistry {
             isNull(userSessionsTable.deactivatedAt),
             gt(userSessionsTable.expiresAt, new Date()),
             eq(usersTable.type, "human"),
-            isNull(usersTable.deactivatedAt)
+            isNull(usersTable.deactivatedAt),
           ),
         )
         .orderBy(desc(userSessionsTable.createdAt))
@@ -130,14 +135,13 @@ export class SessionRegistry {
 
       // Cache the loaded session
       this.setSession(
-        result.user, 
-        result.session.token, 
-        result.session.expiresAt
+        result.user,
+        result.session.token,
+        result.session.expiresAt,
       );
 
       logger.info(`🔄 Session loaded from database: ${result.user.name}`);
       return result.user;
-
     } catch (error) {
       logger.error("Failed to load session from database:", error);
       return null;
@@ -162,7 +166,7 @@ export class SessionRegistry {
 
     try {
       const db = getDatabase();
-      
+
       // Verify session still exists and is valid in database
       const [sessionExists] = await db
         .select({ id: userSessionsTable.id })
@@ -171,8 +175,8 @@ export class SessionRegistry {
           and(
             eq(userSessionsTable.token, this.currentSession.token),
             isNull(userSessionsTable.deactivatedAt),
-            gt(userSessionsTable.expiresAt, new Date())
-          )
+            gt(userSessionsTable.expiresAt, new Date()),
+          ),
         )
         .limit(1);
 
@@ -221,7 +225,8 @@ export class SessionRegistry {
     }
 
     const now = new Date();
-    const timeUntilExpiry = this.currentSession.expiresAt.getTime() - now.getTime();
+    const timeUntilExpiry =
+      this.currentSession.expiresAt.getTime() - now.getTime();
 
     return {
       isLoggedIn: true,

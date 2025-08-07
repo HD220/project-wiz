@@ -6,13 +6,14 @@ import { Button } from "@/renderer/components/ui/button";
 import { ScrollArea } from "@/renderer/components/ui/scroll-area";
 import { EmptyState } from "@/renderer/features/agent/components/provider/empty-state";
 import { ProviderCard } from "@/renderer/features/agent/components/provider/provider-card";
-import type { LlmProvider } from "@/shared/types/llm-provider";
 import {
   validateSearchInput,
   validateSelectFilter,
 } from "@/renderer/lib/search-validation";
 
 import { SearchFilterBar } from "@/components/search-filter-bar";
+
+import type { LlmProvider } from "@/shared/types/llm-provider";
 
 interface ProviderListProps {
   providers: LlmProvider[];
@@ -34,7 +35,13 @@ export function ProviderList(props: ProviderListProps) {
       to: "/user/settings/llm-providers",
       search: {
         ...search,
-        type: validateSelectFilter(value, ["openai", "anthropic", "google", "deepseek", "custom"]),
+        type: validateSelectFilter(value, [
+          "openai",
+          "anthropic",
+          "google",
+          "deepseek",
+          "custom",
+        ]),
       },
     });
   }
@@ -70,8 +77,8 @@ export function ProviderList(props: ProviderListProps) {
   // Inline filter checking and provider categorization following INLINE-FIRST principles
   const hasFilters = !!(search.type || search.search || search.showInactive);
   const filteredProviders = providers; // Backend already handles filtering
-  const activeProviders = providers.filter((p) => p.isActive);
-  const inactiveProviders = providers.filter((p) => !p.isActive);
+  const activeProviders = providers.filter((p) => !p.deactivatedAt);
+  const inactiveProviders = providers.filter((p) => !!p.deactivatedAt);
   const defaultProvider = providers.find((p) => p.isDefault);
 
   // Inline statistics calculation for UI display

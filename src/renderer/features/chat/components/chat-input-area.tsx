@@ -1,5 +1,5 @@
-import { forwardRef, useEffect, useState } from "react";
 import { Send, Paperclip, Smile } from "lucide-react";
+import { forwardRef, useEffect } from "react";
 
 import { Button } from "@/renderer/components/ui/button";
 import { Textarea } from "@/renderer/components/ui/textarea";

@@ -1,15 +1,19 @@
 import { eq, and, inArray, isNull, sql, asc } from "drizzle-orm";
-import { createDatabaseConnection } from "@/shared/config/database";
+
 import {
   dmConversationsTable,
   dmParticipantsTable,
   type SelectDMConversation,
-  type InsertDMConversation,
   type SelectDMParticipant,
-  type InsertDMParticipant
+  type InsertDMParticipant,
 } from "@/main/schemas/dm-conversation.schema";
-import { messagesTable, type SelectMessage, type InsertMessage } from "@/main/schemas/message.schema";
+import {
+  messagesTable,
+  type SelectMessage,
+} from "@/main/schemas/message.schema";
 import { usersTable } from "@/main/schemas/user.schema";
+
+import { createDatabaseConnection } from "@/shared/config/database";
 import { eventBus } from "@/shared/services/events/event-bus";
 import { getLogger } from "@/shared/services/logger/config";
 
@@ -58,17 +62,20 @@ async function generateDMTitle(
 /**
  * Find DM conversation by ID with ownership validation
  */
-export async function findDMConversation(id: string, ownerId: string): Promise<SelectDMConversation | null> {
+export async function findDMConversation(
+  id: string,
+  ownerId: string,
+): Promise<SelectDMConversation | null> {
   const db = getDatabase();
-  
+
   const [conversation] = await db
     .select()
     .from(dmConversationsTable)
     .where(
       and(
         eq(dmConversationsTable.id, id),
-        eq(dmConversationsTable.ownerId, ownerId)
-      )
+        eq(dmConversationsTable.ownerId, ownerId),
+      ),
     )
     .limit(1);
 
@@ -78,9 +85,11 @@ export async function findDMConversation(id: string, ownerId: string): Promise<S
 /**
  * Find DM conversation by ID without ownership validation (for system operations)
  */
-export async function findDMConversationById(id: string): Promise<SelectDMConversation | null> {
+export async function findDMConversationById(
+  id: string,
+): Promise<SelectDMConversation | null> {
   const db = getDatabase();
-  
+
   const [conversation] = await db
     .select()
     .from(dmConversationsTable)
@@ -93,12 +102,12 @@ export async function findDMConversationById(id: string): Promise<SelectDMConver
 /**
  * Create new DM conversation with participants
  */
-export async function createDMConversation(data: { 
+export async function createDMConversation(data: {
   ownerId: string;
   participantIds: string[];
 }): Promise<SelectDMConversation> {
   const db = getDatabase();
-  
+
   // Validate that all participant IDs exist
   const existingUsers = await db
     .select({ id: usersTable.id, name: usersTable.name })
@@ -142,14 +151,10 @@ export async function createDMConversation(data: {
     const participantValues = data.participantIds.map((participantId) => ({
       ownerId: data.ownerId,
       dmConversationId: dmConversation.id,
-      participantId
+      participantId,
     }));
 
-    tx
-      .insert(dmParticipantsTable)
-      .values(participantValues)
-      .returning()
-      .all();
+    tx.insert(dmParticipantsTable).values(participantValues).returning().all();
 
     return dmConversation;
   });
@@ -162,18 +167,22 @@ export async function listUserDMConversations(filters: {
   ownerId: string;
   includeInactive?: boolean;
   includeArchived?: boolean;
-}): Promise<Array<SelectDMConversation & { 
-  participants: SelectDMParticipant[];
-  lastMessage?: {
-    id: string;
-    content: string;
-    authorId: string;
-    createdAt: number;
-    updatedAt: number;
-  };
-}>> {
+}): Promise<
+  Array<
+    SelectDMConversation & {
+      participants: SelectDMParticipant[];
+      lastMessage?: {
+        id: string;
+        content: string;
+        authorId: string;
+        createdAt: number;
+        updatedAt: number;
+      };
+    }
+  >
+> {
   const db = getDatabase();
-  
+
   const { ownerId, includeInactive = false, includeArchived = false } = filters;
 
   // 1. Find DM conversations where the user is a participant
@@ -264,23 +273,32 @@ export async function listUserDMConversations(filters: {
     const conversationMessages = latestMessages.filter(
       (message) => message.sourceId === conversation.id,
     );
-    
-    const lastMessage = conversationMessages.length > 0 
-      ? conversationMessages.reduce((latest, current) => 
-          current.createdAt > latest.createdAt ? current : latest
-        )
-      : undefined;
+
+    const lastMessage =
+      conversationMessages.length > 0
+        ? conversationMessages.reduce((latest, current) =>
+            current.createdAt > latest.createdAt ? current : latest,
+          )
+        : undefined;
 
     return {
       ...conversation,
       participants: conversationParticipants,
-      lastMessage: lastMessage ? {
-        id: lastMessage.id,
-        content: lastMessage.content,
-        authorId: lastMessage.authorId,
-        createdAt: typeof lastMessage.createdAt === 'number' ? lastMessage.createdAt : lastMessage.createdAt.getTime(),
-        updatedAt: typeof lastMessage.updatedAt === 'number' ? lastMessage.updatedAt : lastMessage.updatedAt.getTime(),
-      } : undefined,
+      lastMessage: lastMessage
+        ? {
+            id: lastMessage.id,
+            content: lastMessage.content,
+            authorId: lastMessage.authorId,
+            createdAt:
+              typeof lastMessage.createdAt === "number"
+                ? lastMessage.createdAt
+                : lastMessage.createdAt.getTime(),
+            updatedAt:
+              typeof lastMessage.updatedAt === "number"
+                ? lastMessage.updatedAt
+                : lastMessage.updatedAt.getTime(),
+          }
+        : undefined,
     };
   });
 
@@ -290,7 +308,10 @@ export async function listUserDMConversations(filters: {
 /**
  * Archive DM conversation with ownership validation
  */
-export async function archiveDMConversation(data: { ownerId: string; id: string }): Promise<SelectDMConversation | null> {
+export async function archiveDMConversation(data: {
+  ownerId: string;
+  id: string;
+}): Promise<SelectDMConversation | null> {
   const db = getDatabase();
 
   const [conversation] = await db
@@ -301,8 +322,8 @@ export async function archiveDMConversation(data: { ownerId: string; id: string 
     .where(
       and(
         eq(dmConversationsTable.id, data.id),
-        eq(dmConversationsTable.ownerId, data.ownerId)
-      )
+        eq(dmConversationsTable.ownerId, data.ownerId),
+      ),
     )
     .returning();
 
@@ -312,20 +333,23 @@ export async function archiveDMConversation(data: { ownerId: string; id: string 
 /**
  * Unarchive DM conversation with ownership validation
  */
-export async function unarchiveDMConversation(data: { ownerId: string; id: string }): Promise<SelectDMConversation | null> {
+export async function unarchiveDMConversation(data: {
+  ownerId: string;
+  id: string;
+}): Promise<SelectDMConversation | null> {
   const db = getDatabase();
 
   const [conversation] = await db
     .update(dmConversationsTable)
     .set({
       archivedAt: null,
-      updatedAt: sql`(strftime('%s', 'now'))`
+      updatedAt: sql`(strftime('%s', 'now'))`,
     })
     .where(
       and(
         eq(dmConversationsTable.id, data.id),
-        eq(dmConversationsTable.ownerId, data.ownerId)
-      )
+        eq(dmConversationsTable.ownerId, data.ownerId),
+      ),
     )
     .returning();
 
@@ -335,7 +359,10 @@ export async function unarchiveDMConversation(data: { ownerId: string; id: strin
 /**
  * Soft delete DM conversation with ownership validation
  */
-export async function inactivateDMConversation(id: string, ownerId: string): Promise<SelectDMConversation | null> {
+export async function inactivateDMConversation(
+  id: string,
+  ownerId: string,
+): Promise<SelectDMConversation | null> {
   const db = getDatabase();
 
   const [conversation] = await db
@@ -346,8 +373,8 @@ export async function inactivateDMConversation(id: string, ownerId: string): Pro
     .where(
       and(
         eq(dmConversationsTable.id, id),
-        eq(dmConversationsTable.ownerId, ownerId)
-      )
+        eq(dmConversationsTable.ownerId, ownerId),
+      ),
     )
     .returning();
 
@@ -357,7 +384,9 @@ export async function inactivateDMConversation(id: string, ownerId: string): Pro
 /**
  * Add participant to DM conversation
  */
-export async function addDMParticipant(data: InsertDMParticipant): Promise<SelectDMParticipant> {
+export async function addDMParticipant(
+  data: InsertDMParticipant,
+): Promise<SelectDMParticipant> {
   const db = getDatabase();
 
   const [participant] = await db
@@ -375,7 +404,11 @@ export async function addDMParticipant(data: InsertDMParticipant): Promise<Selec
 /**
  * Remove participant from DM conversation
  */
-export async function removeDMParticipant(conversationId: string, participantId: string, ownerId: string): Promise<boolean> {
+export async function removeDMParticipant(
+  conversationId: string,
+  participantId: string,
+  ownerId: string,
+): Promise<boolean> {
   const db = getDatabase();
 
   const result = await db
@@ -387,8 +420,8 @@ export async function removeDMParticipant(conversationId: string, participantId:
       and(
         eq(dmParticipantsTable.dmConversationId, conversationId),
         eq(dmParticipantsTable.participantId, participantId),
-        eq(dmParticipantsTable.ownerId, ownerId)
-      )
+        eq(dmParticipantsTable.ownerId, ownerId),
+      ),
     );
 
   return result.changes > 0;
@@ -397,13 +430,16 @@ export async function removeDMParticipant(conversationId: string, participantId:
 /**
  * Get messages for a DM conversation with optional limit
  */
-export async function getDMMessages(conversationId: string, options?: { limit?: number }): Promise<SelectMessage[]> {
+export async function getDMMessages(
+  conversationId: string,
+  options?: { limit?: number },
+): Promise<SelectMessage[]> {
   const db = getDatabase();
 
   const conditions = [
     eq(messagesTable.sourceType, "dm"),
     eq(messagesTable.sourceId, conversationId),
-    isNull(messagesTable.deactivatedAt)
+    isNull(messagesTable.deactivatedAt),
   ];
 
   let query = db
@@ -452,7 +488,7 @@ export async function sendDMMessage(data: {
     logger.debug("📤 Emitting user-sent-message event:", {
       messageId: message.id,
       sourceType: message.sourceType,
-      sourceId: message.sourceId
+      sourceId: message.sourceId,
     });
 
     eventBus.emit("user-sent-message", {
@@ -461,12 +497,12 @@ export async function sendDMMessage(data: {
       conversationType: "dm",
       authorId: message.ownerId, // Map ownerId to authorId for event consistency
       content: message.content,
-      timestamp: new Date(message.createdAt)
+      timestamp: new Date(message.createdAt),
     });
 
     logger.info("✅ User message event emitted successfully:", {
       messageId: message.id,
-      conversationId: message.sourceId
+      conversationId: message.sourceId,
     });
   } catch (error) {
     logger.error("❌ Failed to emit user message event:", error);

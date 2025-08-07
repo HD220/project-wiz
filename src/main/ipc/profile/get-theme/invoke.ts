@@ -1,9 +1,14 @@
 import { z } from "zod";
+
 import { getUserTheme } from "@/main/ipc/profile/queries";
 import { requireAuth } from "@/main/services/session-registry";
-import { getLogger } from "@/shared/services/logger/config";
+
 import { eventBus } from "@/shared/services/events/event-bus";
-import { createIPCHandler, InferHandler } from "@/shared/utils/create-ipc-handler";
+import { getLogger } from "@/shared/services/logger/config";
+import {
+  createIPCHandler,
+  InferHandler,
+} from "@/shared/utils/create-ipc-handler";
 
 const logger = getLogger("profile.get-theme.invoke");
 
@@ -20,17 +25,20 @@ const handler = createIPCHandler({
     logger.debug("Getting user theme");
 
     const currentUser = requireAuth();
-    
+
     // Get user theme with ownership validation
     const result = await getUserTheme(currentUser.id);
-    
+
     logger.debug("User theme retrieved", { theme: result.theme });
-    
+
     // Emit event
-    eventBus.emit("profile:theme-retrieved", { userId: currentUser.id, theme: result.theme });
-    
+    eventBus.emit("profile:theme-retrieved", {
+      userId: currentUser.id,
+      theme: result.theme,
+    });
+
     return result;
-  }
+  },
 });
 
 export default handler;
@@ -38,7 +46,7 @@ export default handler;
 declare global {
   namespace WindowAPI {
     interface Profile {
-      getTheme: InferHandler<typeof handler>
+      getTheme: InferHandler<typeof handler>;
     }
   }
 }

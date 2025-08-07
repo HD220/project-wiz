@@ -3,7 +3,6 @@ import { Search, Check, MessageSquare } from "lucide-react";
 import { AlertCircle } from "lucide-react";
 import { useState } from "react";
 
-
 import {
   StandardFormModal,
   StandardFormModalContent,
@@ -68,9 +67,8 @@ function CreateConversationPage() {
   }
 
   // Filter users based on search
-  const filteredUsers = availableUsers.filter(
-    (user) =>
-      user.name.toLowerCase().includes(searchTerm.toLowerCase()),
+  const filteredUsers = availableUsers.filter((user) =>
+    user.name.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
   function handleSearchChange(value: string) {
@@ -274,7 +272,6 @@ export const Route = createFileRoute("/_authenticated/user/dm/new/")({
         name: auth.user.name || "Current User",
         type: auth.user.type || "human",
         avatar: auth.user.avatar || null,
-        deactivatedBy: null,
         createdAt: auth.user.createdAt || new Date(),
         updatedAt: auth.user.updatedAt || new Date(),
       },

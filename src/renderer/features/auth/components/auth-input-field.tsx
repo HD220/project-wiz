@@ -1,12 +1,11 @@
+import { Eye, EyeOff } from "lucide-react";
 import * as React from "react";
 import { useState } from "react";
-import { Eye, EyeOff } from "lucide-react";
 
 import { Button } from "@/renderer/components/ui/button";
 import { Input } from "@/renderer/components/ui/input";
-import { cn } from "@/renderer/lib/utils";
-
 import type { AuthFieldConfig } from "@/renderer/features/auth/utils/auth.utils";
+import { cn } from "@/renderer/lib/utils";
 
 interface AuthInputFieldProps {
   field: {
@@ -27,7 +26,8 @@ export function AuthInputField({
   const [showPassword, setShowPassword] = useState(false);
   const IconComponent = config.icon;
 
-  const inputType = config.type === "password" && showPassword ? "text" : config.type;
+  const inputType =
+    config.type === "password" && showPassword ? "text" : config.type;
 
   return (
     <div className="relative group">

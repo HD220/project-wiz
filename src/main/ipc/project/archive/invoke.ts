@@ -1,9 +1,14 @@
 import { z } from "zod";
-import { requireAuth } from "@/main/services/session-registry";
-import { getLogger } from "@/shared/services/logger/config";
+
 import { archiveProject } from "@/main/ipc/project/queries";
+import { requireAuth } from "@/main/services/session-registry";
+
 import { eventBus } from "@/shared/services/events/event-bus";
-import { createIPCHandler, InferHandler } from "@/shared/utils/create-ipc-handler";
+import { getLogger } from "@/shared/services/logger/config";
+import {
+  createIPCHandler,
+  InferHandler,
+} from "@/shared/utils/create-ipc-handler";
 
 const logger = getLogger("project.archive.invoke");
 
@@ -33,7 +38,7 @@ const handler = createIPCHandler({
     eventBus.emit("project:archived", { projectId: dbProject.id });
 
     return undefined;
-  }
+  },
 });
 
 export default handler;

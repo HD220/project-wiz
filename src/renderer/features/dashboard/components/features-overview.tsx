@@ -1,5 +1,12 @@
 import { Clock, Shield, Target } from "lucide-react";
 
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/renderer/components/ui/card";
 
 export function FeaturesOverview() {
   return (

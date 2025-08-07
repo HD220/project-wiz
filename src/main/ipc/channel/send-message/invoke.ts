@@ -1,14 +1,18 @@
 import { sendChannelMessage } from "@/main/ipc/channel/queries";
-import { MessageSchema } from "@/shared/types";
 import { requireAuth } from "@/main/services/session-registry";
+
 import { getLogger } from "@/shared/services/logger/config";
-import { createIPCHandler, InferHandler } from "@/shared/utils/create-ipc-handler";
+import { MessageSchema } from "@/shared/types";
+import {
+  createIPCHandler,
+  InferHandler,
+} from "@/shared/utils/create-ipc-handler";
 
 const logger = getLogger("channel.send-message.invoke");
 
 const SendChannelMessageInputSchema = MessageSchema.pick({
   sourceId: true,
-  content: true
+  content: true,
 });
 
 const SendChannelMessageOutputSchema = MessageSchema;
@@ -20,18 +24,17 @@ const handler = createIPCHandler({
     logger.debug("Sending message to channel", { channelId: input.sourceId });
 
     const currentUser = requireAuth();
-    
+
     // Send message to channel
     const messageData = {
       sourceType: "channel" as const,
       sourceId: input.sourceId,
       ownerId: currentUser.id, // Use ownerId for database consistency
       content: input.content,
-      isActive: true
     };
-    
+
     const dbMessage = await sendChannelMessage(messageData);
-    
+
     // Map database result to shared type
     const apiMessage = {
       id: dbMessage.id,
@@ -42,14 +45,14 @@ const handler = createIPCHandler({
       createdAt: new Date(dbMessage.createdAt),
       updatedAt: new Date(dbMessage.updatedAt),
     };
-    
-    logger.debug("Message sent to channel", { 
-      channelId: input.sourceId, 
-      messageId: apiMessage.id 
+
+    logger.debug("Message sent to channel", {
+      channelId: input.sourceId,
+      messageId: apiMessage.id,
     });
-    
+
     return apiMessage;
-  }
+  },
 });
 
 export default handler;
@@ -57,7 +60,7 @@ export default handler;
 declare global {
   namespace WindowAPI {
     interface Channel {
-      sendMessage: InferHandler<typeof handler>
+      sendMessage: InferHandler<typeof handler>;
     }
   }
 }

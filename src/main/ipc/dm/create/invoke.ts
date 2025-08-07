@@ -1,15 +1,21 @@
 import { z } from "zod";
+
 import { createDMConversation } from "@/main/ipc/dm/queries";
-import { DMConversationSchema } from "@/shared/types";
 import { requireAuth } from "@/main/services/session-registry";
-import { getLogger } from "@/shared/services/logger/config";
+
 import { eventBus } from "@/shared/services/events/event-bus";
-import { createIPCHandler, InferHandler } from "@/shared/utils/create-ipc-handler";
+import { getLogger } from "@/shared/services/logger/config";
+import {
+  createIPCHandler,
+  InferHandler,
+} from "@/shared/utils/create-ipc-handler";
 
 const logger = getLogger("dm.create.invoke");
 
 const CreateDMInputSchema = z.object({
-  participantIds: z.array(z.string()).min(1, "At least one participant is required"),
+  participantIds: z
+    .array(z.string())
+    .min(1, "At least one participant is required"),
 });
 
 const CreateDMOutputSchema = z.object({
@@ -22,30 +28,35 @@ const handler = createIPCHandler({
   inputSchema: CreateDMInputSchema,
   outputSchema: CreateDMOutputSchema,
   handler: async (input) => {
-    logger.debug("Creating DM conversation", { participantCount: input.participantIds.length });
+    logger.debug("Creating DM conversation", {
+      participantCount: input.participantIds.length,
+    });
 
     const currentUser = requireAuth();
-    
+
     // Create DM conversation with participants
     const dbDMConversation = await createDMConversation({
       ownerId: currentUser.id,
-      participantIds: input.participantIds
+      participantIds: input.participantIds,
     });
-    
+
     // Mapeamento simplificado: apenas id, name, description
     const apiDMConversation = {
       id: dbDMConversation.id,
       name: dbDMConversation.name,
       description: dbDMConversation.description,
     };
-    
-    logger.debug("DM conversation created", { dmId: apiDMConversation.id, name: apiDMConversation.name });
-    
+
+    logger.debug("DM conversation created", {
+      dmId: apiDMConversation.id,
+      name: apiDMConversation.name,
+    });
+
     // Emit event
     eventBus.emit("dm:created", { dmId: apiDMConversation.id });
-    
+
     return apiDMConversation;
-  }
+  },
 });
 
 export default handler;
@@ -53,7 +64,7 @@ export default handler;
 declare global {
   namespace WindowAPI {
     interface Dm {
-      create: InferHandler<typeof handler>
+      create: InferHandler<typeof handler>;
     }
   }
 }
