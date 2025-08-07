@@ -38,9 +38,7 @@ const handler = createIPCHandler({
     await db
       .update(usersTable)
       .set({
-        isActive: false,
         deactivatedAt: new Date(),
-        deactivatedBy: currentUser.id,
       })
       .where(eq(usersTable.id, agentToDeactivate.id));
     

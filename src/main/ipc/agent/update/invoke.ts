@@ -33,11 +33,17 @@ const handler = createIPCHandler({
     const currentUser = requireAuth();
     const { id, data } = input;
     
+    // Convert avatar null to undefined for database compatibility
+    const updateData = {
+      ...data,
+      avatar: data.avatar === null ? undefined : data.avatar
+    };
+    
     // Update agent using queries function
     const updatedAgent = await updateAgent({
       id,
       ownerId: currentUser.id,
-      ...data
+      ...updateData
     });
 
     if (!updatedAgent) {
@@ -47,8 +53,11 @@ const handler = createIPCHandler({
     // Convert to API format
     const apiAgent = {
       ...updatedAgent,
+      isActive: !updatedAgent.deactivatedAt,
       deactivatedAt: updatedAgent.deactivatedAt ? new Date(updatedAgent.deactivatedAt) : null,
       modelConfig: JSON.parse(updatedAgent.modelConfig),
+      createdAt: new Date(updatedAgent.createdAt),
+      updatedAt: new Date(updatedAgent.updatedAt),
     };
     
     logger.debug("Agent updated", { 

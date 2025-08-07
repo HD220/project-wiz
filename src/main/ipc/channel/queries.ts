@@ -220,14 +220,13 @@ export async function listProjectChannels(filters: {
 /**
  * Archive project channel with ownership validation
  */
-export async function archiveProjectChannel(id: string, ownerId: string, archivedBy: string): Promise<SelectProjectChannel | null> {
+export async function archiveProjectChannel(id: string, ownerId: string): Promise<SelectProjectChannel | null> {
   const db = getDatabase();
 
   const [channel] = await db
     .update(projectChannelsTable)
     .set({
       archivedAt: new Date(),
-      archivedBy,
     })
     .where(
       and(
@@ -250,7 +249,6 @@ export async function unarchiveProjectChannel(id: string, ownerId: string): Prom
     .update(projectChannelsTable)
     .set({
       archivedAt: null,
-      archivedBy: null,
       updatedAt: sql`(strftime('%s', 'now'))`
     })
     .where(
@@ -267,14 +265,13 @@ export async function unarchiveProjectChannel(id: string, ownerId: string): Prom
 /**
  * Soft delete project channel with ownership validation
  */
-export async function inactivateProjectChannel(id: string, ownerId: string, deactivatedBy: string): Promise<SelectProjectChannel | null> {
+export async function inactivateProjectChannel(id: string, ownerId: string): Promise<SelectProjectChannel | null> {
   const db = getDatabase();
 
   const [channel] = await db
     .update(projectChannelsTable)
     .set({
       deactivatedAt: new Date(),
-      deactivatedBy,
     })
     .where(
       and(

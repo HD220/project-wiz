@@ -1,4 +1,4 @@
-import { eq, and, ne, isNull } from "drizzle-orm";
+import { eq, and, ne, isNull, isNotNull } from "drizzle-orm";
 import { createDatabaseConnection } from "@/shared/config/database";
 import { usersTable, type SelectUser, type InsertUser } from "@/main/schemas/user.schema";
 import { agentsTable } from "@/main/schemas/agent.schema";
@@ -226,7 +226,7 @@ export async function getUserStats(userId: string): Promise<{
     .from(agentsTable)
     .innerJoin(usersTable, eq(agentsTable.id, usersTable.id))
     .where(
-      and(eq(agentsTable.ownerId, userId), eq(usersTable.isActive, false)),
+      and(eq(agentsTable.ownerId, userId), isNotNull(usersTable.deactivatedAt)),
     );
 
   // Count owned projects
@@ -246,7 +246,7 @@ export async function getUserStats(userId: string): Promise<{
     .where(
       and(
         eq(projectsTable.ownerId, userId),
-        eq(projectsTable.isActive, false),
+        isNotNull(projectsTable.deactivatedAt),
       ),
     );
 
@@ -278,7 +278,7 @@ export async function getUserStats(userId: string): Promise<{
     .where(
       and(
         eq(dmParticipantsTable.participantId, userId),
-        eq(dmParticipantsTable.isActive, false),
+        isNotNull(dmParticipantsTable.deactivatedAt),
       ),
     );
 
@@ -309,7 +309,6 @@ export async function softDeleteUser(userId: string, deactivatedBy: string): Pro
     .update(usersTable)
     .set({
       deactivatedAt: new Date(),
-      deactivatedBy: deactivatedBy,
       updatedAt: new Date(),
     })
     .where(and(eq(usersTable.id, userId), isNull(usersTable.deactivatedAt)))
@@ -328,7 +327,6 @@ export async function activateUser(userId: string): Promise<SelectUser | null> {
     .update(usersTable)
     .set({
       deactivatedAt: null,
-      deactivatedBy: null,
       updatedAt: new Date(),
     })
     .where(eq(usersTable.id, userId))

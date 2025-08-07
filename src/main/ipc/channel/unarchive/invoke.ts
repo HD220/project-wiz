@@ -39,9 +39,10 @@ const handler = createIPCHandler({
       name: dbChannel.name,
       description: dbChannel.description,
       archivedAt: dbChannel.archivedAt ? new Date(dbChannel.archivedAt) : null,
-      archivedBy: dbChannel.archivedBy,
+      archivedBy: null,
       createdAt: new Date(dbChannel.createdAt),
       updatedAt: new Date(dbChannel.updatedAt),
+      deactivatedAt: null,
     };
     
     logger.debug("Channel unarchived", { channelId: apiChannel.id });

@@ -38,7 +38,7 @@ const handler = createIPCHandler({
       branch: result.branch,
       localPath: result.localPath,
       ownerId: result.ownerId,
-      isActive: result.isActive,
+      isActive: !result.deactivatedAt,
       isArchived: !!result.archivedAt,
       createdAt: new Date(result.createdAt),
       updatedAt: new Date(result.updatedAt),

@@ -26,8 +26,7 @@ const handler = createIPCHandler({
     // Create channel with ownership validation
     const dbChannel = await createProjectChannel({
       ...input,
-      ownerId: currentUser.id,
-      isActive: true
+      ownerId: currentUser.id
     });
     
     // Map database result to shared type
@@ -37,9 +36,12 @@ const handler = createIPCHandler({
       name: dbChannel.name,
       description: dbChannel.description,
       archivedAt: dbChannel.archivedAt ? new Date(dbChannel.archivedAt) : null,
-      archivedBy: dbChannel.archivedBy,
+      archivedBy: null,
       createdAt: new Date(dbChannel.createdAt),
       updatedAt: new Date(dbChannel.updatedAt),
+      deactivatedAt: null,
+      isActive: true,
+      isArchived: false,
     };
     
     // Emit event

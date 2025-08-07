@@ -38,9 +38,9 @@ const handler = createIPCHandler({
       archivedBy: dbConversation.archivedBy,
       createdAt: dbConversation.createdAt,
       updatedAt: dbConversation.updatedAt,
-      isActive: dbConversation.isActive,
-      deactivatedAt: dbConversation.deactivatedAt,
-      deactivatedBy: dbConversation.deactivatedBy,
+      isActive: !dbConversation.deactivatedAt,
+      deactivatedAt: dbConversation.deactivatedAt ? new Date(dbConversation.deactivatedAt) : null,
+      deactivatedBy: null,
     } : null;
     
     logger.debug("DM found", { found: !!result, dmId: input.dmId });

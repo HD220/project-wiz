@@ -27,7 +27,7 @@ const handler = createIPCHandler({
     const currentUser = requireAuth();
     
     // Inactivate DM conversation with ownership validation
-    const dbConversation = await inactivateDMConversation(input.dmId, currentUser.id, currentUser.id);
+    const dbConversation = await inactivateDMConversation(input.dmId, currentUser.id);
     
     if (!dbConversation) {
       throw new Error("Failed to inactivate DM conversation or access denied");
@@ -42,9 +42,9 @@ const handler = createIPCHandler({
       archivedBy: dbConversation.archivedBy,
       createdAt: dbConversation.createdAt,
       updatedAt: dbConversation.updatedAt,
-      isActive: dbConversation.isActive,
-      deactivatedAt: dbConversation.deactivatedAt,
-      deactivatedBy: dbConversation.deactivatedBy,
+      isActive: !dbConversation.deactivatedAt,
+      deactivatedAt: dbConversation.deactivatedAt ? new Date(dbConversation.deactivatedAt) : null,
+      deactivatedBy: null,
     };
     
     logger.debug("DM conversation inactivated", { dmId: apiConversation.id });

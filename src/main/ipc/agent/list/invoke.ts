@@ -40,9 +40,8 @@ const handler = createIPCHandler({
       type: agent.type,
       
       // State management (users)
-      isActive: agent.isActive,
+      isActive: !agent.deactivatedAt,
       deactivatedAt: agent.deactivatedAt ? new Date(agent.deactivatedAt) : null,
-      deactivatedBy: agent.deactivatedBy,
       
       // Timestamps (users)
       createdAt: new Date(agent.createdAt),

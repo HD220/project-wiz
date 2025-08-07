@@ -51,13 +51,13 @@ const handler = createIPCHandler({
       name: channel.name,
       description: channel.description,
       archivedAt: channel.archivedAt ? new Date(channel.archivedAt) : null,
-      archivedBy: channel.archivedBy,
+      archivedBy: null,
       createdAt: new Date(channel.createdAt),
       updatedAt: new Date(channel.updatedAt),
       isArchived: !!channel.archivedAt,
-      isActive: channel.isActive,
-      deactivatedAt: channel.deactivatedAt,
-      deactivatedBy: channel.deactivatedBy,
+      isActive: !channel.deactivatedAt,
+      deactivatedAt: channel.deactivatedAt ? new Date(channel.deactivatedAt) : null,
+      deactivatedBy: null,
       lastMessage: channel.lastMessage
     }));
     

@@ -48,13 +48,13 @@ const handler = createIPCHandler({
       name: dbChannel.name,
       description: dbChannel.description,
       archivedAt: dbChannel.archivedAt ? new Date(dbChannel.archivedAt) : null,
-      archivedBy: dbChannel.archivedBy,
+      archivedBy: null,
       createdAt: new Date(dbChannel.createdAt),
       updatedAt: new Date(dbChannel.updatedAt),
       isArchived: !!dbChannel.archivedAt,
-      isActive: dbChannel.isActive,
-      deactivatedAt: dbChannel.deactivatedAt,
-      deactivatedBy: dbChannel.deactivatedBy,
+      isActive: !dbChannel.deactivatedAt,
+      deactivatedAt: dbChannel.deactivatedAt ? new Date(dbChannel.deactivatedAt) : null,
+      deactivatedBy: null,
     };
     
     logger.debug("Channel updated", { channelId: result.id, channelName: result.name });

@@ -25,7 +25,6 @@ const handler = createIPCHandler({
     // Inactivate channel with ownership validation
     const dbChannel = await inactivateProjectChannel(
       input.channelId,
-      currentUser.id,
       currentUser.id
     );
     
@@ -40,13 +39,12 @@ const handler = createIPCHandler({
       name: dbChannel.name,
       description: dbChannel.description,
       archivedAt: dbChannel.archivedAt ? new Date(dbChannel.archivedAt) : null,
-      archivedBy: dbChannel.archivedBy,
+      archivedBy: null,
       createdAt: new Date(dbChannel.createdAt),
       updatedAt: new Date(dbChannel.updatedAt),
-      isActive: dbChannel.isActive,
+      isActive: !dbChannel.deactivatedAt,
       isArchived: !!dbChannel.archivedAt,
       deactivatedAt: dbChannel.deactivatedAt ? new Date(dbChannel.deactivatedAt) : null,
-      deactivatedBy: dbChannel.deactivatedBy,
     };
     
     logger.debug("Channel inactivated", { channelId: apiChannel.id });

@@ -34,7 +34,6 @@ const handler = createIPCHandler({
       ownerId: currentUser.id,
       dmConversationId: input.dmId,
       participantId: input.participantId,
-      isActive: true,
     });
     
     // Mapeamento: SelectDMParticipant → DMParticipant (dados puros da entidade)
@@ -42,7 +41,7 @@ const handler = createIPCHandler({
       id: dbParticipant.id!,
       dmConversationId: dbParticipant.dmConversationId,
       participantId: dbParticipant.participantId,
-      isActive: dbParticipant.isActive,
+      isActive: !dbParticipant.deactivatedAt,
       createdAt: dbParticipant.createdAt,
       updatedAt: dbParticipant.updatedAt,
     };

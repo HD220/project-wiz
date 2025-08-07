@@ -32,13 +32,12 @@ const handler = createIPCHandler({
       name: dbChannel.name,
       description: dbChannel.description,
       archivedAt: dbChannel.archivedAt ? new Date(dbChannel.archivedAt) : null,
-      archivedBy: dbChannel.archivedBy,
+      archivedBy: null,
       createdAt: new Date(dbChannel.createdAt),
       updatedAt: new Date(dbChannel.updatedAt),
       isArchived: !!dbChannel.archivedAt,
-      isActive: dbChannel.isActive,
+      isActive: !dbChannel.deactivatedAt,
       deactivatedAt: dbChannel.deactivatedAt ? new Date(dbChannel.deactivatedAt) : null,
-      deactivatedBy: dbChannel.deactivatedBy,
     } : null;
     
     logger.debug("Channel found", { found: !!result, channelId: input.channelId });

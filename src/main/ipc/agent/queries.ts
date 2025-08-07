@@ -26,9 +26,7 @@ export async function findAgent(agentId: string, ownerId: string): Promise<Agent
       type: usersTable.type,
       
       // State management (users - authoritative)
-      isActive: usersTable.isActive,
       deactivatedAt: usersTable.deactivatedAt,
-      deactivatedBy: usersTable.deactivatedBy,
       
       // Timestamps (users - authoritative)
       createdAt: usersTable.createdAt,
@@ -202,9 +200,7 @@ export async function createAgent(data: {
         type: usersTable.type,
         
         // State management (users - authoritative)
-        isActive: usersTable.isActive,
         deactivatedAt: usersTable.deactivatedAt,
-        deactivatedBy: usersTable.deactivatedBy,
         
         // Timestamps (users - authoritative)
         createdAt: usersTable.createdAt,
@@ -278,9 +274,7 @@ export async function listAgents(filters: {
       type: usersTable.type,
       
       // State management (users - authoritative)
-      isActive: usersTable.isActive,
       deactivatedAt: usersTable.deactivatedAt,
-      deactivatedBy: usersTable.deactivatedBy,
       
       // Timestamps (users - authoritative)
       createdAt: usersTable.createdAt,

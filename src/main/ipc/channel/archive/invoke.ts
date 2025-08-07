@@ -28,7 +28,6 @@ const handler = createIPCHandler({
     // Archive channel with ownership validation
     const dbChannel = await archiveProjectChannel(
       input.channelId,
-      currentUser.id,
       currentUser.id
     );
     
@@ -43,9 +42,10 @@ const handler = createIPCHandler({
       name: dbChannel.name,
       description: dbChannel.description,
       archivedAt: dbChannel.archivedAt ? new Date(dbChannel.archivedAt) : null,
-      archivedBy: dbChannel.archivedBy,
+      archivedBy: currentUser.id,
       createdAt: new Date(dbChannel.createdAt),
       updatedAt: new Date(dbChannel.updatedAt),
+      deactivatedAt: null,
     };
     
     logger.debug("Channel archived", { channelId: apiChannel.id });
