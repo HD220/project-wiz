@@ -17,9 +17,12 @@ export function ConversationSection({ className }: ConversationSectionProps) {
   const navigate = useNavigate();
   const [showArchived, setShowArchived] = useState(false);
   
-  const { conversations, isLoading } = useConversations({
-    includeArchived: showArchived,
-  });
+  const { conversations: allConversations, isLoading } = useConversations();
+  
+  // Filter conversations on frontend based on showArchived state
+  const conversations = allConversations.filter(conversation => 
+    showArchived ? true : !conversation.archivedAt
+  );
 
   const handleToggleArchived = (checked: boolean) => {
     setShowArchived(checked);

@@ -64,7 +64,7 @@ export function useApiMutation<TArgs, TReturn>(
           router.invalidate();
         }
 
-        if (options.onSuccess && response.data !== undefined) {
+        if (options.onSuccess) {
           options.onSuccess(response.data);
         }
       } else {

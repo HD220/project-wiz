@@ -2,11 +2,6 @@ import { useQuery } from "@tanstack/react-query";
 
 import type { DMConversation } from "@/shared/types/dm-conversation";
 
-interface UseConversationsOptions {
-  includeArchived?: boolean;
-  includeInactive?: boolean;
-}
-
 interface UseConversationsReturn {
   conversations: DMConversation[];
   isLoading: boolean;
@@ -16,22 +11,16 @@ interface UseConversationsReturn {
 }
 
 /**
- * Hook for managing conversation data with intelligent caching
- * 
- * @param options - Query options for filtering conversations
- * @returns Conversation data with loading states and controls
+ * Hook for managing conversation data
+ * Fetches all conversations and filters on frontend for simplicity
  */
-export function useConversations(
-  options: UseConversationsOptions = {}
-): UseConversationsReturn {
-  const { includeArchived = false, includeInactive = false } = options;
-
+export function useConversations(): UseConversationsReturn {
   const queryResult = useQuery({
-    queryKey: ["conversations", { includeArchived, includeInactive }],
+    queryKey: ["conversations"],
     queryFn: async () => {
       const response = await window.api.dm.list({
-        includeArchived,
-        includeInactive,
+        includeArchived: true,
+        includeInactive: false,
       });
 
       if (!response.success) {
