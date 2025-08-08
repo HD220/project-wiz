@@ -2,7 +2,7 @@
 description: Rules to initiate execution of a set of tasks using Agent OS
 globs:
 alwaysApply: false
-version: 1.0
+version: 2.0
 encoding: UTF-8
 ---
 
@@ -170,32 +170,34 @@ Execute all assigned parent tasks and their subtasks using @.agent-os/instructio
 
 </step>
 
-<step number="6" subagent="test-runner" name="test_suite_verification">
+<step number="6" name="type_check_verification">
 
-### Step 6: Run All Tests
+### Step 6: TypeScript Type Check
 
-Use the test-runner subagent to run the entire test suite to ensure no regressions and fix any failures until all tests pass.
+Run npm run type-check to verify TypeScript compliance and fix any type errors before proceeding.
 
 <instructions>
-  ACTION: Use test-runner subagent
-  REQUEST: "Run the full test suite"
-  WAIT: For test-runner analysis
-  PROCESS: Fix any reported failures
-  REPEAT: Until all tests pass
+  ACTION: Run npm run type-check
+  VERIFY: All TypeScript types are correct
+  FIX: Any type errors reported
+  ENSURE: 100% type safety compliance
 </instructions>
 
-<test_execution>
-  <order>
-    1. Run entire test suite
-    2. Fix any failures
-  </order>
-  <requirement>100% pass rate</requirement>
-</test_execution>
+<type_check_process>
+  <command>npm run type-check</command>
+  <requirement>zero type errors</requirement>
+  <fix_approach>
+    - Review each type error carefully
+    - Fix type mismatches and missing types
+    - Update interfaces and type definitions as needed
+    - Re-run type-check until all errors resolved
+  </fix_approach>
+</type_check_process>
 
-<failure_handling>
-  <action>troubleshoot and fix</action>
-  <priority>before proceeding</priority>
-</failure_handling>
+<error_handling>
+  <action>fix all type errors before proceeding</action>
+  <priority>mandatory step - never skip</priority>
+</error_handling>
 
 </step>
 
@@ -261,7 +263,6 @@ Check @.agent-os/product/roadmap.md (if not in context) and update roadmap progr
   <update_when>
     - spec fully implements roadmap feature
     - all related tasks completed
-    - tests passing
   </update_when>
   <caution>only mark complete if absolutely certain</caution>
 </roadmap_criteria>
@@ -299,7 +300,7 @@ Play a system sound to alert the user that tasks are complete.
 
 ### Step 10: Completion Summary
 
-Create a structured summary message with emojis showing what was done, any issues, testing instructions, and PR link.
+Create a structured summary message with emojis showing what was done, any issues, review instructions, and PR link.
 
 <summary_template>
   ## ✅ What's been done
@@ -312,11 +313,11 @@ Create a structured summary message with emojis showing what was done, any issue
   [ONLY_IF_APPLICABLE]
   - **[ISSUE_1]** - [DESCRIPTION_AND_REASON]
 
-  ## 👀 Ready to test in browser
+  ## 👀 Ready for review
 
   [ONLY_IF_APPLICABLE]
-  1. [STEP_1_TO_TEST]
-  2. [STEP_2_TO_TEST]
+  1. [REVIEW_STEP_1]
+  2. [REVIEW_STEP_2]
 
   ## 📦 Pull Request
 
@@ -330,7 +331,7 @@ Create a structured summary message with emojis showing what was done, any issue
   </required>
   <conditional>
     - issues encountered (if any)
-    - testing instructions (if testable in browser)
+    - review instructions (if applicable)
   </conditional>
 </summary_sections>
 
@@ -353,10 +354,6 @@ Create a structured summary message with emojis showing what was done, any issue
     - mark with ⚠️ emoji
     - include in summary
   </blocking_issues>
-  <test_failures>
-    - fix before proceeding
-    - never commit broken tests
-  </test_failures>
   <technical_roadblocks>
     - attempt 3 approaches
     - document if unresolved
@@ -367,7 +364,7 @@ Create a structured summary message with emojis showing what was done, any issue
 <final_checklist>
   <verify>
     - [ ] Task implementation complete
-    - [ ] All tests passing
+    - [ ] TypeScript type-check passed
     - [ ] tasks.md updated
     - [ ] Code committed and pushed
     - [ ] Pull request created

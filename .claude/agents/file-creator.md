@@ -124,23 +124,6 @@ This is the API specification for the spec detailed in @.agent-os/specs/[FOLDER]
 [CONTROLLERS_CONTENT]
 ```
 
-#### tests.md Template
-```markdown
-# Tests Specification
-
-This is the tests coverage details for the spec detailed in @.agent-os/specs/[FOLDER]/spec.md
-
-> Created: [CURRENT_DATE]
-> Version: 1.0.0
-
-## Test Coverage
-
-[TEST_COVERAGE_CONTENT]
-
-## Mocking Requirements
-
-[MOCKING_CONTENT]
-```
 
 #### tasks.md Template
 ```markdown

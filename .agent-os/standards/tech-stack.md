@@ -29,8 +29,8 @@ Project-specific tech stack for project-wiz - an Electron desktop application fo
 - Asset Access: Local file system access
 - CI/CD Platform: GitHub Actions
 - CI/CD Trigger: Push to main/staging branches
-- Tests: Vitest (run before packaging)
-- Testing Framework: Vitest + vitest-mock-extended
+- Quality Check: npm run quality:check before packaging  
+- Type Checking: TypeScript strict mode with npm run type-check
 - Production Environment: main branch releases
 - Staging Environment: staging branch builds
 

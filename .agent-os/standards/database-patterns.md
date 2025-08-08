@@ -98,7 +98,7 @@ export const usersTable = sqliteTable('users', {
 
 ### Migration Best Practices
 - Always review generated migrations before applying
-- Test migrations on sample data first
+- Verify migrations on sample data first
 - Use descriptive migration names
 - Document breaking changes in comments
 - Keep migrations idempotent when possible

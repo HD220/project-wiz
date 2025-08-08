@@ -2,7 +2,7 @@
 description: Rules to execute a task and its sub-tasks using Agent OS
 globs:
 alwaysApply: false
-version: 1.0
+version: 2.0
 encoding: UTF-8
 ---
 
@@ -10,7 +10,7 @@ encoding: UTF-8
 
 ## Overview
 
-Execute a specific task along with its sub-tasks systematically following a TDD development workflow.
+Execute a specific task along with its sub-tasks systematically following development best practices.
 
 <pre_flight_check>
   EXECUTE: @.agent-os/instructions/meta/pre-flight.md
@@ -38,7 +38,7 @@ Read and analyze the given parent task and all its sub-tasks from tasks.md to ga
   ACTION: Read the specific parent task and all its sub-tasks
   ANALYZE: Full scope of implementation required
   UNDERSTAND: Dependencies and expected deliverables
-  NOTE: Test requirements for each sub-task
+  NOTE: Implementation requirements for each sub-task
 </instructions>
 
 </step>
@@ -79,7 +79,7 @@ Use the context-fetcher subagent to retrieve relevant sections from @.agent-os/s
     FIND sections relevant to:
     - Task's technology stack
     - Feature type being implemented
-    - Testing approaches needed
+    - Development approaches needed
     - Code organization patterns
   </search_best_practices>
 </selective_reading>
@@ -89,7 +89,7 @@ Use the context-fetcher subagent to retrieve relevant sections from @.agent-os/s
   REQUEST: "Find best practices sections relevant to:
             - Task's technology stack: [CURRENT_TECH]
             - Feature type: [CURRENT_FEATURE_TYPE]
-            - Testing approaches needed
+            - Development approaches needed
             - Code organization patterns"
   PROCESS: Returned best practices
   APPLY: Relevant patterns to implementation
@@ -109,7 +109,7 @@ Use the context-fetcher subagent to retrieve relevant code style rules from @.ag
     - Languages used in this task
     - File types being modified
     - Component patterns being implemented
-    - Testing style guidelines
+    - Code style guidelines
   </search_code_style>
 </selective_reading>
 
@@ -119,7 +119,7 @@ Use the context-fetcher subagent to retrieve relevant code style rules from @.ag
             - Languages: [LANGUAGES_IN_TASK]
             - File types: [FILE_TYPES_BEING_MODIFIED]
             - Component patterns: [PATTERNS_BEING_IMPLEMENTED]
-            - Testing style guidelines"
+            - Code style guidelines"
   PROCESS: Returned style rules
   APPLY: Relevant formatting and patterns
 </instructions>
@@ -130,99 +130,87 @@ Use the context-fetcher subagent to retrieve relevant code style rules from @.ag
 
 ### Step 5: Task and Sub-task Execution
 
-Execute the parent task and all sub-tasks in order using test-driven development (TDD) approach.
+Execute the parent task and all sub-tasks in order following development best practices.
 
 <typical_task_structure>
-  <first_subtask>Write tests for [feature]</first_subtask>
+  <first_subtask>Setup [feature] structure</first_subtask>
   <middle_subtasks>Implementation steps</middle_subtasks>
-  <final_subtask>Verify all tests pass</final_subtask>
+  <final_subtask>Verify implementation complete</final_subtask>
 </typical_task_structure>
 
 <execution_order>
-  <subtask_1_tests>
-    IF sub-task 1 is "Write tests for [feature]":
-      - Write all tests for the parent feature
-      - Include unit tests, integration tests, edge cases
-      - Run tests to ensure they fail appropriately
+  <subtask_1_setup>
+    IF sub-task 1 is "Setup [feature] structure":
+      - Create necessary files and directories
+      - Define interfaces and types
+      - Set up basic structure
       - Mark sub-task 1 complete
-  </subtask_1_tests>
+  </subtask_1_setup>
 
   <middle_subtasks_implementation>
     FOR each implementation sub-task (2 through n-1):
       - Implement the specific functionality
-      - Make relevant tests pass
-      - Update any adjacent/related tests if needed
-      - Refactor while keeping tests green
+      - Ensure TypeScript compliance
+      - Follow established patterns and conventions
+      - Refactor for code quality
       - Mark sub-task complete
   </middle_subtasks_implementation>
 
   <final_subtask_verification>
-    IF final sub-task is "Verify all tests pass":
-      - Run entire test suite
-      - Fix any remaining failures
-      - Ensure no regressions
+    IF final sub-task is "Verify implementation complete":
+      - Review implementation against requirements
+      - Run TypeScript type-check
+      - Ensure all functionality works as expected
       - Mark final sub-task complete
   </final_subtask_verification>
 </execution_order>
 
-<test_management>
-  <new_tests>
-    - Written in first sub-task
-    - Cover all aspects of parent feature
-    - Include edge cases and error handling
-  </new_tests>
-  <test_updates>
-    - Made during implementation sub-tasks
-    - Update expectations for changed behavior
-    - Maintain backward compatibility
-  </test_updates>
-</test_management>
+<implementation_management>
+  <setup_phase>
+    - Define structure in first sub-task
+    - Create necessary files and interfaces
+    - Establish foundation for implementation
+  </setup_phase>
+  <development_phase>
+    - Build functionality incrementally
+    - Maintain TypeScript compliance throughout
+    - Follow established patterns and conventions
+  </development_phase>
+</implementation_management>
 
 <instructions>
   ACTION: Execute sub-tasks in their defined order
-  RECOGNIZE: First sub-task typically writes all tests
+  RECOGNIZE: First sub-task typically sets up structure
   IMPLEMENT: Middle sub-tasks build functionality
-  VERIFY: Final sub-task ensures all tests pass
+  VERIFY: Final sub-task ensures implementation complete
   UPDATE: Mark each sub-task complete as finished
 </instructions>
 
 </step>
 
-<step number="6" subagent="test-runner" name="task_test_verification">
+<step number="6" name="type_check_verification">
 
-### Step 6: Task-Specific Test Verification
+### Step 6: TypeScript Type Check
 
-Use the test-runner subagent to run and verify only the tests specific to this parent task (not the full test suite) to ensure the feature is working correctly.
-
-<focused_test_execution>
-  <run_only>
-    - All new tests written for this parent task
-    - All tests updated during this task
-    - Tests directly related to this feature
-  </run_only>
-  <skip>
-    - Full test suite (done later in execute-tasks.md)
-    - Unrelated test files
-  </skip>
-</focused_test_execution>
-
-<final_verification>
-  IF any test failures:
-    - Debug and fix the specific issue
-    - Re-run only the failed tests
-  ELSE:
-    - Confirm all task tests passing
-    - Ready to proceed
-</final_verification>
+Run npm run type-check to verify TypeScript compliance for the implemented task and fix any type errors.
 
 <instructions>
-  ACTION: Use test-runner subagent
-  REQUEST: "Run tests for [this parent task's test files]"
-  WAIT: For test-runner analysis
-  PROCESS: Returned failure information
-  VERIFY: 100% pass rate for task-specific tests
-  CONFIRM: This feature's tests are complete
+  ACTION: Run npm run type-check
+  VERIFY: All TypeScript types are correct for implemented code
+  FIX: Any type errors related to the current task
+  ENSURE: Type safety compliance before marking task complete
 </instructions>
+
+<type_check_process>
+  <command>npm run type-check</command>
+  <focus>errors related to current task implementation</focus>
+  <fix_approach>
+    - Review each type error in task-related files
+    - Fix type mismatches and missing type definitions
+    - Update interfaces for new functionality
+    - Re-run until task-related type errors are resolved
+  </fix_approach>
+</type_check_process>
 
 </step>
 

@@ -2,7 +2,7 @@
 description: Spec Creation Rules for Agent OS
 globs:
 alwaysApply: false
-version: 1.1
+version: 2.0
 encoding: UTF-8
 ---
 
@@ -216,12 +216,12 @@ Use the file-creator subagent to create the file: .agent-os/specs/YYYY-MM-DD-spe
   <template>
     ## Expected Deliverable
 
-    1. [TESTABLE_OUTCOME_1]
-    2. [TESTABLE_OUTCOME_2]
+    1. [DELIVERABLE_OUTCOME_1]
+    2. [DELIVERABLE_OUTCOME_2]
   </template>
   <constraints>
     - count: 1-3 expectations
-    - focus: browser-testable outcomes
+    - focus: user-visible outcomes
   </constraints>
 </section>
 
@@ -442,8 +442,8 @@ Use the file-creator subagent to await user approval from step 11 and then creat
   <subtasks>
     - count: up to 8 per major task
     - format: decimal notation (1.1, 1.2)
-    - first_subtask: typically write tests
-    - last_subtask: verify all tests pass
+    - first_subtask: typically setup/preparation
+    - last_subtask: verify implementation complete
   </subtasks>
 </task_structure>
 
@@ -451,21 +451,21 @@ Use the file-creator subagent to await user approval from step 11 and then creat
   ## Tasks
 
   - [ ] 1. [MAJOR_TASK_DESCRIPTION]
-    - [ ] 1.1 Write tests for [COMPONENT]
+    - [ ] 1.1 Setup [COMPONENT] structure
     - [ ] 1.2 [IMPLEMENTATION_STEP]
     - [ ] 1.3 [IMPLEMENTATION_STEP]
-    - [ ] 1.4 Verify all tests pass
+    - [ ] 1.4 Verify implementation complete
 
   - [ ] 2. [MAJOR_TASK_DESCRIPTION]
-    - [ ] 2.1 Write tests for [COMPONENT]
+    - [ ] 2.1 Setup [COMPONENT] structure
     - [ ] 2.2 [IMPLEMENTATION_STEP]
 </task_template>
 
 <ordering_principles>
   - Consider technical dependencies
-  - Follow TDD approach
   - Group related functionality
   - Build incrementally
+  - Ensure type safety throughout
 </ordering_principles>
 
 </step>
@@ -604,7 +604,7 @@ Evaluate readiness to begin implementation after completing all previous steps, 
   <create>
     - Comprehensive documentation
     - Clear implementation path
-    - Testable outcomes
+    - Deliverable outcomes
   </create>
 </standards>
 
@@ -615,7 +615,7 @@ Evaluate readiness to begin implementation after completing all previous steps, 
     - [ ] spec.md contains all required sections
     - [ ] All applicable sub-specs created
     - [ ] User approved documentation
-    - [ ] tasks.md created with TDD approach
+    - [ ] tasks.md created with structured approach
     - [ ] Cross-references added to spec.md
     - [ ] Strategic decisions evaluated
   </verify>

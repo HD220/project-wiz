@@ -80,8 +80,8 @@ src/
 ### Quality Assurance
 - Always execute `npm run type-check` before task completion (never use `npx tsx`)
 - Use `npm run lint:fix` for automatic ESLint corrections
-- Verify with `npm run quality:check` before commits (runs lint, type-check, format, test)
-- Never commit code with failing tests or type errors
+- Verify with `npm run quality:check` before commits (runs lint, type-check, format)
+- Never commit code with type errors or linting issues
 
 ### Database Changes Workflow
 1. Modify schema in `src/main/schemas/[table].schema.ts`
@@ -90,12 +90,12 @@ src/
 4. Apply migration: `npm run db:migrate`
 5. Verify changes in DB Studio: `npm run db:studio`
 
-### Testing Strategy
-- **Framework**: Vitest for unit and integration tests
-- **File Location**: Test files alongside source with `.test.ts` extension
-- **IPC Testing**: Mock IPC calls in renderer tests using `vitest-mock-extended`
-- **Coverage**: Focus on business logic and critical paths
-- **Data Loading**: Test TanStack Router data loading patterns
+### Code Quality Strategy
+- **Type Safety**: 100% TypeScript coverage with strict mode
+- **Linting**: ESLint with project-specific rules
+- **Code Formatting**: Prettier with consistent style
+- **Quality Gates**: npm run quality:check before commits
+- **Data Validation**: Zod schemas for runtime validation
 
 ## Component Architecture
 
@@ -168,7 +168,7 @@ src/
 
 ### Migration Best Practices  
 - Review all generated migrations before applying
-- Test migrations on sample data before production
+- Verify migrations on sample data before production
 - Use transactions for complex multi-step migrations
 - Document breaking changes in migration comments
 - Keep migrations idempotent when possible

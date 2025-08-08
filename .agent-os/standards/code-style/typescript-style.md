@@ -173,48 +173,39 @@ eventBus.on('user:created', ({ userId }) => {
 });
 ```
 
-## Testing Patterns
+## Quality Assurance Patterns
 
-### Unit Test Pattern
+### Type Validation
 ```typescript
-// src/renderer/components/user-profile.test.tsx
-import { render, screen } from '@testing-library/react';
-import { UserProfile } from './user-profile';
-
-describe('UserProfile', () => {
-  it('should display user email', () => {
-    const mockUser = {
-      id: '1',
-      email: 'test@example.com',
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
-
-    render(<UserProfile user={mockUser} />);
-    
-    expect(screen.getByText('test@example.com')).toBeInTheDocument();
-  });
-});
-```
-
-### IPC Mock Pattern
-```typescript
-// src/renderer/test-utils/mock-api.ts
-import { vi } from 'vitest';
-
-export const mockApi = {
-  user: {
-    get: vi.fn(),
-    create: vi.fn(),
-    update: vi.fn(),
-    delete: vi.fn(),
-  },
+// Always validate data at boundaries
+const validateUserData = (data: unknown): UserType => {
+  return UserSchema.parse(data);
 };
 
-// In test setup
-vi.mock('@/api', () => ({
-  api: mockApi,
-}));
+// Runtime type checking for API responses
+const apiResult = await window.api.user.get(userId);
+if (apiResult.success) {
+  const user = UserSchema.parse(apiResult.data);
+  return user;
+}
+```
+
+### Error Handling Pattern
+```typescript
+// Structured error handling
+type Result<T> = 
+  | { success: true; data: T }
+  | { success: false; error: string };
+
+// Type-safe async operations
+const handleAsyncOperation = async (): Promise<Result<UserType>> => {
+  try {
+    const user = await getUserData();
+    return { success: true, data: user };
+  } catch (error) {
+    return { success: false, error: 'Failed to get user data' };
+  }
+};
 ```
 
 ## Important Constraints
