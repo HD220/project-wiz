@@ -90,3 +90,48 @@ ELSE:
 - Group imports: external dependencies, internal modules, types, styles
 - Avoid circular dependencies (enforced by ESLint boundaries)
 - Use barrel exports for clean feature imports
+
+## Anti-Over-Engineering Patterns
+
+### TypeScript Best Practices
+- **Use `type` over `interface`** for simple object shapes
+- **Let TypeScript infer return types** - don't annotate what's already obvious
+- **Use Zod schema inference** - `type User = z.infer<typeof userSchema>`
+- **Avoid excessive `unknown`** - use specific types when structure is known
+- **No type casting** - refactor structure instead of using `as any` or `as Type`
+
+### React Component Guidelines
+- **Simple function components** - no `React.FC` wrapper
+- **Proper type definitions** - separate `type ComponentProps = {}` declarations
+- **Direct property access** - use `user.name` instead of `const name = user.name`
+- **Minimal props** - create different components instead of complex prop interfaces
+- **Composable design** - use shadcn primitives inside components
+
+### Function Signatures
+- **Useful abstractions only** - functions that eliminate real duplication
+- **Business logic naming** - complex calculations deserve descriptive names
+- **No wrapper functions** - don't wrap existing APIs without adding value
+- **Inline simple operations** - don't create functions for one-line operations
+
+### Error Handling
+- **Let errors bubble** - don't catch just to re-throw
+- **Handle specific errors** - only catch what you can actually handle
+- **Validate beforehand** - check constraints before operations when possible
+- **Informative messages** - provide context without exposing internals
+
+### Constants and Magic Values
+```typescript
+// ✅ Good: Centralize repeated values
+const USER_ROLES = {
+  ADMIN: 'admin',
+  EDITOR: 'editor',
+  VIEWER: 'viewer'
+} as const;
+
+// ✅ Good: Business logic functions for complex checks
+function canManageUsers(user: User) {
+  return user.role === USER_ROLES.ADMIN && 
+         user.status === 'active' && 
+         user.permissions.includes('manage_users');
+}
+```

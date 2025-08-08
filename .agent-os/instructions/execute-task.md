@@ -68,9 +68,32 @@ Search and extract relevant sections from technical-spec.md to understand the te
 
 </step>
 
-<step number="3" subagent="context-fetcher" name="best_practices_review">
+<step number="3" subagent="context-fetcher" name="critical_workflow_check">
 
-### Step 3: Best Practices Review
+### Step 3: Critical Workflow Check
+
+Use the context-fetcher subagent to retrieve critical thinking rules from @.agent-os/instructions/critical-thinking.md to ensure proper evaluation before implementation.
+
+<critical_thinking>
+  <mandatory_checks>
+    - Can this be done inline instead of creating abstraction?
+    - Is this used 3+ times to justify abstraction?
+    - Am I wrapping an API without adding real value?
+    - Is this business logic or just convenience?
+  </mandatory_checks>
+</critical_thinking>
+
+<instructions>
+  ACTION: Use context-fetcher subagent
+  REQUEST: "Get critical thinking workflow from critical-thinking.md"
+  APPLY: Question every abstraction before implementation
+</instructions>
+
+</step>
+
+<step number="4" subagent="context-fetcher" name="best_practices_review">
+
+### Step 4: Best Practices Review
 
 Use the context-fetcher subagent to retrieve relevant sections from @.agent-os/standards/best-practices.md that apply to the current task's technology stack and feature type.
 
@@ -97,9 +120,9 @@ Use the context-fetcher subagent to retrieve relevant sections from @.agent-os/s
 
 </step>
 
-<step number="4" subagent="context-fetcher" name="code_style_review">
+<step number="5" subagent="context-fetcher" name="code_style_review">
 
-### Step 4: Code Style Review
+### Step 5: Code Style Review
 
 Use the context-fetcher subagent to retrieve relevant code style rules from @.agent-os/standards/code-style.md for the languages and file types being used in this task.
 

@@ -17,21 +17,36 @@ ELSE:
 - Implement code in the fewest lines possible
 - Avoid over-engineering solutions
 - Choose straightforward approaches over clever ones
+- **INLINE FIRST**: Always write code inline before considering abstraction
 
 ### Optimize for Readability
 - Prioritize code clarity over micro-optimizations
 - Write self-documenting code with clear variable names
 - Add comments only for "why" not "what" and only when extremely necessary
+- **Direct access over variables**: Use `user.name` directly instead of `const userName = user.name`
 
-### DRY (Don't Repeat Yourself)
-- Extract repeated business logic to private methods
-- Extract repeated UI markup to reusable components
-- Create utility functions for common operations
+### Smart Abstraction Strategy
+- **THREE USES RULE**: No abstraction until you have 3+ identical use cases
+- **Business logic only**: Abstract complex calculations and business rules, not simple operations
+- **Magic values centralization**: Use constants for repeated string/number literals
+- **NO WRAPPERS**: Don't wrap existing APIs unless adding significant value
+- **NO HELPERS**: One-line operations should stay inline
 
 ### File Structure
 - Keep files focused on a single responsibility
 - Group related functionality together
 - Use consistent naming conventions
+
+### NEVER CREATE THESE
+
+**Automatic "NO" List:**
+- **API wrappers**: `function getUsers() { return api.get('/users'); }`
+- **One-line helpers**: `const getTitle = (item) => item.title;`
+- **Premature mappers**: `function mapUserToDisplay(user) { return { name: user.name }; }`
+- **Generic utilities for specific problems**: `function processItems<T>(...)`
+- **Configuration objects for simple components**: Complex prop interfaces with 10+ optional properties
+- **Pointless try-catch**: Catching errors just to re-throw them
+- **Unnecessary variable assignments**: Creating variables for direct property access
 </conditional-block>
 
 ## Electron Architecture Patterns

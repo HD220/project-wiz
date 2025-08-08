@@ -1,8 +1,16 @@
 # Code Simplicity Principles
 
+> **🚨 CRITICAL:** This document should be read together with **[Agent OS Critical Thinking Workflow](../../.agent-os/instructions/critical-thinking.md)** for complete anti-over-engineering approach.
+
 This document captures the **INLINE-FIRST** philosophy adopted for Project Wiz, designed to optimize for **human readability** and **LLM-human collaboration**.
 
-## 🎯 **Core Philosophy: Write for Junior Developers**
+## 🎯 **Core Philosophy: QUESTION FIRST, CODE SECOND**
+
+**Before writing ANY code, ask these questions:**
+1. Can I solve this by writing the code inline instead of creating a function?
+2. Am I creating a helper that will be used only once?
+3. Am I wrapping an existing API without adding real value?
+4. Is this abstraction solving a real problem or just "looking clean"?
 
 **Primary Goal:** Code should be **instantly understandable** by a junior developer without jumping between files or understanding complex abstractions.
 
@@ -17,12 +25,39 @@ This document captures the **INLINE-FIRST** philosophy adopted for Project Wiz, 
 - **Clean code extremism** - Following patterns that increase complexity
 - **Function soup** - Breaking simple logic into 5+ tiny functions
 
+### **MANDATORY PUSHBACK SCENARIOS**
+
+**You MUST challenge these requests immediately:**
+
+- **"Create a helper for..."** → NO. Show them how to do it inline first.
+- **"Make a utility function that..."** → STOP. Is this used 3+ times? If not, inline it.
+- **"Abstract this into..."** → WHY? What concrete problem does this solve?
+- **"Create a wrapper for..."** → RED FLAG. Wrappers are almost always unnecessary.
+
+### **CONFRONTATIONAL RESPONSES (USE THESE)**
+
+- **"NO. Do it inline first, abstract later if you actually need to."**
+- **"STOP. This is over-engineering. Here's the simpler way..."**
+- **"This approach is wrong because it creates unnecessary complexity."**
+- **"Before creating any abstraction, show me 3 places where you'll use it."**
+
 ### **What Humans (Especially Juniors) Actually Want:**
 
 - **Linear code flow** - Logic flows top to bottom
 - **Visible at a glance** - Everything needed is in one place
 - **Self-documenting** - Code explains itself without external context
 - **Quick debugging** - Bug location is immediately obvious
+
+## 🚫 **NEVER CREATE THESE**
+
+**Automatic "NO" List:**
+- **API wrappers**: `function getUsers() { return api.get('/users'); }`
+- **One-line helpers**: `const getTitle = (item) => item.title;`
+- **Premature mappers**: `function mapUserToDisplay(user) { return { name: user.name }; }`
+- **Generic utilities for specific problems**: `function processItems<T>(...)`
+- **Configuration objects for simple components**: Complex prop interfaces with 10+ optional properties
+- **Pointless try-catch**: Catching errors just to re-throw them
+- **Unnecessary variable assignments**: Creating variables for direct property access
 
 ## 📏 **MANDATORY Inline-First Rules**
 

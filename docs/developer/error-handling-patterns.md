@@ -1,10 +1,24 @@
 # Error Handling Patterns & Generic Helpers
 
+> **🚨 WARNING:** Follow **[Agent OS Best Practices](../../.agent-os/standards/best-practices.md)** for error handling philosophy. Let errors bubble naturally unless you can handle specific cases.
+
 This document defines standardized error handling patterns using generic helpers that maintain type safety while reducing boilerplate code.
 
 **Current Implementation:** TypeScript 5.8.3 + Pino Logger 9.7.0 + Type-Safe IPC
 
 These patterns are **actively implemented** across the entire Project Wiz codebase with **automatic error handling**, **structured logging**, and **consistent user feedback** mechanisms.
+
+## ⚠️ **CRITICAL: Error Handling Anti-Patterns to Avoid**
+
+**❌ NEVER DO:**
+- **Pointless try-catch**: `try { await db.insert(...); } catch(e) { throw e; }`
+- **Generic error handling**: `catch(error) { return { success: false, error: 'Something went wrong' }; }`
+- **Removing error context**: Catching errors just to re-throw with less information
+
+**✅ PREFERRED APPROACH:**
+- **Let errors bubble up naturally** unless you can handle specific cases
+- **Handle specific errors only**: Check error codes/types you can actually handle
+- **Validate beforehand**: Check constraints before operations when possible
 
 ## Problem Statement
 

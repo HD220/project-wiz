@@ -1,8 +1,25 @@
 # Coding Standards - Project Wiz
 
+> **🚨 CRITICAL:** Read **[Agent OS Code Style Guide](../../.agent-os/standards/code-style.md)** and **[Best Practices](../../.agent-os/standards/best-practices.md)** for anti-over-engineering patterns that override these standards when they conflict.
+
 **Current Implementation:** React 19.0.0 + TypeScript 5.8.3 + TanStack Router 1.115.2 + Drizzle ORM 0.44.2
 
 These standards reflect the **actual patterns implemented** in the sophisticated Project Wiz codebase with **85+ service functions**, **14 database tables**, and **enterprise-grade architecture**.
+
+## ⚠️ **CRITICAL WORKFLOW - READ FIRST**
+
+### **STOP AND THINK BEFORE CODING**
+- **Can I do this inline?** Don't create functions for simple operations
+- **Is this used 3+ times?** No abstraction until proven duplication
+- **Am I wrapping an API?** Only if adding real value, otherwise inline
+- **Is this business logic or just convenience?** Only business logic deserves abstraction
+
+### **ABSOLUTE RULES**
+1. **INLINE FIRST** - Write code inline before considering abstraction
+2. **THREE USES RULE** - No abstraction until 3+ identical use cases
+3. **NO WRAPPERS** - Don't wrap existing APIs without significant added value
+4. **TYPES OVER INTERFACES** - Use `type` for simple object shapes
+5. **LET TYPESCRIPT INFER** - Don't annotate obvious return types
 
 ## 📋 Convenções de Nomenclatura
 

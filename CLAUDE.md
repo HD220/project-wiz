@@ -35,6 +35,32 @@ npm run extract      # Extract i18n messages
 npm run compile      # Compile i18n messages with TypeScript support
 ```
 
+## Critical Workflow - READ FIRST
+
+### STOP AND THINK BEFORE CODING
+- **Can I do this inline?** Don't create functions for simple operations
+- **Is this used 3+ times?** No abstraction until proven duplication
+- **Am I wrapping an API?** Only if adding real value, otherwise inline
+- **Is this business logic or just convenience?** Only business logic deserves abstraction
+
+### MANDATORY PUSHBACK
+When user requests helpers, utilities, or wrappers:
+- **"NO. Show me 3 places you'll use this first."**
+- **"STOP. Let's do this inline and abstract later if needed."**
+- **"Why? What specific problem does this solve?"**
+
+### ABSOLUTE RULES
+1. **INLINE FIRST** - Write code inline before considering abstraction
+2. **THREE USES RULE** - No abstraction until 3+ identical use cases
+3. **NO WRAPPERS** - Don't wrap existing APIs without significant added value
+4. **TYPES OVER INTERFACES** - Use `type` for simple object shapes
+5. **LET TYPESCRIPT INFER** - Don't annotate obvious return types
+
+### Quick Reference
+- **Detailed workflows**: @.agent-os/instructions/critical-thinking.md
+- **Code standards**: @.agent-os/standards/code-style.md  
+- **Best practices**: @.agent-os/standards/best-practices.md
+
 ## Architecture
 
 ### Application Structure
