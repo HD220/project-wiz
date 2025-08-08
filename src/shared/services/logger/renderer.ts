@@ -23,21 +23,9 @@ function createRendererGlobalLogger(): pino.Logger {
   const loggerOptions: pino.LoggerOptions = {
     level: config.level,
     browser: {
-      asObject: false, // Better for development console
+      asObject: false,
     },
   };
-
-  // In renderer, we always use browser mode with pretty printing
-  if (config.prettyPrint) {
-    loggerOptions.transport = {
-      target: "pino-pretty",
-      options: {
-        colorize: true,
-        translateTime: "SYS:standard",
-        ignore: "pid,hostname",
-      },
-    };
-  }
 
   return pino(loggerOptions);
 }

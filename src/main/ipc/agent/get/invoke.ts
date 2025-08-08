@@ -42,7 +42,6 @@ const handler = createIPCHandler({
       type: dbAgent.type,
 
       // State management (users)
-      isActive: !dbAgent.deactivatedAt,
       deactivatedAt: dbAgent.deactivatedAt
         ? new Date(dbAgent.deactivatedAt)
         : null,

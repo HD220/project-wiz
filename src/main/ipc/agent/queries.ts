@@ -52,7 +52,6 @@ export async function findAgent(
       and(
         eq(agentsTable.id, agentId),
         eq(agentsTable.ownerId, ownerId),
-        isNull(usersTable.deactivatedAt), // Only active users
       ),
     )
     .limit(1);

@@ -1,7 +1,11 @@
+import { eq } from "drizzle-orm";
 import { z } from "zod";
 
-import { findAgent, updateAgent } from "@/main/ipc/agent/queries";
+import { findAgent } from "@/main/ipc/agent/queries";
+import { usersTable } from "@/main/schemas/user.schema";
 import { requireAuth } from "@/main/services/session-registry";
+
+import { createDatabaseConnection } from "@/shared/config/database";
 
 import { eventBus } from "@/shared/services/events/event-bus";
 import { getLogger } from "@/shared/services/logger/config";
@@ -14,7 +18,7 @@ import {
 const logger = getLogger("agent.restore.invoke");
 
 const RestoreAgentInputSchema = z.object({
-  agentId: z.string().min(1, "Agent ID is required"),
+  id: z.string().min(1, "Agent ID is required"),
 });
 
 const RestoreAgentOutputSchema = AgentSchema;
@@ -23,26 +27,30 @@ const handler = createIPCHandler({
   inputSchema: RestoreAgentInputSchema,
   outputSchema: RestoreAgentOutputSchema,
   handler: async (input) => {
-    logger.debug("Restoring agent", { agentId: input.agentId });
+    logger.debug("Activating agent", { agentId: input.id });
 
     const currentUser = requireAuth();
 
-    // Validar se existe e se o user tem autorização
-    const agentToRestore = await findAgent(input.agentId, currentUser.id);
+    const agentToActivate = await findAgent(input.id, currentUser.id);
 
-    if (!agentToRestore) {
+    if (!agentToActivate) {
       throw new Error("Agent not found for current user session");
     }
 
-    // Só atualizar status do agent (dados de user são mantidos)
-    const dbAgent = await updateAgent({
-      id: agentToRestore.id,
-      ownerId: agentToRestore.ownerId,
-      status: "active", // Reativar o agent
-    });
+    const { getDatabase } = createDatabaseConnection(true);
+    const db = getDatabase();
+
+    await db
+      .update(usersTable)
+      .set({
+        deactivatedAt: null,
+      })
+      .where(eq(usersTable.id, agentToActivate.id));
+
+    const dbAgent = await findAgent(input.id, currentUser.id);
 
     if (!dbAgent) {
-      throw new Error("Failed to update agent");
+      throw new Error("Failed to activate agent");
     }
 
     // Map to API format (dados completos do JOIN)
@@ -54,7 +62,6 @@ const handler = createIPCHandler({
       type: dbAgent.type,
 
       // State management (users)
-      isActive: !dbAgent.deactivatedAt,
       deactivatedAt: dbAgent.deactivatedAt
         ? new Date(dbAgent.deactivatedAt)
         : null,
@@ -73,10 +80,9 @@ const handler = createIPCHandler({
       status: dbAgent.status,
     };
 
-    // Emit event
-    eventBus.emit("agent:restored", { agentId: apiAgent.id });
+    eventBus.emit("agent:activated", { agentId: apiAgent.id });
 
-    logger.debug("Agent restored", { agentId: apiAgent.id });
+    logger.debug("Agent activated", { agentId: apiAgent.id });
 
     return apiAgent;
   },

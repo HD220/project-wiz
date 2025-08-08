@@ -1,4 +1,4 @@
-import type { Agent } from "@/renderer/features/agent/agent.types";
+import type { SelectAgent } from "@/renderer/features/agent/agent.types";
 import { useApiMutation } from "@/renderer/hooks/use-api-mutation.hook";
 
 export function useAgentActions() {
@@ -20,12 +20,16 @@ export function useAgentActions() {
     },
   );
 
-  const handleInactivate = (agent: Agent) => {
+  const handleInactivate = (agent: SelectAgent) => {
     inactivateAgentMutation.mutate(agent.id);
   };
 
-  const handleToggleStatus = (agent: Agent) => {
-    if (agent.status === "active") {
+  const handleActivate = (agent: SelectAgent) => {
+    activateAgentMutation.mutate(agent.id);
+  };
+
+  const handleToggleStatus = (agent: SelectAgent) => {
+    if (!agent.deactivatedAt) {
       inactivateAgentMutation.mutate(agent.id);
     } else {
       activateAgentMutation.mutate(agent.id);
@@ -34,6 +38,7 @@ export function useAgentActions() {
 
   return {
     handleInactivate,
+    handleActivate,
     handleToggleStatus,
     isInactivating: inactivateAgentMutation.isPending,
     isActivating: activateAgentMutation.isPending,

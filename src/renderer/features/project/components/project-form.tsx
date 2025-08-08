@@ -78,9 +78,12 @@ const ProjectFormSchema = z
     },
   );
 
-// Schema for creating projects - omit auto-generated fields
+// Schema for creating projects - omit auto-generated and system-managed fields
 const InsertProjectSchema = ProjectSchema.omit({
   id: true,
+  ownerId: true,
+  deactivatedAt: true,
+  archivedAt: true,
   createdAt: true,
   updatedAt: true,
 });
@@ -195,9 +198,6 @@ export function ProjectForm(props: ProjectFormProps) {
       description: data.description?.trim() || null,
       avatarUrl: null, // No avatar support in form yet
       localPath,
-      ownerId: user.id,
-      deactivatedAt: null,
-      archivedAt: null,
       gitUrl: data.type === "github" ? data.gitUrl?.trim() || null : null,
       branch: data.type === "github" ? data.branch?.trim() || "main" : null,
     };

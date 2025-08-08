@@ -5,7 +5,7 @@ import { z } from "zod";
 import { useAuth } from "@/renderer/contexts/auth.context";
 import { useApiMutation } from "@/renderer/hooks/use-api-mutation.hook";
 
-import type { Project } from "@/shared/types";
+import { ProjectSchema } from "@/shared/types";
 
 const ProjectFormSchema = z
   .object({
@@ -57,6 +57,18 @@ const ProjectFormSchema = z
 
 export type ProjectFormData = z.infer<typeof ProjectFormSchema>;
 
+// Schema for creating projects - omit auto-generated and system-managed fields  
+const CreateProjectSchema = ProjectSchema.omit({
+  id: true,
+  ownerId: true,
+  deactivatedAt: true,
+  archivedAt: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+type CreateProjectInput = z.infer<typeof CreateProjectSchema>;
+
 interface UseProjectFormProps {
   onSuccess?: (projectId: string) => void;
   initialData?: Partial<ProjectFormData>;
@@ -69,7 +81,7 @@ export function useProjectForm({
   const { user } = useAuth();
 
   const createProjectMutation = useApiMutation(
-    (data: Project) => window.api.project.create(data),
+    (data: CreateProjectInput) => window.api.project.create(data),
     {
       successMessage: "Project created successfully",
       errorMessage: "Failed to create project",
@@ -108,18 +120,13 @@ export function useProjectForm({
 
     const localPath = `/projects/${sanitizedName}`;
 
-    const projectData: any = {
-      // TODO: Fix InsertProject type
+    const projectData: CreateProjectInput = {
       name: data.name.trim(),
       description: data.description?.trim() || null,
+      avatarUrl: null,
       localPath,
-      ownerId: user.id,
-      deactivatedAt: null,
-      archivedAt: null,
-      ...(data.type === "github" && {
-        gitUrl: data.gitUrl?.trim() || null,
-        branch: data.branch?.trim() || "main",
-      }),
+      gitUrl: data.type === "github" ? (data.gitUrl?.trim() || null) : null,
+      branch: data.type === "github" ? (data.branch?.trim() || "main") : null,
     };
 
     createProjectMutation.mutate(projectData);

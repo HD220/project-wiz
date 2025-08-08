@@ -22,6 +22,7 @@ export const ModelConfigSchema = z.object({
 
 /**
  * Schema for agent creation validation (renderer-side)
+ * Using individual model config fields for better UX
  */
 export const CreateAgentSchema = z.object({
   name: z
@@ -48,17 +49,21 @@ export const CreateAgentSchema = z.object({
     .string()
     .min(1, "LLM provider is required")
     .uuid("Provider ID must be a valid UUID"),
-  modelConfig: z.string().refine(
-    (val) => {
-      try {
-        const parsed = JSON.parse(val);
-        return ModelConfigSchema.safeParse(parsed).success;
-      } catch {
-        return false;
-      }
-    },
-    { message: "Invalid model configuration JSON" },
-  ),
+  // Individual model config fields for better form validation
+  model: z.string().min(1, "Model is required"),
+  temperature: z
+    .number()
+    .min(0, "Temperature must be at least 0")
+    .max(2, "Temperature must not exceed 2"),
+  maxTokens: z
+    .number()
+    .int("Max tokens must be an integer")
+    .positive("Max tokens must be a positive number"),
+  topP: z
+    .number()
+    .min(0, "Top P must be at least 0")
+    .max(1, "Top P must not exceed 1")
+    .optional(),
   status: z
     .enum(["active", "inactive", "busy"], {
       errorMap: () => ({
@@ -72,7 +77,16 @@ export const CreateAgentSchema = z.object({
     .url("Avatar must be a valid URL")
     .optional()
     .or(z.literal("")),
-});
+}).transform((data) => ({
+  ...data,
+  // Transform individual fields back to modelConfig JSON string for backend
+  modelConfig: JSON.stringify({
+    model: data.model,
+    temperature: data.temperature,
+    maxTokens: data.maxTokens,
+    topP: data.topP,
+  }),
+}));
 
 /**
  * Schema for agent filters validation (renderer-side)

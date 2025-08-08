@@ -94,8 +94,11 @@ export function AgentForm(props: AgentFormProps) {
       goal: initialData?.goal || "",
       providerId:
         initialData?.providerId || (!isEditing && defaultProvider?.id) || "",
-      modelConfig:
-        initialData?.modelConfig || JSON.stringify(defaultModelConfig),
+      // Individual model config fields
+      model: initialData?.modelConfig?.model || defaultModelConfig.model,
+      temperature: initialData?.modelConfig?.temperature || defaultModelConfig.temperature,
+      maxTokens: initialData?.modelConfig?.maxTokens || defaultModelConfig.maxTokens,
+      topP: initialData?.modelConfig?.topP || defaultModelConfig.topP,
       status: "inactive", // Always default to inactive for safety
       avatar: "", // Avatar is stored in user table, not agent table
     },
@@ -121,6 +124,7 @@ export function AgentForm(props: AgentFormProps) {
         onSubmit={form.handleSubmit(handleSubmit)}
         role="form"
         aria-label={isEditing ? "Edit agent form" : "Create agent form"}
+        noValidate
       >
         <FormSection className="space-y-6">
           <AgentFormIdentity form={form} />
@@ -292,18 +296,6 @@ function AgentFormProvider(props: AgentFormProviderProps) {
     (provider) => !provider.deactivatedAt,
   );
 
-  const defaultModelConfig: ModelConfig = {
-    model: "gpt-4o",
-    temperature: 0.7,
-    maxTokens: 4096,
-    topP: 0.95,
-  };
-
-  // PERFORMANCE FIX: Parse modelConfig once per render instead of 4x
-  const modelConfigValue = form.watch("modelConfig");
-  const currentModelConfig = modelConfigValue
-    ? JSON.parse(modelConfigValue)
-    : defaultModelConfig;
 
   return (
     <Card className="bg-gradient-to-br from-chart-3/5 via-chart-3/3 to-chart-3/0 border border-border/60">
@@ -368,20 +360,13 @@ function AgentFormProvider(props: AgentFormProviderProps) {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-[var(--spacing-component-lg)]">
             <FormField
               control={form.control}
-              name="modelConfig"
+              name="model"
               render={({ field }) => (
                 <FormItem className="space-y-[var(--spacing-component-lg)]">
                   <FormLabel className="text-base font-medium">Model</FormLabel>
                   <FormControl>
                     <Input
-                      value={currentModelConfig.model}
-                      onChange={(event) => {
-                        const newConfig = {
-                          ...currentModelConfig,
-                          model: event.target.value,
-                        };
-                        field.onChange(JSON.stringify(newConfig));
-                      }}
+                      {...field}
                       placeholder="gpt-4o"
                       className="h-10"
                     />
@@ -397,7 +382,7 @@ function AgentFormProvider(props: AgentFormProviderProps) {
 
             <FormField
               control={form.control}
-              name="modelConfig"
+              name="temperature"
               render={({ field }) => (
                 <FormItem className="space-y-[var(--spacing-component-lg)]">
                   <FormLabel className="text-base font-medium">
@@ -409,14 +394,8 @@ function AgentFormProvider(props: AgentFormProviderProps) {
                       min="0"
                       max="2"
                       step="0.1"
-                      value={currentModelConfig.temperature}
-                      onChange={(event) => {
-                        const newConfig = {
-                          ...currentModelConfig,
-                          temperature: parseFloat(event.target.value),
-                        };
-                        field.onChange(JSON.stringify(newConfig));
-                      }}
+                      {...field}
+                      onChange={(e) => field.onChange(parseFloat(e.target.value))}
                       placeholder="0.7"
                       className="h-10"
                     />
@@ -431,7 +410,7 @@ function AgentFormProvider(props: AgentFormProviderProps) {
 
             <FormField
               control={form.control}
-              name="modelConfig"
+              name="maxTokens"
               render={({ field }) => (
                 <FormItem className="space-y-[var(--spacing-component-lg)]">
                   <FormLabel className="text-base font-medium">
@@ -441,14 +420,8 @@ function AgentFormProvider(props: AgentFormProviderProps) {
                     <Input
                       type="number"
                       min="1"
-                      value={currentModelConfig.maxTokens}
-                      onChange={(event) => {
-                        const newConfig = {
-                          ...currentModelConfig,
-                          maxTokens: parseInt(event.target.value),
-                        };
-                        field.onChange(JSON.stringify(newConfig));
-                      }}
+                      {...field}
+                      onChange={(e) => field.onChange(parseInt(e.target.value))}
                       placeholder="4000"
                       className="h-10"
                     />
@@ -463,7 +436,7 @@ function AgentFormProvider(props: AgentFormProviderProps) {
 
             <FormField
               control={form.control}
-              name="modelConfig"
+              name="topP"
               render={({ field }) => (
                 <FormItem className="space-y-[var(--spacing-component-lg)]">
                   <FormLabel className="text-base font-medium">
@@ -474,18 +447,11 @@ function AgentFormProvider(props: AgentFormProviderProps) {
                       type="number"
                       min="0"
                       max="1"
-                      step="0.1"
-                      value={currentModelConfig.topP || ""}
-                      onChange={(event) => {
-                        const newConfig = {
-                          ...currentModelConfig,
-                          topP: event.target.value
-                            ? parseFloat(event.target.value)
-                            : undefined,
-                        };
-                        field.onChange(JSON.stringify(newConfig));
-                      }}
-                      placeholder="0.9"
+                      step="0.01"
+                      {...field}
+                      value={field.value || ""}
+                      onChange={(e) => field.onChange(e.target.value ? parseFloat(e.target.value) : undefined)}
+                      placeholder="0.95"
                       className="h-10"
                     />
                   </FormControl>

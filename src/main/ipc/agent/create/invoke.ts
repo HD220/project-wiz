@@ -35,9 +35,16 @@ const handler = createIPCHandler({
 
     const currentUser = requireAuth();
 
+    let parsedModelConfig;
+    try {
+      parsedModelConfig = JSON.parse(input.modelConfig);
+    } catch (error) {
+      throw new Error("Invalid modelConfig JSON format");
+    }
+
     const dbAgent = await createAgent({
       ...input,
-      modelConfig: JSON.stringify(input.modelConfig),
+      modelConfig: JSON.stringify(parsedModelConfig),
       ownerId: currentUser.id,
     });
 
@@ -49,7 +56,6 @@ const handler = createIPCHandler({
       type: dbAgent.type,
 
       // State management (users)
-      isActive: !dbAgent.deactivatedAt,
       deactivatedAt: dbAgent.deactivatedAt
         ? new Date(dbAgent.deactivatedAt)
         : null,

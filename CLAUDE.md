@@ -152,4 +152,7 @@ Data loading follows TanStack Router patterns with helper functions:
 
 ## Development Notes
 - Always execute `npm run type-check` normally without any additional arguments, do not use `npx tsx`
-```
+
+## Best Practices
+- Não deixe comentarios no codigo a não ser que seja extremamente necessario para o entendimento da funcionalidade
+- não execute npm run dev, normalmente já esta em execução

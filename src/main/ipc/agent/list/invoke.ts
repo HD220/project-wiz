@@ -39,30 +39,53 @@ const handler = createIPCHandler({
     });
 
     // Mapear agents (dados já vem completos do JOIN)
-    const apiAgents = dbAgents.map((agent) => ({
-      // Identity fields (users)
-      id: agent.id,
-      name: agent.name,
-      avatar: agent.avatar,
-      type: agent.type,
+    const apiAgents = dbAgents.map((agent) => {
+      logger.debug("Processing agent from DB", {
+        agentId: agent.id,
+        modelConfigType: typeof agent.modelConfig,
+      });
+      logger.debug("Raw modelConfig content", agent.modelConfig);
 
-      // State management (users)
-      isActive: !agent.deactivatedAt,
-      deactivatedAt: agent.deactivatedAt ? new Date(agent.deactivatedAt) : null,
+      let parsedModelConfig;
+      try {
+        parsedModelConfig = JSON.parse(agent.modelConfig);
+        logger.debug("Successfully parsed modelConfig", {
+          agentId: agent.id,
+          parsedModelConfig,
+        });
+      } catch (error) {
+        logger.error("Failed to parse agent modelConfig", {
+          agentId: agent.id,
+          rawModelConfig: agent.modelConfig,
+          error: error instanceof Error ? error.message : String(error),
+        });
+        parsedModelConfig = { model: "gpt-4o", temperature: 0.7, maxTokens: 4096, topP: 0.95 };
+      }
 
-      // Timestamps (users)
-      createdAt: new Date(agent.createdAt),
-      updatedAt: new Date(agent.updatedAt),
+      return {
+        // Identity fields (users)
+        id: agent.id,
+        name: agent.name,
+        avatar: agent.avatar,
+        type: agent.type,
 
-      // Agent-specific fields (agents)
-      ownerId: agent.ownerId,
-      role: agent.role,
-      backstory: agent.backstory,
-      goal: agent.goal,
-      providerId: agent.providerId,
-      modelConfig: JSON.parse(agent.modelConfig),
-      status: agent.status,
-    }));
+        // State management (users)  
+        deactivatedAt: agent.deactivatedAt ? new Date(agent.deactivatedAt) : null,
+
+        // Timestamps (users)
+        createdAt: new Date(agent.createdAt),
+        updatedAt: new Date(agent.updatedAt),
+
+        // Agent-specific fields (agents)
+        ownerId: agent.ownerId,
+        role: agent.role,
+        backstory: agent.backstory,
+        goal: agent.goal,
+        providerId: agent.providerId,
+        modelConfig: parsedModelConfig,
+        status: agent.status,
+      };
+    });
 
     logger.debug("Listed agents", { count: apiAgents.length });
 

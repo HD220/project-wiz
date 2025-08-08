@@ -38,11 +38,19 @@ const handler = createIPCHandler({
     const currentUser = requireAuth();
     const { id, data } = input;
 
-    // Convert avatar null to undefined for database compatibility
     const updateData = {
       ...data,
       avatar: data.avatar === null ? undefined : data.avatar,
     };
+
+    if (data.modelConfig !== undefined) {
+      try {
+        const parsedModelConfig = JSON.parse(data.modelConfig);
+        updateData.modelConfig = JSON.stringify(parsedModelConfig);
+      } catch (error) {
+        throw new Error("Invalid modelConfig JSON format");
+      }
+    }
 
     // Update agent using queries function
     const updatedAgent = await updateAgent({
@@ -58,7 +66,6 @@ const handler = createIPCHandler({
     // Convert to API format
     const apiAgent = {
       ...updatedAgent,
-      isActive: !updatedAgent.deactivatedAt,
       deactivatedAt: updatedAgent.deactivatedAt
         ? new Date(updatedAgent.deactivatedAt)
         : null,

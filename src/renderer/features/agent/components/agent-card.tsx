@@ -27,7 +27,11 @@ import {
 } from "@/renderer/features/user/components/profile-avatar";
 import { cn } from "@/renderer/lib/utils";
 
+import { getRendererLogger } from "@/shared/services/logger/renderer";
 import type { Agent } from "@/shared/types/agent";
+import { getAgentModelName } from "@/renderer/features/agent/utils/agent.utils";
+
+const logger = getRendererLogger("agent-card");
 
 // Main AgentCard component with INLINE-FIRST approach
 interface AgentCardProps {
@@ -43,17 +47,7 @@ export function AgentCard({
   onToggleStatus,
   className,
 }: AgentCardProps) {
-  // Inline model parsing with error handling
-  const getModelName = () => {
-    if (!agent.modelConfig) return "Unknown Model";
-
-    try {
-      const config = JSON.parse(agent.modelConfig);
-      return config.model || "Unknown Model";
-    } catch {
-      return "Invalid Model Config";
-    }
-  };
+  const modelName = getAgentModelName(agent);
 
   // Inline date formatting
   const formattedDate = new Date(agent.createdAt).toLocaleDateString(
@@ -68,6 +62,12 @@ export function AgentCard({
   // Inline action handlers
   const handleDelete = () => onDelete?.(agent);
   const handleToggleStatus = () => onToggleStatus?.(agent);
+  
+  logger.debug("AgentCard render", {
+    agentId: agent.id,
+    deactivatedAt: agent.deactivatedAt,
+    status: agent.status,
+  });
 
   return (
     <Card
@@ -144,13 +144,13 @@ export function AgentCard({
                   <Power
                     className={cn(
                       "mr-3 size-4",
-                      agent.status === "active"
+                      !agent.deactivatedAt
                         ? "text-destructive"
                         : "text-chart-2",
                     )}
                   />
                   <span className="font-medium">
-                    {agent.status === "active" ? "Deactivate" : "Activate"}
+                    {!agent.deactivatedAt ? "Deactivate" : "Activate"}
                   </span>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator className="bg-border/50" />
@@ -177,7 +177,7 @@ export function AgentCard({
           {agent.modelConfig && (
             <div className="flex items-center gap-[var(--spacing-component-sm)] text-xs text-muted-foreground">
               <div className="w-2 h-2 bg-emerald-500 rounded-full"></div>
-              <span className="font-medium">{getModelName()}</span>
+              <span className="font-medium">{modelName}</span>
             </div>
           )}
         </div>
@@ -217,21 +217,17 @@ export function AgentListItem({
   onToggleStatus,
   isLoading = false,
 }: AgentListItemProps) {
-  // Inline model parsing with error handling
-  const getModelName = () => {
-    if (!agent.modelConfig) return "Unknown Model";
-
-    try {
-      const config = JSON.parse(agent.modelConfig);
-      return config.model || "Unknown Model";
-    } catch {
-      return "Invalid Model Config";
-    }
-  };
+  const modelName = getAgentModelName(agent);
 
   // Inline action handlers
   const handleDelete = () => onDelete?.(agent);
   const handleToggleStatus = () => onToggleStatus?.(agent);
+  
+  logger.debug("AgentCard render", {
+    agentId: agent.id,
+    deactivatedAt: agent.deactivatedAt,
+    status: agent.status,
+  });
 
   return (
     <div
@@ -275,7 +271,7 @@ export function AgentListItem({
         <div className="flex items-center gap-[var(--spacing-component-sm)] text-xs text-muted-foreground">
           <span className="truncate">{agent.role || "AI Agent"}</span>
           <span>•</span>
-          <span className="truncate">{getModelName()}</span>
+          <span className="truncate">{modelName}</span>
           {agent.backstory && (
             <>
               <span>•</span>
@@ -331,7 +327,7 @@ export function AgentListItem({
 
             <DropdownMenuItem onClick={handleToggleStatus}>
               <Power className="mr-2 size-4" />
-              {agent.status === "active" ? "Deactivate" : "Activate"}
+              {!agent.deactivatedAt ? "Deactivate" : "Activate"}
             </DropdownMenuItem>
 
             <DropdownMenuSeparator />

@@ -1,7 +1,6 @@
 import { useNavigate, useSearch } from "@tanstack/react-router";
 import { Plus, Search, AlertCircle, LayoutGrid } from "lucide-react";
 import { useState } from "react";
-import { toast } from "sonner";
 
 import { CustomLink } from "@/renderer/components/custom-link";
 import { SearchFilterBar } from "@/renderer/components/search-filter-bar";
@@ -9,7 +8,7 @@ import { Button } from "@/renderer/components/ui/button";
 import { ScrollArea } from "@/renderer/components/ui/scroll-area";
 import { AgentListItem } from "@/renderer/features/agent/components/agent-card";
 import { AgentDeleteDialog } from "@/renderer/features/agent/components/agent-delete-dialog";
-import { useApiMutation } from "@/renderer/hooks/use-api-mutation.hook";
+import { useAgentActions } from "@/renderer/features/agent/hooks/use-agent-actions.hook";
 import {
   validateSearchInput,
   validateSelectFilter,
@@ -32,33 +31,9 @@ export function AgentList(props: AgentListProps) {
 
   // Local state for UI interactions only
   const [agentToDelete, setAgentToDelete] = useState<Agent | null>(null);
+  
+  const { handleToggleStatus, handleInactivate, isTogglingStatus, isInactivating } = useAgentActions();
 
-  // Inline API mutations with proper error handling
-  const deleteAgentMutation = useApiMutation(
-    (id: string) => window.api.agent.inactivate({ agentId: id }),
-    {
-      successMessage: "Agent deleted successfully",
-      errorMessage: "Failed to delete agent",
-      invalidateRouter: true,
-    },
-  );
-
-  const restoreAgentMutation = useApiMutation(
-    (id: string) => window.api.agent.activate({ agentId: id }),
-    {
-      successMessage: "Agent restored successfully",
-      errorMessage: "Failed to restore agent",
-      invalidateRouter: true,
-    },
-  );
-
-  const toggleStatusMutation = useApiMutation(
-    ({ id, status }: { id: string; status: Agent["status"] }) =>
-      window.api.agent.update({ id, status }),
-    {
-      errorMessage: "Failed to update agent status",
-    },
-  );
 
   // Inline action handlers following INLINE-FIRST principles
   function handleDelete(agent: Agent) {
@@ -67,20 +42,10 @@ export function AgentList(props: AgentListProps) {
 
   function confirmDelete() {
     if (!agentToDelete) return;
-    deleteAgentMutation.mutate(agentToDelete.id);
+    handleInactivate(agentToDelete);
     setAgentToDelete(null);
   }
 
-  function handleToggleStatus(agent: Agent) {
-    const newStatus: Agent["status"] =
-      agent.status === "active" ? "inactive" : "active";
-    toggleStatusMutation.mutate({ id: agent.id, status: newStatus });
-
-    // Inline success message with proper status text
-    toast.success(
-      `Agent ${newStatus === "active" ? "activated" : "deactivated"}`,
-    );
-  }
   // IMPROVED: Type-safe status filter with validation
   function handleStatusFilter(value: string) {
     navigate({
@@ -137,51 +102,6 @@ export function AgentList(props: AgentListProps) {
   // Simple responsive grid using Tailwind breakpoints
   const gridColumns = "grid-cols-1 xl:grid-cols-2"; // 1 column on small/medium, 2 on large screens
 
-  // Render empty state when no agents exist and no filters are applied
-  if (filteredAgents.length === 0 && !hasFilters) {
-    return (
-      <div className="flex flex-col h-full">
-        {/* Professional Header */}
-        <div className="flex items-center justify-between px-[var(--spacing-component-lg)] py-[var(--spacing-component-md)] border-b border-border/50 bg-background/95 backdrop-blur-sm">
-          <div className="flex items-center gap-[var(--spacing-component-md)]">
-            <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-primary/10">
-              <LayoutGrid className="w-5 h-5 text-primary" />
-            </div>
-            <div>
-              <h1 className="text-xl font-semibold text-foreground">
-                AI Agents
-              </h1>
-              <p className="text-sm text-muted-foreground">
-                Manage your AI agents and configurations
-              </p>
-            </div>
-          </div>
-          <CustomLink to="/user/agents/new" className="gap-2">
-            <Plus className="w-4 h-4" />
-            New Agent
-          </CustomLink>
-        </div>
-
-        {/* Empty State */}
-        <div className="flex-1 flex flex-col items-center justify-center p-12 text-center">
-          <div className="w-20 h-20 rounded-2xl bg-muted/20 flex items-center justify-center mb-6">
-            <LayoutGrid className="w-10 h-10 text-muted-foreground" />
-          </div>
-          <h3 className="text-xl font-semibold text-foreground mb-3">
-            No agents created yet
-          </h3>
-          <p className="text-base text-muted-foreground mb-8 max-w-lg leading-relaxed">
-            Create your first AI agent to start automating tasks, managing
-            conversations, and building intelligent workflows for your projects.
-          </p>
-          <CustomLink to="/user/agents/new" size="lg" className="gap-2">
-            <Plus className="w-5 h-5" />
-            Create Your First Agent
-          </CustomLink>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <>
@@ -250,6 +170,25 @@ export function AgentList(props: AgentListProps) {
           </div>
         )}
 
+        {/* Empty State when no agents match (with filters available) */}
+        {filteredAgents.length === 0 && !hasFilters && (
+          <div className="flex-1 flex flex-col items-center justify-center p-12 text-center">
+            <div className="w-16 h-16 rounded-2xl bg-muted/20 flex items-center justify-center mb-6">
+              <LayoutGrid className="w-8 h-8 text-muted-foreground" />
+            </div>
+            <h3 className="text-lg font-semibold text-foreground mb-2">
+              No active agents found
+            </h3>
+            <p className="text-base text-muted-foreground mb-6 max-w-md">
+              You might have inactive agents. Try enabling "Show Inactive" above to see all agents, or create your first agent.
+            </p>
+            <CustomLink to="/user/agents/new" size="default" className="gap-2">
+              <Plus className="w-4 h-4" />
+              Create New Agent
+            </CustomLink>
+          </div>
+        )}
+
         {/* Professional Agent List with responsive grid layout */}
         {filteredAgents.length > 0 && (
           <ScrollArea className="flex-1">
@@ -266,11 +205,7 @@ export function AgentList(props: AgentListProps) {
                     agent={{ ...agent, avatar: agent.avatar || null }}
                     onDelete={() => handleDelete(agent)}
                     onToggleStatus={() => handleToggleStatus(agent)}
-                    isLoading={
-                      deleteAgentMutation.isPending ||
-                      restoreAgentMutation.isPending ||
-                      toggleStatusMutation.isPending
-                    }
+                    isLoading={isInactivating || isTogglingStatus}
                   />
                 ))}
               </div>
@@ -285,7 +220,7 @@ export function AgentList(props: AgentListProps) {
         open={!!agentToDelete}
         onOpenChange={(open) => !open && setAgentToDelete(null)}
         onConfirm={confirmDelete}
-        isLoading={deleteAgentMutation.isPending}
+        isLoading={isInactivating}
       />
     </>
   );

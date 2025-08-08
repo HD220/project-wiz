@@ -18,7 +18,6 @@ const CreateLlmProviderInputSchema = LlmProviderSchema.pick({
   type: true,
   defaultModel: true,
   isDefault: true,
-  deactivatedAt: true,
 }).extend({
   apiKey: z.string().min(1, "API key is required"),
   baseUrl: z.string().nullable().optional(),

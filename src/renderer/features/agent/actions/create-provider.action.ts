@@ -6,6 +6,8 @@ import { LlmProviderSchema } from "@/shared/types/llm-provider";
 // Schema for creating providers - omit auto-generated fields
 const CreateProviderSchema = LlmProviderSchema.omit({
   id: true,
+  ownerId: true,
+  deactivatedAt: true,
   createdAt: true,
   updatedAt: true,
 });
@@ -22,7 +24,6 @@ export async function createProviderAction(context: any, form: any) {
 
   const createData: CreateProviderInput = {
     ...form,
-    ownerId: user.id,
     baseUrl: form.baseUrl || null,
   };
 

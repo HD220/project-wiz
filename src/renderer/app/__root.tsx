@@ -7,6 +7,9 @@ import {
 import { Titlebar } from "@/renderer/components/layout/titlebar";
 import { Toaster } from "@/renderer/components/ui/sonner";
 import type { AuthContextType } from "@/renderer/contexts/auth.context";
+import { getRendererLogger } from "@/shared/services/logger/renderer";
+
+const logger = getRendererLogger("root");
 
 interface RouterContext {
   auth: AuthContextType;
@@ -15,6 +18,8 @@ interface RouterContext {
 function RootComponent() {
   const router = useRouter();
   const isLoading = router.state.isLoading;
+  
+  logger.info("RootComponent rendered", { isLoading });
 
   return (
     <div
