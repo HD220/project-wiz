@@ -10,11 +10,12 @@ import type { User } from "@/shared/types/user";
 interface UserSidebarProps {
   conversations: DMConversation[];
   availableUsers: User[];
+  showArchived: boolean;
   className?: string;
 }
 
 export function UserSidebar(props: UserSidebarProps) {
-  const { conversations, availableUsers, className } = props;
+  const { conversations, availableUsers, showArchived, className } = props;
 
   return (
     <aside
@@ -37,6 +38,7 @@ export function UserSidebar(props: UserSidebarProps) {
         <SidebarNavigation
           conversations={conversations}
           availableUsers={availableUsers}
+          showArchived={showArchived}
         />
       </ScrollArea>
 

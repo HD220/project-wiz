@@ -1,9 +1,11 @@
 import { createFileRoute, Outlet } from "@tanstack/react-router";
+import { z } from "zod";
 
 import { UserSidebar } from "@/renderer/components/app/user-sidebar";
 
 function UserLayout() {
   const { conversations, availableUsers } = Route.useLoaderData();
+  const search = Route.useSearch();
 
   return (
     <div className="h-full w-full flex">
@@ -11,6 +13,7 @@ function UserLayout() {
         <UserSidebar
           conversations={conversations}
           availableUsers={availableUsers}
+          showArchived={search.showArchived}
         />
       </div>
       <main className="flex-1 h-full min-w-0">
@@ -20,8 +23,15 @@ function UserLayout() {
   );
 }
 
+// Search schema for URL parameters
+const UserSearchSchema = z.object({
+  showArchived: z.boolean().optional().default(false),
+});
+
 export const Route = createFileRoute("/_authenticated/user")({
-  loader: async ({ context }) => {
+  validateSearch: UserSearchSchema,
+  loaderDeps: ({ search }) => ({ search }),
+  loader: async ({ context, deps }) => {
     const { auth } = context;
 
     // Defensive check - ensure user exists
@@ -29,10 +39,10 @@ export const Route = createFileRoute("/_authenticated/user")({
       throw new Error("User not authenticated");
     }
 
-    // Load all DM conversations (including archived) - filtering handled in component
+    // Load DM conversations based on showArchived parameter - backend filtering
     const [conversationsResponse, availableUsersResponse] = await Promise.all([
       window.api.dm.list({
-        includeArchived: true, // Always load all conversations
+        includeArchived: deps.search.showArchived, // Use URL parameter for backend filtering
         includeInactive: false, // Always exclude inactive conversations
       }),
       window.api.user.list({}),

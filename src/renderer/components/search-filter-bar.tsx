@@ -11,7 +11,7 @@ import {
   SelectValue,
 } from "@/renderer/components/ui/select";
 import { Switch } from "@/renderer/components/ui/switch";
-import { useDebounce } from "@/renderer/hooks/use-debounce.hook";
+import { useDebounce } from "use-debounce";
 import { cn } from "@/renderer/lib/utils";
 
 interface FilterOption {
@@ -67,7 +67,7 @@ export function SearchFilterBar(props: SearchFilterBarProps) {
   const [localSearchValue, setLocalSearchValue] = useState(searchValue);
 
   // PERFORMANCE FIX: Debounce the search value before calling onSearchChange
-  const debouncedSearchValue = useDebounce(localSearchValue, 300);
+  const [debouncedSearchValue] = useDebounce(localSearchValue, 300);
 
   // PERFORMANCE FIX: Sync with external searchValue changes (e.g., from URL or clear filters)
   useEffect(() => {

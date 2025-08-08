@@ -170,11 +170,7 @@ Data loading follows TanStack Router patterns with helper functions:
 - Seek to understand the origin of the data and use the correct type
 - Type conversions should only be used in exceptional cases
 
-## Testing
-- **Vitest** for unit and integration tests
-- Test files alongside source with `.test.ts` extension
-- Mock IPC calls in renderer tests
-- Use `vitest-mock-extended` for complex mocks
+## Testing - NOT WRITE OR MODIFY TESTS
 
 ## Development Notes
 - Always execute `npm run type-check` normally without any additional arguments, do not use `npx tsx`

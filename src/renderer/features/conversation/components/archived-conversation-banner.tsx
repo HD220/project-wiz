@@ -3,6 +3,7 @@ import { Archive, ArchiveRestore, Calendar, Clock } from "lucide-react";
 
 import { Button } from "@/renderer/components/ui/button";
 import { useApiMutation } from "@/renderer/hooks/use-api-mutation.hook";
+import { formatArchivedDate } from "@/renderer/features/conversation/utils/date-formatting.utils";
 import { cn } from "@/renderer/lib/utils";
 
 interface ArchivedConversationBannerProps {
@@ -35,34 +36,6 @@ export function ArchivedConversationBanner(
     unarchiveMutation.mutate(conversationId);
   }
 
-  // Format archived date - enhanced EN format with relative time
-  const formatArchivedDate = () => {
-    try {
-      const archivedDate = new Date(archivedAt);
-      const now = new Date();
-      const diffInDays = Math.floor(
-        (now.getTime() - archivedDate.getTime()) / (1000 * 60 * 60 * 24),
-      );
-
-      if (diffInDays === 0) {
-        return `today at ${new Intl.DateTimeFormat("en-US", {
-          hour: "2-digit",
-          minute: "2-digit",
-        }).format(archivedDate)}`;
-      } else if (diffInDays === 1) {
-        return "yesterday";
-      } else if (diffInDays < 7) {
-        return `${diffInDays} days ago`;
-      }
-      return new Intl.DateTimeFormat("en-US", {
-        day: "2-digit",
-        month: "2-digit",
-        year: "numeric",
-      }).format(archivedDate);
-    } catch (error) {
-      return "Invalid date";
-    }
-  };
 
   return (
     <div
@@ -92,7 +65,7 @@ export function ArchivedConversationBanner(
             <div className="flex items-center gap-3 text-sm text-amber-700 dark:text-amber-300">
               <div className="flex items-center gap-1.5">
                 <Calendar className="h-3.5 w-3.5" />
-                <span className="font-medium">{formatArchivedDate()}</span>
+                <span className="font-medium">{formatArchivedDate(archivedAt)}</span>
               </div>
               <div className="w-1 h-1 bg-amber-500 rounded-full" />
               <div className="flex items-center gap-1.5">

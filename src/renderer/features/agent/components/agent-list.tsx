@@ -1,13 +1,13 @@
 import { useNavigate, useSearch } from "@tanstack/react-router";
-import { Plus, Search, AlertCircle, LayoutGrid } from "lucide-react";
 import { useState } from "react";
+import { Plus, Search, AlertCircle, LayoutGrid } from "lucide-react";
 
 import { CustomLink } from "@/renderer/components/custom-link";
 import { SearchFilterBar } from "@/renderer/components/search-filter-bar";
 import { Button } from "@/renderer/components/ui/button";
 import { ScrollArea } from "@/renderer/components/ui/scroll-area";
 import { AgentListItem } from "@/renderer/features/agent/components/agent-card";
-import { AgentDeleteDialog } from "@/renderer/features/agent/components/agent-delete-dialog";
+import { ConfirmationDialog } from "@/renderer/components/ui/confirmation-dialog";
 import { useAgentActions } from "@/renderer/features/agent/hooks/use-agent-actions.hook";
 import {
   validateSearchInput,
@@ -30,21 +30,9 @@ export function AgentList(props: AgentListProps) {
   const navigate = useNavigate();
 
   // Local state for UI interactions only
-  const [agentToDelete, setAgentToDelete] = useState<Agent | null>(null);
-  
-  const { handleToggleStatus, handleInactivate, isTogglingStatus, isInactivating } = useAgentActions();
-
-
-  // Inline action handlers following INLINE-FIRST principles
-  function handleDelete(agent: Agent) {
-    setAgentToDelete(agent);
-  }
-
-  function confirmDelete() {
-    if (!agentToDelete) return;
-    handleInactivate(agentToDelete);
-    setAgentToDelete(null);
-  }
+  const { handleToggleStatus, isTogglingStatus } = useAgentActions();
+  const [agentToToggle, setAgentToToggle] = useState<Agent | null>(null);
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
 
   // IMPROVED: Type-safe status filter with validation
   function handleStatusFilter(value: string) {
@@ -83,6 +71,29 @@ export function AgentList(props: AgentListProps) {
       to: "/user/agents",
       search: {},
     });
+  }
+
+  function handleShowConfirmDialog(agent: Agent) {
+    // Only show confirmation for deactivation, not activation
+    if (!agent.deactivatedAt) {
+      setAgentToToggle(agent);
+      setShowConfirmDialog(true);
+    } else {
+      // Direct activation without confirmation
+      handleToggleStatus(agent);
+    }
+  }
+
+  function handleCloseConfirmDialog() {
+    setShowConfirmDialog(false);
+    setAgentToToggle(null);
+  }
+
+  async function handleConfirmToggleStatus() {
+    if (agentToToggle) {
+      await handleToggleStatus(agentToToggle);
+      handleCloseConfirmDialog();
+    }
   }
 
   // Inline filter checking and agent categorization following INLINE-FIRST principles
@@ -203,9 +214,8 @@ export function AgentList(props: AgentListProps) {
                   <AgentListItem
                     key={agent.id}
                     agent={{ ...agent, avatar: agent.avatar || null }}
-                    onDelete={() => handleDelete(agent)}
-                    onToggleStatus={() => handleToggleStatus(agent)}
-                    isLoading={isInactivating || isTogglingStatus}
+                    onDelete={() => handleShowConfirmDialog(agent)}
+                    isLoading={isTogglingStatus}
                   />
                 ))}
               </div>
@@ -214,13 +224,15 @@ export function AgentList(props: AgentListProps) {
         )}
       </div>
 
-      {/* Delete Confirmation Dialog */}
-      <AgentDeleteDialog
-        agent={agentToDelete}
-        open={!!agentToDelete}
-        onOpenChange={(open) => !open && setAgentToDelete(null)}
-        onConfirm={confirmDelete}
-        isLoading={isInactivating}
+      <ConfirmationDialog
+        open={showConfirmDialog}
+        onOpenChange={handleCloseConfirmDialog}
+        onConfirm={handleConfirmToggleStatus}
+        title="Deactivate Agent"
+        description={`Are you sure you want to deactivate "${agentToToggle?.name}"? This will make the agent unavailable for new conversations.`}
+        confirmText="Deactivate"
+        variant="destructive"
+        isLoading={isTogglingStatus}
       />
     </>
   );

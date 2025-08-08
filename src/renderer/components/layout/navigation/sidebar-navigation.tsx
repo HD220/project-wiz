@@ -11,10 +11,11 @@ import type { User } from "@/shared/types/user";
 interface SidebarNavigationProps {
   conversations: DMConversation[];
   availableUsers: User[];
+  showArchived: boolean;
 }
 
 export function SidebarNavigation(props: SidebarNavigationProps) {
-  const { conversations, availableUsers } = props;
+  const { conversations, availableUsers, showArchived } = props;
 
   return (
     <ScrollArea className="flex-1">
@@ -43,6 +44,7 @@ export function SidebarNavigation(props: SidebarNavigationProps) {
           <ConversationList
             conversations={conversations}
             availableUsers={availableUsers}
+            showArchived={showArchived}
           />
         </div>
       </nav>

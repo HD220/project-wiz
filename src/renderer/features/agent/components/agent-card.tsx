@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { MoreHorizontal, Pencil, Power, Trash2 } from "lucide-react";
+import { MoreHorizontal, Pencil, Power } from "lucide-react";
 
 import { Badge } from "@/renderer/components/ui/badge";
 import { Button } from "@/renderer/components/ui/button";
@@ -37,14 +37,12 @@ const logger = getRendererLogger("agent-card");
 interface AgentCardProps {
   agent: Agent;
   onDelete?: (agent: Agent) => void;
-  onToggleStatus?: (agent: Agent) => void;
   className?: string;
 }
 
 export function AgentCard({
   agent,
   onDelete,
-  onToggleStatus,
   className,
 }: AgentCardProps) {
   const modelName = getAgentModelName(agent);
@@ -61,7 +59,6 @@ export function AgentCard({
 
   // Inline action handlers
   const handleDelete = () => onDelete?.(agent);
-  const handleToggleStatus = () => onToggleStatus?.(agent);
   
   logger.debug("AgentCard render", {
     agentId: agent.id,
@@ -137,9 +134,15 @@ export function AgentCard({
                     <span className="font-medium">Edit Agent</span>
                   </Link>
                 </DropdownMenuItem>
+                <DropdownMenuSeparator className="bg-border/50" />
                 <DropdownMenuItem
-                  onClick={handleToggleStatus}
-                  className="focus:bg-accent/50 transition-colors"
+                  onClick={handleDelete}
+                  className={cn(
+                    "focus:bg-accent/50 transition-colors font-medium",
+                    !agent.deactivatedAt
+                      ? "text-destructive focus:text-destructive focus:bg-destructive/10"
+                      : "text-chart-2 focus:text-chart-2 focus:bg-chart-2/10"
+                  )}
                 >
                   <Power
                     className={cn(
@@ -149,17 +152,9 @@ export function AgentCard({
                         : "text-chart-2",
                     )}
                   />
-                  <span className="font-medium">
-                    {!agent.deactivatedAt ? "Deactivate" : "Activate"}
+                  <span>
+                    {!agent.deactivatedAt ? "Deactivate Agent" : "Activate Agent"}
                   </span>
-                </DropdownMenuItem>
-                <DropdownMenuSeparator className="bg-border/50" />
-                <DropdownMenuItem
-                  onClick={handleDelete}
-                  className="text-destructive focus:text-destructive focus:bg-destructive/10 transition-colors"
-                >
-                  <Trash2 className="mr-3 size-4" />
-                  <span className="font-medium">Delete Agent</span>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -207,21 +202,18 @@ export function AgentCard({
 interface AgentListItemProps {
   agent: Agent;
   onDelete?: (agent: Agent) => void;
-  onToggleStatus?: (agent: Agent) => void;
   isLoading?: boolean;
 }
 
 export function AgentListItem({
   agent,
   onDelete,
-  onToggleStatus,
   isLoading = false,
 }: AgentListItemProps) {
   const modelName = getAgentModelName(agent);
 
   // Inline action handlers
   const handleDelete = () => onDelete?.(agent);
-  const handleToggleStatus = () => onToggleStatus?.(agent);
   
   logger.debug("AgentCard render", {
     agentId: agent.id,
@@ -325,19 +317,18 @@ export function AgentListItem({
               </Link>
             </DropdownMenuItem>
 
-            <DropdownMenuItem onClick={handleToggleStatus}>
-              <Power className="mr-2 size-4" />
-              {!agent.deactivatedAt ? "Deactivate" : "Activate"}
-            </DropdownMenuItem>
-
             <DropdownMenuSeparator />
 
             <DropdownMenuItem
               onClick={handleDelete}
-              className="text-destructive focus:text-destructive"
+              className={cn(
+                !agent.deactivatedAt
+                  ? "text-destructive focus:text-destructive"
+                  : "text-chart-2 focus:text-chart-2"
+              )}
             >
-              <Trash2 className="mr-2 size-4" />
-              Delete
+              <Power className="mr-2 size-4" />
+              {!agent.deactivatedAt ? "Deactivate" : "Activate"}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

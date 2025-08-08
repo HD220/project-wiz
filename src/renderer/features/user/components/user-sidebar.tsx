@@ -87,6 +87,7 @@ export function UserSidebar({
           <ConversationList
             conversations={conversations}
             availableUsers={availableUsers}
+            showArchived={showArchived}
           />
         </SidebarGroup>
       </SidebarContent>

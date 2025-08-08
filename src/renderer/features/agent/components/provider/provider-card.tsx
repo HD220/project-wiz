@@ -2,23 +2,14 @@ import { Link } from "@tanstack/react-router";
 import {
   MoreHorizontal,
   Edit2,
-  Trash2,
+  Power,
   Star,
   StarOff,
   ExternalLink,
 } from "lucide-react";
 import { useState } from "react";
 
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/renderer/components/ui/alert-dialog";
+import { ConfirmationDialog } from "@/renderer/components/ui/confirmation-dialog";
 import { Badge } from "@/renderer/components/ui/badge";
 import { Button } from "@/renderer/components/ui/button";
 import {
@@ -50,7 +41,7 @@ interface ProviderCardProps {
 
 export function ProviderCard(props: ProviderCardProps) {
   const { provider } = props;
-  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
 
   // Delete provider mutation with inline messages
   const deleteProviderMutation = useApiMutation(
@@ -74,11 +65,23 @@ export function ProviderCard(props: ProviderCardProps) {
   const isLoading =
     deleteProviderMutation.isPending || setDefaultProviderMutation.isPending;
 
-  function handleDelete() {
+  function handleToggleStatus() {
+    // Only show confirmation for deactivation, not activation
+    if (!provider.deactivatedAt) {
+      setShowConfirmDialog(true);
+    } else {
+      // Direct activation without confirmation
+      if (provider.id) {
+        deleteProviderMutation.mutate(provider.id);
+      }
+    }
+  }
+
+  function handleConfirmDeactivate() {
     if (provider.id) {
       deleteProviderMutation.mutate(provider.id);
     }
-    setShowDeleteDialog(false);
+    setShowConfirmDialog(false);
   }
 
   function handleSetDefault() {
@@ -189,38 +192,32 @@ export function ProviderCard(props: ProviderCardProps) {
               <DropdownMenuSeparator />
 
               <DropdownMenuItem
-                onClick={() => setShowDeleteDialog(true)}
-                className="text-destructive focus:text-destructive"
+                onClick={handleToggleStatus}
+                className={
+                  !provider.deactivatedAt
+                    ? "text-destructive focus:text-destructive"
+                    : "text-chart-2 focus:text-chart-2"
+                }
               >
-                <Trash2 className="mr-2 size-4" />
-                Delete
+                <Power className="mr-2 size-4" />
+                {!provider.deactivatedAt ? "Deactivate" : "Activate"}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
       </div>
 
-      {/* Delete Confirmation Dialog */}
-      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Delete Provider</AlertDialogTitle>
-            <AlertDialogDescription>
-              Are you sure you want to delete &quot;{provider.name}&quot;? This
-              action cannot be undone.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleDelete}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
-              Delete
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      {/* Deactivate Confirmation Dialog */}
+      <ConfirmationDialog
+        open={showConfirmDialog}
+        onOpenChange={setShowConfirmDialog}
+        onConfirm={handleConfirmDeactivate}
+        title="Deactivate Provider"
+        description={`Are you sure you want to deactivate "${provider.name}"? This will prevent it from being used by agents.`}
+        confirmText="Deactivate"
+        variant="destructive"
+        isLoading={isLoading}
+      />
     </>
   );
 }
