@@ -58,6 +58,7 @@ When user requests helpers, utilities, or wrappers:
 
 ### Quick Reference
 - **Detailed workflows**: @.agent-os/instructions/critical-thinking.md
+- **Task management**: @.agent-os/instructions/ai-task-management.md
 - **Code standards**: @.agent-os/standards/code-style.md  
 - **Best practices**: @.agent-os/standards/best-practices.md
 

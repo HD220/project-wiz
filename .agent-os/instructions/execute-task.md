@@ -68,11 +68,20 @@ Search and extract relevant sections from technical-spec.md to understand the te
 
 </step>
 
-<step number="3" subagent="context-fetcher" name="critical_workflow_check">
+<step number="3" subagent="context-fetcher" name="task_management_and_critical_workflow_check">
 
-### Step 3: Critical Workflow Check
+### Step 3: Task Management and Critical Workflow Check
 
-Use the context-fetcher subagent to retrieve critical thinking rules from @.agent-os/instructions/critical-thinking.md to ensure proper evaluation before implementation.
+Use the context-fetcher subagent to retrieve both systematic task management principles and critical thinking rules to ensure proper analysis and implementation approach.
+
+<task_management_principles>
+  <systematic_approach>
+    - Start from the beginning: trace user interaction flow
+    - Follow complete code paths from input to output
+    - Document all findings and context
+    - Divide complex tasks into manageable components
+  </systematic_approach>
+</task_management_principles>
 
 <critical_thinking>
   <mandatory_checks>
@@ -85,7 +94,9 @@ Use the context-fetcher subagent to retrieve critical thinking rules from @.agen
 
 <instructions>
   ACTION: Use context-fetcher subagent
+  REQUEST: "Get systematic task management approach from ai-task-management.md"
   REQUEST: "Get critical thinking workflow from critical-thinking.md"
+  APPLY: Use systematic methodology for complex task analysis
   APPLY: Question every abstraction before implementation
 </instructions>
 
@@ -149,11 +160,11 @@ Use the context-fetcher subagent to retrieve relevant code style rules from @.ag
 
 </step>
 
-<step number="5" name="task_execution">
+<step number="6" name="task_execution">
 
-### Step 5: Task and Sub-task Execution
+### Step 6: Task and Sub-task Execution
 
-Execute the parent task and all sub-tasks in order following development best practices.
+Execute the parent task and all sub-tasks in order following systematic task management principles and development best practices.
 
 <typical_task_structure>
   <first_subtask>Setup [feature] structure</first_subtask>
@@ -162,8 +173,18 @@ Execute the parent task and all sub-tasks in order following development best pr
 </typical_task_structure>
 
 <execution_order>
+  <systematic_analysis_first>
+    BEFORE implementing ANY sub-task:
+      - Discover modification points: trace from user interaction to code changes
+      - Map complete flow: input → processing → output
+      - Document context and dependencies
+      - Apply two-question methodology: "Do I have confidence?" and "Can I estimate time?"
+      - If NO to either question, divide the sub-task further
+  </systematic_analysis_first>
+
   <subtask_1_setup>
     IF sub-task 1 is "Setup [feature] structure":
+      - Apply systematic analysis to understand requirements
       - Create necessary files and directories
       - Define interfaces and types
       - Set up basic structure
@@ -172,16 +193,18 @@ Execute the parent task and all sub-tasks in order following development best pr
 
   <middle_subtasks_implementation>
     FOR each implementation sub-task (2 through n-1):
-      - Implement the specific functionality
+      - Apply critical thinking: inline first, avoid unnecessary abstractions
+      - Implement the specific functionality following traced code flow
       - Ensure TypeScript compliance
       - Follow established patterns and conventions
-      - Refactor for code quality
+      - Refactor for code quality (but avoid over-engineering)
       - Mark sub-task complete
   </middle_subtasks_implementation>
 
   <final_subtask_verification>
     IF final sub-task is "Verify implementation complete":
       - Review implementation against requirements
+      - Verify all modification points were addressed
       - Run TypeScript type-check
       - Ensure all functionality works as expected
       - Mark final sub-task complete
@@ -202,18 +225,20 @@ Execute the parent task and all sub-tasks in order following development best pr
 </implementation_management>
 
 <instructions>
-  ACTION: Execute sub-tasks in their defined order
+  ACTION: Execute sub-tasks in their defined order with systematic methodology
+  ANALYZE: Apply systematic task management before each sub-task
   RECOGNIZE: First sub-task typically sets up structure
-  IMPLEMENT: Middle sub-tasks build functionality
-  VERIFY: Final sub-task ensures implementation complete
+  IMPLEMENT: Middle sub-tasks build functionality using critical thinking principles
+  VERIFY: Final sub-task ensures implementation complete and all modification points addressed
   UPDATE: Mark each sub-task complete as finished
+  ORGANIZE: Document findings and maintain clear task progression
 </instructions>
 
 </step>
 
-<step number="6" name="type_check_verification">
+<step number="7" name="type_check_verification">
 
-### Step 6: TypeScript Type Check
+### Step 7: TypeScript Type Check
 
 Run npm run type-check to verify TypeScript compliance for the implemented task and fix any type errors.
 
@@ -237,9 +262,9 @@ Run npm run type-check to verify TypeScript compliance for the implemented task 
 
 </step>
 
-<step number="7" name="task_status_updates">
+<step number="8" name="task_status_updates">
 
-### Step 7: Task Status Updates
+### Step 8: Task Status Updates
 
 Update the tasks.md file immediately after completing each task to track progress.
 
