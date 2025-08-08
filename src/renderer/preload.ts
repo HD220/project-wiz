@@ -82,10 +82,9 @@ contextBridge.exposeInMainWorld("api", {
   dm: {
     create: (input) => ipcRenderer.invoke("invoke:dm:create", input),
     list: (options) => ipcRenderer.invoke("invoke:dm:list", options),
-    get: (dmId) => ipcRenderer.invoke("invoke:dm:get", { dmId }),
+    get: (input) => ipcRenderer.invoke("invoke:dm:get", input),
     archive: (input) => ipcRenderer.invoke("invoke:dm:archive", input),
-    unarchive: (channelId) =>
-      ipcRenderer.invoke("invoke:dm:unarchive", { dmId: channelId }),
+    unarchive: (input) => ipcRenderer.invoke("invoke:dm:unarchive", input),
     sendMessage: (input) => ipcRenderer.invoke("invoke:dm:send-message", input),
     listMessages: (input) =>
       ipcRenderer.invoke("invoke:dm:list-messages", input),

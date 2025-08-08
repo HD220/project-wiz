@@ -1,20 +1,12 @@
 import { createFileRoute, Outlet } from "@tanstack/react-router";
-import { z } from "zod";
 
 import { UserSidebar } from "@/renderer/components/app/user-sidebar";
 
 function UserLayout() {
-  const { conversations, availableUsers } = Route.useLoaderData();
-  const search = Route.useSearch();
-
   return (
     <div className="h-full w-full flex">
       <div className="w-60 h-full flex-shrink-0 min-w-0 overflow-hidden">
-        <UserSidebar
-          conversations={conversations}
-          availableUsers={availableUsers}
-          showArchived={search.showArchived}
-        />
+        <UserSidebar />
       </div>
       <main className="flex-1 h-full min-w-0">
         <Outlet />
@@ -23,79 +15,6 @@ function UserLayout() {
   );
 }
 
-// Search schema for URL parameters
-const UserSearchSchema = z.object({
-  showArchived: z.boolean().optional().default(false),
-});
-
 export const Route = createFileRoute("/_authenticated/user")({
-  validateSearch: UserSearchSchema,
-  loaderDeps: ({ search }) => ({ search }),
-  loader: async ({ context, deps }) => {
-    const { auth } = context;
-
-    // Defensive check - ensure user exists
-    if (!auth.user?.id) {
-      throw new Error("User not authenticated");
-    }
-
-    // Load DM conversations based on showArchived parameter - backend filtering
-    const [conversationsResponse, availableUsersResponse] = await Promise.all([
-      window.api.dm.list({
-        includeArchived: deps.search.showArchived, // Use URL parameter for backend filtering
-        includeInactive: false, // Always exclude inactive conversations
-      }),
-      window.api.user.list({}),
-    ]);
-
-    if (!conversationsResponse.success) {
-      throw new Error(
-        conversationsResponse.error || "Failed to load conversations",
-      );
-    }
-
-    if (!availableUsersResponse.success) {
-      throw new Error(
-        availableUsersResponse.error || "Failed to load available users",
-      );
-    }
-
-    const dmConversations = conversationsResponse.data || [];
-    const availableUsers = availableUsersResponse.data || [];
-
-    // Transform DM conversations to universal format
-    const conversations = dmConversations.map((dm) => ({
-      ...dm,
-      type: "dm" as const,
-      title: dm.name,
-      isArchived: dm.archivedAt !== null,
-      participants: dm.participants?.map((p) => ({
-        id: p.id,
-        conversationId: p.dmConversationId,
-        userId: p.participantId,
-        joinedAt: p.createdAt,
-      })),
-      lastMessage: dm.lastMessage
-        ? {
-            id: dm.lastMessage.id,
-            isActive: true,
-            deactivatedAt: null,
-            createdAt: dm.lastMessage.createdAt,
-            updatedAt: dm.lastMessage.updatedAt || dm.lastMessage.createdAt,
-            conversationId: dm.id,
-            content: dm.lastMessage.content,
-            authorId: dm.lastMessage.authorId,
-            senderId: dm.lastMessage.authorId,
-            senderType: "user" as const,
-            metadata: null,
-          }
-        : undefined,
-    }));
-
-    return {
-      conversations,
-      availableUsers,
-    };
-  },
   component: UserLayout,
 });

@@ -4,18 +4,11 @@ import { SidebarNavigation } from "@/renderer/components/layout/navigation/sideb
 import { ScrollArea } from "@/renderer/components/ui/scroll-area";
 import { cn } from "@/renderer/lib/utils";
 
-import type { DMConversation } from "@/shared/types/dm-conversation";
-import type { User } from "@/shared/types/user";
-
 interface UserSidebarProps {
-  conversations: DMConversation[];
-  availableUsers: User[];
-  showArchived: boolean;
   className?: string;
 }
 
-export function UserSidebar(props: UserSidebarProps) {
-  const { conversations, availableUsers, showArchived, className } = props;
+export function UserSidebar({ className }: UserSidebarProps) {
 
   return (
     <aside
@@ -35,11 +28,7 @@ export function UserSidebar(props: UserSidebarProps) {
       </div>
 
       <ScrollArea className="flex-1 overflow-hidden" type="auto">
-        <SidebarNavigation
-          conversations={conversations}
-          availableUsers={availableUsers}
-          showArchived={showArchived}
-        />
+        <SidebarNavigation />
       </ScrollArea>
 
       <div

@@ -1,5 +1,4 @@
-import { useQueryClient } from "@tanstack/react-query";
-import { useNavigate, useLocation, Link } from "@tanstack/react-router";
+import { Link } from "@tanstack/react-router";
 import { MessageCircle, Archive, Plus, MoreHorizontal } from "lucide-react";
 import { useState } from "react";
 
@@ -17,7 +16,8 @@ import {
   getOtherParticipants,
   createConversationAvatar,
 } from "@/renderer/features/conversation/utils/conversation-avatar.utils";
-import { useApiMutation } from "@/renderer/hooks/use-api-mutation.hook";
+import { useArchiveConversation } from "@/renderer/features/conversation/hooks/use-archive-conversation.hook";
+import { useUnarchiveConversation } from "@/renderer/features/conversation/hooks/use-unarchive-conversation.hook";
 import { cn } from "@/renderer/lib/utils";
 
 import type { DMConversation } from "@/shared/types/dm-conversation";
@@ -37,35 +37,13 @@ interface ConversationListProps {
   conversations: DMConversationWithLastMessage[];
   availableUsers: User[];
   showArchived: boolean;
+  onToggleShowArchived: (checked: boolean) => void;
+  onCreateConversation: () => void;
 }
 
 export function ConversationList(props: ConversationListProps) {
-  const { conversations, availableUsers, showArchived } = props;
+  const { conversations, availableUsers, showArchived, onToggleShowArchived, onCreateConversation } = props;
   const { user: currentUser } = useAuth();
-  const navigate = useNavigate();
-  const location = useLocation();
-
-  // Handle archive toggle with URL navigation - backend filtering
-  const handleToggleShowArchived = (checked: boolean) => {
-    // Navigate away from archived conversation when turning off archived mode
-    if (!checked && location.pathname.includes("/dm/")) {
-      const currentConversationId = location.pathname.split("/dm/")[1];
-      const currentConversation = conversations.find(
-        (conv) => conv.id === currentConversationId,
-      );
-
-      if (currentConversation?.archivedAt) {
-        navigate({ to: "/user", search: { showArchived: false } });
-        return;
-      }
-    }
-
-    // Update URL to trigger backend filtering
-    navigate({ 
-      to: "/user", 
-      search: { showArchived: checked } 
-    });
-  };
 
   // No more filtering - conversations are already filtered by backend
   const displayConversations = conversations;
@@ -81,9 +59,9 @@ export function ConversationList(props: ConversationListProps) {
   return (
     <div className="flex flex-col h-full min-w-0 w-full overflow-hidden">
       <ConversationListHeader
-        onCreateConversation={() => navigate({ to: "/user/dm/new" })}
+        onCreateConversation={onCreateConversation}
         showArchived={showArchived}
-        onToggleShowArchived={handleToggleShowArchived}
+        onToggleShowArchived={onToggleShowArchived}
       />
 
       {displayConversations.length === 0 ? (
@@ -201,21 +179,13 @@ interface ConversationListItemProps {
 
 function ConversationListItem(props: ConversationListItemProps) {
   const { conversation } = props;
-  const queryClient = useQueryClient();
   const [showArchiveDialog, setShowArchiveDialog] = useState(false);
+  const [showUnarchiveDialog, setShowUnarchiveDialog] = useState(false);
   const { user } = useAuth();
 
-  // Archive conversation mutation
-  const archiveMutation = useApiMutation(
-    () => window.api.dm.archive({ dmId: conversation.id }),
-    {
-      successMessage: "Conversation archived",
-      errorMessage: "Failed to archive conversation",
-      onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: ["conversations"] });
-      },
-    },
-  );
+  // Use specific hooks for each action
+  const archiveMutation = useArchiveConversation();
+  const unarchiveMutation = useUnarchiveConversation();
 
   // Inline logic for display name - simplified
   const conversationName = conversation.name || "Unnamed Conversation";
@@ -251,14 +221,18 @@ function ConversationListItem(props: ConversationListItemProps) {
       })()
     : "";
 
-  // Archive handlers - inline logic
+  // Action handlers - using specific mutations
   const handleArchive = () => setShowArchiveDialog(true);
+  const handleUnarchive = () => setShowUnarchiveDialog(true);
+  
   const handleConfirmArchive = () => {
     archiveMutation.mutate(conversation.id);
     setShowArchiveDialog(false);
   };
-  const handleUnarchive = () => {
-    // TODO: Implement unarchive functionality when backend supports it
+  
+  const handleConfirmUnarchive = () => {
+    unarchiveMutation.mutate(conversation.id);
+    setShowUnarchiveDialog(false);
   };
 
   // Unread messages logic - placeholder for future implementation
@@ -385,6 +359,18 @@ function ConversationListItem(props: ConversationListItemProps) {
         confirmText="Archive"
         variant="warning"
         isLoading={archiveMutation.isPending}
+      />
+
+      {/* Unarchive confirmation dialog */}
+      <ConfirmationDialog
+        open={showUnarchiveDialog}
+        onOpenChange={setShowUnarchiveDialog}
+        onConfirm={handleConfirmUnarchive}
+        title="Unarchive Conversation"
+        description={`Are you sure you want to unarchive "${conversationName}"? This will move it back to your active conversations.`}
+        confirmText="Unarchive"
+        variant="default"
+        isLoading={unarchiveMutation.isPending}
       />
     </div>
   );

@@ -60,14 +60,15 @@ async function generateDMTitle(
 }
 
 /**
- * Find DM conversation by ID with ownership validation
+ * Find DM conversation by ID with ownership validation and participants
  */
 export async function findDMConversation(
   id: string,
   ownerId: string,
-): Promise<SelectDMConversation | null> {
+): Promise<(SelectDMConversation & { participants: SelectDMParticipant[] }) | null> {
   const db = getDatabase();
 
+  // Get conversation
   const [conversation] = await db
     .select()
     .from(dmConversationsTable)
@@ -79,7 +80,25 @@ export async function findDMConversation(
     )
     .limit(1);
 
-  return conversation || null;
+  if (!conversation) {
+    return null;
+  }
+
+  // Get participants for this conversation
+  const participants = await db
+    .select()
+    .from(dmParticipantsTable)
+    .where(
+      and(
+        eq(dmParticipantsTable.dmConversationId, id),
+        eq(dmParticipantsTable.ownerId, ownerId),
+      ),
+    );
+
+  return {
+    ...conversation,
+    participants,
+  };
 }
 
 /**

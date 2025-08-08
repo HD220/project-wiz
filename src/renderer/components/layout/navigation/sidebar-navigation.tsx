@@ -3,19 +3,9 @@ import { Hash, Bot } from "lucide-react";
 import { NavigationItem } from "@/renderer/components/layout/navigation/navigation-item";
 import { ScrollArea } from "@/renderer/components/ui/scroll-area";
 import { Separator } from "@/renderer/components/ui/separator";
-import { ConversationList } from "@/renderer/features/conversation/components/conversation-list";
+import { ConversationSection } from "@/renderer/features/conversation";
 
-import type { DMConversation } from "@/shared/types/dm-conversation";
-import type { User } from "@/shared/types/user";
-
-interface SidebarNavigationProps {
-  conversations: DMConversation[];
-  availableUsers: User[];
-  showArchived: boolean;
-}
-
-export function SidebarNavigation(props: SidebarNavigationProps) {
-  const { conversations, availableUsers, showArchived } = props;
+export function SidebarNavigation() {
 
   return (
     <ScrollArea className="flex-1">
@@ -35,18 +25,10 @@ export function SidebarNavigation(props: SidebarNavigationProps) {
 
         <Separator className="my-[var(--spacing-component-md)] bg-sidebar-border/40" />
 
-        {/* Conversations List with enhanced container */}
-        <div
-          role="region"
-          aria-label="Conversations"
+        {/* Conversations Section - self-contained */}
+        <ConversationSection 
           className="min-h-0 w-full overflow-hidden"
-        >
-          <ConversationList
-            conversations={conversations}
-            availableUsers={availableUsers}
-            showArchived={showArchived}
-          />
-        </div>
+        />
       </nav>
     </ScrollArea>
   );

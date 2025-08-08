@@ -1,3 +1,4 @@
+import { useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { Search, Check, MessageSquare } from "lucide-react";
 import { AlertCircle } from "lucide-react";
@@ -30,6 +31,7 @@ export function CreateConversationPage({
   currentUser,
 }: CreateConversationPageProps) {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const {
     searchTerm,
     filteredUsers,
@@ -47,8 +49,10 @@ export function CreateConversationPage({
     {
       successMessage: "Conversation created successfully",
       errorMessage: "Failed to create conversation",
-      invalidateRouter: true,
       onSuccess: (response) => {
+        // Invalidate conversations query to refresh the list
+        queryClient.invalidateQueries({ queryKey: ["conversations"] });
+        
         // Response will have the conversation data
         if (response && typeof response === "object" && "id" in response) {
           handleSuccess(response.id as string);

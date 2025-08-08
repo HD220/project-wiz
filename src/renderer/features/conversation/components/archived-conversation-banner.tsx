@@ -1,8 +1,7 @@
-import { useRouter } from "@tanstack/react-router";
 import { Archive, ArchiveRestore, Calendar, Clock } from "lucide-react";
 
 import { Button } from "@/renderer/components/ui/button";
-import { useApiMutation } from "@/renderer/hooks/use-api-mutation.hook";
+import { useUnarchiveConversation } from "@/renderer/features/conversation/hooks/use-unarchive-conversation.hook";
 import { formatArchivedDate } from "@/renderer/features/conversation/utils/date-formatting.utils";
 import { cn } from "@/renderer/lib/utils";
 
@@ -17,20 +16,9 @@ export function ArchivedConversationBanner(
   props: ArchivedConversationBannerProps,
 ) {
   const { conversationId, archivedAt, className } = props;
-  const router = useRouter();
-
-  // Unarchive mutation with automatic error handling
-  const unarchiveMutation = useApiMutation(
-    (conversationId: string) =>
-      window.api.dm.unarchive({ dmId: conversationId }),
-    {
-      successMessage: "Conversation unarchived successfully",
-      onSuccess: () => {
-        // Invalidate routes to refresh conversation lists
-        router.invalidate();
-      },
-    },
-  );
+  
+  // Use specific hook for unarchive action
+  const unarchiveMutation = useUnarchiveConversation();
 
   function handleUnarchive() {
     unarchiveMutation.mutate(conversationId);

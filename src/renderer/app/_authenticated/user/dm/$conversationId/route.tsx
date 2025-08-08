@@ -488,13 +488,12 @@ export const Route = createFileRoute("/_authenticated/user/dm/$conversationId")(
     loader: async ({ params }) => {
       const { conversationId } = params;
 
-      // Load data sequentially to handle dependencies properly
-      const conversations = await loadApiData(
-        () => window.api.dm.list({}),
-        "Failed to load DM conversations",
+      // Load specific conversation directly instead of loading all conversations
+      const dmConversation = await loadApiData(
+        () => window.api.dm.get({ dmId: conversationId }),
+        "Failed to load DM conversation",
       );
 
-      const dmConversation = conversations.find((c) => c.id === conversationId);
       if (!dmConversation) {
         throw new Error("DM conversation not found");
       }
@@ -522,7 +521,7 @@ export const Route = createFileRoute("/_authenticated/user/dm/$conversationId")(
         ),
       ]);
 
-      // Get participants for this conversation from availableUsers
+      // Get participant user details from availableUsers using the participants from dm.get()
       const participants = availableUsers.filter((user) =>
         dmConversation.participants?.some((p) => p.participantId === user.id),
       );
