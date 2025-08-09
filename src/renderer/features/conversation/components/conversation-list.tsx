@@ -266,41 +266,41 @@ function ConversationListItem(props: ConversationListItemProps) {
           )}
         </div>
 
-        {/* Content - proper flexbox structure */}
-        <div className="flex-1 min-w-0">
-          {/* Name and time row */}
-          <div className="flex items-center">
-            <span
+        {/* Content - responsive grid layout */}
+        <div className="flex-1 min-w-0 overflow-hidden">
+          {/* Name and time row - CSS Grid for optimal space distribution */}
+          <div className="grid grid-cols-[1fr_auto] gap-2 items-center min-w-0">
+            <h3
               className={cn(
-                "text-sm font-medium truncate flex-1 min-w-0",
+                "text-sm font-medium truncate min-w-0",
                 conversation.archivedAt && "line-through text-muted-foreground",
                 hasUnreadMessages
                   ? "text-sidebar-foreground"
                   : "text-sidebar-foreground/80",
               )}
               title={conversationName}
-              style={{ maxWidth: "120px" }}
             >
               {conversationName}
-            </span>
+            </h3>
             {formattedTime && (
-              <span
+              <time
                 className={cn(
-                  "text-xs whitespace-nowrap flex-shrink-0 ml-2",
+                  "text-xs whitespace-nowrap",
                   hasUnreadMessages
                     ? "text-primary font-medium"
                     : "text-muted-foreground/80",
                 )}
+                dateTime={conversation.lastMessage?.createdAt}
               >
                 {formattedTime}
-              </span>
+              </time>
             )}
           </div>
 
           {/* Message preview */}
-          <div className="text-xs text-muted-foreground/70 leading-tight truncate">
+          <p className="text-xs text-muted-foreground/70 leading-tight truncate min-w-0">
             {messagePreview}
-          </div>
+          </p>
         </div>
 
         {/* Unread indicator and actions */}
