@@ -21,7 +21,7 @@ export function ConversationSection({ className }: ConversationSectionProps) {
   
   // Filter conversations on frontend based on showArchived state
   const conversations = allConversations.filter(conversation => 
-    showArchived ? true : !conversation.archivedAt
+    showArchived ? !!conversation.archivedAt : !conversation.archivedAt
   );
 
   const handleToggleArchived = (checked: boolean) => {

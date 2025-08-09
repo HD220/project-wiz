@@ -290,7 +290,7 @@ function ConversationListItem(props: ConversationListItemProps) {
                     ? "text-primary font-medium"
                     : "text-muted-foreground/80",
                 )}
-                dateTime={conversation.lastMessage?.createdAt}
+                dateTime={conversation.lastMessage?.createdAt?.toString()}
               >
                 {formattedTime}
               </time>
