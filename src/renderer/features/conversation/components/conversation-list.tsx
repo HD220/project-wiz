@@ -278,6 +278,8 @@ function ConversationListItem(props: ConversationListItemProps) {
                   ? "text-sidebar-foreground"
                   : "text-sidebar-foreground/80",
               )}
+              title={conversationName}
+              style={{ maxWidth: "120px" }}
             >
               {conversationName}
             </span>
