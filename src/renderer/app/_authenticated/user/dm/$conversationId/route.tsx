@@ -9,6 +9,10 @@ import {
   ChatInput,
 } from "@/renderer/components/chat";
 import { ContentHeader } from "@/renderer/components/layout/content-header";
+import {
+  MemberSidebar,
+  type Member,
+} from "@/renderer/components/members/member-sidebar";
 import { Button } from "@/renderer/components/ui/button";
 import { Textarea } from "@/renderer/components/ui/textarea";
 import {
@@ -45,6 +49,7 @@ function DMLayout() {
     Route.useLoaderData() as DMLoaderData;
   const [optimisticMessages, setOptimisticMessages] = useState(messages || []);
   const [sendingMessage, setSendingMessage] = useState(false);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
 
   // Update optimistic messages when route data changes
   useEffect(() => {
@@ -102,6 +107,21 @@ function DMLayout() {
   const { participants } = Route.useLoaderData() as DMLoaderData;
   const otherParticipants = getOtherParticipants(participants, user.id);
 
+  // Determine if it's a group conversation (3+ participants) or 1-1 (2 participants)
+  const isGroupConversation = otherParticipants.length > 1;
+  const is1on1Conversation = otherParticipants.length === 1;
+
+  // Convert participants to Member format for sidebar
+  const conversationMembers: Member[] = participants.map((participant) => ({
+    id: participant.id,
+    name: participant.name,
+    username: participant.name.toLowerCase().replace(/\s+/g, ""),
+    status: "online", // Default status - could be enhanced with real status
+    role: participant.id === user.id ? "owner" : "member",
+    avatarUrl: participant.avatar || undefined,
+    type: participant.type === "agent" ? "agent" : "user",
+  }));
+
   const displayName = conversation.name || "Unknown DM";
   const description =
     otherParticipants.length === 1
@@ -141,9 +161,14 @@ function DMLayout() {
         title={displayName}
         description={description}
         customIcon={conversationAvatar}
+        showMembersToggle={isGroupConversation || is1on1Conversation}
+        isMemberSidebarCollapsed={isSidebarCollapsed}
+        onToggleMemberSidebar={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
       />
-      <main className="flex-1 overflow-hidden">
-        <Chat
+      <div className="flex-1 flex">
+        {/* Main Chat Content */}
+        <main className="flex-1 overflow-hidden">
+          <Chat
           keyFn={(message: any) => message.id}
           value={optimisticMessages}
           onSend={(input, context) => {
@@ -376,8 +401,33 @@ function DMLayout() {
               />
             </div>
           )}
-        </Chat>
-      </main>
+          </Chat>
+        </main>
+
+        {/* Sidebar - Members for groups, Profile for 1-1 */}
+        {!isSidebarCollapsed && (
+          <div className="w-60">
+            {isGroupConversation ? (
+              <MemberSidebar
+                members={conversationMembers}
+                isCollapsed={isSidebarCollapsed}
+                onToggle={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+              />
+            ) : is1on1Conversation ? (
+              <div className="h-full bg-sidebar border-l border-sidebar-border">
+                <div className="p-4">
+                  <h3 className="font-medium text-sidebar-foreground mb-2">
+                    User Profile
+                  </h3>
+                  <p className="text-sm text-sidebar-foreground/60">
+                    Profile content will be implemented here.
+                  </p>
+                </div>
+              </div>
+            ) : null}
+          </div>
+        )}
+      </div>
       <Outlet />
     </div>
   );
@@ -523,9 +573,12 @@ export const Route = createFileRoute("/_authenticated/user/dm/$conversationId")(
       ]);
 
       // Get participant user details from availableUsers using the participants from dm.get()
-      const participants = availableUsers.filter((user) =>
+      const otherParticipants = availableUsers.filter((user) =>
         dmConversation.participants?.some((p) => p.participantId === user.id),
       );
+      
+      // Include current user in participants list
+      const participants = [currentUser, ...otherParticipants];
 
       return {
         conversation: dmConversation,
