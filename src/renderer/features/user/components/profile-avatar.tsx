@@ -109,12 +109,12 @@ function ProfileAvatarImage({
       <AvatarFallback
         className={cn(
           "font-semibold flex items-center justify-center",
-          name
+          name && name.trim()
             ? "bg-gradient-to-br from-primary/90 to-primary text-primary-foreground ring-2 ring-primary/20"
             : "bg-gradient-to-br from-primary/10 to-primary/5 text-primary border border-primary/20",
         )}
       >
-        {name ? name.charAt(0).toUpperCase() : fallbackIcon}
+        {name && name.trim() ? name.charAt(0).toUpperCase() : (fallbackIcon || "?")}
       </AvatarFallback>
     </Avatar>
   );

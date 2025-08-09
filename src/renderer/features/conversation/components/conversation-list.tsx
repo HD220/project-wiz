@@ -13,7 +13,7 @@ import {
 import { Switch } from "@/renderer/components/ui/switch";
 import { useAuth } from "@/renderer/contexts/auth.context";
 import {
-  getOtherParticipants,
+  getParticipantUsers,
   createConversationAvatar,
 } from "@/renderer/features/conversation/utils/conversation-avatar.utils";
 import { useArchiveConversation } from "@/renderer/features/conversation/hooks/use-archive-conversation.hook";
@@ -21,15 +21,29 @@ import { useUnarchiveConversation } from "@/renderer/features/conversation/hooks
 import { cn } from "@/renderer/lib/utils";
 
 import type { DMConversation } from "@/shared/types/dm-conversation";
-import type { Message } from "@/shared/types/message";
 import type { User } from "@/shared/types/user";
 
 import { ConfirmationDialog } from "@/renderer/components/ui/confirmation-dialog";
 
 // Local type that reflects what dm.list() API actually returns
 interface DMConversationWithLastMessage extends DMConversation {
-  lastMessage?: Message;
-  participants?: User[];
+  lastMessage?: {
+    id: string;
+    content: string;
+    authorId: string;
+    createdAt: number;
+    updatedAt: number;
+  };
+  participants?: {
+    id: string;
+    ownerId: string;
+    dmConversationId: string;
+    participantId: string;
+    isActive: boolean;
+    deactivatedAt: Date | null;
+    createdAt: Date;
+    updatedAt: Date;
+  }[];
 }
 
 // Main ConversationList component
@@ -178,7 +192,7 @@ interface ConversationListItemProps {
 }
 
 function ConversationListItem(props: ConversationListItemProps) {
-  const { conversation } = props;
+  const { conversation, availableUsers = [] } = props;
   const [showArchiveDialog, setShowArchiveDialog] = useState(false);
   const [showUnarchiveDialog, setShowUnarchiveDialog] = useState(false);
   const { user } = useAuth();
@@ -257,13 +271,16 @@ function ConversationListItem(props: ConversationListItemProps) {
       >
         {/* Avatar - smaller Discord style with space for overlapped groups */}
         <div className="relative flex-shrink-0">
-          {createConversationAvatar(
-            getOtherParticipants(
+          {(() => {
+            // Combine participant IDs with user data from availableUsers
+            const otherUsers = getParticipantUsers(
               conversation.participants || [],
-              user?.id || "",
-            ),
-            "sm",
-          )}
+              availableUsers,
+              user?.id || ""
+            );
+            
+            return createConversationAvatar(otherUsers, "sm");
+          })()}
         </div>
 
         {/* Content - responsive grid layout */}

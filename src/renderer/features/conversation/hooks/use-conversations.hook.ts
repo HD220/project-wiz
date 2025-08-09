@@ -2,8 +2,31 @@ import { useQuery } from "@tanstack/react-query";
 
 import type { DMConversation } from "@/shared/types/dm-conversation";
 
+// Extended conversation from API with lastMessage and participants
+interface DMConversationWithData extends DMConversation {
+  isActive: boolean;
+  isArchived: boolean;
+  participants: {
+    id: string;
+    ownerId: string;
+    dmConversationId: string;
+    participantId: string;
+    isActive: boolean;
+    deactivatedAt: Date | null;
+    createdAt: Date;
+    updatedAt: Date;
+  }[];
+  lastMessage?: {
+    id: string;
+    content: string;
+    authorId: string;
+    createdAt: number;
+    updatedAt: number;
+  };
+}
+
 interface UseConversationsReturn {
-  conversations: DMConversation[];
+  conversations: DMConversationWithData[];
   isLoading: boolean;
   isError: boolean;
   error: Error | null;
