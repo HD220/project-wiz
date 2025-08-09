@@ -8,8 +8,8 @@ export function ConversationWelcomeMessage({
   isArchived,
 }: ConversationWelcomeMessageProps) {
   return (
-    <div className="flex-1 flex flex-col items-center justify-center p-8 text-center">
-      <div className="mb-6">
+    <div className="absolute inset-0 flex flex-col items-center justify-center p-8 text-center">
+      <div className="mb-6 flex flex-col items-center">
         <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mb-4">
           <span className="text-2xl">💬</span>
         </div>
