@@ -49,7 +49,7 @@ function DMLayout() {
     Route.useLoaderData() as DMLoaderData;
   const [optimisticMessages, setOptimisticMessages] = useState(messages || []);
   const [sendingMessage, setSendingMessage] = useState(false);
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(true);
 
   // Update optimistic messages when route data changes
   useEffect(() => {
