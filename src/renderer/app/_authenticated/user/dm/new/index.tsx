@@ -259,9 +259,9 @@ export const Route = createFileRoute("/_authenticated/user/dm/new/")({
       throw new Error("User not authenticated");
     }
 
-    // Load available users for conversation creation
+    // Load available users for conversation creation (excluding current user)
     const users = await loadApiData(
-      () => window.api.user.list({}),
+      () => window.api.user.listAvailableUsers({}),
       "Failed to load users",
     );
 
