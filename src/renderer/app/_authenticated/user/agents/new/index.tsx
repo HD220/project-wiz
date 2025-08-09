@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useRouter } from "@tanstack/react-router";
 import { Bot, Loader2 } from "lucide-react";
 import { useState, useEffect } from "react";
 
@@ -28,7 +28,7 @@ type CreateAgentInput = Pick<
 >;
 
 function CreateAgentPage() {
-  const navigate = useNavigate();
+  const router = useRouter();
   const [providers, setProviders] = useState<LlmProvider[]>([]);
   const [isLoadingProviders, setIsLoadingProviders] = useState(true);
 
@@ -65,8 +65,8 @@ function CreateAgentPage() {
   );
 
   function handleClose() {
-    // Navigate back to agents page
-    navigate({ to: "/user/agents" });
+    // Navigate back to previous page
+    router.history.back();
   }
 
   function handleSubmit(data: CreateAgentInput) {

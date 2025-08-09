@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useNavigate, useRouter } from "@tanstack/react-router";
 import { FolderIcon } from "lucide-react";
 
 import {
@@ -15,6 +15,7 @@ import { ProjectForm } from "@/renderer/features/project/components/project-form
 
 function CreateProjectPage() {
   const navigate = useNavigate();
+  const router = useRouter();
 
   function handleSuccess(projectId: string) {
     // Navigate to the new project
@@ -25,8 +26,8 @@ function CreateProjectPage() {
   }
 
   function handleClose() {
-    // Navigate back to root page
-    navigate({ to: "/" });
+    // Navigate back to previous page
+    router.history.back();
   }
 
   // Correct masked route implementation - single modal only

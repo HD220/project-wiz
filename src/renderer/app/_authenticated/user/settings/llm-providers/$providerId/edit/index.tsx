@@ -1,16 +1,15 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useRouter } from "@tanstack/react-router";
 
 import { ProviderForm } from "@/renderer/features/agent/components/provider/provider-form";
 import { loadApiData } from "@/renderer/lib/route-loader";
 
 function EditProviderDialog() {
-  const navigate = useNavigate();
+  const router = useRouter();
   const { provider } = Route.useLoaderData();
 
   function handleClose() {
-    navigate({
-      to: "/user/settings/llm-providers",
-    });
+    // Navigate back to previous page
+    router.history.back();
   }
 
   if (!provider) {

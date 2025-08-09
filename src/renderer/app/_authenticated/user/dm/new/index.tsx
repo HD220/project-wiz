@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useNavigate, useRouter } from "@tanstack/react-router";
 import { Search, Check, MessageSquare } from "lucide-react";
 import { AlertCircle } from "lucide-react";
 import { useState } from "react";
@@ -33,6 +33,7 @@ import { cn } from "@/renderer/lib/utils";
 
 function CreateConversationPage() {
   const navigate = useNavigate();
+  const router = useRouter();
   const { availableUsers, currentUser } = Route.useLoaderData();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedUserIds, setSelectedUserIds] = useState<string[]>([]);
@@ -62,8 +63,8 @@ function CreateConversationPage() {
   }
 
   function handleClose() {
-    // Navigate back to user page
-    navigate({ to: "/user" });
+    // Navigate back to previous page
+    router.history.back();
   }
 
   // Filter users based on search

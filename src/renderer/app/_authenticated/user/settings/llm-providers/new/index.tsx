@@ -1,14 +1,13 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useRouter } from "@tanstack/react-router";
 
 import { ProviderForm } from "@/renderer/features/agent/components/provider/provider-form";
 
 function NewProviderPage() {
-  const navigate = useNavigate();
+  const router = useRouter();
 
   function handleClose() {
-    navigate({
-      to: "/user/settings/llm-providers",
-    });
+    // Navigate back to previous page
+    router.history.back();
   }
 
   return <ProviderForm provider={null} onClose={handleClose} />;
