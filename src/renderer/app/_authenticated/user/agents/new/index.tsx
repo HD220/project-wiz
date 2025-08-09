@@ -17,9 +17,9 @@ import { useApiMutation } from "@/renderer/hooks/use-api-mutation.hook";
 import { loadApiData } from "@/renderer/lib/route-loader";
 
 import type { LlmProvider, Agent } from "@/shared/types";
-// Logger available if needed in the future
-// import { getRendererLogger } from "@/shared/services/logger/renderer";
-// const logger = getRendererLogger("agent-new");
+import { getRendererLogger } from "@/shared/services/logger/renderer";
+
+const logger = getRendererLogger("agent-new");
 
 // Create agent input type derived from Agent
 type CreateAgentInput = Pick<
@@ -42,7 +42,7 @@ function CreateAgentPage() {
         );
         setProviders(providersData as LlmProvider[]);
       } catch (error) {
-        console.error("Error loading providers:", error);
+        logger.error("Error loading providers:", error);
       } finally {
         setIsLoadingProviders(false);
       }

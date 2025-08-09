@@ -22,6 +22,9 @@ import {
 } from "@/renderer/features/user/components/profile-avatar";
 import { loadApiData } from "@/renderer/lib/route-loader";
 import { cn } from "@/renderer/lib/utils";
+import { getRendererLogger } from "@/shared/services/logger/renderer";
+
+const logger = getRendererLogger("dm-conversation");
 
 import type { DMConversation } from "@/shared/types/dm-conversation";
 import type { Message } from "@/shared/types/message";
@@ -82,7 +85,7 @@ function DMLayout() {
       setOptimisticMessages((prev) =>
         prev.filter((msg) => msg.id !== optimisticMessage.id),
       );
-      console.error("Failed to send message:", error);
+      logger.error("Failed to send message:", error);
     } finally {
       setSendingMessage(false);
     }

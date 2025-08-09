@@ -23,7 +23,7 @@ function createRendererGlobalLogger(): pino.Logger {
   const loggerOptions: pino.LoggerOptions = {
     level: config.level,
     browser: {
-      asObject: false,
+      asObject: true,
     },
   };
 

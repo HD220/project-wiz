@@ -8,6 +8,9 @@ import {
   providerFormSchema,
 } from "@/renderer/features/agent/provider-constants";
 import type { LlmProvider } from "@/renderer/features/agent/provider.types";
+import { getRendererLogger } from "@/shared/services/logger/renderer";
+
+const logger = getRendererLogger("use-provider-form");
 
 interface UseProviderFormProps {
   provider?: LlmProvider | null;
@@ -37,7 +40,7 @@ export function useProviderForm({ provider }: UseProviderFormProps) {
 
   function onSubmit(data: ProviderFormData) {
     // TODO: Implement proper form submission with API calls
-    console.log("Form submission:", data);
+    logger.info("Form submission:", data);
     // For now, just navigate back
     router.navigate({ to: "/user/settings/llm-providers" });
   }

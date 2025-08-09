@@ -3,6 +3,9 @@ import { useRouter } from "@tanstack/react-router";
 import { toast } from "sonner";
 
 import type { IPCResponse } from "@/shared/utils/create-ipc-handler";
+import { getRendererLogger } from "@/shared/services/logger/renderer";
+
+const logger = getRendererLogger("use-api-mutation");
 
 export interface ApiMutationOptions<TReturn> {
   /** Success toast message */
@@ -56,6 +59,11 @@ export function useApiMutation<TArgs, TReturn>(
     onSuccess: (response) => {
       if (response.success) {
         // Success handling
+        logger.info("API mutation succeeded", { 
+          hasSuccessMessage: !!options.successMessage,
+          invalidateRouter: options.invalidateRouter !== false 
+        });
+        
         if (options.successMessage) {
           toast.success(options.successMessage);
         }
@@ -71,6 +79,12 @@ export function useApiMutation<TArgs, TReturn>(
         // API returned error
         const errorMsg =
           response.error || options.errorMessage || "Operation failed";
+        
+        logger.error("API mutation failed", { 
+          error: response.error,
+          fallbackMessage: options.errorMessage 
+        });
+        
         toast.error(errorMsg);
 
         if (options.onError) {
@@ -78,9 +92,13 @@ export function useApiMutation<TArgs, TReturn>(
         }
       }
     },
-    onError: (_error) => {
+    onError: (error) => {
       // Network/system errors (IPC communication failure)
-      // Error is already logged by the toast system
+      logger.error("API mutation network error", { 
+        error: error.message,
+        fallbackMessage: options.errorMessage 
+      });
+      
       const errorMsg = options.errorMessage || "An unexpected error occurred";
       toast.error(errorMsg);
 

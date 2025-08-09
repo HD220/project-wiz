@@ -6,6 +6,9 @@ import type {
   SelectMessage,
   AuthenticatedUser,
 } from "@/renderer/features/conversation/types";
+import { getRendererLogger } from "@/shared/services/logger/renderer";
+
+const logger = getRendererLogger("use-dm-conversation");
 
 interface UseDmConversationProps {
   conversationId: string;
@@ -56,7 +59,7 @@ export function useDmConversation({
       setOptimisticMessages((prev) =>
         prev.filter((msg) => msg.id !== optimisticMessage.id),
       );
-      console.error("Failed to send message:", error);
+      logger.error("Failed to send message:", error);
     } finally {
       setSendingMessage(false);
     }
