@@ -12,25 +12,20 @@ import {
 
 const logger = getLogger("user.list-available-users.invoke");
 
-const ListAvailableUsersInputSchema = z.object({
-  type: z.enum(["human", "agent"]).optional(),
-});
+const ListAvailableUsersInputSchema = z.object({});
 
 const ListAvailableUsersOutputSchema = z.array(UserSchema);
 
 const handler = createIPCHandler({
   inputSchema: ListAvailableUsersInputSchema,
   outputSchema: ListAvailableUsersOutputSchema,
-  handler: async (input) => {
+  handler: async () => {
     logger.debug("Listing available users");
 
     const currentUser = requireAuth();
 
     // Query database
-    const dbUsers = await listAvailableUsers(
-      currentUser.id,
-      input.type ? { type: input.type } : undefined,
-    );
+    const dbUsers = await listAvailableUsers(currentUser.id);
 
     // Mapping: SelectUser[] → User[] (without technical fields)
     const apiUsers = dbUsers.map((dbUser) => ({

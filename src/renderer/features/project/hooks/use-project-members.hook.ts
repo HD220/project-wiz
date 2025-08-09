@@ -18,7 +18,7 @@ export function useProjectMembers(projectId: string) {
       try {
         const [users, agents] = await Promise.all([
           loadApiData(
-            () => window.api.user.listAvailableUsers({ projectId }),
+            () => window.api.user.listAvailableUsers({}),
             "Failed to load users",
           ),
           loadApiData(

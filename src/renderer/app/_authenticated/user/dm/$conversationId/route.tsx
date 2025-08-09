@@ -517,9 +517,7 @@ export const Route = createFileRoute("/_authenticated/user/dm/$conversationId")(
         ),
         loadApiData(
           () =>
-            window.api.user.listAvailableUsers({
-              currentUserId: currentUser.id,
-            }),
+            window.api.user.listAvailableUsers({}),
           "Failed to load available users",
         ),
       ]);
