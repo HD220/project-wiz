@@ -2,6 +2,22 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Product Overview
+
+**Project Wiz** is a desktop application for automating the software development lifecycle with AI Agents. It combines artificial intelligence with project management to revolutionize software development through customizable AI agents, team collaboration, and integration with multiple LLM providers.
+
+### Key Features
+- **Intelligent AI Agents**: Create assistants with specific roles, backstories, and goals
+- **Multi-Provider LLM Support**: OpenAI, Anthropic, DeepSeek, Google, and custom providers
+- **Advanced Project Management**: Git integration, team collaboration, organized channels
+- **Integrated Communication**: Project channels, direct messaging, AI chat
+- **Enterprise Security**: Local SQLite database, API key encryption, secure authentication
+
+### Target Users
+- **Developers**: Automate code reviews, configure specialized assistants, manage multiple projects
+- **Teams**: Create specialized agents, centralize project communication, maintain decision history
+- **Enterprises**: Local deployment, corporate AI providers, permission management
+
 ## Common Development Commands
 
 **Development**: `npm run dev` - Starts Electron app with hot reload via electron-forge
@@ -84,3 +100,70 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 **Worker System**: Currently disabled but architecture remains for future AI job processing.
 
 **Security**: Content Security Policy enforced, external window creation blocked, Node integration disabled in renderer.
+
+## Development Guidelines
+
+### When Working with Features
+
+**Agent Management**:
+- Agents are AI entities with configurable roles, backstories, goals, and LLM provider assignments
+- Each agent has a status (active/inactive/busy) and model configuration
+- Agent forms are in `src/renderer/features/agent/components/`
+- Database schema: `src/main/schemas/agent.schema.ts`
+
+**Project Management**:
+- Projects can have Git integration (gitUrl, branch, localPath)
+- Each project contains channels for team communication
+- Project forms and components: `src/renderer/features/project/`
+- Support for project archiving and member management
+
+**LLM Providers**:
+- Support for OpenAI, Anthropic, DeepSeek, Google, and custom providers
+- Each provider has API keys, base URLs, and default models
+- Provider constants and schemas: `src/renderer/features/agent/provider-*`
+- API keys are encrypted and stored locally
+
+**Communication System**:
+- **Channels**: Project-specific communication threads
+- **DMs**: Direct messaging between users (humans and agents)
+- Messages support markdown rendering and are stored with metadata
+- Chat components: `src/renderer/features/chat/` and `src/renderer/features/conversation/`
+
+### Code Patterns to Follow
+
+**IPC Handlers**: Always create handlers in domain-specific directories under `src/main/ipc/` with:
+```
+domain/
+├── action/
+│   └── invoke.ts
+├── queries.ts
+```
+
+**React Components**: Use feature-based organization:
+```
+features/
+├── domain/
+│   ├── components/
+│   ├── hooks/
+│   ├── actions/
+│   └── utils/
+```
+
+**Database Operations**: Use Drizzle ORM with proper schemas and migrations. Always run `npm run db:generate` after schema changes.
+
+**Styling**: Use Tailwind CSS with Radix UI components. Follow the established design system in `src/renderer/components/ui/`.
+
+**I18n**: Use LinguiJS macros for all user-facing text. Run `npm run extract` to extract strings and `npm run compile` to generate TypeScript files.
+
+### Testing & Quality
+
+Always run before committing:
+```bash
+npm run quality:check  # Runs lint, type-check, format:check, and tests
+```
+
+For database work:
+```bash
+npm run db:studio      # Visual database management
+npm run db:setup-demo  # Setup demo data for testing
+```

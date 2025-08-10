@@ -20,7 +20,6 @@
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
     "db:studio": "drizzle-kit studio",
-    "db:setup-demo": "node scripts/setup-demo-user.js",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "rebuild": "electron-rebuild -f -w better-sqlite3",
