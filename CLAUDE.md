@@ -150,18 +150,18 @@ export const API_CONFIG = { baseUrl: "..." };
 
 **Naming**:
 - **Variables/Functions**: camelCase (`getUserData`, `isLoading`)
-- **Types/Interfaces**: PascalCase (`UserData`, `ApiResponse`)
+- **Types**: PascalCase (`UserData`, `ApiResponse`)
 - **Constants**: UPPER_CASE (`API_BASE_URL`, `DEFAULT_TIMEOUT`)
 - **Enums**: PascalCase with PascalCase members (`Status.Active`)
 
 **Type Definitions**:
 ```typescript
-// Prefer interfaces for object shapes
-interface UserConfig {
+// Prefer type over interface for all definitions
+type UserConfig = {
   name: string;
   email: string;
   preferences?: UserPreferences;
-}
+};
 
 // Use type for unions, primitives, and complex types
 type Status = "active" | "inactive" | "pending";
@@ -210,11 +210,11 @@ import { useAuth } from "@/contexts/auth.context";
 import { useApiMutation } from "@/hooks/use-api-mutation.hook";
 
 // 2. Types (inline for component-specific types)
-interface ComponentProps {
+type ComponentProps = {
   data: Data[];
   onSubmit: (data: FormData) => void;
   isLoading?: boolean;
-}
+};
 
 // 3. Component implementation with destructured props
 export function Component({ data, onSubmit, isLoading = false }: ComponentProps) {
@@ -288,7 +288,7 @@ export function AgentForm({ initialData, providers, onSubmit, isLoading }: Agent
 }
 
 // Co-locate compound components, export on declaration
-export function AgentFormIdentity({ initialData }: IdentityProps) {
+export function AgentFormIdentity({ initialData }: { initialData: Agent | null }) {
   // Implementation
 }
 ```
@@ -411,9 +411,9 @@ export default handler;
 // Type declaration
 declare global {
   namespace WindowAPI {
-    interface User {
+    type User = {
       create: InferHandler<typeof handler>;
-    }
+    };
   }
 }
 ```
@@ -682,20 +682,20 @@ export class AdvancedCalculationEngine {
 }
 
 // ✅ YAGNI - Only what's needed now
-interface CreateUserInput {
+type CreateUserInput = {
   name: string;
   email: string;
-}
+};
 
 // ❌ YAGNI violation - adding fields "just in case"
-interface CreateUserInput {
+type CreateUserInput = {
   name: string;
   email: string;
   phone?: string;          // Not needed yet
   address?: Address;       // Not needed yet
   preferences?: UserPrefs; // Not needed yet
   metadata?: unknown;      // Definitely not needed
-}
+};
 ```
 
 ### ESLint Configuration Highlights
