@@ -16,8 +16,8 @@ import { AgentForm } from "@/renderer/features/agent/components/agent-form";
 import { useApiMutation } from "@/renderer/hooks/use-api-mutation.hook";
 import { loadApiData } from "@/renderer/lib/route-loader";
 
-import type { LlmProvider, Agent } from "@/shared/types";
 import { getRendererLogger } from "@/shared/services/logger/renderer";
+import type { LlmProvider, Agent } from "@/shared/types";
 
 const logger = getRendererLogger("agent-new");
 

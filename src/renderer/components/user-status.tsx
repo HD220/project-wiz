@@ -1,12 +1,13 @@
 import { Badge } from "@/renderer/components/ui/badge";
 import { cn } from "@/renderer/lib/utils";
-import { 
+
+import {
   getUserStatusVariant,
-  getUserStatusSizeClasses, 
+  getUserStatusSizeClasses,
   getUserStatusDotColor,
   getUserStatusDotSize,
   getUserStatusLabel,
-  type UserStatus 
+  type UserStatus,
 } from "@/shared/utils/user-status.utils";
 
 interface UserStatusProps {
@@ -18,7 +19,7 @@ interface UserStatusProps {
 
 export function UserStatusBadge({
   status,
-  size = "md", 
+  size = "md",
   showDot = true,
   className,
 }: UserStatusProps) {

@@ -40,7 +40,7 @@ export async function findAgent(
       goal: agentsTable.goal,
       providerId: agentsTable.providerId,
       modelConfig: agentsTable.modelConfig,
-      
+
       // Status from users table
       status: usersTable.status,
     })
@@ -277,7 +277,7 @@ export async function listAgents(filters: {
       goal: agentsTable.goal,
       providerId: agentsTable.providerId,
       modelConfig: agentsTable.modelConfig,
-      
+
       // Status from users table
       status: usersTable.status,
     })

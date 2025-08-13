@@ -2,8 +2,8 @@ import { useMutation, UseMutationResult } from "@tanstack/react-query";
 import { useRouter } from "@tanstack/react-router";
 import { toast } from "sonner";
 
-import type { IPCResponse } from "@/shared/utils/create-ipc-handler";
 import { getRendererLogger } from "@/shared/services/logger/renderer";
+import type { IPCResponse } from "@/shared/utils/create-ipc-handler";
 
 const logger = getRendererLogger("use-api-mutation");
 

@@ -6,7 +6,6 @@ import { usersTable } from "@/main/schemas/user.schema";
 import { requireAuth } from "@/main/services/session-registry";
 
 import { createDatabaseConnection } from "@/shared/config/database";
-
 import { eventBus } from "@/shared/services/events/event-bus";
 import { getLogger } from "@/shared/services/logger/config";
 import { AgentSchema } from "@/shared/types";

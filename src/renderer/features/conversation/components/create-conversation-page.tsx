@@ -7,6 +7,8 @@ import * as StandardFormModal from "@/renderer/components/form-modal";
 import { Alert, AlertDescription } from "@/renderer/components/ui/alert";
 import { Checkbox } from "@/renderer/components/ui/checkbox";
 import { Input } from "@/renderer/components/ui/input";
+import type { UserSummary } from "@/renderer/features/conversation/hooks/use-user-selection.hook";
+import { useUserSelection } from "@/renderer/features/conversation/hooks/use-user-selection.hook";
 import type {
   CreateConversationInput,
   AuthenticatedUser,
@@ -16,8 +18,6 @@ import {
   ProfileAvatarImage,
   ProfileAvatarStatus,
 } from "@/renderer/features/user/components/profile-avatar";
-import type { UserSummary } from "@/renderer/features/conversation/hooks/use-user-selection.hook";
-import { useUserSelection } from "@/renderer/features/conversation/hooks/use-user-selection.hook";
 import { useApiMutation } from "@/renderer/hooks/use-api-mutation.hook";
 import { cn } from "@/renderer/lib/utils";
 

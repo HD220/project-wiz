@@ -1,13 +1,13 @@
 import { useNavigate, useSearch } from "@tanstack/react-router";
-import { useState } from "react";
 import { Plus, Search, AlertCircle, LayoutGrid } from "lucide-react";
+import { useState } from "react";
 
 import { CustomLink } from "@/renderer/components/custom-link";
 import { SearchFilterBar } from "@/renderer/components/search-filter-bar";
 import { Button } from "@/renderer/components/ui/button";
+import { ConfirmationDialog } from "@/renderer/components/ui/confirmation-dialog";
 import { ScrollArea } from "@/renderer/components/ui/scroll-area";
 import { AgentListItem } from "@/renderer/features/agent/components/agent-card";
-import { ConfirmationDialog } from "@/renderer/components/ui/confirmation-dialog";
 import { useAgentActions } from "@/renderer/features/agent/hooks/use-agent-actions.hook";
 import {
   validateSearchInput,

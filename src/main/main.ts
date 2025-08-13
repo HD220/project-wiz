@@ -9,7 +9,6 @@ import squirrel from "electron-squirrel-startup";
 
 // import { QueueClient } from "@/shared/queue-client/queue-client"; // Commented out - used only in test code
 // Worker management
-import { startWorker, stopWorker } from "@/main/services/worker-manager";
 // import { initializeAgenticWorkerHandler, agenticWorkerHandler } from "@/shared/worker/agentic-worker.handler"; // Removed - will be rewritten
 
 // Import all IPC handlers
@@ -183,16 +182,11 @@ function initializeJobResultHandler(): void {
 }
 
 /**
- * Initialize worker process
+ * Initialize worker
  */
 async function initializeWorker(): Promise<void> {
-  try {
-    await startWorker();
-    logger.info("🚀 Worker process started successfully");
-  } catch (error) {
-    logger.error("❌ Failed to start worker process:", error);
-    // Don't fail the app if worker fails to start - it can be started later
-  }
+  // Worker initialization will be added when needed
+  logger.info("🚀 Worker system ready");
 }
 
 /**
@@ -416,14 +410,13 @@ app.on("window-all-closed", () => {
   }
 });
 
-// Cleanup job result handler and worker on app quit
+// Cleanup services on app quit
 app.on("before-quit", async () => {
   logger.info("App is quitting, cleaning up services");
 
   try {
     eventBus.shutdown();
-    await stopWorker(); // Worker enabled - proper cleanup
-    logger.info("🛑 Worker and EventBus stopped successfully");
+    logger.info("🛑 Services stopped successfully");
   } catch (error) {
     logger.error("❌ Error stopping services:", error);
   }

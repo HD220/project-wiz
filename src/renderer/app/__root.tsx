@@ -7,6 +7,7 @@ import {
 import { Titlebar } from "@/renderer/components/layout/titlebar";
 import { Toaster } from "@/renderer/components/ui/sonner";
 import type { AuthContextType } from "@/renderer/contexts/auth.context";
+
 import { getRendererLogger } from "@/shared/services/logger/renderer";
 
 const logger = getRendererLogger("root");

@@ -6,6 +6,7 @@ import type {
   SelectMessage,
   AuthenticatedUser,
 } from "@/renderer/features/conversation/types";
+
 import { getRendererLogger } from "@/shared/services/logger/renderer";
 
 const logger = getRendererLogger("use-dm-conversation");

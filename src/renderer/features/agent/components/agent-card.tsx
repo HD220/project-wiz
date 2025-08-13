@@ -20,6 +20,7 @@ import {
   DropdownMenuTrigger,
 } from "@/renderer/components/ui/dropdown-menu";
 import { UserStatusBadge } from "@/renderer/components/user-status";
+import { getAgentModelName } from "@/renderer/features/agent/utils/agent.utils";
 import {
   ProfileAvatar,
   ProfileAvatarImage,
@@ -29,7 +30,6 @@ import { cn } from "@/renderer/lib/utils";
 
 import { getRendererLogger } from "@/shared/services/logger/renderer";
 import type { Agent } from "@/shared/types/agent";
-import { getAgentModelName } from "@/renderer/features/agent/utils/agent.utils";
 
 const logger = getRendererLogger("agent-card");
 
@@ -82,10 +82,7 @@ export function AgentCard({ agent, onDelete, className }: AgentCardProps) {
                 name={agent.name}
                 className="shrink-0 ring-2 ring-primary/10 transition-all duration-200 group-hover:ring-primary/20"
               />
-              <ProfileAvatarStatus
-                status={agent.status}
-                size="sm"
-              />
+              <ProfileAvatarStatus status={agent.status} size="sm" />
             </ProfileAvatar>
           </div>
 
@@ -236,10 +233,7 @@ export function AgentListItem({
             name={agent.name}
             className="ring-2 ring-primary/10 transition-all duration-200 group-hover:ring-primary/20"
           />
-          <ProfileAvatarStatus
-            status={agent.status}
-            size="sm"
-          />
+          <ProfileAvatarStatus status={agent.status} size="sm" />
         </ProfileAvatar>
       </div>
 

@@ -1,12 +1,12 @@
 import { createFileRoute, Outlet } from "@tanstack/react-router";
 
 import { ProjectSidebar } from "@/renderer/components/app/project-sidebar";
-import { loadApiData } from "@/renderer/lib/route-loader";
 import {
   ResizablePanelGroup,
   ResizablePanel,
   ResizableHandle,
 } from "@/renderer/components/ui/resizable";
+import { loadApiData } from "@/renderer/lib/route-loader";
 
 function ProjectLayout() {
   const { project } = Route.useLoaderData();

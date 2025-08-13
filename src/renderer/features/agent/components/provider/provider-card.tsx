@@ -9,9 +9,9 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 
-import { ConfirmationDialog } from "@/renderer/components/ui/confirmation-dialog";
 import { Badge } from "@/renderer/components/ui/badge";
 import { Button } from "@/renderer/components/ui/button";
+import { ConfirmationDialog } from "@/renderer/components/ui/confirmation-dialog";
 import {
   DropdownMenu,
   DropdownMenuContent,

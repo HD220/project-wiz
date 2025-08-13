@@ -14,12 +14,8 @@ import {
 import { usersTable } from "@/main/schemas/user.schema";
 
 import { createDatabaseConnection } from "@/shared/config/database";
-import { eventBus } from "@/shared/services/events/event-bus";
-import { getLogger } from "@/shared/services/logger/config";
-import { DMDispatcher } from "@/main/services/dm-dispatcher";
 
 const { getDatabase } = createDatabaseConnection(true);
-const logger = getLogger("dm.queries");
 
 /**
  * Generate DM conversation title from participant names
@@ -521,49 +517,6 @@ export async function sendDMMessage(data: {
 
   if (!message) {
     throw new Error("Failed to send message");
-  }
-
-  // 2. Dispatch message to agents in conversation
-  try {
-    logger.debug("📤 Dispatching message to agents:", {
-      messageId: message.id,
-      sourceType: message.sourceType,
-      sourceId: message.sourceId,
-    });
-
-    // Use simple dispatcher (no LLM, just route to all agents)
-    await DMDispatcher.dispatchMessage({
-      messageId: message.id,
-      conversationId: message.sourceId,
-      authorId: message.authorId, // Now we have proper authorId field
-      content: message.content,
-      timestamp: new Date(message.createdAt),
-    });
-
-    logger.info("✅ Message dispatched to agents successfully:", {
-      messageId: message.id,
-      conversationId: message.sourceId,
-    });
-  } catch (error) {
-    logger.error("❌ Failed to dispatch message to agents:", error);
-    // Don't fail the message sending if dispatch fails - log and continue
-  }
-
-  // 3. Emit user-sent-message event for UI updates
-  try {
-    eventBus.emit("user-sent-message", {
-      messageId: message.id,
-      conversationId: message.sourceId,
-      conversationType: "dm",
-      authorId: message.authorId, // Now we have proper authorId field
-      content: message.content,
-      timestamp: new Date(message.createdAt),
-    });
-
-    logger.debug("✅ User message event emitted for UI updates");
-  } catch (error) {
-    logger.error("❌ Failed to emit user message event:", error);
-    // Don't fail the message sending if event emission fails
   }
 
   return message;

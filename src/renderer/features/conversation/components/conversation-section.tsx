@@ -1,6 +1,6 @@
+import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
 
 import { ConversationList } from "@/renderer/features/conversation/components/conversation-list";
 import { useConversations } from "@/renderer/features/conversation/hooks/use-conversations.hook";

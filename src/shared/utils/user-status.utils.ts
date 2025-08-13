@@ -42,13 +42,13 @@ export const getUserStatusDotColor = (status: UserStatus) => {
 
 export const getUserStatusDotSize = (size: "sm" | "md" | "lg") => {
   switch (size) {
-  case "sm":
-    return "size-1.5";
-  case "lg":
-    return "size-2.5";
-  case "md":
-  default:
-    return "size-2";
+    case "sm":
+      return "size-1.5";
+    case "lg":
+      return "size-2.5";
+    case "md":
+    default:
+      return "size-2";
   }
 };
 

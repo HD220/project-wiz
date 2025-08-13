@@ -1,5 +1,6 @@
 import { Search, Eye, EyeOff } from "lucide-react";
 import { useEffect, useState } from "react";
+import { useDebounce } from "use-debounce";
 
 import { Button } from "@/renderer/components/ui/button";
 import { Input } from "@/renderer/components/ui/input";
@@ -11,7 +12,6 @@ import {
   SelectValue,
 } from "@/renderer/components/ui/select";
 import { Switch } from "@/renderer/components/ui/switch";
-import { useDebounce } from "use-debounce";
 import { cn } from "@/renderer/lib/utils";
 
 interface FilterOption {

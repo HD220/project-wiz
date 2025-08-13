@@ -1,3 +1,4 @@
+import { sql } from "drizzle-orm";
 import {
   sqliteTable,
   text,
@@ -5,9 +6,9 @@ import {
   index,
   primaryKey,
 } from "drizzle-orm/sqlite-core";
-import { sql } from "drizzle-orm";
-import { usersTable } from "./user.schema";
+
 import { projectsTable } from "./project.schema";
+import { usersTable } from "./user.schema";
 
 // Main memory table
 export const memoryTable = sqliteTable(

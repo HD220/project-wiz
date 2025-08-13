@@ -204,4 +204,3 @@ export function MemberSidebar(props: MemberSidebarProps) {
     </aside>
   );
 }
-

@@ -4,6 +4,7 @@ import { useState } from "react";
 
 import { CustomLink } from "@/renderer/components/custom-link";
 import { Button } from "@/renderer/components/ui/button";
+import { ConfirmationDialog } from "@/renderer/components/ui/confirmation-dialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -12,18 +13,16 @@ import {
 } from "@/renderer/components/ui/dropdown-menu";
 import { Switch } from "@/renderer/components/ui/switch";
 import { useAuth } from "@/renderer/contexts/auth.context";
+import { useArchiveConversation } from "@/renderer/features/conversation/hooks/use-archive-conversation.hook";
+import { useUnarchiveConversation } from "@/renderer/features/conversation/hooks/use-unarchive-conversation.hook";
 import {
   getParticipantUsers,
   createConversationAvatar,
 } from "@/renderer/features/conversation/utils/conversation-avatar.utils";
-import { useArchiveConversation } from "@/renderer/features/conversation/hooks/use-archive-conversation.hook";
-import { useUnarchiveConversation } from "@/renderer/features/conversation/hooks/use-unarchive-conversation.hook";
 import { cn } from "@/renderer/lib/utils";
 
 import type { DMConversation } from "@/shared/types/dm-conversation";
 import type { User } from "@/shared/types/user";
-
-import { ConfirmationDialog } from "@/renderer/components/ui/confirmation-dialog";
 
 // Local type that reflects what dm.list() API actually returns
 interface DMConversationWithLastMessage extends DMConversation {

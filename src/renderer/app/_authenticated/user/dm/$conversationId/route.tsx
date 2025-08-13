@@ -15,11 +15,11 @@ import {
 } from "@/renderer/components/members/member-sidebar";
 import { Button } from "@/renderer/components/ui/button";
 import { Textarea } from "@/renderer/components/ui/textarea";
+import { ConversationWelcomeMessage } from "@/renderer/features/conversation/components/conversation-welcome-message";
 import {
   getOtherParticipants,
   createConversationAvatar,
 } from "@/renderer/features/conversation/utils/conversation-avatar.utils";
-import { ConversationWelcomeMessage } from "@/renderer/features/conversation/components/conversation-welcome-message";
 import {
   ProfileAvatar,
   ProfileAvatarImage,
@@ -27,6 +27,7 @@ import {
 } from "@/renderer/features/user/components/profile-avatar";
 import { loadApiData } from "@/renderer/lib/route-loader";
 import { cn } from "@/renderer/lib/utils";
+
 import { getRendererLogger } from "@/shared/services/logger/renderer";
 
 const logger = getRendererLogger("dm-conversation");

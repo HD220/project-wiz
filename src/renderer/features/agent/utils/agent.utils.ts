@@ -1,4 +1,5 @@
 import type { Agent } from "@/renderer/features/agent/agent.types";
+
 import { getRendererLogger } from "@/shared/services/logger/renderer";
 
 const logger = getRendererLogger("agent.utils");
