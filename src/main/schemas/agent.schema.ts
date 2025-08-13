@@ -3,8 +3,6 @@ import { sqliteTable, text, index } from "drizzle-orm/sqlite-core";
 import { llmProvidersTable } from "@/main/schemas/llm-provider.schema";
 import { usersTable } from "@/main/schemas/user.schema";
 
-export type AgentStatus = "active" | "inactive" | "busy";
-
 export const agentsTable = sqliteTable(
   "agents",
   {
@@ -21,14 +19,12 @@ export const agentsTable = sqliteTable(
     role: text("role").notNull(),
     backstory: text("backstory").notNull(),
     goal: text("goal").notNull(),
-    status: text("status").$type<AgentStatus>().notNull().default("inactive"),
     modelConfig: text("model_config").notNull(), // JSON string
   },
   (table) => ({
     // Performance indexes for foreign keys
     ownerIdIdx: index("agents_owner_id_idx").on(table.ownerId),
     providerIdIdx: index("agents_provider_id_idx").on(table.providerId),
-    statusIdx: index("agents_status_idx").on(table.status),
   }),
 );
 

@@ -12,9 +12,9 @@ interface ConversationEmptyStateProps {
  * Empty state component for conversation lists
  * Pure presentational component with different states for archived/active views
  */
-export function ConversationEmptyState({ 
-  showArchived, 
-  className 
+export function ConversationEmptyState({
+  showArchived,
+  className,
 }: ConversationEmptyStateProps) {
   return (
     <div
@@ -26,18 +26,18 @@ export function ConversationEmptyState({
       <div className="w-12 h-12 rounded-full bg-muted/40 flex items-center justify-center mb-4">
         <MessageCircle className="w-6 h-6 text-muted-foreground/60" />
       </div>
-      
+
       <div className="space-y-[var(--spacing-component-sm)] max-w-xs">
         <h3 className="font-medium text-foreground text-sm">
           {showArchived ? "No Archived Conversations" : "No Direct Messages"}
         </h3>
-        
+
         <p className="text-xs text-muted-foreground leading-relaxed">
           {showArchived
             ? "You haven't archived any conversations yet."
             : "Start a conversation with someone to begin chatting."}
         </p>
-        
+
         {!showArchived && (
           <CustomLink
             to="/user/dm/new"

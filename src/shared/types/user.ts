@@ -8,6 +8,7 @@ export const UserSchema = z.object({
   name: z.string(),
   avatar: z.string().nullable(),
   type: z.enum(["human", "agent"]),
+  status: z.enum(["online", "away", "busy", "offline"]),
   createdAt: z.date(),
   updatedAt: z.date(),
 });

@@ -96,8 +96,10 @@ export function AgentForm(props: AgentFormProps) {
         initialData?.providerId || (!isEditing && defaultProvider?.id) || "",
       // Individual model config fields
       model: initialData?.modelConfig?.model || defaultModelConfig.model,
-      temperature: initialData?.modelConfig?.temperature || defaultModelConfig.temperature,
-      maxTokens: initialData?.modelConfig?.maxTokens || defaultModelConfig.maxTokens,
+      temperature:
+        initialData?.modelConfig?.temperature || defaultModelConfig.temperature,
+      maxTokens:
+        initialData?.modelConfig?.maxTokens || defaultModelConfig.maxTokens,
       topP: initialData?.modelConfig?.topP || defaultModelConfig.topP,
       status: "inactive", // Always default to inactive for safety
       avatar: "", // Avatar is stored in user table, not agent table
@@ -296,7 +298,6 @@ function AgentFormProvider(props: AgentFormProviderProps) {
     (provider) => !provider.deactivatedAt,
   );
 
-
   return (
     <Card className="bg-gradient-to-br from-chart-3/5 via-chart-3/3 to-chart-3/0 border border-border/60">
       <CardHeader className="pb-[var(--spacing-component-md)]">
@@ -365,11 +366,7 @@ function AgentFormProvider(props: AgentFormProviderProps) {
                 <FormItem className="space-y-[var(--spacing-component-lg)]">
                   <FormLabel className="text-base font-medium">Model</FormLabel>
                   <FormControl>
-                    <Input
-                      {...field}
-                      placeholder="gpt-4o"
-                      className="h-10"
-                    />
+                    <Input {...field} placeholder="gpt-4o" className="h-10" />
                   </FormControl>
                   <FormDescription className="text-sm text-muted-foreground">
                     The specific AI model to use (e.g., gpt-4o,
@@ -395,7 +392,9 @@ function AgentFormProvider(props: AgentFormProviderProps) {
                       max="2"
                       step="0.1"
                       {...field}
-                      onChange={(e) => field.onChange(parseFloat(e.target.value))}
+                      onChange={(e) =>
+                        field.onChange(parseFloat(e.target.value))
+                      }
                       placeholder="0.7"
                       className="h-10"
                     />
@@ -450,7 +449,13 @@ function AgentFormProvider(props: AgentFormProviderProps) {
                       step="0.01"
                       {...field}
                       value={field.value || ""}
-                      onChange={(e) => field.onChange(e.target.value ? parseFloat(e.target.value) : undefined)}
+                      onChange={(e) =>
+                        field.onChange(
+                          e.target.value
+                            ? parseFloat(e.target.value)
+                            : undefined,
+                        )
+                      }
                       placeholder="0.95"
                       className="h-10"
                     />

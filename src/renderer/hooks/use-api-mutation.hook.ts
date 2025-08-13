@@ -59,11 +59,11 @@ export function useApiMutation<TArgs, TReturn>(
     onSuccess: (response) => {
       if (response.success) {
         // Success handling
-        logger.info("API mutation succeeded", { 
+        logger.info("API mutation succeeded", {
           hasSuccessMessage: !!options.successMessage,
-          invalidateRouter: options.invalidateRouter !== false 
+          invalidateRouter: options.invalidateRouter !== false,
         });
-        
+
         if (options.successMessage) {
           toast.success(options.successMessage);
         }
@@ -79,12 +79,12 @@ export function useApiMutation<TArgs, TReturn>(
         // API returned error
         const errorMsg =
           response.error || options.errorMessage || "Operation failed";
-        
-        logger.error("API mutation failed", { 
+
+        logger.error("API mutation failed", {
           error: response.error,
-          fallbackMessage: options.errorMessage 
+          fallbackMessage: options.errorMessage,
         });
-        
+
         toast.error(errorMsg);
 
         if (options.onError) {
@@ -94,11 +94,11 @@ export function useApiMutation<TArgs, TReturn>(
     },
     onError: (error) => {
       // Network/system errors (IPC communication failure)
-      logger.error("API mutation network error", { 
+      logger.error("API mutation network error", {
         error: error.message,
-        fallbackMessage: options.errorMessage 
+        fallbackMessage: options.errorMessage,
       });
-      
+
       const errorMsg = options.errorMessage || "An unexpected error occurred";
       toast.error(errorMsg);
 

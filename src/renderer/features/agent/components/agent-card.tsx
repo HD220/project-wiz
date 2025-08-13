@@ -19,7 +19,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/renderer/components/ui/dropdown-menu";
-import { AgentStatus } from "@/renderer/features/agent/components/agent-status";
+import { UserStatusBadge } from "@/renderer/components/user-status";
 import {
   ProfileAvatar,
   ProfileAvatarImage,
@@ -40,11 +40,7 @@ interface AgentCardProps {
   className?: string;
 }
 
-export function AgentCard({
-  agent,
-  onDelete,
-  className,
-}: AgentCardProps) {
+export function AgentCard({ agent, onDelete, className }: AgentCardProps) {
   const modelName = getAgentModelName(agent);
 
   // Inline date formatting
@@ -59,7 +55,7 @@ export function AgentCard({
 
   // Inline action handlers
   const handleDelete = () => onDelete?.(agent);
-  
+
   logger.debug("AgentCard render", {
     agentId: agent.id,
     deactivatedAt: agent.deactivatedAt,
@@ -87,7 +83,7 @@ export function AgentCard({
                 className="shrink-0 ring-2 ring-primary/10 transition-all duration-200 group-hover:ring-primary/20"
               />
               <ProfileAvatarStatus
-                status={agent.status === "active" ? "online" : "offline"}
+                status={agent.status}
                 size="sm"
               />
             </ProfileAvatar>
@@ -141,7 +137,7 @@ export function AgentCard({
                     "focus:bg-accent/50 transition-colors font-medium",
                     !agent.deactivatedAt
                       ? "text-destructive focus:text-destructive focus:bg-destructive/10"
-                      : "text-chart-2 focus:text-chart-2 focus:bg-chart-2/10"
+                      : "text-chart-2 focus:text-chart-2 focus:bg-chart-2/10",
                   )}
                 >
                   <Power
@@ -153,7 +149,9 @@ export function AgentCard({
                     )}
                   />
                   <span>
-                    {!agent.deactivatedAt ? "Deactivate Agent" : "Activate Agent"}
+                    {!agent.deactivatedAt
+                      ? "Deactivate Agent"
+                      : "Activate Agent"}
                   </span>
                 </DropdownMenuItem>
               </DropdownMenuContent>
@@ -180,7 +178,7 @@ export function AgentCard({
 
       <CardFooter className="pt-0 border-t border-border/40 bg-card/30 relative z-10">
         <div className="flex items-center justify-between w-full">
-          <AgentStatus
+          <UserStatusBadge
             status={agent.status}
             size="sm"
             className="border border-border/50 shadow-sm"
@@ -214,7 +212,7 @@ export function AgentListItem({
 
   // Inline action handlers
   const handleDelete = () => onDelete?.(agent);
-  
+
   logger.debug("AgentCard render", {
     agentId: agent.id,
     deactivatedAt: agent.deactivatedAt,
@@ -239,7 +237,7 @@ export function AgentListItem({
             className="ring-2 ring-primary/10 transition-all duration-200 group-hover:ring-primary/20"
           />
           <ProfileAvatarStatus
-            status={agent.status === "active" ? "online" : "offline"}
+            status={agent.status}
             size="sm"
           />
         </ProfileAvatar>
@@ -324,7 +322,7 @@ export function AgentListItem({
               className={cn(
                 !agent.deactivatedAt
                   ? "text-destructive focus:text-destructive"
-                  : "text-chart-2 focus:text-chart-2"
+                  : "text-chart-2 focus:text-chart-2",
               )}
             >
               <Power className="mr-2 size-4" />

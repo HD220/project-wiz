@@ -114,7 +114,9 @@ function ProfileAvatarImage({
             : "bg-gradient-to-br from-primary/10 to-primary/5 text-primary border border-primary/20",
         )}
       >
-        {name && name.trim() ? name.charAt(0).toUpperCase() : (fallbackIcon || "?")}
+        {name && name.trim()
+          ? name.charAt(0).toUpperCase()
+          : fallbackIcon || "?"}
       </AvatarFallback>
     </Avatar>
   );

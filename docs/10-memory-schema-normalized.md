@@ -5,6 +5,7 @@
 ### Tabela Principal de Memória
 
 **Arquivo: `src/main/schemas/memory.schema.ts`**
+
 ```typescript
 import { sqliteTable, text, integer, index } from "drizzle-orm/sqlite-core";
 import { sql } from "drizzle-orm";
@@ -18,13 +19,13 @@ export const memoryTable = sqliteTable(
     id: text("id")
       .primaryKey()
       .$defaultFn(() => crypto.randomUUID()),
-    
+
     content: text("content").notNull(),
-    
+
     createdBy: text("created_by")
       .notNull()
       .references(() => usersTable.id),
-    
+
     createdAt: integer("created_at", { mode: "timestamp_ms" })
       .notNull()
       .default(sql`(unixepoch('subsec') * 1000)`),
@@ -32,7 +33,7 @@ export const memoryTable = sqliteTable(
   (table) => ({
     createdByIdx: index("memory_created_by_idx").on(table.createdBy),
     createdAtIdx: index("memory_created_at_idx").on(table.createdAt),
-  })
+  }),
 );
 
 // Agent personal memory
@@ -42,7 +43,7 @@ export const agentMemoryTable = sqliteTable(
     memoryId: text("memory_id")
       .notNull()
       .references(() => memoryTable.id, { onDelete: "cascade" }),
-    
+
     agentId: text("agent_id")
       .notNull()
       .references(() => usersTable.id, { onDelete: "cascade" }),
@@ -50,7 +51,7 @@ export const agentMemoryTable = sqliteTable(
   (table) => ({
     pk: primaryKey({ columns: [table.memoryId, table.agentId] }),
     agentIdx: index("agent_memory_agent_idx").on(table.agentId),
-  })
+  }),
 );
 
 // Team shared memory
@@ -60,7 +61,7 @@ export const teamMemoryTable = sqliteTable(
     memoryId: text("memory_id")
       .notNull()
       .references(() => memoryTable.id, { onDelete: "cascade" }),
-    
+
     projectId: text("project_id")
       .notNull()
       .references(() => projectsTable.id, { onDelete: "cascade" }),
@@ -68,7 +69,7 @@ export const teamMemoryTable = sqliteTable(
   (table) => ({
     pk: primaryKey({ columns: [table.memoryId, table.projectId] }),
     projectIdx: index("team_memory_project_idx").on(table.projectId),
-  })
+  }),
 );
 
 // Project global memory
@@ -78,7 +79,7 @@ export const projectMemoryTable = sqliteTable(
     memoryId: text("memory_id")
       .notNull()
       .references(() => memoryTable.id, { onDelete: "cascade" }),
-    
+
     projectId: text("project_id")
       .notNull()
       .references(() => projectsTable.id, { onDelete: "cascade" }),
@@ -86,27 +87,28 @@ export const projectMemoryTable = sqliteTable(
   (table) => ({
     pk: primaryKey({ columns: [table.memoryId, table.projectId] }),
     projectIdx: index("project_memory_project_idx").on(table.projectId),
-  })
+  }),
 );
 ```
 
 ## Service para Gerenciar Memória
 
 **Arquivo: `src/worker/services/memory.service.ts`**
+
 ```typescript
-import { getDatabase } from '@/shared/config/database';
-import { 
-  memoryTable, 
-  agentMemoryTable, 
-  teamMemoryTable, 
-  projectMemoryTable 
-} from '@/main/schemas/memory.schema';
-import { eq, and, desc } from 'drizzle-orm';
-import { getLogger } from '@/shared/services/logger/config';
+import { getDatabase } from "@/shared/config/database";
+import {
+  memoryTable,
+  agentMemoryTable,
+  teamMemoryTable,
+  projectMemoryTable,
+} from "@/main/schemas/memory.schema";
+import { eq, and, desc } from "drizzle-orm";
+import { getLogger } from "@/shared/services/logger/config";
 
-const logger = getLogger('memory-service');
+const logger = getLogger("memory-service");
 
-export type MemoryLevel = 'agent' | 'team' | 'project';
+export type MemoryLevel = "agent" | "team" | "project";
 
 export class MemoryService {
   /**
@@ -119,10 +121,10 @@ export class MemoryService {
     context: {
       agentId?: string;
       projectId?: string;
-    }
+    },
   ): Promise<string> {
     const db = getDatabase();
-    
+
     // Create the memory record
     const memoryId = crypto.randomUUID();
     await db.insert(memoryTable).values({
@@ -131,32 +133,32 @@ export class MemoryService {
       createdBy,
       createdAt: new Date(),
     });
-    
+
     // Create the appropriate relation
     switch (level) {
-      case 'agent':
+      case "agent":
         if (!context.agentId) {
-          throw new Error('agentId required for agent memory');
+          throw new Error("agentId required for agent memory");
         }
         await db.insert(agentMemoryTable).values({
           memoryId,
           agentId: context.agentId,
         });
         break;
-        
-      case 'team':
+
+      case "team":
         if (!context.projectId) {
-          throw new Error('projectId required for team memory');
+          throw new Error("projectId required for team memory");
         }
         await db.insert(teamMemoryTable).values({
           memoryId,
           projectId: context.projectId,
         });
         break;
-        
-      case 'project':
+
+      case "project":
         if (!context.projectId) {
-          throw new Error('projectId required for project memory');
+          throw new Error("projectId required for project memory");
         }
         await db.insert(projectMemoryTable).values({
           memoryId,
@@ -164,11 +166,11 @@ export class MemoryService {
         });
         break;
     }
-    
+
     logger.info(`Saved ${level} memory: ${memoryId}`);
     return memoryId;
   }
-  
+
   /**
    * Get memories by level
    */
@@ -178,16 +180,16 @@ export class MemoryService {
       agentId?: string;
       projectId?: string;
     },
-    limit = 10
+    limit = 10,
   ): Promise<Array<{ id: string; content: string; createdAt: Date }>> {
     const db = getDatabase();
-    
+
     let query;
-    
+
     switch (level) {
-      case 'agent':
+      case "agent":
         if (!context.agentId) {
-          throw new Error('agentId required to fetch agent memory');
+          throw new Error("agentId required to fetch agent memory");
         }
         query = db
           .select({
@@ -196,15 +198,18 @@ export class MemoryService {
             createdAt: memoryTable.createdAt,
           })
           .from(memoryTable)
-          .innerJoin(agentMemoryTable, eq(agentMemoryTable.memoryId, memoryTable.id))
+          .innerJoin(
+            agentMemoryTable,
+            eq(agentMemoryTable.memoryId, memoryTable.id),
+          )
           .where(eq(agentMemoryTable.agentId, context.agentId))
           .orderBy(desc(memoryTable.createdAt))
           .limit(limit);
         break;
-        
-      case 'team':
+
+      case "team":
         if (!context.projectId) {
-          throw new Error('projectId required to fetch team memory');
+          throw new Error("projectId required to fetch team memory");
         }
         query = db
           .select({
@@ -213,15 +218,18 @@ export class MemoryService {
             createdAt: memoryTable.createdAt,
           })
           .from(memoryTable)
-          .innerJoin(teamMemoryTable, eq(teamMemoryTable.memoryId, memoryTable.id))
+          .innerJoin(
+            teamMemoryTable,
+            eq(teamMemoryTable.memoryId, memoryTable.id),
+          )
           .where(eq(teamMemoryTable.projectId, context.projectId))
           .orderBy(desc(memoryTable.createdAt))
           .limit(limit);
         break;
-        
-      case 'project':
+
+      case "project":
         if (!context.projectId) {
-          throw new Error('projectId required to fetch project memory');
+          throw new Error("projectId required to fetch project memory");
         }
         query = db
           .select({
@@ -230,34 +238,37 @@ export class MemoryService {
             createdAt: memoryTable.createdAt,
           })
           .from(memoryTable)
-          .innerJoin(projectMemoryTable, eq(projectMemoryTable.memoryId, memoryTable.id))
+          .innerJoin(
+            projectMemoryTable,
+            eq(projectMemoryTable.memoryId, memoryTable.id),
+          )
           .where(eq(projectMemoryTable.projectId, context.projectId))
           .orderBy(desc(memoryTable.createdAt))
           .limit(limit);
         break;
     }
-    
+
     return await query;
   }
-  
+
   /**
    * Get all relevant memories for an agent in a project
    */
   static async getRelevantMemories(
     agentId: string,
     projectId: string,
-    limit = 30
+    limit = 30,
   ): Promise<{
     agent: Array<{ id: string; content: string; createdAt: Date }>;
     team: Array<{ id: string; content: string; createdAt: Date }>;
     project: Array<{ id: string; content: string; createdAt: Date }>;
   }> {
     const [agentMemories, teamMemories, projectMemories] = await Promise.all([
-      this.getByLevel('agent', { agentId }, limit / 3),
-      this.getByLevel('team', { projectId }, limit / 3),
-      this.getByLevel('project', { projectId }, limit / 3),
+      this.getByLevel("agent", { agentId }, limit / 3),
+      this.getByLevel("team", { projectId }, limit / 3),
+      this.getByLevel("project", { projectId }, limit / 3),
     ]);
-    
+
     return {
       agent: agentMemories,
       team: teamMemories,
@@ -270,6 +281,7 @@ export class MemoryService {
 ## Atualização no Work Processor
 
 **Modificar tool saveMemory em `work-processor.ts`:**
+
 ```typescript
 saveMemory: tool({
   description: 'Save knowledge to memory',
@@ -296,16 +308,19 @@ saveMemory: tool({
 ## Vantagens da Normalização
 
 ### 1. **Flexibilidade**
+
 - Fácil adicionar novos níveis de memória
 - Pode compartilhar memória entre múltiplos agentes/projetos
 - Permite queries complexas
 
 ### 2. **Performance**
+
 - Índices específicos por tipo
 - Joins eficientes
 - Menos dados duplicados
 
 ### 3. **Integridade**
+
 - CASCADE delete automático
 - Constraints garantem consistência
 - Impossível ter memória órfã

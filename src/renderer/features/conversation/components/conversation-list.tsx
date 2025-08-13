@@ -56,7 +56,13 @@ interface ConversationListProps {
 }
 
 export function ConversationList(props: ConversationListProps) {
-  const { conversations, availableUsers, showArchived, onToggleShowArchived, onCreateConversation } = props;
+  const {
+    conversations,
+    availableUsers,
+    showArchived,
+    onToggleShowArchived,
+    onCreateConversation,
+  } = props;
   const { user: currentUser } = useAuth();
 
   // No more filtering - conversations are already filtered by backend
@@ -238,12 +244,12 @@ function ConversationListItem(props: ConversationListItemProps) {
   // Action handlers - using specific mutations
   const handleArchive = () => setShowArchiveDialog(true);
   const handleUnarchive = () => setShowUnarchiveDialog(true);
-  
+
   const handleConfirmArchive = () => {
     archiveMutation.mutate(conversation.id);
     setShowArchiveDialog(false);
   };
-  
+
   const handleConfirmUnarchive = () => {
     unarchiveMutation.mutate(conversation.id);
     setShowUnarchiveDialog(false);
@@ -276,9 +282,9 @@ function ConversationListItem(props: ConversationListItemProps) {
             const otherUsers = getParticipantUsers(
               conversation.participants || [],
               availableUsers,
-              user?.id || ""
+              user?.id || "",
             );
-            
+
             return createConversationAvatar(otherUsers, "sm");
           })()}
         </div>

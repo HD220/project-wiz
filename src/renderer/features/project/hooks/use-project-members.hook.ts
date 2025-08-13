@@ -1,10 +1,8 @@
 import { useState, useEffect } from "react";
 
 import type { Member } from "@/renderer/components/members/member-sidebar";
-import type { UserSummary } from "@/renderer/features/user/hooks/use-user-selection.hook";
+import type { UserSummary } from "@/renderer/features/conversation/hooks/use-user-selection.hook";
 import { loadApiData } from "@/renderer/lib/route-loader";
-
-import type { Agent } from "@/shared/types";
 
 export function useProjectMembers(projectId: string) {
   const [members, setMembers] = useState<Member[]>([]);
@@ -16,44 +14,27 @@ export function useProjectMembers(projectId: string) {
       setLoading(true);
       setError(null);
       try {
-        const [users, agents] = await Promise.all([
-          loadApiData(
-            () => window.api.user.listAvailableUsers({}),
-            "Failed to load users",
-          ),
-          loadApiData(
-            () => window.api.agent.list({ projectId }),
-            "Failed to load agents",
-          ),
-        ]);
+        const users = await loadApiData(
+          () => window.api.user.listAvailableUsers({}),
+          "Failed to load users",
+        );
 
         const combinedMembers: Member[] = [];
 
-        // Add users
+        // Add all users (both humans and agents)
         users.forEach((user: UserSummary) => {
           combinedMembers.push({
             id: user.id,
             name: user.name,
             username: user.name.toLowerCase().replace(/\s+/g, ""),
-            status: "online", // Default status for users
+            status: user.status || "offline", // Use actual user status
             role: "member",
             avatarUrl: user.avatar || undefined,
-            type: "user",
+            type: user.type, // Will be "user" or "agent"
           });
         });
 
-        // Add agents
-        agents.forEach((agent: Agent) => {
-          combinedMembers.push({
-            id: agent.id,
-            name: agent.name,
-            username: agent.name.toLowerCase().replace(/\s+/g, ""),
-            status: agent.status === "active" ? "online" : "offline", // Map agent status
-            role: "member",
-            avatarUrl: agent.avatar || undefined,
-            type: "agent",
-          });
-        });
+        // Note: agents are now included in users query above since agents ARE users
 
         setMembers(combinedMembers);
       } catch (err: any) {

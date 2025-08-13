@@ -44,7 +44,7 @@ const handler = createIPCHandler({
       id: dbMessage.id,
       sourceType: dbMessage.sourceType,
       sourceId: dbMessage.sourceId,
-      authorId: dbMessage.ownerId, // Map ownerId to authorId for API consistency
+      authorId: dbMessage.authorId, // Now we have proper authorId field
       content: dbMessage.content,
       createdAt: new Date(dbMessage.createdAt),
       updatedAt: new Date(dbMessage.updatedAt),

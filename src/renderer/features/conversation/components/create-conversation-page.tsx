@@ -16,8 +16,8 @@ import {
   ProfileAvatarImage,
   ProfileAvatarStatus,
 } from "@/renderer/features/user/components/profile-avatar";
-import type { UserSummary } from "@/renderer/features/user/hooks/use-user-selection.hook";
-import { useUserSelection } from "@/renderer/features/user/hooks/use-user-selection.hook";
+import type { UserSummary } from "@/renderer/features/conversation/hooks/use-user-selection.hook";
+import { useUserSelection } from "@/renderer/features/conversation/hooks/use-user-selection.hook";
 import { useApiMutation } from "@/renderer/hooks/use-api-mutation.hook";
 import { cn } from "@/renderer/lib/utils";
 
@@ -52,7 +52,7 @@ export function CreateConversationPage({
       onSuccess: (response) => {
         // Invalidate conversations query to refresh the list
         queryClient.invalidateQueries({ queryKey: ["conversations"] });
-        
+
         // Response will have the conversation data
         if (response && typeof response === "object" && "id" in response) {
           handleSuccess(response.id as string);

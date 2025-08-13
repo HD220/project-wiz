@@ -148,10 +148,18 @@ export class WorkerManager {
     this.worker.stderr?.pipe(process.stderr);
 
     // Handle IPC messages from worker
-    this.worker.on("message", (message: any) => {
+    this.worker.on("message", async (message: any) => {
       this.logger.info("📨 Worker message received:", message);
+      
+      // Check if this is a domain operation request from worker
+      if (message.requestId && message.action) {
+        this.logger.info("📨 Processing domain operation request from worker:", message.action);
+        await this.handleWorkerRequest(message);
+        return;
+      }
+      
+      // Otherwise, handle as regular response callback
       this.logger.info(`📨 Active callbacks: ${this.messageCallbacks.size}`);
-      // Emit to all listeners (simple approach)
       this.messageCallbacks.forEach((callback, messageId) => {
         this.logger.info(`📨 Calling callback for messageId: ${messageId}`);
         callback(message);
@@ -161,6 +169,68 @@ export class WorkerManager {
 
   private delay(ms: number): Promise<void> {
     return new Promise((resolve) => setTimeout(resolve, ms));
+  }
+
+  /**
+   * Handle domain operation requests from worker
+   */
+  private async handleWorkerRequest(message: {
+    requestId: string;
+    action: string;
+    payload: any;
+  }): Promise<void> {
+    const { requestId, action, payload } = message;
+    
+    try {
+      let result: any;
+      
+      switch (action) {
+        case "getDecryptedApiKey":
+          result = await this.handleGetDecryptedApiKey(payload);
+          break;
+          
+        default:
+          throw new Error(`Unknown worker request action: ${action}`);
+      }
+      
+      // Send successful response back to worker
+      const response = {
+        success: true,
+        result,
+        requestId,
+      };
+      
+      this.logger.info("📨 Sending response back to worker:", response);
+      this.worker?.postMessage(response);
+      
+    } catch (error) {
+      // Send error response back to worker
+      const response = {
+        success: false,
+        error: error instanceof Error ? error.message : String(error),
+        requestId,
+      };
+      
+      this.logger.error("📨 Sending error response back to worker:", response);
+      this.worker?.postMessage(response);
+    }
+  }
+
+  /**
+   * Handle decrypted API key request from worker
+   */
+  private async handleGetDecryptedApiKey(payload: {
+    providerId: string;
+    ownerId: string;
+  }): Promise<{ apiKey: string }> {
+    const { getDecryptedApiKey } = await import("@/main/ipc/llm-provider/queries");
+    
+    const decryptedApiKey = await getDecryptedApiKey(
+      payload.providerId,
+      payload.ownerId,
+    );
+    
+    return { apiKey: decryptedApiKey };
   }
 
   // Send message and get response

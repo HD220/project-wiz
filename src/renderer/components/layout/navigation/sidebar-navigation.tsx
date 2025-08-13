@@ -6,7 +6,6 @@ import { Separator } from "@/renderer/components/ui/separator";
 import { ConversationSection } from "@/renderer/features/conversation";
 
 export function SidebarNavigation() {
-
   return (
     <ScrollArea className="flex-1">
       <nav
@@ -26,9 +25,7 @@ export function SidebarNavigation() {
         <Separator className="my-[var(--spacing-component-md)] bg-sidebar-border/40" />
 
         {/* Conversations Section - self-contained */}
-        <ConversationSection 
-          className="min-h-0 w-full overflow-hidden"
-        />
+        <ConversationSection className="min-h-0 w-full overflow-hidden" />
       </nav>
     </ScrollArea>
   );

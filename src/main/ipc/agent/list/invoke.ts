@@ -14,7 +14,6 @@ const logger = getLogger("agent.list.invoke");
 
 const ListAgentsInputSchema = z
   .object({
-    status: z.enum(["active", "inactive", "busy"]).optional(),
     search: z.string().optional(),
     showInactive: z.boolean().optional().default(false),
   })
@@ -33,7 +32,6 @@ const handler = createIPCHandler({
     // Query recebe dados e gerencia campos técnicos internamente
     const dbAgents = await listAgents({
       ownerId: currentUser.id,
-      status: input?.status,
       search: input?.search,
       showInactive: input?.showInactive,
     });
@@ -59,7 +57,12 @@ const handler = createIPCHandler({
           rawModelConfig: agent.modelConfig,
           error: error instanceof Error ? error.message : String(error),
         });
-        parsedModelConfig = { model: "gpt-4o", temperature: 0.7, maxTokens: 4096, topP: 0.95 };
+        parsedModelConfig = {
+          model: "gpt-4o",
+          temperature: 0.7,
+          maxTokens: 4096,
+          topP: 0.95,
+        };
       }
 
       return {
@@ -68,9 +71,12 @@ const handler = createIPCHandler({
         name: agent.name,
         avatar: agent.avatar,
         type: agent.type,
+        status: agent.status,
 
-        // State management (users)  
-        deactivatedAt: agent.deactivatedAt ? new Date(agent.deactivatedAt) : null,
+        // State management (users)
+        deactivatedAt: agent.deactivatedAt
+          ? new Date(agent.deactivatedAt)
+          : null,
 
         // Timestamps (users)
         createdAt: new Date(agent.createdAt),
@@ -83,7 +89,6 @@ const handler = createIPCHandler({
         goal: agent.goal,
         providerId: agent.providerId,
         modelConfig: parsedModelConfig,
-        status: agent.status,
       };
     });
 

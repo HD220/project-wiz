@@ -16,7 +16,7 @@ const { getDatabase } = createDatabaseConnection(true);
 export class Worker {
   private running = false;
   private config: ProcessorConfig = {
-    pollInterval: 500, // 500ms to reduce database load
+    pollInterval: 15000, // 15 seconds to reduce database load
     maxConcurrentJobs: 1, // Sequential processing
     retryDelay: 1000, // 1 second retry delay
   };
@@ -47,7 +47,7 @@ export class Worker {
           // Process job sequentially - one at a time
           await this.processJob(job);
         } else {
-          // No jobs found - wait before next poll
+          // No jobs found - wait before next poll (no logging to reduce spam)
           await this.delay(this.config.pollInterval);
         }
       } catch (error) {

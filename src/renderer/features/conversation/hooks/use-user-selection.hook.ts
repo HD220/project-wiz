@@ -5,6 +5,7 @@ export interface UserSummary {
   name: string;
   avatar: string | null;
   type: "human" | "agent";
+  status: "online" | "away" | "busy" | "offline";
 }
 
 export function useUserSelection(initialUsers: UserSummary[]) {

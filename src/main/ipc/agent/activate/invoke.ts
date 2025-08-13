@@ -60,6 +60,7 @@ const handler = createIPCHandler({
       name: dbAgent.name,
       avatar: dbAgent.avatar,
       type: dbAgent.type,
+      status: dbAgent.status,
 
       // State management (users)
       deactivatedAt: dbAgent.deactivatedAt
@@ -77,7 +78,6 @@ const handler = createIPCHandler({
       goal: dbAgent.goal,
       providerId: dbAgent.providerId,
       modelConfig: JSON.parse(dbAgent.modelConfig),
-      status: dbAgent.status,
     };
 
     eventBus.emit("agent:activated", { agentId: apiAgent.id });

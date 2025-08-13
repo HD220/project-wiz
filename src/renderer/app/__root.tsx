@@ -18,7 +18,7 @@ interface RouterContext {
 function RootComponent() {
   const router = useRouter();
   const isLoading = router.state.isLoading;
-  
+
   logger.info("RootComponent rendered", { isLoading });
 
   return (

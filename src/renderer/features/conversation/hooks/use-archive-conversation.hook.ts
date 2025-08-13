@@ -9,14 +9,11 @@ import { useApiMutation } from "@/renderer/hooks/use-api-mutation.hook";
 export function useArchiveConversation() {
   const queryClient = useQueryClient();
 
-  return useApiMutation(
-    (dmId: string) => window.api.dm.archive({ dmId }),
-    {
-      successMessage: "Conversation archived",
-      errorMessage: "Failed to archive conversation",
-      onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: ["conversations"] });
-      },
+  return useApiMutation((dmId: string) => window.api.dm.archive({ dmId }), {
+    successMessage: "Conversation archived",
+    errorMessage: "Failed to archive conversation",
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["conversations"] });
     },
-  );
+  });
 }

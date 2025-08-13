@@ -1,6 +1,8 @@
 import { sql } from "drizzle-orm";
 import { sqliteTable, text, integer, index } from "drizzle-orm/sqlite-core";
 
+export type UserStatus = "online" | "away" | "busy" | "offline";
+
 export const usersTable = sqliteTable(
   "users",
   {
@@ -10,6 +12,7 @@ export const usersTable = sqliteTable(
     name: text("name").notNull(),
     avatar: text("avatar"),
     type: text("type").$type<"human" | "agent">().notNull().default("human"),
+    status: text("status").$type<UserStatus>().notNull().default("offline"),
 
     // Soft deletion fields
     deactivatedAt: integer("deactivated_at", { mode: "timestamp_ms" }),
@@ -22,7 +25,8 @@ export const usersTable = sqliteTable(
       .default(sql`CURRENT_TIMESTAMP`),
   },
   (table) => ({
-    // Soft deletion indexes
+    // Performance indexes
+    statusIdx: index("users_status_idx").on(table.status),
     deactivatedAtIdx: index("users_deactivated_at_idx").on(table.deactivatedAt),
   }),
 );

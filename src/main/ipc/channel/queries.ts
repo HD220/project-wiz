@@ -382,7 +382,7 @@ export async function sendChannelMessage(
       messageId: message.id,
       conversationId: message.sourceId,
       conversationType: "channel",
-      authorId: message.ownerId, // Map ownerId to authorId for event consistency
+      authorId: message.authorId, // Now we have proper authorId field
       content: message.content,
       timestamp: new Date(message.createdAt),
     });

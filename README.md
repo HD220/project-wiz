@@ -12,21 +12,25 @@ Project Wiz é uma plataforma desktop inovadora que combina inteligência artifi
 ## ✨ Principais Funcionalidades
 
 ### 🤖 Agentes de IA Inteligentes
+
 - **Agentes Personalizáveis**: Crie assistentes de IA com roles, backstories e objetivos específicos
 - **Multi-Provider**: Suporte para OpenAI, Anthropic, DeepSeek, Google e provedores customizados
 - **Configuração Flexível**: Modelos e configurações adaptáveis para diferentes necessidades
 
 ### 🚀 Gestão de Projetos Avançada
+
 - **Integração Git**: Conecte repositórios e branches automaticamente
 - **Organização Intuitiva**: Gerencie projetos com descrições, avatares e paths locais
 - **Colaboração**: Trabalhe em equipe com canais de comunicação dedicados
 
 ### 💬 Comunicação Integrada
+
 - **Canais de Projeto**: Conversas organizadas por projeto com histórico completo
 - **Mensagens Diretas**: Comunicação privada entre membros da equipe
 - **Chat com IA**: Interaja diretamente com seus agentes de IA
 
 ### 🔐 Segurança Enterprise
+
 - **Autenticação Robusta**: Sistema de login e registro com sessões seguras
 - **Dados Locais**: SQLite local para controle total dos seus dados
 - **Criptografia**: Proteção de chaves de API e informações sensíveis
@@ -34,6 +38,7 @@ Project Wiz é uma plataforma desktop inovadora que combina inteligência artifi
 ## 🛠️ Stack Tecnológica
 
 ### Frontend
+
 - **React 19** - Interface moderna e responsiva
 - **TanStack Router** - Roteamento declarativo e type-safe
 - **TanStack Query** - Gerenciamento de estado e cache
@@ -41,18 +46,21 @@ Project Wiz é uma plataforma desktop inovadora que combina inteligência artifi
 - **Radix UI** - Componentes acessíveis e customizáveis
 
 ### Backend
+
 - **Electron** - Aplicação desktop multiplataforma
 - **Node.js** - Runtime JavaScript
 - **SQLite + Drizzle ORM** - Base de dados local com queries type-safe
 - **IPC Handlers** - Comunicação segura entre processos
 
 ### IA & Integrações
+
 - **Vercel AI SDK** - Integração unificada com LLMs
 - **Multi-Provider Support** - OpenAI, Anthropic, DeepSeek, Google
 - **Processamento Markdown** - Renderização rica de mensagens
 - **Git Integration** - Automação de workflows de desenvolvimento
 
 ### Desenvolvimento
+
 - **TypeScript** - Type safety em toda aplicação
 - **Vite** - Build tool moderna e rápida
 - **Vitest** - Testing framework
@@ -62,6 +70,7 @@ Project Wiz é uma plataforma desktop inovadora que combina inteligência artifi
 ## 🚀 Começando
 
 ### Pré-requisitos
+
 - Node.js 18+
 - npm ou yarn
 
@@ -133,18 +142,21 @@ src/
 ## 🎯 Casos de Uso
 
 ### Para Desenvolvedores
+
 - Automatize code reviews com agentes especializados
 - Configure assistentes para diferentes tecnologias
 - Gerencie múltiplos projetos em uma interface única
 - Colabore com equipes usando canais dedicados
 
 ### Para Equipes
+
 - Crie agentes especializados em arquitetura, testes, documentação
 - Centralize comunicação de projetos
 - Mantenha histórico de decisões e discussões
 - Integre workflows de desenvolvimento
 
 ### Para Empresas
+
 - Deploy local para controle total dos dados
 - Configuração de provedores de IA corporativos
 - Gestão de permissões e acesso
@@ -153,6 +165,7 @@ src/
 ## 🔧 Comandos Úteis
 
 ### Desenvolvimento
+
 ```bash
 npm run dev              # Inicia aplicação em modo desenvolvimento
 npm run db:studio        # Abre Drizzle Studio
@@ -161,6 +174,7 @@ npm run extract          # Extrai strings para i18n
 ```
 
 ### Qualidade
+
 ```bash
 npm run lint             # Verifica código com ESLint
 npm run type-check       # Verifica tipos TypeScript
@@ -169,6 +183,7 @@ npm run test:coverage    # Testes com coverage
 ```
 
 ### Build
+
 ```bash
 npm run build           # Build completo da aplicação
 npm run package         # Gera executável
@@ -177,6 +192,7 @@ npm run package         # Gera executável
 ## 🌍 Internacionalização
 
 Suporte completo para:
+
 - 🇧🇷 **Português (Brasil)** - Idioma padrão
 - 🇺🇸 **English (US)** - Totalmente traduzido
 

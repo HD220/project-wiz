@@ -6,7 +6,15 @@ export default defineConfig({
   plugins: [tsconfigPaths()],
   build: {
     rollupOptions: {
-      external: ["better-sqlite3", "pino", "pino-pretty"],
+      external: [
+        "better-sqlite3", 
+        "pino", 
+        "pino-pretty",
+        "@xenova/transformers",
+        "onnxruntime-node",
+        "sharp",
+		"sqlite-vec"
+      ],
     },
   },
   resolve: {

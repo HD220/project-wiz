@@ -28,7 +28,8 @@ interface ConfirmationDialogProps {
 
 const getVariantStyles = (variant: ConfirmationVariant) => {
   const styles = {
-    destructive: "bg-destructive text-destructive-foreground hover:bg-destructive/90",
+    destructive:
+      "bg-destructive text-destructive-foreground hover:bg-destructive/90",
     success: "bg-chart-2 text-chart-2-foreground hover:bg-chart-2/90",
     warning: "bg-amber-600 text-white hover:bg-amber-700",
     default: "bg-primary text-primary-foreground hover:bg-primary/90",
@@ -59,9 +60,7 @@ export function ConfirmationDialog(props: ConfirmationDialogProps) {
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>{title}</AlertDialogTitle>
-          <AlertDialogDescription>
-            {description}
-          </AlertDialogDescription>
+          <AlertDialogDescription>{description}</AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel disabled={isLoading}>

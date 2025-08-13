@@ -30,12 +30,12 @@ export function getParticipantUsers(
   currentUserId: string,
 ): User[] {
   // Create a map for faster lookup
-  const userMap = new Map(availableUsers.map(user => [user.id, user]));
-  
+  const userMap = new Map(availableUsers.map((user) => [user.id, user]));
+
   // Get user objects for each participant, excluding current user
   return participants
-    .filter(p => p.participantId !== currentUserId)
-    .map(p => userMap.get(p.participantId))
+    .filter((p) => p.participantId !== currentUserId)
+    .map((p) => userMap.get(p.participantId))
     .filter((user): user is User => user !== undefined);
 }
 
@@ -48,7 +48,6 @@ export function getOtherParticipants(
 ): User[] {
   return participants.filter((participant) => participant.id !== currentUserId);
 }
-
 
 /**
  * Create conversation avatar component based on participants (legacy function)

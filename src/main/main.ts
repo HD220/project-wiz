@@ -8,8 +8,8 @@ import { app, BrowserWindow } from "electron";
 import squirrel from "electron-squirrel-startup";
 
 // import { QueueClient } from "@/shared/queue-client/queue-client"; // Commented out - used only in test code
-// Worker management disabled
-// import { startWorker, stopWorker } from "@/main/services/worker-manager";
+// Worker management
+import { startWorker, stopWorker } from "@/main/services/worker-manager";
 // import { initializeAgenticWorkerHandler, agenticWorkerHandler } from "@/shared/worker/agentic-worker.handler"; // Removed - will be rewritten
 
 // Import all IPC handlers
@@ -183,17 +183,17 @@ function initializeJobResultHandler(): void {
 }
 
 /**
- * Initialize worker process - DISABLED
+ * Initialize worker process
  */
-// async function initializeWorker(): Promise<void> {
-//   try {
-//     await startWorker();
-//     logger.info("Worker process started successfully");
-//   } catch (error) {
-//     logger.error("Failed to start worker process:", error);
-//     // Don't fail the app if worker fails to start - it can be started later
-//   }
-// }
+async function initializeWorker(): Promise<void> {
+  try {
+    await startWorker();
+    logger.info("🚀 Worker process started successfully");
+  } catch (error) {
+    logger.error("❌ Failed to start worker process:", error);
+    // Don't fail the app if worker fails to start - it can be started later
+  }
+}
 
 /**
  * Initialize startup job with API key from environment
@@ -402,7 +402,7 @@ app.whenReady().then(async () => {
   await initializeSessionManager();
   await setupAllIpcHandlers();
   initializeJobResultHandler();
-  // await initializeWorker(); // Removed - worker disabled
+  await initializeWorker(); // Worker enabled for agent processing
   createMainWindow();
   setupMacOSHandlers();
 });
@@ -421,12 +421,11 @@ app.on("before-quit", async () => {
   logger.info("App is quitting, cleaning up services");
 
   try {
-    // agenticWorkerHandler.shutdown(); // Removed - will be rewritten
     eventBus.shutdown();
-    // await stopWorker(); // Removed - worker disabled
-    logger.info("AgenticWorkerHandler and EventBus stopped successfully");
+    await stopWorker(); // Worker enabled - proper cleanup
+    logger.info("🛑 Worker and EventBus stopped successfully");
   } catch (error) {
-    logger.error("Error stopping services:", error);
+    logger.error("❌ Error stopping services:", error);
   }
 });
 

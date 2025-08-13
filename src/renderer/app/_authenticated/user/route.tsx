@@ -1,16 +1,16 @@
 import { createFileRoute, Outlet } from "@tanstack/react-router";
 
 import { UserSidebar } from "@/renderer/components/app/user-sidebar";
-import { 
-  ResizablePanelGroup, 
-  ResizablePanel, 
-  ResizableHandle 
+import {
+  ResizablePanelGroup,
+  ResizablePanel,
+  ResizableHandle,
 } from "@/renderer/components/ui/resizable";
 
 function UserLayout() {
   return (
     <div className="h-full w-full">
-      <ResizablePanelGroup 
+      <ResizablePanelGroup
         direction="horizontal"
         className="h-full"
         id="user-layout"
@@ -23,9 +23,9 @@ function UserLayout() {
         >
           <UserSidebar />
         </ResizablePanel>
-        
+
         <ResizableHandle withHandle />
-        
+
         <ResizablePanel className="min-w-0">
           <main className="h-full w-full">
             <Outlet />

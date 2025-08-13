@@ -16,14 +16,13 @@ export function ArchivedConversationBanner(
   props: ArchivedConversationBannerProps,
 ) {
   const { conversationId, archivedAt, className } = props;
-  
+
   // Use specific hook for unarchive action
   const unarchiveMutation = useUnarchiveConversation();
 
   function handleUnarchive() {
     unarchiveMutation.mutate(conversationId);
   }
-
 
   return (
     <div
@@ -53,7 +52,9 @@ export function ArchivedConversationBanner(
             <div className="flex items-center gap-3 text-sm text-amber-700 dark:text-amber-300">
               <div className="flex items-center gap-1.5">
                 <Calendar className="h-3.5 w-3.5" />
-                <span className="font-medium">{formatArchivedDate(archivedAt)}</span>
+                <span className="font-medium">
+                  {formatArchivedDate(archivedAt)}
+                </span>
               </div>
               <div className="w-1 h-1 bg-amber-500 rounded-full" />
               <div className="flex items-center gap-1.5">

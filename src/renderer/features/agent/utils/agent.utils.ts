@@ -11,7 +11,10 @@ export interface ParsedModelConfig {
   [key: string]: any;
 }
 
-export function parseModelConfig(modelConfig: any, agentId?: string): ParsedModelConfig {
+export function parseModelConfig(
+  modelConfig: any,
+  agentId?: string,
+): ParsedModelConfig {
   const defaultConfig: ParsedModelConfig = {
     model: "Unknown Model",
     temperature: 0.7,
@@ -24,30 +27,30 @@ export function parseModelConfig(modelConfig: any, agentId?: string): ParsedMode
     return defaultConfig;
   }
 
-  if (typeof modelConfig === 'object') {
+  if (typeof modelConfig === "object") {
     logger.debug("Parsed modelConfig from object", { agentId, modelConfig });
     return { ...defaultConfig, ...modelConfig };
   }
 
-  if (typeof modelConfig === 'string') {
+  if (typeof modelConfig === "string") {
     try {
       const parsed = JSON.parse(modelConfig);
       logger.debug("Parsed modelConfig from JSON string", { agentId, parsed });
       return { ...defaultConfig, ...parsed };
     } catch (error) {
-      logger.error("Failed to parse modelConfig JSON", { 
-        agentId, 
+      logger.error("Failed to parse modelConfig JSON", {
+        agentId,
         modelConfig,
-        error: error instanceof Error ? error.message : String(error)
+        error: error instanceof Error ? error.message : String(error),
       });
       return defaultConfig;
     }
   }
 
-  logger.warn("Unexpected modelConfig type", { 
-    agentId, 
+  logger.warn("Unexpected modelConfig type", {
+    agentId,
     type: typeof modelConfig,
-    value: modelConfig 
+    value: modelConfig,
   });
   return defaultConfig;
 }

@@ -49,9 +49,7 @@ const handler = createIPCHandler({
       deactivatedAt: dbProject.deactivatedAt
         ? new Date(dbProject.deactivatedAt)
         : null,
-      archivedAt: dbProject.archivedAt
-        ? new Date(dbProject.archivedAt)
-        : null,
+      archivedAt: dbProject.archivedAt ? new Date(dbProject.archivedAt) : null,
       createdAt: new Date(dbProject.createdAt),
       updatedAt: new Date(dbProject.updatedAt),
     };

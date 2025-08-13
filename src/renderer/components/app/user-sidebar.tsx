@@ -9,7 +9,6 @@ interface UserSidebarProps {
 }
 
 export function UserSidebar({ className }: UserSidebarProps) {
-
   return (
     <aside
       className={cn(

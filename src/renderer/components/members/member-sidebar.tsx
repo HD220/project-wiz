@@ -11,14 +11,14 @@ import {
 import type { UserStatusType } from "@/renderer/features/user/components/user-status";
 import { cn } from "@/renderer/lib/utils";
 
-interface Member {
+export interface Member {
   id: string;
   name: string;
   username?: string;
   status: UserStatusType;
   role?: "owner" | "admin" | "member";
   avatarUrl?: string;
-  type?: "user" | "agent";
+  type?: "human" | "agent";
 }
 
 interface MemberSidebarProps {
@@ -205,4 +205,3 @@ export function MemberSidebar(props: MemberSidebarProps) {
   );
 }
 
-export type { Member };

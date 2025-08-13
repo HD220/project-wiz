@@ -6,7 +6,6 @@ import { ConversationList } from "@/renderer/features/conversation/components/co
 import { useConversations } from "@/renderer/features/conversation/hooks/use-conversations.hook";
 import { cn } from "@/renderer/lib/utils";
 
-
 interface ConversationSectionProps {
   className?: string;
 }
@@ -18,9 +17,10 @@ interface ConversationSectionProps {
 export function ConversationSection({ className }: ConversationSectionProps) {
   const navigate = useNavigate();
   const [showArchived, setShowArchived] = useState(false);
-  
-  const { conversations: allConversations, isLoading: conversationsLoading } = useConversations();
-  
+
+  const { conversations: allConversations, isLoading: conversationsLoading } =
+    useConversations();
+
   // Load available users for combining with conversation data
   const { data: availableUsers = [], isLoading: usersLoading } = useQuery({
     queryKey: ["availableUsers"],
@@ -34,12 +34,12 @@ export function ConversationSection({ className }: ConversationSectionProps) {
     staleTime: 5 * 60 * 1000, // 5 minutes
     refetchOnWindowFocus: false,
   });
-  
+
   // Filter conversations on frontend based on showArchived state
-  const conversations = allConversations.filter(conversation => 
-    showArchived ? !!conversation.archivedAt : !conversation.archivedAt
+  const conversations = allConversations.filter((conversation) =>
+    showArchived ? !!conversation.archivedAt : !conversation.archivedAt,
   );
-  
+
   const isLoading = conversationsLoading || usersLoading;
 
   const handleToggleArchived = (checked: boolean) => {

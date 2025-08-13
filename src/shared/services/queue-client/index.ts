@@ -148,7 +148,7 @@ export class QueueClient extends EventEmitter {
       this.checkJobStatuses().catch((error) => {
         this.logger.error("❌ Error during job status polling:", error);
       });
-    }, 1000); // Poll every second
+    }, 30000); // Poll every 30 seconds
 
     this.logger.debug("🔄 Started job status polling");
   }

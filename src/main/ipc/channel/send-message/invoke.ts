@@ -25,11 +25,12 @@ const handler = createIPCHandler({
 
     const currentUser = requireAuth();
 
-    // Send message to channel
+    // Send message to channel - need to get channel owner and set proper fields
     const messageData = {
       sourceType: "channel" as const,
       sourceId: input.sourceId,
-      ownerId: currentUser.id, // Use ownerId for database consistency
+      ownerId: currentUser.id, // For now assume current user owns channel (TODO: get actual owner)
+      authorId: currentUser.id, // Who is sending the message
       content: input.content,
     };
 
@@ -40,7 +41,7 @@ const handler = createIPCHandler({
       id: dbMessage.id,
       sourceType: dbMessage.sourceType,
       sourceId: dbMessage.sourceId,
-      authorId: dbMessage.ownerId, // Map ownerId to authorId for API consistency
+      authorId: dbMessage.authorId, // Now we have proper authorId field
       content: dbMessage.content,
       createdAt: new Date(dbMessage.createdAt),
       updatedAt: new Date(dbMessage.updatedAt),

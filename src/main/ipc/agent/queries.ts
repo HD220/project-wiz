@@ -1,10 +1,6 @@
 import { eq, and, desc, like, or, isNull } from "drizzle-orm";
 
-import {
-  agentsTable,
-  type UpdateAgent,
-  type AgentStatus,
-} from "@/main/schemas/agent.schema";
+import { agentsTable, type UpdateAgent } from "@/main/schemas/agent.schema";
 import { llmProvidersTable } from "@/main/schemas/llm-provider.schema";
 import { usersTable } from "@/main/schemas/user.schema";
 
@@ -44,16 +40,13 @@ export async function findAgent(
       goal: agentsTable.goal,
       providerId: agentsTable.providerId,
       modelConfig: agentsTable.modelConfig,
-      status: agentsTable.status,
+      
+      // Status from users table
+      status: usersTable.status,
     })
     .from(agentsTable)
     .innerJoin(usersTable, eq(agentsTable.id, usersTable.id))
-    .where(
-      and(
-        eq(agentsTable.id, agentId),
-        eq(agentsTable.ownerId, ownerId),
-      ),
-    )
+    .where(and(eq(agentsTable.id, agentId), eq(agentsTable.ownerId, ownerId)))
     .limit(1);
 
   return agent as Agent | null;
@@ -110,11 +103,7 @@ export async function getActiveAgentsCount(ownerId: string): Promise<number> {
     .from(agentsTable)
     .innerJoin(usersTable, eq(agentsTable.id, usersTable.id))
     .where(
-      and(
-        eq(agentsTable.ownerId, ownerId),
-        isNull(usersTable.deactivatedAt),
-        eq(agentsTable.status, "active"),
-      ),
+      and(eq(agentsTable.ownerId, ownerId), isNull(usersTable.deactivatedAt)),
     );
 
   return result.length;
@@ -185,7 +174,6 @@ export async function createAgent(data: {
           typeof data.modelConfig === "string"
             ? data.modelConfig
             : JSON.stringify(data.modelConfig),
-        status: "inactive", // Sempre começa como inactive
       })
       .returning({ id: agentsTable.id })
       .all();
@@ -220,7 +208,6 @@ export async function createAgent(data: {
         goal: agentsTable.goal,
         providerId: agentsTable.providerId,
         modelConfig: agentsTable.modelConfig,
-        status: agentsTable.status,
       })
       .from(agentsTable)
       .innerJoin(usersTable, eq(agentsTable.id, usersTable.id))
@@ -242,7 +229,6 @@ export async function createAgent(data: {
  */
 export async function listAgents(filters: {
   ownerId: string;
-  status?: AgentStatus;
   search?: string;
   showInactive?: boolean;
 }): Promise<Agent[]> {
@@ -255,10 +241,7 @@ export async function listAgents(filters: {
     conditions.push(isNull(usersTable.deactivatedAt));
   }
 
-  // Add status filter
-  if (filters.status) {
-    conditions.push(eq(agentsTable.status, filters.status));
-  }
+  // Status filtering is now handled by deactivatedAt field above
 
   // Add search filter (search in name and role)
   if (filters.search) {
@@ -294,7 +277,9 @@ export async function listAgents(filters: {
       goal: agentsTable.goal,
       providerId: agentsTable.providerId,
       modelConfig: agentsTable.modelConfig,
-      status: agentsTable.status,
+      
+      // Status from users table
+      status: usersTable.status,
     })
     .from(agentsTable)
     .innerJoin(usersTable, eq(agentsTable.id, usersTable.id))

@@ -1,1 +1,1 @@
-export { AgentStatus } from "./agent-status";
+// AgentStatus component removed - use UserStatusBadge from @/renderer/components/user-status instead

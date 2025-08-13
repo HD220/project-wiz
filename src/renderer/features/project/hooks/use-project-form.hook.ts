@@ -57,7 +57,7 @@ const ProjectFormSchema = z
 
 export type ProjectFormData = z.infer<typeof ProjectFormSchema>;
 
-// Schema for creating projects - omit auto-generated and system-managed fields  
+// Schema for creating projects - omit auto-generated and system-managed fields
 const CreateProjectSchema = ProjectSchema.omit({
   id: true,
   ownerId: true,
@@ -125,8 +125,8 @@ export function useProjectForm({
       description: data.description?.trim() || null,
       avatarUrl: null,
       localPath,
-      gitUrl: data.type === "github" ? (data.gitUrl?.trim() || null) : null,
-      branch: data.type === "github" ? (data.branch?.trim() || "main") : null,
+      gitUrl: data.type === "github" ? data.gitUrl?.trim() || null : null,
+      branch: data.type === "github" ? data.branch?.trim() || "main" : null,
     };
 
     createProjectMutation.mutate(projectData);

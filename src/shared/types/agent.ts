@@ -8,6 +8,7 @@ export const AgentSchema = z.object({
   name: z.string(),
   avatar: z.string().nullable(),
   type: z.literal("agent"),
+  status: z.enum(["online", "away", "busy", "offline"]),
   deactivatedAt: z.date().nullable(),
   createdAt: z.date(),
   updatedAt: z.date(),
@@ -17,7 +18,6 @@ export const AgentSchema = z.object({
   goal: z.string(),
   providerId: z.string(),
   modelConfig: z.any(),
-  status: z.enum(["active", "inactive", "busy"]),
 });
 
 export type Agent = z.infer<typeof AgentSchema>;

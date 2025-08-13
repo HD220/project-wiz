@@ -16,6 +16,7 @@ import { usersTable } from "@/main/schemas/user.schema";
 import { createDatabaseConnection } from "@/shared/config/database";
 import { eventBus } from "@/shared/services/events/event-bus";
 import { getLogger } from "@/shared/services/logger/config";
+import { DMDispatcher } from "@/main/services/dm-dispatcher";
 
 const { getDatabase } = createDatabaseConnection(true);
 const logger = getLogger("dm.queries");
@@ -65,7 +66,9 @@ async function generateDMTitle(
 export async function findDMConversation(
   id: string,
   ownerId: string,
-): Promise<(SelectDMConversation & { participants: SelectDMParticipant[] }) | null> {
+): Promise<
+  (SelectDMConversation & { participants: SelectDMParticipant[] }) | null
+> {
   const db = getDatabase();
 
   // Get conversation
@@ -274,7 +277,7 @@ export async function listUserDMConversations(filters: {
     .select({
       id: messagesTable.id,
       content: messagesTable.content,
-      authorId: messagesTable.ownerId, // Map ownerId to authorId for API consistency
+      authorId: messagesTable.authorId, // Now we have proper authorId field
       sourceId: messagesTable.sourceId,
       createdAt: messagesTable.createdAt,
       updatedAt: messagesTable.updatedAt,
@@ -484,16 +487,34 @@ export async function sendDMMessage(data: {
   sourceType: "dm";
   sourceId: string;
   content: string;
+  ownerId?: string; // Optional - will be inferred from DM conversation if not provided
 }): Promise<SelectMessage> {
   const db = getDatabase();
 
-  // 1. Send message to database
+  // 1. Get DM conversation to determine ownerId if not provided
+  let ownerId = data.ownerId;
+  if (!ownerId) {
+    const dmConversation = await db
+      .select({ ownerId: dmConversationsTable.ownerId })
+      .from(dmConversationsTable)
+      .where(eq(dmConversationsTable.id, data.sourceId))
+      .get();
+
+    if (!dmConversation) {
+      throw new Error(`DM conversation ${data.sourceId} not found`);
+    }
+
+    ownerId = dmConversation.ownerId;
+  }
+
+  // 2. Send message to database with correct ownership
   const [message] = await db
     .insert(messagesTable)
     .values({
       sourceType: data.sourceType,
       sourceId: data.sourceId,
-      ownerId: data.authorId,
+      ownerId: ownerId, // Who OWNS the conversation
+      authorId: data.authorId, // Who WROTE the message
       content: data.content,
     })
     .returning();
@@ -502,27 +523,44 @@ export async function sendDMMessage(data: {
     throw new Error("Failed to send message");
   }
 
-  // 2. Emit user-sent-message event
+  // 2. Dispatch message to agents in conversation
   try {
-    logger.debug("📤 Emitting user-sent-message event:", {
+    logger.debug("📤 Dispatching message to agents:", {
       messageId: message.id,
       sourceType: message.sourceType,
       sourceId: message.sourceId,
     });
 
-    eventBus.emit("user-sent-message", {
+    // Use simple dispatcher (no LLM, just route to all agents)
+    await DMDispatcher.dispatchMessage({
       messageId: message.id,
       conversationId: message.sourceId,
-      conversationType: "dm",
-      authorId: message.ownerId, // Map ownerId to authorId for event consistency
+      authorId: message.authorId, // Now we have proper authorId field
       content: message.content,
       timestamp: new Date(message.createdAt),
     });
 
-    logger.info("✅ User message event emitted successfully:", {
+    logger.info("✅ Message dispatched to agents successfully:", {
       messageId: message.id,
       conversationId: message.sourceId,
     });
+  } catch (error) {
+    logger.error("❌ Failed to dispatch message to agents:", error);
+    // Don't fail the message sending if dispatch fails - log and continue
+  }
+
+  // 3. Emit user-sent-message event for UI updates
+  try {
+    eventBus.emit("user-sent-message", {
+      messageId: message.id,
+      conversationId: message.sourceId,
+      conversationType: "dm",
+      authorId: message.authorId, // Now we have proper authorId field
+      content: message.content,
+      timestamp: new Date(message.createdAt),
+    });
+
+    logger.debug("✅ User message event emitted for UI updates");
   } catch (error) {
     logger.error("❌ Failed to emit user message event:", error);
     // Don't fail the message sending if event emission fails

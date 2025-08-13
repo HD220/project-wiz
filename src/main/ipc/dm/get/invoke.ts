@@ -20,14 +20,16 @@ const GetDMInputSchema = z.object({
 const GetDMOutputSchema = DMConversationSchema.extend({
   isActive: z.boolean(),
   deactivatedAt: z.date().nullable(),
-  participants: z.array(z.object({
-    id: z.string(),
-    dmConversationId: z.string(),
-    participantId: z.string(),
-    deactivatedAt: z.date().nullable(),
-    createdAt: z.date(),
-    updatedAt: z.date(),
-  })),
+  participants: z.array(
+    z.object({
+      id: z.string(),
+      dmConversationId: z.string(),
+      participantId: z.string(),
+      deactivatedAt: z.date().nullable(),
+      createdAt: z.date(),
+      updatedAt: z.date(),
+    }),
+  ),
 }).nullable();
 
 const handler = createIPCHandler({

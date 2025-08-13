@@ -2,10 +2,10 @@ import { createFileRoute, Outlet } from "@tanstack/react-router";
 
 import { ProjectSidebar } from "@/renderer/components/app/project-sidebar";
 import { loadApiData } from "@/renderer/lib/route-loader";
-import { 
-  ResizablePanelGroup, 
-  ResizablePanel, 
-  ResizableHandle 
+import {
+  ResizablePanelGroup,
+  ResizablePanel,
+  ResizableHandle,
 } from "@/renderer/components/ui/resizable";
 
 function ProjectLayout() {
@@ -21,7 +21,7 @@ function ProjectLayout() {
 
   return (
     <div className="h-full w-full">
-      <ResizablePanelGroup 
+      <ResizablePanelGroup
         direction="horizontal"
         className="h-full"
         id="project-layout"
@@ -34,9 +34,9 @@ function ProjectLayout() {
         >
           <ProjectSidebar project={project} conversations={[]} agents={[]} />
         </ResizablePanel>
-        
+
         <ResizableHandle withHandle />
-        
+
         <ResizablePanel className="min-w-0">
           <main className="h-full w-full">
             <Outlet />

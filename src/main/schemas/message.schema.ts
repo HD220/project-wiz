@@ -1,11 +1,5 @@
 import { sql } from "drizzle-orm";
-import {
-  sqliteTable,
-  text,
-  integer,
-  index,
-  primaryKey,
-} from "drizzle-orm/sqlite-core";
+import { sqliteTable, text, integer, index } from "drizzle-orm/sqlite-core";
 
 import { usersTable } from "@/main/schemas/user.schema";
 
@@ -15,16 +9,23 @@ export const messagesTable = sqliteTable(
   "messages",
   {
     id: text("id")
-      .notNull()
+      .primaryKey()
       .$defaultFn(() => crypto.randomUUID()),
 
     // Polymorphic reference - can point to DM or Channel
     sourceType: text("source_type").$type<MessageSourceType>().notNull(),
     sourceId: text("source_id").notNull(), // dm_conversation_id or project_channel_id
 
+    // Who OWNS/CONTROLS this message (user who owns the conversation)
     ownerId: text("owner_id")
       .notNull()
       .references(() => usersTable.id, { onDelete: "cascade" }),
+
+    // Who AUTHORED/SENT this message (user or agent who wrote it)
+    authorId: text("author_id")
+      .notNull()
+      .references(() => usersTable.id, { onDelete: "cascade" }),
+
     content: text("content").notNull(),
 
     // Soft deletion fields
@@ -38,11 +39,9 @@ export const messagesTable = sqliteTable(
       .default(sql`(unixepoch() * 1000)`),
   },
   (table) => ({
-    // Composite primary key
-    pk: primaryKey({ columns: [table.ownerId, table.id] }),
-
     // Performance indexes for foreign keys
     ownerIdIdx: index("messages_owner_id_idx").on(table.ownerId),
+    authorIdIdx: index("messages_author_id_idx").on(table.authorId),
     sourceTypeIdx: index("messages_source_type_idx").on(table.sourceType),
     sourceIdIdx: index("messages_source_id_idx").on(table.sourceId),
     createdAtIdx: index("messages_created_at_idx").on(table.createdAt),
@@ -70,7 +69,9 @@ export const messagesTable = sqliteTable(
 export const llmMessagesTable = sqliteTable(
   "llm_messages",
   {
-    id: text("id").$defaultFn(() => crypto.randomUUID()),
+    id: text("id")
+      .primaryKey()
+      .$defaultFn(() => crypto.randomUUID()),
     ownerId: text("owner_id")
       .notNull()
       .references(() => usersTable.id, { onDelete: "cascade" }),
@@ -93,9 +94,6 @@ export const llmMessagesTable = sqliteTable(
       .default(sql`(unixepoch() * 1000)`),
   },
   (table) => ({
-    // Composite primary key
-    pk: primaryKey({ columns: [table.ownerId, table.id] }),
-
     // Performance indexes
     ownerIdIdx: index("llm_messages_owner_id_idx").on(table.ownerId),
     messageIdIdx: index("llm_messages_message_id_idx").on(table.messageId),

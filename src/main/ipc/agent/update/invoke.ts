@@ -22,7 +22,7 @@ const UpdateAgentInputSchema = z.object({
     goal: true,
     providerId: true,
     modelConfig: true,
-    status: true,
+    deactivatedAt: true,
     avatar: true,
   }).partial(),
 });
@@ -77,7 +77,7 @@ const handler = createIPCHandler({
     logger.debug("Agent updated", {
       agentId: apiAgent.id,
       agentName: apiAgent.name,
-      status: apiAgent.status,
+      deactivatedAt: apiAgent.deactivatedAt,
     });
 
     // Emit specific event for update

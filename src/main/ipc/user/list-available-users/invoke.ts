@@ -33,6 +33,7 @@ const handler = createIPCHandler({
       name: dbUser.name,
       avatar: dbUser.avatar,
       type: dbUser.type,
+      status: dbUser.status,
       createdAt: new Date(dbUser.createdAt),
       updatedAt: new Date(dbUser.updatedAt),
     }));

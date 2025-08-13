@@ -26,7 +26,7 @@ export function ConversationHeader({
         <h2 className="text-xs font-semibold text-sidebar-foreground/60 uppercase tracking-wide">
           Direct Messages
         </h2>
-        
+
         <Button
           variant="ghost"
           size="icon"
@@ -49,7 +49,7 @@ export function ConversationHeader({
             Show Archived
           </span>
         </div>
-        
+
         <Switch
           checked={showArchived}
           onCheckedChange={onToggleArchived}

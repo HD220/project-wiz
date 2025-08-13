@@ -17,11 +17,6 @@ export type { Agent };
 export type { CreateAgentInput, AgentFiltersInput, ModelConfigInput };
 
 /**
- * Agent status type
- */
-export type AgentStatus = "active" | "inactive" | "busy";
-
-/**
  * Select variant of Agent - used in database queries
  * This represents an Agent as returned by database select operations
  */
@@ -39,13 +34,19 @@ export interface AgentWithProvider extends Agent {
 }
 
 /**
+ * User status types for presence indication
+ */
+export type UserStatus = "online" | "away" | "busy" | "offline";
+
+/**
  * Agent list item - minimal agent data for list displays
  */
 export interface AgentListItem {
   id: string;
   name: string;
   role: string;
-  status: AgentStatus;
+  status: UserStatus;
+  deactivatedAt: Date | null;
   avatar: string | null;
   providerId: string;
   createdAt: Date;
@@ -60,7 +61,8 @@ export interface UpdateAgentInput {
   role?: string;
   backstory?: string;
   goal?: string;
-  status?: AgentStatus;
+  status?: UserStatus;
+  deactivatedAt?: Date | null;
   avatar?: string | null;
   providerId?: string;
   modelConfig?: string;
