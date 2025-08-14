@@ -3,7 +3,7 @@ import { z } from "zod";
 import { setDefaultLlmProvider } from "@/main/ipc/llm-provider/queries";
 import { requireAuth } from "@/main/services/session-registry";
 
-import { eventBus } from "@/shared/services/events/event-bus";
+import { emit } from "@/shared/services/events/event-bus";
 import { getLogger } from "@/shared/services/logger/config";
 import {
   createIPCHandler,
@@ -37,7 +37,7 @@ const handler = createIPCHandler({
     });
 
     // Emit specific event
-    eventBus.emit("llm-provider:default-changed", {
+    emit("llm-provider:default-changed", {
       providerId: input.providerId,
     });
 

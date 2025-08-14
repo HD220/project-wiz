@@ -13,7 +13,7 @@ import {
 import { projectsTable } from "@/main/schemas/project.schema";
 
 import { createDatabaseConnection } from "@/shared/config/database";
-import { eventBus } from "@/shared/services/events/event-bus";
+import { emit } from "@/shared/services/events/event-bus";
 import { getLogger } from "@/shared/services/logger/config";
 
 const { getDatabase } = createDatabaseConnection(true);
@@ -378,7 +378,7 @@ export async function sendChannelMessage(
       sourceId: message.sourceId,
     });
 
-    eventBus.emit("user-sent-message", {
+    emit("user-sent-message", {
       messageId: message.id,
       conversationId: message.sourceId,
       conversationType: "channel",

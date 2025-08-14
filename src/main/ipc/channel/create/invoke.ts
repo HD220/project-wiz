@@ -1,7 +1,7 @@
 import { createProjectChannel } from "@/main/ipc/channel/queries";
 import { requireAuth } from "@/main/services/session-registry";
 
-import { eventBus } from "@/shared/services/events/event-bus";
+import { emit } from "@/shared/services/events/event-bus";
 import { getLogger } from "@/shared/services/logger/config";
 import { ChannelSchema } from "@/shared/types";
 import {
@@ -48,7 +48,7 @@ const handler = createIPCHandler({
     };
 
     // Emit event
-    eventBus.emit("channel:created", { channelId: apiChannel.id });
+    emit("channel:created", { channelId: apiChannel.id });
 
     logger.debug("Channel created", { channelId: apiChannel.id });
 

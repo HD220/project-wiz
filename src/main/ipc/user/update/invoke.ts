@@ -3,7 +3,7 @@ import { z } from "zod";
 import { updateUser } from "@/main/ipc/user/queries";
 import { requireAuth } from "@/main/services/session-registry";
 
-import { eventBus } from "@/shared/services/events/event-bus";
+import { emit } from "@/shared/services/events/event-bus";
 import { getLogger } from "@/shared/services/logger/config";
 import { UserSchema } from "@/shared/types";
 import {
@@ -59,7 +59,7 @@ const handler = createIPCHandler({
     });
 
     // Emit specific event for update
-    eventBus.emit("user:updated", { userId: apiUser.id });
+    emit("user:updated", { userId: apiUser.id });
 
     return apiUser;
   },

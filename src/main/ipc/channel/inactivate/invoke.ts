@@ -3,7 +3,7 @@ import { z } from "zod";
 import { inactivateProjectChannel } from "@/main/ipc/channel/queries";
 import { requireAuth } from "@/main/services/session-registry";
 
-import { eventBus } from "@/shared/services/events/event-bus";
+import { emit } from "@/shared/services/events/event-bus";
 import { getLogger } from "@/shared/services/logger/config";
 import { ChannelSchema } from "@/shared/types/channel";
 import {
@@ -56,7 +56,7 @@ const handler = createIPCHandler({
     logger.debug("Channel inactivated", { channelId: apiChannel.id });
 
     // Emit specific event for channel inactivation
-    eventBus.emit("channel:inactivated", { channelId: apiChannel.id });
+    emit("channel:inactivated", { channelId: apiChannel.id });
 
     return apiChannel;
   },

@@ -3,7 +3,7 @@ import { z } from "zod";
 import { findDMConversation } from "@/main/ipc/dm/queries";
 import { requireAuth } from "@/main/services/session-registry";
 
-import { eventBus } from "@/shared/services/events/event-bus";
+import { emit } from "@/shared/services/events/event-bus";
 import { getLogger } from "@/shared/services/logger/config";
 import { DMConversationSchema } from "@/shared/types/dm-conversation";
 import {
@@ -72,7 +72,7 @@ const handler = createIPCHandler({
     logger.debug("DM found", { found: !!result, dmId: input.dmId });
 
     // Emit event
-    eventBus.emit("dm:get", { dmId: input.dmId, found: !!result });
+    emit("dm:get", { dmId: input.dmId, found: !!result });
 
     return result;
   },

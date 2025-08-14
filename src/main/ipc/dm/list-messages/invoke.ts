@@ -3,7 +3,7 @@ import { z } from "zod";
 import { getDMMessages } from "@/main/ipc/dm/queries";
 import { requireAuth } from "@/main/services/session-registry";
 
-import { eventBus } from "@/shared/services/events/event-bus";
+import { emit } from "@/shared/services/events/event-bus";
 import { getLogger } from "@/shared/services/logger/config";
 import { MessageSchema } from "@/shared/types";
 import {
@@ -48,7 +48,7 @@ const handler = createIPCHandler({
     });
 
     // Emit event
-    eventBus.emit("dm:list-messages", {
+    emit("dm:list-messages", {
       dmId: input.dmId,
       messageCount: apiMessages.length,
     });

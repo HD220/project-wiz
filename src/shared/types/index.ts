@@ -7,3 +7,14 @@ export * from "./message";
 export * from "./profile";
 export * from "./project";
 export * from "./user";
+
+// Export reactive events types
+export type {
+  EventDefinitions,
+  EventDomain,
+  EventAction,
+  EventData,
+  EventPayload,
+  EventListener,
+  EventPattern,
+} from "./reactive-events.types";

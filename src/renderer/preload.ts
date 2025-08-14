@@ -126,8 +126,79 @@ contextBridge.exposeInMainWorld("api", {
     close: () => ipcRenderer.invoke("invoke:window:close"),
   } satisfies WindowAPI.Window,
 
-  // Event system for reactive stores
-  event: {
-    register: (input) => ipcRenderer.invoke("invoke:event:register", input),
-  } satisfies WindowAPI.Event,
 } satisfies WindowAPI.API);
+
+// Track event callbacks for proper cleanup
+const eventCallbacks = new Map<string, Map<unknown, unknown>>();
+
+// Expose reactive events bridge for useReactiveQuery hook
+contextBridge.exposeInMainWorld("events", {
+  /**
+   * Register an event listener for reactive events
+   *
+   * @param eventName - The event name to listen for (e.g., "event:messages")
+   * @param callback - Callback function to handle the event data
+   */
+  on: <T = unknown>(eventName: string, callback: (data: T) => void) => {
+    const wrappedCallback = (_event: Electron.IpcRendererEvent, data: T) => {
+      callback(data);
+    };
+
+    // Track the callback mapping for proper cleanup
+    if (!eventCallbacks.has(eventName)) {
+      eventCallbacks.set(eventName, new Map());
+    }
+    eventCallbacks.get(eventName)!.set(callback, wrappedCallback);
+
+    ipcRenderer.on(eventName, wrappedCallback);
+
+    // Return cleanup function
+    return () => {
+      const callbackMap = eventCallbacks.get(eventName);
+      if (callbackMap?.has(callback)) {
+        const wrappedCb = callbackMap.get(callback);
+        if (wrappedCb) {
+          ipcRenderer.removeListener(
+            eventName,
+            wrappedCb as Parameters<typeof ipcRenderer.removeListener>[1],
+          );
+          callbackMap.delete(callback);
+        }
+      }
+    };
+  },
+
+  /**
+   * Remove an event listener for reactive events
+   *
+   * @param eventName - The event name to stop listening for
+   * @param callback - The callback function to remove
+   */
+  off: <T = unknown>(eventName: string, callback: (data: T) => void) => {
+    const callbackMap = eventCallbacks.get(eventName);
+    if (callbackMap?.has(callback)) {
+      const wrappedCallback = callbackMap.get(callback);
+      if (wrappedCallback) {
+        ipcRenderer.removeListener(
+          eventName,
+          wrappedCallback as Parameters<typeof ipcRenderer.removeListener>[1],
+        );
+        callbackMap.delete(callback);
+      }
+    }
+  },
+
+  /**
+   * Register a one-time event listener
+   *
+   * @param eventName - The event name to listen for
+   * @param callback - Callback function to handle the event data
+   */
+  once: <T = unknown>(eventName: string, callback: (data: T) => void) => {
+    const wrappedCallback = (_event: Electron.IpcRendererEvent, data: T) => {
+      callback(data);
+    };
+
+    ipcRenderer.once(eventName, wrappedCallback);
+  },
+});

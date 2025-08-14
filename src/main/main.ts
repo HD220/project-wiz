@@ -45,7 +45,6 @@ import dmListMessagesHandler from "@/main/ipc/dm/list-messages/invoke";
 import dmRemoveParticipantHandler from "@/main/ipc/dm/remove-participant/invoke";
 import dmSendMessageHandler from "@/main/ipc/dm/send-message/invoke";
 import dmUnarchiveHandler from "@/main/ipc/dm/unarchive/invoke";
-import eventRegisterHandler from "@/main/ipc/event/register/invoke";
 import llmProviderCreateHandler from "@/main/ipc/llm-provider/create/invoke";
 import llmProviderGetHandler from "@/main/ipc/llm-provider/get/invoke";
 import llmProviderGetDefaultHandler from "@/main/ipc/llm-provider/get-default/invoke";
@@ -83,10 +82,7 @@ import {
   type HandlerRegistration,
 } from "@/main/utils/ipc-loader";
 
-import {
-  initializeEventBus,
-  eventBus,
-} from "@/shared/services/events/event-bus";
+import { initialize } from "@/shared/services/events/event-bus";
 import { getLogger } from "@/shared/services/logger/config";
 
 declare const MAIN_WINDOW_VITE_DEV_SERVER_URL: string | undefined;
@@ -124,6 +120,9 @@ function createMainWindow(): void {
 
   // Register window in WindowRegistry for IPC handlers
   registerWindow("main", mainWindow);
+
+  // Initialize event system with the main window
+  initialize(mainWindow);
 
   // Load the app
   if (MAIN_WINDOW_VITE_DEV_SERVER_URL) {
@@ -298,8 +297,6 @@ async function setupAllIpcHandlers(): Promise<void> {
     { handler: dmSendMessageHandler, channel: "invoke:dm:send-message" },
     { handler: dmUnarchiveHandler, channel: "invoke:dm:unarchive" },
 
-    // Event handlers
-    { handler: eventRegisterHandler, channel: "invoke:event:register" },
 
     // LLM Provider handlers
     {
@@ -391,7 +388,6 @@ function setupMacOSHandlers(): void {
 app.whenReady().then(async () => {
   logger.info("App is ready, initializing IPC handlers and main window");
 
-  initializeEventBus();
   // initializeAgenticWorkerHandler(); // Removed - will be rewritten
   await initializeSessionManager();
   await setupAllIpcHandlers();
@@ -415,7 +411,6 @@ app.on("before-quit", async () => {
   logger.info("App is quitting, cleaning up services");
 
   try {
-    eventBus.shutdown();
     logger.info("🛑 Services stopped successfully");
   } catch (error) {
     logger.error("❌ Error stopping services:", error);

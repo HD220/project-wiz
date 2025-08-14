@@ -3,7 +3,7 @@ import { z } from "zod";
 import { sendDMMessage } from "@/main/ipc/dm/queries";
 import { requireAuth } from "@/main/services/session-registry";
 
-import { eventBus } from "@/shared/services/events/event-bus";
+import { emit } from "@/shared/services/events/event-bus";
 import { getLogger } from "@/shared/services/logger/config";
 import { MessageSchema } from "@/shared/types";
 import {
@@ -56,7 +56,7 @@ const handler = createIPCHandler({
     });
 
     // Emit specific event for this operation
-    eventBus.emit("dm:message-sent", {
+    emit("dm:message-sent", {
       messageId: apiMessage.id,
       sourceId: apiMessage.sourceId,
     });

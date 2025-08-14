@@ -3,7 +3,7 @@ import { z } from "zod";
 import { createLlmProvider } from "@/main/ipc/llm-provider/queries";
 import { requireAuth } from "@/main/services/session-registry";
 
-import { eventBus } from "@/shared/services/events/event-bus";
+import { emit } from "@/shared/services/events/event-bus";
 import { getLogger } from "@/shared/services/logger/config";
 import { LlmProviderSchema } from "@/shared/types";
 import {
@@ -67,7 +67,7 @@ const handler = createIPCHandler({
     });
 
     // Emit specific event for creation
-    eventBus.emit("llm-provider:created", { providerId: apiProvider.id });
+    emit("llm-provider:created", { providerId: apiProvider.id });
 
     return apiProvider;
   },

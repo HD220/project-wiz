@@ -3,7 +3,7 @@ import { z } from "zod";
 import { authenticateUser } from "@/main/ipc/auth/queries";
 import { sessionRegistry } from "@/main/services/session-registry";
 
-import { eventBus } from "@/shared/services/events/event-bus";
+import { emit } from "@/shared/services/events/event-bus";
 import { getLogger } from "@/shared/services/logger/config";
 import { UserSchema } from "@/shared/types";
 import {
@@ -60,7 +60,7 @@ const handler = createIPCHandler({
     };
 
     // 6. Emit user login event
-    eventBus.emit("user:logged-in", {
+    emit("user:logged-in", {
       userId: result.user.id,
       username: result.user.name,
       timestamp: new Date(),

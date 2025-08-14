@@ -1,16 +1,15 @@
 import { EventEmitter } from "events";
 
+import { BrowserWindow } from "electron";
+
 import { getLogger } from "@/shared/services/logger/config";
 
 const logger = getLogger("event-bus");
 
 /**
- * Generic type-safe Event Bus using composition pattern
- * Provides centralized event coordination with flexible event types
+ * Internal Event Bus class
  */
-export class EventBus<
-  TEvents extends Record<string, unknown> = Record<string, unknown>,
-> {
+class EventBus {
   private emitter: EventEmitter;
 
   constructor() {
@@ -18,80 +17,96 @@ export class EventBus<
     logger.info("🔄 EventBus initialized");
   }
 
-  /**
-   * Type-safe event emission
-   */
-  emit<T extends keyof TEvents>(eventName: T, data: TEvents[T]): boolean {
-    logger.debug(`📤 Emitting event: ${String(eventName)}`, data);
-    return this.emitter.emit(eventName as string, data);
+  emit(eventName: string, data: unknown): boolean {
+    logger.debug(`📤 Emitting event: ${eventName}`);
+    return this.emitter.emit(eventName, data);
   }
 
-  /**
-   * Type-safe event listener registration
-   */
-  on<T extends keyof TEvents>(
-    eventName: T,
-    listener: (data: TEvents[T]) => void,
-  ): this {
-    logger.debug(`👂 Registering listener for: ${String(eventName)}`);
-    this.emitter.on(eventName as string, listener);
+  on(eventName: string, listener: (data: unknown) => void): this {
+    logger.debug(`👂 Registering listener for: ${eventName}`);
+    this.emitter.on(eventName, listener);
     return this;
   }
 
-  /**
-   * Type-safe one-time event listener registration
-   */
-  once<T extends keyof TEvents>(
-    eventName: T,
-    listener: (data: TEvents[T]) => void,
-  ): this {
-    logger.debug(`👂 Registering one-time listener for: ${String(eventName)}`);
-    this.emitter.once(eventName as string, listener);
+  once(eventName: string, listener: (data: unknown) => void): this {
+    logger.debug(`👂 Registering one-time listener for: ${eventName}`);
+    this.emitter.once(eventName, listener);
     return this;
   }
 
-  /**
-   * Remove all listeners for a specific event
-   */
-  removeAllListeners<T extends keyof TEvents>(eventName?: T): this {
+  removeAllListeners(eventName?: string): this {
     if (eventName) {
-      logger.debug(`🗑️ Removing all listeners for: ${String(eventName)}`);
-      this.emitter.removeAllListeners(eventName as string);
+      logger.debug(`🗑️ Removing all listeners for: ${eventName}`);
+      this.emitter.removeAllListeners(eventName);
     } else {
       logger.debug("🗑️ Removing all listeners");
       this.emitter.removeAllListeners();
     }
     return this;
   }
+}
 
-  /**
-   * Get listener count for debugging
-   */
-  getEventListenerCount<T extends keyof TEvents>(eventName: T): number {
-    return this.emitter.listenerCount(eventName as string);
+/**
+ * Event Bridge class
+ */
+class EventBridge {
+  private mainWindow: BrowserWindow | null = null;
+
+  initialize(mainWindow: BrowserWindow): void {
+    this.mainWindow = mainWindow;
+    this.setupForwarding();
+    logger.info("✅ EventBridge initialized");
   }
 
-  /**
-   * Graceful shutdown - remove all listeners
-   */
-  shutdown(): void {
-    logger.info("🛑 EventBus shutting down, removing all listeners");
-    this.removeAllListeners();
+  private setupForwarding(): void {
+    // Better approach: listen to the emitter directly for all events
+    const originalEmit = eventBus.emit.bind(eventBus);
+    eventBus.emit = (eventName: string, data: unknown) => {
+      const result = originalEmit(eventName, data);
+
+      // Forward all events starting with "event:" to renderer
+      if (eventName.startsWith("event:")) {
+        this.forwardToRenderer(eventName, data);
+      }
+
+      return result;
+    };
+
+    logger.info("🚀 Event forwarding active");
+  }
+
+  private forwardToRenderer(eventName: string, eventData: unknown): void {
+    if (this.mainWindow && !this.mainWindow.isDestroyed()) {
+      this.mainWindow.webContents.send(eventName, eventData);
+    }
   }
 }
 
-// Global singleton instance - can be typed with specific event interface when needed
-export const eventBus = new EventBus();
+// Internal instances
+const eventBus = new EventBus();
+const eventBridge = new EventBridge();
 
-// Export singleton initialization function for explicit setup
-export function initializeEventBus(): EventBus {
-  logger.info("🚀 EventBus singleton initialized");
-  return eventBus;
+/**
+ * Public API - Emit reactive events
+ */
+export function emit(eventName: string, payload: unknown): void {
+  eventBus.emit(eventName, payload);
 }
 
-// Helper function to create typed event bus instances
-export function createEventBus<
-  TEvents extends Record<string, unknown>,
->(): EventBus<TEvents> {
-  return new EventBus<TEvents>();
+/**
+ * Public API - Listen to events
+ */
+export function listen(
+  eventName: string,
+  listener: (data: unknown) => void,
+): void {
+  eventBus.on(eventName, listener);
+}
+
+/**
+ * Initialize the event system
+ */
+export function initialize(mainWindow: BrowserWindow): void {
+  eventBridge.initialize(mainWindow);
+  logger.info("🚀 Event system initialized");
 }

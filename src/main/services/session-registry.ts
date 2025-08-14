@@ -4,7 +4,7 @@ import { userSessionsTable } from "@/main/schemas/user-sessions.schema";
 import { usersTable } from "@/main/schemas/user.schema";
 
 import { createDatabaseConnection } from "@/shared/config/database";
-import { eventBus } from "@/shared/services/events/event-bus";
+import { emit } from "@/shared/services/events/event-bus";
 import { getLogger } from "@/shared/services/logger/config";
 import type { User } from "@/shared/types/user";
 
@@ -78,9 +78,9 @@ export class SessionRegistry {
 
     // Emit events via global event-bus
     if (!previousUser) {
-      eventBus.emit("session:login", { user, token, expiresAt });
+      emit("session:login", { user, token, expiresAt });
     } else if (previousUser.id !== user.id) {
-      eventBus.emit("session:user-change", {
+      emit("session:user-change", {
         previous: previousUser,
         current: user,
       });
@@ -97,7 +97,7 @@ export class SessionRegistry {
     logger.info("🔓 Session cleared");
 
     if (previousUser) {
-      eventBus.emit("session:logout", { user: previousUser });
+      emit("session:logout", { user: previousUser });
     }
   }
 

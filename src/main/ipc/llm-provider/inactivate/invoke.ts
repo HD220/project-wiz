@@ -3,7 +3,7 @@ import { z } from "zod";
 import { inactivateLlmProvider } from "@/main/ipc/llm-provider/queries";
 import { requireAuth } from "@/main/services/session-registry";
 
-import { eventBus } from "@/shared/services/events/event-bus";
+import { emit } from "@/shared/services/events/event-bus";
 import { getLogger } from "@/shared/services/logger/config";
 import {
   createIPCHandler,
@@ -36,7 +36,7 @@ const handler = createIPCHandler({
     logger.debug("LLM provider inactivated", { providerId: input.id });
 
     // Emit event
-    eventBus.emit("llm-provider:inactivated", { providerId: input.id });
+    emit("llm-provider:inactivated", { providerId: input.id });
 
     return undefined;
   },

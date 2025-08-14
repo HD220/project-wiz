@@ -3,7 +3,7 @@ import { z } from "zod";
 import { getUserTheme } from "@/main/ipc/profile/queries";
 import { requireAuth } from "@/main/services/session-registry";
 
-import { eventBus } from "@/shared/services/events/event-bus";
+import { emit } from "@/shared/services/events/event-bus";
 import { getLogger } from "@/shared/services/logger/config";
 import {
   createIPCHandler,
@@ -32,7 +32,7 @@ const handler = createIPCHandler({
     logger.debug("User theme retrieved", { theme: result.theme });
 
     // Emit event
-    eventBus.emit("profile:theme-retrieved", {
+    emit("profile:theme-retrieved", {
       userId: currentUser.id,
       theme: result.theme,
     });

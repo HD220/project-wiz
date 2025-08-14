@@ -3,7 +3,7 @@ import { z } from "zod";
 import { addDMParticipant } from "@/main/ipc/dm/queries";
 import { requireAuth } from "@/main/services/session-registry";
 
-import { eventBus } from "@/shared/services/events/event-bus";
+import { emit } from "@/shared/services/events/event-bus";
 import { getLogger } from "@/shared/services/logger/config";
 import {
   createIPCHandler,
@@ -60,7 +60,7 @@ const handler = createIPCHandler({
     });
 
     // Emit event
-    eventBus.emit("dm:participant-added", {
+    emit("dm:participant-added", {
       dmId: apiParticipant.dmConversationId,
       participantId: apiParticipant.participantId,
     });

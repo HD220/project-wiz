@@ -3,7 +3,7 @@ import { z } from "zod";
 import { listUserDMConversations } from "@/main/ipc/dm/queries";
 import { requireAuth } from "@/main/services/session-registry";
 
-import { eventBus } from "@/shared/services/events/event-bus";
+import { emit } from "@/shared/services/events/event-bus";
 import { getLogger } from "@/shared/services/logger/config";
 import { DMConversationSchema } from "@/shared/types/dm-conversation";
 import {
@@ -101,7 +101,7 @@ const handler = createIPCHandler({
     });
 
     // Emit event
-    eventBus.emit("dm:list", {
+    emit("dm:list", {
       ownerId: currentUser.id,
       conversationCount: apiConversations.length,
     });

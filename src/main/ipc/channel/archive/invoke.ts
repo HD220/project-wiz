@@ -3,7 +3,7 @@ import { z } from "zod";
 import { archiveProjectChannel } from "@/main/ipc/channel/queries";
 import { requireAuth } from "@/main/services/session-registry";
 
-import { eventBus } from "@/shared/services/events/event-bus";
+import { emit } from "@/shared/services/events/event-bus";
 import { getLogger } from "@/shared/services/logger/config";
 import { ChannelSchema } from "@/shared/types/channel";
 import {
@@ -54,7 +54,7 @@ const handler = createIPCHandler({
     logger.debug("Channel archived", { channelId: apiChannel.id });
 
     // Emit specific event for channel archive
-    eventBus.emit("channel:archived", { channelId: apiChannel.id });
+    emit("channel:archived", { channelId: apiChannel.id });
 
     return apiChannel;
   },

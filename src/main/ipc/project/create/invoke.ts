@@ -1,7 +1,7 @@
 import { createProject } from "@/main/ipc/project/queries";
 import { requireAuth } from "@/main/services/session-registry";
 
-import { eventBus } from "@/shared/services/events/event-bus";
+import { emit } from "@/shared/services/events/event-bus";
 import { getLogger } from "@/shared/services/logger/config";
 import { ProjectSchema } from "@/shared/types";
 import {
@@ -55,7 +55,7 @@ const handler = createIPCHandler({
     };
 
     // Emit event
-    eventBus.emit("project:created", { projectId: apiProject.id });
+    emit("project:created", { projectId: apiProject.id });
 
     logger.debug("Project created", { projectId: apiProject.id });
 

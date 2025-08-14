@@ -3,7 +3,7 @@ import { z } from "zod";
 import { softDeleteUser } from "@/main/ipc/user/queries";
 import { requireAuth } from "@/main/services/session-registry";
 
-import { eventBus } from "@/shared/services/events/event-bus";
+import { emit } from "@/shared/services/events/event-bus";
 import { getLogger } from "@/shared/services/logger/config";
 import {
   createIPCHandler,
@@ -36,7 +36,7 @@ const handler = createIPCHandler({
     logger.debug("User soft deleted", { userId: input.userId });
 
     // Emit specific event for deletion
-    eventBus.emit("user:deleted", { userId: input.userId });
+    emit("user:deleted", { userId: input.userId });
 
     return undefined;
   },

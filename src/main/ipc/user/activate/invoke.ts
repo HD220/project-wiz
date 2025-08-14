@@ -3,7 +3,7 @@ import { z } from "zod";
 import { activateUser } from "@/main/ipc/user/queries";
 import { requireAuth } from "@/main/services/session-registry";
 
-import { eventBus } from "@/shared/services/events/event-bus";
+import { emit } from "@/shared/services/events/event-bus";
 import { getLogger } from "@/shared/services/logger/config";
 import { UserSchema } from "@/shared/types";
 import {
@@ -47,7 +47,7 @@ const handler = createIPCHandler({
     logger.debug("User activated", { userId: apiUser.id });
 
     // Emit event
-    eventBus.emit("user:activated", {
+    emit("user:activated", {
       userId: apiUser.id,
       activatedBy: currentUser.id,
     });

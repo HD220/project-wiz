@@ -6,7 +6,7 @@ import { usersTable } from "@/main/schemas/user.schema";
 import { requireAuth } from "@/main/services/session-registry";
 
 import { createDatabaseConnection } from "@/shared/config/database";
-import { eventBus } from "@/shared/services/events/event-bus";
+import { emit } from "@/shared/services/events/event-bus";
 import { getLogger } from "@/shared/services/logger/config";
 import {
   createIPCHandler,
@@ -48,7 +48,7 @@ const handler = createIPCHandler({
       .where(eq(usersTable.id, agentToDeactivate.id));
 
     // Emit event
-    eventBus.emit("agent:deleted", { agentId: input.id });
+    emit("event:agents", { action: "deleted", key: input.id });
 
     logger.debug("Agent deleted", { agentId: input.id });
 

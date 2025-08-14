@@ -3,7 +3,7 @@ import { z } from "zod";
 import { updateAgent } from "@/main/ipc/agent/queries";
 import { requireAuth } from "@/main/services/session-registry";
 
-import { eventBus } from "@/shared/services/events/event-bus";
+import { emit } from "@/shared/services/events/event-bus";
 import { getLogger } from "@/shared/services/logger/config";
 import { AgentSchema } from "@/shared/types";
 import {
@@ -81,7 +81,7 @@ const handler = createIPCHandler({
     });
 
     // Emit specific event for update
-    eventBus.emit("agent:updated", { agentId: apiAgent.id });
+    emit("event:agents", { action: "updated", key: apiAgent.id });
 
     return apiAgent;
   },

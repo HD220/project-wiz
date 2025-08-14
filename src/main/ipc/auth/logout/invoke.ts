@@ -3,7 +3,7 @@ import { z } from "zod";
 import { clearUserSessions } from "@/main/ipc/auth/queries";
 import { sessionRegistry } from "@/main/services/session-registry";
 
-import { eventBus } from "@/shared/services/events/event-bus";
+import { emit } from "@/shared/services/events/event-bus";
 import { getLogger } from "@/shared/services/logger/config";
 import {
   createIPCHandler,
@@ -28,7 +28,7 @@ const handler = createIPCHandler({
     sessionRegistry.clearSession();
 
     // 3. Emit logout event
-    eventBus.emit("user:logged-out", {
+    emit("user:logged-out", {
       timestamp: new Date(),
     });
 

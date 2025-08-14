@@ -3,7 +3,7 @@ import { z } from "zod";
 import { updateProjectChannel } from "@/main/ipc/channel/queries";
 import { requireAuth } from "@/main/services/session-registry";
 
-import { eventBus } from "@/shared/services/events/event-bus";
+import { emit } from "@/shared/services/events/event-bus";
 import { getLogger } from "@/shared/services/logger/config";
 import { ChannelSchema } from "@/shared/types/channel";
 import {
@@ -69,7 +69,7 @@ const handler = createIPCHandler({
     });
 
     // Emit specific event for channel update
-    eventBus.emit("channel:updated", { channelId: result.id });
+    emit("channel:updated", { channelId: result.id });
 
     return result;
   },

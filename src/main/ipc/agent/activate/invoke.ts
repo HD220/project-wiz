@@ -6,7 +6,7 @@ import { usersTable } from "@/main/schemas/user.schema";
 import { requireAuth } from "@/main/services/session-registry";
 
 import { createDatabaseConnection } from "@/shared/config/database";
-import { eventBus } from "@/shared/services/events/event-bus";
+import { emit } from "@/shared/services/events/event-bus";
 import { getLogger } from "@/shared/services/logger/config";
 import { AgentSchema } from "@/shared/types";
 import {
@@ -79,7 +79,7 @@ const handler = createIPCHandler({
       modelConfig: JSON.parse(dbAgent.modelConfig),
     };
 
-    eventBus.emit("agent:activated", { agentId: apiAgent.id });
+    emit("event:agents", { action: "activated", key: apiAgent.id });
 
     logger.debug("Agent activated", { agentId: apiAgent.id });
 
