@@ -1,440 +1,439 @@
-# CLAUDE.md
+# CLAUDE.md - Project Wiz Development Guide
 
-**Project Wiz Development Guide**
+> **Purpose**: This guide enables Claude Code to make correct architectural decisions and write consistent, high-quality code for Project Wiz.
 
-This file provides comprehensive guidance for Claude Code when working with the Project Wiz codebase.
+## Table of Contents
 
-## Core Development Philosophy
+1. [Quick Start](#quick-start)
+2. [Project Context](#project-context)
+3. [Architecture & Structure](#architecture--structure)
+4. [Code Standards](#code-standards)
+5. [Development Patterns](#development-patterns)
+6. [Common Tasks](#common-tasks)
+7. [Quality Checklist](#quality-checklist)
 
-### KISS (Keep It Simple, Stupid)
+---
 
-Simplicity should be a key goal in design. Choose straightforward solutions over complex ones whenever possible. Simple solutions are easier to understand, maintain, and debug.
+## Quick Start
 
-### YAGNI (You Aren't Gonna Need It)
+### Essential Commands
 
-Avoid building functionality on speculation. Implement features only when they are needed, not when you anticipate they might be useful in the future.
+```bash
+# Before ANY code changes
+npm run quality:check    # Run all checks
 
-### Design Principles
+# After schema changes
+npm run db:generate     # Generate migrations
+npm run db:migrate      # Apply migrations
 
-- **Dependency Inversion**: High-level modules should not depend on low-level modules. Both should depend on abstractions.
-- **Open/Closed Principle**: Software entities should be open for extension but closed for modification.
-- **Single Responsibility**: Each function, class, and module should have one clear purpose.
-- **Fail Fast**: Check for potential errors early and raise exceptions immediately when issues occur.
+# After adding UI text
+npm run extract         # Extract i18n strings
+npm run compile         # Compile translations
+```
 
-## 🧱 Code Structure & Modularity
+### Critical Rules
 
-### File and Function Limits
+1. **NEVER modify** files in `/components/ui/` (shadcn/ui)
+2. **ALWAYS use** English in code, Portuguese only via LinguiJS
+3. **ALWAYS export** on declaration, avoid `export default`
+4. **ALWAYS use** `requireAuth()` in protected IPC handlers
+5. **NEVER use** EventBus in renderer process
+6. **Files max** 500 lines, functions max 50 lines
 
-- **Never create a file longer than 500 lines of code**. If approaching this limit, refactor by splitting into modules.
-- **Functions should be under 50 lines** with a single, clear responsibility.
-- **Classes should be under 100 lines** and represent a single concept or entity.
-- **Organize code into clearly separated modules**, grouped by feature or responsibility.
+---
 
-## Project Overview
+## Project Context
 
-**Project Wiz** is a desktop application that automates the software development lifecycle using AI Agents. It combines artificial intelligence with project management to revolutionize software development through customizable AI agents, team collaboration, and integration with multiple LLM providers.
+**Project Wiz** is an Electron desktop application that automates software development using AI agents. It's designed for developers, teams, and enterprises who need intelligent automation in their development workflow.
 
-### Core Features
-- **Intelligent AI Agents**: Create assistants with specific roles, backstories, and goals
-- **Multi-Provider LLM Support**: OpenAI, Anthropic, DeepSeek, Google, and custom providers
-- **Advanced Project Management**: Git integration, team collaboration, organized channels
-- **Integrated Communication**: Project channels, direct messaging, AI chat
-- **Enterprise Security**: Local SQLite database, API key encryption, secure authentication
+### Core Capabilities
 
-### Target Users
-- **Developers**: Automate code reviews, configure specialized assistants, manage multiple projects
-- **Teams**: Create specialized agents, centralize project communication, maintain decision history
-- **Enterprises**: Local deployment, corporate AI providers, permission management
+- **AI Agents**: Customizable autonomous agents with specific roles and expertise
+- **Multi-LLM Support**: OpenAI, Anthropic, DeepSeek, Google providers
+- **Project Management**: Git integration, channels, team collaboration
+- **Local-First**: SQLite database, encrypted API keys, offline capability
 
-## Architecture Overview
+### Design Philosophy
 
-### Multi-Process Electron Architecture
+```typescript
+// KISS - Keep It Simple, Stupid
+// ✅ Simple and clear
+export function calculateTotal(items: Item[]): number {
+  return items.reduce((sum, item) => sum + item.price, 0);
+}
+
+// ❌ Over-engineered
+class CalculationEngine {
+  private strategies: Map<string, Strategy>;
+  calculate(items: Item[], strategy: string): number {
+    /* complex */
+  }
+}
+
+// YAGNI - You Aren't Gonna Need It
+// ✅ Only what's needed now
+type User = { id: string; name: string; email: string };
+
+// ❌ Speculative fields
+type User = {
+  id: string;
+  name: string;
+  email: string;
+  futureField?: unknown; // Not needed yet
+  metadata?: any; // Definitely not needed
+};
+```
+
+---
+
+## Architecture & Structure
+
+### Directory Layout
+
 ```
 src/
-├── main/           # Node.js backend (IPC handlers, database, system operations)
-├── renderer/       # React frontend (TanStack Router, UI components)
-├── shared/         # Common types, utilities, services
-└── worker/         # Background job processing (currently disabled)
+├── main/                 # Electron main process (Node.js)
+│   ├── ipc/             # IPC handlers by domain
+│   │   └── {domain}/    # e.g., agent/, user/, project/
+│   │       └── {action}/
+│   │           └── invoke.ts
+│   ├── schemas/         # Database schemas (Drizzle ORM)
+│   ├── services/        # Business logic services
+│   └── utils/           # Main process utilities
+│
+├── renderer/            # Electron renderer (React)
+│   ├── app/            # File-based routing (TanStack Router)
+│   ├── features/       # Feature modules
+│   │   └── {feature}/
+│   │       ├── components/
+│   │       ├── hooks/
+│   │       └── utils/
+│   ├── components/
+│   │   └── ui/        # shadcn/ui (DO NOT MODIFY)
+│   ├── hooks/         # Global hooks
+│   └── lib/           # Global utilities
+│
+└── shared/             # Cross-process code
+    ├── types/         # TypeScript types
+    └── utils/         # Shared utilities
 ```
-
-### Key Architectural Components
-
-**IPC Communication**: Domain-based handlers in `src/main/ipc/` following the pattern:
-```
-{domain-name}/
-├── {action-name}/
-│   └── invoke.ts
-└── queries.ts
-```
-
-**Database**: SQLite with Drizzle ORM. Schemas in `src/main/schemas/`. Timestamps use `timestamp_ms` (integer)
-
-**Frontend Structure**:
-- File-based routing with TanStack Router in `src/renderer/app/`
-- Feature-based organization in `src/renderer/features/`
-- Shared UI components using shadcn/ui in `src/renderer/components/ui/` (generated, do not modify)
-
-**Event System**: Type-safe EventBus for cross-process communication
 
 ### Technology Stack
-- **Frontend**: React 19, TanStack Router, TanStack Query, Tailwind CSS, shadcn/ui
-- **Backend**: Electron, Drizzle ORM, SQLite, Node.js
-- **AI Integration**: Vercel AI SDK with multiple provider support
-- **Build Tools**: Vite, Electron Forge, TypeScript, ESLint
-- **Testing**: Vitest, Testing Library
-- **I18n**: LinguiJS for translations (Portuguese and English)
-- **UI Components**: shadcn/ui (built on Radix UI + Tailwind CSS)
 
-## Development Commands
-
-### Core Commands
-```bash
-# Code Quality (available via Bash tool)
-npm run lint            # ESLint check
-npm run lint:fix        # ESLint with auto-fix
-npm run type-check      # TypeScript type checking
-npm run format          # Prettier format
-npm run format:check    # Check Prettier formatting
-npm run quality:check   # Run all quality checks
-
-# Database (available via Bash tool)
-npm run db:generate     # Generate Drizzle migrations after schema changes
-npm run db:migrate      # Run database migrations
-
-# Internationalization (available via Bash tool)
-npm run extract         # Extract i18n strings from code
-npm run compile         # Compile translations to TypeScript
-
-# Development (user-initiated)
-npm run dev             # Start Electron app with hot reload
-npm run build           # Extract i18n, compile translations, build app
-npm run package         # Create distributable package
-```
-
-## Coding Style Guidelines
+| Layer      | Technology                      | Purpose                    |
+| ---------- | ------------------------------- | -------------------------- |
+| Frontend   | React 19, TanStack Router/Query | UI and state management    |
+| Styling    | Tailwind CSS, shadcn/ui         | Component styling          |
+| Backend    | Electron, Node.js               | Desktop integration        |
+| Database   | SQLite, Drizzle ORM             | Local data persistence     |
+| AI         | Vercel AI SDK                   | LLM provider abstraction   |
+| i18n       | LinguiJS                        | Portuguese/English support |
+| Validation | Zod                             | Runtime type validation    |
 
 ### File Naming Conventions
 
-**General Rules**:
-- Use kebab-case for files and directories
-- Use descriptive suffixes for file types
-- Group related files in directories
-
-**File Suffixes**:
-```
-*.schema.ts        # Zod schemas and database schemas
-*.types.ts         # Type definitions and interfaces
-*.hook.ts          # Custom React hooks
-*.action.ts        # Server actions and mutations
-*.utils.ts         # Utility functions
-*.constants.ts     # Application constants
-*.config.ts        # Configuration files
-```
-
-**Language Guidelines**:
 ```typescript
-// ✅ All code, UI text, and messages should be in English
-export const WELCOME_MESSAGE = "Welcome to Project Wiz";
-export const ERROR_MESSAGES = {
-  INVALID_EMAIL: "Please enter a valid email address",
-  REQUIRED_FIELD: "This field is required"
-};
+// Suffix patterns - ALWAYS use these
+*.schema.ts        // Zod validation or database schemas
+*.types.ts         // TypeScript type definitions
+*.hook.ts          // React hooks (use- prefix)
+*.action.ts        // Server actions/mutations
+*.utils.ts         // Utility functions
+*.constants.ts     // Application constants
+*.config.ts        // Configuration files
 
-// ✅ Use LinguiJS for user-facing text that needs translation
-import { msg } from "@lingui/macro";
-
-export const welcomeText = msg`Welcome to Project Wiz`;
-export const errorMessage = msg`Please enter a valid email address`;
-
-// ❌ Do not write Portuguese directly in code
-const mensagemBemVindo = "Bem-vindo ao Project Wiz"; // WRONG
-
-// ❌ Avoid export default
-export default ERROR_MESSAGES; // WRONG
-
-// ✅ Always export on declaration
-export const API_CONFIG = { baseUrl: "..." };
-```
-
-**Component Files**:
-```
-{feature-name}/
+// Component organization
+{feature}/
 ├── components/
-│   ├── {feature-name}-form.tsx
-│   ├── {feature-name}-list.tsx
-│   └── index.ts          # Re-exports
+│   ├── {feature}-form.tsx      // Form component
+│   ├── {feature}-list.tsx      // List component
+│   ├── {feature}-card.tsx      // Card component
+│   └── index.ts                 // Re-exports
 ├── hooks/
-│   └── use-{feature-name}.hook.ts
-├── utils/
-│   └── {feature-name}.utils.ts
-├── {feature-name}.schema.ts
-├── {feature-name}.types.ts
-└── index.ts
+│   └── use-{feature}.hook.ts   // Feature hook
+├── {feature}.schema.ts         // Validation schemas
+├── {feature}.types.ts          // Type definitions
+└── index.ts                     // Public API
 ```
+
+---
+
+## Code Standards
 
 ### TypeScript Conventions
 
-**Naming**:
-- **Variables/Functions**: camelCase (`getUserData`, `isLoading`)
-- **Types**: PascalCase (`UserData`, `ApiResponse`)
-- **Constants**: UPPER_CASE (`API_BASE_URL`, `DEFAULT_TIMEOUT`)
-- **Enums**: PascalCase with PascalCase members (`Status.Active`)
+#### Imports - STRICT ORDER
 
-**Type Definitions**:
-```typescript
-// Prefer type over interface for all definitions
-type UserConfig = {
-  name: string;
-  email: string;
-  preferences?: UserPreferences;
-};
-
-// Use type for unions, primitives, and complex types
-type Status = "active" | "inactive" | "pending";
-type ApiResponse<T> = { success: true; data: T } | { success: false; error: string };
-
-// Use const assertions for immutable data
-const PROVIDERS = ["openai", "anthropic", "deepseek"] as const;
-type Provider = typeof PROVIDERS[number];
-
-// Prefer utility types for transformations
-type CreateUser = Omit<User, "id" | "createdAt" | "updatedAt">;
-type UpdateUser = Partial<CreateUser> & { id: string };
-```
-
-**Import Organization**:
 ```typescript
 // 1. Node.js built-ins
 import fs from "fs";
 import path from "path";
 
-// 2. React imports (avoid default React import)
-import { useEffect, useState, useCallback } from "react";
+// 2. React (NEVER use default import)
+import { useState, useEffect, useCallback } from "react";
 
 // 3. External libraries (alphabetical)
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
 import { z } from "zod";
 
-// 4. Internal imports with aliases (avoid relative paths)
-import { eventBus } from "@/shared/services/events/event-bus";
-import { createAgent } from "@/main/ipc/agent/queries";
+// 4. Internal imports (use aliases, not relative paths)
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/contexts/auth.context";
+import { createAgent } from "@/main/ipc/agent/queries";
 
-// 5. Type imports (last, with 'type' keyword)
+// 5. Type imports (always last, with 'type' keyword)
 import type { Agent } from "@/shared/types/agent";
 import type { ComponentProps } from "react";
 ```
 
-### React Component Patterns
+#### Type Definitions
 
-**Component Structure**:
 ```typescript
-// 1. Imports (avoid default React import, use aliases)
-import { useState, useRef, useEffect } from "react";
-import { useForm } from "react-hook-form";
-
-import { useAuth } from "@/contexts/auth.context";
-import { useApiMutation } from "@/hooks/use-api-mutation.hook";
-
-// 2. Types (inline for component-specific types)
-type ComponentProps = {
-  data: Data[];
-  onSubmit: (data: FormData) => void;
-  isLoading?: boolean;
+// ALWAYS use 'type' over 'interface'
+type User = {
+  id: string;
+  name: string;
+  email: string;
 };
 
-// 3. Component implementation with destructured props
-export function Component({ data, onSubmit, isLoading = false }: ComponentProps) {
-  // 4. Hooks (in order: state, refs, context, custom hooks)
-  const [state, setState] = useState();
-  const ref = useRef<HTMLElement>(null);
-  const { user } = useAuth();
-  
-  // Use useApiMutation for form submissions and actions
-  const mutation = useApiMutation(
-    (formData: FormData) => window.api.example.create(formData),
-    {
-      successMessage: "Created successfully",
-      onSuccess: onSubmit,
-    }
-  );
-  
-  // 5. Event handlers
-  function handleClick() {
-    // Implementation
-  }
-  
-  // 6. Effects
-  useEffect(() => {
-    // Implementation
-  }, []);
-  
-  // 7. Render
-  return (
-    <div>
-      {/* JSX */}
-    </div>
-  );
-}
+// Use const assertions for literals
+const ROLES = ["admin", "user", "guest"] as const;
+type Role = (typeof ROLES)[number];
+
+// Utility types for transformations
+type CreateUser = Omit<User, "id" | "createdAt">;
+type UpdateUser = Partial<CreateUser> & Pick<User, "id">;
+
+// ALWAYS export on declaration
+export type ApiResponse<T> =
+  | { success: true; data: T }
+  | { success: false; error: string };
+
+// NEVER use export default
+export default User; // ❌ WRONG
 ```
 
-**Custom Hooks**:
+#### Naming Conventions
+
 ```typescript
-// Use descriptive names with 'use' prefix, export on declaration
-export function useAgentActions() {
+// Variables and functions: camelCase
+const userData = {};
+function getUserById(id: string) {}
+
+// Types and classes: PascalCase
+type UserProfile = {};
+class UserService {}
+
+// Constants: UPPER_SNAKE_CASE
+const MAX_RETRY_COUNT = 3;
+const API_BASE_URL = "https://api.example.com";
+
+// Boolean variables: is/has/should prefix
+const isLoading = true;
+const hasPermission = false;
+const shouldRefetch = true;
+
+// Event handlers: handle prefix
+const handleSubmit = () => {};
+const handleUserClick = () => {};
+
+// Async functions: descriptive verbs
+async function fetchUserData() {}
+async function createProject() {}
+async function validateCredentials() {}
+```
+
+### React Patterns
+
+#### Component Structure - STRICT ORDER
+
+```typescript
+// 1. Imports (follow import order rules)
+import { useState, useEffect } from "react";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+
+import { Button } from "@/components/ui/button";
+import { useApiMutation } from "@/hooks/use-api-mutation.hook";
+
+// 2. Type definitions (inline for component-specific)
+type ComponentProps = {
+  initialData: Data | null;
+  onSubmit: (data: FormData) => void;
+  isDisabled?: boolean;
+};
+
+// 3. Schema definitions (if needed)
+const FormSchema = z.object({
+  name: z.string().min(1, "Name required"),
+  email: z.string().email("Valid email required"),
+});
+
+// 4. Component (ALWAYS destructure props in parameters)
+export function Component({
+  initialData,
+  onSubmit,
+  isDisabled = false
+}: ComponentProps) {
+  // 5. State hooks (group related state)
+  const [isOpen, setIsOpen] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  // 6. Form hooks
+  const form = useForm({
+    resolver: zodResolver(FormSchema),
+    defaultValues: initialData || { name: "", email: "" },
+  });
+
+  // 7. API mutations (use useApiMutation for all API calls)
   const mutation = useApiMutation(
-    (agentId: string) => window.api.agent.inactivate({ id: agentId }),
+    (data: z.infer<typeof FormSchema>) => window.api.user.create(data),
     {
-      successMessage: "Agent inactivated successfully",
-      errorMessage: "Failed to inactivate agent",
-      invalidateRouter: true,
+      successMessage: "User created successfully",
+      errorMessage: "Failed to create user",
+      onSuccess: (result) => {
+        onSubmit(result);
+        setIsOpen(false);
+      },
+      invalidateRouter: true, // Refresh route data
     }
   );
-  
-  const handleAction = useCallback((id: string) => {
-    mutation.mutate(id);
-  }, [mutation]);
-  
-  return {
-    handleAction,
-    isLoading: mutation.isPending,
+
+  // 8. Event handlers (use handle prefix)
+  const handleFormSubmit = (data: z.infer<typeof FormSchema>) => {
+    mutation.mutate(data);
   };
-}
-```
 
-**Compound Components**:
-```typescript
-// Use compound component pattern for complex components, destructure props
-export function AgentForm({ initialData, providers, onSubmit, isLoading }: AgentFormProps) {
+  const handleCancel = () => {
+    form.reset();
+    setIsOpen(false);
+  };
+
+  // 9. Effects (minimal, prefer route loaders)
+  useEffect(() => {
+    if (initialData) {
+      form.reset(initialData);
+    }
+  }, [initialData, form]);
+
+  // 10. Early returns (guard clauses)
+  if (!initialData && isDisabled) {
+    return <div>No data available</div>;
+  }
+
+  // 11. Main render
   return (
-    <Form>
-      <AgentFormIdentity initialData={initialData} />
-      <AgentFormProvider providers={providers} />
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(handleFormSubmit)}>
+        {/* Form content */}
+        <Button
+          type="submit"
+          disabled={mutation.isPending || isDisabled}
+        >
+          {mutation.isPending ? "Creating..." : "Create"}
+        </Button>
+      </form>
     </Form>
   );
 }
-
-// Co-locate compound components, export on declaration
-export function AgentFormIdentity({ initialData }: { initialData: Agent | null }) {
-  // Implementation
-}
 ```
 
-### Database Patterns
+#### Custom Hooks
 
-**Schema Definitions**:
 ```typescript
-import { sqliteTable, text, index } from "drizzle-orm/sqlite-core";
+// Always in separate file with .hook.ts suffix
+// hooks/use-agent-actions.hook.ts
 
-export const usersTable = sqliteTable(
-  "users",
-  {
-    id: text("id")
-      .primaryKey()
-      .$defaultFn(() => crypto.randomUUID()),
-    name: text("name").notNull(),
-    email: text("email").unique().notNull(),
-    createdAt: integer("created_at", { mode: "timestamp_ms" })
-      .notNull()
-      .$defaultFn(() => new Date()),
-    updatedAt: integer("updated_at", { mode: "timestamp_ms" })
-      .notNull()
-      .$defaultFn(() => new Date()),
-  },
-  (table) => ({
-    // Performance indexes
-    emailIdx: index("users_email_idx").on(table.email),
-  }),
-);
+export function useAgentActions() {
+  // Group related mutations
+  const inactivateMutation = useApiMutation(
+    (agentId: string) => window.api.agent.inactivate({ id: agentId }),
+    {
+      successMessage: "Agent inactivated",
+      invalidateRouter: true,
+    },
+  );
 
-// Type inference
-export type SelectUser = typeof usersTable.$inferSelect;
-export type InsertUser = typeof usersTable.$inferInsert;
-export type UpdateUser = Partial<InsertUser> & { id: string };
-```
+  const deleteMutation = useApiMutation(
+    (agentId: string) => window.api.agent.delete({ id: agentId }),
+    {
+      successMessage: "Agent deleted",
+      invalidateRouter: true,
+    },
+  );
 
-**Query Functions**:
-```typescript
-// ✅ Use descriptive function names, export on declaration
-export async function findUserById(id: string): Promise<User | null> {
-  const db = getDatabase();
-  
-  const [user] = await db
-    .select()
-    .from(usersTable)
-    .where(eq(usersTable.id, id))
-    .limit(1);
-    
-  return user || null;
-}
-
-// ✅ Use transactions for complex operations, export on declaration
-export async function createUserWithProfile(data: CreateUserData): Promise<User> {
-  const db = getDatabase();
-  
-  return db.transaction((tx) => {
-    // Implementation
-  });
+  // Return consistent API
+  return {
+    inactivate: inactivateMutation.mutate,
+    delete: deleteMutation.mutate,
+    isInactivating: inactivateMutation.isPending,
+    isDeleting: deleteMutation.isPending,
+  };
 }
 ```
 
 ### IPC Handler Patterns
 
-**Handler Structure**:
+#### Handler Implementation
+
 ```typescript
-// File: src/main/ipc/{domain-name}/{action-name}/invoke.ts
+// src/main/ipc/{domain}/{action}/invoke.ts
+import { z } from "zod";
 import { createIPCHandler } from "@/shared/utils/create-ipc-handler";
 import { requireAuth } from "@/main/services/session-registry";
+import { eventBus } from "@/shared/services/events/event-bus";
 
+// Input validation schema
 const InputSchema = z.object({
-  name: z.string().min(1),
+  name: z.string().min(1).max(100),
   email: z.string().email(),
+  role: z.enum(["admin", "user"]),
 });
 
-const OutputSchema = UserSchema;
+// Output validation schema
+const OutputSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  email: z.string(),
+  role: z.string(),
+  createdAt: z.date(),
+});
 
+// Handler implementation
 const handler = createIPCHandler({
   inputSchema: InputSchema,
   outputSchema: OutputSchema,
   handler: async (input) => {
+    // Authentication check (throws if not authenticated)
     const currentUser = requireAuth();
-    
+
+    // Authorization check
+    if (currentUser.role !== "admin") {
+      throw new Error("Admin access required");
+    }
+
     // Business logic
-    const result = await createUser({
+    const user = await createUser({
       ...input,
       ownerId: currentUser.id,
+      createdAt: new Date(),
     });
-    
-    // Event emission
-    eventBus.emit("user:created", { userId: result.id });
-    
-    return result;
+
+    // Event emission (main process only)
+    eventBus.emit("user:created", {
+      userId: user.id,
+      createdBy: currentUser.id,
+    });
+
+    return user;
   },
 });
 
-// ✅ Export on declaration (preferred pattern)
-// Note: Existing codebase uses export default for handlers, but export on declaration is preferred
-export const handler = createIPCHandler({
-  inputSchema: InputSchema,
-  outputSchema: OutputSchema,
-  handler: async (input) => {
-    const currentUser = requireAuth();
-    
-    // Business logic
-    const result = await createUser({
-      ...input,
-      ownerId: currentUser.id,
-    });
-    
-    // Event emission
-    eventBus.emit("user:created", { userId: result.id });
-    
-    return result;
-  },
-});
-
+// Export (existing code uses default, but prefer named)
 export default handler;
 
-// Type declaration
+// Type declaration for frontend
 declare global {
   namespace WindowAPI {
     type User = {
@@ -444,228 +443,342 @@ declare global {
 }
 ```
 
-### Styling Conventions
+### Database Patterns (Drizzle ORM)
 
-**shadcn/ui Components**:
+#### Schema Definition
+
 ```typescript
-// Use existing shadcn/ui components (DO NOT modify files in components/ui/)
-import { Button } from "@/renderer/components/ui/button";
-import { Card, CardHeader, CardContent } from "@/renderer/components/ui/card";
+// src/main/schemas/users.schema.ts
+import { sqliteTable, text, integer, index } from "drizzle-orm/sqlite-core";
 
-// Extend with additional classes if needed
-<Card className="bg-gradient-to-br from-primary/5 via-primary/3 to-primary/0">
-  <CardHeader className="pb-[var(--spacing-component-md)]">
-    {/* Content */}
-  </CardHeader>
-</Card>
+export const usersTable = sqliteTable(
+  "users",
+  {
+    // Primary key with UUID
+    id: text("id")
+      .primaryKey()
+      .$defaultFn(() => crypto.randomUUID()),
 
-// Use semantic color tokens and variants
-<Button variant="default" size="default">
-  Submit
-</Button>
+    // Required fields
+    name: text("name").notNull(),
+    email: text("email").unique().notNull(),
+    role: text("role", { enum: ["admin", "user"] })
+      .notNull()
+      .default("user"),
+
+    // Timestamps (always use timestamp_ms)
+    createdAt: integer("created_at", { mode: "timestamp_ms" })
+      .notNull()
+      .$defaultFn(() => new Date()),
+    updatedAt: integer("updated_at", { mode: "timestamp_ms" })
+      .notNull()
+      .$defaultFn(() => new Date()),
+
+    // Soft delete
+    deletedAt: integer("deleted_at", { mode: "timestamp_ms" }),
+  },
+  (table) => ({
+    // Performance indexes for queried fields
+    emailIdx: index("users_email_idx").on(table.email),
+    roleIdx: index("users_role_idx").on(table.role),
+    deletedIdx: index("users_deleted_idx").on(table.deletedAt),
+  }),
+);
+
+// Type exports
+export type SelectUser = typeof usersTable.$inferSelect;
+export type InsertUser = typeof usersTable.$inferInsert;
+export type UpdateUser = Partial<InsertUser> & Pick<InsertUser, "id">;
 ```
 
-**Custom Components**:
+#### Query Functions
+
 ```typescript
-// Create custom components outside of components/ui/
-// Use shadcn/ui as building blocks
-export function CustomFeatureCard({ children }: { children: React.ReactNode }) {
+// src/main/ipc/user/queries.ts
+import { eq, isNull, and } from "drizzle-orm";
+import { getDatabase } from "@/main/database";
+import { usersTable } from "@/main/schemas/users.schema";
+
+// Single record queries
+export async function findUserById(id: string): Promise<SelectUser | null> {
+  const db = getDatabase();
+
+  const [user] = await db
+    .select()
+    .from(usersTable)
+    .where(and(eq(usersTable.id, id), isNull(usersTable.deletedAt)))
+    .limit(1);
+
+  return user || null;
+}
+
+// List queries with filtering
+export async function listUsers(filters?: {
+  role?: string;
+  search?: string;
+}): Promise<SelectUser[]> {
+  const db = getDatabase();
+
+  let query = db.select().from(usersTable).where(isNull(usersTable.deletedAt));
+
+  if (filters?.role) {
+    query = query.where(eq(usersTable.role, filters.role));
+  }
+
+  return query;
+}
+
+// Transactions for complex operations
+export async function createUserWithProfile(
+  userData: InsertUser,
+  profileData: InsertProfile,
+): Promise<SelectUser> {
+  const db = getDatabase();
+
+  return db.transaction(async (tx) => {
+    // Insert user
+    const [user] = await tx.insert(usersTable).values(userData).returning();
+
+    // Insert profile
+    await tx.insert(profilesTable).values({
+      ...profileData,
+      userId: user.id,
+    });
+
+    return user;
+  });
+}
+```
+
+### Internationalization (i18n)
+
+#### Using LinguiJS
+
+```typescript
+import { Trans, t } from "@lingui/macro";
+import { useLingui } from "@lingui/react";
+
+export function InternationalizedComponent() {
+  const { t: translate } = useLingui();
+
   return (
-    <Card className="custom-feature-styles">
-      <CardContent>
+    <div>
+      {/* Static text - use Trans component */}
+      <h1>
+        <Trans>Welcome to Project Wiz</Trans>
+      </h1>
+
+      {/* Dynamic text - use t function */}
+      <Input
+        placeholder={translate(t`Enter your email`)}
+      />
+
+      {/* Conditional messages */}
+      <Button>
+        {isLoading ? (
+          <Trans>Loading...</Trans>
+        ) : (
+          <Trans>Submit</Trans>
+        )}
+      </Button>
+
+      {/* Variables in translations */}
+      <p>
+        <Trans>
+          Hello {userName}, you have {count} new messages
+        </Trans>
+      </p>
+    </div>
+  );
+}
+
+// ❌ NEVER write Portuguese directly
+const message = "Bem-vindo ao Project Wiz"; // WRONG
+
+// ✅ ALWAYS use English with LinguiJS
+const message = t`Welcome to Project Wiz`; // CORRECT
+```
+
+### UI Components (shadcn/ui)
+
+#### Using shadcn/ui Components
+
+```typescript
+// IMPORTANT: Never modify files in /components/ui/
+// These are generated by shadcn/ui CLI
+
+// ✅ CORRECT - Use existing components
+import { Button } from "@/components/ui/button";
+import { Card, CardHeader, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+
+// ✅ CORRECT - Extend with custom classes
+<Card className="border-2 border-primary/20 shadow-xl">
+  <CardContent className="p-6">
+    {/* Custom content */}
+  </CardContent>
+</Card>
+
+// ✅ CORRECT - Create wrapper components
+export function FeatureCard({
+  children,
+  highlight = false
+}: {
+  children: React.ReactNode;
+  highlight?: boolean;
+}) {
+  return (
+    <Card className={highlight ? "ring-2 ring-primary" : ""}>
+      <CardContent className="p-4">
         {children}
       </CardContent>
     </Card>
   );
 }
+
+// ❌ WRONG - Don't create new components in /ui/
+// Don't modify existing shadcn/ui components
 ```
 
-**CSS Variables** (in globals.css):
-```css
-:root {
-  /* Spacing */
-  --spacing-component-sm: 0.5rem;
-  --spacing-component-md: 1rem;
-  --spacing-component-lg: 1.5rem;
-  --spacing-layout-md: 2rem;
-  
-  /* Colors - use HSL format */
-  --primary: 210 100% 50%;
-  --primary-foreground: 0 0% 100%;
-}
-```
+---
 
-### Error Handling Patterns
+## Development Patterns
 
-**IPC Handlers**:
+### Authentication & Authorization
+
 ```typescript
-// Errors are automatically handled by createIPCHandler
+// IPC handler with auth
+import { requireAuth, requireRole } from "@/main/services/session-registry";
+
 const handler = createIPCHandler({
-  // configuration
   handler: async (input) => {
-    // Throw errors directly - they will be caught and formatted
-    if (!input.email) {
-      throw new Error("Email is required");
+    // Basic authentication
+    const user = requireAuth(); // Throws if not authenticated
+
+    // Role-based authorization
+    requireRole(user, "admin"); // Throws if not admin
+
+    // Owner-based authorization
+    const resource = await findResource(input.id);
+    if (resource.ownerId !== user.id) {
+      throw new Error("Access denied");
     }
-    
-    return result;
+
+    return performAction(input);
   },
 });
 ```
 
-**React Components**:
+### Event System (Main Process Only)
+
 ```typescript
-// ❌ Avoid useQuery when data can be fetched at route level
-// ✅ Use TanStack Router loaders instead for better performance
-export function Component({ data }: { data: User[] }) {
-  // Data comes from route loader
-  
-  return <div>{/* Content with data */}</div>;
-}
-
-// Route file example:
-// export const Route = createFileRoute('/users/')({
-//   loader: () => window.api.user.list(),
-//   component: UsersPage,
-// })
-```
-
-
-## Key Development Patterns
-
-### Feature Development Workflow
-
-1. **Domain Analysis**: Understand the business domain and entities by examining existing code
-2. **Schema Design**: Create database schemas in `src/main/schemas/` and Zod validation schemas
-3. **IPC Handlers**: Implement backend logic in `src/main/ipc/{domain-name}/` with proper validation
-4. **Type Definitions**: Define shared types in `src/shared/types/`
-5. **React Components**: Build UI components in `src/renderer/features/{feature-name}/` following established patterns
-6. **Custom Hooks**: Extract business logic into reusable hooks in feature directories
-7. **Quality Checks**: Run `npm run lint`, `npm run type-check`, and `npm run format` via Bash tool
-
-### Authentication Pattern
-
-All IPC handlers requiring authentication should use:
-```typescript
-import { requireAuth } from "@/main/services/session-registry";
-
-const handler = createIPCHandler({
-  // configuration
-  handler: async (input) => {
-    const currentUser = requireAuth(); // Throws if not authenticated
-    
-    // Use currentUser.id for ownership checks
-    return await doSomething({ ...input, ownerId: currentUser.id });
-  },
+// Emit events after state changes
+eventBus.emit("project:created", {
+  projectId: project.id,
+  userId: user.id,
 });
+
+// Listen to events
+eventBus.on("project:created", async ({ projectId }) => {
+  await notifyTeamMembers(projectId);
+});
+
+// ❌ NEVER use EventBus in renderer
+// ✅ Use TanStack Router invalidation instead
 ```
 
-### Event-Driven Architecture
+### Form Handling with Validation
 
-**Main Process Only** - EventBus for IPC communication:
-```typescript
-// Main process - Emit events after significant operations
-eventBus.emit("agent:created", { agentId: agent.id });
-eventBus.emit("user:updated", { userId: user.id });
-
-// ❌ Do NOT use EventBus in renderer process
-// ✅ Use TanStack Router invalidation and useApiMutation instead
-```
-
-### Internationalization Pattern
-
-All user-facing text must use LinguiJS with Trans component or useLingui hook:
-```typescript
-import { Trans } from "@lingui/macro";
-import { useLingui } from "@lingui/react";
-
-export function Component({ userName }: { userName: string }) {
-  const { t } = useLingui();
-  
-  return (
-    <div>
-      {/* Static text with Trans component */}
-      <h1><Trans>Welcome to Project Wiz</Trans></h1>
-      
-      {/* Dynamic text with t function */}
-      <p>{t`Hello, ${userName}!`}</p>
-      
-      {/* Form placeholders and labels */}
-      <Input placeholder={t`Enter your email`} />
-      
-      {/* Error messages */}
-      <FormMessage>{t`This field is required`}</FormMessage>
-    </div>
-  );
-}
-
-// ❌ NEVER write Portuguese directly in code
-const errorMessage = "Este campo é obrigatório"; // WRONG
-
-// ✅ Always use English in code, Portuguese comes from translations
-const errorMessage = t`This field is required`; // CORRECT
-```
-
-### Form Handling Pattern
-
-Use react-hook-form with Zod and useApiMutation:
 ```typescript
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { Trans } from "@lingui/macro";
+import { Trans, t } from "@lingui/macro";
 import { useLingui } from "@lingui/react";
 
-import { useApiMutation } from "@/hooks/use-api-mutation.hook";
-
-const FormSchema = z.object({
-  name: z.string().min(1, "Name is required"),
-  email: z.string().email("Valid email required"),
+// Schema with custom error messages
+const ProjectSchema = z.object({
+  name: z
+    .string()
+    .min(1, "Project name is required")
+    .max(100, "Project name too long"),
+  description: z
+    .string()
+    .max(500, "Description too long")
+    .optional(),
+  visibility: z.enum(["public", "private"]),
 });
 
-export function MyForm({ onSuccess }: { onSuccess?: () => void }) {
-  const { t } = useLingui();
-  
-  const form = useForm({
-    resolver: zodResolver(FormSchema),
+type ProjectFormData = z.infer<typeof ProjectSchema>;
+
+export function ProjectForm({
+  onSuccess
+}: {
+  onSuccess?: (data: Project) => void;
+}) {
+  const { t: translate } = useLingui();
+
+  // Form setup
+  const form = useForm<ProjectFormData>({
+    resolver: zodResolver(ProjectSchema),
     defaultValues: {
       name: "",
-      email: "",
+      description: "",
+      visibility: "private",
     },
   });
-  
-  // Use useApiMutation for form submissions
+
+  // API mutation
   const createMutation = useApiMutation(
-    (data: z.infer<typeof FormSchema>) => window.api.user.create(data),
+    (data: ProjectFormData) => window.api.project.create(data),
     {
-      successMessage: "User created successfully",
-      errorMessage: "Failed to create user",
-      onSuccess,
+      successMessage: "Project created successfully",
+      onSuccess: (project) => {
+        form.reset();
+        onSuccess?.(project);
+      },
       invalidateRouter: true,
     }
   );
-  
-  function handleSubmit(data: z.infer<typeof FormSchema>) {
-    createMutation.mutate(data);
-  }
-  
+
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit)}>
+      <form onSubmit={form.handleSubmit((data) => createMutation.mutate(data))}>
         <FormField
+          control={form.control}
           name="name"
           render={({ field }) => (
             <FormItem>
-              <FormLabel><Trans>Name</Trans></FormLabel>
+              <FormLabel>
+                <Trans>Project Name</Trans>
+              </FormLabel>
               <FormControl>
-                <Input placeholder={t`Enter your name`} {...field} />
+                <Input
+                  placeholder={translate(t`Enter project name`)}
+                  {...field}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
-        
-        <Button type="submit" disabled={createMutation.isPending}>
-          {createMutation.isPending ? t`Creating...` : t`Create User`}
+
+        <Button
+          type="submit"
+          disabled={createMutation.isPending}
+        >
+          {createMutation.isPending ? (
+            <Trans>Creating...</Trans>
+          ) : (
+            <Trans>Create Project</Trans>
+          )}
         </Button>
       </form>
     </Form>
@@ -673,134 +786,277 @@ export function MyForm({ onSuccess }: { onSuccess?: () => void }) {
 }
 ```
 
-## Code Quality Rules
-
-### Design Principles
-
-**KISS (Keep It Simple, Stupid)**:
-- Write simple, readable code over clever solutions
-- Prefer straightforward implementations over complex abstractions
-- Use clear variable names and simple logic flows
-- Break complex problems into smaller, manageable functions
-- Avoid premature optimization
-
-**YAGNI (You Aren't Gonna Need It)**:
-- Only implement features that are currently needed
-- Don't add functionality for potential future requirements
-- Remove unused code, imports, and dependencies
-- Avoid over-engineering solutions
-- Start with the simplest implementation that works
+### Data Fetching Patterns
 
 ```typescript
-// ✅ KISS - Simple and clear
-export function calculateTotal(items: Item[]): number {
-  return items.reduce((sum, item) => sum + item.price, 0);
+// ✅ PREFERRED - Route loader for initial data
+// routes/projects.$projectId.tsx
+export const Route = createFileRoute('/projects/$projectId')({
+  loader: async ({ params }) => {
+    const project = await window.api.project.get({
+      id: params.projectId
+    });
+    return { project };
+  },
+  component: ProjectPage,
+});
+
+function ProjectPage() {
+  const { project } = Route.useLoaderData();
+  return <div>{project.name}</div>;
 }
 
-// ❌ Over-engineered for current needs
-export class AdvancedCalculationEngine {
-  private strategies: Map<string, CalculationStrategy> = new Map();
-  private cache: WeakMap<Item[], number> = new WeakMap();
-  
-  public calculateWithStrategy(items: Item[], strategy: string): number {
-    // Complex implementation for simple sum
-  }
+// ✅ OK - useQuery for dynamic data (avoid when possible)
+function DynamicDataComponent() {
+  const { data, isLoading } = useQuery({
+    queryKey: ['notifications'],
+    queryFn: () => window.api.notification.list(),
+    refetchInterval: 30000, // Poll every 30s
+  });
+
+  if (isLoading) return <Spinner />;
+  return <NotificationList data={data} />;
 }
 
-// ✅ YAGNI - Only what's needed now
-type CreateUserInput = {
-  name: string;
-  email: string;
-};
-
-// ❌ YAGNI violation - adding fields "just in case"
-type CreateUserInput = {
-  name: string;
-  email: string;
-  phone?: string;          // Not needed yet
-  address?: Address;       // Not needed yet
-  preferences?: UserPrefs; // Not needed yet
-  metadata?: unknown;      // Definitely not needed
-};
+// ❌ AVOID - useQuery for data that can be in route loader
 ```
 
-### ESLint Configuration Highlights
+### Error Handling
 
-- **TypeScript**: Strict naming conventions, no `any`, explicit return types
-- **React**: Hooks rules, JSX accessibility, avoid default React import
-- **Import Order**: Enforced import grouping, prefer aliases over relative paths
-- **Code Complexity**: Max function length (150 lines), max depth (4), max statements (50)
-- **Architecture Boundaries**: Renderer cannot import main process code except types
-- **Component Props**: Destructure props in function parameters, not inside component
-- **Exports**: Always use export on declaration, avoid export default (existing handlers use export default but should be migrated)
-- **Language**: All code and UI text in English, Portuguese only via LinguiJS translations
+```typescript
+// IPC handler errors
+const handler = createIPCHandler({
+  handler: async (input) => {
+    // Validation errors (automatic via Zod)
 
-### Prettier Configuration
+    // Business logic errors
+    if (!isValidOperation(input)) {
+      throw new Error("Invalid operation");
+    }
 
-- **Line Length**: 80 characters
-- **Tabs**: 2 spaces
-- **Semicolons**: Always
-- **Quotes**: Double quotes
-- **Trailing Commas**: ES5
+    // Database errors (caught automatically)
+    const result = await database.insert(data);
 
-### TypeScript Configuration
+    return result;
+  },
+});
 
-- **Strict Mode**: Enabled with additional safety checks
-- **Path Mapping**: Configured for clean imports (`@/components/*`, `@/lib/*`)
-- **Library Support**: ES2024, DOM, Vitest globals
-- **Safety Checks**: `noUnusedLocals`, `noUnusedParameters`, `noUncheckedIndexedAccess`
-
-## Common Patterns Reference
-
-### Database Relationship Patterns
-- **User-Agent**: Agents extend users table with additional fields
-- **Project-Channel**: Channels belong to projects with proper foreign keys
-- **Provider-Agent**: Agents reference LLM providers for AI functionality
-
-### UI Component Patterns
-- **shadcn/ui Components**: Use existing components from `src/renderer/components/ui/` (DO NOT modify these files)
-- **Custom Components**: Create application-specific components in feature directories or `src/renderer/components/`
-- **Compound Components**: Complex forms broken into logical sections
-- **Form Components**: Standardized form fields with validation using shadcn/ui primitives
-
-### State Management Patterns
-- **TanStack Query**: Server state management with caching
-- **React Hook Form**: Form state with validation
-- **Zustand**: Client state when needed (currently minimal usage)
-
-### Error Boundary Patterns
-- **IPC Error Handling**: Centralized error formatting in `createIPCHandler`
-- **React Error Boundaries**: Graceful error recovery in UI
-- **Validation Errors**: Zod schema validation with user-friendly messages
+// React error boundaries
+export function FeatureErrorBoundary({
+  children
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <ErrorBoundary
+      fallback={({ error, reset }) => (
+        <Card>
+          <CardContent>
+            <h2><Trans>Something went wrong</Trans></h2>
+            <p>{error.message}</p>
+            <Button onClick={reset}>
+              <Trans>Try again</Trans>
+            </Button>
+          </CardContent>
+        </Card>
+      )}
+    >
+      {children}
+    </ErrorBoundary>
+  );
+}
+```
 
 ---
 
-## Quick Reference
+## Common Tasks
 
-**Always run before completing changes:**
+### Creating a New Feature
+
 ```bash
-npm run quality:check   # Available via Bash tool
+# 1. Create feature structure
+mkdir -p src/renderer/features/my-feature/{components,hooks,utils}
+
+# 2. Create schema
+touch src/main/schemas/my-feature.schema.ts
+
+# 3. Create IPC handlers
+mkdir -p src/main/ipc/my-feature/{create,list,update,delete}
+touch src/main/ipc/my-feature/queries.ts
+
+# 4. Create types
+touch src/shared/types/my-feature.ts
+
+# 5. Create route
+touch src/renderer/app/routes/my-feature.tsx
+
+# 6. Run migrations if database changed
+npm run db:generate
+npm run db:migrate
+
+# 7. Extract i18n strings
+npm run extract
+npm run compile
 ```
 
-**Common file operations:**
-```bash
-# Create new feature
-mkdir -p src/renderer/features/{feature-name}/{components,hooks,utils}
+### Adding a New IPC Handler
 
-# Generate database migration after schema changes
+```typescript
+// 1. Create handler file
+// src/main/ipc/my-domain/my-action/invoke.ts
+
+// 2. Register in main process
+// src/main/ipc/index.ts
+import myHandler from "./my-domain/my-action/invoke";
+ipcMain.handle("my-domain:my-action", myHandler);
+
+// 3. Add type declaration
+declare global {
+  namespace WindowAPI {
+    type MyDomain = {
+      myAction: InferHandler<typeof myHandler>;
+    };
+  }
+}
+
+// 4. Use in renderer
+const result = await window.api.myDomain.myAction(input);
+```
+
+### Working with Database
+
+```typescript
+// 1. Define schema
+export const itemsTable = sqliteTable("items", {
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  name: text("name").notNull(),
+  // ... other fields
+});
+
+// 2. Generate migration
 npm run db:generate
 
-# Extract and compile translations after adding new text
-npm run extract && npm run compile
+// 3. Run migration
+npm run db:migrate
 
-# Database is SQLite binary file, use queries to read data
-# Database location: project-wiz.db
+// 4. Create queries
+export async function createItem(data: InsertItem) {
+  const db = getDatabase();
+  const [item] = await db.insert(itemsTable).values(data).returning();
+  return item;
+}
 ```
 
-**Architecture reminders:**
-- IPC handlers in `src/main/ipc/{domain-name}/{action-name}/invoke.ts`
-- Shared types in `src/shared/types/`
-- Feature components in `src/renderer/features/{feature-name}/components/`
-- Database schemas in `src/main/schemas/`
-- Use shadcn/ui components from `src/renderer/components/ui/` (DO NOT create or modify)
-- Create custom components in feature directories or `src/renderer/components/`
+---
+
+## Quality Checklist
+
+### Before Committing Code
+
+```bash
+# Run all quality checks
+npm run quality:check
+```
+
+### Code Review Checklist
+
+#### Structure
+
+- [ ] Files under 500 lines
+- [ ] Functions under 50 lines
+- [ ] Proper file naming (.schema.ts, .hook.ts, etc.)
+- [ ] Imports in correct order
+- [ ] No circular dependencies
+
+#### TypeScript
+
+- [ ] Using `type` not `interface`
+- [ ] Export on declaration
+- [ ] No `export default` (except existing IPC handlers)
+- [ ] Proper type exports for database schemas
+- [ ] No `any` types
+
+#### React
+
+- [ ] Props destructured in parameters
+- [ ] Using `useApiMutation` for API calls
+- [ ] Form validation with Zod
+- [ ] Proper hook dependencies
+- [ ] No inline styles
+
+#### i18n
+
+- [ ] All UI text uses LinguiJS
+- [ ] No Portuguese in code
+- [ ] Translations extracted and compiled
+
+#### Database
+
+- [ ] Indexes on queried fields
+- [ ] Using `timestamp_ms` for dates
+- [ ] Soft delete where appropriate
+- [ ] Transactions for complex operations
+
+#### Security
+
+- [ ] IPC handlers use `requireAuth()`
+- [ ] Proper authorization checks
+- [ ] Input validation with Zod
+- [ ] No sensitive data in logs
+
+#### Performance
+
+- [ ] Route loaders for initial data
+- [ ] Minimal `useEffect` usage
+- [ ] Proper React memo usage
+- [ ] Database query optimization
+
+---
+
+## Troubleshooting
+
+### Common Issues
+
+**Issue**: Type errors after schema changes
+
+```bash
+npm run db:generate
+npm run type-check
+```
+
+**Issue**: Missing translations
+
+```bash
+npm run extract
+npm run compile
+```
+
+**Issue**: IPC handler not found
+
+- Check handler registration in `src/main/ipc/index.ts`
+- Verify type declaration in handler file
+- Ensure proper export/import
+
+**Issue**: shadcn/ui component styling broken
+
+- Don't modify files in `/components/ui/`
+- Use Tailwind classes for customization
+- Create wrapper components if needed
+
+**Issue**: Database migration fails
+
+- Check schema syntax
+- Verify no breaking changes
+- Consider data migration script
+
+---
+
+## Final Notes
+
+1. **Always prioritize simplicity** - If you're writing complex code, step back and reconsider
+2. **Follow existing patterns** - Consistency is more important than perfection
+3. **Test your changes** - Run quality checks before committing
+4. **Document complex logic** - Future developers (including Claude) will thank you
+5. **Ask when uncertain** - It's better to clarify than to guess
+
+Remember: This codebase values **maintainability**, **consistency**, and **simplicity** over clever solutions.

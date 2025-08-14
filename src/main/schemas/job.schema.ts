@@ -31,8 +31,11 @@ export const jobsTable = sqliteTable(
     attempts: integer("attempts").notNull().default(0),
     maxAttempts: integer("max_attempts").notNull().default(3),
 
-    // Delay (milliseconds)
-    delay: integer("delay").notNull().default(0),
+    // Delay duration in milliseconds (for retry backoff)
+    delayMs: integer("delay_ms").notNull().default(0),
+
+    // Timestamp when job should be processed (for delayed jobs)
+    scheduledFor: integer("scheduled_for", { mode: "timestamp_ms" }),
 
     // Result (JSON string)
     result: text("result"),
@@ -40,22 +43,28 @@ export const jobsTable = sqliteTable(
     // Error info
     failureReason: text("failure_reason"),
 
+    // Worker ID (for tracking which worker is processing)
+    workerId: text("worker_id"),
+
     // Timestamps
     createdAt: integer("created_at", { mode: "timestamp_ms" })
+      .notNull()
+      .default(sql`(unixepoch('subsec') * 1000)`),
+    updatedAt: integer("updated_at", { mode: "timestamp_ms" })
       .notNull()
       .default(sql`(unixepoch('subsec') * 1000)`),
     processedOn: integer("processed_on", { mode: "timestamp_ms" }),
     finishedOn: integer("finished_on", { mode: "timestamp_ms" }),
   },
   (table) => ({
-    // Performance indexes
+    // Performance indexes for 1 worker, 15 concurrent jobs
     queueStatusIdx: index("jobs_queue_status_idx").on(
       table.queueName,
       table.status,
       table.priority,
     ),
-    statusIdx: index("jobs_status_idx").on(table.status),
-    delayIdx: index("jobs_delay_idx").on(table.delay),
+    scheduledIdx: index("jobs_scheduled_idx").on(table.scheduledFor),
+    workerIdx: index("jobs_worker_idx").on(table.workerId),
   }),
 );
 
