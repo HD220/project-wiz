@@ -25,7 +25,7 @@ export type ChatAction =
       };
     }
   | { type: "SET_MESSAGES"; payload: unknown[] }
-  | { type: "SET_PROPERTY"; payload: { key: keyof ChatState; value: any } }
+  | { type: "SET_PROPERTY"; payload: { key: keyof ChatState; value: unknown } }
   | { type: "ADD_PENDING"; payload: string | number }
   | { type: "REMOVE_PENDING"; payload: string | number }
   | { type: "CLEAR"; payload?: undefined }

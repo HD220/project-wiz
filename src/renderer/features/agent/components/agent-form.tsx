@@ -159,7 +159,7 @@ function AgentFormIdentity(props: AgentFormIdentityProps) {
               Agent Identity
             </CardTitle>
             <CardDescription className="text-sm mt-1">
-              Define your agent's basic information and personality
+              Define your agent&apos;s basic information and personality
             </CardDescription>
           </div>
         </div>
@@ -223,7 +223,7 @@ function AgentFormIdentity(props: AgentFormIdentityProps) {
                 />
               </FormControl>
               <FormDescription className="text-sm text-muted-foreground">
-                Optional image URL for your agent's profile picture
+                Optional image URL for your agent&apos;s profile picture
               </FormDescription>
               <FormMessage />
             </FormItem>
@@ -248,9 +248,9 @@ function AgentFormIdentity(props: AgentFormIdentityProps) {
                   />
                 </FormControl>
                 <FormDescription className="text-sm text-muted-foreground">
-                  Describe your agent's background, expertise, and personality.
-                  This helps define how the agent will behave and respond.
-                  (10-1000 characters)
+                  Describe your agent&apos;s background, expertise, and
+                  personality. This helps define how the agent will behave and
+                  respond. (10-1000 characters)
                 </FormDescription>
                 <FormMessage />
               </FormItem>
@@ -273,8 +273,8 @@ function AgentFormIdentity(props: AgentFormIdentityProps) {
                   />
                 </FormControl>
                 <FormDescription className="text-sm text-muted-foreground">
-                  Define your agent's primary goal and objectives. What should
-                  this agent focus on accomplishing? (10-500 characters)
+                  Define your agent&apos;s primary goal and objectives. What
+                  should this agent focus on accomplishing? (10-500 characters)
                 </FormDescription>
                 <FormMessage />
               </FormItem>
@@ -392,8 +392,8 @@ function AgentFormProvider(props: AgentFormProviderProps) {
                       max="2"
                       step="0.1"
                       {...field}
-                      onChange={(e) =>
-                        field.onChange(parseFloat(e.target.value))
+                      onChange={(event) =>
+                        field.onChange(parseFloat(event.target.value))
                       }
                       placeholder="0.7"
                       className="h-10"
@@ -420,7 +420,9 @@ function AgentFormProvider(props: AgentFormProviderProps) {
                       type="number"
                       min="1"
                       {...field}
-                      onChange={(e) => field.onChange(parseInt(e.target.value))}
+                      onChange={(event) =>
+                        field.onChange(parseInt(event.target.value))
+                      }
                       placeholder="4000"
                       className="h-10"
                     />
@@ -449,10 +451,10 @@ function AgentFormProvider(props: AgentFormProviderProps) {
                       step="0.01"
                       {...field}
                       value={field.value || ""}
-                      onChange={(e) =>
+                      onChange={(event) =>
                         field.onChange(
-                          e.target.value
-                            ? parseFloat(e.target.value)
+                          event.target.value
+                            ? parseFloat(event.target.value)
                             : undefined,
                         )
                       }

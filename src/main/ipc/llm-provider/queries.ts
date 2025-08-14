@@ -143,7 +143,7 @@ export async function updateLlmProvider(
 ): Promise<SelectLlmProvider | null> {
   const db = getDatabase();
 
-  const { ownerId, ...updates } = data; // Remove ownerId from updates using destructuring
+  const { ownerId: _ownerId, ...updates } = data; // Remove ownerId from updates using destructuring
 
   // If updating API key, encrypt it
   if (updates.apiKey) {

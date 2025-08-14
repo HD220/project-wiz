@@ -9,11 +9,11 @@ export interface ParsedModelConfig {
   temperature?: number;
   maxTokens?: number;
   topP?: number;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export function parseModelConfig(
-  modelConfig: any,
+  modelConfig: unknown,
   agentId?: string,
 ): ParsedModelConfig {
   const defaultConfig: ParsedModelConfig = {

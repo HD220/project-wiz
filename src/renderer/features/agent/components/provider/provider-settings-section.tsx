@@ -22,7 +22,7 @@ import {
 } from "@/renderer/components/ui/form";
 
 // Schema for form input
-const LlmProviderFormSchema = LlmProviderSchema.omit({
+const _LlmProviderFormSchema = LlmProviderSchema.omit({
   id: true,
   createdAt: true,
   updatedAt: true,
@@ -30,7 +30,7 @@ const LlmProviderFormSchema = LlmProviderSchema.omit({
 import { cn } from "@/renderer/lib/utils";
 
 export function ProviderSettingsSection() {
-  const form = useFormContext<z.infer<typeof LlmProviderFormSchema>>();
+  const form = useFormContext<z.infer<typeof _LlmProviderFormSchema>>();
 
   return (
     <Card className="bg-gradient-to-br from-chart-4/5 via-chart-4/3 to-chart-4/0 border border-border/60">

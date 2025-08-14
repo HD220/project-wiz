@@ -34,8 +34,8 @@ export function getParticipantUsers(
 
   // Get user objects for each participant, excluding current user
   return participants
-    .filter((p) => p.participantId !== currentUserId)
-    .map((p) => userMap.get(p.participantId))
+    .filter((participant) => participant.participantId !== currentUserId)
+    .map((participant) => userMap.get(participant.participantId))
     .filter((user): user is User => user !== undefined);
 }
 

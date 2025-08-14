@@ -21,7 +21,7 @@ export const formatArchivedDate = (archivedAt: Date): string => {
       month: "2-digit",
       year: "numeric",
     }).format(archivedDate);
-  } catch (error) {
+  } catch (_error) {
     return "Invalid date";
   }
 };

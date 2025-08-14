@@ -1,6 +1,6 @@
 import { createFileRoute, Outlet, useRouter } from "@tanstack/react-router";
 import { Send, Paperclip, Smile } from "lucide-react";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 
 import {
   Chat,
@@ -20,6 +20,7 @@ import {
   getOtherParticipants,
   createConversationAvatar,
 } from "@/renderer/features/conversation/utils/conversation-avatar.utils";
+import { processMessages } from "@/renderer/features/conversation/utils/message-processing.utils";
 import {
   ProfileAvatar,
   ProfileAvatarImage,
@@ -29,12 +30,11 @@ import { loadApiData } from "@/renderer/lib/route-loader";
 import { cn } from "@/renderer/lib/utils";
 
 import { getRendererLogger } from "@/shared/services/logger/renderer";
-
-const logger = getRendererLogger("dm-conversation");
-
 import type { DMConversation } from "@/shared/types/dm-conversation";
 import type { Message } from "@/shared/types/message";
 import type { User } from "@/shared/types/user";
+
+const logger = getRendererLogger("dm-conversation");
 
 interface DMLoaderData {
   conversation: DMConversation;
@@ -47,7 +47,7 @@ interface DMLoaderData {
 function DMLayout() {
   const { conversationId } = Route.useParams();
   const router = useRouter();
-  const { conversation, messages, availableUsers, user } =
+  const { conversation, messages, availableUsers, user, participants } =
     Route.useLoaderData() as DMLoaderData;
   const [optimisticMessages, setOptimisticMessages] = useState(messages || []);
   const [sendingMessage, setSendingMessage] = useState(false);
@@ -106,7 +106,6 @@ function DMLayout() {
     );
   }
 
-  const { participants } = Route.useLoaderData() as DMLoaderData;
   const otherParticipants = getOtherParticipants(participants, user.id);
 
   // Determine if it's a group conversation (3+ participants) or 1-1 (2 participants)
@@ -137,25 +136,7 @@ function DMLayout() {
     </div>
   );
 
-  // Process messages into groups (Discord-like)
-  const processMessages = (messages: any[]) => {
-    const messageGroups: any[] = [];
-
-    messages.forEach((msg: any) => {
-      const lastGroup = messageGroups[messageGroups.length - 1];
-
-      if (lastGroup && lastGroup.authorId === msg.authorId) {
-        lastGroup.messages.push(msg);
-      } else {
-        messageGroups.push({
-          authorId: msg.authorId,
-          messages: [msg],
-        });
-      }
-    });
-
-    return messageGroups;
-  };
+  // Using imported processMessages function from utils
 
   return (
     <div className="h-full w-full flex flex-col">
@@ -171,7 +152,10 @@ function DMLayout() {
         {/* Main Chat Content */}
         <main className="flex-1 overflow-hidden">
           <Chat
-            keyFn={(message: any) => message.id}
+            keyFn={(message) => {
+              const msg = message as Message;
+              return msg.id;
+            }}
             value={optimisticMessages}
             onSend={(input, context) => {
               handleSendMessage(input);
@@ -201,7 +185,8 @@ function DMLayout() {
                     group.authorId === user.id
                       ? { id: user.id, name: user.name, avatar: user.avatar }
                       : availableUsers.find(
-                          (u: User) => u.id === group.authorId,
+                          (availableUser: User) =>
+                            availableUser.id === group.authorId,
                         ) || {
                           id: group.authorId,
                           name: "Unknown User",
@@ -209,13 +194,16 @@ function DMLayout() {
                         };
 
                   // Calculate if should show avatar (first message of group or >7min)
+                  const previousGroup = messageGroups[groupIndex - 1];
                   const timeDiff =
-                    groupIndex > 0 && group.messages[0]?.createdAt
+                    groupIndex > 0 &&
+                    group.messages[0]?.createdAt &&
+                    previousGroup
                       ? new Date(group.messages[0].createdAt).getTime() -
                         new Date(
-                          messageGroups[groupIndex - 1].messages[
-                            messageGroups[groupIndex - 1].messages.length - 1
-                          ].createdAt,
+                          previousGroup.messages[
+                            previousGroup.messages.length - 1
+                          ]?.createdAt || 0,
                         ).getTime()
                       : 0;
 
@@ -227,99 +215,101 @@ function DMLayout() {
                       key={groupIndex}
                       className={showAvatar ? "mt-[17px] first:mt-0" : ""}
                     >
-                      {group.messages.map((msg: any, messageIndex: number) => (
-                        <ChatMessage
-                          key={msg.id}
-                          messageData={msg}
-                          messageIndex={messageIndex}
-                          render={(_message) => (
-                            <div
-                              className={cn(
-                                "group relative flex gap-3 px-4 py-0.5 hover:bg-muted/30 transition-colors",
-                                showAvatar && messageIndex === 0
-                                  ? "mt-3 pb-0.5"
-                                  : "mt-0 pb-0",
-                              )}
-                            >
-                              {/* Avatar/Timestamp Area */}
-                              <div className="flex-shrink-0 w-10">
-                                {showAvatar && messageIndex === 0 ? (
-                                  <ProfileAvatar size="sm">
-                                    <ProfileAvatarImage
-                                      src={author.avatar}
-                                      name={author.name || "Unknown"}
-                                      className={cn(
-                                        !author.name ||
-                                          author.name === "Unknown User"
-                                          ? "text-muted-foreground bg-muted"
-                                          : "",
-                                      )}
-                                    />
-                                    {author.id && (
-                                      <ProfileAvatarStatus id={author.id} />
-                                    )}
-                                  </ProfileAvatar>
-                                ) : (
-                                  <div className="flex justify-end items-start h-5 pt-0.5">
-                                    <span className="text-xs text-muted-foreground/40 opacity-0 group-hover:opacity-100 transition-opacity font-mono">
-                                      {new Date(
-                                        msg.createdAt,
-                                      ).toLocaleTimeString([], {
-                                        hour: "2-digit",
-                                        minute: "2-digit",
-                                      })}
-                                    </span>
-                                  </div>
+                      {group.messages.map(
+                        (msg: Message, messageIndex: number) => (
+                          <ChatMessage
+                            key={msg.id}
+                            messageData={msg}
+                            messageIndex={messageIndex}
+                            render={(_message) => (
+                              <div
+                                className={cn(
+                                  "group relative flex gap-3 px-4 py-0.5 hover:bg-muted/30 transition-colors",
+                                  showAvatar && messageIndex === 0
+                                    ? "mt-3 pb-0.5"
+                                    : "mt-0 pb-0",
                                 )}
-                              </div>
-
-                              {/* Message Content */}
-                              <div className="flex-1 min-w-0">
-                                {showAvatar && messageIndex === 0 && (
-                                  <div className="flex items-baseline gap-2 mb-1">
-                                    <span
-                                      className={cn(
-                                        "text-sm font-medium hover:underline cursor-pointer",
-                                        !author.name ||
-                                          author.name === "Unknown User"
-                                          ? "text-muted-foreground"
-                                          : "text-foreground hover:text-primary",
+                              >
+                                {/* Avatar/Timestamp Area */}
+                                <div className="flex-shrink-0 w-10">
+                                  {showAvatar && messageIndex === 0 ? (
+                                    <ProfileAvatar size="sm">
+                                      <ProfileAvatarImage
+                                        src={author.avatar}
+                                        name={author.name || "Unknown"}
+                                        className={cn(
+                                          !author.name ||
+                                            author.name === "Unknown User"
+                                            ? "text-muted-foreground bg-muted"
+                                            : "",
+                                        )}
+                                      />
+                                      {author.id && (
+                                        <ProfileAvatarStatus id={author.id} />
                                       )}
-                                    >
-                                      {author.name || "Unknown User"}
-                                    </span>
-                                    <span className="text-xs text-muted-foreground/60 font-mono">
-                                      {new Date(msg.createdAt).toLocaleString(
-                                        [],
-                                        {
-                                          month: "short",
-                                          day: "numeric",
+                                    </ProfileAvatar>
+                                  ) : (
+                                    <div className="flex justify-end items-start h-5 pt-0.5">
+                                      <span className="text-xs text-muted-foreground/40 opacity-0 group-hover:opacity-100 transition-opacity font-mono">
+                                        {new Date(
+                                          msg.createdAt,
+                                        ).toLocaleTimeString([], {
                                           hour: "2-digit",
                                           minute: "2-digit",
-                                        },
-                                      )}
-                                    </span>
-                                  </div>
-                                )}
-
-                                <div
-                                  className={cn(
-                                    "text-sm leading-[1.375] break-words",
-                                    !author.name ||
-                                      author.name === "Unknown User"
-                                      ? "text-muted-foreground/80"
-                                      : "text-foreground",
+                                        })}
+                                      </span>
+                                    </div>
                                   )}
-                                >
-                                  <p className="whitespace-pre-wrap selection:bg-primary/20 m-0">
-                                    {msg.content}
-                                  </p>
+                                </div>
+
+                                {/* Message Content */}
+                                <div className="flex-1 min-w-0">
+                                  {showAvatar && messageIndex === 0 && (
+                                    <div className="flex items-baseline gap-2 mb-1">
+                                      <span
+                                        className={cn(
+                                          "text-sm font-medium hover:underline cursor-pointer",
+                                          !author.name ||
+                                            author.name === "Unknown User"
+                                            ? "text-muted-foreground"
+                                            : "text-foreground hover:text-primary",
+                                        )}
+                                      >
+                                        {author.name || "Unknown User"}
+                                      </span>
+                                      <span className="text-xs text-muted-foreground/60 font-mono">
+                                        {new Date(msg.createdAt).toLocaleString(
+                                          [],
+                                          {
+                                            month: "short",
+                                            day: "numeric",
+                                            hour: "2-digit",
+                                            minute: "2-digit",
+                                          },
+                                        )}
+                                      </span>
+                                    </div>
+                                  )}
+
+                                  <div
+                                    className={cn(
+                                      "text-sm leading-[1.375] break-words",
+                                      !author.name ||
+                                        author.name === "Unknown User"
+                                        ? "text-muted-foreground/80"
+                                        : "text-foreground",
+                                    )}
+                                  >
+                                    <p className="whitespace-pre-wrap selection:bg-primary/20 m-0">
+                                      {msg.content}
+                                    </p>
+                                  </div>
                                 </div>
                               </div>
-                            </div>
-                          )}
-                        />
-                      ))}
+                            )}
+                          />
+                        ),
+                      )}
                     </div>
                   );
                 });
@@ -345,12 +335,15 @@ function DMLayout() {
                       loading={sendingMessage}
                       onValueChange={chatInput.setValue}
                       onSend={chatInput.send}
-                      onKeyDown={(e) => {
-                        if (e.key === "ArrowUp" && !chatInput.value) {
-                          e.preventDefault();
+                      onKeyDown={(event) => {
+                        if (event.key === "ArrowUp" && !chatInput.value) {
+                          event.preventDefault();
                           chatInput.navigateHistory("up");
-                        } else if (e.key === "ArrowDown" && !chatInput.value) {
-                          e.preventDefault();
+                        } else if (
+                          event.key === "ArrowDown" &&
+                          !chatInput.value
+                        ) {
+                          event.preventDefault();
                           chatInput.navigateHistory("down");
                         }
                       }}
@@ -423,27 +416,27 @@ function FunctionalChatInput({
     }
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (event.key === "Enter" && !event.shiftKey) {
+      event.preventDefault();
       handleSubmit();
     }
 
-    onKeyDown?.(e);
+    onKeyDown?.(event);
   };
 
   // Auto-resize textarea com throttling para performance
-  const resizeTextarea = () => {
+  const resizeTextarea = React.useCallback(() => {
     if (inputRef?.current) {
       inputRef.current.style.height = "auto";
       inputRef.current.style.height = `${inputRef.current.scrollHeight}px`;
     }
-  };
+  }, [inputRef]);
 
   useEffect(() => {
     const timeoutId = setTimeout(resizeTextarea, 0);
     return () => clearTimeout(timeoutId);
-  }, [value]);
+  }, [value, resizeTextarea]);
 
   return (
     <div className="flex items-end gap-3">
@@ -451,8 +444,8 @@ function FunctionalChatInput({
         <Textarea
           ref={inputRef}
           value={value}
-          onChange={(e) => {
-            const newValue = e.target.value;
+          onChange={(event) => {
+            const newValue = event.target.value;
             onValueChange(newValue);
           }}
           onKeyDown={handleKeyDown}
@@ -533,7 +526,9 @@ export const Route = createFileRoute("/_authenticated/user/dm/$conversationId")(
 
       // Get participant user details from availableUsers using the participants from dm.get()
       const otherParticipants = availableUsers.filter((user) =>
-        dmConversation.participants?.some((p) => p.participantId === user.id),
+        dmConversation.participants?.some(
+          (participant) => participant.participantId === user.id,
+        ),
       );
 
       // Include current user in participants list

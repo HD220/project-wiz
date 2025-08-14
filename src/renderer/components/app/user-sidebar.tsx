@@ -19,7 +19,6 @@ export function UserSidebar({ className }: UserSidebarProps) {
         "transition-all duration-300 ease-in-out",
         className,
       )}
-      role="complementary"
       aria-label="User area navigation"
     >
       <div className="flex-shrink-0">

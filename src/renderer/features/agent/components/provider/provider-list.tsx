@@ -77,17 +77,22 @@ export function ProviderList(props: ProviderListProps) {
   // Inline filter checking and provider categorization following INLINE-FIRST principles
   const hasFilters = !!(search.type || search.search || search.showInactive);
   const filteredProviders = providers; // Backend already handles filtering
-  const activeProviders = providers.filter((p) => !p.deactivatedAt);
-  const inactiveProviders = providers.filter((p) => !!p.deactivatedAt);
-  const defaultProvider = providers.find((p) => p.isDefault);
+  const activeProviders = providers.filter(
+    (provider) => !provider.deactivatedAt,
+  );
+  const inactiveProviders = providers.filter(
+    (provider) => !!provider.deactivatedAt,
+  );
+  const defaultProvider = providers.find((provider) => provider.isDefault);
 
   // Inline statistics calculation for UI display
   const providerStats = {
     total: filteredProviders.length,
     active: activeProviders.length,
     inactive: inactiveProviders.length,
-    openai: providers.filter((p) => p.type === "openai").length,
-    anthropic: providers.filter((p) => p.type === "anthropic").length,
+    openai: providers.filter((provider) => provider.type === "openai").length,
+    anthropic: providers.filter((provider) => provider.type === "anthropic")
+      .length,
   };
 
   // Render empty state when no providers exist and no filters are applied

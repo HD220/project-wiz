@@ -24,7 +24,7 @@ export class Logger {
    * @param message - The log message
    * @param data - Optional data to log (objects, strings, numbers, etc.)
    */
-  debug(message: string, ...data: any[]): void {
+  debug(message: string, ...data: unknown[]): void {
     if (data.length === 0) {
       this.pinoLogger.debug(message);
     } else if (
@@ -43,7 +43,7 @@ export class Logger {
    * @param message - The log message
    * @param data - Optional data to log (objects, strings, numbers, etc.)
    */
-  info(message: string, ...data: any[]): void {
+  info(message: string, ...data: unknown[]): void {
     if (data.length === 0) {
       this.pinoLogger.info(message);
     } else if (
@@ -62,7 +62,7 @@ export class Logger {
    * @param message - The log message
    * @param data - Optional data to log (objects, strings, numbers, etc.)
    */
-  warn(message: string, ...data: any[]): void {
+  warn(message: string, ...data: unknown[]): void {
     if (data.length === 0) {
       this.pinoLogger.warn(message);
     } else if (
@@ -81,7 +81,7 @@ export class Logger {
    * @param message - The log message
    * @param data - Optional data to log (objects, strings, numbers, etc.)
    */
-  error(message: string, ...data: any[]): void {
+  error(message: string, ...data: unknown[]): void {
     if (data.length === 0) {
       this.pinoLogger.error(message);
     } else if (
@@ -100,7 +100,7 @@ export class Logger {
    * @param bindings - Additional context to bind to all logs
    * @returns New Logger instance with additional context
    */
-  child(bindings: Record<string, any>): Logger {
+  child(bindings: Record<string, unknown>): Logger {
     return new Logger(this.pinoLogger.child(bindings));
   }
 

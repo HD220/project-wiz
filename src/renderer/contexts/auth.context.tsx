@@ -36,7 +36,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         if (response.success && response.data) {
           setUser(response.data);
         }
-      } catch (error) {
+      } catch (_error) {
         // Session load failure is expected when user is not logged in
       } finally {
         setIsLoading(false);

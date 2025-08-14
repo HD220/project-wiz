@@ -336,7 +336,6 @@ function ConversationListItem(props: ConversationListItemProps) {
             className={cn(
               "opacity-0 group-hover:opacity-100 transition-opacity w-4",
             )}
-            onClick={(e) => e.preventDefault()}
           >
             <DropdownMenu>
               <DropdownMenuTrigger asChild>

@@ -24,7 +24,7 @@ const handler = createIPCHandler({
     });
 
     // Register pattern on EventBus and forward to renderer when events match
-    eventBus.on(input.pattern as any, (data: any) => {
+    eventBus.on(input.pattern as string, (data: unknown) => {
       logger.debug(`EventBus event matched pattern, forwarding to renderer`, {
         pattern: input.pattern,
         hasData: !!data,

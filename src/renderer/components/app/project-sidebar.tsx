@@ -38,7 +38,6 @@ export function ProjectSidebar(props: ProjectSidebarProps) {
         "transition-all duration-300 ease-in-out",
         className,
       )}
-      role="complementary"
       aria-label={`${project.name} navigation`}
     >
       {/* Project Header */}
@@ -140,12 +139,6 @@ export function ProjectSidebar(props: ProjectSidebarProps) {
                           <span className="truncate flex-1 text-left">
                             {channel.name}
                           </span>
-                          {false && !isActive && (
-                            <div
-                              className="ml-2 w-2 h-2 bg-destructive rounded-full flex-shrink-0"
-                              aria-label="Unread messages"
-                            />
-                          )}
                         </Button>
                       )}
                     </Link>

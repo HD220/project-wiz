@@ -67,7 +67,7 @@ type ChatAction =
       };
     }
   | { type: "SET_MESSAGES"; payload: unknown[] }
-  | { type: "SET_PROPERTY"; payload: { key: keyof ChatState; value: any } }
+  | { type: "SET_PROPERTY"; payload: { key: keyof ChatState; value: unknown } }
   | { type: "ADD_PENDING"; payload: string | number }
   | { type: "REMOVE_PENDING"; payload: string | number }
   | { type: "CLEAR"; payload?: undefined }
@@ -280,80 +280,56 @@ function Chat({
     }
   }, [state.autoScroll]);
 
-  // Helper para complex actions com callbacks
-  const createAction =
-    (
-      actionType: ChatAction["type"],
-      payloadFn: (...args: any[]) => any,
-      messageCalculator?: (messages: unknown[], ...args: any[]) => unknown[],
-      callback?: (contextValue: ChatContextValue, ...args: any[]) => void,
-    ) =>
-    (...args: any[]) => {
-      dispatch({ type: actionType, payload: payloadFn(...args) });
-      if (messageCalculator) {
-        const newMessages = messageCalculator(messages, ...args);
-        onValueChange?.(newMessages);
-      }
-      if (callback) {
-        callback(contextValue, ...args); // contextValue será definido abaixo
-      }
-    };
-
   // Actions simplificadas usando helper centralizado - memoized for performance
   const actions = React.useMemo(
     () => ({
-      addMessage: createAction(
-        "ADD_MESSAGE",
-        (message: unknown) => message,
-        (msgs, message: unknown) => [...msgs, message],
-      ),
+      addMessage: (message: unknown) => {
+        dispatch({ type: "ADD_MESSAGE", payload: message });
+        if (onValueChange) {
+          const newMessages = [...messages, message];
+          onValueChange(newMessages);
+        }
+      },
 
-      updateMessage: createAction(
-        "UPDATE_MESSAGE",
-        (id: string | number, updates: Record<string, unknown>) => ({
-          id,
-          updates,
-        }),
-        (msgs, id: string | number, updates: Record<string, unknown>) => {
-          return msgs.map((msg) => {
-            const msgId = keyFn(msg, msgs.indexOf(msg));
+      updateMessage: (
+        id: string | number,
+        updates: Record<string, unknown>,
+      ) => {
+        dispatch({ type: "UPDATE_MESSAGE", payload: { id, updates } });
+        if (onValueChange) {
+          const newMessages = messages.map((msg) => {
+            const msgId = keyFn(msg, messages.indexOf(msg));
             return msgId === id
               ? { ...(msg as Record<string, unknown>), ...updates }
               : msg;
           });
-        },
-        (ctx, id: string | number, updates: Record<string, unknown>) => {
-          onMessageUpdate?.(id, updates, ctx);
-        },
-      ),
+          onValueChange(newMessages);
+        }
+      },
 
-      removeMessage: createAction(
-        "REMOVE_MESSAGE",
-        (id: string | number) => ({ id }),
-        (msgs, id: string | number) => {
-          return msgs.filter((msg) => {
-            const msgId = keyFn(msg, msgs.indexOf(msg));
+      removeMessage: (id: string | number) => {
+        dispatch({ type: "REMOVE_MESSAGE", payload: { id } });
+        if (onValueChange) {
+          const newMessages = messages.filter((msg) => {
+            const msgId = keyFn(msg, messages.indexOf(msg));
             return msgId !== id;
           });
-        },
-        (ctx, id: string | number) => {
-          onMessageRemove?.(id, ctx);
-        },
-      ),
+          onValueChange(newMessages);
+        }
+      },
 
-      setMessages: createAction(
-        "SET_MESSAGES",
-        (messagesOrFn: unknown[] | ((prev: unknown[]) => unknown[])) => {
-          return typeof messagesOrFn === "function"
+      setMessages: (
+        messagesOrFn: unknown[] | ((prev: unknown[]) => unknown[]),
+      ) => {
+        const newMessages =
+          typeof messagesOrFn === "function"
             ? messagesOrFn(messages)
             : messagesOrFn;
-        },
-        (msgs, messagesOrFn: unknown[] | ((prev: unknown[]) => unknown[])) => {
-          return typeof messagesOrFn === "function"
-            ? messagesOrFn(msgs)
-            : messagesOrFn;
-        },
-      ),
+        dispatch({ type: "SET_MESSAGES", payload: newMessages });
+        if (onValueChange) {
+          onValueChange(newMessages);
+        }
+      },
 
       setLoading: (loading: boolean) =>
         dispatch({
@@ -376,19 +352,16 @@ function Chat({
       removePendingMessage: (id: string | number) =>
         dispatch({ type: "REMOVE_PENDING", payload: id }),
 
-      send: (input: string) => {
-        if (onSend && input && input.trim() && !state.loading && !disabled) {
-          // contextValue will be defined below
-          onSend(input.trim(), contextValue);
-        }
+      send: (_input: string) => {
+        // This will be overridden with proper contextValue later
       },
 
-      clear: createAction(
-        "CLEAR",
-        () => undefined,
-        () => [],
-        (ctx) => onClear?.(ctx),
-      ),
+      clear: () => {
+        dispatch({ type: "CLEAR" });
+        if (onValueChange) {
+          onValueChange([]);
+        }
+      },
 
       isPending: (id: string | number) => state.pendingMessages.has(id),
       navigateHistory: (direction: "up" | "down") =>
@@ -399,27 +372,60 @@ function Chat({
       messages,
       keyFn,
       onValueChange,
-      onMessageUpdate,
-      onMessageRemove,
-      onClear,
-      onSend,
-      state.loading,
-      disabled,
       state.pendingMessages,
       scrollToBottom,
+      dispatch,
     ],
   );
 
   // Context construction simplificada - memoized for stability
-  const contextValue: ChatContextValue = React.useMemo(
-    () => ({
+  const contextValue: ChatContextValue = React.useMemo(() => {
+    const ctx: ChatContextValue = {
       state: { ...state, messages },
-      actions,
+      actions: {
+        ...actions,
+        send: (input: string) => {
+          if (onSend && input && input.trim() && !state.loading && !disabled) {
+            onSend(input.trim(), ctx);
+          }
+        },
+        updateMessage: (
+          id: string | number,
+          updates: Record<string, unknown>,
+        ) => {
+          actions.updateMessage(id, updates);
+          if (onMessageUpdate) {
+            onMessageUpdate(id, updates, ctx);
+          }
+        },
+        removeMessage: (id: string | number) => {
+          actions.removeMessage(id);
+          if (onMessageRemove) {
+            onMessageRemove(id, ctx);
+          }
+        },
+        clear: () => {
+          actions.clear();
+          if (onClear) {
+            onClear(ctx);
+          }
+        },
+      },
       refs: { messagesRef, inputRef },
       keyFn,
-    }),
-    [state, messages, actions, keyFn],
-  );
+    };
+    return ctx;
+  }, [
+    state,
+    messages,
+    actions,
+    keyFn,
+    onSend,
+    onMessageUpdate,
+    onMessageRemove,
+    onClear,
+    disabled,
+  ]);
 
   // Auto scroll when messages change
   React.useEffect(() => {
@@ -438,7 +444,6 @@ function Chat({
         role="log"
         aria-label="Chat conversation"
         aria-live="polite"
-        aria-disabled={disabled}
         {...props}
       >
         {children}
@@ -511,7 +516,6 @@ function ChatMessages({ className, children, ...props }: ChatMessagesProps) {
           role="log"
           aria-label="Messages"
           aria-live="polite"
-          tabIndex={0}
         >
           {children}
         </div>

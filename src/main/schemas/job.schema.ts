@@ -15,7 +15,7 @@ export const jobsTable = sqliteTable(
     // Job data (JSON string)
     data: text("data").notNull(),
 
-    // Job options (JSON string)  
+    // Job options (JSON string)
     opts: text("opts"),
 
     // Job status

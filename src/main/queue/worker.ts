@@ -1,10 +1,11 @@
-import { eq, and, asc, desc, lt } from "drizzle-orm";
 import { EventEmitter } from "events";
+
+import { eq, and, asc, desc, lt } from "drizzle-orm";
+
+import { jobsTable, type Job } from "@/main/schemas/job.schema";
 
 import { createDatabaseConnection } from "@/shared/config/database";
 import { getLogger } from "@/shared/services/logger/config";
-
-import { jobsTable, type Job } from "@/main/schemas/job.schema";
 
 const { getDatabase } = createDatabaseConnection(true);
 
@@ -14,19 +15,19 @@ export interface WorkerOptions {
   stuckJobTimeout?: number; // Time before considering a job stuck
 }
 
-export interface ProcessorFunction<T = any, R = any> {
+export interface ProcessorFunction<T = unknown, R = unknown> {
   (job: { id: string; data: T }): Promise<R>;
 }
 
 export interface WorkerEvents {
-  active: (job: { id: string; data: any }) => void;
-  completed: (job: { id: string; result: any; duration: number }) => void;
+  active: (job: { id: string; data: unknown }) => void;
+  completed: (job: { id: string; result: unknown; duration: number }) => void;
   failed: (job: { id: string; error: string; duration: number }) => void;
   stalled: (job: { id: string }) => void;
 }
 
 // Optimized Worker for single instance with 15 concurrent jobs
-export class Worker<T = any, R = any> extends EventEmitter {
+export class Worker<T = unknown, R = unknown> extends EventEmitter {
   private logger = getLogger("worker");
   private running = false;
   private processor: ProcessorFunction<T, R>;
@@ -38,7 +39,7 @@ export class Worker<T = any, R = any> extends EventEmitter {
   constructor(
     public readonly queueName: string,
     processor: ProcessorFunction<T, R>,
-    opts: WorkerOptions = {}
+    opts: WorkerOptions = {},
   ) {
     super();
     this.processor = processor;
@@ -47,9 +48,11 @@ export class Worker<T = any, R = any> extends EventEmitter {
       pollInterval: opts.pollInterval || 1000, // Faster polling for responsiveness
       stuckJobTimeout: opts.stuckJobTimeout || 30000, // 30s timeout
     };
-    
+
     this.workerId = `worker-${crypto.randomUUID()}`;
-    this.logger.debug(`Worker created for queue: ${queueName} (${this.workerId})`);
+    this.logger.debug(
+      `Worker created for queue: ${queueName} (${this.workerId})`,
+    );
   }
 
   // Start worker with real concurrency
@@ -60,38 +63,31 @@ export class Worker<T = any, R = any> extends EventEmitter {
     }
 
     this.running = true;
-    this.logger.info(`Starting worker for queue: ${this.queueName} (concurrency: ${this.options.concurrency})`);
+    this.logger.info(
+      `Starting worker for queue: ${this.queueName} (concurrency: ${this.options.concurrency})`,
+    );
 
     // Main polling loop
     while (this.running) {
       try {
         // Clean up stuck jobs first
         await this.recoverStuckJobs();
-        
+
         // Process delayed jobs (move to waiting if time has come)
         await this.processDelayedJobs();
-        
+
         // If we have capacity, try to start new jobs
         const availableSlots = this.options.concurrency - this.activeJobs.size;
-        
+
         if (availableSlots > 0) {
-          // Get and start jobs up to available slots
-          for (let i = 0; i < availableSlots; i++) {
-            const job = await this.getAndLockNextJob();
-            if (job) {
-              this.startJobProcessing(job);
-            } else {
-              break; // No more jobs available
-            }
-          }
+          await this.fillAvailableSlots(availableSlots);
         }
 
         // Clean up completed promises
         await this.cleanupCompletedPromises();
-        
+
         // Wait before next poll
         await this.delay(this.options.pollInterval);
-        
       } catch (error) {
         this.logger.error("Worker polling error:", error);
         await this.delay(this.options.pollInterval);
@@ -106,10 +102,10 @@ export class Worker<T = any, R = any> extends EventEmitter {
   async close(): Promise<void> {
     this.logger.info(`Stopping worker for queue: ${this.queueName}`);
     this.running = false;
-    
+
     // Wait for active jobs to finish
     await this.waitForAllJobs();
-    
+
     this.logger.info(`Worker stopped for queue: ${this.queueName}`);
   }
 
@@ -130,8 +126,8 @@ export class Worker<T = any, R = any> extends EventEmitter {
       .where(
         and(
           eq(jobsTable.queueName, this.queueName),
-          eq(jobsTable.status, "waiting")
-        )
+          eq(jobsTable.status, "waiting"),
+        ),
       )
       .orderBy(desc(jobsTable.priority), asc(jobsTable.createdAt))
       .limit(1)
@@ -147,7 +143,7 @@ export class Worker<T = any, R = any> extends EventEmitter {
 
     const result = await db
       .update(jobsTable)
-      .set({ 
+      .set({
         status: "waiting",
         updatedAt: new Date(now),
       })
@@ -155,8 +151,8 @@ export class Worker<T = any, R = any> extends EventEmitter {
         and(
           eq(jobsTable.queueName, this.queueName),
           eq(jobsTable.status, "delayed"),
-          lt(jobsTable.scheduledFor, new Date(now))
-        )
+          lt(jobsTable.scheduledFor, new Date(now)),
+        ),
       );
 
     if (result.changes && result.changes > 0) {
@@ -176,14 +172,14 @@ export class Worker<T = any, R = any> extends EventEmitter {
         and(
           eq(jobsTable.queueName, this.queueName),
           eq(jobsTable.status, "active"),
-          lt(jobsTable.processedOn, stuckThreshold)
-        )
+          lt(jobsTable.processedOn, stuckThreshold),
+        ),
       );
 
     for (const job of stuckJobs) {
       this.logger.warn(`Recovering stuck job: ${job.id}`);
       this.emit("stalled", { id: job.id });
-      
+
       // Move back to waiting for retry
       await db
         .update(jobsTable)
@@ -197,66 +193,80 @@ export class Worker<T = any, R = any> extends EventEmitter {
     }
   }
 
+  // Fill available slots with jobs
+  private async fillAvailableSlots(availableSlots: number): Promise<void> {
+    for (let slotIndex = 0; slotIndex < availableSlots; slotIndex++) {
+      const job = await this.getAndLockNextJob();
+      if (job) {
+        this.startJobProcessing(job);
+      } else {
+        break; // No more jobs available
+      }
+    }
+  }
+
   // Start processing a job (non-blocking)
   private startJobProcessing(job: Job): void {
     this.activeJobs.add(job.id);
-    
-    const processingPromise = this.processJob(job)
-      .finally(() => {
-        this.activeJobs.delete(job.id);
-      });
-    
+
+    const processingPromise = this.processJob(job).finally(() => {
+      this.activeJobs.delete(job.id);
+    });
+
     this.processingPromises.add(processingPromise);
   }
 
   // Process a single job with events
   private async processJob(job: Job): Promise<void> {
     const startTime = Date.now();
-    
+
     try {
       this.logger.debug(`Processing job ${job.id}`);
-      
+
       // Parse job data
       const jobData = JSON.parse(job.data);
-      
+
       // Emit active event
       this.emit("active", { id: job.id, data: jobData });
-      
+
       // Call processor function
       const result = await this.processor({
         id: job.id,
         data: jobData,
       });
-      
+
       const duration = Date.now() - startTime;
-      
+
       // Mark job as completed
       await this.markJobCompleted(job.id, result, duration);
-      
+
       // Emit completed event
       this.emit("completed", { id: job.id, result, duration });
-      
+
       this.logger.debug(`Job ${job.id} completed in ${duration}ms`);
-      
     } catch (error) {
       const duration = Date.now() - startTime;
       this.logger.error(`Job ${job.id} failed after ${duration}ms:`, error);
-      
+
       await this.markJobFailed(job.id, error as Error, duration);
-      
+
       // Emit failed event
-      this.emit("failed", { id: job.id, error: (error as Error).message, duration });
+      this.emit("failed", {
+        id: job.id,
+        error: (error as Error).message,
+        duration,
+      });
     }
   }
 
   // Mark job as completed with better tracking
   private async markJobCompleted(
     jobId: string,
-    result: any,
-    _duration: number
+    result: unknown,
+    _duration: number,
   ): Promise<void> {
     const db = getDatabase();
-    
+
     await db
       .update(jobsTable)
       .set({
@@ -273,10 +283,10 @@ export class Worker<T = any, R = any> extends EventEmitter {
   private async markJobFailed(
     jobId: string,
     error: Error,
-    _duration: number
+    _duration: number,
   ): Promise<void> {
     const db = getDatabase();
-    
+
     // Get current job to check retry logic
     const [currentJob] = await db
       .select()
@@ -298,7 +308,7 @@ export class Worker<T = any, R = any> extends EventEmitter {
       const jitter = Math.random() * 1000; // Add up to 1s jitter
       const retryDelayMs = baseDelay + jitter;
       const scheduledFor = Date.now() + retryDelayMs;
-      
+
       await db
         .update(jobsTable)
         .set({
@@ -311,8 +321,10 @@ export class Worker<T = any, R = any> extends EventEmitter {
           workerId: null, // Release worker claim
         })
         .where(eq(jobsTable.id, jobId));
-        
-      this.logger.debug(`Job ${jobId} will retry in ${Math.round(retryDelayMs)}ms (attempt ${newAttempts}/${currentJob.maxAttempts})`);
+
+      this.logger.debug(
+        `Job ${jobId} will retry in ${Math.round(retryDelayMs)}ms (attempt ${newAttempts}/${currentJob.maxAttempts})`,
+      );
     } else {
       // Mark as permanently failed
       await db
@@ -326,25 +338,33 @@ export class Worker<T = any, R = any> extends EventEmitter {
           workerId: null, // Release worker claim
         })
         .where(eq(jobsTable.id, jobId));
-        
-      this.logger.warn(`Job ${jobId} failed permanently after ${newAttempts} attempts: ${error.message}`);
+
+      this.logger.warn(
+        `Job ${jobId} failed permanently after ${newAttempts} attempts: ${error.message}`,
+      );
     }
   }
 
   // Clean up completed promises
   private async cleanupCompletedPromises(): Promise<void> {
     const completedPromises: Promise<void>[] = [];
-    
+
     for (const promise of this.processingPromises) {
       // Check if promise is settled (completed or rejected)
       try {
-        const result = await Promise.race([
-          promise.then(() => ({ status: "fulfilled" })),
-          promise.catch(() => ({ status: "rejected" })),
-          new Promise(resolve => setTimeout(() => resolve({ status: "pending" }), 0))
+        type PromiseStatus = { status: "fulfilled" | "rejected" | "pending" };
+
+        const result: PromiseStatus = await Promise.race([
+          promise.then(
+            (): PromiseStatus => ({ status: "fulfilled" }),
+            (): PromiseStatus => ({ status: "rejected" }),
+          ),
+          new Promise<PromiseStatus>((resolve) =>
+            setTimeout(() => resolve({ status: "pending" }), 0),
+          ),
         ]);
-        
-        if ((result as any).status !== "pending") {
+
+        if (result.status !== "pending") {
           completedPromises.push(promise);
         }
       } catch {
@@ -352,7 +372,7 @@ export class Worker<T = any, R = any> extends EventEmitter {
         completedPromises.push(promise);
       }
     }
-    
+
     // Remove completed promises
     for (const promise of completedPromises) {
       this.processingPromises.delete(promise);
@@ -362,7 +382,9 @@ export class Worker<T = any, R = any> extends EventEmitter {
   // Wait for all active jobs to complete
   private async waitForAllJobs(): Promise<void> {
     if (this.processingPromises.size > 0) {
-      this.logger.info(`Waiting for ${this.processingPromises.size} active jobs to complete...`);
+      this.logger.info(
+        `Waiting for ${this.processingPromises.size} active jobs to complete...`,
+      );
       await Promise.allSettled(Array.from(this.processingPromises));
       this.processingPromises.clear();
       this.activeJobs.clear();

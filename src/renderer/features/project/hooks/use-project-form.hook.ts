@@ -58,7 +58,7 @@ const ProjectFormSchema = z
 export type ProjectFormData = z.infer<typeof ProjectFormSchema>;
 
 // Schema for creating projects - omit auto-generated and system-managed fields
-const CreateProjectSchema = ProjectSchema.omit({
+const _CreateProjectSchema = ProjectSchema.omit({
   id: true,
   ownerId: true,
   deactivatedAt: true,
@@ -67,7 +67,7 @@ const CreateProjectSchema = ProjectSchema.omit({
   updatedAt: true,
 });
 
-type CreateProjectInput = z.infer<typeof CreateProjectSchema>;
+type CreateProjectInput = z.infer<typeof _CreateProjectSchema>;
 
 interface UseProjectFormProps {
   onSuccess?: (projectId: string) => void;

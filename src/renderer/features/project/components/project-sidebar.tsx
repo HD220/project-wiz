@@ -5,7 +5,7 @@ import type { Project } from "@/shared/types";
 
 interface ProjectSidebarProps {
   project: Project; // SelectProject;
-  conversations?: any[]; // SelectConversation[];
+  conversations?: unknown[]; // SelectConversation[];
   className?: string;
 }
 

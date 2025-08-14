@@ -23,7 +23,7 @@ import { PROVIDER_CONFIGS } from "@/renderer/features/agent/provider-constants";
 import { LlmProviderSchema } from "@/shared/types/llm-provider";
 
 // Schema for form input
-const LlmProviderFormSchema = LlmProviderSchema.omit({
+const _LlmProviderFormSchema = LlmProviderSchema.omit({
   id: true,
   createdAt: true,
   updatedAt: true,
@@ -36,7 +36,7 @@ interface ProviderApiConfigurationSectionProps {
 export function ProviderApiConfigurationSection({
   watchedType,
 }: ProviderApiConfigurationSectionProps) {
-  const form = useFormContext<z.infer<typeof LlmProviderFormSchema>>();
+  const form = useFormContext<z.infer<typeof _LlmProviderFormSchema>>();
 
   return (
     <Card className="bg-gradient-to-br from-chart-3/5 via-chart-3/3 to-chart-3/0 border border-border/60">

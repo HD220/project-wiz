@@ -82,7 +82,6 @@ export function ChatMessages({
           role="log"
           aria-label="Messages"
           aria-live="polite"
-          tabIndex={0}
         >
           {children}
         </div>

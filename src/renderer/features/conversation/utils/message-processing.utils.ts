@@ -6,7 +6,7 @@ export interface MessageGroup {
 }
 
 export const processMessages = (messages: SelectMessage[]) => {
-  const messageGroups: any[] = [];
+  const messageGroups: MessageGroup[] = [];
 
   messages.forEach((msg: SelectMessage) => {
     const lastGroup = messageGroups[messageGroups.length - 1];

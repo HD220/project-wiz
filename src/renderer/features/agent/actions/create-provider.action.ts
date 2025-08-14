@@ -4,7 +4,7 @@ import { z } from "zod";
 import { LlmProviderSchema } from "@/shared/types/llm-provider";
 
 // Schema for creating providers - omit auto-generated fields
-const CreateProviderSchema = LlmProviderSchema.omit({
+const _CreateProviderSchema = LlmProviderSchema.omit({
   id: true,
   ownerId: true,
   deactivatedAt: true,
@@ -12,9 +12,21 @@ const CreateProviderSchema = LlmProviderSchema.omit({
   updatedAt: true,
 });
 
-type CreateProviderInput = z.infer<typeof CreateProviderSchema>;
+type CreateProviderInput = z.infer<typeof _CreateProviderSchema>;
 
-export async function createProviderAction(context: any, form: any) {
+interface ActionContext {
+  queryClient: {
+    invalidateQueries: (options: { queryKey: string[] }) => void;
+  };
+  auth: {
+    user?: { id: string } | null;
+  };
+}
+
+export async function createProviderAction(
+  context: ActionContext,
+  form: CreateProviderInput,
+) {
   const { queryClient } = context;
   const { user } = context.auth;
 

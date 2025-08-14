@@ -37,8 +37,10 @@ export function useProjectMembers(projectId: string) {
         // Note: agents are now included in users query above since agents ARE users
 
         setMembers(combinedMembers);
-      } catch (err: any) {
-        setError(err.message || "An unknown error occurred");
+      } catch (err: unknown) {
+        setError(
+          err instanceof Error ? err.message : "An unknown error occurred",
+        );
       } finally {
         setLoading(false);
       }

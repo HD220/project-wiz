@@ -1,5 +1,5 @@
 import { Send, Paperclip, Smile } from "lucide-react";
-import { forwardRef, useEffect } from "react";
+import React, { forwardRef, useEffect } from "react";
 
 import { Button } from "@/renderer/components/ui/button";
 import { Textarea } from "@/renderer/components/ui/textarea";
@@ -37,27 +37,27 @@ const ChatInputArea = forwardRef<HTMLDivElement, ChatInputAreaProps>(
       }
     };
 
-    const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-      if (e.key === "Enter" && !e.shiftKey) {
-        e.preventDefault();
+    const handleKeyDown = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
+      if (event.key === "Enter" && !event.shiftKey) {
+        event.preventDefault();
         handleSubmit();
       }
 
-      onKeyDown?.(e);
+      onKeyDown?.(event);
     };
 
     // Auto-resize textarea with throttling for performance
-    const resizeTextarea = () => {
+    const resizeTextarea = React.useCallback(() => {
       if (inputRef?.current) {
         inputRef.current.style.height = "auto";
         inputRef.current.style.height = `${inputRef.current.scrollHeight}px`;
       }
-    };
+    }, [inputRef]);
 
     useEffect(() => {
       const timeoutId = setTimeout(resizeTextarea, 0);
       return () => clearTimeout(timeoutId);
-    }, [value]);
+    }, [value, resizeTextarea]);
 
     return (
       <div ref={ref} className={cn("flex items-end gap-3", props.className)}>
@@ -65,8 +65,8 @@ const ChatInputArea = forwardRef<HTMLDivElement, ChatInputAreaProps>(
           <Textarea
             ref={inputRef}
             value={value}
-            onChange={(e) => {
-              const newValue = e.target.value;
+            onChange={(event) => {
+              const newValue = event.target.value;
               onValueChange(newValue);
             }}
             onKeyDown={handleKeyDown}

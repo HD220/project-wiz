@@ -124,9 +124,10 @@ function AppearancePage() {
                 const Icon = themeOption.icon;
 
                 return (
-                  <div
+                  <button
                     key={themeOption.id}
-                    className={`relative cursor-pointer rounded-lg border-2 p-[var(--spacing-component-sm)] transition-all ${
+                    type="button"
+                    className={`relative cursor-pointer rounded-lg border-2 p-[var(--spacing-component-sm)] transition-all focus:outline-none focus:ring-2 focus:ring-primary/50 ${
                       isSelected
                         ? "border-primary ring-2 ring-primary/20"
                         : "border-border hover:border-muted-foreground/50"
@@ -136,6 +137,8 @@ function AppearancePage() {
                         themeOption.id as "light" | "dark" | "system",
                       )
                     }
+                    aria-label={`Select ${themeOption.label} theme`}
+                    aria-pressed={isSelected}
                   >
                     {/* Theme Preview */}
                     <div
@@ -172,7 +175,7 @@ function AppearancePage() {
                         )}
                       </div>
                     </div>
-                  </div>
+                  </button>
                 );
               })}
             </div>

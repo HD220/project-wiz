@@ -190,8 +190,9 @@ export function AgentList(props: AgentListProps) {
               No active agents found
             </h3>
             <p className="text-base text-muted-foreground mb-6 max-w-md">
-              You might have inactive agents. Try enabling "Show Inactive" above
-              to see all agents, or create your first agent.
+              You might have inactive agents. Try enabling &quot;Show
+              Inactive&quot; above to see all agents, or create your first
+              agent.
             </p>
             <CustomLink to="/user/agents/new" size="default" className="gap-2">
               <Plus className="w-4 h-4" />

@@ -20,7 +20,7 @@ export type { CreateAgentInput, AgentFiltersInput, ModelConfigInput };
  * Select variant of Agent - used in database queries
  * This represents an Agent as returned by database select operations
  */
-export interface SelectAgent extends Agent {}
+export type SelectAgent = Agent;
 
 /**
  * Agent with extended relationships for UI display

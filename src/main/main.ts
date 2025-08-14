@@ -1,7 +1,7 @@
 import * as path from "path";
 
-// Load environment variables first
 import dotenv from "dotenv";
+// Configure dotenv
 dotenv.config();
 
 import { app, BrowserWindow } from "electron";

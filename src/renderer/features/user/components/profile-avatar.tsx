@@ -22,9 +22,9 @@ const getStatusColor = (status: UserStatus): string => {
 };
 
 const getStatusFromId = (id: string): UserStatus => {
-  const hash = id.split("").reduce((a, b) => {
-    a = (a << 5) - a + b.charCodeAt(0);
-    return a & a;
+  const hash = id.split("").reduce((accumulator, char) => {
+    accumulator = (accumulator << 5) - accumulator + char.charCodeAt(0);
+    return accumulator & accumulator;
   }, 0);
 
   const statusIndex = Math.abs(hash) % 4;
@@ -57,7 +57,7 @@ const profileAvatarVariants = {
 
 // Container principal
 function ProfileAvatar({
-  size = "md",
+  size: _size = "md",
   className,
   children,
   ...props

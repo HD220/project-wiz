@@ -15,8 +15,8 @@ function SettingsLayout() {
   const location = useLocation();
 
   // Handle ESC key to close
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Escape") {
+  const handleKeyDown = (event: React.KeyboardEvent) => {
+    if (event.key === "Escape") {
       navigate({ to: "/user" });
     }
   };
@@ -24,94 +24,106 @@ function SettingsLayout() {
   return (
     <div
       className="fixed inset-0 z-50 bg-background flex"
-      onKeyDown={handleKeyDown}
-      tabIndex={-1}
+      role="dialog"
+      aria-modal="true"
+      aria-label="Settings modal"
     >
-      {/* Sidebar */}
-      <div className="w-60 bg-[#2f3136] border-r border-[#202225] p-4">
-        <div className="mb-6">
-          <h2 className="text-white font-semibold">Settings</h2>
-        </div>
+      <div
+        tabIndex={-1}
+        onKeyDown={handleKeyDown}
+        className="contents"
+        role="presentation"
+      >
+        {/* Sidebar */}
+        <div className="w-60 bg-[#2f3136] border-r border-[#202225] p-4">
+          <div className="mb-6">
+            <h2 className="text-white font-semibold">Settings</h2>
+          </div>
 
-        {/* Navigation */}
-        <div className="space-y-6">
-          {[
-            {
-              category: "User Settings",
-              items: [
-                {
-                  path: "/user/settings/appearance",
-                  label: "Appearance",
-                  icon: Settings,
-                },
-              ],
-            },
-            {
-              category: "App Settings",
-              items: [
-                {
-                  path: "/user/settings/llm-providers",
-                  label: "AI Providers",
-                  icon: Bot,
-                },
-              ],
-            },
-          ].map((section) => (
-            <div key={section.category}>
-              <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">
-                {section.category}
-              </h3>
-              <div className="space-y-1">
-                {section.items.map((item) => {
-                  const isActive = location.pathname === item.path;
-                  return (
-                    <button
-                      key={item.path}
-                      className={`w-full flex items-center gap-3 px-3 py-2 rounded text-sm transition-colors ${
-                        isActive
-                          ? "bg-[#404249] text-white"
-                          : "text-gray-300 hover:text-white hover:bg-[#35373c]"
-                      }`}
-                      onClick={() => navigate({ to: item.path })}
-                    >
-                      {item.label}
-                    </button>
-                  );
-                })}
+          {/* Navigation */}
+          <div className="space-y-6">
+            {[
+              {
+                category: "User Settings",
+                items: [
+                  {
+                    path: "/user/settings/appearance",
+                    label: "Appearance",
+                    icon: Settings,
+                  },
+                ],
+              },
+              {
+                category: "App Settings",
+                items: [
+                  {
+                    path: "/user/settings/llm-providers",
+                    label: "AI Providers",
+                    icon: Bot,
+                  },
+                ],
+              },
+            ].map((section) => (
+              <div key={section.category}>
+                <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">
+                  {section.category}
+                </h3>
+                <div className="space-y-1">
+                  {section.items.map((item) => {
+                    const isActive = location.pathname === item.path;
+                    return (
+                      <button
+                        key={item.path}
+                        className={`w-full flex items-center gap-3 px-3 py-2 rounded text-sm transition-colors ${
+                          isActive
+                            ? "bg-[#404249] text-white"
+                            : "text-gray-300 hover:text-white hover:bg-[#35373c]"
+                        }`}
+                        onClick={() => navigate({ to: item.path })}
+                      >
+                        {item.label}
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Content */}
+        <ScrollArea className="flex-1">
+          {/* Header */}
+          <div className="bg-background border-b px-6 py-3 flex items-center justify-between">
+            <div className="text-sm text-muted-foreground">
+              Press{" "}
+              <span className="text-xs text-muted-foreground font-mono">
+                ESC
+              </span>{" "}
+              to close
             </div>
-          ))}
-        </div>
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-muted-foreground font-mono">
+                ESC
+              </span>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="w-8 h-8 rounded-full hover:bg-accent/80"
+                onClick={() => navigate({ to: "/user" })}
+                title="Close settings"
+              >
+                <X className="w-4 h-4" />
+              </Button>
+            </div>
+          </div>
+
+          {/* Page Content - Discord style compact padding */}
+          <div className="p-4">
+            <Outlet />
+          </div>
+        </ScrollArea>
       </div>
-
-      {/* Content */}
-      <ScrollArea className="flex-1">
-        {/* Header */}
-        <div className="bg-background border-b px-6 py-3 flex items-center justify-between">
-          <div className="text-sm text-muted-foreground">
-            Press{" "}
-            <span className="text-xs text-muted-foreground font-mono">ESC</span>{" "}
-            to close
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="text-xs text-muted-foreground font-mono">ESC</span>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="w-8 h-8 rounded-full hover:bg-accent/80"
-              onClick={() => navigate({ to: "/user" })}
-              title="Close settings"
-            >
-              <X className="w-4 h-4" />
-            </Button>
-          </div>
-        </div>
-
-        {/* Page Content - Discord style compact padding */}
-        <div className="p-4">
-          <Outlet />
-        </div>
-      </ScrollArea>
     </div>
   );
 }

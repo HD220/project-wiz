@@ -113,7 +113,7 @@ export function CreateConversationPage({
               <Input
                 placeholder="Find or start a conversation"
                 value={searchTerm}
-                onChange={(e) => handleSearchChange(e.target.value)}
+                onChange={(event) => handleSearchChange(event.target.value)}
                 className="pl-10 h-9 bg-muted/30 border-0 focus:bg-background focus-visible:ring-1 focus-visible:ring-ring"
                 maxLength={100}
               />
@@ -157,7 +157,7 @@ export function CreateConversationPage({
                           handleUserToggle(user.id);
                         }
                       }}
-                      onClick={(e) => e.stopPropagation()}
+                      onClick={(event) => event.stopPropagation()}
                       className="data-[state=checked]:bg-primary data-[state=checked]:border-primary"
                     />
 

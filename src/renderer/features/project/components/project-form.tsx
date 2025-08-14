@@ -79,7 +79,7 @@ const ProjectFormSchema = z
   );
 
 // Schema for creating projects - omit auto-generated and system-managed fields
-const InsertProjectSchema = ProjectSchema.omit({
+const _InsertProjectSchema = ProjectSchema.omit({
   id: true,
   ownerId: true,
   deactivatedAt: true,
@@ -88,7 +88,7 @@ const InsertProjectSchema = ProjectSchema.omit({
   updatedAt: true,
 });
 
-type InsertProject = z.infer<typeof InsertProjectSchema>;
+type InsertProject = z.infer<typeof _InsertProjectSchema>;
 
 type ProjectFormData = z.infer<typeof ProjectFormSchema>;
 
@@ -295,23 +295,17 @@ export function ProjectForm(props: ProjectFormProps) {
             <div
               className={cn(
                 "bg-muted/30 rounded-lg border transition-all duration-200",
-                false
-                  ? "space-y-[var(--spacing-component-sm)] p-[var(--spacing-component-sm)]"
-                  : "space-y-[var(--spacing-component-md)] p-[var(--spacing-component-md)]",
+                "space-y-[var(--spacing-component-md)] p-[var(--spacing-component-md)]",
               )}
             >
               <div
                 className={cn(
                   "flex items-center",
-                  false
-                    ? "gap-[var(--spacing-component-xs)]"
-                    : "gap-[var(--spacing-component-sm)]",
+                  "gap-[var(--spacing-component-sm)]",
                 )}
               >
                 <Github className="h-4 w-4 text-muted-foreground" />
-                <span
-                  className={cn("font-medium", false ? "text-xs" : "text-sm")}
-                >
+                <span className={cn("font-medium", "text-sm")}>
                   Repository Details
                 </span>
               </div>

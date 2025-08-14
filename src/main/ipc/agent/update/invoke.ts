@@ -47,7 +47,7 @@ const handler = createIPCHandler({
       try {
         const parsedModelConfig = JSON.parse(data.modelConfig);
         updateData.modelConfig = JSON.stringify(parsedModelConfig);
-      } catch (error) {
+      } catch (_error) {
         throw new Error("Invalid modelConfig JSON format");
       }
     }

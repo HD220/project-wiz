@@ -34,10 +34,10 @@ export function MemberSidebar(props: MemberSidebarProps) {
 
   // Group members by status with better organization
   const memberGroups = {
-    online: members.filter((m) => m.status === "online"),
-    away: members.filter((m) => m.status === "away"),
-    busy: members.filter((m) => m.status === "busy"),
-    offline: members.filter((m) => m.status === "offline"),
+    online: members.filter((member) => member.status === "online"),
+    away: members.filter((member) => member.status === "away"),
+    busy: members.filter((member) => member.status === "busy"),
+    offline: members.filter((member) => member.status === "offline"),
   } as const;
 
   const getStatusLabel = (status: Member["status"]) => {
@@ -123,6 +123,7 @@ export function MemberSidebar(props: MemberSidebarProps) {
         </div>
         <div className="space-y-1" role="list">
           {sectionMembers.map((member) => (
+            // eslint-disable-next-line react/prop-types
             <div key={member.id} role="listitem">
               <MemberItem member={member} />
             </div>
@@ -146,7 +147,6 @@ export function MemberSidebar(props: MemberSidebarProps) {
         "h-full flex flex-col bg-card/50 backdrop-blur-sm border-l border-border/50",
         className,
       )}
-      role="complementary"
       aria-label="Member list"
     >
       <ScrollArea className="flex-1">

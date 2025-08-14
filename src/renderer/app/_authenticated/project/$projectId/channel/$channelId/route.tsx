@@ -29,6 +29,11 @@ interface ChannelLoaderData {
   user: User;
 }
 
+interface ChannelChatInput {
+  content: string;
+  attachments?: string[];
+}
+
 function ChannelLayout() {
   const { channelId } = Route.useParams();
   const [isMemberSidebarCollapsed, setIsMemberSidebarCollapsed] =
@@ -82,10 +87,17 @@ function ChannelLayout() {
         {/* Main Channel Content */}
         <main className="flex-1">
           <Chat
-            keyFn={(message: any) => message.id} // eslint-disable-line @typescript-eslint/no-explicit-any -- Chat component uses generic interface
+            keyFn={(message) => {
+              // Type assertion para Message dentro do keyFn
+              const msg = message as Message;
+              return msg.id;
+            }}
             value={messages || []}
-            onSend={async (input: any) => {
-              await window.api.channel.sendMessage({ channelId, input });
+            onSend={async (input: string) => {
+              await window.api.channel.sendMessage({
+                channelId,
+                input: { content: input } satisfies ChannelChatInput,
+              });
             }}
             className="bg-background"
           >
@@ -149,14 +161,18 @@ function ChannelLayout() {
                     key={message.id}
                     messageData={message}
                     messageIndex={index}
-                    render={(msg: any) => (
-                      <div className="group relative flex gap-3 px-4 py-2 hover:bg-muted/30 transition-colors">
-                        {/* Message content */}
-                        <div className="flex-1">
-                          <p className="text-sm">{msg.data.content}</p>
+                    render={(messageProps) => {
+                      // Type assertion para Message dentro do render
+                      const message = messageProps.data as Message;
+                      return (
+                        <div className="group relative flex gap-3 px-4 py-2 hover:bg-muted/30 transition-colors">
+                          {/* Message content */}
+                          <div className="flex-1">
+                            <p className="text-sm">{message.content}</p>
+                          </div>
                         </div>
-                      </div>
-                    )}
+                      );
+                    }}
                   />
                 ));
               })()}
@@ -164,18 +180,21 @@ function ChannelLayout() {
 
             <div className="border-t border-border/60 px-4 py-3">
               <ChatInput
-                render={(chatInput: any) => (
+                render={(chatInput) => (
                   <FunctionalChatInput
                     value={chatInput.value}
                     loading={chatInput.loading}
                     onValueChange={chatInput.setValue}
                     onSend={chatInput.send}
-                    onKeyDown={(e) => {
-                      if (e.key === "ArrowUp" && !chatInput.value) {
-                        e.preventDefault();
+                    onKeyDown={(event) => {
+                      if (event.key === "ArrowUp" && !chatInput.value) {
+                        event.preventDefault();
                         chatInput.navigateHistory("up");
-                      } else if (e.key === "ArrowDown" && !chatInput.value) {
-                        e.preventDefault();
+                      } else if (
+                        event.key === "ArrowDown" &&
+                        !chatInput.value
+                      ) {
+                        event.preventDefault();
                         chatInput.navigateHistory("down");
                       }
                     }}
@@ -235,13 +254,13 @@ function FunctionalChatInput({
     }
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (event.key === "Enter" && !event.shiftKey) {
+      event.preventDefault();
       handleSubmit();
     }
 
-    onKeyDown?.(e);
+    onKeyDown?.(event);
   };
 
   // Auto-resize textarea
@@ -258,7 +277,7 @@ function FunctionalChatInput({
         <Textarea
           ref={textareaRef}
           value={value}
-          onChange={(e) => onValueChange(e.target.value)}
+          onChange={(event) => onValueChange(event.target.value)}
           onKeyDown={handleKeyDown}
           placeholder={placeholder}
           disabled={disabled || loading}

@@ -38,7 +38,7 @@ export const Route = createFileRoute("/_authenticated")({
         "Failed to load projects",
       );
       return { projects };
-    } catch (error) {
+    } catch (_error) {
       // Fallback to empty array for projects
       return { projects: [] };
     }

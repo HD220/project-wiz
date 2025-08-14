@@ -303,6 +303,15 @@ export default [
     ],
     rules: {
       "boundaries/element-types": "off",
+      "no-undef": "off", // Allow undefined globals in type declaration files
+    },
+  },
+
+  // 6. Override for IPC handler files - allow namespace declarations for global augmentation
+  {
+    files: ["src/main/ipc/**/invoke.ts"],
+    rules: {
+      "@typescript-eslint/no-namespace": "off", // Allow namespace for WindowAPI global augmentation
     },
   },
 ];

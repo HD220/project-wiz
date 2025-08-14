@@ -9,7 +9,7 @@ const logger = getLogger("event-bus");
  * Provides centralized event coordination with flexible event types
  */
 export class EventBus<
-  TEvents extends Record<string, any> = Record<string, any>,
+  TEvents extends Record<string, unknown> = Record<string, unknown>,
 > {
   private emitter: EventEmitter;
 
@@ -91,7 +91,7 @@ export function initializeEventBus(): EventBus {
 
 // Helper function to create typed event bus instances
 export function createEventBus<
-  TEvents extends Record<string, any>,
+  TEvents extends Record<string, unknown>,
 >(): EventBus<TEvents> {
   return new EventBus<TEvents>();
 }
