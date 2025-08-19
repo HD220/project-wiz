@@ -66,48 +66,6 @@ export const messagesTable = sqliteTable(
   }),
 );
 
-export const llmMessagesTable = sqliteTable(
-  "llm_messages",
-  {
-    id: text("id")
-      .primaryKey()
-      .$defaultFn(() => crypto.randomUUID()),
-    ownerId: text("owner_id")
-      .notNull()
-      .references(() => usersTable.id, { onDelete: "cascade" }),
-    messageId: text("message_id")
-      .notNull()
-      .references(() => messagesTable.id, { onDelete: "cascade" }),
-    role: text("role")
-      .$type<"user" | "assistant" | "system" | "tool">()
-      .notNull(),
-    content: text("content").notNull(),
-
-    // Soft deletion fields
-    deactivatedAt: integer("deactivated_at", { mode: "timestamp_ms" }),
-
-    createdAt: integer("created_at", { mode: "timestamp_ms" })
-      .notNull()
-      .default(sql`(unixepoch() * 1000)`),
-    updatedAt: integer("updated_at", { mode: "timestamp_ms" })
-      .notNull()
-      .default(sql`(unixepoch() * 1000)`),
-  },
-  (table) => ({
-    // Performance indexes
-    ownerIdIdx: index("llm_messages_owner_id_idx").on(table.ownerId),
-    messageIdIdx: index("llm_messages_message_id_idx").on(table.messageId),
-    roleIdx: index("llm_messages_role_idx").on(table.role),
-    createdAtIdx: index("llm_messages_created_at_idx").on(table.createdAt),
-
-    // Soft deletion indexes
-    deactivatedAtIdx: index("llm_messages_deactivated_at_idx").on(
-      table.deactivatedAt,
-    ),
-  }),
-);
 
 export type SelectMessage = typeof messagesTable.$inferSelect;
 export type InsertMessage = typeof messagesTable.$inferInsert;
-export type SelectLlmMessage = typeof llmMessagesTable.$inferSelect;
-export type InsertLlmMessage = typeof llmMessagesTable.$inferInsert;

@@ -1,7 +1,7 @@
 // Export all shared domain entity types
 export * from "./agent";
 export * from "./channel";
-export * from "./dm-conversation";
+export * from "./direct-message";
 export * from "./llm-provider";
 export * from "./message";
 export * from "./profile";

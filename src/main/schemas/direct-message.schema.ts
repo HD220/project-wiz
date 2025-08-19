@@ -10,8 +10,8 @@ import {
 
 import { usersTable } from "@/main/schemas/user.schema";
 
-export const dmConversationsTable = sqliteTable(
-  "dm_conversations",
+export const directMessagesTable = sqliteTable(
+  "direct_messages",
   {
     id: text("id")
       .notNull()
@@ -40,27 +40,27 @@ export const dmConversationsTable = sqliteTable(
     pk: primaryKey({ columns: [table.ownerId, table.id] }),
 
     // Performance indexes
-    ownerIdIdx: index("dm_conversations_owner_id_idx").on(table.ownerId),
-    createdAtIdx: index("dm_conversations_created_at_idx").on(table.createdAt),
+    ownerIdIdx: index("direct_messages_owner_id_idx").on(table.ownerId),
+    createdAtIdx: index("direct_messages_created_at_idx").on(table.createdAt),
 
     // Soft deletion indexes
-    deactivatedAtIdx: index("dm_conversations_deactivated_at_idx").on(
+    deactivatedAtIdx: index("direct_messages_deactivated_at_idx").on(
       table.deactivatedAt,
     ),
 
     // Archiving indexes
-    archivedAtIdx: index("dm_conversations_archived_at_idx").on(
+    archivedAtIdx: index("direct_messages_archived_at_idx").on(
       table.archivedAt,
     ),
     // Combined archiving index
     deactivatedArchivedAtIdx: index(
-      "dm_conversations_deactivated_archived_at_idx",
+      "direct_messages_deactivated_archived_at_idx",
     ).on(table.deactivatedAt, table.archivedAt),
   }),
 );
 
-export const dmParticipantsTable = sqliteTable(
-  "dm_participants",
+export const directMessageParticipantsTable = sqliteTable(
+  "direct_message_participants",
   {
     id: text("id")
       .notNull()
@@ -68,7 +68,7 @@ export const dmParticipantsTable = sqliteTable(
     ownerId: text("owner_id")
       .notNull()
       .references(() => usersTable.id, { onDelete: "cascade" }),
-    dmConversationId: text("dm_conversation_id").notNull(),
+    directMessageId: text("direct_message_id").notNull(),
     participantId: text("participant_id")
       .notNull()
       .references(() => usersTable.id, { onDelete: "cascade" }),
@@ -87,35 +87,35 @@ export const dmParticipantsTable = sqliteTable(
     // Composite primary key
     pk: primaryKey({ columns: [table.ownerId, table.id] }),
 
-    // Foreign key composta para dm_conversations
-    dmConversationFk: foreignKey({
-      columns: [table.ownerId, table.dmConversationId],
-      foreignColumns: [dmConversationsTable.ownerId, dmConversationsTable.id],
+    // Foreign key composta para direct_messages
+    directMessageFk: foreignKey({
+      columns: [table.ownerId, table.directMessageId],
+      foreignColumns: [directMessagesTable.ownerId, directMessagesTable.id],
     }),
 
     // Performance indexes
-    ownerIdIdx: index("dm_participants_owner_id_idx").on(table.ownerId),
-    dmConversationIdIdx: index("dm_participants_dm_conversation_id_idx").on(
-      table.dmConversationId,
+    ownerIdIdx: index("direct_message_participants_owner_id_idx").on(table.ownerId),
+    directMessageIdIdx: index("direct_message_participants_direct_message_id_idx").on(
+      table.directMessageId,
     ),
-    participantIdIdx: index("dm_participants_participant_id_idx").on(
+    participantIdIdx: index("direct_message_participants_participant_id_idx").on(
       table.participantId,
     ),
 
     // Soft deletion indexes
-    deactivatedAtIdx: index("dm_participants_deactivated_at_idx").on(
+    deactivatedAtIdx: index("direct_message_participants_deactivated_at_idx").on(
       table.deactivatedAt,
     ),
 
     // Composite index for unique participant in DM
-    dmParticipantIdx: index("dm_participants_dm_participant_idx").on(
-      table.dmConversationId,
+    directMessageParticipantIdx: index("direct_message_participants_dm_participant_idx").on(
+      table.directMessageId,
       table.participantId,
     ),
   }),
 );
 
-export type SelectDMConversation = typeof dmConversationsTable.$inferSelect;
-export type InsertDMConversation = typeof dmConversationsTable.$inferInsert;
-export type SelectDMParticipant = typeof dmParticipantsTable.$inferSelect;
-export type InsertDMParticipant = typeof dmParticipantsTable.$inferInsert;
+export type SelectDirectMessage = typeof directMessagesTable.$inferSelect;
+export type InsertDirectMessage = typeof directMessagesTable.$inferInsert;
+export type SelectDirectMessageParticipant = typeof directMessageParticipantsTable.$inferSelect;
+export type InsertDirectMessageParticipant = typeof directMessageParticipantsTable.$inferInsert;

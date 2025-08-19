@@ -12,23 +12,15 @@ contextBridge.exposeInMainWorld("api", {
 
   // Authentication API (new colocated handlers)
   auth: {
-    register: (params) => ipcRenderer.invoke("invoke:auth:register", params),
     login: (credentials) =>
       ipcRenderer.invoke("invoke:auth:login", credentials),
-    getCurrent: () => ipcRenderer.invoke("invoke:auth:get-current"),
     logout: () => ipcRenderer.invoke("invoke:auth:logout"),
-    isLoggedIn: () => ipcRenderer.invoke("invoke:auth:check-login"),
-    getUser: (userId) => ipcRenderer.invoke("invoke:auth:get-user", { userId }),
     getActiveSession: () => ipcRenderer.invoke("invoke:auth:get-session"),
   } satisfies WindowAPI.Auth,
 
   // Users API (new colocated handlers)
   user: {
-    listAvailableUsers: (params) =>
-      ipcRenderer.invoke("invoke:user:list-available-users", params),
     list: (input) => ipcRenderer.invoke("invoke:user:list", input),
-    listHumans: (input) => ipcRenderer.invoke("invoke:user:list-humans", input),
-    listAgents: (input) => ipcRenderer.invoke("invoke:user:list-agents", input),
     get: (input) => ipcRenderer.invoke("invoke:user:get", input),
     getByType: (input) => ipcRenderer.invoke("invoke:user:get-by-type", input),
     create: (input) => ipcRenderer.invoke("invoke:user:create", input),
@@ -37,8 +29,6 @@ contextBridge.exposeInMainWorld("api", {
       ipcRenderer.invoke("invoke:user:inactivate", { userId }),
     activate: (userId) =>
       ipcRenderer.invoke("invoke:user:activate", { userId }),
-    getStats: (userId) =>
-      ipcRenderer.invoke("invoke:user:get-user-stats", { userId }),
   } satisfies WindowAPI.User,
 
   // Projects API (new colocated handlers)
@@ -49,6 +39,8 @@ contextBridge.exposeInMainWorld("api", {
     update: (input) => ipcRenderer.invoke("invoke:project:update", input),
     archive: (id) =>
       ipcRenderer.invoke("invoke:project:archive", { projectId: id }),
+    unarchive: (id) =>
+      ipcRenderer.invoke("invoke:project:unarchive", { projectId: id }),
   } satisfies WindowAPI.Project,
 
   // LLM Providers API (new colocated handlers)
@@ -60,6 +52,7 @@ contextBridge.exposeInMainWorld("api", {
     update: (input) => ipcRenderer.invoke("invoke:llm-provider:update", input),
     inactivate: (id) =>
       ipcRenderer.invoke("invoke:llm-provider:inactivate", { id }),
+    activate: (input) => ipcRenderer.invoke("invoke:provider:activate", input),
     setDefault: (input) =>
       ipcRenderer.invoke("invoke:llm-provider:set-default", input),
     getDefault: () => ipcRenderer.invoke("invoke:llm-provider:get-default"),
@@ -75,7 +68,6 @@ contextBridge.exposeInMainWorld("api", {
     update: (input) => ipcRenderer.invoke("invoke:agent:update", input),
     inactivate: (input) => ipcRenderer.invoke("invoke:agent:inactivate", input),
     activate: (input) => ipcRenderer.invoke("invoke:agent:activate", input),
-    countActive: () => ipcRenderer.invoke("invoke:agent:count-active"),
   } satisfies WindowAPI.Agent,
 
   // DM Conversations API (new colocated handlers)
@@ -85,15 +77,17 @@ contextBridge.exposeInMainWorld("api", {
     get: (input) => ipcRenderer.invoke("invoke:dm:get", input),
     archive: (input) => ipcRenderer.invoke("invoke:dm:archive", input),
     unarchive: (input) => ipcRenderer.invoke("invoke:dm:unarchive", input),
-    sendMessage: (input) => ipcRenderer.invoke("invoke:dm:send-message", input),
-    listMessages: (input) =>
-      ipcRenderer.invoke("invoke:dm:list-messages", input),
     addParticipant: (input) =>
       ipcRenderer.invoke("invoke:dm:add-participant", input),
     removeParticipant: (input) =>
       ipcRenderer.invoke("invoke:dm:remove-participant", input),
-    inactivate: (input) => ipcRenderer.invoke("invoke:dm:inactivate", input),
   } satisfies WindowAPI.Dm,
+
+  // Conversation API (new handlers)
+  conversation: {
+    get: (input) => ipcRenderer.invoke("invoke:conversation:get", input),
+    sendMessage: (input) => ipcRenderer.invoke("invoke:conversation:send-message", input),
+  } satisfies WindowAPI.Conversation,
 
   // Project Channels API (new colocated handlers)
   channel: {
@@ -104,12 +98,6 @@ contextBridge.exposeInMainWorld("api", {
     archive: (input) => ipcRenderer.invoke("invoke:channel:archive", input),
     unarchive: (channelId) =>
       ipcRenderer.invoke("invoke:channel:unarchive", { channelId }),
-    sendMessage: (input) =>
-      ipcRenderer.invoke("invoke:channel:send-message", input),
-    listMessages: (input) =>
-      ipcRenderer.invoke("invoke:channel:list-messages", input),
-    inactivate: (input) =>
-      ipcRenderer.invoke("invoke:channel:inactivate", input),
   } satisfies WindowAPI.Channel,
 
   // Profile API (new colocated handlers)

@@ -54,10 +54,10 @@ declare global {
       agent: Agent;
       llmProvider: LlmProvider;
       dm: Dm;
+      conversation: Conversation;
       channel: Channel;
       profile: Profile;
       window: Window;
-      event: Event;
     }
   }
 }
