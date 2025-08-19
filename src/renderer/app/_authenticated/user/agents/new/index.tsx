@@ -40,7 +40,7 @@ function CreateAgentPage() {
           () => window.api.llmProvider.list({}),
           "Failed to load providers",
         );
-        setProviders(providersData as LlmProvider[]);
+        setProviders(providersData);
       } catch (error) {
         logger.error("Error loading providers:", error);
       } finally {

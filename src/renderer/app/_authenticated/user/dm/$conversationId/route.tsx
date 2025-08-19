@@ -1,4 +1,6 @@
-import { createFileRoute, Outlet, useRouter } from "@tanstack/react-router";
+import { createFileRoute, Outlet } from "@tanstack/react-router";
+
+import { useReactiveQuery } from "@/renderer/hooks/use-reactive-query.hook";
 import { Send, Paperclip, Smile } from "lucide-react";
 import React, { useEffect, useState } from "react";
 
@@ -30,7 +32,7 @@ import { loadApiData } from "@/renderer/lib/route-loader";
 import { cn } from "@/renderer/lib/utils";
 
 import { getRendererLogger } from "@/shared/services/logger/renderer";
-import type { DMConversation } from "@/shared/types/dm-conversation";
+import type { DMConversation } from "@/shared/types/direct-message";
 import type { Message } from "@/shared/types/message";
 import type { User } from "@/shared/types/user";
 
@@ -46,17 +48,34 @@ interface DMLoaderData {
 
 function DMLayout() {
   const { conversationId } = Route.useParams();
-  const router = useRouter();
   const { conversation, messages, availableUsers, user, participants } =
-    Route.useLoaderData() as DMLoaderData;
+    Route.useLoaderData();
   const [optimisticMessages, setOptimisticMessages] = useState(messages || []);
   const [sendingMessage, setSendingMessage] = useState(false);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(true);
 
-  // Update optimistic messages when route data changes
+  // Use reactive query to automatically update messages when events occur
+  const { data: liveMessages } = useReactiveQuery({
+    domain: "messages",
+    key: conversationId,
+    queryFn: async () => {
+      const response = await window.api.dm.listMessages({ dmId: conversationId });
+      if (!response.success) {
+        throw new Error(response.error);
+      }
+      return response.data;
+    },
+    queryOptions: {
+      initialData: messages,
+      staleTime: 1000 * 30, // Consider data stale after 30 seconds
+    },
+  });
+
+  // Update optimistic messages when route data or live data changes
   useEffect(() => {
-    setOptimisticMessages(messages || []);
-  }, [messages]);
+    const messagesToUse = liveMessages || messages || [];
+    setOptimisticMessages(messagesToUse);
+  }, [messages, liveMessages]);
 
   // Handle message sending with optimistic updates
   const handleSendMessage = async (input: string) => {
@@ -85,8 +104,8 @@ function DMLayout() {
         content: input.trim(),
       });
 
-      // Invalidate router to refresh messages from backend
-      router.invalidate();
+      // Note: No need to manually invalidate - useReactiveQuery will automatically
+      // refresh when the "messages:sent" event is received
     } catch (error) {
       // Remove optimistic message on error
       setOptimisticMessages((prev) =>
@@ -152,10 +171,7 @@ function DMLayout() {
         {/* Main Chat Content */}
         <main className="flex-1 overflow-hidden">
           <Chat
-            keyFn={(message) => {
-              const msg = message as Message;
-              return msg.id;
-            }}
+            keyFn={(message) => message.id}
             value={optimisticMessages}
             onSend={(input, context) => {
               handleSendMessage(input);

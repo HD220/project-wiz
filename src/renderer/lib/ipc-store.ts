@@ -37,19 +37,17 @@ export function createIpcStore<T>(
   let isInitialized = false;
   const listeners = new Set<() => void>();
 
-  // Register pattern with main process (once)
+  // Listen for events that match the pattern (once)
   if (!isInitialized) {
-    window.api.event.register(pattern);
-
-    // TODO: Listen for events that match the pattern
-    // window.api.on(pattern, async () => {
-    //   try {
-    //     state = await fetchFn();
-    //     listeners.forEach((listener) => listener());
-    //   } catch (error) {
-    //     console.error(`Error refreshing store for pattern ${pattern}:`, error);
-    //   }
-    // });
+    // Use window.events instead of api.event.register
+    window.events.on(pattern, async () => {
+      try {
+        state = await _fetchFn();
+        listeners.forEach((listener) => listener());
+      } catch (error) {
+        console.error(`Error refreshing store for pattern ${pattern}:`, error);
+      }
+    });
 
     isInitialized = true;
   }

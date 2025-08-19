@@ -266,15 +266,16 @@ export function AuthForm({ mode, className }: AuthFormProps) {
   const handleSubmit = async (data: AuthFormData) => {
     try {
       if (mode === "login") {
-        const loginData = data as LoginFormData;
-        await login(loginData);
+        await login(data);
         // Wait for context update before navigating
         await new Promise((resolve) => setTimeout(resolve, 0));
         // Use redirect param if available, otherwise go to /user
         const redirectTo = search?.redirect || "/user";
         router.navigate({ to: redirectTo });
       } else {
+        // In register mode, data will have name property
         const registerData = data as RegisterFormData;
+        
         const response = await window.api.auth.register({
           name: registerData.name,
           username: registerData.username,

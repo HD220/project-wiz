@@ -68,8 +68,8 @@ function EditAgentPage() {
 
         <StandardFormModalBody>
           <AgentForm
-            initialData={agent as Agent}
-            providers={providers as LlmProvider[]}
+            initialData={agent}
+            providers={providers}
             onSubmit={handleSubmit}
             onCancel={handleClose}
             isLoading={updateAgentMutation.isPending}

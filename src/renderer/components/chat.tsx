@@ -91,9 +91,7 @@ function createChatReducer(
           ...state,
           messages: state.messages.map((msg) => {
             const msgId = keyFn(msg, state.messages.indexOf(msg));
-            return msgId === id
-              ? { ...(msg as Record<string, unknown>), ...updates }
-              : msg;
+            return msgId === id ? { ...msg, ...updates } : msg;
           }),
         };
       }
@@ -299,9 +297,7 @@ function Chat({
         if (onValueChange) {
           const newMessages = messages.map((msg) => {
             const msgId = keyFn(msg, messages.indexOf(msg));
-            return msgId === id
-              ? { ...(msg as Record<string, unknown>), ...updates }
-              : msg;
+            return msgId === id ? { ...msg, ...updates } : msg;
           });
           onValueChange(newMessages);
         }
@@ -469,15 +465,13 @@ function ChatMessages({ className, children, ...props }: ChatMessagesProps) {
       // Find the viewport element inside ScrollArea using querySelector
       const viewport = containerRef.current.querySelector(
         '[data-slot="scroll-area-viewport"]',
-      ) as HTMLDivElement;
+      );
       if (viewport) {
         scrollViewportRef.current = viewport;
 
         // Update the chat context ref to point to viewport for scrolling
         if (refs.messagesRef) {
-          (
-            refs.messagesRef as React.MutableRefObject<HTMLDivElement | null>
-          ).current = viewport;
+          refs.messagesRef.current = viewport;
         }
       }
     }

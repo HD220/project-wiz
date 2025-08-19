@@ -2,10 +2,21 @@ import { useNavigate, useSearch } from "@tanstack/react-router";
 import { useMemo } from "react";
 
 import type { LlmProvider } from "@/renderer/features/agent/provider.types";
-import {
-  validateSearchInput,
-  validateProviderTypeFilter,
-} from "@/renderer/lib/search-validation";
+// Simple validation functions inline
+function validateSearchInput(value: string): string | undefined {
+  const trimmed = value.trim();
+  if (trimmed.length === 0) return undefined;
+  if (trimmed.length > 100) return trimmed.slice(0, 100);
+  return trimmed;
+}
+
+function validateProviderTypeFilter(
+  value: string,
+): "openai" | "deepseek" | "anthropic" | "google" | "custom" | undefined {
+  const validTypes = ["openai", "deepseek", "anthropic", "google", "custom"] as const;
+  if (value === "all" || !value) return undefined;
+  return validTypes.find(type => type === value);
+}
 
 export function useProviderList(providers: LlmProvider[]) {
   const search = useSearch({

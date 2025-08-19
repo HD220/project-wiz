@@ -48,11 +48,6 @@ function AppearancePage() {
     setter: (value: boolean) => void,
     value: boolean,
   ) => {
-    // Basic validation: ensure boolean value
-    if (typeof value !== "boolean") {
-      setError("Invalid setting value");
-      return;
-    }
     setError(null);
     setter(value);
   };

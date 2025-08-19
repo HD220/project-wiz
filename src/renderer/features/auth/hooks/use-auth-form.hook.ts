@@ -8,6 +8,8 @@ import {
   AuthFormData,
   LoginFormData,
   RegisterFormData,
+  loginSchema,
+  registerSchema,
   getAuthSchema,
   getDefaultValues,
   getFieldsConfig,
@@ -26,47 +28,67 @@ export function useAuthForm({ mode }: UseAuthFormProps) {
   const search =
     mode === "login" ? (location.search as { redirect?: string }) : undefined;
 
-  const schema = getAuthSchema(mode);
-  const defaultValues = getDefaultValues(mode);
+  if (mode === "login") {
+    const form = useForm<LoginFormData>({
+      resolver: zodResolver(loginSchema),
+      defaultValues: {
+        username: "",
+        password: "",
+      },
+    });
 
-  const form = useForm<AuthFormData>({
-    resolver: zodResolver(schema),
-    defaultValues,
-  });
-
-  const handleSubmit = async (data: AuthFormData) => {
-    try {
-      if (mode === "login") {
-        const loginData = data as LoginFormData;
-        await login(loginData);
+    const handleSubmit = async (data: LoginFormData) => {
+      try {
+        await login(data);
         await new Promise((resolve) => setTimeout(resolve, 0));
         const redirectTo = search?.redirect || "/user";
         router.navigate({ to: redirectTo });
-      } else {
-        const registerData = data as RegisterFormData;
-        const response = await window.api.auth.register({
-          name: registerData.name,
-          username: registerData.username,
-          password: registerData.password,
+      } catch (error) {
+        form.setError("root", {
+          message: error instanceof Error ? error.message : "Login failed",
         });
-
-        if (!response.success) {
-          throw new Error(response.error || "Registration failed");
-        }
-
-        await login({
-          username: registerData.username,
-          password: registerData.password,
-        });
-
-        router.navigate({ to: "/user" });
       }
+    };
+
+    return {
+      form,
+      handleSubmit,
+      fieldsConfig: getFieldsConfig(mode),
+      uiContent: getUIContent(mode),
+    };
+  }
+
+  const form = useForm<RegisterFormData>({
+    resolver: zodResolver(registerSchema),
+    defaultValues: {
+      name: "",
+      username: "",
+      password: "",
+      confirmPassword: "",
+    },
+  });
+
+  const handleSubmit = async (data: RegisterFormData) => {
+    try {
+      const response = await window.api.auth.register({
+        name: data.name,
+        username: data.username,
+        password: data.password,
+      });
+
+      if (!response.success) {
+        throw new Error(response.error || "Registration failed");
+      }
+
+      await login({
+        username: data.username,
+        password: data.password,
+      });
+
+      router.navigate({ to: "/user" });
     } catch (error) {
       form.setError("root", {
-        message:
-          error instanceof Error
-            ? error.message
-            : `${mode === "login" ? "Login" : "Registration"} failed`,
+        message: error instanceof Error ? error.message : "Registration failed",
       });
     }
   };

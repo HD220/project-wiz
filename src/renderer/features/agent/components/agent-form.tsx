@@ -111,7 +111,7 @@ export function AgentForm(props: AgentFormProps) {
     try {
       // Validate form data again before submission
       const validatedData = CreateAgentSchema.parse(data);
-      onSubmit(validatedData as CreateAgentInput);
+      onSubmit(validatedData);
     } catch (error) {
       // Error handling is done by the parent component via useApiMutation
       // This catch prevents unhandled promise rejection

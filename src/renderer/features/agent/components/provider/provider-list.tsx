@@ -6,10 +6,21 @@ import { Button } from "@/renderer/components/ui/button";
 import { ScrollArea } from "@/renderer/components/ui/scroll-area";
 import { EmptyState } from "@/renderer/features/agent/components/provider/empty-state";
 import { ProviderCard } from "@/renderer/features/agent/components/provider/provider-card";
-import {
-  validateSearchInput,
-  validateSelectFilter,
-} from "@/renderer/lib/search-validation";
+// Simple validation functions inline
+function validateSearchInput(value: string): string | undefined {
+  const trimmed = value.trim();
+  if (trimmed.length === 0) return undefined;
+  if (trimmed.length > 100) return trimmed.slice(0, 100);
+  return trimmed;
+}
+
+function validateSelectFilter<T extends string>(
+  value: string,
+  validValues: readonly T[],
+): T | undefined {
+  if (value === "all" || !value) return undefined;
+  return validValues.find(valid => valid === value);
+}
 
 import { SearchFilterBar } from "@/components/search-filter-bar";
 

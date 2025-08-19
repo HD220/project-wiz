@@ -9,10 +9,21 @@ import { ConfirmationDialog } from "@/renderer/components/ui/confirmation-dialog
 import { ScrollArea } from "@/renderer/components/ui/scroll-area";
 import { AgentListItem } from "@/renderer/features/agent/components/agent-card";
 import { useAgentActions } from "@/renderer/features/agent/hooks/use-agent-actions.hook";
-import {
-  validateSearchInput,
-  validateSelectFilter,
-} from "@/renderer/lib/search-validation";
+// Simple validation functions inline
+function validateSearchInput(value: string): string | undefined {
+  const trimmed = value.trim();
+  if (trimmed.length === 0) return undefined;
+  if (trimmed.length > 100) return trimmed.slice(0, 100);
+  return trimmed;
+}
+
+function validateSelectFilter<T extends string>(
+  value: string,
+  validValues: readonly T[],
+): T | undefined {
+  if (value === "all" || !value) return undefined;
+  return validValues.find(valid => valid === value);
+}
 import { cn } from "@/renderer/lib/utils";
 
 import type { Agent } from "@/shared/types/agent";

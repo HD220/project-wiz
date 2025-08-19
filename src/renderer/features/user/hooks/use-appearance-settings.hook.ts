@@ -35,10 +35,6 @@ export function useAppearanceSettings() {
     setter: (value: boolean) => void,
     value: boolean,
   ) => {
-    if (typeof value !== "boolean") {
-      setError("Invalid setting value");
-      return;
-    }
     setError(null);
     setter(value);
   };

@@ -44,7 +44,7 @@ function ChannelLayout() {
     messages,
     availableUsers,
     user: _user,
-  } = Route.useLoaderData() as ChannelLoaderData;
+  } = Route.useLoaderData();
 
   if (!channel) {
     return (
@@ -87,16 +87,12 @@ function ChannelLayout() {
         {/* Main Channel Content */}
         <main className="flex-1">
           <Chat
-            keyFn={(message) => {
-              // Type assertion para Message dentro do keyFn
-              const msg = message as Message;
-              return msg.id;
-            }}
+            keyFn={(message) => message.id}
             value={messages || []}
             onSend={async (input: string) => {
-              await window.api.channel.sendMessage({
-                channelId,
-                input: { content: input } satisfies ChannelChatInput,
+              await window.api.conversation.sendMessage({
+                conversationId: channelId,
+                content: input,
               });
             }}
             className="bg-background"
@@ -162,8 +158,7 @@ function ChannelLayout() {
                     messageData={message}
                     messageIndex={index}
                     render={(messageProps) => {
-                      // Type assertion para Message dentro do render
-                      const message = messageProps.data as Message;
+                      const message = messageProps.data;
                       return (
                         <div className="group relative flex gap-3 px-4 py-2 hover:bg-muted/30 transition-colors">
                           {/* Message content */}
@@ -334,9 +329,9 @@ export const Route = createFileRoute(
           "Failed to load channel",
         ),
         loadApiData(
-          () => window.api.channel.listMessages(channelId),
-          "Failed to load channel messages",
-        ),
+          () => window.api.conversation.get({ conversationId: channelId }),
+          "Failed to load channel conversation",
+        ).then(conversation => ({ messages: conversation.messages || [] })),
         loadApiData(
           () => window.api.user.list({}),
           "Failed to load available users",

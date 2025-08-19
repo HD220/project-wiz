@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 
-import type { DMConversation } from "@/shared/types/dm-conversation";
+import type { DMConversation } from "@/shared/types/direct-message";
 
 // Extended conversation from API with lastMessage and participants
 interface DMConversationWithData extends DMConversation {

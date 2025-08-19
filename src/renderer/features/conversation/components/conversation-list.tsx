@@ -21,7 +21,7 @@ import {
 } from "@/renderer/features/conversation/utils/conversation-avatar.utils";
 import { cn } from "@/renderer/lib/utils";
 
-import type { DMConversation } from "@/shared/types/dm-conversation";
+import type { DMConversation } from "@/shared/types/direct-message";
 import type { User } from "@/shared/types/user";
 
 // Local type that reflects what dm.list() API actually returns

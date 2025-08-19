@@ -12,7 +12,7 @@ export function cn(...inputs: ClassValue[]) {
 export function isValidAvatarUrl(
   url: string | null | undefined,
 ): string | null {
-  if (!url || typeof url !== "string" || url.trim() === "") {
+  if (!url || url.trim() === "") {
     return null;
   }
 
