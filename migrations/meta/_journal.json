@@ -5,57 +5,8 @@
     {
       "idx": 0,
       "version": "6",
-      "when": 1754584407028,
-      "tag": "0000_omniscient_lockjaw",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "6",
-      "when": 1754611063217,
-      "tag": "0001_loud_human_cannonball",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "6",
-      "when": 1754936671473,
-      "tag": "0002_omniscient_wind_dancer",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "6",
-      "when": 1754941848463,
-      "tag": "0003_violet_spot",
-      "breakpoints": true
-    },
-    {
-      "idx": 4,
-      "version": "6",
-      "when": 1754942232594,
-      "tag": "0004_tidy_ozymandias",
-      "breakpoints": true
-    },
-    {
-      "idx": 5,
-      "version": "6",
-      "when": 1754950820435,
-      "tag": "0005_mature_may_parker",
-      "breakpoints": true
-    },
-    {
-      "idx": 6,
-      "version": "6",
-      "when": 1754954257973,
-      "tag": "0006_warm_firebrand",
-      "breakpoints": true
-    },
-    {
-      "idx": 7,
-      "version": "6",
-      "when": 1754955330325,
-      "tag": "0007_public_mandroid",
+      "when": 1755641084754,
+      "tag": "0000_lethal_killraven",
       "breakpoints": true
     }
   ]

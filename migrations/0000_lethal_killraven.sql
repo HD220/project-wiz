@@ -18,7 +18,6 @@ CREATE TABLE `agents` (
 	`role` text NOT NULL,
 	`backstory` text NOT NULL,
 	`goal` text NOT NULL,
-	`status` text DEFAULT 'inactive' NOT NULL,
 	`model_config` text NOT NULL,
 	FOREIGN KEY (`id`) REFERENCES `users`(`id`) ON UPDATE no action ON DELETE cascade,
 	FOREIGN KEY (`owner_id`) REFERENCES `users`(`id`) ON UPDATE no action ON DELETE cascade,
@@ -27,8 +26,26 @@ CREATE TABLE `agents` (
 --> statement-breakpoint
 CREATE INDEX `agents_owner_id_idx` ON `agents` (`owner_id`);--> statement-breakpoint
 CREATE INDEX `agents_provider_id_idx` ON `agents` (`provider_id`);--> statement-breakpoint
-CREATE INDEX `agents_status_idx` ON `agents` (`status`);--> statement-breakpoint
-CREATE TABLE `dm_conversations` (
+CREATE TABLE `direct_message_participants` (
+	`id` text NOT NULL,
+	`owner_id` text NOT NULL,
+	`direct_message_id` text NOT NULL,
+	`participant_id` text NOT NULL,
+	`deactivated_at` integer,
+	`created_at` integer DEFAULT CURRENT_TIMESTAMP NOT NULL,
+	`updated_at` integer DEFAULT CURRENT_TIMESTAMP NOT NULL,
+	PRIMARY KEY(`owner_id`, `id`),
+	FOREIGN KEY (`owner_id`) REFERENCES `users`(`id`) ON UPDATE no action ON DELETE cascade,
+	FOREIGN KEY (`participant_id`) REFERENCES `users`(`id`) ON UPDATE no action ON DELETE cascade,
+	FOREIGN KEY (`owner_id`,`direct_message_id`) REFERENCES `direct_messages`(`owner_id`,`id`) ON UPDATE no action ON DELETE no action
+);
+--> statement-breakpoint
+CREATE INDEX `direct_message_participants_owner_id_idx` ON `direct_message_participants` (`owner_id`);--> statement-breakpoint
+CREATE INDEX `direct_message_participants_direct_message_id_idx` ON `direct_message_participants` (`direct_message_id`);--> statement-breakpoint
+CREATE INDEX `direct_message_participants_participant_id_idx` ON `direct_message_participants` (`participant_id`);--> statement-breakpoint
+CREATE INDEX `direct_message_participants_deactivated_at_idx` ON `direct_message_participants` (`deactivated_at`);--> statement-breakpoint
+CREATE INDEX `direct_message_participants_dm_participant_idx` ON `direct_message_participants` (`direct_message_id`,`participant_id`);--> statement-breakpoint
+CREATE TABLE `direct_messages` (
 	`id` text NOT NULL,
 	`owner_id` text NOT NULL,
 	`name` text,
@@ -41,30 +58,34 @@ CREATE TABLE `dm_conversations` (
 	FOREIGN KEY (`owner_id`) REFERENCES `users`(`id`) ON UPDATE no action ON DELETE cascade
 );
 --> statement-breakpoint
-CREATE INDEX `dm_conversations_owner_id_idx` ON `dm_conversations` (`owner_id`);--> statement-breakpoint
-CREATE INDEX `dm_conversations_created_at_idx` ON `dm_conversations` (`created_at`);--> statement-breakpoint
-CREATE INDEX `dm_conversations_deactivated_at_idx` ON `dm_conversations` (`deactivated_at`);--> statement-breakpoint
-CREATE INDEX `dm_conversations_archived_at_idx` ON `dm_conversations` (`archived_at`);--> statement-breakpoint
-CREATE INDEX `dm_conversations_deactivated_archived_at_idx` ON `dm_conversations` (`deactivated_at`,`archived_at`);--> statement-breakpoint
-CREATE TABLE `dm_participants` (
-	`id` text NOT NULL,
-	`owner_id` text NOT NULL,
-	`dm_conversation_id` text NOT NULL,
-	`participant_id` text NOT NULL,
-	`deactivated_at` integer,
-	`created_at` integer DEFAULT CURRENT_TIMESTAMP NOT NULL,
-	`updated_at` integer DEFAULT CURRENT_TIMESTAMP NOT NULL,
-	PRIMARY KEY(`owner_id`, `id`),
-	FOREIGN KEY (`owner_id`) REFERENCES `users`(`id`) ON UPDATE no action ON DELETE cascade,
-	FOREIGN KEY (`participant_id`) REFERENCES `users`(`id`) ON UPDATE no action ON DELETE cascade,
-	FOREIGN KEY (`owner_id`,`dm_conversation_id`) REFERENCES `dm_conversations`(`owner_id`,`id`) ON UPDATE no action ON DELETE no action
+CREATE INDEX `direct_messages_owner_id_idx` ON `direct_messages` (`owner_id`);--> statement-breakpoint
+CREATE INDEX `direct_messages_created_at_idx` ON `direct_messages` (`created_at`);--> statement-breakpoint
+CREATE INDEX `direct_messages_deactivated_at_idx` ON `direct_messages` (`deactivated_at`);--> statement-breakpoint
+CREATE INDEX `direct_messages_archived_at_idx` ON `direct_messages` (`archived_at`);--> statement-breakpoint
+CREATE INDEX `direct_messages_deactivated_archived_at_idx` ON `direct_messages` (`deactivated_at`,`archived_at`);--> statement-breakpoint
+CREATE TABLE `jobs` (
+	`id` text PRIMARY KEY NOT NULL,
+	`queue_name` text NOT NULL,
+	`data` text NOT NULL,
+	`opts` text,
+	`status` text DEFAULT 'waiting' NOT NULL,
+	`priority` integer DEFAULT 0 NOT NULL,
+	`attempts` integer DEFAULT 0 NOT NULL,
+	`max_attempts` integer DEFAULT 3 NOT NULL,
+	`delay_ms` integer DEFAULT 0 NOT NULL,
+	`scheduled_for` integer,
+	`result` text,
+	`failure_reason` text,
+	`worker_id` text,
+	`created_at` integer DEFAULT (unixepoch('subsec') * 1000) NOT NULL,
+	`updated_at` integer DEFAULT (unixepoch('subsec') * 1000) NOT NULL,
+	`processed_on` integer,
+	`finished_on` integer
 );
 --> statement-breakpoint
-CREATE INDEX `dm_participants_owner_id_idx` ON `dm_participants` (`owner_id`);--> statement-breakpoint
-CREATE INDEX `dm_participants_dm_conversation_id_idx` ON `dm_participants` (`dm_conversation_id`);--> statement-breakpoint
-CREATE INDEX `dm_participants_participant_id_idx` ON `dm_participants` (`participant_id`);--> statement-breakpoint
-CREATE INDEX `dm_participants_deactivated_at_idx` ON `dm_participants` (`deactivated_at`);--> statement-breakpoint
-CREATE INDEX `dm_participants_dm_participant_idx` ON `dm_participants` (`dm_conversation_id`,`participant_id`);--> statement-breakpoint
+CREATE INDEX `jobs_queue_status_idx` ON `jobs` (`queue_name`,`status`,`priority`);--> statement-breakpoint
+CREATE INDEX `jobs_scheduled_idx` ON `jobs` (`scheduled_for`);--> statement-breakpoint
+CREATE INDEX `jobs_worker_idx` ON `jobs` (`worker_id`);--> statement-breakpoint
 CREATE TABLE `llm_providers` (
 	`id` text PRIMARY KEY NOT NULL,
 	`owner_id` text NOT NULL,
@@ -84,39 +105,59 @@ CREATE INDEX `llm_providers_owner_id_idx` ON `llm_providers` (`owner_id`);--> st
 CREATE INDEX `llm_providers_type_idx` ON `llm_providers` (`type`);--> statement-breakpoint
 CREATE INDEX `llm_providers_is_default_idx` ON `llm_providers` (`is_default`);--> statement-breakpoint
 CREATE INDEX `llm_providers_deactivated_at_idx` ON `llm_providers` (`deactivated_at`);--> statement-breakpoint
-CREATE TABLE `llm_messages` (
-	`id` text,
-	`owner_id` text NOT NULL,
-	`message_id` text NOT NULL,
-	`role` text NOT NULL,
-	`content` text NOT NULL,
-	`deactivated_at` integer,
-	`created_at` integer DEFAULT (unixepoch() * 1000) NOT NULL,
-	`updated_at` integer DEFAULT (unixepoch() * 1000) NOT NULL,
-	PRIMARY KEY(`owner_id`, `id`),
-	FOREIGN KEY (`owner_id`) REFERENCES `users`(`id`) ON UPDATE no action ON DELETE cascade,
-	FOREIGN KEY (`message_id`) REFERENCES `messages`(`id`) ON UPDATE no action ON DELETE cascade
+CREATE TABLE `agent_memory` (
+	`memory_id` text NOT NULL,
+	`agent_id` text NOT NULL,
+	PRIMARY KEY(`memory_id`, `agent_id`),
+	FOREIGN KEY (`memory_id`) REFERENCES `memory`(`id`) ON UPDATE no action ON DELETE cascade,
+	FOREIGN KEY (`agent_id`) REFERENCES `users`(`id`) ON UPDATE no action ON DELETE cascade
 );
 --> statement-breakpoint
-CREATE INDEX `llm_messages_owner_id_idx` ON `llm_messages` (`owner_id`);--> statement-breakpoint
-CREATE INDEX `llm_messages_message_id_idx` ON `llm_messages` (`message_id`);--> statement-breakpoint
-CREATE INDEX `llm_messages_role_idx` ON `llm_messages` (`role`);--> statement-breakpoint
-CREATE INDEX `llm_messages_created_at_idx` ON `llm_messages` (`created_at`);--> statement-breakpoint
-CREATE INDEX `llm_messages_deactivated_at_idx` ON `llm_messages` (`deactivated_at`);--> statement-breakpoint
+CREATE INDEX `agent_memory_agent_idx` ON `agent_memory` (`agent_id`);--> statement-breakpoint
+CREATE TABLE `memory` (
+	`id` text PRIMARY KEY NOT NULL,
+	`content` text NOT NULL,
+	`created_by` text NOT NULL,
+	`created_at` integer DEFAULT (unixepoch('subsec') * 1000) NOT NULL,
+	FOREIGN KEY (`created_by`) REFERENCES `users`(`id`) ON UPDATE no action ON DELETE no action
+);
+--> statement-breakpoint
+CREATE INDEX `memory_created_by_idx` ON `memory` (`created_by`);--> statement-breakpoint
+CREATE INDEX `memory_created_at_idx` ON `memory` (`created_at`);--> statement-breakpoint
+CREATE TABLE `project_memory` (
+	`memory_id` text NOT NULL,
+	`project_id` text NOT NULL,
+	PRIMARY KEY(`memory_id`, `project_id`),
+	FOREIGN KEY (`memory_id`) REFERENCES `memory`(`id`) ON UPDATE no action ON DELETE cascade,
+	FOREIGN KEY (`project_id`) REFERENCES `projects`(`id`) ON UPDATE no action ON DELETE cascade
+);
+--> statement-breakpoint
+CREATE INDEX `project_memory_project_idx` ON `project_memory` (`project_id`);--> statement-breakpoint
+CREATE TABLE `team_memory` (
+	`memory_id` text NOT NULL,
+	`project_id` text NOT NULL,
+	PRIMARY KEY(`memory_id`, `project_id`),
+	FOREIGN KEY (`memory_id`) REFERENCES `memory`(`id`) ON UPDATE no action ON DELETE cascade,
+	FOREIGN KEY (`project_id`) REFERENCES `projects`(`id`) ON UPDATE no action ON DELETE cascade
+);
+--> statement-breakpoint
+CREATE INDEX `team_memory_project_idx` ON `team_memory` (`project_id`);--> statement-breakpoint
 CREATE TABLE `messages` (
-	`id` text NOT NULL,
+	`id` text PRIMARY KEY NOT NULL,
 	`source_type` text NOT NULL,
 	`source_id` text NOT NULL,
 	`owner_id` text NOT NULL,
+	`author_id` text NOT NULL,
 	`content` text NOT NULL,
 	`deactivated_at` integer,
 	`created_at` integer DEFAULT (unixepoch() * 1000) NOT NULL,
 	`updated_at` integer DEFAULT (unixepoch() * 1000) NOT NULL,
-	PRIMARY KEY(`owner_id`, `id`),
-	FOREIGN KEY (`owner_id`) REFERENCES `users`(`id`) ON UPDATE no action ON DELETE cascade
+	FOREIGN KEY (`owner_id`) REFERENCES `users`(`id`) ON UPDATE no action ON DELETE cascade,
+	FOREIGN KEY (`author_id`) REFERENCES `users`(`id`) ON UPDATE no action ON DELETE cascade
 );
 --> statement-breakpoint
 CREATE INDEX `messages_owner_id_idx` ON `messages` (`owner_id`);--> statement-breakpoint
+CREATE INDEX `messages_author_id_idx` ON `messages` (`author_id`);--> statement-breakpoint
 CREATE INDEX `messages_source_type_idx` ON `messages` (`source_type`);--> statement-breakpoint
 CREATE INDEX `messages_source_id_idx` ON `messages` (`source_id`);--> statement-breakpoint
 CREATE INDEX `messages_created_at_idx` ON `messages` (`created_at`);--> statement-breakpoint
@@ -153,6 +194,7 @@ CREATE TABLE `projects` (
 	`branch` text,
 	`local_path` text NOT NULL,
 	`owner_id` text NOT NULL,
+	`archived_at` integer,
 	`deactivated_at` integer,
 	`created_at` integer DEFAULT (strftime('%s', 'now')) NOT NULL,
 	`updated_at` integer DEFAULT (strftime('%s', 'now')) NOT NULL,
@@ -160,6 +202,7 @@ CREATE TABLE `projects` (
 );
 --> statement-breakpoint
 CREATE INDEX `projects_owner_id_idx` ON `projects` (`owner_id`);--> statement-breakpoint
+CREATE INDEX `projects_archived_at_idx` ON `projects` (`archived_at`);--> statement-breakpoint
 CREATE INDEX `projects_deactivated_at_idx` ON `projects` (`deactivated_at`);--> statement-breakpoint
 CREATE TABLE `user_preferences` (
 	`id` text PRIMARY KEY NOT NULL,
@@ -192,38 +235,11 @@ CREATE TABLE `users` (
 	`name` text NOT NULL,
 	`avatar` text,
 	`type` text DEFAULT 'human' NOT NULL,
+	`status` text DEFAULT 'offline' NOT NULL,
 	`deactivated_at` integer,
 	`created_at` integer DEFAULT CURRENT_TIMESTAMP NOT NULL,
 	`updated_at` integer DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
 --> statement-breakpoint
-CREATE INDEX `users_deactivated_at_idx` ON `users` (`deactivated_at`);--> statement-breakpoint
-CREATE TABLE `llm_jobs` (
-	`id` text PRIMARY KEY NOT NULL,
-	`name` text NOT NULL,
-	`data` text NOT NULL,
-	`opts` text,
-	`priority` integer DEFAULT 0 NOT NULL,
-	`status` text DEFAULT 'waiting' NOT NULL,
-	`progress` integer DEFAULT 0 NOT NULL,
-	`attempts` integer DEFAULT 0 NOT NULL,
-	`max_attempts` integer DEFAULT 3 NOT NULL,
-	`delay` integer DEFAULT 0 NOT NULL,
-	`parent_job_id` text,
-	`dependency_count` integer DEFAULT 0 NOT NULL,
-	`result` text,
-	`failure_reason` text,
-	`stacktrace` text,
-	`created_at` integer DEFAULT (unixepoch('subsec') * 1000) NOT NULL,
-	`processed_on` integer,
-	`finished_on` integer,
-	FOREIGN KEY (`parent_job_id`) REFERENCES `llm_jobs`(`id`) ON UPDATE no action ON DELETE set null
-);
---> statement-breakpoint
-CREATE INDEX `llm_jobs_queue_processing_idx` ON `llm_jobs` (`status`,`priority`,`created_at`);--> statement-breakpoint
-CREATE INDEX `llm_jobs_dependencies_idx` ON `llm_jobs` (`parent_job_id`,`dependency_count`);--> statement-breakpoint
-CREATE INDEX `llm_jobs_delayed_idx` ON `llm_jobs` (`status`,`delay`,`created_at`);--> statement-breakpoint
-CREATE INDEX `llm_jobs_status_idx` ON `llm_jobs` (`status`);--> statement-breakpoint
-CREATE INDEX `llm_jobs_name_idx` ON `llm_jobs` (`name`);--> statement-breakpoint
-CREATE INDEX `llm_jobs_created_at_idx` ON `llm_jobs` (`created_at`);--> statement-breakpoint
-CREATE INDEX `llm_jobs_parent_job_id_idx` ON `llm_jobs` (`parent_job_id`);
+CREATE INDEX `users_status_idx` ON `users` (`status`);--> statement-breakpoint
+CREATE INDEX `users_deactivated_at_idx` ON `users` (`deactivated_at`);
