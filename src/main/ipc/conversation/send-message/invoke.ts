@@ -11,54 +11,58 @@ import {
   InferHandler,
 } from "@/shared/utils/create-ipc-handler";
 
-const logger = getLogger("dm.send-message.invoke");
+const logger = getLogger("conversation.send-message.invoke");
 
-const SendDMMessageInputSchema = z.object({
-  dmId: z.string().min(1, "DM ID is required"),
+const SendConversationMessageInputSchema = z.object({
+  conversationId: z.string().min(1, "Conversation ID is required"),
   content: z.string().min(1, "Content is required"),
+  sourceType: z.enum(["dm", "channel"]).optional().default("dm"),
 });
 
-const SendDMMessageOutputSchema = MessageSchema;
+const SendConversationMessageOutputSchema = MessageSchema;
 
 const handler = createIPCHandler({
-  inputSchema: SendDMMessageInputSchema,
-  outputSchema: SendDMMessageOutputSchema,
+  inputSchema: SendConversationMessageInputSchema,
+  outputSchema: SendConversationMessageOutputSchema,
   handler: async (input) => {
-    logger.debug("Sending message to DM", {
-      dmId: input.dmId,
+    logger.debug("Sending message to conversation", {
+      conversationId: input.conversationId,
       contentLength: input.content.length,
     });
 
     const currentUser = requireAuth();
 
-    // Send message to DM conversation
+    // Send message to conversation 
+    // For now, using sendDMMessage for both - will be refactored when universal message sending is implemented
     const dbMessage = await sendDMMessage({
       authorId: currentUser.id,
-      sourceType: "dm",
-      sourceId: input.dmId,
+      sourceType: input.sourceType,
+      sourceId: input.conversationId,
       content: input.content,
     });
 
-    // Mapeamento: SelectMessage → Message (dados puros da entidade)
+    // Map database message to API format
     const apiMessage = {
       id: dbMessage.id,
       sourceType: dbMessage.sourceType,
       sourceId: dbMessage.sourceId,
-      authorId: dbMessage.authorId, // Now we have proper authorId field
+      authorId: dbMessage.authorId,
       content: dbMessage.content,
       createdAt: new Date(dbMessage.createdAt),
       updatedAt: new Date(dbMessage.updatedAt),
     };
 
-    logger.debug("Message sent to DM", {
+    logger.debug("Message sent to conversation", {
       messageId: apiMessage.id,
-      sourceId: apiMessage.sourceId,
+      conversationId: input.conversationId,
     });
 
-    // Emit specific event for this operation
-    emit("dm:message-sent", {
+    // Emit reactive event - event listeners will handle agent responses
+    emit("event:messages", {
+      action: "sent",
+      key: input.conversationId,
       messageId: apiMessage.id,
-      sourceId: apiMessage.sourceId,
+      authorId: currentUser.id,
     });
 
     return apiMessage;
@@ -69,7 +73,7 @@ export default handler;
 
 declare global {
   namespace WindowAPI {
-    interface Dm {
+    interface Conversation {
       sendMessage: InferHandler<typeof handler>;
     }
   }

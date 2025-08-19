@@ -1,7 +1,7 @@
 import { eq, and, ne, isNull, isNotNull } from "drizzle-orm";
 
 import { agentsTable } from "@/main/schemas/agent.schema";
-import { dmParticipantsTable } from "@/main/schemas/dm-conversation.schema";
+import { directMessageParticipantsTable } from "@/main/schemas/direct-message.schema";
 import { projectsTable } from "@/main/schemas/project.schema";
 import { userSessionsTable } from "@/main/schemas/user-sessions.schema";
 import {
@@ -279,22 +279,22 @@ export async function getUserStats(userId: string): Promise<{
 
   // Count DM participations
   const participationsActive = await db
-    .select({ count: dmParticipantsTable.id })
-    .from(dmParticipantsTable)
+    .select({ count: directMessageParticipantsTable.id })
+    .from(directMessageParticipantsTable)
     .where(
       and(
-        eq(dmParticipantsTable.participantId, userId),
-        isNull(dmParticipantsTable.deactivatedAt),
+        eq(directMessageParticipantsTable.participantId, userId),
+        isNull(directMessageParticipantsTable.deactivatedAt),
       ),
     );
 
   const participationsInactive = await db
-    .select({ count: dmParticipantsTable.id })
-    .from(dmParticipantsTable)
+    .select({ count: directMessageParticipantsTable.id })
+    .from(directMessageParticipantsTable)
     .where(
       and(
-        eq(dmParticipantsTable.participantId, userId),
-        isNotNull(dmParticipantsTable.deactivatedAt),
+        eq(directMessageParticipantsTable.participantId, userId),
+        isNotNull(directMessageParticipantsTable.deactivatedAt),
       ),
     );
 

@@ -5,7 +5,7 @@ import { requireAuth } from "@/main/services/session-registry";
 
 import { emit } from "@/shared/services/events/event-bus";
 import { getLogger } from "@/shared/services/logger/config";
-import { DMConversationSchema } from "@/shared/types/dm-conversation";
+import { DirectMessageSchema } from "@/shared/types";
 import {
   createIPCHandler,
   InferHandler,
@@ -17,13 +17,13 @@ const GetDMInputSchema = z.object({
   dmId: z.string().min(1, "DM ID is required"),
 });
 
-const GetDMOutputSchema = DMConversationSchema.extend({
+const GetDMOutputSchema = DirectMessageSchema.extend({
   isActive: z.boolean(),
   deactivatedAt: z.date().nullable(),
   participants: z.array(
     z.object({
       id: z.string(),
-      dmConversationId: z.string(),
+      directMessageId: z.string(),
       participantId: z.string(),
       deactivatedAt: z.date().nullable(),
       createdAt: z.date(),
@@ -58,7 +58,7 @@ const handler = createIPCHandler({
             : null,
           participants: dbConversation.participants.map((participant) => ({
             id: participant.id,
-            dmConversationId: participant.dmConversationId,
+            directMessageId: participant.directMessageId,
             participantId: participant.participantId,
             deactivatedAt: participant.deactivatedAt
               ? new Date(participant.deactivatedAt)

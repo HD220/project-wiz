@@ -1,12 +1,12 @@
 import { eq, and, inArray, isNull, sql, asc } from "drizzle-orm";
 
 import {
-  dmConversationsTable,
-  dmParticipantsTable,
-  type SelectDMConversation,
-  type SelectDMParticipant,
-  type InsertDMParticipant,
-} from "@/main/schemas/dm-conversation.schema";
+  directMessagesTable,
+  directMessageParticipantsTable,
+  type SelectDirectMessage,
+  type SelectDirectMessageParticipant,
+  type InsertDirectMessageParticipant,
+} from "@/main/schemas/direct-message.schema";
 import {
   messagesTable,
   type SelectMessage,
@@ -63,18 +63,18 @@ export async function findDMConversation(
   id: string,
   ownerId: string,
 ): Promise<
-  (SelectDMConversation & { participants: SelectDMParticipant[] }) | null
+  (SelectDirectMessage & { participants: SelectDirectMessageParticipant[] }) | null
 > {
   const db = getDatabase();
 
   // Get conversation
   const [conversation] = await db
     .select()
-    .from(dmConversationsTable)
+    .from(directMessagesTable)
     .where(
       and(
-        eq(dmConversationsTable.id, id),
-        eq(dmConversationsTable.ownerId, ownerId),
+        eq(directMessagesTable.id, id),
+        eq(directMessagesTable.ownerId, ownerId),
       ),
     )
     .limit(1);
@@ -86,11 +86,11 @@ export async function findDMConversation(
   // Get participants for this conversation
   const participants = await db
     .select()
-    .from(dmParticipantsTable)
+    .from(directMessageParticipantsTable)
     .where(
       and(
-        eq(dmParticipantsTable.dmConversationId, id),
-        eq(dmParticipantsTable.ownerId, ownerId),
+        eq(directMessageParticipantsTable.directMessageId, id),
+        eq(directMessageParticipantsTable.ownerId, ownerId),
       ),
     );
 
@@ -105,13 +105,13 @@ export async function findDMConversation(
  */
 export async function findDMConversationById(
   id: string,
-): Promise<SelectDMConversation | null> {
+): Promise<SelectDirectMessage | null> {
   const db = getDatabase();
 
   const [conversation] = await db
     .select()
-    .from(dmConversationsTable)
-    .where(eq(dmConversationsTable.id, id))
+    .from(directMessagesTable)
+    .where(eq(directMessagesTable.id, id))
     .limit(1);
 
   return conversation || null;
@@ -123,7 +123,7 @@ export async function findDMConversationById(
 export async function createDMConversation(data: {
   ownerId: string;
   participantIds: string[];
-}): Promise<SelectDMConversation> {
+}): Promise<SelectDirectMessage> {
   const db = getDatabase();
 
   // Validate that all participant IDs exist
@@ -152,7 +152,7 @@ export async function createDMConversation(data: {
   return db.transaction((tx) => {
     // 1. Create DM conversation
     const dmConversationResults = tx
-      .insert(dmConversationsTable)
+      .insert(directMessagesTable)
       .values({
         ownerId: data.ownerId,
         name: conversationName,
@@ -168,11 +168,11 @@ export async function createDMConversation(data: {
     // 2. Add participants
     const participantValues = data.participantIds.map((participantId) => ({
       ownerId: data.ownerId,
-      dmConversationId: dmConversation.id,
+      directMessageId: dmConversation.id,
       participantId,
     }));
 
-    tx.insert(dmParticipantsTable).values(participantValues).returning().all();
+    tx.insert(directMessageParticipantsTable).values(participantValues).returning().all();
 
     return dmConversation;
   });
@@ -187,8 +187,8 @@ export async function listUserDMConversations(filters: {
   includeArchived?: boolean;
 }): Promise<
   Array<
-    SelectDMConversation & {
-      participants: SelectDMParticipant[];
+    SelectDirectMessage & {
+      participants: SelectDirectMessageParticipant[];
       lastMessage?: {
         id: string;
         content: string;
@@ -205,63 +205,63 @@ export async function listUserDMConversations(filters: {
 
   // 1. Find DM conversations where the user is a participant
   const participantConditions = [
-    eq(dmParticipantsTable.participantId, ownerId),
+    eq(directMessageParticipantsTable.participantId, ownerId),
   ];
 
   if (!includeInactive) {
-    participantConditions.push(isNull(dmParticipantsTable.deactivatedAt));
+    participantConditions.push(isNull(directMessageParticipantsTable.deactivatedAt));
   }
 
   const userDMConversations = await db
     .select({
-      dmConversationId: dmParticipantsTable.dmConversationId,
+      directMessageId: directMessageParticipantsTable.directMessageId,
     })
-    .from(dmParticipantsTable)
+    .from(directMessageParticipantsTable)
     .where(and(...participantConditions));
 
-  const dmConversationIds = userDMConversations.map(
-    (userConv) => userConv.dmConversationId,
+  const directMessageIds = userDMConversations.map(
+    (userConv) => userConv.directMessageId,
   );
 
-  if (dmConversationIds.length === 0) {
+  if (directMessageIds.length === 0) {
     return [];
   }
 
   // 2. Get conversations with filters
   const conversationConditions = [
-    inArray(dmConversationsTable.id, dmConversationIds),
+    inArray(directMessagesTable.id, directMessageIds),
   ];
 
   if (!includeInactive) {
-    conversationConditions.push(isNull(dmConversationsTable.deactivatedAt));
+    conversationConditions.push(isNull(directMessagesTable.deactivatedAt));
   }
 
   if (!includeArchived) {
-    conversationConditions.push(isNull(dmConversationsTable.archivedAt));
+    conversationConditions.push(isNull(directMessagesTable.archivedAt));
   }
 
   const dmConversations = await db
     .select()
-    .from(dmConversationsTable)
+    .from(directMessagesTable)
     .where(and(...conversationConditions));
 
   // 3. Get all participants for these conversations
   const participantQueryConditions = [
-    inArray(dmParticipantsTable.dmConversationId, dmConversationIds),
+    inArray(directMessageParticipantsTable.directMessageId, directMessageIds),
   ];
 
   if (!includeInactive) {
-    participantQueryConditions.push(isNull(dmParticipantsTable.deactivatedAt));
+    participantQueryConditions.push(isNull(directMessageParticipantsTable.deactivatedAt));
   }
 
   const allParticipants = await db
     .select()
-    .from(dmParticipantsTable)
+    .from(directMessageParticipantsTable)
     .where(and(...participantQueryConditions));
 
   // 4. Get latest messages
   const messageConditions = [
-    inArray(messagesTable.sourceId, dmConversationIds),
+    inArray(messagesTable.sourceId, directMessageIds),
     eq(messagesTable.sourceType, "dm" as const),
   ];
 
@@ -284,7 +284,7 @@ export async function listUserDMConversations(filters: {
   // 5. Combine data
   const result = dmConversations.map((conversation) => {
     const conversationParticipants = allParticipants.filter(
-      (participant) => participant.dmConversationId === conversation.id,
+      (participant) => participant.directMessageId === conversation.id,
     );
 
     // Find latest message for this conversation
@@ -329,18 +329,18 @@ export async function listUserDMConversations(filters: {
 export async function archiveDMConversation(data: {
   ownerId: string;
   id: string;
-}): Promise<SelectDMConversation | null> {
+}): Promise<SelectDirectMessage | null> {
   const db = getDatabase();
 
   const [conversation] = await db
-    .update(dmConversationsTable)
+    .update(directMessagesTable)
     .set({
       archivedAt: new Date(),
     })
     .where(
       and(
-        eq(dmConversationsTable.id, data.id),
-        eq(dmConversationsTable.ownerId, data.ownerId),
+        eq(directMessagesTable.id, data.id),
+        eq(directMessagesTable.ownerId, data.ownerId),
       ),
     )
     .returning();
@@ -354,19 +354,19 @@ export async function archiveDMConversation(data: {
 export async function unarchiveDMConversation(data: {
   ownerId: string;
   id: string;
-}): Promise<SelectDMConversation | null> {
+}): Promise<SelectDirectMessage | null> {
   const db = getDatabase();
 
   const [conversation] = await db
-    .update(dmConversationsTable)
+    .update(directMessagesTable)
     .set({
       archivedAt: null,
       updatedAt: sql`(strftime('%s', 'now'))`,
     })
     .where(
       and(
-        eq(dmConversationsTable.id, data.id),
-        eq(dmConversationsTable.ownerId, data.ownerId),
+        eq(directMessagesTable.id, data.id),
+        eq(directMessagesTable.ownerId, data.ownerId),
       ),
     )
     .returning();
@@ -380,18 +380,18 @@ export async function unarchiveDMConversation(data: {
 export async function inactivateDMConversation(
   id: string,
   ownerId: string,
-): Promise<SelectDMConversation | null> {
+): Promise<SelectDirectMessage | null> {
   const db = getDatabase();
 
   const [conversation] = await db
-    .update(dmConversationsTable)
+    .update(directMessagesTable)
     .set({
       deactivatedAt: new Date(),
     })
     .where(
       and(
-        eq(dmConversationsTable.id, id),
-        eq(dmConversationsTable.ownerId, ownerId),
+        eq(directMessagesTable.id, id),
+        eq(directMessagesTable.ownerId, ownerId),
       ),
     )
     .returning();
@@ -403,12 +403,12 @@ export async function inactivateDMConversation(
  * Add participant to DM conversation
  */
 export async function addDMParticipant(
-  data: InsertDMParticipant,
-): Promise<SelectDMParticipant> {
+  data: InsertDirectMessageParticipant,
+): Promise<SelectDirectMessageParticipant> {
   const db = getDatabase();
 
   const [participant] = await db
-    .insert(dmParticipantsTable)
+    .insert(directMessageParticipantsTable)
     .values(data)
     .returning();
 
@@ -430,15 +430,15 @@ export async function removeDMParticipant(
   const db = getDatabase();
 
   const result = await db
-    .update(dmParticipantsTable)
+    .update(directMessageParticipantsTable)
     .set({
       deactivatedAt: new Date(),
     })
     .where(
       and(
-        eq(dmParticipantsTable.dmConversationId, conversationId),
-        eq(dmParticipantsTable.participantId, participantId),
-        eq(dmParticipantsTable.ownerId, ownerId),
+        eq(directMessageParticipantsTable.directMessageId, conversationId),
+        eq(directMessageParticipantsTable.participantId, participantId),
+        eq(directMessageParticipantsTable.ownerId, ownerId),
       ),
     );
 
@@ -476,6 +476,33 @@ export async function getDMMessages(
 }
 
 /**
+ * Get all agent participants in a DM conversation
+ */
+export async function getDMConversationAgents(
+  conversationId: string
+): Promise<Array<{ id: string; name: string }>> {
+  const db = getDatabase();
+
+  const agents = await db
+    .select({
+      id: usersTable.id,
+      name: usersTable.name,
+    })
+    .from(directMessageParticipantsTable)
+    .innerJoin(usersTable, eq(directMessageParticipantsTable.participantId, usersTable.id))
+    .where(
+      and(
+        eq(directMessageParticipantsTable.directMessageId, conversationId),
+        eq(usersTable.type, "agent"),
+        isNull(directMessageParticipantsTable.deactivatedAt),
+        isNull(usersTable.deactivatedAt)
+      )
+    );
+
+  return agents;
+}
+
+/**
  * Send message to DM conversation
  */
 export async function sendDMMessage(data: {
@@ -491,9 +518,9 @@ export async function sendDMMessage(data: {
   let ownerId = data.ownerId;
   if (!ownerId) {
     const dmConversation = await db
-      .select({ ownerId: dmConversationsTable.ownerId })
-      .from(dmConversationsTable)
-      .where(eq(dmConversationsTable.id, data.sourceId))
+      .select({ ownerId: directMessagesTable.ownerId })
+      .from(directMessagesTable)
+      .where(eq(directMessagesTable.id, data.sourceId))
       .get();
 
     if (!dmConversation) {

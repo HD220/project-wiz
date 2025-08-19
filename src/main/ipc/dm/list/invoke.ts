@@ -5,7 +5,7 @@ import { requireAuth } from "@/main/services/session-registry";
 
 import { emit } from "@/shared/services/events/event-bus";
 import { getLogger } from "@/shared/services/logger/config";
-import { DMConversationSchema } from "@/shared/types/dm-conversation";
+import { DMConversationSchema } from "@/shared/types/direct-message";
 import {
   createIPCHandler,
   InferHandler,

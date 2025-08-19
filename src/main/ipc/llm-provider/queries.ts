@@ -296,6 +296,39 @@ export async function getDecryptedApiKey(
 }
 
 /**
+ * Activate LLM provider with ownership validation
+ */
+export async function activateProvider(
+  id: string,
+  ownerId: string,
+): Promise<SelectLlmProvider> {
+  const db = getDatabase();
+
+  // First verify ownership
+  const provider = await findLlmProvider(id, ownerId);
+  if (!provider) {
+    throw new Error("Provider not found or access denied");
+  }
+
+  const [updatedProvider] = await db
+    .update(llmProvidersTable)
+    .set({
+      deactivatedAt: null,
+      updatedAt: sql`(strftime('%s', 'now'))`,
+    })
+    .where(
+      and(eq(llmProvidersTable.id, id), eq(llmProvidersTable.ownerId, ownerId)),
+    )
+    .returning();
+
+  if (!updatedProvider) {
+    throw new Error("Failed to activate provider");
+  }
+
+  return updatedProvider;
+}
+
+/**
  * Soft delete LLM provider with ownership validation and dependency check
  */
 export async function inactivateLlmProvider(

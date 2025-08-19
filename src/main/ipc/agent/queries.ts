@@ -10,6 +10,43 @@ import type { Agent } from "@/shared/types";
 const { getDatabase } = createDatabaseConnection(true);
 
 /**
+ * Transform raw database result to Agent type
+ */
+function transformToAgent(raw: {
+  id: string;
+  name: string;
+  avatar: string | null;
+  type: "human" | "agent";
+  status: "online" | "away" | "busy" | "offline";
+  deactivatedAt: Date | null;
+  createdAt: Date;
+  updatedAt: Date;
+  ownerId: string | null;
+  role: string;
+  backstory: string;
+  goal: string;
+  providerId: string;
+  modelConfig: string;
+}): Agent {
+  return {
+    id: raw.id,
+    name: raw.name,
+    avatar: raw.avatar,
+    type: "agent", // Always "agent" for this transform
+    status: raw.status,
+    deactivatedAt: raw.deactivatedAt,
+    createdAt: raw.createdAt,
+    updatedAt: raw.updatedAt,
+    ownerId: raw.ownerId!, // Non-null assertion since agents must have owners
+    role: raw.role,
+    backstory: raw.backstory,
+    goal: raw.goal,
+    providerId: raw.providerId,
+    modelConfig: raw.modelConfig ? JSON.parse(raw.modelConfig) : {},
+  };
+}
+
+/**
  * Buscar agent por id e owner (sempre JOIN com users)
  */
 export async function findAgent(
@@ -46,10 +83,14 @@ export async function findAgent(
     })
     .from(agentsTable)
     .innerJoin(usersTable, eq(agentsTable.id, usersTable.id))
-    .where(and(eq(agentsTable.id, agentId), eq(agentsTable.ownerId, ownerId)))
+    .where(and(
+      eq(agentsTable.id, agentId), 
+      eq(agentsTable.ownerId, ownerId),
+      eq(usersTable.type, "agent")
+    ))
     .limit(1);
 
-  return agent as Agent | null;
+  return agent ? transformToAgent(agent) : null;
 }
 
 /**
@@ -220,7 +261,7 @@ export async function createAgent(data: {
       throw new Error(`Failed to retrieve created agent "${data.name}"`);
     }
 
-    return completeAgent as Agent;
+    return transformToAgent(completeAgent);
   });
 }
 
@@ -283,8 +324,8 @@ export async function listAgents(filters: {
     })
     .from(agentsTable)
     .innerJoin(usersTable, eq(agentsTable.id, usersTable.id))
-    .where(and(...conditions))
+    .where(and(...conditions, eq(usersTable.type, "agent")))
     .orderBy(desc(usersTable.createdAt));
 
-  return agents as Agent[];
+  return agents.map(transformToAgent);
 }
