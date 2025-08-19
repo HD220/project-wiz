@@ -44,26 +44,8 @@ const handler = createIPCHandler({
       });
       logger.debug("Raw modelConfig content", agent.modelConfig);
 
-      let parsedModelConfig;
-      try {
-        parsedModelConfig = JSON.parse(agent.modelConfig);
-        logger.debug("Successfully parsed modelConfig", {
-          agentId: agent.id,
-          parsedModelConfig,
-        });
-      } catch (error) {
-        logger.error("Failed to parse agent modelConfig", {
-          agentId: agent.id,
-          rawModelConfig: agent.modelConfig,
-          error: error instanceof Error ? error.message : String(error),
-        });
-        parsedModelConfig = {
-          model: "gpt-4o",
-          temperature: 0.7,
-          maxTokens: 4096,
-          topP: 0.95,
-        };
-      }
+      // modelConfig already comes parsed as object from transformToAgent()
+      const parsedModelConfig = agent.modelConfig;
 
       return {
         // Identity fields (users)

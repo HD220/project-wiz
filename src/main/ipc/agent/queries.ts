@@ -234,6 +234,7 @@ export async function createAgent(data: {
         name: usersTable.name,
         avatar: usersTable.avatar,
         type: usersTable.type,
+        status: usersTable.status,
 
         // State management (users - authoritative)
         deactivatedAt: usersTable.deactivatedAt,

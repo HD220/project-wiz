@@ -57,7 +57,7 @@ const handler = createIPCHandler({
       backstory: dbAgent.backstory,
       goal: dbAgent.goal,
       providerId: dbAgent.providerId,
-      modelConfig: JSON.parse(dbAgent.modelConfig),
+      modelConfig: dbAgent.modelConfig, // Object from transformToAgent() - perfect!
     };
 
     logger.debug("Agent get result", { found: apiAgent !== null });

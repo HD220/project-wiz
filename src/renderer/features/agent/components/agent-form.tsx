@@ -47,7 +47,12 @@ interface CreateAgentInput {
   backstory: string;
   goal: string;
   providerId: string;
-  modelConfig: string;
+  modelConfig: {
+    model: string;
+    temperature: number;
+    maxTokens: number;
+    topP?: number;
+  };
   avatar?: string;
 }
 
@@ -94,13 +99,15 @@ export function AgentForm(props: AgentFormProps) {
       goal: initialData?.goal || "",
       providerId:
         initialData?.providerId || (!isEditing && defaultProvider?.id) || "",
-      // Individual model config fields
-      model: initialData?.modelConfig?.model || defaultModelConfig.model,
-      temperature:
-        initialData?.modelConfig?.temperature || defaultModelConfig.temperature,
-      maxTokens:
-        initialData?.modelConfig?.maxTokens || defaultModelConfig.maxTokens,
-      topP: initialData?.modelConfig?.topP || defaultModelConfig.topP,
+      // SIMPLIFIED: Nested modelConfig object
+      modelConfig: {
+        model: initialData?.modelConfig?.model || defaultModelConfig.model,
+        temperature:
+          initialData?.modelConfig?.temperature || defaultModelConfig.temperature,
+        maxTokens:
+          initialData?.modelConfig?.maxTokens || defaultModelConfig.maxTokens,
+        topP: initialData?.modelConfig?.topP || defaultModelConfig.topP,
+      },
       status: "inactive", // Always default to inactive for safety
       avatar: "", // Avatar is stored in user table, not agent table
     },
@@ -361,7 +368,7 @@ function AgentFormProvider(props: AgentFormProviderProps) {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-[var(--spacing-component-lg)]">
             <FormField
               control={form.control}
-              name="model"
+              name="modelConfig.model"
               render={({ field }) => (
                 <FormItem className="space-y-[var(--spacing-component-lg)]">
                   <FormLabel className="text-base font-medium">Model</FormLabel>
@@ -379,7 +386,7 @@ function AgentFormProvider(props: AgentFormProviderProps) {
 
             <FormField
               control={form.control}
-              name="temperature"
+              name="modelConfig.temperature"
               render={({ field }) => (
                 <FormItem className="space-y-[var(--spacing-component-lg)]">
                   <FormLabel className="text-base font-medium">
@@ -409,7 +416,7 @@ function AgentFormProvider(props: AgentFormProviderProps) {
 
             <FormField
               control={form.control}
-              name="maxTokens"
+              name="modelConfig.maxTokens"
               render={({ field }) => (
                 <FormItem className="space-y-[var(--spacing-component-lg)]">
                   <FormLabel className="text-base font-medium">
@@ -437,7 +444,7 @@ function AgentFormProvider(props: AgentFormProviderProps) {
 
             <FormField
               control={form.control}
-              name="topP"
+              name="modelConfig.topP"
               render={({ field }) => (
                 <FormItem className="space-y-[var(--spacing-component-lg)]">
                   <FormLabel className="text-base font-medium">

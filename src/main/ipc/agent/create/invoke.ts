@@ -1,3 +1,5 @@
+import { z } from "zod";
+
 import { createAgent } from "@/main/ipc/agent/queries";
 import { requireAuth } from "@/main/services/session-registry";
 
@@ -11,14 +13,20 @@ import {
 
 const logger = getLogger("agent.create.invoke");
 
-const CreateAgentInputSchema = AgentSchema.pick({
-  name: true,
-  role: true,
-  backstory: true,
-  goal: true,
-  providerId: true,
-  modelConfig: true,
-  avatar: true,
+// SIMPLIFIED: modelConfig as object, not string
+const CreateAgentInputSchema = z.object({
+  name: z.string(),
+  role: z.string(),
+  backstory: z.string(),
+  goal: z.string(),
+  providerId: z.string(),
+  modelConfig: z.object({
+    model: z.string(),
+    temperature: z.number(),
+    maxTokens: z.number(),
+    topP: z.number().optional(),
+  }),
+  avatar: z.string().optional(),
 });
 
 const CreateAgentOutputSchema = AgentSchema;
@@ -35,16 +43,10 @@ const handler = createIPCHandler({
 
     const currentUser = requireAuth();
 
-    let parsedModelConfig;
-    try {
-      parsedModelConfig = JSON.parse(input.modelConfig);
-    } catch (_error) {
-      throw new Error("Invalid modelConfig JSON format");
-    }
-
+    // SIMPLIFIED: Convert object to JSON string only for database storage
     const dbAgent = await createAgent({
       ...input,
-      modelConfig: JSON.stringify(parsedModelConfig),
+      modelConfig: JSON.stringify(input.modelConfig), // Object → String for DB
       ownerId: currentUser.id,
     });
 
@@ -71,7 +73,7 @@ const handler = createIPCHandler({
       backstory: dbAgent.backstory,
       goal: dbAgent.goal,
       providerId: dbAgent.providerId,
-      modelConfig: JSON.parse(dbAgent.modelConfig),
+      modelConfig: dbAgent.modelConfig, // Object from transformToAgent() - perfect!
     };
 
     emit("event:agents", {

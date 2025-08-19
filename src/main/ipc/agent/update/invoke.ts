@@ -13,18 +13,24 @@ import {
 
 const logger = getLogger("agent.update.invoke");
 
+// SIMPLIFIED: modelConfig as object, not string
 const UpdateAgentInputSchema = z.object({
   id: z.string().min(1, "Agent ID is required"),
-  data: AgentSchema.pick({
-    name: true,
-    role: true,
-    backstory: true,
-    goal: true,
-    providerId: true,
-    modelConfig: true,
-    deactivatedAt: true,
-    avatar: true,
-  }).partial(),
+  data: z.object({
+    name: z.string().optional(),
+    role: z.string().optional(),
+    backstory: z.string().optional(),
+    goal: z.string().optional(),
+    providerId: z.string().optional(),
+    modelConfig: z.object({
+      model: z.string(),
+      temperature: z.number(),
+      maxTokens: z.number(),
+      topP: z.number().optional(),
+    }).optional(),
+    deactivatedAt: z.date().nullable().optional(),
+    avatar: z.string().optional(),
+  }),
 });
 
 const UpdateAgentOutputSchema = AgentSchema;
@@ -38,18 +44,15 @@ const handler = createIPCHandler({
     const currentUser = requireAuth();
     const { id, data } = input;
 
-    const updateData = {
+    // SIMPLIFIED: Prepare data for database with proper types
+    const updateData: any = {
       ...data,
       avatar: data.avatar === null ? undefined : data.avatar,
     };
 
+    // Convert object to JSON string only for database storage
     if (data.modelConfig !== undefined) {
-      try {
-        const parsedModelConfig = JSON.parse(data.modelConfig);
-        updateData.modelConfig = JSON.stringify(parsedModelConfig);
-      } catch (_error) {
-        throw new Error("Invalid modelConfig JSON format");
-      }
+      updateData.modelConfig = JSON.stringify(data.modelConfig); // Object → String for DB
     }
 
     // Update agent using queries function
@@ -69,7 +72,7 @@ const handler = createIPCHandler({
       deactivatedAt: updatedAgent.deactivatedAt
         ? new Date(updatedAgent.deactivatedAt)
         : null,
-      modelConfig: JSON.parse(updatedAgent.modelConfig),
+      modelConfig: updatedAgent.modelConfig, // Object from transformToAgent() - perfect!
       createdAt: new Date(updatedAgent.createdAt),
       updatedAt: new Date(updatedAgent.updatedAt),
     };
