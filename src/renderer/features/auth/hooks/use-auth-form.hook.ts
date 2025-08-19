@@ -70,7 +70,7 @@ export function useAuthForm({ mode }: UseAuthFormProps) {
 
   const handleSubmit = async (data: RegisterFormData) => {
     try {
-      const response = await window.api.auth.register({
+      const response = await window.api.user.create({
         name: data.name,
         username: data.username,
         password: data.password,

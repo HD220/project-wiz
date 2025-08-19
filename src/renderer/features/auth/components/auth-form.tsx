@@ -276,7 +276,7 @@ export function AuthForm({ mode, className }: AuthFormProps) {
         // In register mode, data will have name property
         const registerData = data as RegisterFormData;
         
-        const response = await window.api.auth.register({
+        const response = await window.api.user.create({
           name: registerData.name,
           username: registerData.username,
           password: registerData.password,

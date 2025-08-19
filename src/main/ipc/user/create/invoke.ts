@@ -1,5 +1,6 @@
-import { createUser } from "@/main/ipc/user/queries";
-import { requireAuth } from "@/main/services/session-registry";
+import { z } from "zod";
+
+import { createUserAccount, checkUsernameExists } from "@/main/ipc/auth/queries";
 
 import { emit } from "@/shared/services/events/event-bus";
 import { getLogger } from "@/shared/services/logger/config";
@@ -11,48 +12,63 @@ import {
 
 const logger = getLogger("user.create.invoke");
 
-const CreateUserInputSchema = UserSchema.pick({
-  name: true,
-  avatar: true,
-  type: true,
+const CreateUserInputSchema = z.object({
+  name: z.string().min(1),
+  username: z.string().min(1),
+  password: z.string().min(6),
 });
 
-const CreateUserOutputSchema = UserSchema;
+const CreateUserOutputSchema = z.object({
+  user: UserSchema,
+  token: z.string(),
+});
 
 const handler = createIPCHandler({
   inputSchema: CreateUserInputSchema,
   outputSchema: CreateUserOutputSchema,
   handler: async (input) => {
-    logger.debug("Creating user", {
+    logger.debug("Creating user account", {
       userName: input.name,
-      userType: input.type,
+      username: input.username,
     });
 
-    requireAuth();
+    // Check if username already exists
+    const usernameExists = await checkUsernameExists(input.username);
+    if (usernameExists) {
+      throw new Error("Username already exists");
+    }
 
-    // Query recebe dados e gerencia campos técnicos internamente
-    const dbUser = await createUser(input);
+    // Create user account with authentication
+    const result = await createUserAccount({
+      name: input.name,
+      username: input.username,
+      password: input.password,
+    });
 
-    // Mapeamento: SelectUser → User (sem campos técnicos)
+    // Mapeamento: SelectUser → User (API clean type)
     const apiUser = {
-      id: dbUser.id,
-      name: dbUser.name,
-      avatar: dbUser.avatar,
-      type: dbUser.type,
-      createdAt: new Date(dbUser.createdAt),
-      updatedAt: new Date(dbUser.updatedAt),
+      id: result.user.id,
+      name: result.user.name,
+      avatar: result.user.avatar,
+      type: result.user.type,
+      status: result.user.status,
+      createdAt: new Date(result.user.createdAt),
+      updatedAt: new Date(result.user.updatedAt),
     };
 
-    logger.debug("User created", {
+    logger.debug("User account created", {
       userId: apiUser.id,
       name: apiUser.name,
-      type: apiUser.type,
+      username: input.username,
     });
 
     // Emit specific event for creation
     emit("user:created", { userId: apiUser.id, type: apiUser.type });
 
-    return apiUser;
+    return {
+      user: apiUser,
+      token: result.sessionToken,
+    };
   },
 });
 
