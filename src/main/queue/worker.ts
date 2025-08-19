@@ -1,6 +1,6 @@
 import { EventEmitter } from "events";
 
-import { eq, and, asc, desc, lt } from "drizzle-orm";
+import { eq, and, lt, sql } from "drizzle-orm";
 
 import { jobsTable, type Job } from "@/main/schemas/job.schema";
 
@@ -11,12 +11,16 @@ const { getDatabase } = createDatabaseConnection(true);
 
 export interface WorkerOptions {
   concurrency?: number; // Max 15 for our use case
-  pollInterval?: number;
+  minPollInterval?: number; // Minimum poll interval (1s)
+  maxPollInterval?: number; // Maximum poll interval (15s)
   stuckJobTimeout?: number; // Time before considering a job stuck
+  heartbeatInterval?: number; // How often to update job heartbeat
 }
 
+import { JobInstance, MoveToDelayedError, MoveToFailedError } from "./job";
+
 export interface ProcessorFunction<T = unknown, R = unknown> {
-  (job: { id: string; data: T }): Promise<R>;
+  (job: JobInstance): Promise<R>;
 }
 
 export interface WorkerEvents {
@@ -33,8 +37,16 @@ export class Worker<T = unknown, R = unknown> extends EventEmitter {
   private processor: ProcessorFunction<T, R>;
   private options: Required<WorkerOptions>;
   private workerId: string;
-  private activeJobs = new Set<string>();
+  private activeJobs = new Map<string, {
+    job: JobInstance;
+    heartbeatTimer: NodeJS.Timeout;
+  }>();
   private processingPromises = new Set<Promise<void>>();
+  
+  // Backoff exponential properties
+  private currentPollInterval: number;
+  private consecutiveEmptyPolls = 0;
+  private backoffMultiplier = 1.5;
 
   constructor(
     public readonly queueName: string,
@@ -45,9 +57,14 @@ export class Worker<T = unknown, R = unknown> extends EventEmitter {
     this.processor = processor;
     this.options = {
       concurrency: Math.min(opts.concurrency || 15, 15), // Max 15 jobs
-      pollInterval: opts.pollInterval || 1000, // Faster polling for responsiveness
+      minPollInterval: opts.minPollInterval || 1000, // 1s minimum
+      maxPollInterval: opts.maxPollInterval || 15000, // 15s maximum
       stuckJobTimeout: opts.stuckJobTimeout || 30000, // 30s timeout
+      heartbeatInterval: opts.heartbeatInterval || 10000, // 10s heartbeat
     };
+
+    // Initialize with minimum poll interval
+    this.currentPollInterval = this.options.minPollInterval;
 
     this.workerId = `worker-${crypto.randomUUID()}`;
     this.logger.debug(
@@ -67,34 +84,56 @@ export class Worker<T = unknown, R = unknown> extends EventEmitter {
       `Starting worker for queue: ${this.queueName} (concurrency: ${this.options.concurrency})`,
     );
 
+    // No global heartbeat needed - each job has its own timer
+
     // Main polling loop
     while (this.running) {
       try {
-        // Clean up stuck jobs first
+        // 1. Atomic UPDATE: Recover stuck jobs (active -> delayed)
         await this.recoverStuckJobs();
 
-        // Process delayed jobs (move to waiting if time has come)
+        // 2. Atomic UPDATE: Process delayed jobs (delayed -> waiting)
         await this.processDelayedJobs();
 
-        // If we have capacity, try to start new jobs
+        // 3. Atomic UPDATE: Get new jobs if we have capacity
         const availableSlots = this.options.concurrency - this.activeJobs.size;
-
+        
         if (availableSlots > 0) {
-          await this.fillAvailableSlots(availableSlots);
+          const newJobs = await this.getAndLockJobs(availableSlots);
+          
+          if (newJobs.length > 0) {
+            // Reset backoff - we found jobs!
+            this.resetBackoff();
+            
+            // Start processing jobs (no excess handling needed - LIMIT takes care of it)
+            for (const jobRecord of newJobs) {
+              const jobInstance = new JobInstance(jobRecord);
+              this.startJobProcessing(jobInstance);
+            }
+            
+            this.logger.debug(`Started processing ${newJobs.length} jobs`);
+          } else {
+            // No jobs found - apply backoff
+            this.applyBackoff();
+          }
+        } else {
+          // Worker at capacity - keep minimum interval
+          this.currentPollInterval = this.options.minPollInterval;
         }
 
         // Clean up completed promises
         await this.cleanupCompletedPromises();
 
-        // Wait before next poll
-        await this.delay(this.options.pollInterval);
+        // Wait with dynamic interval (1s-15s based on workload)
+        await this.delay(this.currentPollInterval);
+        
       } catch (error) {
         this.logger.error("Worker polling error:", error);
-        await this.delay(this.options.pollInterval);
+        await this.delay(this.currentPollInterval);
       }
     }
 
-    // Wait for all active jobs to complete before shutting down
+    // Cleanup
     await this.waitForAllJobs();
   }
 
@@ -103,41 +142,47 @@ export class Worker<T = unknown, R = unknown> extends EventEmitter {
     this.logger.info(`Stopping worker for queue: ${this.queueName}`);
     this.running = false;
 
-    // Wait for active jobs to finish
+    // Wait for active jobs to finish (timers will be cleaned up automatically)
     await this.waitForAllJobs();
 
     this.logger.info(`Worker stopped for queue: ${this.queueName}`);
   }
 
-  // Atomic get and lock next job (for single worker)
-  private async getAndLockNextJob(): Promise<Job | null> {
+  // UPDATE: Move stuck jobs from active to delayed (retry)
+  private async recoverStuckJobs(): Promise<number> {
     const db = getDatabase();
     const now = Date.now();
+    const stuckThreshold = new Date(now - this.options.stuckJobTimeout);
 
-    // Use UPDATE...RETURNING for atomic lock
-    const [job] = await db
+    const result = await db
       .update(jobsTable)
       .set({
-        status: "active",
-        processedOn: new Date(now),
+        status: "delayed",
+        workerId: null,
+        processedOn: null,
         updatedAt: new Date(now),
-        workerId: this.workerId,
+        attempts: sql`${jobsTable.attempts} + 1`,
+        scheduledFor: new Date(now + 5000), // 5s delay for stuck jobs
+        failureReason: "Job stuck - worker timeout",
       })
       .where(
         and(
           eq(jobsTable.queueName, this.queueName),
-          eq(jobsTable.status, "waiting"),
+          eq(jobsTable.status, "active"),
+          lt(jobsTable.updatedAt, stuckThreshold),
         ),
-      )
-      .orderBy(desc(jobsTable.priority), asc(jobsTable.createdAt))
-      .limit(1)
-      .returning();
+      );
 
-    return job || null;
+    const recoveredCount = result.changes || 0;
+    if (recoveredCount > 0) {
+      this.logger.warn(`Recovered ${recoveredCount} stuck jobs`);
+    }
+    
+    return recoveredCount;
   }
 
-  // Process delayed jobs (move to waiting if scheduled time has come)
-  private async processDelayedJobs(): Promise<void> {
+  // UPDATE: Move delayed jobs to waiting (ready to process)
+  private async processDelayedJobs(): Promise<number> {
     const db = getDatabase();
     const now = Date.now();
 
@@ -152,93 +197,118 @@ export class Worker<T = unknown, R = unknown> extends EventEmitter {
           eq(jobsTable.queueName, this.queueName),
           eq(jobsTable.status, "delayed"),
           lt(jobsTable.scheduledFor, new Date(now)),
+          lt(jobsTable.attempts, jobsTable.maxAttempts),
         ),
       );
 
-    if (result.changes && result.changes > 0) {
-      this.logger.debug(`Moved ${result.changes} delayed jobs to waiting`);
+    const processedCount = result.changes || 0;
+    if (processedCount > 0) {
+      this.logger.debug(`Moved ${processedCount} delayed jobs to waiting`);
     }
+    
+    return processedCount;
   }
 
-  // Recover stuck jobs (jobs that have been active too long)
-  private async recoverStuckJobs(): Promise<void> {
+  // UPDATE: Get and lock waiting jobs atomically with LIMIT  
+  private async getAndLockJobs(maxJobs: number): Promise<Job[]> {
     const db = getDatabase();
-    const stuckThreshold = new Date(Date.now() - this.options.stuckJobTimeout);
+    const now = Date.now();
 
-    const stuckJobs = await db
-      .select()
-      .from(jobsTable)
+    // Use rowid with MIN to get exactly maxJobs in priority order
+    const jobs = await db
+      .update(jobsTable)
+      .set({
+        status: "active",
+        processedOn: new Date(now),
+        updatedAt: new Date(now),
+        workerId: this.workerId,
+      })
       .where(
-        and(
-          eq(jobsTable.queueName, this.queueName),
-          eq(jobsTable.status, "active"),
-          lt(jobsTable.processedOn, stuckThreshold),
-        ),
-      );
+        sql`rowid IN (
+          SELECT rowid FROM ${jobsTable} 
+          WHERE queue_name = ${this.queueName} 
+            AND status = 'waiting'
+          ORDER BY priority DESC, created_at ASC
+          LIMIT ${maxJobs}
+        )`
+      )
+      .returning();
 
-    for (const job of stuckJobs) {
-      this.logger.warn(`Recovering stuck job: ${job.id}`);
-      this.emit("stalled", { id: job.id });
-
-      // Move back to waiting for retry
-      await db
-        .update(jobsTable)
-        .set({
-          status: "waiting",
-          updatedAt: new Date(),
-          workerId: null,
-          processedOn: null,
-        })
-        .where(eq(jobsTable.id, job.id));
+    if (jobs.length > 0) {
+      this.logger.debug(`Locked ${jobs.length} jobs for processing`);
     }
+
+    return jobs;
   }
 
-  // Fill available slots with jobs
-  private async fillAvailableSlots(availableSlots: number): Promise<void> {
-    for (let slotIndex = 0; slotIndex < availableSlots; slotIndex++) {
-      const job = await this.getAndLockNextJob();
-      if (job) {
-        this.startJobProcessing(job);
-      } else {
-        break; // No more jobs available
+
+
+  // Reset backoff to minimum interval
+  private resetBackoff(): void {
+    this.consecutiveEmptyPolls = 0;
+    this.currentPollInterval = this.options.minPollInterval;
+    this.logger.debug("Backoff reset - jobs found");
+  }
+
+  // Apply exponential backoff
+  private applyBackoff(): void {
+    this.consecutiveEmptyPolls++;
+    
+    if (this.consecutiveEmptyPolls > 2) { // After 3 empty polls, start backing off
+      const newInterval = Math.min(
+        this.currentPollInterval * this.backoffMultiplier,
+        this.options.maxPollInterval
+      );
+      
+      if (newInterval !== this.currentPollInterval) {
+        this.currentPollInterval = newInterval;
+        this.logger.debug(
+          `Backoff applied: ${this.currentPollInterval}ms (${this.consecutiveEmptyPolls} empty polls)`
+        );
       }
     }
   }
 
-  // Start processing a job (non-blocking)
-  private startJobProcessing(job: Job): void {
-    this.activeJobs.add(job.id);
 
-    const processingPromise = this.processJob(job).finally(() => {
-      this.activeJobs.delete(job.id);
-    });
+  // Start processing a job (non-blocking)
+  private startJobProcessing(job: JobInstance): void {
+    // Create individual heartbeat timer for this job
+    const heartbeatTimer = setInterval(async () => {
+      job.alive(); // Mark as alive in memory
+      await this.persistJobState(job); // Persist heartbeat
+    }, this.options.heartbeatInterval);
+
+    // Add to active jobs map with timer
+    this.activeJobs.set(job.id, { job, heartbeatTimer });
+
+    const processingPromise = this.processJob(job)
+      .finally(async () => {
+        // Cleanup: cancel timer, persist final state, remove from active jobs
+        clearInterval(heartbeatTimer);
+        await this.persistJobState(job); // Final persist
+        this.activeJobs.delete(job.id);
+      });
 
     this.processingPromises.add(processingPromise);
   }
 
   // Process a single job with events
-  private async processJob(job: Job): Promise<void> {
+  private async processJob(job: JobInstance): Promise<void> {
     const startTime = Date.now();
 
     try {
       this.logger.debug(`Processing job ${job.id}`);
 
-      // Parse job data
-      const jobData = JSON.parse(job.data);
-
       // Emit active event
-      this.emit("active", { id: job.id, data: jobData });
+      this.emit("active", { id: job.id, data: job.data });
 
-      // Call processor function
-      const result = await this.processor({
-        id: job.id,
-        data: jobData,
-      });
+      // Call processor function with JobInstance
+      const result = await this.processor(job);
 
       const duration = Date.now() - startTime;
 
-      // Mark job as completed
-      await this.markJobCompleted(job.id, result, duration);
+      // Mark job as completed in memory
+      job.markCompleted(result);
 
       // Emit completed event
       this.emit("completed", { id: job.id, result, duration });
@@ -246,9 +316,42 @@ export class Worker<T = unknown, R = unknown> extends EventEmitter {
       this.logger.debug(`Job ${job.id} completed in ${duration}ms`);
     } catch (error) {
       const duration = Date.now() - startTime;
-      this.logger.error(`Job ${job.id} failed after ${duration}ms:`, error);
+      
+      // Handle specific job control errors
+      if (error instanceof MoveToDelayedError) {
+        // Job explicitly requested to be moved to delayed
+        job.markDelayed(error.originalError || error, error.customDelay);
+        
+        this.logger.debug(
+          `Job ${job.id} explicitly moved to delayed: ${error.message} ${error.customDelay ? `(custom delay: ${error.customDelay}ms)` : ''}`
+        );
+      } else if (error instanceof MoveToFailedError) {
+        // Job explicitly requested to be failed
+        job.markFailed(error.originalError || error);
+        
+        this.logger.warn(
+          `Job ${job.id} explicitly failed: ${error.message}`
+        );
+      } else {
+        // Unknown error - follow standard retry logic
+        this.logger.error(`Job ${job.id} failed after ${duration}ms:`, error);
+        
+        if (job.shouldRetry()) {
+          // Mark for retry (delayed)
+          job.markDelayed(error as Error);
 
-      await this.markJobFailed(job.id, error as Error, duration);
+          this.logger.debug(
+            `Job ${job.id} scheduled for retry (attempt ${job.attempts}/${job.maxAttempts})`
+          );
+        } else {
+          // Mark as finally failed
+          job.markFailed(error as Error);
+
+          this.logger.warn(
+            `Job ${job.id} failed permanently after ${job.attempts} attempts`
+          );
+        }
+      }
 
       // Emit failed event
       this.emit("failed", {
@@ -259,90 +362,33 @@ export class Worker<T = unknown, R = unknown> extends EventEmitter {
     }
   }
 
-  // Mark job as completed with better tracking
-  private async markJobCompleted(
-    jobId: string,
-    result: unknown,
-    _duration: number,
-  ): Promise<void> {
+  // Persist job state to database (single responsibility)
+  private async persistJobState(job: JobInstance): Promise<void> {
+    if (!job.isDirty) {
+      return; // No changes to persist
+    }
+
     const db = getDatabase();
+    const jobData = job.getRawRecord();
 
     await db
       .update(jobsTable)
       .set({
-        status: "completed",
-        result: JSON.stringify(result),
-        finishedOn: new Date(),
-        updatedAt: new Date(),
-        workerId: null, // Release worker claim
+        status: jobData.status,
+        result: jobData.result,
+        attempts: jobData.attempts,
+        delayMs: jobData.delayMs,
+        scheduledFor: jobData.scheduledFor,
+        failureReason: jobData.failureReason,
+        finishedOn: jobData.finishedOn,
+        updatedAt: jobData.updatedAt,
+        workerId: jobData.workerId,
+        processedOn: jobData.processedOn,
       })
-      .where(eq(jobsTable.id, jobId));
-  }
+      .where(eq(jobsTable.id, job.id));
 
-  // Mark job as failed with improved retry logic
-  private async markJobFailed(
-    jobId: string,
-    error: Error,
-    _duration: number,
-  ): Promise<void> {
-    const db = getDatabase();
-
-    // Get current job to check retry logic
-    const [currentJob] = await db
-      .select()
-      .from(jobsTable)
-      .where(eq(jobsTable.id, jobId))
-      .limit(1);
-
-    if (!currentJob) {
-      this.logger.error(`Failed to find job ${jobId} for failure handling`);
-      return;
-    }
-
-    const newAttempts = currentJob.attempts + 1;
-    const shouldRetry = newAttempts < currentJob.maxAttempts;
-
-    if (shouldRetry) {
-      // Exponential backoff with jitter
-      const baseDelay = Math.min(1000 * Math.pow(2, newAttempts), 30000);
-      const jitter = Math.random() * 1000; // Add up to 1s jitter
-      const retryDelayMs = baseDelay + jitter;
-      const scheduledFor = Date.now() + retryDelayMs;
-
-      await db
-        .update(jobsTable)
-        .set({
-          status: "delayed",
-          attempts: newAttempts,
-          delayMs: retryDelayMs,
-          scheduledFor: new Date(scheduledFor),
-          failureReason: error.message,
-          updatedAt: new Date(),
-          workerId: null, // Release worker claim
-        })
-        .where(eq(jobsTable.id, jobId));
-
-      this.logger.debug(
-        `Job ${jobId} will retry in ${Math.round(retryDelayMs)}ms (attempt ${newAttempts}/${currentJob.maxAttempts})`,
-      );
-    } else {
-      // Mark as permanently failed
-      await db
-        .update(jobsTable)
-        .set({
-          status: "failed",
-          attempts: newAttempts,
-          failureReason: error.message,
-          finishedOn: new Date(),
-          updatedAt: new Date(),
-          workerId: null, // Release worker claim
-        })
-        .where(eq(jobsTable.id, jobId));
-
-      this.logger.warn(
-        `Job ${jobId} failed permanently after ${newAttempts} attempts: ${error.message}`,
-      );
-    }
+    // Mark as persisted
+    job.markPersisted();
   }
 
   // Clean up completed promises
@@ -387,6 +433,11 @@ export class Worker<T = unknown, R = unknown> extends EventEmitter {
       );
       await Promise.allSettled(Array.from(this.processingPromises));
       this.processingPromises.clear();
+      
+      // Clean up any remaining timers (should already be cleaned by finally)
+      for (const activeJob of this.activeJobs.values()) {
+        clearInterval(activeJob.heartbeatTimer);
+      }
       this.activeJobs.clear();
     }
   }
@@ -399,6 +450,9 @@ export class Worker<T = unknown, R = unknown> extends EventEmitter {
       maxConcurrency: this.options.concurrency,
       workerId: this.workerId,
       queueName: this.queueName,
+      currentPollInterval: this.currentPollInterval,
+      consecutiveEmptyPolls: this.consecutiveEmptyPolls,
+      heartbeatActive: this.activeJobs.size > 0, // Individual timers per job
     };
   }
 

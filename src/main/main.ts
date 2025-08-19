@@ -11,39 +11,33 @@ import squirrel from "electron-squirrel-startup";
 // Worker management
 // import { initializeAgenticWorkerHandler, agenticWorkerHandler } from "@/shared/worker/agentic-worker.handler"; // Removed - will be rewritten
 
+// Agent response system
+import { startAgentResponseWorker, stopAgentResponseWorker } from "@/main/queue/processors";
+
 // Import all IPC handlers
 import agentActivateHandler from "@/main/ipc/agent/activate/invoke";
-import agentCountActiveHandler from "@/main/ipc/agent/count-active/invoke";
 import agentCreateHandler from "@/main/ipc/agent/create/invoke";
 import agentGetHandler from "@/main/ipc/agent/get/invoke";
 import agentInactivateHandler from "@/main/ipc/agent/inactivate/invoke";
 import agentListHandler from "@/main/ipc/agent/list/invoke";
 import agentUpdateHandler from "@/main/ipc/agent/update/invoke";
-import authCheckLoginHandler from "@/main/ipc/auth/check-login/invoke";
-import authGetCurrentHandler from "@/main/ipc/auth/get-current/invoke";
 import authGetSessionHandler from "@/main/ipc/auth/get-session/invoke";
-import authGetUserHandler from "@/main/ipc/auth/get-user/invoke";
 import authLoginHandler from "@/main/ipc/auth/login/invoke";
 import authLogoutHandler from "@/main/ipc/auth/logout/invoke";
-import authRegisterHandler from "@/main/ipc/auth/register/invoke";
 import channelArchiveHandler from "@/main/ipc/channel/archive/invoke";
 import channelCreateHandler from "@/main/ipc/channel/create/invoke";
 import channelGetHandler from "@/main/ipc/channel/get/invoke";
-import channelInactivateHandler from "@/main/ipc/channel/inactivate/invoke";
 import channelListHandler from "@/main/ipc/channel/list/invoke";
-import channelListMessagesHandler from "@/main/ipc/channel/list-messages/invoke";
-import channelSendMessageHandler from "@/main/ipc/channel/send-message/invoke";
 import channelUnarchiveHandler from "@/main/ipc/channel/unarchive/invoke";
 import channelUpdateHandler from "@/main/ipc/channel/update/invoke";
+import conversationGetHandler from "@/main/ipc/conversation/get/invoke";
+import conversationSendMessageHandler from "@/main/ipc/conversation/send-message/invoke";
 import dmAddParticipantHandler from "@/main/ipc/dm/add-participant/invoke";
 import dmArchiveHandler from "@/main/ipc/dm/archive/invoke";
 import dmCreateHandler from "@/main/ipc/dm/create/invoke";
 import dmGetHandler from "@/main/ipc/dm/get/invoke";
-import dmInactivateHandler from "@/main/ipc/dm/inactivate/invoke";
 import dmListHandler from "@/main/ipc/dm/list/invoke";
-import dmListMessagesHandler from "@/main/ipc/dm/list-messages/invoke";
 import dmRemoveParticipantHandler from "@/main/ipc/dm/remove-participant/invoke";
-import dmSendMessageHandler from "@/main/ipc/dm/send-message/invoke";
 import dmUnarchiveHandler from "@/main/ipc/dm/unarchive/invoke";
 import llmProviderCreateHandler from "@/main/ipc/llm-provider/create/invoke";
 import llmProviderGetHandler from "@/main/ipc/llm-provider/get/invoke";
@@ -53,23 +47,21 @@ import llmProviderInactivateHandler from "@/main/ipc/llm-provider/inactivate/inv
 import llmProviderListHandler from "@/main/ipc/llm-provider/list/invoke";
 import llmProviderSetDefaultHandler from "@/main/ipc/llm-provider/set-default/invoke";
 import llmProviderUpdateHandler from "@/main/ipc/llm-provider/update/invoke";
+import llmProviderActivateHandler from "@/main/ipc/llm-provider/activate/invoke";
 import profileGetThemeHandler from "@/main/ipc/profile/get-theme/invoke";
 import profileUpdateHandler from "@/main/ipc/profile/update/invoke";
 import projectArchiveHandler from "@/main/ipc/project/archive/invoke";
 import projectCreateHandler from "@/main/ipc/project/create/invoke";
 import projectGetHandler from "@/main/ipc/project/get/invoke";
 import projectListHandler from "@/main/ipc/project/list/invoke";
+import projectUnarchiveHandler from "@/main/ipc/project/unarchive/invoke";
 import projectUpdateHandler from "@/main/ipc/project/update/invoke";
 import userActivateHandler from "@/main/ipc/user/activate/invoke";
 import userCreateHandler from "@/main/ipc/user/create/invoke";
 import userGetHandler from "@/main/ipc/user/get/invoke";
 import userGetByTypeHandler from "@/main/ipc/user/get-by-type/invoke";
-import userGetUserStatsHandler from "@/main/ipc/user/get-user-stats/invoke";
 import userInactivateHandler from "@/main/ipc/user/inactivate/invoke";
 import userListHandler from "@/main/ipc/user/list/invoke";
-import userListAgentsHandler from "@/main/ipc/user/list-agents/invoke";
-import userListAvailableUsersHandler from "@/main/ipc/user/list-available-users/invoke";
-import userListHumansHandler from "@/main/ipc/user/list-humans/invoke";
 import userUpdateHandler from "@/main/ipc/user/update/invoke";
 import windowCloseHandler from "@/main/ipc/window/close/invoke";
 import windowMaximizeHandler from "@/main/ipc/window/maximize/invoke";
@@ -181,11 +173,19 @@ function initializeJobResultHandler(): void {
 }
 
 /**
- * Initialize worker
+ * Initialize worker and agent response services
  */
 async function initializeWorker(): Promise<void> {
-  // Worker initialization will be added when needed
-  logger.info("🚀 Worker system ready");
+  try {
+    logger.info("🚀 Initializing agent response system...");
+    
+    // Start agent response worker
+    await startAgentResponseWorker();
+    
+    logger.info("✅ Agent response system initialized successfully");
+  } catch (error) {
+    logger.error("❌ Failed to initialize agent response system:", error);
+  }
 }
 
 /**
@@ -249,7 +249,6 @@ async function setupAllIpcHandlers(): Promise<void> {
   const handlers: HandlerRegistration[] = [
     // Agent handlers
     { handler: agentActivateHandler, channel: "invoke:agent:activate" },
-    { handler: agentCountActiveHandler, channel: "invoke:agent:count-active" },
     { handler: agentCreateHandler, channel: "invoke:agent:create" },
     { handler: agentGetHandler, channel: "invoke:agent:get" },
     { handler: agentInactivateHandler, channel: "invoke:agent:inactivate" },
@@ -257,44 +256,32 @@ async function setupAllIpcHandlers(): Promise<void> {
     { handler: agentUpdateHandler, channel: "invoke:agent:update" },
 
     // Auth handlers
-    { handler: authCheckLoginHandler, channel: "invoke:auth:check-login" },
-    { handler: authGetCurrentHandler, channel: "invoke:auth:get-current" },
     { handler: authGetSessionHandler, channel: "invoke:auth:get-session" },
-    { handler: authGetUserHandler, channel: "invoke:auth:get-user" },
     { handler: authLoginHandler, channel: "invoke:auth:login" },
     { handler: authLogoutHandler, channel: "invoke:auth:logout" },
-    { handler: authRegisterHandler, channel: "invoke:auth:register" },
 
     // Channel handlers
     { handler: channelArchiveHandler, channel: "invoke:channel:archive" },
     { handler: channelCreateHandler, channel: "invoke:channel:create" },
     { handler: channelGetHandler, channel: "invoke:channel:get" },
-    { handler: channelInactivateHandler, channel: "invoke:channel:inactivate" },
     { handler: channelListHandler, channel: "invoke:channel:list" },
-    {
-      handler: channelListMessagesHandler,
-      channel: "invoke:channel:list-messages",
-    },
-    {
-      handler: channelSendMessageHandler,
-      channel: "invoke:channel:send-message",
-    },
     { handler: channelUnarchiveHandler, channel: "invoke:channel:unarchive" },
     { handler: channelUpdateHandler, channel: "invoke:channel:update" },
+
+    // Conversation handlers
+    { handler: conversationGetHandler, channel: "invoke:conversation:get" },
+    { handler: conversationSendMessageHandler, channel: "invoke:conversation:send-message" },
 
     // DM handlers
     { handler: dmAddParticipantHandler, channel: "invoke:dm:add-participant" },
     { handler: dmArchiveHandler, channel: "invoke:dm:archive" },
     { handler: dmCreateHandler, channel: "invoke:dm:create" },
     { handler: dmGetHandler, channel: "invoke:dm:get" },
-    { handler: dmInactivateHandler, channel: "invoke:dm:inactivate" },
     { handler: dmListHandler, channel: "invoke:dm:list" },
-    { handler: dmListMessagesHandler, channel: "invoke:dm:list-messages" },
     {
       handler: dmRemoveParticipantHandler,
       channel: "invoke:dm:remove-participant",
     },
-    { handler: dmSendMessageHandler, channel: "invoke:dm:send-message" },
     { handler: dmUnarchiveHandler, channel: "invoke:dm:unarchive" },
 
 
@@ -325,6 +312,10 @@ async function setupAllIpcHandlers(): Promise<void> {
       handler: llmProviderUpdateHandler,
       channel: "invoke:llm-provider:update",
     },
+    {
+      handler: llmProviderActivateHandler,
+      channel: "invoke:provider:activate",
+    },
 
     // Profile handlers
     { handler: profileGetThemeHandler, channel: "invoke:profile:get-theme" },
@@ -335,22 +326,17 @@ async function setupAllIpcHandlers(): Promise<void> {
     { handler: projectCreateHandler, channel: "invoke:project:create" },
     { handler: projectGetHandler, channel: "invoke:project:get" },
     { handler: projectListHandler, channel: "invoke:project:list" },
+    { handler: projectUnarchiveHandler, channel: "invoke:project:unarchive" },
     { handler: projectUpdateHandler, channel: "invoke:project:update" },
+
 
     // User handlers
     { handler: userActivateHandler, channel: "invoke:user:activate" },
     { handler: userCreateHandler, channel: "invoke:user:create" },
     { handler: userGetHandler, channel: "invoke:user:get" },
     { handler: userGetByTypeHandler, channel: "invoke:user:get-by-type" },
-    { handler: userGetUserStatsHandler, channel: "invoke:user:get-user-stats" },
     { handler: userInactivateHandler, channel: "invoke:user:inactivate" },
     { handler: userListHandler, channel: "invoke:user:list" },
-    { handler: userListAgentsHandler, channel: "invoke:user:list-agents" },
-    {
-      handler: userListAvailableUsersHandler,
-      channel: "invoke:user:list-available-users",
-    },
-    { handler: userListHumansHandler, channel: "invoke:user:list-humans" },
     { handler: userUpdateHandler, channel: "invoke:user:update" },
 
     // Window handlers
@@ -406,22 +392,24 @@ app.on("window-all-closed", () => {
   }
 });
 
-// Cleanup services on app quit
-app.on("before-quit", async () => {
-  logger.info("App is quitting, cleaning up services");
-
-  try {
-    logger.info("🛑 Services stopped successfully");
-  } catch (error) {
-    logger.error("❌ Error stopping services:", error);
-  }
-});
-
 // Handle app activation (macOS)
 app.on("activate", () => {
   if (mainWindow === null) {
     logger.info("App activated, creating main window");
     createMainWindow();
+  }
+});
+
+// Cleanup services on app quit
+app.on("before-quit", async () => {
+  logger.info("App is quitting, cleaning up services");
+  try {
+    // Stop agent response worker
+    await stopAgentResponseWorker();
+    
+    logger.info("🛑 Services stopped successfully");
+  } catch (error) {
+    logger.error("❌ Error stopping services:", error);
   }
 });
 

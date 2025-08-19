@@ -4,22 +4,6 @@ import { getLogger } from "@/shared/services/logger/config";
 
 const logger = getLogger("ipc-loader");
 
-// Expected IPC result structure
-interface IPCResult {
-  success: boolean;
-  data?: unknown;
-  error?: string;
-}
-
-// Type guard for IPC result
-function isIPCResult(value: unknown): value is IPCResult {
-  return (
-    typeof value === "object" &&
-    value !== null &&
-    "success" in value &&
-    typeof (value as IPCResult).success === "boolean"
-  );
-}
 
 // Handler definition interface - compatible with Electron IPC handlers
 type IPCHandlerFunction = (
@@ -70,7 +54,7 @@ export class IpcLoader {
     channel: string,
   ): Promise<boolean> {
     try {
-      if (!handlerFunction || typeof handlerFunction !== "function") {
+      if (!handlerFunction) {
         logger.error(`❌ Invalid handler function for ${channel}`);
         return false;
       }
@@ -87,18 +71,9 @@ export class IpcLoader {
 
         const result = await handlerFunction(data, event);
 
-        // Log result with proper type checking
-        if (isIPCResult(result)) {
-          logger.debug(`📤 IPC result: ${channel}`, {
-            success: result.success,
-            hasData: !!result.data,
-            hasError: !!result.error,
-          });
-        } else {
-          logger.debug(`📤 IPC result: ${channel}`, {
-            hasResult: result !== undefined,
-          });
-        }
+        logger.debug(`📤 IPC result: ${channel}`, {
+          hasResult: result !== undefined,
+        });
 
         return result;
       });
