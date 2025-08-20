@@ -19,7 +19,7 @@ const AddParticipantInputSchema = z.object({
 
 const AddParticipantOutputSchema = z.object({
   id: z.string(),
-  dmConversationId: z.string(),
+  directMessageId: z.string(),
   participantId: z.string(),
   isActive: z.boolean(),
   createdAt: z.date(),
@@ -40,14 +40,14 @@ const handler = createIPCHandler({
     // Execute business logic with ownership validation
     const dbParticipant = await addDMParticipant({
       ownerId: currentUser.id,
-      dmConversationId: input.dmId,
+      directMessageId: input.dmId,
       participantId: input.participantId,
     });
 
     // Mapeamento: SelectDMParticipant → DMParticipant (dados puros da entidade)
     const apiParticipant = {
       id: dbParticipant.id!,
-      dmConversationId: dbParticipant.dmConversationId,
+      directMessageId: dbParticipant.directMessageId,
       participantId: dbParticipant.participantId,
       isActive: !dbParticipant.deactivatedAt,
       createdAt: dbParticipant.createdAt,
@@ -55,13 +55,13 @@ const handler = createIPCHandler({
     };
 
     logger.debug("Participant added to DM", {
-      dmId: apiParticipant.dmConversationId,
+      dmId: apiParticipant.directMessageId,
       participantId: apiParticipant.participantId,
     });
 
     // Emit event
     emit("dm:participant-added", {
-      dmId: apiParticipant.dmConversationId,
+      dmId: apiParticipant.directMessageId,
       participantId: apiParticipant.participantId,
     });
 

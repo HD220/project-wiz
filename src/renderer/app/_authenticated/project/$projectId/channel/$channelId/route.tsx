@@ -18,21 +18,9 @@ import { Textarea } from "@/renderer/components/ui/textarea";
 import { loadApiData } from "@/renderer/lib/route-loader";
 
 import { getRendererLogger } from "@/shared/services/logger/renderer";
-import type { Message, Channel, User } from "@/shared/types";
+import type { Message } from "@/shared/types";
 
 const logger = getRendererLogger("channel-route");
-
-interface ChannelLoaderData {
-  channel: Channel;
-  messages: Message[];
-  availableUsers: User[];
-  user: User;
-}
-
-interface ChannelChatInput {
-  content: string;
-  attachments?: string[];
-}
 
 function ChannelLayout() {
   const { channelId } = Route.useParams();
@@ -87,8 +75,8 @@ function ChannelLayout() {
         {/* Main Channel Content */}
         <main className="flex-1">
           <Chat
-            keyFn={(message) => message.id}
-            value={messages || []}
+            keyFn={(message: unknown) => (message as Message).id}
+            value={(messages as unknown[]) || []}
             onSend={async (input: string) => {
               await window.api.conversation.sendMessage({
                 conversationId: channelId,
@@ -152,13 +140,13 @@ function ChannelLayout() {
                 }
 
                 // Render messages when they exist
-                return messages.map((message: Message, index: number) => (
+                return messages.map((message: unknown, index: number) => (
                   <ChatMessage
-                    key={message.id}
-                    messageData={message}
+                    key={(message as Message).id}
+                    messageData={message as Message}
                     messageIndex={index}
                     render={(messageProps) => {
-                      const message = messageProps.data;
+                      const message: Message = messageProps.data as Message;
                       return (
                         <div className="group relative flex gap-3 px-4 py-2 hover:bg-muted/30 transition-colors">
                           {/* Message content */}
@@ -323,32 +311,38 @@ export const Route = createFileRoute(
 
     try {
       // Load multiple API calls in parallel with standardized error handling
-      const [channel, messages, availableUsers, user] = await Promise.all([
-        loadApiData(
-          () => window.api.channel.get(channelId),
-          "Failed to load channel",
-        ),
-        loadApiData(
-          () => window.api.conversation.get({ conversationId: channelId }),
-          "Failed to load channel conversation",
-        ).then(conversation => ({ messages: conversation.messages || [] })),
-        loadApiData(
-          () => window.api.user.list({}),
-          "Failed to load available users",
-        ),
-        loadApiData(
-          () => window.api.auth.getCurrent({}),
-          "Failed to load current user",
-        ),
-      ]);
+      const [channel, messages, availableUsers, sessionData] =
+        await Promise.all([
+          loadApiData(
+            () => window.api.channel.get(channelId),
+            "Failed to load channel",
+          ),
+          loadApiData(
+            () => window.api.conversation.get({ conversationId: channelId }),
+            "Failed to load channel conversation",
+          ).then((conversation) => conversation.messages || []),
+          loadApiData(
+            () => window.api.user.list({}),
+            "Failed to load available users",
+          ),
+          loadApiData(
+            () => window.api.auth.getActiveSession({}),
+            "Failed to load current user",
+          ),
+        ]);
 
       if (!channel) {
         throw new Error("Channel not found");
       }
 
+      const user = sessionData?.user;
+      if (!user) {
+        throw new Error("No authenticated user");
+      }
+
       return {
         channel,
-        messages: messages || [],
+        messages,
         availableUsers,
         user,
       };

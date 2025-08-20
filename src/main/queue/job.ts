@@ -9,16 +9,36 @@ export class JobInstance {
   }
 
   // Getters for job properties
-  get id(): string { return this._data.id; }
-  get queueName(): string { return this._data.queueName; }
-  get data(): any { return JSON.parse(this._data.data); }
-  get status(): string { return this._data.status; }
-  get attempts(): number { return this._data.attempts; }
-  get maxAttempts(): number { return this._data.maxAttempts; }
-  get workerId(): string | null { return this._data.workerId; }
-  get createdAt(): Date { return this._data.createdAt; }
-  get updatedAt(): Date { return this._data.updatedAt; }
-  get isDirty(): boolean { return this._dirty; }
+  get id(): string {
+    return this._data.id;
+  }
+  get queueName(): string {
+    return this._data.queueName;
+  }
+  get data(): unknown {
+    return JSON.parse(this._data.data);
+  }
+  get status(): string {
+    return this._data.status;
+  }
+  get attempts(): number {
+    return this._data.attempts;
+  }
+  get maxAttempts(): number {
+    return this._data.maxAttempts;
+  }
+  get workerId(): string | null {
+    return this._data.workerId;
+  }
+  get createdAt(): Date {
+    return this._data.createdAt;
+  }
+  get updatedAt(): Date {
+    return this._data.updatedAt;
+  }
+  get isDirty(): boolean {
+    return this._dirty;
+  }
 
   // Check if job should retry on failure
   shouldRetry(): boolean {
@@ -30,15 +50,18 @@ export class JobInstance {
     const baseDelay = 1000; // 1s
     const maxDelay = 30000; // 30s
     const jitter = Math.random() * 1000; // 0-1s jitter
-    
-    const exponentialDelay = Math.min(baseDelay * Math.pow(2, this.attempts), maxDelay);
+
+    const exponentialDelay = Math.min(
+      baseDelay * Math.pow(2, this.attempts),
+      maxDelay,
+    );
     return exponentialDelay + jitter;
   }
 
   // Mark job as completed (in memory only)
   markCompleted(result: unknown): void {
     const now = new Date();
-    
+
     this._data.status = "completed";
     this._data.result = JSON.stringify(result);
     this._data.finishedOn = now;
@@ -50,7 +73,7 @@ export class JobInstance {
   // Mark job as failed (in memory only)
   markFailed(error: Error): void {
     const now = new Date();
-    
+
     this._data.status = "failed";
     this._data.attempts = this.attempts + 1;
     this._data.failureReason = error.message;
@@ -94,7 +117,11 @@ export class JobInstance {
   }
 
   // Methods for JobInstance to control its own fate
-  requestRetry(reason: string, originalError?: Error, customDelay?: number): never {
+  requestRetry(
+    reason: string,
+    originalError?: Error,
+    customDelay?: number,
+  ): never {
     throw new MoveToDelayedError(reason, originalError, customDelay);
   }
 
@@ -110,9 +137,9 @@ export class JobInstance {
 // Custom error types that JobInstance can throw to control its fate
 export class MoveToDelayedError extends Error {
   constructor(
-    message: string, 
+    message: string,
     public readonly originalError?: Error,
-    public readonly customDelay?: number // Optional custom delay
+    public readonly customDelay?: number, // Optional custom delay
   ) {
     super(message);
     this.name = "MoveToDelayedError";
@@ -120,7 +147,10 @@ export class MoveToDelayedError extends Error {
 }
 
 export class MoveToFailedError extends Error {
-  constructor(message: string, public readonly originalError?: Error) {
+  constructor(
+    message: string,
+    public readonly originalError?: Error,
+  ) {
     super(message);
     this.name = "MoveToFailedError";
   }
@@ -128,7 +158,10 @@ export class MoveToFailedError extends Error {
 
 // Job processing errors that can be thrown by JobInstance methods
 export class JobProcessingError extends Error {
-  constructor(message: string, public readonly originalError?: Error) {
+  constructor(
+    message: string,
+    public readonly originalError?: Error,
+  ) {
     super(message);
     this.name = "JobProcessingError";
   }

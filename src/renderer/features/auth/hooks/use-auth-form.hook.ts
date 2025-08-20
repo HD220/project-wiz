@@ -25,37 +25,16 @@ export function useAuthForm({ mode }: UseAuthFormProps) {
   const search =
     mode === "login" ? (location.search as { redirect?: string }) : undefined;
 
-  if (mode === "login") {
-    const form = useForm<LoginFormData>({
-      resolver: zodResolver(loginSchema),
-      defaultValues: {
-        username: "",
-        password: "",
-      },
-    });
+  // Always call both hooks to maintain hook order
+  const loginForm = useForm<LoginFormData>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: {
+      username: "",
+      password: "",
+    },
+  });
 
-    const handleSubmit = async (data: LoginFormData) => {
-      try {
-        await login(data);
-        await new Promise((resolve) => setTimeout(resolve, 0));
-        const redirectTo = search?.redirect || "/user";
-        router.navigate({ to: redirectTo });
-      } catch (error) {
-        form.setError("root", {
-          message: error instanceof Error ? error.message : "Login failed",
-        });
-      }
-    };
-
-    return {
-      form,
-      handleSubmit,
-      fieldsConfig: getFieldsConfig(mode),
-      uiContent: getUIContent(mode),
-    };
-  }
-
-  const form = useForm<RegisterFormData>({
+  const registerForm = useForm<RegisterFormData>({
     resolver: zodResolver(registerSchema),
     defaultValues: {
       name: "",
@@ -65,7 +44,20 @@ export function useAuthForm({ mode }: UseAuthFormProps) {
     },
   });
 
-  const handleSubmit = async (data: RegisterFormData) => {
+  const handleLoginSubmit = async (data: LoginFormData) => {
+    try {
+      await login(data);
+      await new Promise((resolve) => setTimeout(resolve, 0));
+      const redirectTo = search?.redirect || "/user";
+      router.navigate({ to: redirectTo });
+    } catch (error) {
+      loginForm.setError("root", {
+        message: error instanceof Error ? error.message : "Login failed",
+      });
+    }
+  };
+
+  const handleRegisterSubmit = async (data: RegisterFormData) => {
     try {
       const response = await window.api.user.create({
         name: data.name,
@@ -84,15 +76,25 @@ export function useAuthForm({ mode }: UseAuthFormProps) {
 
       router.navigate({ to: "/user" });
     } catch (error) {
-      form.setError("root", {
+      registerForm.setError("root", {
         message: error instanceof Error ? error.message : "Registration failed",
       });
     }
   };
 
+  // Return the appropriate form and handler based on mode
+  if (mode === "login") {
+    return {
+      form: loginForm,
+      handleSubmit: handleLoginSubmit,
+      fieldsConfig: getFieldsConfig(mode),
+      uiContent: getUIContent(mode),
+    };
+  }
+
   return {
-    form,
-    handleSubmit,
+    form: registerForm,
+    handleSubmit: handleRegisterSubmit,
     fieldsConfig: getFieldsConfig(mode),
     uiContent: getUIContent(mode),
   };

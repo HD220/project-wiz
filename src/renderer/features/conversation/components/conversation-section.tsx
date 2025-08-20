@@ -6,6 +6,8 @@ import { ConversationList } from "@/renderer/features/conversation/components/co
 import { useConversations } from "@/renderer/features/conversation/hooks/use-conversations.hook";
 import { cn } from "@/renderer/lib/utils";
 
+import type { User } from "@/shared/types/user";
+
 interface ConversationSectionProps {
   className?: string;
 }
@@ -25,7 +27,7 @@ export function ConversationSection({ className }: ConversationSectionProps) {
   const { data: availableUsers = [], isLoading: usersLoading } = useQuery({
     queryKey: ["availableUsers"],
     queryFn: async () => {
-      const response = await window.api.user.listAvailableUsers({});
+      const response = await window.api.user.list({});
       if (!response.success) {
         throw new Error(response.error || "Failed to load available users");
       }
@@ -62,7 +64,12 @@ export function ConversationSection({ className }: ConversationSectionProps) {
     <div className={cn("min-h-0 w-full overflow-hidden", className)}>
       <ConversationList
         conversations={conversations}
-        availableUsers={availableUsers}
+        availableUsers={availableUsers.map(
+          (user): User => ({
+            ...user,
+            status: (user as User).status || "offline",
+          }),
+        )}
         showArchived={showArchived}
         onToggleShowArchived={handleToggleArchived}
         onCreateConversation={handleCreateConversation}

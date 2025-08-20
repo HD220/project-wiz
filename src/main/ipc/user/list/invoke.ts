@@ -35,6 +35,7 @@ const handler = createIPCHandler({
       name: user.name,
       avatar: user.avatar,
       type: user.type,
+      status: user.status,
       createdAt: new Date(user.createdAt),
       updatedAt: new Date(user.updatedAt),
     }));

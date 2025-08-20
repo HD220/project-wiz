@@ -13,7 +13,7 @@ import type { User } from "@/shared/types/user";
 interface DMParticipant {
   id: string;
   ownerId: string;
-  dmConversationId: string;
+  directMessageId: string;
   participantId: string;
   isActive: boolean;
   deactivatedAt: Date | null;

@@ -7,6 +7,7 @@ description: Planejamento completo de implementação de feature com análise de
 # ULTRATHINK - Feature Implementation Planning
 
 ## Feature Description
+
 $ARGUMENTS
 
 ## Codebase Context
@@ -20,6 +21,7 @@ $ARGUMENTS
 ## Your ULTRATHINK Planning Workflow
 
 ### STEP 1: FEATURE UNDERSTANDING & CLARIFICATION
+
 1. **Analyze the feature description** provided above
 2. **Self-assess confidence level (0-10)** on understanding the requirements
    - If confidence < 8, **ASK CLARIFYING QUESTIONS** such as:
@@ -31,6 +33,7 @@ $ARGUMENTS
 3. **Extract core requirements** and list them clearly
 
 ### STEP 2: CODEBASE ANALYSIS & REFACTORING ASSESSMENT
+
 1. **Search for similar patterns** in the existing codebase
 2. **Identify potential code duplication** or opportunities for abstraction
 3. **Check if this feature will create a "rule of 3"** (third repetition requiring abstraction)
@@ -38,6 +41,7 @@ $ARGUMENTS
 5. **Follow CLAUDE.md guidelines** - verify compliance with project standards
 
 ### STEP 3: DATA FLOW & ARCHITECTURE DESIGN
+
 Apply **YAGNI (You Aren't Gonna Need It)** and **KISS (Keep It Simple, Stupid)** principles:
 
 1. **Define minimum viable data model**:
@@ -56,6 +60,7 @@ Apply **YAGNI (You Aren't Gonna Need It)** and **KISS (Keep It Simple, Stupid)**
    - How does it fit with existing UI patterns?
 
 ### STEP 4: IMPLEMENTATION BREAKDOWN
+
 1. **Database changes** (if any):
    - Schema modifications
    - Migration requirements
@@ -77,7 +82,9 @@ Apply **YAGNI (You Aren't Gonna Need It)** and **KISS (Keep It Simple, Stupid)**
    - Error handling
 
 ### STEP 5: FINAL IMPLEMENTATION PLAN
+
 Present a **step-by-step implementation plan** that:
+
 1. **Prioritizes simplicity** over premature optimization
 2. **Follows existing code patterns** from the codebase
 3. **Includes only what's needed now** (YAGNI principle)
@@ -85,6 +92,7 @@ Present a **step-by-step implementation plan** that:
 5. **Provides clear deliverables** for each step
 
 ## Critical Reminders
+
 - **NO PREMATURE ABSTRACTION**: Only abstract when you have 3+ similar implementations
 - **FOLLOW CLAUDE.md**: Strict adherence to project conventions
 - **SIMPLE DATA MODEL**: Only fields that are actually used

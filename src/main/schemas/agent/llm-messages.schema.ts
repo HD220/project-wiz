@@ -32,7 +32,9 @@ export const llmMessagesTable = sqliteTable(
   (table) => ({
     // Performance indexes
     ownerIdIdx: index("llm_messages_owner_id_idx").on(table.ownerId),
-    agentExecutionIdIdx: index("llm_messages_agent_execution_id_idx").on(table.agentExecutionId),
+    agentExecutionIdIdx: index("llm_messages_agent_execution_id_idx").on(
+      table.agentExecutionId,
+    ),
     roleIdx: index("llm_messages_role_idx").on(table.role),
     createdAtIdx: index("llm_messages_created_at_idx").on(table.createdAt),
 

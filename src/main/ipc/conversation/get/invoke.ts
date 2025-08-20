@@ -1,11 +1,11 @@
 import { z } from "zod";
 
-import { findDMConversation, getDMMessages } from "@/main/ipc/dm/queries";
 import { findProjectChannel } from "@/main/ipc/channel/queries";
+import { findDMConversation, getDMMessages } from "@/main/ipc/dm/queries";
 import { requireAuth } from "@/main/services/session-registry";
 
 import { getLogger } from "@/shared/services/logger/config";
-import { MessageSchema } from "@/shared/types";
+import { MessageSchema, type Message } from "@/shared/types";
 import {
   createIPCHandler,
   InferHandler,
@@ -24,11 +24,13 @@ const GetConversationOutputSchema = z.object({
   description: z.string().nullable(),
   sourceType: z.enum(["dm", "channel"]),
   messages: z.array(MessageSchema),
-  participants: z.array(z.object({
-    id: z.string(),
-    name: z.string(),
-    avatar: z.string().nullable(),
-  })),
+  participants: z.array(
+    z.object({
+      id: z.string(),
+      name: z.string(),
+      avatar: z.string().nullable(),
+    }),
+  ),
   createdAt: z.date(),
   updatedAt: z.date(),
 });
@@ -45,14 +47,17 @@ const handler = createIPCHandler({
 
     if (input.sourceType === "dm") {
       // Handle Direct Message conversations
-      const dmConversation = await findDMConversation(input.conversationId, currentUser.id);
-      
+      const dmConversation = await findDMConversation(
+        input.conversationId,
+        currentUser.id,
+      );
+
       if (!dmConversation) {
         throw new Error("Direct message conversation not found");
       }
 
       // Get messages for this DM
-      const messages = await getDMMessages(input.conversationId, { ownerId: currentUser.id });
+      const messages = await getDMMessages(input.conversationId);
 
       return {
         id: dmConversation.id,
@@ -60,38 +65,35 @@ const handler = createIPCHandler({
         description: dmConversation.description,
         sourceType: "dm" as const,
         messages: messages || [],
-        participants: dmConversation.participants?.map(p => ({
-          id: p.participantId,
-          name: p.participant?.name || "Unknown",
-          avatar: p.participant?.avatar || null,
-        })) || [],
+        participants: [], // TODO: Join with users table to get participant details
         createdAt: dmConversation.createdAt,
         updatedAt: dmConversation.updatedAt,
       };
-    } else {
-      // Handle Channel conversations
-      const channel = await findProjectChannel(input.conversationId, currentUser.id);
-      
-      if (!channel) {
-        throw new Error("Channel not found");
-      }
+    }
+    // Handle Channel conversations
+    const channel = await findProjectChannel(
+      input.conversationId,
+      currentUser.id,
+    );
 
-      // Get messages for this channel (TODO: implement specific channel message query)
-      const messages = []; // Temporary - will implement when channel queries are updated
-
-      // For channels, participants are project members (handled by channel query)
-      return {
-        id: channel.id,
-        name: channel.name,
-        description: channel.description,
-        sourceType: "channel" as const,
-        messages: messages || [],
-        participants: [], // TODO: Get project members when channel queries are updated
-        createdAt: channel.createdAt,
-        updatedAt: channel.updatedAt,
-      };
+    if (!channel) {
+      throw new Error("Channel not found");
     }
 
+    // Get messages for this channel (TODO: implement specific channel message query)
+    const messages: Message[] = []; // Temporary - will implement when channel queries are updated
+
+    // For channels, participants are project members (handled by channel query)
+    return {
+      id: channel.id,
+      name: channel.name,
+      description: channel.description,
+      sourceType: "channel" as const,
+      messages: messages || [],
+      participants: [], // TODO: Get project members when channel queries are updated
+      createdAt: channel.createdAt,
+      updatedAt: channel.updatedAt,
+    };
   },
 });
 

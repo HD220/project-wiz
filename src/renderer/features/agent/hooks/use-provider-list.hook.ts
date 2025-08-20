@@ -13,9 +13,15 @@ function validateSearchInput(value: string): string | undefined {
 function validateProviderTypeFilter(
   value: string,
 ): "openai" | "deepseek" | "anthropic" | "google" | "custom" | undefined {
-  const validTypes = ["openai", "deepseek", "anthropic", "google", "custom"] as const;
+  const validTypes = [
+    "openai",
+    "deepseek",
+    "anthropic",
+    "google",
+    "custom",
+  ] as const;
   if (value === "all" || !value) return undefined;
-  return validTypes.find(type => type === value);
+  return validTypes.find((type) => type === value);
 }
 
 export function useProviderList(providers: LlmProvider[]) {

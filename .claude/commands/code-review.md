@@ -10,21 +10,27 @@ description: Realizar code review detalhado com contexto git, referências preci
 ## Contexto Git Atual
 
 ### Status do Repositório
+
 !`git status --porcelain`
 
 ### Branch Atual
+
 !`git branch --show-current`
 
 ### Diferenças (Staged)
+
 !`git diff --cached --name-only`
 
 ### Diferenças (Working Directory)
+
 !`git diff --name-only`
 
 ### Commits Recentes (últimos 5)
+
 !`git log --oneline -5`
 
 ### Diferenças Detalhadas (Staged + Working)
+
 !`git diff HEAD`
 
 ## Formato Obrigatório para Constatações
@@ -32,6 +38,7 @@ description: Realizar code review detalhado com contexto git, referências preci
 **INSTRUÇÃO CRÍTICA**: Para CADA constatação (issue, problema, melhoria), SEMPRE inclua:
 
 ### Como Identificar Referências Precisas:
+
 1. **No git diff**: As linhas modificadas mostram `@@` com os números de linha
 2. **Ao ler arquivos**: Use a ferramenta `Read` - ela já mostra `linha→conteúdo`
 3. **Para blocos de código**: Use formato `linha_início-linha_fim`
@@ -39,20 +46,25 @@ description: Realizar code review detalhado com contexto git, referências preci
 5. **Seja preciso**: Use os números de linha exatos, não aproximações
 
 ### Formato para Issues/Problemas:
-```
+
+````
 ❌ **PROBLEMA**: Descrição clara do issue
 **Local**: `arquivo:linha` ou `arquivo:linha_início-linha_fim`
 **Código atual**:
 ```typescript
 // Código problemático exato
-```
+````
+
 **Solução**:
+
 ```typescript
 // Código corrigido sugerido
 ```
+
 **Justificativa**: Por que isso é um problema e como a solução resolve
 
 ### Formato para Melhorias:
+
 ```
 🔧 **MELHORIA**: Descrição da otimização sugerida
 **Local**: `arquivo:linha`
@@ -61,6 +73,7 @@ description: Realizar code review detalhado com contexto git, referências preci
 ```
 
 ### Formato para Aprovações:
+
 ```
 ✅ **APROVADO**: Aspecto bem implementado
 **Local**: `arquivo:linha` (opcional)
@@ -165,11 +178,14 @@ Considerando que este é o **Project Wiz** (sistema de automação com IA agents
 Após a análise completa, forneça:
 
 ### 1. **Resumo Executivo**
+
 - **Status**: 🟢 Aprovado / 🟡 Requer Mudanças / 🔴 Rejeitar
 - **Resumo**: Estado geral do código em 2-3 frases
 
 ### 2. **Issues Críticos** (que impedem merge)
+
 Para cada issue crítico:
+
 ```
 🚨 **CRÍTICO**: Descrição
 **Arquivo**: `caminho/arquivo:linha`
@@ -177,7 +193,9 @@ Para cada issue crítico:
 ```
 
 ### 3. **Melhorias Sugeridas** (não bloqueantes)
+
 Para cada melhoria:
+
 ```
 💡 **MELHORIA**: Descrição
 **Arquivo**: `caminho/arquivo:linha`
@@ -185,18 +203,22 @@ Para cada melhoria:
 ```
 
 ### 4. **Aprovações Específicas**
+
 Destaque aspectos bem implementados:
+
 ```
 👏 **BEM FEITO**: O que foi bem implementado
 **Arquivo**: `caminho/arquivo:linha`
 ```
 
 ### 5. **Próximos Passos**
+
 - Lista ordenada por prioridade
 - Estimativa de tempo para correções críticas
 - Comandos específicos para verificação
 
 ### 6. **Resumo de Localização**
+
 Tabela resumo de todos os problemas encontrados:
 | Severidade | Arquivo | Linha | Problema |
 |------------|---------|-------|----------|

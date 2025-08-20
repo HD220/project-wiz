@@ -4,7 +4,6 @@ import { getLogger } from "@/shared/services/logger/config";
 
 const logger = getLogger("ipc-loader");
 
-
 // Handler definition interface - compatible with Electron IPC handlers
 type IPCHandlerFunction = (
   data: unknown,

@@ -1,14 +1,14 @@
-import { generateText } from "ai";
-import type { CoreMessage } from "ai";
 import { createAnthropic } from "@ai-sdk/anthropic";
-import { createOpenAI } from "@ai-sdk/openai";
-import { createGoogleGenerativeAI } from "@ai-sdk/google";
 import { createDeepSeek } from "@ai-sdk/deepseek";
+import { createGoogleGenerativeAI } from "@ai-sdk/google";
+import { createOpenAI } from "@ai-sdk/openai";
+import { generateText } from "ai";
 
 import { getLogger } from "@/shared/services/logger/config";
 
-import type { ProcessorFunction } from "../worker";
 import type { JobInstance } from "../job";
+import type { ProcessorFunction } from "../worker";
+import type { CoreMessage } from "ai";
 
 const logger = getLogger("agent-response.processor");
 
@@ -72,8 +72,10 @@ function createProviderInstance(
  * Pure function that takes all data needed and generates AI response
  * No database operations - that's handled by the worker/caller
  */
-export const processAgentResponse: ProcessorFunction<AgentResponseResult> = async (job: JobInstance) => {
-  const data = job.data;
+export const processAgentResponse: ProcessorFunction<
+  AgentResponseResult
+> = async (job: JobInstance) => {
+  const data = job.data as AgentResponseJobData;
 
   logger.debug("Processing agent response job", {
     jobId: job.id,

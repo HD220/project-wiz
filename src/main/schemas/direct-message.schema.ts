@@ -94,28 +94,31 @@ export const directMessageParticipantsTable = sqliteTable(
     }),
 
     // Performance indexes
-    ownerIdIdx: index("direct_message_participants_owner_id_idx").on(table.ownerId),
-    directMessageIdIdx: index("direct_message_participants_direct_message_id_idx").on(
-      table.directMessageId,
+    ownerIdIdx: index("direct_message_participants_owner_id_idx").on(
+      table.ownerId,
     ),
-    participantIdIdx: index("direct_message_participants_participant_id_idx").on(
-      table.participantId,
-    ),
+    directMessageIdIdx: index(
+      "direct_message_participants_direct_message_id_idx",
+    ).on(table.directMessageId),
+    participantIdIdx: index(
+      "direct_message_participants_participant_id_idx",
+    ).on(table.participantId),
 
     // Soft deletion indexes
-    deactivatedAtIdx: index("direct_message_participants_deactivated_at_idx").on(
-      table.deactivatedAt,
-    ),
+    deactivatedAtIdx: index(
+      "direct_message_participants_deactivated_at_idx",
+    ).on(table.deactivatedAt),
 
     // Composite index for unique participant in DM
-    directMessageParticipantIdx: index("direct_message_participants_dm_participant_idx").on(
-      table.directMessageId,
-      table.participantId,
-    ),
+    directMessageParticipantIdx: index(
+      "direct_message_participants_dm_participant_idx",
+    ).on(table.directMessageId, table.participantId),
   }),
 );
 
 export type SelectDirectMessage = typeof directMessagesTable.$inferSelect;
 export type InsertDirectMessage = typeof directMessagesTable.$inferInsert;
-export type SelectDirectMessageParticipant = typeof directMessageParticipantsTable.$inferSelect;
-export type InsertDirectMessageParticipant = typeof directMessageParticipantsTable.$inferInsert;
+export type SelectDirectMessageParticipant =
+  typeof directMessageParticipantsTable.$inferSelect;
+export type InsertDirectMessageParticipant =
+  typeof directMessageParticipantsTable.$inferInsert;

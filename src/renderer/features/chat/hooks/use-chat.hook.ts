@@ -2,6 +2,7 @@ import * as React from "react";
 
 import { ChatState } from "../chat.reducer";
 import { createChatReducer } from "../chat.reducer";
+
 import type { ChatContextValue } from "../chat.context";
 
 interface UseChatOptions {
@@ -90,7 +91,9 @@ export function useChat(options: UseChatOptions) {
         if (onValueChange) {
           const newMessages = messages.map((msg) => {
             const msgId = keyFn(msg, messages.indexOf(msg));
-            return msgId === id ? { ...msg, ...updates } : msg;
+            return msgId === id
+              ? { ...(msg && typeof msg === "object" ? msg : {}), ...updates }
+              : msg;
           });
           onValueChange(newMessages);
         }

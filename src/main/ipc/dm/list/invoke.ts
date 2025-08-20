@@ -30,7 +30,7 @@ const ListDMConversationsOutputSchema = z.array(
       z.object({
         id: z.string(),
         ownerId: z.string(),
-        dmConversationId: z.string(),
+        directMessageId: z.string(),
         participantId: z.string(),
         isActive: z.boolean(),
         deactivatedAt: z.date().nullable(),
@@ -83,7 +83,7 @@ const handler = createIPCHandler({
       participants: conversation.participants.map((participant) => ({
         id: participant.id,
         ownerId: participant.ownerId,
-        dmConversationId: participant.dmConversationId,
+        directMessageId: participant.directMessageId,
         participantId: participant.participantId,
         isActive: !participant.deactivatedAt,
         deactivatedAt: participant.deactivatedAt

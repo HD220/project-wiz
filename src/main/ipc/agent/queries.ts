@@ -83,11 +83,13 @@ export async function findAgent(
     })
     .from(agentsTable)
     .innerJoin(usersTable, eq(agentsTable.id, usersTable.id))
-    .where(and(
-      eq(agentsTable.id, agentId), 
-      eq(agentsTable.ownerId, ownerId),
-      eq(usersTable.type, "agent")
-    ))
+    .where(
+      and(
+        eq(agentsTable.id, agentId),
+        eq(agentsTable.ownerId, ownerId),
+        eq(usersTable.type, "agent"),
+      ),
+    )
     .limit(1);
 
   return agent ? transformToAgent(agent) : null;

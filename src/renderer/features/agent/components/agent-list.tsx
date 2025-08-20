@@ -22,7 +22,7 @@ function validateSelectFilter<T extends string>(
   validValues: readonly T[],
 ): T | undefined {
   if (value === "all" || !value) return undefined;
-  return validValues.find(valid => valid === value);
+  return validValues.find((valid) => valid === value);
 }
 import { cn } from "@/renderer/lib/utils";
 

@@ -1,6 +1,9 @@
 import { z } from "zod";
 
-import { createUserAccount, checkUsernameExists } from "@/main/ipc/auth/queries";
+import {
+  createUserAccount,
+  checkUsernameExists,
+} from "@/main/ipc/auth/queries";
 
 import { emit } from "@/shared/services/events/event-bus";
 import { getLogger } from "@/shared/services/logger/config";

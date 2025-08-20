@@ -51,8 +51,9 @@ export function useDmConversation({
     setOptimisticMessages((prev) => [...prev, optimisticMessage]);
 
     try {
-      await window.api.dm.sendMessage({
-        dmId: conversationId,
+      await window.api.conversation.sendMessage({
+        sourceType: "dm",
+        sourceId: conversationId,
         content: input.trim(),
       });
       router.invalidate(); // Invalidate to refetch messages from backend

@@ -3,6 +3,8 @@ import { useState, useEffect } from "react";
 import type { Member } from "@/renderer/components/members/member-sidebar";
 import { loadApiData } from "@/renderer/lib/route-loader";
 
+import type { User } from "@/shared/types/user";
+
 export function useProjectMembers(projectId: string) {
   const [members, setMembers] = useState<Member[]>([]);
   const [loading, setLoading] = useState(true);
@@ -21,12 +23,12 @@ export function useProjectMembers(projectId: string) {
         const combinedMembers: Member[] = [];
 
         // Add all users (both humans and agents)
-        users.forEach((user: any) => {
+        users.forEach((user: User) => {
           combinedMembers.push({
             id: user.id,
             name: user.name,
             username: user.name.toLowerCase().replace(/\s+/g, ""),
-            status: user.status || "offline", // Use actual user status
+            status: user.status, // Use actual user status
             role: "member",
             avatarUrl: user.avatar || undefined,
             type: user.type, // Will be "user" or "agent"

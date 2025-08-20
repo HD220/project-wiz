@@ -103,7 +103,8 @@ export function AgentForm(props: AgentFormProps) {
       modelConfig: {
         model: initialData?.modelConfig?.model || defaultModelConfig.model,
         temperature:
-          initialData?.modelConfig?.temperature || defaultModelConfig.temperature,
+          initialData?.modelConfig?.temperature ||
+          defaultModelConfig.temperature,
         maxTokens:
           initialData?.modelConfig?.maxTokens || defaultModelConfig.maxTokens,
         topP: initialData?.modelConfig?.topP || defaultModelConfig.topP,

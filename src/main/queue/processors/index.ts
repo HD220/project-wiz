@@ -1,11 +1,12 @@
+import { getLogger } from "@/shared/services/logger/config";
+
 import { Queue, Worker } from "../index";
+
 import {
   processAgentResponse,
   type AgentResponseJobData,
   type AgentResponseResult,
 } from "./agent-response.processor";
-
-import { getLogger } from "@/shared/services/logger/config";
 
 const logger = getLogger("queue.processors");
 
@@ -42,24 +43,49 @@ export async function startAgentResponseWorker(): Promise<void> {
   });
 
   // Setup event listeners
-  agentResponseWorker.on("active", ({ id, data }: { id: string; data: unknown }) => {
-    logger.info("Agent response job started", {
-      jobId: id,
-      agentId: (data as AgentResponseJobData)?.agentId,
-    });
-  });
+  agentResponseWorker.on(
+    "active",
+    ({ id, data }: { id: string; data: unknown }) => {
+      logger.info("Agent response job started", {
+        jobId: id,
+        agentId: (data as AgentResponseJobData)?.agentId,
+      });
+    },
+  );
 
-  agentResponseWorker.on("completed", ({ id, result, duration }: { id: string; result: unknown; duration: number }) => {
-    logger.info("Agent response job completed", {
-      jobId: id,
+  agentResponseWorker.on(
+    "completed",
+    ({
+      id,
+      result,
       duration,
-      messageId: (result as AgentResponseResult)?.agentResponse,
-    });
-  });
+    }: {
+      id: string;
+      result: unknown;
+      duration: number;
+    }) => {
+      logger.info("Agent response job completed", {
+        jobId: id,
+        duration,
+        messageId: (result as AgentResponseResult)?.agentResponse,
+      });
+    },
+  );
 
-  agentResponseWorker.on("failed", ({ id, error, duration }: { id: string; error: string; duration: number }) => {
-    logger.error("Agent response job failed", { jobId: id, duration, error });
-  });
+  agentResponseWorker.on(
+    "failed",
+    ({
+      id,
+      error,
+      duration,
+    }: {
+      id: string;
+      error: string;
+      duration: number;
+    }) => {
+      logger.error("Agent response job failed", { jobId: id, duration, error });
+    },
+  );
 
   agentResponseWorker.on("stalled", ({ id }: { id: string }) => {
     logger.warn("Agent response job stalled", { jobId: id });

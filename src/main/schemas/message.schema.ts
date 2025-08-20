@@ -66,6 +66,5 @@ export const messagesTable = sqliteTable(
   }),
 );
 
-
 export type SelectMessage = typeof messagesTable.$inferSelect;
 export type InsertMessage = typeof messagesTable.$inferInsert;

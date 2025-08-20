@@ -266,7 +266,7 @@ export const Route = createFileRoute("/_authenticated/user/dm/new/")({
 
     // Load available users for conversation creation (excluding current user)
     const users = await loadApiData(
-      () => window.api.user.listAvailableUsers({}),
+      () => window.api.user.list({}),
       "Failed to load users",
     );
 

@@ -36,7 +36,7 @@ interface DMConversationWithLastMessage extends DMConversation {
   participants?: {
     id: string;
     ownerId: string;
-    dmConversationId: string;
+    directMessageId: string;
     participantId: string;
     isActive: boolean;
     deactivatedAt: Date | null;

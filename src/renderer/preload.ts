@@ -86,7 +86,8 @@ contextBridge.exposeInMainWorld("api", {
   // Conversation API (new handlers)
   conversation: {
     get: (input) => ipcRenderer.invoke("invoke:conversation:get", input),
-    sendMessage: (input) => ipcRenderer.invoke("invoke:conversation:send-message", input),
+    sendMessage: (input) =>
+      ipcRenderer.invoke("invoke:conversation:send-message", input),
   } satisfies WindowAPI.Conversation,
 
   // Project Channels API (new colocated handlers)
@@ -113,7 +114,6 @@ contextBridge.exposeInMainWorld("api", {
     toggle: () => ipcRenderer.invoke("invoke:window:toggle-size"),
     close: () => ipcRenderer.invoke("invoke:window:close"),
   } satisfies WindowAPI.Window,
-
 } satisfies WindowAPI.API);
 
 // Track event callbacks for proper cleanup

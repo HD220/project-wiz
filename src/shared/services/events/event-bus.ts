@@ -103,7 +103,6 @@ export function listen(
   eventBus.on(eventName, listener);
 }
 
-
 /**
  * Initialize the event system
  */

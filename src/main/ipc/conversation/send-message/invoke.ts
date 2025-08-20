@@ -1,5 +1,6 @@
 import { z } from "zod";
 
+import { sendChannelMessage } from "@/main/ipc/channel/queries";
 import { sendDMMessage } from "@/main/ipc/dm/queries";
 import { requireAuth } from "@/main/services/session-registry";
 
@@ -32,14 +33,26 @@ const handler = createIPCHandler({
 
     const currentUser = requireAuth();
 
-    // Send message to conversation 
-    // For now, using sendDMMessage for both - will be refactored when universal message sending is implemented
-    const dbMessage = await sendDMMessage({
-      authorId: currentUser.id,
-      sourceType: input.sourceType,
-      sourceId: input.conversationId,
-      content: input.content,
-    });
+    // Send message to conversation based on source type
+    let dbMessage;
+    const sourceType = input.sourceType || "dm";
+
+    if (sourceType === "dm") {
+      dbMessage = await sendDMMessage({
+        authorId: currentUser.id,
+        sourceType: "dm",
+        sourceId: input.conversationId,
+        content: input.content,
+      });
+    } else {
+      dbMessage = await sendChannelMessage({
+        sourceType: "channel",
+        sourceId: input.conversationId,
+        authorId: currentUser.id,
+        ownerId: currentUser.id, // For channels, the sender is also the owner
+        content: input.content,
+      });
+    }
 
     // Map database message to API format
     const apiMessage = {

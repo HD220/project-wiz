@@ -27,10 +27,12 @@ export const DirectMessageParticipantSchema = z.object({
   updatedAt: z.date(),
 });
 
-export type DirectMessageParticipant = z.infer<typeof DirectMessageParticipantSchema>;
+export type DirectMessageParticipant = z.infer<
+  typeof DirectMessageParticipantSchema
+>;
 
 // Backward compatibility exports
 export const DMConversationSchema = DirectMessageSchema;
 export type DMConversation = DirectMessage;
-export const DMParticipantSchema = DirectMessageParticipantSchema; 
+export const DMParticipantSchema = DirectMessageParticipantSchema;
 export type DMParticipant = DirectMessageParticipant;

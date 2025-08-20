@@ -9,6 +9,7 @@ description: Investigação sistemática e resolução de bugs com análise de c
 **ULTRATHINK**: Analise sistematicamente o bug desde os sintomas até a causa raiz, garantindo uma solução robusta e duradoura.
 
 ## Bug Description
+
 $ARGUMENTS
 
 ## Systematic Bug Investigation Workflow
@@ -32,6 +33,7 @@ $ARGUMENTS
 **INSTRUÇÃO CRÍTICA**: Para CADA pista de investigação, SEMPRE inclua referências precisas de arquivo:linha
 
 #### Code Search Strategy:
+
 1. **Search for error messages** (if any):
    - Look for exact error text in codebase
    - Check console logs/error handling
@@ -48,6 +50,7 @@ $ARGUMENTS
 #### Hypothesis-Driven Investigation:
 
 **Template para cada hipótese:**
+
 ```
 🔍 **HIPÓTESE #N**: Descrição da possível causa
 **Local Suspeito**: `arquivo:linha` ou componente
@@ -61,6 +64,7 @@ $ARGUMENTS
 Once root cause is identified:
 
 #### Solution Planning:
+
 ```
 ✅ **CAUSA RAIZ IDENTIFICADA**: Descrição da verdadeira causa
 **Local**: `arquivo:linha`
@@ -75,6 +79,7 @@ Once root cause is identified:
 ```
 
 #### Solution Options Assessment:
+
 - **Quick Fix**: Solução rápida mas talvez temporária
 - **Proper Fix**: Solução robusta e duradoura
 - **Refactor**: Se o bug indica problema de design
@@ -82,12 +87,14 @@ Once root cause is identified:
 ### STEP 5: IMPLEMENTATION STRATEGY
 
 #### Pre-Implementation Checklist:
+
 - [ ] **Backup**: Commit/stash current work
 - [ ] **Tests**: Understand how to test the fix
 - [ ] **Dependencies**: Check what else might break
 - [ ] **Documentation**: Note what needs updating
 
 #### Implementation Plan:
+
 ```
 📋 **PLANO DE IMPLEMENTAÇÃO**
 
@@ -110,6 +117,7 @@ Once root cause is identified:
 ### STEP 6: PREVENTION ANALYSIS
 
 #### Future-Proofing Questions:
+
 1. **Como evitar que esse bug aconteça novamente?**
 2. **Que testes/validações poderiam ter detectado isso?**
 3. **Há outros lugares com padrão similar que podem ter o mesmo problema?**
@@ -117,7 +125,7 @@ Once root cause is identified:
 
 ```
 🛡️ **MEDIDAS PREVENTIVAS**:
-- **Validações**: Que validações implementar  
+- **Validações**: Que validações implementar
 - **Documentação**: Que padrões documentar
 - **Refactoring**: Que melhorias arquiteturais considerar
 ```
@@ -125,6 +133,7 @@ Once root cause is identified:
 ## Investigation Tools & Commands
 
 ### Code Analysis:
+
 ```bash
 # Search for specific patterns
 grep -r "pattern" src/ --include="*.ts" --include="*.tsx"
@@ -140,6 +149,7 @@ grep -r "catch\|throw\|Error" src/ --include="*.ts"
 ```
 
 ### Testing & Validation:
+
 ```bash
 # Check types
 npm run type-check
@@ -147,7 +157,7 @@ npm run type-check
 # Format
 npm run format
 
-# Lint 
+# Lint
 npm run lint:fix
 ```
 
@@ -166,7 +176,7 @@ npm run lint:fix
 ### 🔍 Investigation Process
 
 1. **Symptoms**: O que foi observado
-2. **Hypotheses Tested**: 
+2. **Hypotheses Tested**:
    - ❌ Hipótese descartada - razão
    - ✅ Hipótese confirmada - evidência
 3. **Root Cause**: Explicação detalhada
@@ -174,10 +184,12 @@ npm run lint:fix
 ### 🛠️ Implementation Details
 
 **Changes Made**:
+
 - `arquivo:linha` - descrição da mudança
 - `arquivo:linha` - descrição da mudança
 
 **Testing**:
+
 - [ ] Manual testing completed
 - [ ] Edge cases verified
 
@@ -190,6 +202,7 @@ npm run lint:fix
 ### 🧪 Verification Steps
 
 Para verificar que o bug foi resolvido:
+
 1. Passo específico de teste
 2. Resultado esperado
 3. Como confirmar sucesso

@@ -63,7 +63,8 @@ export async function findDMConversation(
   id: string,
   ownerId: string,
 ): Promise<
-  (SelectDirectMessage & { participants: SelectDirectMessageParticipant[] }) | null
+  | (SelectDirectMessage & { participants: SelectDirectMessageParticipant[] })
+  | null
 > {
   const db = getDatabase();
 
@@ -172,7 +173,10 @@ export async function createDMConversation(data: {
       participantId,
     }));
 
-    tx.insert(directMessageParticipantsTable).values(participantValues).returning().all();
+    tx.insert(directMessageParticipantsTable)
+      .values(participantValues)
+      .returning()
+      .all();
 
     return dmConversation;
   });
@@ -209,7 +213,9 @@ export async function listUserDMConversations(filters: {
   ];
 
   if (!includeInactive) {
-    participantConditions.push(isNull(directMessageParticipantsTable.deactivatedAt));
+    participantConditions.push(
+      isNull(directMessageParticipantsTable.deactivatedAt),
+    );
   }
 
   const userDMConversations = await db
@@ -251,7 +257,9 @@ export async function listUserDMConversations(filters: {
   ];
 
   if (!includeInactive) {
-    participantQueryConditions.push(isNull(directMessageParticipantsTable.deactivatedAt));
+    participantQueryConditions.push(
+      isNull(directMessageParticipantsTable.deactivatedAt),
+    );
   }
 
   const allParticipants = await db
@@ -479,7 +487,7 @@ export async function getDMMessages(
  * Get all agent participants in a DM conversation
  */
 export async function getDMConversationAgents(
-  conversationId: string
+  conversationId: string,
 ): Promise<Array<{ id: string; name: string }>> {
   const db = getDatabase();
 
@@ -489,14 +497,17 @@ export async function getDMConversationAgents(
       name: usersTable.name,
     })
     .from(directMessageParticipantsTable)
-    .innerJoin(usersTable, eq(directMessageParticipantsTable.participantId, usersTable.id))
+    .innerJoin(
+      usersTable,
+      eq(directMessageParticipantsTable.participantId, usersTable.id),
+    )
     .where(
       and(
         eq(directMessageParticipantsTable.directMessageId, conversationId),
         eq(usersTable.type, "agent"),
         isNull(directMessageParticipantsTable.deactivatedAt),
-        isNull(usersTable.deactivatedAt)
-      )
+        isNull(usersTable.deactivatedAt),
+      ),
     );
 
   return agents;

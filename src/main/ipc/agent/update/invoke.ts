@@ -22,12 +22,14 @@ const UpdateAgentInputSchema = z.object({
     backstory: z.string().optional(),
     goal: z.string().optional(),
     providerId: z.string().optional(),
-    modelConfig: z.object({
-      model: z.string(),
-      temperature: z.number(),
-      maxTokens: z.number(),
-      topP: z.number().optional(),
-    }).optional(),
+    modelConfig: z
+      .object({
+        model: z.string(),
+        temperature: z.number(),
+        maxTokens: z.number(),
+        topP: z.number().optional(),
+      })
+      .optional(),
     deactivatedAt: z.date().nullable().optional(),
     avatar: z.string().optional(),
   }),
@@ -45,14 +47,14 @@ const handler = createIPCHandler({
     const { id, data } = input;
 
     // SIMPLIFIED: Prepare data for database with proper types
-    const updateData: any = {
+    const updateData: Record<string, unknown> = {
       ...data,
       avatar: data.avatar === null ? undefined : data.avatar,
     };
 
     // Convert object to JSON string only for database storage
     if (data.modelConfig !== undefined) {
-      updateData.modelConfig = JSON.stringify(data.modelConfig); // Object → String for DB
+      updateData["modelConfig"] = JSON.stringify(data.modelConfig); // Object → String for DB
     }
 
     // Update agent using queries function

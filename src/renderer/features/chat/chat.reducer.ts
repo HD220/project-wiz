@@ -49,7 +49,9 @@ export function createChatReducer(
           ...state,
           messages: state.messages.map((msg) => {
             const msgId = keyFn(msg, state.messages.indexOf(msg));
-            return msgId === id ? { ...msg, ...updates } : msg;
+            return msgId === id
+              ? { ...(msg && typeof msg === "object" ? msg : {}), ...updates }
+              : msg;
           }),
         };
       }

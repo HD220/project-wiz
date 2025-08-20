@@ -12,7 +12,6 @@ import squirrel from "electron-squirrel-startup";
 // import { initializeAgenticWorkerHandler, agenticWorkerHandler } from "@/shared/worker/agentic-worker.handler"; // Removed - will be rewritten
 
 // Agent response system
-import { startAgentResponseWorker, stopAgentResponseWorker } from "@/main/queue/processors";
 
 // Import all IPC handlers
 import agentActivateHandler from "@/main/ipc/agent/activate/invoke";
@@ -39,6 +38,7 @@ import dmGetHandler from "@/main/ipc/dm/get/invoke";
 import dmListHandler from "@/main/ipc/dm/list/invoke";
 import dmRemoveParticipantHandler from "@/main/ipc/dm/remove-participant/invoke";
 import dmUnarchiveHandler from "@/main/ipc/dm/unarchive/invoke";
+import llmProviderActivateHandler from "@/main/ipc/llm-provider/activate/invoke";
 import llmProviderCreateHandler from "@/main/ipc/llm-provider/create/invoke";
 import llmProviderGetHandler from "@/main/ipc/llm-provider/get/invoke";
 import llmProviderGetDefaultHandler from "@/main/ipc/llm-provider/get-default/invoke";
@@ -47,7 +47,6 @@ import llmProviderInactivateHandler from "@/main/ipc/llm-provider/inactivate/inv
 import llmProviderListHandler from "@/main/ipc/llm-provider/list/invoke";
 import llmProviderSetDefaultHandler from "@/main/ipc/llm-provider/set-default/invoke";
 import llmProviderUpdateHandler from "@/main/ipc/llm-provider/update/invoke";
-import llmProviderActivateHandler from "@/main/ipc/llm-provider/activate/invoke";
 import profileGetThemeHandler from "@/main/ipc/profile/get-theme/invoke";
 import profileUpdateHandler from "@/main/ipc/profile/update/invoke";
 import projectArchiveHandler from "@/main/ipc/project/archive/invoke";
@@ -67,6 +66,10 @@ import windowCloseHandler from "@/main/ipc/window/close/invoke";
 import windowMaximizeHandler from "@/main/ipc/window/maximize/invoke";
 import windowMinimizeHandler from "@/main/ipc/window/minimize/invoke";
 import windowToggleSizeHandler from "@/main/ipc/window/toggle-size/invoke";
+import {
+  startAgentResponseWorker,
+  stopAgentResponseWorker,
+} from "@/main/queue/processors";
 import { sessionRegistry } from "@/main/services/session-registry";
 import { registerWindow } from "@/main/services/window-registry";
 import {
@@ -178,10 +181,10 @@ function initializeJobResultHandler(): void {
 async function initializeWorker(): Promise<void> {
   try {
     logger.info("🚀 Initializing agent response system...");
-    
+
     // Start agent response worker
     await startAgentResponseWorker();
-    
+
     logger.info("✅ Agent response system initialized successfully");
   } catch (error) {
     logger.error("❌ Failed to initialize agent response system:", error);
@@ -270,7 +273,10 @@ async function setupAllIpcHandlers(): Promise<void> {
 
     // Conversation handlers
     { handler: conversationGetHandler, channel: "invoke:conversation:get" },
-    { handler: conversationSendMessageHandler, channel: "invoke:conversation:send-message" },
+    {
+      handler: conversationSendMessageHandler,
+      channel: "invoke:conversation:send-message",
+    },
 
     // DM handlers
     { handler: dmAddParticipantHandler, channel: "invoke:dm:add-participant" },
@@ -283,7 +289,6 @@ async function setupAllIpcHandlers(): Promise<void> {
       channel: "invoke:dm:remove-participant",
     },
     { handler: dmUnarchiveHandler, channel: "invoke:dm:unarchive" },
-
 
     // LLM Provider handlers
     {
@@ -328,7 +333,6 @@ async function setupAllIpcHandlers(): Promise<void> {
     { handler: projectListHandler, channel: "invoke:project:list" },
     { handler: projectUnarchiveHandler, channel: "invoke:project:unarchive" },
     { handler: projectUpdateHandler, channel: "invoke:project:update" },
-
 
     // User handlers
     { handler: userActivateHandler, channel: "invoke:user:activate" },
@@ -406,7 +410,7 @@ app.on("before-quit", async () => {
   try {
     // Stop agent response worker
     await stopAgentResponseWorker();
-    
+
     logger.info("🛑 Services stopped successfully");
   } catch (error) {
     logger.error("❌ Error stopping services:", error);

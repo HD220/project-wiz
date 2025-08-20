@@ -31,10 +31,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
   useEffect(() => {
     async function loadSession() {
       try {
-        const response = await window.api.auth.getCurrent({});
+        const response = await window.api.auth.getActiveSession({});
 
         if (response.success && response.data) {
-          setUser(response.data);
+          setUser(response.data.user);
         }
       } catch (_error) {
         // Session load failure is expected when user is not logged in

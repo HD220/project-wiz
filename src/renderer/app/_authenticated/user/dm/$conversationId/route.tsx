@@ -1,6 +1,4 @@
 import { createFileRoute, Outlet } from "@tanstack/react-router";
-
-import { useReactiveQuery } from "@/renderer/hooks/use-reactive-query.hook";
 import { Send, Paperclip, Smile } from "lucide-react";
 import React, { useEffect, useState } from "react";
 
@@ -28,29 +26,24 @@ import {
   ProfileAvatarImage,
   ProfileAvatarStatus,
 } from "@/renderer/features/user/components/profile-avatar";
+import { useReactiveQuery } from "@/renderer/hooks/use-reactive-query.hook";
 import { loadApiData } from "@/renderer/lib/route-loader";
 import { cn } from "@/renderer/lib/utils";
 
 import { getRendererLogger } from "@/shared/services/logger/renderer";
-import type { DMConversation } from "@/shared/types/direct-message";
 import type { Message } from "@/shared/types/message";
 import type { User } from "@/shared/types/user";
 
 const logger = getRendererLogger("dm-conversation");
 
-interface DMLoaderData {
-  conversation: DMConversation;
-  messages: Message[];
-  availableUsers: User[];
-  user: User;
-  participants: User[];
-}
-
 function DMLayout() {
   const { conversationId } = Route.useParams();
+  const loaderData = Route.useLoaderData();
   const { conversation, messages, availableUsers, user, participants } =
-    Route.useLoaderData();
-  const [optimisticMessages, setOptimisticMessages] = useState(messages || []);
+    loaderData;
+  const [optimisticMessages, setOptimisticMessages] = useState<Message[]>(
+    (messages as Message[]) || [],
+  );
   const [sendingMessage, setSendingMessage] = useState(false);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(true);
 
@@ -58,22 +51,27 @@ function DMLayout() {
   const { data: liveMessages } = useReactiveQuery({
     domain: "messages",
     key: conversationId,
-    queryFn: async () => {
-      const response = await window.api.dm.listMessages({ dmId: conversationId });
-      if (!response.success) {
-        throw new Error(response.error);
+    queryFn: async (): Promise<Message[]> => {
+      const conversation = await window.api.conversation.get({
+        conversationId: conversationId,
+        sourceType: "dm",
+      });
+      // Extract messages from conversation data
+      if (conversation.success) {
+        return conversation.data.messages || [];
       }
-      return response.data;
+      throw new Error(conversation.error || "Failed to load conversation");
     },
     queryOptions: {
-      initialData: messages,
+      initialData: messages as Message[],
       staleTime: 1000 * 30, // Consider data stale after 30 seconds
     },
   });
 
   // Update optimistic messages when route data or live data changes
   useEffect(() => {
-    const messagesToUse = liveMessages || messages || [];
+    const messagesToUse: Message[] =
+      (liveMessages as Message[]) || (messages as Message[]) || [];
     setOptimisticMessages(messagesToUse);
   }, [messages, liveMessages]);
 
@@ -95,12 +93,13 @@ function DMLayout() {
     };
 
     // Add optimistic message immediately
-    setOptimisticMessages((prev) => [...prev, optimisticMessage]);
+    setOptimisticMessages((prev: Message[]) => [...prev, optimisticMessage]);
 
     try {
       // Send message to backend
-      await window.api.dm.sendMessage({
-        dmId: conversationId,
+      await window.api.conversation.sendMessage({
+        sourceType: "dm",
+        sourceId: conversationId,
         content: input.trim(),
       });
 
@@ -108,8 +107,8 @@ function DMLayout() {
       // refresh when the "messages:sent" event is received
     } catch (error) {
       // Remove optimistic message on error
-      setOptimisticMessages((prev) =>
-        prev.filter((msg) => msg.id !== optimisticMessage.id),
+      setOptimisticMessages((prev: Message[]) =>
+        prev.filter((msg: Message) => msg.id !== optimisticMessage.id),
       );
       logger.error("Failed to send message:", error);
     } finally {
@@ -125,22 +124,33 @@ function DMLayout() {
     );
   }
 
-  const otherParticipants = getOtherParticipants(participants, user.id);
+  // Ensure participants have status property for compatibility
+  const validatedParticipants: User[] = participants.map((p) => ({
+    ...p,
+    status: (p as User).status || "offline",
+  }));
+
+  const otherParticipants = getOtherParticipants(
+    validatedParticipants,
+    user.id,
+  );
 
   // Determine if it's a group conversation (3+ participants) or 1-1 (2 participants)
   const isGroupConversation = otherParticipants.length > 1;
   const is1on1Conversation = otherParticipants.length === 1;
 
   // Convert participants to Member format for sidebar
-  const conversationMembers: Member[] = participants.map((participant) => ({
-    id: participant.id,
-    name: participant.name,
-    username: participant.name.toLowerCase().replace(/\s+/g, ""),
-    status: "online", // Default status - could be enhanced with real status
-    role: participant.id === user.id ? "owner" : "member",
-    avatarUrl: participant.avatar || undefined,
-    type: participant.type === "agent" ? "agent" : "human",
-  }));
+  const conversationMembers: Member[] = validatedParticipants.map(
+    (participant) => ({
+      id: participant.id,
+      name: participant.name,
+      username: participant.name.toLowerCase().replace(/\s+/g, ""),
+      status: "online", // Default status - could be enhanced with real status
+      role: participant.id === user.id ? "owner" : "member",
+      avatarUrl: participant.avatar || undefined,
+      type: participant.type === "agent" ? "agent" : "human",
+    }),
+  );
 
   const displayName = conversation.name || "Unknown DM";
   const description =
@@ -171,8 +181,8 @@ function DMLayout() {
         {/* Main Chat Content */}
         <main className="flex-1 overflow-hidden">
           <Chat
-            keyFn={(message) => message.id}
-            value={optimisticMessages}
+            keyFn={(message: unknown) => (message as Message).id}
+            value={(optimisticMessages as unknown[]) || []}
             onSend={(input, context) => {
               handleSendMessage(input);
               // Focus back to input after sending (input clears automatically now)
@@ -182,7 +192,7 @@ function DMLayout() {
           >
             <ChatMessages>
               {(() => {
-                const processedMessages = optimisticMessages || [];
+                const processedMessages: Message[] = optimisticMessages || [];
 
                 // Welcome message for new conversations
                 if (processedMessages.length === 0) {
@@ -200,7 +210,7 @@ function DMLayout() {
                   const author =
                     group.authorId === user.id
                       ? { id: user.id, name: user.name, avatar: user.avatar }
-                      : availableUsers.find(
+                      : (availableUsers as User[]).find(
                           (availableUser: User) =>
                             availableUser.id === group.authorId,
                         ) || {
@@ -520,35 +530,59 @@ export const Route = createFileRoute("/_authenticated/user/dm/$conversationId")(
         throw new Error("DM conversation not found");
       }
 
-      const currentUser = await loadApiData(
-        () => window.api.auth.getCurrent({}),
+      const sessionData = await loadApiData(
+        () => window.api.auth.getActiveSession({}),
         "Failed to load current user",
       );
+
+      const currentUser = sessionData?.user;
 
       if (!currentUser) {
         throw new Error("No authenticated user");
       }
 
       const [messages, availableUsers] = await Promise.all([
+        (async () => {
+          const conversation = await window.api.conversation.get({
+            conversationId: conversationId,
+            sourceType: "dm",
+          });
+          if (conversation.success) {
+            return conversation.data.messages || [];
+          }
+          throw new Error(conversation.error || "Failed to load conversation");
+        })(),
         loadApiData(
-          () => window.api.dm.listMessages({ dmId: conversationId }),
-          "Failed to load DM messages",
-        ),
-        loadApiData(
-          () => window.api.user.listAvailableUsers({}),
+          () => window.api.user.list({}),
           "Failed to load available users",
         ),
       ]);
 
       // Get participant user details from availableUsers using the participants from dm.get()
-      const otherParticipants = availableUsers.filter((user) =>
-        dmConversation.participants?.some(
-          (participant) => participant.participantId === user.id,
-        ),
+      const otherParticipants = (availableUsers as User[]).filter(
+        (user: User) =>
+          dmConversation.participants?.some(
+            (participant) => participant.participantId === user.id,
+          ),
       );
 
-      // Include current user in participants list
-      const participants = [currentUser, ...otherParticipants];
+      // Include current user in participants list, ensuring both have status property
+      const currentUserWithStatus: User = {
+        ...currentUser,
+        status: (currentUser as User).status || "online",
+      };
+
+      const otherParticipantsWithStatus: User[] = otherParticipants.map(
+        (p) => ({
+          ...p,
+          status: p.status || "offline",
+        }),
+      );
+
+      const participants = [
+        currentUserWithStatus,
+        ...otherParticipantsWithStatus,
+      ];
 
       return {
         conversation: dmConversation,
