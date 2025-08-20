@@ -9,6 +9,7 @@ import { ConfirmationDialog } from "@/renderer/components/ui/confirmation-dialog
 import { ScrollArea } from "@/renderer/components/ui/scroll-area";
 import { AgentListItem } from "@/renderer/features/agent/components/agent-card";
 import { useAgentActions } from "@/renderer/features/agent/hooks/use-agent-actions.hook";
+
 // Simple validation functions inline
 function validateSearchInput(value: string): string | undefined {
   const trimmed = value.trim();

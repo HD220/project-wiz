@@ -15,7 +15,7 @@ interface NavigationButtonProps
   label?: string;
   className?: string;
   children?: React.ReactNode;
-  "aria-label"?: string;
+  ariaLabel?: string;
   navigationVariant?: "default" | "sidebar";
   role?: string;
 }
@@ -33,6 +33,7 @@ const NavigationButton = forwardRef<HTMLButtonElement, NavigationButtonProps>(
       activeOptions,
       navigationVariant = "default",
       role,
+      ariaLabel,
       ...restLinkProps
     } = props;
 
@@ -58,6 +59,7 @@ const NavigationButton = forwardRef<HTMLButtonElement, NavigationButtonProps>(
           to={to}
           activeOptions={activeOptions}
           role={role}
+          aria-label={ariaLabel}
           className={cn("flex items-center w-full h-full")}
         >
           {children || (

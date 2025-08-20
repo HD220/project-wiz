@@ -55,9 +55,10 @@ interface StandardFormModalHeaderProps {
 function StandardFormModalHeader({
   title,
   description,
-  icon: Icon,
+  icon,
   className,
 }: StandardFormModalHeaderProps) {
+  const IconComponent = icon;
   return (
     <div
       className={cn(
@@ -67,9 +68,9 @@ function StandardFormModalHeader({
       )}
     >
       <div className="flex items-center justify-center gap-3 mb-2">
-        {Icon && (
+        {IconComponent && (
           <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-primary/10">
-            <Icon className="size-4 text-primary" />
+            <IconComponent className="size-4 text-primary" />
           </div>
         )}
         <DialogTitle

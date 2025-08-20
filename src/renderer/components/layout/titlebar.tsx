@@ -41,11 +41,11 @@ export function Titlebar(props: TitlebarProps) {
         role="group"
         aria-label="Window controls"
       >
-        <TitlebarButton onClick={handleMinimize} aria-label="Minimize window">
+        <TitlebarButton onClick={handleMinimize} ariaLabel="Minimize window">
           <MinimizeIcon />
         </TitlebarButton>
 
-        <TitlebarButton onClick={handleMaximize} aria-label="Maximize window">
+        <TitlebarButton onClick={handleMaximize} ariaLabel="Maximize window">
           <MaximizeIcon />
         </TitlebarButton>
 
@@ -67,14 +67,10 @@ export function Titlebar(props: TitlebarProps) {
 interface TitlebarButtonProps {
   onClick: () => void;
   children: React.ReactNode;
-  "aria-label"?: string;
+  ariaLabel?: string;
 }
 
-function TitlebarButton({
-  onClick,
-  children,
-  "aria-label": ariaLabel,
-}: TitlebarButtonProps) {
+function TitlebarButton({ onClick, children, ariaLabel }: TitlebarButtonProps) {
   return (
     <Button
       variant="ghost"

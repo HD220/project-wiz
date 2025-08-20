@@ -145,7 +145,7 @@ export function ProjectForm(props: ProjectFormProps) {
   // Compact Discord-style option component
   function ProjectTypeOption({
     value,
-    icon: IconComponent,
+    icon,
     title,
     description,
   }: {
@@ -155,6 +155,7 @@ export function ProjectForm(props: ProjectFormProps) {
     description: string;
   }) {
     const isSelected = form.watch("type") === value;
+    const IconComponent = icon;
 
     return (
       <div

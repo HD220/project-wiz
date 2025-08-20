@@ -13,22 +13,22 @@ export interface EventDefinitions {
     sent: { key: string; messageId: string; authorId: string };
     edited: { key: string; messageId: string; content: string };
     deleted: { key: string; messageId: string };
-    "typing-start": { key: string; userId: string };
-    "typing-stop": { key: string; userId: string };
+    typingStart: { key: string; userId: string };
+    typingStop: { key: string; userId: string };
   };
 
   conversations: {
     created: { key: string; type: "dm" | "channel" };
     archived: { key: string };
     unarchived: { key: string };
-    "message-sent": { key: string; lastMessageId: string };
+    messageSent: { key: string; lastMessageId: string };
     updated: { key: string; name?: string };
-    "participant-added": { key: string; userId: string };
-    "participant-removed": { key: string; userId: string };
+    participantAdded: { key: string; userId: string };
+    participantRemoved: { key: string; userId: string };
   };
 
   users: {
-    "status-changed": {
+    statusChanged: {
       key: string;
       status: "online" | "offline" | "busy" | "away";
     };
@@ -41,7 +41,7 @@ export interface EventDefinitions {
   agents: {
     activated: { key: string };
     deactivated: { key: string };
-    "status-changed": {
+    statusChanged: {
       key: string;
       status: "idle" | "working" | "error" | "offline";
     };
@@ -53,7 +53,7 @@ export interface EventDefinitions {
     created: { key: string; provider: string };
     updated: { key: string; changes: Record<string, unknown> };
     deactivated: { key: string };
-    "default-changed": { key: string; previousDefaultId?: string };
+    defaultChanged: { key: string; previousDefaultId?: string };
   };
 
   projects: {

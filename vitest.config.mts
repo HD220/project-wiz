@@ -14,5 +14,6 @@ export default defineConfig({
       include: ["src/**/*.ts"], // Coverage also scoped
     },
     include: ["src/**/*.spec.ts", "src/**/*.test.ts"],
+    passWithNoTests: true, // Don't fail when no test files found
   },
 });

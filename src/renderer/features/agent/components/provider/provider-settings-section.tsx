@@ -1,8 +1,5 @@
 import { AlertCircle, CheckCircle2, Shield } from "lucide-react"; // Assuming Lucide icons
 import { useFormContext } from "react-hook-form";
-
-import { LlmProviderSchema } from "@/shared/types/llm-provider";
-
 import { z } from "zod";
 
 import {
@@ -20,6 +17,9 @@ import {
   FormItem,
   FormLabel,
 } from "@/renderer/components/ui/form";
+import { cn } from "@/renderer/lib/utils";
+
+import { LlmProviderSchema } from "@/shared/types/llm-provider";
 
 // Schema for form input
 const _LlmProviderFormSchema = LlmProviderSchema.omit({
@@ -27,7 +27,6 @@ const _LlmProviderFormSchema = LlmProviderSchema.omit({
   createdAt: true,
   updatedAt: true,
 });
-import { cn } from "@/renderer/lib/utils";
 
 export function ProviderSettingsSection() {
   const form = useFormContext<z.infer<typeof _LlmProviderFormSchema>>();

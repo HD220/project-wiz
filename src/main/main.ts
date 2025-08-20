@@ -1,5 +1,4 @@
 import * as path from "path";
-
 import dotenv from "dotenv";
 // Configure dotenv
 dotenv.config();

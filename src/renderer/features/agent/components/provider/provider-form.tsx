@@ -46,6 +46,8 @@ import {
   providerFormSchema,
   type ProviderFormData,
 } from "@/renderer/features/agent/provider-constants";
+import { useApiMutation } from "@/renderer/hooks/use-api-mutation.hook";
+import { cn } from "@/renderer/lib/utils";
 
 import type { LlmProvider } from "@/shared/types/llm-provider";
 
@@ -59,8 +61,6 @@ interface CreateProviderInput {
   isDefault: boolean;
   ownerId: string;
 }
-import { useApiMutation } from "@/renderer/hooks/use-api-mutation.hook";
-import { cn } from "@/renderer/lib/utils";
 
 interface ProviderFormProps {
   provider?: LlmProvider | null;
