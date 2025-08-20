@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 
 import type { Member } from "@/renderer/components/members/member-sidebar";
-import type { UserSummary } from "@/renderer/features/conversation/hooks/use-user-selection.hook";
 import { loadApiData } from "@/renderer/lib/route-loader";
 
 export function useProjectMembers(projectId: string) {
@@ -15,14 +14,14 @@ export function useProjectMembers(projectId: string) {
       setError(null);
       try {
         const users = await loadApiData(
-          () => window.api.user.listAvailableUsers({}),
+          () => window.api.user.list({}),
           "Failed to load users",
         );
 
         const combinedMembers: Member[] = [];
 
         // Add all users (both humans and agents)
-        users.forEach((user: UserSummary) => {
+        users.forEach((user: any) => {
           combinedMembers.push({
             id: user.id,
             name: user.name,

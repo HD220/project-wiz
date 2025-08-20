@@ -19,7 +19,7 @@ export interface WorkerOptions {
 
 import { JobInstance, MoveToDelayedError, MoveToFailedError } from "./job";
 
-export interface ProcessorFunction<T = unknown, R = unknown> {
+export interface ProcessorFunction<R = unknown> {
   (job: JobInstance): Promise<R>;
 }
 
@@ -31,18 +31,21 @@ export interface WorkerEvents {
 }
 
 // Optimized Worker for single instance with 15 concurrent jobs
-export class Worker<T = unknown, R = unknown> extends EventEmitter {
+export class Worker<R = unknown> extends EventEmitter {
   private logger = getLogger("worker");
   private running = false;
-  private processor: ProcessorFunction<T, R>;
+  private processor: ProcessorFunction<R>;
   private options: Required<WorkerOptions>;
   private workerId: string;
-  private activeJobs = new Map<string, {
-    job: JobInstance;
-    heartbeatTimer: NodeJS.Timeout;
-  }>();
+  private activeJobs = new Map<
+    string,
+    {
+      job: JobInstance;
+      heartbeatTimer: NodeJS.Timeout;
+    }
+  >();
   private processingPromises = new Set<Promise<void>>();
-  
+
   // Backoff exponential properties
   private currentPollInterval: number;
   private consecutiveEmptyPolls = 0;
@@ -50,7 +53,7 @@ export class Worker<T = unknown, R = unknown> extends EventEmitter {
 
   constructor(
     public readonly queueName: string,
-    processor: ProcessorFunction<T, R>,
+    processor: ProcessorFunction<R>,
     opts: WorkerOptions = {},
   ) {
     super();
@@ -97,20 +100,20 @@ export class Worker<T = unknown, R = unknown> extends EventEmitter {
 
         // 3. Atomic UPDATE: Get new jobs if we have capacity
         const availableSlots = this.options.concurrency - this.activeJobs.size;
-        
+
         if (availableSlots > 0) {
           const newJobs = await this.getAndLockJobs(availableSlots);
-          
+
           if (newJobs.length > 0) {
             // Reset backoff - we found jobs!
             this.resetBackoff();
-            
+
             // Start processing jobs (no excess handling needed - LIMIT takes care of it)
             for (const jobRecord of newJobs) {
               const jobInstance = new JobInstance(jobRecord);
               this.startJobProcessing(jobInstance);
             }
-            
+
             this.logger.debug(`Started processing ${newJobs.length} jobs`);
           } else {
             // No jobs found - apply backoff
@@ -126,7 +129,6 @@ export class Worker<T = unknown, R = unknown> extends EventEmitter {
 
         // Wait with dynamic interval (1s-15s based on workload)
         await this.delay(this.currentPollInterval);
-        
       } catch (error) {
         this.logger.error("Worker polling error:", error);
         await this.delay(this.currentPollInterval);
@@ -177,7 +179,7 @@ export class Worker<T = unknown, R = unknown> extends EventEmitter {
     if (recoveredCount > 0) {
       this.logger.warn(`Recovered ${recoveredCount} stuck jobs`);
     }
-    
+
     return recoveredCount;
   }
 
@@ -205,11 +207,11 @@ export class Worker<T = unknown, R = unknown> extends EventEmitter {
     if (processedCount > 0) {
       this.logger.debug(`Moved ${processedCount} delayed jobs to waiting`);
     }
-    
+
     return processedCount;
   }
 
-  // UPDATE: Get and lock waiting jobs atomically with LIMIT  
+  // UPDATE: Get and lock waiting jobs atomically with LIMIT
   private async getAndLockJobs(maxJobs: number): Promise<Job[]> {
     const db = getDatabase();
     const now = Date.now();
@@ -230,7 +232,7 @@ export class Worker<T = unknown, R = unknown> extends EventEmitter {
             AND status = 'waiting'
           ORDER BY priority DESC, created_at ASC
           LIMIT ${maxJobs}
-        )`
+        )`,
       )
       .returning();
 
@@ -240,8 +242,6 @@ export class Worker<T = unknown, R = unknown> extends EventEmitter {
 
     return jobs;
   }
-
-
 
   // Reset backoff to minimum interval
   private resetBackoff(): void {
@@ -253,22 +253,22 @@ export class Worker<T = unknown, R = unknown> extends EventEmitter {
   // Apply exponential backoff
   private applyBackoff(): void {
     this.consecutiveEmptyPolls++;
-    
-    if (this.consecutiveEmptyPolls > 2) { // After 3 empty polls, start backing off
+
+    if (this.consecutiveEmptyPolls > 2) {
+      // After 3 empty polls, start backing off
       const newInterval = Math.min(
         this.currentPollInterval * this.backoffMultiplier,
-        this.options.maxPollInterval
+        this.options.maxPollInterval,
       );
-      
+
       if (newInterval !== this.currentPollInterval) {
         this.currentPollInterval = newInterval;
         this.logger.debug(
-          `Backoff applied: ${this.currentPollInterval}ms (${this.consecutiveEmptyPolls} empty polls)`
+          `Backoff applied: ${this.currentPollInterval}ms (${this.consecutiveEmptyPolls} empty polls)`,
         );
       }
     }
   }
-
 
   // Start processing a job (non-blocking)
   private startJobProcessing(job: JobInstance): void {
@@ -281,13 +281,12 @@ export class Worker<T = unknown, R = unknown> extends EventEmitter {
     // Add to active jobs map with timer
     this.activeJobs.set(job.id, { job, heartbeatTimer });
 
-    const processingPromise = this.processJob(job)
-      .finally(async () => {
-        // Cleanup: cancel timer, persist final state, remove from active jobs
-        clearInterval(heartbeatTimer);
-        await this.persistJobState(job); // Final persist
-        this.activeJobs.delete(job.id);
-      });
+    const processingPromise = this.processJob(job).finally(async () => {
+      // Cleanup: cancel timer, persist final state, remove from active jobs
+      clearInterval(heartbeatTimer);
+      await this.persistJobState(job); // Final persist
+      this.activeJobs.delete(job.id);
+    });
 
     this.processingPromises.add(processingPromise);
   }
@@ -316,39 +315,37 @@ export class Worker<T = unknown, R = unknown> extends EventEmitter {
       this.logger.debug(`Job ${job.id} completed in ${duration}ms`);
     } catch (error) {
       const duration = Date.now() - startTime;
-      
+
       // Handle specific job control errors
       if (error instanceof MoveToDelayedError) {
         // Job explicitly requested to be moved to delayed
         job.markDelayed(error.originalError || error, error.customDelay);
-        
+
         this.logger.debug(
-          `Job ${job.id} explicitly moved to delayed: ${error.message} ${error.customDelay ? `(custom delay: ${error.customDelay}ms)` : ''}`
+          `Job ${job.id} explicitly moved to delayed: ${error.message} ${error.customDelay ? `(custom delay: ${error.customDelay}ms)` : ""}`,
         );
       } else if (error instanceof MoveToFailedError) {
         // Job explicitly requested to be failed
         job.markFailed(error.originalError || error);
-        
-        this.logger.warn(
-          `Job ${job.id} explicitly failed: ${error.message}`
-        );
+
+        this.logger.warn(`Job ${job.id} explicitly failed: ${error.message}`);
       } else {
         // Unknown error - follow standard retry logic
         this.logger.error(`Job ${job.id} failed after ${duration}ms:`, error);
-        
+
         if (job.shouldRetry()) {
           // Mark for retry (delayed)
           job.markDelayed(error as Error);
 
           this.logger.debug(
-            `Job ${job.id} scheduled for retry (attempt ${job.attempts}/${job.maxAttempts})`
+            `Job ${job.id} scheduled for retry (attempt ${job.attempts}/${job.maxAttempts})`,
           );
         } else {
           // Mark as finally failed
           job.markFailed(error as Error);
 
           this.logger.warn(
-            `Job ${job.id} failed permanently after ${job.attempts} attempts`
+            `Job ${job.id} failed permanently after ${job.attempts} attempts`,
           );
         }
       }
@@ -433,7 +430,7 @@ export class Worker<T = unknown, R = unknown> extends EventEmitter {
       );
       await Promise.allSettled(Array.from(this.processingPromises));
       this.processingPromises.clear();
-      
+
       // Clean up any remaining timers (should already be cleaned by finally)
       for (const activeJob of this.activeJobs.values()) {
         clearInterval(activeJob.heartbeatTimer);

@@ -30,7 +30,6 @@ import { useAuth } from "@/renderer/contexts/auth.context";
 import {
   type AuthMode,
   type AuthFormData,
-  type LoginFormData,
   type RegisterFormData,
   getAuthSchema,
   getDefaultValues,
@@ -275,7 +274,7 @@ export function AuthForm({ mode, className }: AuthFormProps) {
       } else {
         // In register mode, data will have name property
         const registerData = data as RegisterFormData;
-        
+
         const response = await window.api.user.create({
           name: registerData.name,
           username: registerData.username,

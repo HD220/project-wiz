@@ -5,13 +5,10 @@ import { useForm } from "react-hook-form";
 import { useAuth } from "@/renderer/contexts/auth.context";
 import {
   AuthMode,
-  AuthFormData,
   LoginFormData,
   RegisterFormData,
   loginSchema,
   registerSchema,
-  getAuthSchema,
-  getDefaultValues,
   getFieldsConfig,
   getUIContent,
 } from "@/renderer/features/auth/auth.schema";

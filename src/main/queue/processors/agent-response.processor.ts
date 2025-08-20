@@ -19,17 +19,17 @@ export interface AgentResponseJobData {
   agentRole: string;
   agentGoal: string;
   agentBackstory: string;
-  
+
   // Provider configuration
   providerType: "openai" | "anthropic" | "google" | "deepseek";
   providerApiKey: string;
-  
+
   // Model configuration
   model: string;
   temperature?: number;
   maxTokens?: number;
   topP?: number;
-  
+
   // Message data
   dmConversationId: string;
   conversationHistory: CoreMessage[];
@@ -48,7 +48,10 @@ export interface AgentResponseResult {
 }
 
 // Helper function to create provider instances
-function createProviderInstance(providerType: AgentResponseJobData["providerType"], apiKey: string) {
+function createProviderInstance(
+  providerType: AgentResponseJobData["providerType"],
+  apiKey: string,
+) {
   switch (providerType) {
     case "openai":
       return createOpenAI({ apiKey });
@@ -65,16 +68,13 @@ function createProviderInstance(providerType: AgentResponseJobData["providerType
 
 /**
  * Processor for agent response jobs
- * 
+ *
  * Pure function that takes all data needed and generates AI response
  * No database operations - that's handled by the worker/caller
  */
-export const processAgentResponse: ProcessorFunction<
-  AgentResponseJobData,
-  AgentResponseResult
-> = async (job: JobInstance) => {
+export const processAgentResponse: ProcessorFunction<AgentResponseResult> = async (job: JobInstance) => {
   const data = job.data;
-  
+
   logger.debug("Processing agent response job", {
     jobId: job.id,
     agentId: data.agentId,
@@ -105,7 +105,10 @@ Always respond in character and be helpful while staying true to your role and g
     });
 
     // 3. Create provider instance and generate response
-    const provider = createProviderInstance(data.providerType, data.providerApiKey);
+    const provider = createProviderInstance(
+      data.providerType,
+      data.providerApiKey,
+    );
 
     const result = await generateText({
       model: provider(data.model),
@@ -124,13 +127,15 @@ Always respond in character and be helpful while staying true to your role and g
     return {
       agentResponse: result.text,
       finishReason: result.finishReason,
-      usage: result.totalUsage ? {
-        inputTokens: result.totalUsage.inputTokens || 0,
-        outputTokens: result.totalUsage.outputTokens || 0,
-        totalTokens: result.totalUsage.totalTokens || 0,
-        reasoningTokens: result.totalUsage.reasoningTokens,
-        cachedInputTokens: result.totalUsage.cachedInputTokens,
-      } : undefined,
+      usage: result.totalUsage
+        ? {
+            inputTokens: result.totalUsage.inputTokens || 0,
+            outputTokens: result.totalUsage.outputTokens || 0,
+            totalTokens: result.totalUsage.totalTokens || 0,
+            reasoningTokens: result.totalUsage.reasoningTokens,
+            cachedInputTokens: result.totalUsage.cachedInputTokens,
+          }
+        : undefined,
     };
   } catch (error) {
     logger.error("Agent response generation failed", {

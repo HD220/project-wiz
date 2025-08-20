@@ -18,7 +18,7 @@ import { AgentForm } from "@/renderer/features/agent/components/agent-form";
 import { useApiMutation } from "@/renderer/hooks/use-api-mutation.hook";
 import { loadApiData } from "@/renderer/lib/route-loader";
 
-import type { LlmProvider, Agent } from "@/shared/types";
+import type { Agent } from "@/shared/types";
 
 // Create agent input type derived from Agent
 type CreateAgentInput = Pick<
