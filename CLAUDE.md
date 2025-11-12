@@ -39,6 +39,9 @@ npm run compile         # Compile translations
 4. **ALWAYS use** `requireAuth()` in protected IPC handlers
 5. **NEVER use** EventBus in renderer process
 6. **Files max** 500 lines, functions max 50 lines
+7. **API Documentation Search** Always use context7 when I need code generation, setup or configuration steps, or
+library/API documentation. This means you should automatically use the Context7 MCP
+tools to resolve library id and get library docs without me having to explicitly ask.
 
 ---
 
